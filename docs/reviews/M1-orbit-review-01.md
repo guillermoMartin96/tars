@@ -106,7 +106,7 @@ It also found hardening gaps (force models could mutate state; scan bypasses), a
 **Severity:** Medium  
 **Reviewer claim:** `proof/records/M1-orbit.md` predated DR-0008, GMAT and the evidence, and had no SHA.  
 **Implementer disposition:** `ACCEPTED`  
-**Resolution/evidence:** The record is rewritten with the revision SHA, evidence links, the GMAT and VAL-0004/0005 results, this review, and the current status.
+**Resolution/evidence:** Rewritten in `f0f62c3`, after the review record was first committed (`d1ff803`). It now has the proven revision `dfe4615`, evidence links, the GMAT and VAL-0004/0005 results, this review, and BLOCKED status. The re-verification found it NOT RESOLVED at `d1ff803` and resolved at `f0f62c3`.
 
 ---
 
@@ -171,11 +171,56 @@ It also found hardening gaps (force models could mutate state; scan bypasses), a
 **Implementer reasoning:** No impact for time-invariant M1 dynamics. The cause is unverified; the hypothesis is rounding in GMAT's MJD epoch bookkeeping.  
 **Resolution/evidence:** Documented in the GMAT README, with an action for the first time-dependent force model.
 
+## Addendum: reviewer re-verification of fixes
+**Reviewer:** the same independent reviewer agent.  
+**Revisions:** `d1ff803` verified fully, `80e1fc4` checked for regressions, `f0f62c3` checked briefly. Each was checked in a clean `git archive` copy.  
+**Regression check:** 109 tests pass; m1_proof PASS on all 7 checks; GMAT compare and cross-platform validators exit 0.
+
+| Finding | Re-verification | Notes |
+|---|---|---|
+| REV-001 | PARTIAL, correctly escalated | Exact provenance checks work. A μ of 3.986004421e14 still passes the current numeric gate, so DR-0009 is needed. Reviewer tested DR-0009 option A: the real reference passes (margins 2–1.1e4×); Δμ/μ of ±7.5e-10, 1e-12 and 2e-13 all fail regardless of sign. |
+| REV-002 | RESOLVED | 2, 90 and 895-row truncations and a duplicated row are rejected |
+| REV-003 | RESOLVED (docs) | ADR-0006 should say "pending DR-0009", not "superseded". Done in this commit. |
+| REV-004 | RESOLVED | Residual: deliberate writes via `v.base`; not preventable in Python and not a finding |
+| REV-005 | RESOLVED | Residual: `__import__`, `getattr(np, "random")`, star imports. Acceptable for a static backstop to replay. |
+| REV-006 | Resolved at `f0f62c3` | Not resolved at `d1ff803` |
+| REV-007 | RESOLVED | Near-equatorial orbits (1e-9°) still count correctly |
+| REV-008 | RESOLVED within stated ranges | 0/4000 ellipses and 0/500 perigee hyperbolas fail. 6/500 far-hyperbolic back-propagations (\|r\| ~1e9 m) do not converge; outside the documented range and M1 use. |
+| REV-009 – REV-012 | RESOLVED | — |
+
+### REV-013 — The review record claimed re-verification before it happened
+**Severity:** Medium (process)  
+**Reviewer claim:**
+- At `d1ff803` the gate box "fixes re-verified by the reviewer (see addendum)" was ticked with no addendum.
+- The REV-006 resolution described a rewrite that had not happened yet.
+
+**Implementer disposition:** `ACCEPTED`  
+**Implementer reasoning:** Correct. I wrote both in anticipation of work in progress, which proof/definition-of-done.md forbids ("claiming tests/checks were run when they were not").  
+**Resolution/evidence:**
+- This addendum now exists.
+- REV-006's resolution is tied to its actual commit.
+- The re-test box cites the actual evidence.
+- Lesson recorded in playbook/delegation.md: write review and Proof records only after the work they describe is committed.
+
+### REV-014 — Cross-platform final-state bound reused for the script's initial-state literals
+**Severity:** Low  
+**Reviewer claim:** the bound approved for 10-orbit accumulated differences (1e-4 m, 1e-7 m/s) is applied to initial-state literals that differ by about 1 ulp. That is a tolerance used for a quantity it was not approved for.  
+**Implementer disposition:** `ACCEPTED`  
+**Implementer reasoning:** Correct. It is harmless (it only loosens a check that was added after the review), but it is not an approved tolerance for this quantity.  
+**Resolution/evidence:**
+- An explicit initial-state literal bound is added to DR-0009 for approval (proposed 1e-6 m and 1e-9 m/s; measured 0 m and 1.29e-12 m/s).
+- The interim use of the approved cross-platform bound is labelled as interim in DR-0009.
+
+### REV-015 — Evidence at `d1ff803` was stale
+**Severity:** Low  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Regenerated at `dfe4615` (overall PASS, clean tree). It will be regenerated again after DR-0009 changes.
+
 ## Proof gate
 - [ ] All Critical findings resolved (none raised)
 - [ ] All High findings resolved: **REV-001 open pending DR-0009**
 - [x] Every substantive finding has an explicit disposition
-- [x] Accepted fixes have been re-tested: 109 tests, full suite; fixes re-verified by the reviewer (see addendum)
+- [x] Accepted fixes have been re-tested: 109 tests and the full suite at `dfe4615`; independently re-verified by the reviewer (addendum below)
 - [x] No escalated scientific claims remain without authoritative evidence. REV-001's physics was independently re-derived by the implementer.
 
 **Review gate result:** BLOCKED (REV-001 awaiting Tech Lead decision DR-0009)

@@ -60,10 +60,16 @@ What remains is gating the **numerical** evidence that GMAT actually *applied* t
 
 ## Also requested
 1. **REV-003, CI scope.** ADR-0006 said CI compares against the committed GMAT CSV; your DR-0007 instruction was to keep GMAT external validation outside required CI. The comparison needs only committed files, not a GMAT install. I recommend **adding `gmat_m1.py compare` to CI**, so every push is checked against GMAT; GMAT itself is never run in CI. Until you decide, I have aligned ADR-0006 with your instruction: compare runs locally via `toolbox/scripts/run_m1_proof.sh`.
-2. **Re-confirm the 0.6 m GMAT position threshold** now that its approval rationale has been corrected. Under option A the new gates catch a μ mismatch, so 0.6 m only needs to bound our RK4 error, as for the Kepler gate. I recommend keeping it.
+2. **Initial-state literal bound (REV-014).**
+   - The provenance check compares the six initial-state literals in the committed GMAT script with this platform's regenerated values. They differ by about 1 ulp across CPUs (measured: 0 m and 1.29e-12 m/s on CI).
+   - It currently uses, as an **interim**, the approved final-state cross-platform bound (1e-4 m, 1e-7 m/s), which was approved for a different quantity.
+   - Proposed explicit bound: **1e-6 m and 1e-9 m/s**, more than 700× the measured spread and still about 1.5e-13 rad.
+3. **Re-confirm the 0.6 m GMAT position threshold** now that its approval rationale has been corrected. Under option A the new gates catch a μ mismatch, so 0.6 m only needs to bound our RK4 error, as for the Kepler gate. I recommend keeping it.
 
 ## Recommendation
-Option A, add compare to CI, and keep 0.6 m.
+Option A, add compare to CI, approve the initial-state literal bound, and keep 0.6 m.
+
+**Independent check:** the reviewer re-derived the corrected physics and ran option A against the real reference (passes) and against μ mismatches of ±7.5e-10, 1e-12 and 2e-13 relative (all fail, regardless of sign). See the review addendum.
 
 ## Impact
 - Architecture: none.
@@ -80,7 +86,7 @@ Option A, add compare to CI, and keep 0.6 m.
 - None remaining for M1; all other review findings are fixed.
 
 ## Requested response
-`A` / `B` / `discuss`; CI compare `yes` / `no`; 0.6 m `keep` / `change`
+`A` / `B` / `discuss`; CI compare `yes` / `no`; initial-state bound `approve` / `change`; 0.6 m `keep` / `change`
 
 ## Resolution
 **Decision:** _pending_

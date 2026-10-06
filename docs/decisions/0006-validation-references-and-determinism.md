@@ -14,7 +14,7 @@ M1 Proof needs trusted references and a testable definition of determinism. CI m
 
 **Oracle 2 — GMAT** (external)
 - GMAT scripts are committed under `toolbox/references/gmat/`. The exported reports (CSV) are committed alongside them with the GMAT version and configuration.
-- CI never runs GMAT. Per DR-0007, GMAT external validation stays outside required CI for M1. The comparison against the committed reference runs locally through `toolbox/scripts/run_m1_proof.sh`. Adding that comparison, which needs no GMAT install, to CI is proposed in DR-0009 (review REV-003).
+- CI never runs GMAT. Whether CI should also run the comparison against the committed reference, which needs no GMAT install, is **pending DR-0009** (review REV-003). That decision interprets DR-0007's "keep GMAT external validation outside required CI". Until then the comparison runs locally through `toolbox/scripts/run_m1_proof.sh`.
 
 **Determinism**
 - Same platform with pinned `uv.lock`: two runs must produce byte-identical `events.jsonl` (compared by SHA-256).
