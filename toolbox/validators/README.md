@@ -5,6 +5,7 @@ Deterministic Proof checks. They exit non-zero on failure and write machine-read
 | Validator | Proves | Used by |
 |---|---|---|
 | `m1_proof.py` | Mission success, two-body invariants, Kepler-reference error, node-crossing period, RK4 convergence order, in-process determinism, architecture scan. Thresholds come from `proof/thresholds/m1.json`. | proof/physics.md, proof/architecture.md, CI |
+| `cross_platform.py` | Final state within the approved bound of the committed golden state (DR-0006, DR-0008) | proof/physics.md, CI |
 | `determinism.py` | Byte-identical event logs from fresh processes (DR-0006) | proof/mission.md, CI |
 
 The GMAT comparison is `toolbox/scripts/gmat_m1.py compare` (see `toolbox/references/gmat/README.md`).

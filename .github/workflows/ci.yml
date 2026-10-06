@@ -38,6 +38,9 @@ jobs:
       - name: Cross-process determinism
         run: uv run python toolbox/validators/determinism.py
 
+      - name: Cross-platform agreement with golden M1 state (DR-0006, DR-0008)
+        run: uv run python toolbox/validators/cross_platform.py
+
       - name: M1 Proof (non-GMAT checks)
         run: uv run python toolbox/validators/m1_proof.py --out runs/proof/m1_non_gmat_${{ matrix.os }}.json
 

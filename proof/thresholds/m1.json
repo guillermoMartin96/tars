@@ -1,30 +1,33 @@
 {
   "milestone": "M1 Orbit",
-  "status": "provisional",
-  "approved_by": null,
-  "approved_on": null,
-  "basis": "DR-0004: final values to be proposed from the convergence study and approved by the Tech Lead. Only the two candidate limits named in the approved plan are gated provisionally; null means reported but not yet gated.",
+  "status": "approved",
+  "approved_by": "Guillermo (Tech Lead)",
+  "approved_on": "2026-10-05",
+  "basis": "DR-0008 option A: dt = 10 s; limits ~2x the values measured on three platforms (VAL-0002, VAL-0003, VAL-0004). Any change to dt, integrator, force model or scenario requires re-measurement and re-approval.",
   "limits": {
     "invariants": {
       "energy_rel_drift_max": 1e-9,
-      "angular_momentum_rel_drift_max": null,
-      "eccentricity_vector_drift_max": null,
-      "sma_drift_max_m": null
+      "angular_momentum_rel_drift_max": 5e-10,
+      "eccentricity_vector_drift_max": 1.2e-9,
+      "sma_drift_max_m": 0.006
     },
     "kepler_reference": {
-      "position_error_max_m": 1.0,
-      "velocity_error_max_mps": null
+      "position_error_max_m": 0.6,
+      "velocity_error_max_mps": 7e-4
     },
     "period": {
-      "period_error_max_s": null,
-      "node_crossing_time_error_max_s": null
+      "period_error_max_s": 1e-5,
+      "node_crossing_time_error_max_s": 8e-5
     },
     "convergence": {
-      "order_deviation_from_4": null
+      "order_deviation_from_4": 0.5
     },
     "gmat_reference": {
-      "position_error_max_m": null,
-      "velocity_error_max_mps": null
+      "position_error_max_m": 0.6
+    },
+    "cross_platform": {
+      "final_position_difference_m": 1e-4,
+      "final_velocity_difference_mps": 1e-7
     }
   }
 }

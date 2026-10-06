@@ -128,3 +128,29 @@ def test_repository_passes_architecture_scan():
 def test_in_process_determinism(m1_scenario):
     hashes = determinism.repeat_hashes(m1_scenario, runs=2)
     assert hashes[0] == hashes[1]
+
+
+def test_cross_platform_comparison(m1_scenario):
+    from tars.sim.runner import run_scenario
+    from tars.validation import cross_platform
+
+    result = run_scenario(m1_scenario, record_samples=False)
+    golden = cross_platform.golden_record(result)
+    m = cross_platform.compare_to_golden(result, golden)
+    assert m == {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0,
+        "bit_identical_to_golden": 1.0,
+    }
+    shifted = {**golden, "final_r_m": [x + 3e-4 for x in golden["final_r_m"]]}
+    m = cross_platform.compare_to_golden(result, shifted)
+    assert m["final_position_difference_m"] == pytest.approx(3e-4 * math.sqrt(3), rel=1e-3)
+    with pytest.raises(ValueError):
+        cross_platform.compare_to_golden(result, {**golden, "scenario_hash": "x"})
+
+
+def test_committed_golden_is_current(m1_scenario):
+    from tars.validation.cross_platform import load_golden
+
+    golden = load_golden()
+    assert golden["scenario_hash"] == m1_scenario.config_hash()

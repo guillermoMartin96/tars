@@ -1,6 +1,6 @@
 # Decision Request: M1 timestep and Proof tolerances (from measured convergence data)
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-05  
 **Related milestone/issue:** Milestone 1 — Orbit; follow-up to DR-0004 and DR-0006
@@ -123,6 +123,12 @@ Same-platform repeat runs, both in-process and in separate processes, are byte-i
 `A` / `B` / `C` / `discuss` (plus any threshold you want changed)
 
 ## Resolution
-**Decision:** _pending_  
-**Reasoning/notes:**  
-**Follow-up:** Update `proof/thresholds/m1.json` (status `approved`, approved_by, approved_on); add a cross-platform validator using the approved bound.
+**Decision:** APPROVED — Option A (Tech Lead, 2026-10-05).  
+**Reasoning/notes:**
+- Timestep dt = 10 s.
+- Position-error threshold 0.6 m; energy-drift threshold 1e-9; cross-platform bound 1e-4 m.
+- All other option-A thresholds apply as listed above, including the cross-platform velocity bound of 1e-7 m/s.
+
+**Follow-up:**
+- `proof/thresholds/m1.json` set to `approved`.
+- `toolbox/validators/cross_platform.py` checks against the golden state in `proof/references/m1_final_state.json` (reference platform macOS x86_64) and runs in CI on Linux x86_64 and macOS arm64.
