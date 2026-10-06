@@ -57,7 +57,8 @@ def test_circular_orbit_uses_argument_of_latitude():
     assert el.nu == el.u
     assert np.linalg.norm(r) == pytest.approx(radius, rel=1e-15)
     assert np.linalg.norm(v) == pytest.approx(math.sqrt(WGS84.mu / radius), rel=1e-15)
-    assert np.dot(r, v) == pytest.approx(0.0, abs=1e-6)
+    # r.v = 0 for circular motion; float cancellation noise scales with |r||v| (~5e10 here).
+    assert abs(np.dot(r, v)) / (np.linalg.norm(r) * np.linalg.norm(v)) < 1e-14
 
 
 def test_m1_initial_state_is_on_ascending_node():

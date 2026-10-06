@@ -83,7 +83,9 @@ def test_kepler_conserves_energy_and_handles_hyperbola():
     assert specific_energy(r, v, WGS84.mu) == pytest.approx(
         specific_energy(r0, v0, WGS84.mu), rel=1e-10
     )
-    np.testing.assert_allclose(np.cross(r, v), np.cross(r0, v0), rtol=1e-11)
+    h0 = np.cross(r0, v0)
+    # Vector-relative comparison: a zero component makes componentwise rtol meaningless.
+    assert np.linalg.norm(np.cross(r, v) - h0) / np.linalg.norm(h0) < 1e-12
 
 
 def test_zero_time_returns_copy():
