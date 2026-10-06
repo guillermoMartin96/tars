@@ -132,3 +132,11 @@ Same-platform repeat runs, both in-process and in separate processes, are byte-i
 **Follow-up:**
 - `proof/thresholds/m1.json` set to `approved`.
 - `toolbox/validators/cross_platform.py` checks against the golden state in `proof/references/m1_final_state.json` (reference platform macOS x86_64) and runs in CI on Linux x86_64 and macOS arm64.
+
+## Erratum (2026-10-05, after external review REV-001)
+The option-A justification above contains an error by the implementing engineer.
+- **The error.** It says a μ mismatch at GMAT's default value "adds about 0.16 m along-track; that alone does not breach 0.6 m, but the initial-SMA check catches it." That figure assumed equal orbit radii.
+- **The correct figure.** With the same Cartesian initial state, the period shift is ≈ 2·Δμ/μ, about 0.63 m after 10 orbits.
+- **The missing gate.** The initial-SMA check was reported but not gated.
+
+The approved thresholds themselves are unchanged. The hardening and a re-confirmation of the 0.6 m GMAT threshold are requested in **DR-0009**.

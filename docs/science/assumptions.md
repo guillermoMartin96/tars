@@ -209,12 +209,15 @@ Not applicable in M1.
 
 ## Known limitations / expected error
 - GMAT's default Earth μ is 398600.4415 km³/s² [GMATVV]. That differs by 3×10⁻⁴ km³/s² (relative 7.5×10⁻¹⁰).
-- The resulting period difference at 250 km is about 2.0×10⁻⁶ s per orbit, giving about 0.16 m along-track after 10 orbits. This is computed, not estimated.
+- The size of the period difference depends on how the orbit is defined. Both cases below are computed, not estimated, and corrected per external review REV-001.
+  - Both tools place the orbit at the same radius, each with its own μ: about 2.0×10⁻⁶ s per orbit.
+  - Both tools start from **the same Cartesian state**, as in our GMAT comparison: GMAT's SMA shifts by about 5 mm, ΔT/T ≈ 2·Δμ/μ, and the period shifts by about 8.1×10⁻⁶ s per orbit. That is **about 0.63 m along-track after 10 orbits**, comparable to the RK4 error at dt = 10 s.
 - **GMAT validation cases must override Earth μ (and radius) to WGS 84.** Otherwise the comparison measures a configuration mismatch.
 
 ## Validation approach
 - The GMAT script sets the constants explicitly.
-- The comparison validator checks that the reference metadata records matching constants.
+- `gmat_m1.py compare` rejects any reference whose committed script differs from the script regenerated for the current scenario, or whose metadata constants differ from the scenario's. These are exact checks.
+- GMAT's applied μ is evidenced by the initial-SMA and period differences. Gating them numerically is pending **DR-0009**.
 
 ## Accepted discrepancy / tolerance
 Zero: constants must match exactly in reference comparisons.

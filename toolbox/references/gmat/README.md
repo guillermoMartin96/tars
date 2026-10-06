@@ -30,7 +30,18 @@ uv run python toolbox/scripts/gmat_m1.py compare
 - GMAT vs the exact Kepler solution
 - ours vs the exact Kepler solution
 
-It also checks the constants match (initial SMA and period differences) and that the starting states are identical.
+Before comparing, it **rejects** the reference if any of the following hold:
+- The committed script differs from the script regenerated for the current scenario. This covers the constants in the `Earth.Mu` and `EquatorialRadius` lines.
+- The metadata constants differ from the scenario's.
+- A sha256 does not match.
+- The report does not cover the full 60 s grid.
+
+It also reports the initial SMA, period and initial-state differences, which give numerical evidence that GMAT applied the constants. Gating those is pending DR-0009.
+
+**Epoch column note (REV-012):** `(Sat.TTModJulian − 31041.5)·86400 − ElapsedS` drifts to −1.07e-4 s by 53 640 s.
+- The states are nevertheless at the labelled ElapsedS: GMAT matches exact Kepler at those times to 7 µm, while a 1e-4 s time offset would show as about 0.8 m.
+- Our working hypothesis, not verified against GMAT internals, is accumulated rounding in GMAT's Modified-Julian epoch bookkeeping. That is the same failure mode our integer-tick time avoids (ADR-0002).
+- No impact while the dynamics are time-invariant (M1). Once forces depend on absolute time (Earth rotation, ephemerides, drag), align on GMAT's epoch rather than on a script counter, and re-investigate this drift.
 
 ## Installed reference tool (provenance)
 | Item | Value |

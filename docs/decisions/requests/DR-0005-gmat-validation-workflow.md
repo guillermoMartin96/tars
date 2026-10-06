@@ -62,3 +62,5 @@ A.
 - When installation becomes necessary, stop and give the exact install steps.
 
 **Follow-up:** `toolbox/references/gmat/`.
+
+**Note (2026-10-05, review REV-003):** option A's "CI uses the committed reference CSV" was superseded by the DR-0007 resolution, which keeps GMAT validation outside required CI for M1. The comparison runs locally (`toolbox/scripts/run_m1_proof.sh`). Adding it to CI is proposed in DR-0009.
