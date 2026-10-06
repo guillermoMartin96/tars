@@ -51,7 +51,9 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 ## Validation approach
 - Analytic Kepler oracle and invariant conservation.
 - GMAT configured with point-mass Earth gravity (degree/order 0) and matched μ.
-- Optional informational GMAT run with a realistic gravity field to measure the omission.
+- Informational GMAT runs (VAL-0007) **measured** the omission:
+  - J2 node drift −5.44°/day, matching the analytic −5.41°/day;
+  - divergence from M1 of about 741 km after 10 orbits (J2 only).
 
 ## Accepted discrepancy / tolerance
 - Versus a realistic model: not applicable in M1; the omission is deliberate.
@@ -171,7 +173,9 @@ DR-0002 (option A). Each requires its own researched model. The force-model boun
 
 ## Validation approach
 - M1 compares only against references configured with the same exclusions.
-- An optional informational GMAT run with drag measures the omission.
+- Informational GMAT runs (VAL-0007) **measured** the drag omission for an illustrative spacecraft (m/(Cd·A) = 25.8 kg/m²):
+  - mean SMA decay of 3.6–12.4 km over 10 orbits for F10.7 = 70–250;
+  - divergence from M1 of 0.9–1.3 thousand km including J2.
 
 ## Accepted discrepancy / tolerance
 Not applicable in M1.

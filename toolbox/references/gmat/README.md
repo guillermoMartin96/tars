@@ -66,3 +66,15 @@ The committed GMAT script, report and metadata are the reference our simulator i
 - Regenerating or replacing them requires explicit review. That means a Decision Request or a reviewed record naming the reason, for example a scenario change approved by the Tech Lead or a GMAT version upgrade, plus a comparison of the old and new reference.
 - `gmat_m1.py run` enforces this: it refuses to overwrite an existing reference unless `--replace-reason` is given. The reason is stored in `m1_two_body_metadata.json`.
 - `compare` rejects references that are stale, edited, incomplete, or carry different constants. It gates GMAT's own agreement with the exact Kepler solution, the constants it actually applied, and the initial state (DR-0009).
+
+## Informational realistic-model runs (DR-0005; not an M1 gate)
+`informational/` holds GMAT runs from the same initial state with JGM-3 gravity (J2-only and 4×4) and Jacchia-Roberts drag (F10.7 = 70, 150, 250). The spacecraft is GMAT's default (850 kg, 15 m², Cd 2.2) and is illustrative only.
+- Results and interpretation: VAL-0007 in `docs/science/validation.md`.
+- Recompute the summary from the committed reports: `uv run python toolbox/scripts/gmat_m1.py realistic-summary`.
+- Re-running GMAT (`realistic`) is subject to the same replacement policy (`--replace-reason`).
+
+## Deferred: REV-012 epoch-column drift
+The ~0.1 ms drift between GMAT's `TTModJulian` column and the `ElapsedS` label is **explicitly deferred** (Tech Lead, 2026-10-05). It is not an M1 blocker.
+- **Trigger:** investigate it **before the first time-dependent force model** (Earth rotation, ephemerides, drag in gated validation).
+- **Then:** align comparisons on GMAT's epoch rather than the script counter.
+- **Note:** the informational drag runs are time-dependent but not gated. A 0.1 ms timing difference is negligible at their km scale (about 0.8 m).

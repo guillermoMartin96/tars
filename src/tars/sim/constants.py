@@ -36,3 +36,8 @@ WGS84 = EarthConstants(
 )
 
 EARTH_CONSTANTS: dict[str, EarthConstants] = {WGS84.name: WGS84}
+
+# Earth's second zonal harmonic, approximate (SCI-0001; Vallado 2013 §9.6). Informational
+# only: used to compare GMAT's J2 node drift with the first-order analytic rate. The M1
+# force model does NOT include J2 (DR-0002).
+EARTH_J2_APPROX = 1.0826e-3
