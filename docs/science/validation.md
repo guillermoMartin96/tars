@@ -79,3 +79,19 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - There is no modelling or configuration disagreement.
 - **Status:** accepted; within the approved 0.6 m (DR-0008).
 - **Linked:** ADR-0006, DR-0005, DR-0008, SCI-0001, SCI-0004, SCI-0005
+
+## VAL-0005 — Cross-platform validator under approved bounds; CI hardware variability
+- **Date / revision:** 2026-10-06 / CI runs 37397754454 and 37399273081
+- **Golden:** `proof/references/m1_final_state.json`. Reference platform: macOS x86_64, Intel i9-9880H.
+- **Results:**
+
+| Platform | \|Δr\| | \|Δv\| |
+|---|---|---|
+| ubuntu-latest, run 37397754454 | 2.89e-6 m | 3.4e-9 m/s |
+| ubuntu-latest, run 37399273081 | 8.76e-7 m | 1.0e-9 m/s |
+| macos-latest arm64, both runs | 8.76e-7 m | 1.0e-9 m/s |
+
+- **Finding:** the same CI label (`ubuntu-latest`, same `uv.lock`) produced different last bits on different runs. GitHub-hosted runners vary in CPU model, and NumPy dispatches SIMD kernels by CPU at runtime.
+  - "Same platform" in DR-0006 must therefore be read as the same machine type (CPU and instruction set), not the same OS label.
+  - Reports now record the CPU model (`platform_info`).
+- **Classification:** numerical (floating-point, hardware-dependent). Status: accepted. All runs are within the approved 1e-4 m / 1e-7 m/s bounds, by a margin of more than 30×.

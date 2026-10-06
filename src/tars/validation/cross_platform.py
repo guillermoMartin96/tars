@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import platform
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -22,17 +23,43 @@ from tars.validation.thresholds import REPO_ROOT
 GOLDEN_M1 = REPO_ROOT / "proof" / "references" / "m1_final_state.json"
 
 
+def platform_info() -> dict[str, str]:
+    """Identify the execution platform, including the CPU model.
+
+    CPU matters: CI 'ubuntu-latest' runners with different CPUs produced different
+    last bits (NumPy selects SIMD code paths at runtime), see VAL-0003.
+    """
+    cpu = platform.processor()
+    try:
+        if platform.system() == "Linux":
+            for line in Path("/proc/cpuinfo").read_text().splitlines():
+                if line.startswith("model name"):
+                    cpu = line.split(":", 1)[1].strip()
+                    break
+        elif platform.system() == "Darwin":
+            cpu = (
+                subprocess.run(
+                    ["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True
+                ).stdout.strip()
+                or cpu
+            )
+    except OSError:
+        pass
+    return {
+        "system": platform.system(),
+        "machine": platform.machine(),
+        "cpu": cpu,
+        "python": platform.python_version(),
+        "numpy": np.__version__,
+    }
+
+
 def golden_record(result: RunResult) -> dict:
     final = result.final
     return {
         "scenario": result.scenario.name,
         "scenario_hash": result.scenario.config_hash(),
-        "platform": {
-            "system": platform.system(),
-            "machine": platform.machine(),
-            "python": platform.python_version(),
-            "numpy": np.__version__,
-        },
+        "platform": platform_info(),
         "events_sha256": event_log_sha256(result),
         "final_tick": final.tick,
         "final_r_m": final.r.tolist(),

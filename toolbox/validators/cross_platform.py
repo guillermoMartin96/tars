@@ -15,7 +15,13 @@ from pathlib import Path
 
 from tars.sim.runner import run_scenario
 from tars.sim.scenario import load_scenario
-from tars.validation.cross_platform import GOLDEN_M1, compare_to_golden, golden_record, load_golden
+from tars.validation.cross_platform import (
+    GOLDEN_M1,
+    compare_to_golden,
+    golden_record,
+    load_golden,
+    platform_info,
+)
 from tars.validation.thresholds import REPO_ROOT, Check, load_thresholds
 
 
@@ -41,7 +47,7 @@ def main(argv: list[str] | None = None) -> int:
         compare_to_golden(result, golden),
         thresholds.for_validator("cross_platform"),
         thresholds.status,
-        f"golden platform: {golden['platform']}",
+        f"this platform: {platform_info()}; golden platform: {golden['platform']}",
     )
     print(json.dumps(check.to_event().model_dump(mode="json")))
     return 0 if check.passed else 1

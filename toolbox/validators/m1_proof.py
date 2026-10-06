@@ -15,18 +15,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import platform
 import sys
 from dataclasses import asdict
 from pathlib import Path
-
-import numpy as np
 
 import tars
 from tars.sim.runner import run_scenario
 from tars.sim.scenario import load_scenario
 from tars.validation import architecture, determinism, orbit
 from tars.validation.convergence import convergence_study
+from tars.validation.cross_platform import platform_info
 from tars.validation.thresholds import REPO_ROOT, Check, load_thresholds
 
 DEFAULT_SCENARIO = REPO_ROOT / "scenarios" / "m1_leo_250km.json"
@@ -106,12 +104,7 @@ def main(argv: list[str] | None = None) -> int:
         "scenario": scenario.name,
         "scenario_hash": scenario.config_hash(),
         "software_version": tars.__version__,
-        "platform": {
-            "system": platform.system(),
-            "machine": platform.machine(),
-            "python": platform.python_version(),
-            "numpy": np.__version__,
-        },
+        "platform": platform_info(),
         "threshold_status": status,
         "final_state": {"t": run.final.t, "r": run.final.r.tolist(), "v": run.final.v.tolist()},
         "results": [c.to_event().model_dump(mode="json") for c in checks],
