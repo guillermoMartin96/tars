@@ -95,3 +95,7 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - "Same platform" in DR-0006 must therefore be read as the same machine type (CPU and instruction set), not the same OS label.
   - Reports now record the CPU model (`platform_info`).
 - **Classification:** numerical (floating-point, hardware-dependent). Status: accepted. All runs are within the approved 1e-4 m / 1e-7 m/s bounds, by a margin of more than 30×.
+- **Addendum (CI run 37400894038):** on both CI platforms the M1 initial velocity differs from the reference platform's by 1.29e-12 m/s, about 1.5 ulp. This comes from the last bits of `sin`/`cos(51.6°)` in the platform math library.
+  - The initial position is identical.
+  - Growth of this 1-ulp initial difference, mostly along-track, plausibly accounts for the ~1e-6 m final-state differences.
+  - Consequence: the GMAT-script provenance check compares the six state literals within the approved cross-platform bound. All other lines must match exactly.
