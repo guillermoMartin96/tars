@@ -4,7 +4,7 @@
 - Every required Proof check passes against approved thresholds (DR-0008, DR-0009).
 - External review is complete; every finding is dispositioned, and no Critical or High finding is open.
 
-**Proven revision:** `2b115d4` (branch `milestone-1-orbit`). Evidence was generated from a clean working tree. Later commits change only this record and the evidence files.  
+**Proven revision:** `18e14a3` (branch `milestone-1-orbit`), the final M1 verification run of 2026-10-06T02:18Z. Evidence was generated from a clean working tree. Later commits change only this record and the evidence files.  
 **Evidence:** `proof/records/evidence/M1/` contains `proof_run.log`, `m1_non_gmat.json`, `gmat_reference.json`, `cross_platform.json` and `mission_summary.json`.  
 **Reproduce:** `toolbox/scripts/run_m1_proof.sh` (set `UV=` if uv is not on PATH).  
 **Definition of done:** prototype phase (proof/definition-of-done.md).  
@@ -14,7 +14,7 @@
 ## Standard gate (proof/PROOF.md)
 | Check | Status | Evidence |
 |---|---|---|
-| Unit tests pass | ✅ | 114 tests (`proof_run.log`); CI green on ubuntu-latest x86_64 and macos-latest arm64 (run 37401710116) |
+| Unit tests pass | ✅ | 118 tests (`proof_run.log`); CI green on ubuntu-latest x86_64 and macos-latest arm64 |
 | Integration tests pass | ✅ | `tests/test_simulator.py`, `tests/test_mission_m1.py`, `tests/test_cli.py` |
 | Physics validation passes or discrepancies accepted | ✅ | Kepler oracle PASS; GMAT R2026a PASS on all 9 approved gates (VAL-0002, VAL-0004, VAL-0006); GMAT compare runs in CI |
 | Mission-level simulation passes | ✅ | 10 `OrbitCompleted` events, then `SimulationCompleted(success)`. Impact, escape, timeout and non-finite paths are tested. |
@@ -27,7 +27,7 @@
 | Every substantive finding dispositioned | ✅ | REV-001…015 |
 | No unresolved Critical/High findings | ✅ | No Critical raised; REV-001 (High) resolved via DR-0009 |
 | No secrets/debug artifacts | ✅ | `runs/` is git-ignored; evidence is intentional |
-| Branch pushed, revision identified | ✅ | `2b115d4` |
+| Branch pushed, revision identified | ✅ | `18e14a3` |
 
 ## Physics Proof (proof/physics.md, M1 scaffold)
 | Requirement | Result vs approved threshold |
@@ -38,6 +38,7 @@
 | GMAT discrepancy documented | Ours vs GMAT is 0.298 m (≤ 0.6). It equals our RK4 error, while GMAT vs Kepler is 7.2 µm (≤ 1e-4), so it is classified as numerical. GMAT applied the WGS 84 μ: initial SMA difference 1.9e-9 m (≤ 1e-6). See VAL-0004 and VAL-0006. |
 | Cross-platform agreement (DR-0006) | Final state ≤ 8.8e-7 m and 1.0e-9 m/s on CI platforms (≤ 1e-4 m, 1e-7 m/s). A 2.9e-6 m case was seen earlier (VAL-0005). |
 | No unexplained numerical instability | All errors explained: along-track phase lag; pre-asymptotic order; ulp-level platform differences. |
+| Informational realism check (DR-0005; not a gate) | VAL-0007: realistic GMAT physics (J2, 4×4, drag) diverges from the M1 model by 0.74–1.32 thousand km in 10 orbits; J2 node drift −5.44°/day matches analytic −5.41°/day (SCI-0001). |
 | Reference configuration recorded | `toolbox/references/gmat/` (script, report, metadata with command, build, hashes, host and revision; install provenance). Replacement requires explicit review (DR-0009). |
 
 ## Discrepancies
@@ -47,14 +48,13 @@
 | M1-D2 | Fitted RK4 order 4.33 | Numerical (pre-asymptotic) | Accepted (DR-0008) |
 | M1-D3 | Ours vs GMAT 0.298 m | Numerical (our RK4 truncation; GMAT exact to 7 µm) | Accepted (VAL-0004) |
 | M1-D4 | Same CI label gives different last bits across runs | Numerical (runner CPU variability) | Accepted (VAL-0005) |
-| M1-D5 | GMAT epoch column drifts −1.07e-4 s from ElapsedS | Reference tool bookkeeping (hypothesis); no effect on states | Documented (REV-012) |
+| M1-D5 | GMAT epoch column drifts −1.07e-4 s from ElapsedS | Reference tool bookkeeping (hypothesis); no effect on states | **Deferred by Tech Lead** until before the first time-dependent force model (REV-012) |
 
 ## Known limitations allowed at the prototype bar
 - The model is deliberately unrealistic for a real 250 km spacecraft: no J2 (about −5.4°/day node regression) and no drag (SCI-0001, SCI-0004). M1 proves numerical fidelity to the chosen model, not real-world prediction.
 - Orbit counting by ascending node excludes equatorial orbits (REV-007).
 
 ## Follow-ups (non-blocking)
-- **Optional:** a second external review by a different model provider, for stronger independence (playbook/git.md).
-- **Optional (DR-0005):** an informational GMAT run with J2 and drag to measure how far the M1 model departs from reality.
-- **Before any time-dependent force model:** re-investigate the GMAT epoch-column drift (REV-012) and align on GMAT epochs.
-- **Merging** `milestone-1-orbit` into `main` is the Tech Lead's decision.
+- **REV-012 (deferred by the Tech Lead):** investigate the GMAT epoch-column drift before introducing any time-dependent force model.
+- **Merge:** merging `milestone-1-orbit` into `main` requires Tech Lead approval. Milestone 2 does not start until it is approved.
+- **Cross-provider review:** not required for M1 (Tech Lead, 2026-10-05).
