@@ -1,10 +1,14 @@
 """Analytic two-body propagation with universal variables (validation oracle).
 
-Solves the Kepler problem exactly (to floating-point precision) for any conic.
+Solves the Kepler problem to floating-point precision for elliptic and hyperbolic
+orbits (tested: LEO to e~0.97 ellipses and e up to 5 hyperbolas). The M1 Proof
+uses it only for near-circular LEO.
 References: Curtis (2014) Algorithms 3.3-3.4; Vallado (2013) §2.3, Algorithm 8.
 
 For bound orbits the requested time is first reduced modulo the period, which
 keeps the universal anomaly small and avoids precision loss over many orbits.
+Newton's iteration stops at the requested tolerance or, if that is below the
+attainable floating-point precision, once the correction stops shrinking (REV-008).
 """
 
 from __future__ import annotations
@@ -63,7 +67,19 @@ def propagate(
         period = 2.0 * math.pi / (sqrt_mu * alpha**1.5)
         dt = math.fmod(dt, period)
 
-    chi = sqrt_mu * abs(alpha) * dt if alpha != 0.0 else sqrt_mu * dt / r0n
+    if alpha > 0.0:
+        chi = sqrt_mu * alpha * dt
+    elif alpha < 0.0:
+        # Vallado (2013) Algorithm 8 hyperbolic initial guess (a = 1/alpha < 0).
+        a = 1.0 / alpha
+        sign = 1.0 if dt >= 0.0 else -1.0
+        arg = (-2.0 * mu * alpha * dt) / (
+            float(np.dot(r0, v0)) + sign * math.sqrt(-mu * a) * (1.0 - r0n * alpha)
+        )
+        chi = sign * math.sqrt(-a) * math.log(arg) if arg > 0.0 else sqrt_mu * dt / r0n
+    else:
+        chi = sqrt_mu * dt / r0n
+    prev_step = math.inf
     for _ in range(max_iter):
         z = alpha * chi * chi
         c, s = stumpff_c(z), stumpff_s(z)
@@ -76,8 +92,14 @@ def propagate(
         dF = r0n * vr0 / sqrt_mu * chi * (1.0 - z * s) + (1.0 - alpha * r0n) * chi * chi * c + r0n
         delta = F / dF
         chi -= delta
-        if abs(delta) <= rtol * max(1.0, abs(chi)):
+        step = abs(delta)
+        scale = max(1.0, abs(chi))
+        if step <= rtol * scale:
             break
+        # Round-off floor: corrections stopped shrinking at near machine precision.
+        if step >= prev_step and step <= 1e-12 * scale:
+            break
+        prev_step = step
     else:
         raise RuntimeError("universal Kepler equation did not converge")
 

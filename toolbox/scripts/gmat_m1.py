@@ -29,7 +29,7 @@ from pathlib import Path
 
 from tars.sim.runner import run_scenario
 from tars.sim.scenario import load_scenario
-from tars.validation.gmat import compare, m1_script, parse_report
+from tars.validation.gmat import compare, m1_script, parse_report, provenance_problems
 from tars.validation.thresholds import REPO_ROOT, Check, load_thresholds
 
 REF_DIR = REPO_ROOT / "toolbox" / "references" / "gmat"
@@ -76,6 +76,12 @@ def cmd_run(args: argparse.Namespace) -> int:
                 file=sys.stderr,
             )
             return 1
+        # Validate completeness before trusting and hashing the new report (REV-002).
+        try:
+            compare(parse_report(report.read_text()), run_scenario(scenario).samples, scenario)
+        except ValueError as exc:
+            print(f"GMAT report rejected: {exc}", file=sys.stderr)
+            return 1
         shutil.copyfile(report, REPORT)
     build = re.search(r"Build Date: (.+)", proc.stdout)
     revision = subprocess.run(
@@ -113,11 +119,13 @@ def cmd_compare(args: argparse.Namespace) -> int:
         print("no committed GMAT reference; run the 'run' subcommand first", file=sys.stderr)
         return 2
     metadata = json.loads(METADATA.read_text())
-    if metadata["scenario_hash"] != scenario.config_hash():
-        print("GMAT reference is stale: scenario hash differs; regenerate it", file=sys.stderr)
-        return 2
+    problems = provenance_problems(metadata, scenario, SCRIPT.read_text())
     if metadata["report_sha256"] != _sha256(REPORT):
-        print("GMAT report does not match its recorded sha256", file=sys.stderr)
+        problems.append("GMAT report does not match its recorded sha256")
+    if metadata["script_sha256"] != _sha256(SCRIPT):
+        problems.append("GMAT script does not match its recorded sha256")
+    if problems:
+        print("GMAT reference rejected: " + "; ".join(problems), file=sys.stderr)
         return 2
 
     run = run_scenario(scenario)

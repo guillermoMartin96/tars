@@ -94,3 +94,37 @@ def test_zero_time_returns_copy():
     np.testing.assert_array_equal(r, r0)
     np.testing.assert_array_equal(v, v0)
     assert r is not r0
+
+
+def test_rev008_roundoff_limited_elliptic_case_converges():
+    """REV-008: Newton cycling at 1 ulp above rtol must terminate, and stay accurate."""
+    rng = np.random.default_rng(2)
+    checked = 0
+    while checked < 4000:
+        a, e = rng.uniform(6.6e6, 2e8), rng.uniform(0, 0.97)
+        if a * (1 - e) < 6.578e6:
+            continue
+        angles = rng.uniform(0, math.pi), *rng.uniform(0, 6.28, size=3)
+        r0, v0 = elements_to_rv(a, e, *angles, WGS84.mu)
+        dt = rng.uniform(-20, 20) * keplerian_period(a, WGS84.mu)
+        r, v = propagate(r0, v0, dt, WGS84.mu)
+        assert specific_energy(r, v, WGS84.mu) == pytest.approx(
+            specific_energy(r0, v0, WGS84.mu), rel=1e-9
+        )
+        checked += 1
+
+
+def test_rev008_hyperbolic_cases_converge_and_match_dop853():
+    rng = np.random.default_rng(1)
+    for _ in range(500):
+        rp, e = rng.uniform(6.6e6, 2e7), rng.uniform(1.01, 5)
+        r0 = np.array([rp, 0.0, 0.0])
+        v0 = np.array([0.0, math.sqrt(WGS84.mu * (1 + e) / rp), 0.0])
+        propagate(r0, v0, rng.uniform(-2e5, 2e5), WGS84.mu)  # must not raise
+    r0 = np.array([7.0e6, 0.0, 0.0])
+    v0 = np.array([0.0, math.sqrt(WGS84.mu * 2.5 / 7.0e6), 0.0])
+    for dt in (600.0, 3600.0, 36000.0):
+        r, v = propagate(r0, v0, dt, WGS84.mu)
+        r_ref, v_ref = _dop853(r0, v0, dt, WGS84.mu)
+        assert np.linalg.norm(r - r_ref) / np.linalg.norm(r_ref) < 1e-9
+        assert np.linalg.norm(v - v_ref) / np.linalg.norm(v_ref) < 1e-9

@@ -74,6 +74,11 @@ def period_metrics(
     """
     if not crossing_times:
         raise ValueError("no node crossings recorded")
+    # The k*T comparison is valid only if the run starts on the ascending node (REV-011).
+    if not (
+        abs(float(initial.r[2])) <= 1e-9 * float(np.linalg.norm(initial.r)) and initial.v[2] > 0.0
+    ):
+        raise ValueError("period_metrics requires the initial state on the ascending node")
     a = -mu / (2.0 * specific_energy(initial.r, initial.v, mu))
     period = keplerian_period(a, mu)
     times = np.asarray(crossing_times) - initial.t

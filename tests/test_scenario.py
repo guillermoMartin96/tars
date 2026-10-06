@@ -49,3 +49,12 @@ def test_invalid_scenarios_rejected(patch):
     data = {**json.loads(M1_SCENARIO.read_text()), **patch}
     with pytest.raises(ValidationError):
         Scenario.model_validate(data)
+
+
+@pytest.mark.parametrize("inc", [0.0, 180.0])
+def test_equatorial_orbits_rejected(inc):
+    """REV-007: ascending-node orbit counting needs a non-equatorial orbit."""
+    data = json.loads(M1_SCENARIO.read_text())
+    data["initial_orbit"]["inclination_deg"] = inc
+    with pytest.raises(ValidationError):
+        Scenario.model_validate(data)

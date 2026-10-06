@@ -22,7 +22,9 @@ class CircularOrbit(_Strict):
 
     kind: Literal["circular"] = "circular"
     altitude_m: float = Field(gt=0.0)
-    inclination_deg: float = Field(ge=0.0, le=180.0)
+    # Equatorial orbits are excluded: orbit counting uses ascending-node crossings,
+    # which do not exist for i = 0 or 180 deg (REV-007).
+    inclination_deg: float = Field(gt=0.0, lt=180.0)
     raan_deg: float = Field(ge=0.0, lt=360.0)
     arg_latitude_deg: float = Field(ge=0.0, lt=360.0)
 

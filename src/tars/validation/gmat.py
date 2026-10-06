@@ -174,6 +174,14 @@ def compare(
     rows: Sequence[GmatRow], samples: Sequence[StateSnapshot], scenario: Scenario
 ) -> dict[str, float]:
     mu = scenario.constants.mu
+    interval, count = report_schedule(scenario)
+    expected_times = [interval * k for k in range(count + 1)]
+    if [row.t for row in rows] != expected_times:
+        # A truncated or re-gridded reference must never pass (REV-002).
+        raise ValueError(
+            f"incomplete GMAT reference: {len(rows)} rows, expected {count + 1} "
+            f"at {interval} s spacing up to {expected_times[-1]} s"
+        )
     ours = {s.t: s for s in samples}
     missing = [row.t for row in rows if row.t not in ours]
     if missing:
@@ -206,3 +214,26 @@ def compare(
         "period_difference_s": abs(rows[0].period - keplerian_period(a_expected, mu)),
         "rows_compared": float(len(rows)),
     }
+
+
+def provenance_problems(metadata: dict, scenario: Scenario, committed_script: str) -> list[str]:
+    """Exact (tolerance-free) checks that the committed reference matches the project (REV-001).
+
+    The committed script must equal the script regenerated from the current scenario
+    (so its Earth.Mu / EquatorialRadius lines carry the current constants), and the
+    recorded constants must equal the scenario's constants.
+    """
+    problems = []
+    if metadata.get("scenario_hash") != scenario.config_hash():
+        problems.append("scenario hash differs (stale reference)")
+    if committed_script != m1_script(scenario):
+        problems.append("committed GMAT script differs from the script generated for this scenario")
+    c = scenario.constants
+    expected = {
+        "name": c.name,
+        "mu_km3_s2": c.mu / 1e9,
+        "equatorial_radius_km": c.equatorial_radius / 1000.0,
+    }
+    if metadata.get("constants") != expected:
+        problems.append(f"metadata constants {metadata.get('constants')} != {expected}")
+    return problems

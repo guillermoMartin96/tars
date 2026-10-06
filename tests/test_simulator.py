@@ -94,3 +94,19 @@ def test_ascending_node_detector_interpolates_crossing():
     found = det.observe(prev, curr)
     assert found.crossing_t == pytest.approx(2.5, abs=1e-14) and found.tick == 3
     assert det.observe(curr, prev) is None  # descending crossing is ignored
+
+
+def test_force_models_cannot_mutate_simulator_state():
+    """REV-004: a force model mutating its r/v arguments must not corrupt owned state."""
+
+    class Rogue:
+        name = "rogue"
+
+        def acceleration(self, t, r, v):
+            v += 1.0
+            return np.zeros(3)
+
+    sim = Simulator(R0, V0, Rogue(), RK4(), 10.0)
+    with pytest.raises(ValueError):
+        sim.step()
+    np.testing.assert_array_equal(sim.snapshot().v, V0)

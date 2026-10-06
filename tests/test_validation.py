@@ -154,3 +154,38 @@ def test_committed_golden_is_current(m1_scenario):
 
     golden = load_golden()
     assert golden["scenario_hash"] == m1_scenario.config_hash()
+
+
+def test_architecture_scan_catches_review_rev005_bypasses(tmp_path):
+    """REV-005: attribute access via aliases, relative imports, clocks, OS entropy, importlib."""
+    pkg = tmp_path / "tars"
+    (pkg / "sim").mkdir(parents=True)
+    (pkg / "sim" / "a.py").write_text("import numpy as np\nx = np.random.default_rng().random()\n")
+    (pkg / "sim" / "b.py").write_text("from ..validation import orbit\n")
+    (pkg / "sim" / "c.py").write_text("import datetime, os\nt = datetime.datetime.now()\n")
+    (pkg / "sim" / "d.py").write_text("import importlib\nr = importlib.import_module('random')\n")
+    (pkg / "sim" / "ok.py").write_text("import numpy as np\nfrom . import state\nx = np.zeros(3)\n")
+    found = {(v.path, v.module) for v in architecture.scan(pkg)}
+    assert ("sim/a.py", "numpy.random.default_rng") in found
+    assert ("sim/b.py", "tars.validation") in found
+    assert ("sim/c.py", "datetime") in found and ("sim/c.py", "os") in found
+    assert ("sim/d.py", "importlib") in found
+    assert not any(path == "sim/ok.py" for path, _ in found)
+
+
+def test_threshold_groups_must_match_validators(tmp_path):
+    """REV-010: a misspelled group must fail loudly, not silently disable gating."""
+    data = json.loads(M1_THRESHOLDS.read_text())
+    data["limits"]["kepler_refrence"] = data["limits"].pop("kepler_reference")
+    bad = tmp_path / "m1.json"
+    bad.write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="kepler_refrence"):
+        load_thresholds(bad)
+
+
+def test_period_metrics_require_ascending_node_start():
+    """REV-011."""
+    r0, v0 = circular_orbit_state(RADIUS, math.radians(51.6), 0.0, math.pi / 2, MU)
+    initial = StateSnapshot(tick=0, t=0.0, r=r0, v=v0)
+    with pytest.raises(ValueError):
+        orbit.period_metrics([PERIOD], initial, MU)

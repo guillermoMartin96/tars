@@ -23,8 +23,23 @@ class Thresholds:
         return {k: v for k, v in self.limits.get(name, {}).items() if v is not None}
 
 
+# Every threshold group must be consumed by a validator; a typo must not silently
+# disable gating (REV-010).
+KNOWN_VALIDATORS = frozenset(
+    {
+        "mission", "invariants", "kepler_reference", "period", "convergence",
+        "determinism", "architecture", "gmat_reference", "cross_platform",
+    }
+)  # fmt: skip
+
+
 def load_thresholds(path: Path = M1_THRESHOLDS) -> Thresholds:
     data = json.loads(path.read_text())
+    unknown = sorted(set(data["limits"]) - KNOWN_VALIDATORS)
+    if unknown:
+        raise ValueError(f"threshold groups match no validator: {unknown}")
+    if data["status"] not in ("provisional", "approved"):
+        raise ValueError(f"invalid threshold status {data['status']!r}")
     return Thresholds(status=data["status"], limits=data["limits"])
 
 

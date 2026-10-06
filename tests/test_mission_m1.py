@@ -80,3 +80,10 @@ def test_timeout_guard(monkeypatch, m1_scenario):
         monkeypatch, m1_scenario, lambda r, v: 2e-2 * v / np.linalg.norm(v)
     )
     assert result.completed.failure_cause == "timeout"
+
+
+def test_final_state_is_sampled_and_validated(m1_run):
+    """REV-009: the final (off-cadence) state must be in samples and telemetry."""
+    assert m1_run.samples[-1].tick == m1_run.final.tick == m1_run.completed.tick
+    sampled = [e for e in m1_run.events if e.type == "StateSampled"]
+    assert sampled[-1].tick == m1_run.final.tick

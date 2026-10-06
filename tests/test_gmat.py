@@ -1,7 +1,5 @@
 """GMAT tooling tests using a synthetic report built from the exact Kepler solution."""
 
-import math
-
 import numpy as np
 import pytest
 
@@ -81,15 +79,20 @@ def test_compare_against_exact_reference(m1_scenario):
 
 
 def test_compare_detects_mismatched_mu(m1_scenario):
-    """GMAT's default mu (398600.4415 km^3/s^2) must be caught (SCI-0005)."""
-    rows = gmat.parse_report(_synthetic_report(m1_scenario, mu_gmat=3.986004415e14, n_rows=10))
+    """GMAT's default mu (398600.4415 km^3/s^2) must be visible in the metrics (SCI-0005).
+
+    Same Cartesian start, different mu: delta_a/a ~ -delta_mu/mu, so the period shifts
+    by delta_T/T ~ -2 delta_mu/mu (8.1e-6 s/orbit), ~0.63 m along-track after 10 orbits
+    (corrected per external review REV-001; the earlier 0.16 m figure assumed equal radii).
+    """
+    rows = gmat.parse_report(_synthetic_report(m1_scenario, mu_gmat=3.986004415e14))
     run = run_scenario(m1_scenario)
     m = gmat.compare(rows, run.samples, m1_scenario)
-    # Circular orbit: delta_a ~ r * delta_mu / mu ~ 6.6e6 m * 7.5e-10 ~ 5 mm.
     assert m["initial_sma_difference_m"] == pytest.approx(
         6628137.0 * (3e5 / 3.986004415e14), rel=1e-2
     )
-    assert math.isfinite(m["period_difference_s"]) and m["period_difference_s"] > 1e-6
+    assert m["period_difference_s"] == pytest.approx(8.08e-6, rel=1e-2)
+    assert m["gmat_vs_kepler_position_error_max_m"] == pytest.approx(0.627, rel=1e-2)
 
 
 def test_compare_rejects_off_grid_times(m1_scenario):
@@ -97,3 +100,39 @@ def test_compare_rejects_off_grid_times(m1_scenario):
     run = run_scenario(m1_scenario)
     with pytest.raises(ValueError):
         gmat.compare(gmat.parse_report(text), run.samples, m1_scenario)
+
+
+@pytest.mark.parametrize("n_rows", [1, 89, 894])
+def test_truncated_reference_is_rejected(m1_scenario, n_rows):
+    """REV-002: a partial GMAT report must never pass."""
+    rows = gmat.parse_report(_synthetic_report(m1_scenario, n_rows=n_rows))
+    run = run_scenario(m1_scenario)
+    with pytest.raises(ValueError, match="incomplete"):
+        gmat.compare(rows, run.samples, m1_scenario)
+
+
+def test_provenance_checks_are_exact(m1_scenario):
+    """REV-001: constants and script must match the current scenario exactly."""
+    script = gmat.m1_script(m1_scenario)
+    good = {
+        "scenario_hash": m1_scenario.config_hash(),
+        "constants": {"name": "WGS84", "mu_km3_s2": 398600.4418, "equatorial_radius_km": 6378.137},
+    }
+    assert gmat.provenance_problems(good, m1_scenario, script) == []
+    wrong_mu = {**good, "constants": {**good["constants"], "mu_km3_s2": 398600.4415}}
+    assert gmat.provenance_problems(wrong_mu, m1_scenario, script)
+    edited = script.replace("398600.4418", "398600.4415")
+    assert gmat.provenance_problems(good, m1_scenario, edited)
+
+
+def test_committed_reference_passes_provenance_checks(m1_scenario):
+    import json
+
+    from tests.conftest import REPO_ROOT
+
+    ref = REPO_ROOT / "toolbox" / "references" / "gmat"
+    metadata = json.loads((ref / "m1_two_body_metadata.json").read_text())
+    script = (ref / "m1_two_body.script").read_text()
+    assert gmat.provenance_problems(metadata, m1_scenario, script) == []
+    rows = gmat.parse_report((ref / "m1_two_body_report.txt").read_text())
+    gmat.compare(rows, run_scenario(m1_scenario).samples, m1_scenario)  # complete

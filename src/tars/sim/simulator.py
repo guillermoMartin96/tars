@@ -18,6 +18,11 @@ from tars.sim.integrators import Integrator
 from tars.sim.state import StateSnapshot, Vector, frozen_vector
 
 
+def _read_only(arr: NDArray[np.float64]) -> NDArray[np.float64]:
+    arr.flags.writeable = False
+    return arr
+
+
 @dataclass(frozen=True)
 class AscendingNodeCrossing:
     """Spacecraft crossed the equatorial plane going north (z: - -> +)."""
@@ -102,7 +107,9 @@ class Simulator:
         self._dt = float(dt)
         self._detectors = tuple(detectors)
         self._tick = 0
-        self._y: NDArray[np.float64] = np.concatenate([frozen_vector(r0), frozen_vector(v0)])
+        self._y: NDArray[np.float64] = _read_only(
+            np.concatenate([frozen_vector(r0), frozen_vector(v0)])
+        )
 
     @property
     def dt(self) -> float:
@@ -130,7 +137,9 @@ class Simulator:
         y_next = self._integrator.step(self._derivative, prev.t, self._y, self._dt)
         if not np.all(np.isfinite(y_next)):
             raise FloatingPointError(f"non-finite state produced at tick {self._tick + 1}")
-        self._y = y_next
+        # Read-only so no force model can mutate simulator-owned state through the
+        # r/v views it receives (REV-004); only step() replaces the state.
+        self._y = _read_only(y_next)
         self._tick += 1
         curr = self.snapshot()
         detections = []

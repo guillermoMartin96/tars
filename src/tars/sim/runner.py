@@ -152,6 +152,9 @@ def run_scenario(scenario: Scenario, record_samples: bool = True) -> RunResult:
             cause = "escape"
             break
 
+    # The final state is always part of the telemetry and validated samples (REV-009).
+    if snap.tick % scenario.sample_every_ticks != 0:
+        sample(snap)
     result.final = snap
     result.status = "success" if cause is None else "failure"
     result.failure_cause = cause
