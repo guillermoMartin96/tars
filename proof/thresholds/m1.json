@@ -3,31 +3,39 @@
   "status": "approved",
   "approved_by": "Guillermo (Tech Lead)",
   "approved_on": "2026-10-05",
-  "basis": "DR-0008 option A: dt = 10 s; limits ~2x the values measured on three platforms (VAL-0002, VAL-0003, VAL-0004). Any change to dt, integrator, force model or scenario requires re-measurement and re-approval.",
+  "basis": "DR-0008 option A: dt = 10 s; limits ~2x the values measured on three platforms (VAL-0002, VAL-0003, VAL-0004). Any change to dt, integrator, force model or scenario requires re-measurement and re-approval. GMAT reference gates and script initial-state bounds: DR-0009 option A (approved 2026-10-05).",
   "limits": {
     "invariants": {
-      "energy_rel_drift_max": 1e-9,
+      "energy_rel_drift_max": 1e-09,
       "angular_momentum_rel_drift_max": 5e-10,
-      "eccentricity_vector_drift_max": 1.2e-9,
+      "eccentricity_vector_drift_max": 1.2e-09,
       "sma_drift_max_m": 0.006
     },
     "kepler_reference": {
       "position_error_max_m": 0.6,
-      "velocity_error_max_mps": 7e-4
+      "velocity_error_max_mps": 0.0007
     },
     "period": {
-      "period_error_max_s": 1e-5,
-      "node_crossing_time_error_max_s": 8e-5
+      "period_error_max_s": 1e-05,
+      "node_crossing_time_error_max_s": 8e-05
     },
     "convergence": {
       "order_deviation_from_4": 0.5
     },
     "gmat_reference": {
-      "position_error_max_m": 0.6
+      "position_error_max_m": 0.6,
+      "velocity_error_max_mps": 0.0007,
+      "gmat_vs_kepler_position_error_max_m": 0.0001,
+      "gmat_vs_kepler_velocity_error_max_mps": 1e-07,
+      "initial_sma_difference_m": 1e-06,
+      "initial_state_difference_m": 1e-06,
+      "period_difference_s": 1e-08,
+      "script_initial_position_difference_m": 1e-06,
+      "script_initial_velocity_difference_mps": 1e-09
     },
     "cross_platform": {
-      "final_position_difference_m": 1e-4,
-      "final_velocity_difference_mps": 1e-7
+      "final_position_difference_m": 0.0001,
+      "final_velocity_difference_mps": 1e-07
     }
   }
 }

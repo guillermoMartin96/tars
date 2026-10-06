@@ -37,3 +37,21 @@ def test_cross_process_determinism_validator():
     proc = _run("toolbox/validators/determinism.py")
     assert proc.returncode == 0, proc.stdout + proc.stderr
     assert json.loads(proc.stdout)["passed"] is True
+
+
+def test_gmat_run_refuses_to_replace_committed_reference_without_reason(tmp_path):
+    """DR-0009: committed reference data is never silently regenerated."""
+    proc = _run(
+        "toolbox/scripts/gmat_m1.py", "run", "--gmat-console", tmp_path / "GmatConsole",
+        "--gmat-version", "R2026a",
+    )  # fmt: skip
+    assert proc.returncode == 2
+    assert "--replace-reason" in proc.stderr
+
+
+def test_gmat_compare_passes_against_committed_reference():
+    proc = _run("toolbox/scripts/gmat_m1.py", "compare")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    result = json.loads(proc.stdout)
+    assert result["passed"] is True and result["threshold_status"] == "approved"
+    assert len(result["thresholds"]) == 9

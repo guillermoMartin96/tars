@@ -1,6 +1,6 @@
 # Decision Request: Harden the M1 GMAT reference gate (external review REV-001, REV-003)
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-05  
 **Related milestone/issue:** Milestone 1 — Orbit; follow-up to DR-0008; review `docs/reviews/M1-orbit-review-01.md`
@@ -89,4 +89,17 @@ Option A, add compare to CI, approve the initial-state literal bound, and keep 0
 `A` / `B` / `discuss`; CI compare `yes` / `no`; initial-state bound `approve` / `change`; 0.6 m `keep` / `change`
 
 ## Resolution
-**Decision:** _pending_
+**Decision:** APPROVED — Option A (Tech Lead, 2026-10-05).  
+**Reasoning/notes:**
+1. All proposed sign-independent GMAT reference gates and limits are approved.
+2. CI runs the comparison against the committed reference. GMAT itself is not required in CI.
+3. The REV-014 initial-state literal bounds are approved: 1e-6 m and 1e-9 m/s.
+4. The 0.6 m GMAT position threshold is kept. The reference and initial-state gates now cover reference correctness, so this threshold mainly accommodates the expected RK4 error.
+5. Regenerating or replacing the committed GMAT reference data requires explicit review. It is never updated automatically in response to a failing comparison.
+
+**Follow-up:**
+- The gates are in `proof/thresholds/m1.json` under `gmat_reference`.
+- The CI step is "GMAT reference comparison".
+- `gmat_m1.py run` refuses to replace an existing reference without `--replace-reason`, which is recorded in the metadata.
+- The policy is documented in the GMAT README and playbook/science.md.
+- Regression test: `test_approved_gates_reject_mu_mismatch_of_either_sign`.

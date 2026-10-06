@@ -36,7 +36,7 @@ Before comparing, it **rejects** the reference if any of the following hold:
 - A sha256 does not match.
 - The report does not cover the full 60 s grid.
 
-It also reports the initial SMA, period and initial-state differences, which give numerical evidence that GMAT applied the constants. Gating those is pending DR-0009.
+It also reports the initial SMA, period and initial-state differences, which give numerical evidence that GMAT applied the constants. These are gated by DR-0009.
 
 **Epoch column note (REV-012):** `(Sat.TTModJulian − 31041.5)·86400 − ElapsedS` drifts to −1.07e-4 s by 53 640 s.
 - The states are nevertheless at the labelled ElapsedS: GMAT matches exact Kepler at those times to 7 µm, while a 1e-4 s time offset would show as about 0.8 m.
@@ -59,3 +59,10 @@ It also reports the initial SMA, period and initial-state differences, which giv
 **Reproducibility:** two consecutive runs produced byte-identical reports (sha256 `9ac597c6…`).
 
 **Report format note:** GMAT R2026a writes the header line again when the first Report inside the `For` loop runs. The parser skips repeated headers.
+
+## Policy: committed reference data is evidence, not a fixture (DR-0009)
+The committed GMAT script, report and metadata are the reference our simulator is judged against.
+- **They are never regenerated or replaced to make a failing comparison pass.** A failing `compare` is a discrepancy to investigate and classify (playbook/science.md), not a stale fixture.
+- Regenerating or replacing them requires explicit review. That means a Decision Request or a reviewed record naming the reason, for example a scenario change approved by the Tech Lead or a GMAT version upgrade, plus a comparison of the old and new reference.
+- `gmat_m1.py run` enforces this: it refuses to overwrite an existing reference unless `--replace-reason` is given. The reason is stored in `m1_two_body_metadata.json`.
+- `compare` rejects references that are stale, edited, incomplete, or carry different constants. It gates GMAT's own agreement with the exact Kepler solution, the constants it actually applied, and the initial state (DR-0009).

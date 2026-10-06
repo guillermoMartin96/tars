@@ -144,3 +144,22 @@ def test_committed_reference_passes_provenance_checks(m1_scenario):
     assert gmat.provenance_problems(metadata, m1_scenario, script, 1e-4, 1e-7) == []
     rows = gmat.parse_report((ref / "m1_two_body_report.txt").read_text())
     gmat.compare(rows, run_scenario(m1_scenario).samples, m1_scenario)  # complete
+
+
+@pytest.mark.parametrize("mu_gmat", [3.986004415e14, 3.986004421e14, 3.986004418e14 * (1 + 1e-12)])
+def test_approved_gates_reject_mu_mismatch_of_either_sign(m1_scenario, mu_gmat):
+    """REV-001 / DR-0009: a mu mismatch must fail regardless of its sign.
+
+    Before DR-0009, mu = 3.986004421e14 passed (ours vs GMAT 0.33 m < 0.6 m).
+    """
+    from tars.validation.thresholds import Check, load_thresholds
+
+    rows = gmat.parse_report(_synthetic_report(m1_scenario, mu_gmat=mu_gmat))
+    metrics = gmat.compare(rows, run_scenario(m1_scenario).samples, m1_scenario)
+    th = load_thresholds()
+    gates = {
+        k: v for k, v in th.for_validator("gmat_reference").items() if not k.startswith("script_")
+    }
+    check = Check("gmat_reference", metrics, gates, th.status)
+    assert not check.passed
+    assert any("gmat_vs_kepler_position" in f for f in check.failures)

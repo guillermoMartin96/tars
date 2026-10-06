@@ -217,7 +217,7 @@ Not applicable in M1.
 ## Validation approach
 - The GMAT script sets the constants explicitly.
 - `gmat_m1.py compare` rejects any reference whose committed script differs from the script regenerated for the current scenario, or whose metadata constants differ from the scenario's. These are exact checks.
-- GMAT's applied μ is evidenced by the initial-SMA and period differences. Gating them numerically is pending **DR-0009**.
+- GMAT's applied μ is evidenced by the initial-SMA and period differences. They are gated numerically: initial SMA difference ≤ 1e-6 m and GMAT vs Kepler ≤ 1e-4 m (**DR-0009**).
 
 ## Accepted discrepancy / tolerance
 Zero: constants must match exactly in reference comparisons.

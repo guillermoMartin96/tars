@@ -41,7 +41,11 @@ It also found hardening gaps (force models could mutate state; scan bypasses), a
   - Tests: `test_provenance_checks_are_exact` and `test_committed_reference_passes_provenance_checks`.
 - `test_compare_detects_mismatched_mu` now asserts the corrected 8.08e-6 s and 0.627 m.
 - SCI-0005 and the README are corrected, and an erratum is appended to DR-0008.
-- The numeric gates are **escalated in DR-0009 (OPEN)**. **This finding remains unresolved until DR-0009 is decided, so it blocks Proof.**
+- The numeric gates were escalated in DR-0009.
+- **Resolved after DR-0009 approval (option A, 2026-10-05):**
+  - all nine `gmat_reference` gates are in `proof/thresholds/m1.json`;
+  - CI runs the committed-reference compare;
+  - `test_approved_gates_reject_mu_mismatch_of_either_sign` shows the reviewer's passing case (μ = 3.986004421e14) and a 1e-12 relative mismatch now fail.
 
 ---
 
@@ -208,8 +212,7 @@ It also found hardening gaps (force models could mutate state; scan bypasses), a
 **Implementer disposition:** `ACCEPTED`  
 **Implementer reasoning:** Correct. It is harmless (it only loosens a check that was added after the review), but it is not an approved tolerance for this quantity.  
 **Resolution/evidence:**
-- An explicit initial-state literal bound is added to DR-0009 for approval (proposed 1e-6 m and 1e-9 m/s; measured 0 m and 1.29e-12 m/s).
-- The interim use of the approved cross-platform bound is labelled as interim in DR-0009.
+- Approved in DR-0009 (1e-6 m, 1e-9 m/s). `gmat_m1.py compare` now uses these bounds in place of the interim cross-platform bound.
 
 ### REV-015 — Evidence at `d1ff803` was stale
 **Severity:** Low  
@@ -217,10 +220,10 @@ It also found hardening gaps (force models could mutate state; scan bypasses), a
 **Resolution/evidence:** Regenerated at `dfe4615` (overall PASS, clean tree). It will be regenerated again after DR-0009 changes.
 
 ## Proof gate
-- [ ] All Critical findings resolved (none raised)
-- [ ] All High findings resolved: **REV-001 open pending DR-0009**
+- [x] All Critical findings resolved (none raised)
+- [x] All High findings resolved: REV-001 resolved via DR-0009
 - [x] Every substantive finding has an explicit disposition
 - [x] Accepted fixes have been re-tested: 109 tests and the full suite at `dfe4615`; independently re-verified by the reviewer (addendum below)
 - [x] No escalated scientific claims remain without authoritative evidence. REV-001's physics was independently re-derived by the implementer.
 
-**Review gate result:** BLOCKED (REV-001 awaiting Tech Lead decision DR-0009)
+**Review gate result:** PASS. REV-001 was resolved via DR-0009, every finding is dispositioned, and accepted fixes were re-tested and re-verified.

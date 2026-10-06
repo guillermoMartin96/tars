@@ -58,6 +58,15 @@ def cmd_generate(args: argparse.Namespace) -> int:
 
 def cmd_run(args: argparse.Namespace) -> int:
     scenario = load_scenario(args.scenario)
+    # The committed reference is evidence, not a fixture: it is never regenerated to make
+    # a failing comparison pass. Replacing it needs an explicit, reviewed reason (DR-0009).
+    if REPORT.exists() and not args.replace_reason:
+        print(
+            "a committed GMAT reference exists; replacing it requires --replace-reason and "
+            "explicit Tech Lead review (toolbox/references/gmat/README.md)",
+            file=sys.stderr,
+        )
+        return 2
     console = Path(args.gmat_console).expanduser()
     if not console.exists():
         print(f"GmatConsole not found: {console}", file=sys.stderr)
@@ -102,6 +111,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         "host_platform": platform.platform(),
         "tars_git_revision": revision,
         "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+        "replace_reason": args.replace_reason,
         "scenario": scenario.name,
         "scenario_hash": scenario.config_hash(),
         "script_sha256": _sha256(SCRIPT),
@@ -126,13 +136,13 @@ def cmd_compare(args: argparse.Namespace) -> int:
         return 2
     metadata = json.loads(METADATA.read_text())
     thresholds = load_thresholds()
-    xp = thresholds.for_validator("cross_platform")
+    gates = thresholds.for_validator("gmat_reference")
     problems = provenance_problems(
         metadata,
         scenario,
         SCRIPT.read_text(),
-        xp["final_position_difference_m"],
-        xp["final_velocity_difference_mps"],
+        gates["script_initial_position_difference_m"],  # DR-0009 (REV-014)
+        gates["script_initial_velocity_difference_mps"],
     )
     if metadata["report_sha256"] != _sha256(REPORT):
         problems.append("GMAT report does not match its recorded sha256")
@@ -168,6 +178,12 @@ def main(argv: list[str] | None = None) -> int:
         "--console-args", nargs="*", default=["--run"], help="arguments before the script path"
     )
     run.add_argument("--timeout", type=float, default=600.0)
+    run.add_argument(
+        "--replace-reason",
+        default=None,
+        help="required to replace an existing committed reference; must cite the reviewed "
+        "decision or record that authorizes it",
+    )
     run.set_defaults(func=cmd_run)
     sub.add_parser("compare").set_defaults(func=cmd_compare)
     args = parser.parse_args(argv)

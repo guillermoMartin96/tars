@@ -1,5 +1,6 @@
-# M1 CI (DR-0007): lint, tests, determinism, and every M1 Proof check that does not
-# need GMAT. GMAT validation stays outside required CI and uses committed artifacts.
+# M1 CI (DR-0007, DR-0009): lint, tests, determinism, cross-platform agreement, every M1
+# Proof check, and the comparison against the committed GMAT reference. GMAT itself is
+# never installed or run in CI.
 name: ci
 
 on:
@@ -40,6 +41,9 @@ jobs:
 
       - name: Cross-platform agreement with golden M1 state (DR-0006, DR-0008)
         run: uv run python toolbox/validators/cross_platform.py
+
+      - name: GMAT reference comparison (committed artifacts only; GMAT not installed, DR-0009)
+        run: uv run python toolbox/scripts/gmat_m1.py compare
 
       - name: M1 Proof (non-GMAT checks)
         run: uv run python toolbox/validators/m1_proof.py --out runs/proof/m1_non_gmat_${{ matrix.os }}.json

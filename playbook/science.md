@@ -35,3 +35,6 @@ If physics or validation suggests an existing requirement is questionable, inves
 
 ## Scientific assumptions registry
 Use `docs/science/assumptions.md`. Significant assumptions must have stable IDs, rationale, sources, known limitations/error, validation approach, and revisit conditions.
+
+## Reference data is evidence, not a fixture
+Committed reference outputs (for example GMAT reports) must never be regenerated or replaced in response to a failing comparison. A failure is a discrepancy to classify. Replacing reference data requires explicit review with a recorded reason, and tooling should enforce this where practical (DR-0009; `gmat_m1.py run --replace-reason`).

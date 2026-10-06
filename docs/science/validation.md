@@ -99,3 +99,21 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - The initial position is identical.
   - Growth of this 1-ulp initial difference, mostly along-track, plausibly accounts for the ~1e-6 m final-state differences.
   - Consequence: the GMAT-script provenance check compares the six state literals within the approved cross-platform bound. All other lines must match exactly.
+
+## VAL-0006 — GMAT reference gates (DR-0009)
+- **Date:** 2026-10-05
+- **Result:** the committed GMAT R2026a reference passes all nine approved `gmat_reference` gates.
+
+| Gate | Measured | Limit | Margin |
+|---|---|---|---|
+| Ours vs GMAT, position | 0.298 m | 0.6 m | 2.0× |
+| Ours vs GMAT, velocity | 3.49e-4 m/s | 7e-4 m/s | 2.0× |
+| GMAT vs Kepler, position | 7.2e-6 m | 1e-4 m | 14× |
+| GMAT vs Kepler, velocity | 8.4e-9 m/s | 1e-7 m/s | 12× |
+| Initial SMA difference | 1.9e-9 m | 1e-6 m | 537× |
+| Initial-state difference | 0 m | 1e-6 m | — |
+| Period difference | 9e-13 s | 1e-8 s | 1.1e4× |
+| Script initial position | 0 m | 1e-6 m | — |
+| Script initial velocity | 0 m/s (CI: 1.3e-12 m/s) | 1e-9 m/s | ≥ 770× |
+
+- **Sensitivity:** synthetic references with μ = 3.986004415e14, 3.986004421e14 and μ·(1+1e-12) all fail, regardless of sign (test and reviewer `/tmp/rerev_a.py`).
