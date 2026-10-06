@@ -1,0 +1,49 @@
+# M1 CI (DR-0007): lint, tests, determinism, and every M1 Proof check that does not
+# need GMAT. GMAT validation stays outside required CI and uses committed artifacts.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        # Two platforms measure the cross-platform agreement required by DR-0006.
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --locked
+
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Tests
+        run: uv run pytest
+
+      - name: Cross-process determinism
+        run: uv run python toolbox/validators/determinism.py
+
+      - name: M1 Proof (non-GMAT checks)
+        run: uv run python toolbox/validators/m1_proof.py --out runs/proof/m1_non_gmat_${{ matrix.os }}.json
+
+      - name: Upload Proof report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m1-proof-${{ matrix.os }}
+          path: runs/proof/
