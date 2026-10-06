@@ -1,10 +1,10 @@
-revision: dfe4615b67d0cf0428eca8c727f65201d71e489f
+revision: 2b115d44044bddb718923d1a7b755643b23de8db
 branch: milestone-1-orbit
-date_utc: 2026-10-06T01:47:57Z
+date_utc: 2026-10-06T01:57:30Z
 working_tree_clean_excluding_evidence: yes
 == uv sync --locked: /Users/guillermomartin/Library/Python/3.9/bin/uv sync --locked
-Resolved 15 packages in 7ms
-Checked 14 packages in 0.82ms
+Resolved 15 packages in 6ms
+Checked 14 packages in 0.85ms
    exit=0
 == ruff check: /Users/guillermomartin/Library/Python/3.9/bin/uv run ruff check .
 All checks passed!
@@ -13,16 +13,16 @@ All checks passed!
 87 files already formatted
    exit=0
 == pytest: /Users/guillermomartin/Library/Python/3.9/bin/uv run pytest -q
-........................................................................ [ 66%]
-.....................................                                    [100%]
-109 passed in 15.79s
+........................................................................ [ 63%]
+..........................................                               [100%]
+114 passed in 19.92s
    exit=0
 == determinism (cross-process): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py
 {"validator": "determinism_cross_process", "passed": true, "sha256": ["7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4", "7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4"]}
    exit=0
-== cross-platform: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.LTZG7l52jd/cross_platform.json"
+== cross-platform: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.f15tdygMOv/cross_platform.json"
    exit=0
-== m1_proof (non-GMAT): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.LTZG7l52jd/m1_non_gmat.json
+== m1_proof (non-GMAT): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.f15tdygMOv/m1_non_gmat.json
 [PASS] mission: failed=0, orbits_short_of_target=0
 [PASS] invariants: energy_rel_drift_max=3.82693e-10, angular_momentum_rel_drift_max=1.91347e-10, eccentricity_vector_drift_max=5.85589e-10, sma_drift_max_m=0.00253654
 [PASS] kepler_reference: position_error_max_m=0.298364, position_error_final_m=0.298364, velocity_error_max_mps=0.000349092, velocity_error_final_mps=0.000349092
@@ -38,11 +38,11 @@ convergence (dt s -> position error m, |dE/E|):
         5 -> 1.4905e-02, 1.194e-11
       2.5 -> 8.2243e-04, 3.974e-13
         1 -> 1.5233e-05, 1.028e-14
-thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.LTZG7l52jd/m1_non_gmat.json
+thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.f15tdygMOv/m1_non_gmat.json
    exit=0
-== gmat compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.LTZG7l52jd/gmat_reference.json"
+== gmat compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.f15tdygMOv/gmat_reference.json"
    exit=0
-== run_mission: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m1_leo_250km.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.LTZG7l52jd/mission
-m1_leo_250km: success, 10 orbits, events sha256 7a4e18777ccd134b... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.LTZG7l52jd/mission
+== run_mission: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m1_leo_250km.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.f15tdygMOv/mission
+m1_leo_250km: success, 10 orbits, events sha256 7a4e18777ccd134b... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.f15tdygMOv/mission
    exit=0
 overall: PASS
