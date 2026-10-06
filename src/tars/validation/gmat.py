@@ -14,6 +14,7 @@ GMAT works in km and km/s; conversion happens only here (ADR-0002).
 from __future__ import annotations
 
 import math
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
 
@@ -216,18 +217,66 @@ def compare(
     }
 
 
-def provenance_problems(metadata: dict, scenario: Scenario, committed_script: str) -> list[str]:
-    """Exact (tolerance-free) checks that the committed reference matches the project (REV-001).
+_STATE_LINE = re.compile(r"^GMAT Sat\.(X|Y|Z|VX|VY|VZ) = (.+);$")
 
-    The committed script must equal the script regenerated from the current scenario
-    (so its Earth.Mu / EquatorialRadius lines carry the current constants), and the
-    recorded constants must equal the scenario's constants.
+
+def _split_script(script: str) -> tuple[list[str], np.ndarray, np.ndarray]:
+    """Separate initial-state literals (km, km/s) from all other script lines."""
+    other, state = [], {}
+    for line in script.splitlines():
+        match = _STATE_LINE.match(line)
+        if match:
+            state[match.group(1)] = float(match.group(2))
+        else:
+            other.append(line)
+    r = np.array([state.get(k, np.nan) for k in ("X", "Y", "Z")]) * 1000.0
+    v = np.array([state.get(k, np.nan) for k in ("VX", "VY", "VZ")]) * 1000.0
+    return other, r, v
+
+
+def script_state_difference(committed_script: str, scenario: Scenario) -> dict[str, float]:
+    """Initial-state difference [m, m/s] between the committed script and this platform's.
+
+    The initial state comes from trigonometric functions whose last bits differ
+    across CPUs (VAL-0005), so these six literals are compared numerically.
+    """
+    _, r_c, v_c = _split_script(committed_script)
+    _, r_n, v_n = _split_script(m1_script(scenario))
+    return {
+        "script_initial_position_difference_m": float(np.linalg.norm(r_c - r_n)),
+        "script_initial_velocity_difference_mps": float(np.linalg.norm(v_c - v_n)),
+    }
+
+
+def provenance_problems(
+    metadata: dict,
+    scenario: Scenario,
+    committed_script: str,
+    position_tol_m: float,
+    velocity_tol_mps: float,
+) -> list[str]:
+    """Check that the committed reference matches the project (REV-001).
+
+    - Every non-state script line (constants, force model, integrator, epoch, ...)
+      must equal the script regenerated from the current scenario exactly.
+    - The six initial-state literals must agree within the approved cross-platform
+      bound (DR-0006/DR-0008), since they carry platform-dependent last bits.
+    - Recorded constants must equal the scenario's exactly.
     """
     problems = []
     if metadata.get("scenario_hash") != scenario.config_hash():
         problems.append("scenario hash differs (stale reference)")
-    if committed_script != m1_script(scenario):
-        problems.append("committed GMAT script differs from the script generated for this scenario")
+    other_c, _, _ = _split_script(committed_script)
+    other_n, _, _ = _split_script(m1_script(scenario))
+    if other_c != other_n:
+        diff = [f"{a!r} != {b!r}" for a, b in zip(other_c, other_n, strict=False) if a != b]
+        problems.append(f"GMAT script differs from regenerated script: {diff[:3]}")
+    d = script_state_difference(committed_script, scenario)
+    if not (
+        d["script_initial_position_difference_m"] <= position_tol_m
+        and d["script_initial_velocity_difference_mps"] <= velocity_tol_mps
+    ):
+        problems.append(f"GMAT script initial state differs beyond cross-platform bound: {d}")
     c = scenario.constants
     expected = {
         "name": c.name,

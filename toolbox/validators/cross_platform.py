@@ -22,6 +22,7 @@ from tars.validation.cross_platform import (
     load_golden,
     platform_info,
 )
+from tars.validation.gmat import script_state_difference
 from tars.validation.thresholds import REPO_ROOT, Check, load_thresholds
 
 
@@ -42,9 +43,14 @@ def main(argv: list[str] | None = None) -> int:
 
     golden = load_golden()
     thresholds = load_thresholds()
+    metrics = compare_to_golden(result, golden)
+    # Reported (not gated here): this platform's initial state vs the committed GMAT
+    # script, whose literals were generated on the reference platform.
+    script = REPO_ROOT / "toolbox" / "references" / "gmat" / "m1_two_body.script"
+    metrics.update(script_state_difference(script.read_text(), result.scenario))
     check = Check(
         "cross_platform",
-        compare_to_golden(result, golden),
+        metrics,
         thresholds.for_validator("cross_platform"),
         thresholds.status,
         f"this platform: {platform_info()}; golden platform: {golden['platform']}",

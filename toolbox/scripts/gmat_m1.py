@@ -29,7 +29,13 @@ from pathlib import Path
 
 from tars.sim.runner import run_scenario
 from tars.sim.scenario import load_scenario
-from tars.validation.gmat import compare, m1_script, parse_report, provenance_problems
+from tars.validation.gmat import (
+    compare,
+    m1_script,
+    parse_report,
+    provenance_problems,
+    script_state_difference,
+)
 from tars.validation.thresholds import REPO_ROOT, Check, load_thresholds
 
 REF_DIR = REPO_ROOT / "toolbox" / "references" / "gmat"
@@ -119,7 +125,15 @@ def cmd_compare(args: argparse.Namespace) -> int:
         print("no committed GMAT reference; run the 'run' subcommand first", file=sys.stderr)
         return 2
     metadata = json.loads(METADATA.read_text())
-    problems = provenance_problems(metadata, scenario, SCRIPT.read_text())
+    thresholds = load_thresholds()
+    xp = thresholds.for_validator("cross_platform")
+    problems = provenance_problems(
+        metadata,
+        scenario,
+        SCRIPT.read_text(),
+        xp["final_position_difference_m"],
+        xp["final_velocity_difference_mps"],
+    )
     if metadata["report_sha256"] != _sha256(REPORT):
         problems.append("GMAT report does not match its recorded sha256")
     if metadata["script_sha256"] != _sha256(SCRIPT):
@@ -130,7 +144,7 @@ def cmd_compare(args: argparse.Namespace) -> int:
 
     run = run_scenario(scenario)
     metrics = compare(parse_report(REPORT.read_text()), run.samples, scenario)
-    thresholds = load_thresholds()
+    metrics.update(script_state_difference(SCRIPT.read_text(), scenario))
     check = Check(
         "gmat_reference",
         metrics,

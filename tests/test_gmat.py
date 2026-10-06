@@ -118,11 +118,19 @@ def test_provenance_checks_are_exact(m1_scenario):
         "scenario_hash": m1_scenario.config_hash(),
         "constants": {"name": "WGS84", "mu_km3_s2": 398600.4418, "equatorial_radius_km": 6378.137},
     }
-    assert gmat.provenance_problems(good, m1_scenario, script) == []
+    tol = (1e-4, 1e-7)
+    assert gmat.provenance_problems(good, m1_scenario, script, *tol) == []
     wrong_mu = {**good, "constants": {**good["constants"], "mu_km3_s2": 398600.4415}}
-    assert gmat.provenance_problems(wrong_mu, m1_scenario, script)
+    assert gmat.provenance_problems(wrong_mu, m1_scenario, script, *tol)
     edited = script.replace("398600.4418", "398600.4415")
-    assert gmat.provenance_problems(good, m1_scenario, edited)
+    assert gmat.provenance_problems(good, m1_scenario, edited, *tol)
+    # Last-bit differences in the initial state are tolerated; real changes are not.
+    r0, _ = initial_state(m1_scenario)
+    x_line = f"GMAT Sat.X = {float(r0[0]) / 1000.0!r};"
+    nudged = script.replace(x_line, f"GMAT Sat.X = {float(r0[0]) / 1000.0 + 1e-12!r};")
+    assert nudged != script and gmat.provenance_problems(good, m1_scenario, nudged, *tol) == []
+    moved = script.replace(x_line, f"GMAT Sat.X = {float(r0[0]) / 1000.0 + 1e-3!r};")
+    assert gmat.provenance_problems(good, m1_scenario, moved, *tol)
 
 
 def test_committed_reference_passes_provenance_checks(m1_scenario):
@@ -133,6 +141,6 @@ def test_committed_reference_passes_provenance_checks(m1_scenario):
     ref = REPO_ROOT / "toolbox" / "references" / "gmat"
     metadata = json.loads((ref / "m1_two_body_metadata.json").read_text())
     script = (ref / "m1_two_body.script").read_text()
-    assert gmat.provenance_problems(metadata, m1_scenario, script) == []
+    assert gmat.provenance_problems(metadata, m1_scenario, script, 1e-4, 1e-7) == []
     rows = gmat.parse_report((ref / "m1_two_body_report.txt").read_text())
     gmat.compare(rows, run_scenario(m1_scenario).samples, m1_scenario)  # complete
