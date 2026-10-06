@@ -1,0 +1,48 @@
+revision: 849f8c0c321d11626f64315f8f688a738181e969
+branch: milestone-1-orbit
+date_utc: 2026-10-06T01:30:43Z
+working_tree_clean_excluding_evidence: yes
+== uv sync --locked: /Users/guillermomartin/Library/Python/3.9/bin/uv sync --locked
+Resolved 15 packages in 39ms
+Checked 14 packages in 5ms
+   exit=0
+== ruff check: /Users/guillermomartin/Library/Python/3.9/bin/uv run ruff check .
+All checks passed!
+   exit=0
+== ruff format --check: /Users/guillermomartin/Library/Python/3.9/bin/uv run ruff format --check .
+85 files already formatted
+   exit=0
+== pytest: /Users/guillermomartin/Library/Python/3.9/bin/uv run pytest -q
+........................................................................ [ 75%]
+.......................                                                  [100%]
+95 passed in 16.58s
+   exit=0
+== determinism (cross-process): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py
+{"validator": "determinism_cross_process", "passed": true, "sha256": ["1039a431cbec3b31aa037baa6ca6402a75a8a6f0fea38a37945711bb6f2a991f", "1039a431cbec3b31aa037baa6ca6402a75a8a6f0fea38a37945711bb6f2a991f"]}
+   exit=0
+== cross-platform: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.15Yj0zQjHZ/cross_platform.json"
+   exit=0
+== m1_proof (non-GMAT): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.15Yj0zQjHZ/m1_non_gmat.json
+[PASS] mission: failed=0, orbits_short_of_target=0
+[PASS] invariants: energy_rel_drift_max=3.82622e-10, angular_momentum_rel_drift_max=1.91311e-10, eccentricity_vector_drift_max=5.85589e-10, sma_drift_max_m=0.00253607
+[PASS] kepler_reference: position_error_max_m=0.298332, position_error_final_m=0.298332, velocity_error_max_mps=0.000349027, velocity_error_final_mps=0.000349027
+[PASS] period: analytic_period_s=5370.3, measured_mean_period_s=5370.3, period_error_max_s=5.23407e-06, node_crossing_time_error_max_s=3.84703e-05, orbits_measured=10
+[PASS] convergence: fitted_order=4.32893, order_deviation_from_4=0.328933
+[PASS] determinism: distinct_hashes_minus_one=0
+[PASS] architecture: violations=0
+convergence (dt s -> position error m, |dE/E|):
+       60 -> 1.1612e+03, 2.978e-06
+       30 -> 4.3522e+01, 9.300e-08
+       20 -> 6.6851e+00, 1.225e-08
+       10 -> 2.9833e-01, 3.826e-10
+        5 -> 1.4905e-02, 1.194e-11
+      2.5 -> 8.2243e-04, 3.974e-13
+        1 -> 1.5233e-05, 1.028e-14
+thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.15Yj0zQjHZ/m1_non_gmat.json
+   exit=0
+== gmat compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.15Yj0zQjHZ/gmat_reference.json"
+   exit=0
+== run_mission: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m1_leo_250km.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.15Yj0zQjHZ/mission
+m1_leo_250km: success, 10 orbits, events sha256 1039a431cbec3b31... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.15Yj0zQjHZ/mission
+   exit=0
+overall: PASS
