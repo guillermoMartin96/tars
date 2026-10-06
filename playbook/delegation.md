@@ -47,3 +47,6 @@ Repeated successful workflows should likewise be codified. Small reliable improv
 - **Level 3 — Mission Director:** Tech Lead defines missions; agent researches, decomposes, designs, implements, validates, experiments, and learns.
 
 Never self-promote delegation level.
+
+## Records describe completed work only
+Write review dispositions, Proof records and checklist ticks only after the work they describe is committed, and cite that commit. Do not pre-fill them for work in progress (lesson from M1 review REV-013).

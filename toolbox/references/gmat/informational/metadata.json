@@ -1,0 +1,73 @@
+{
+  "purpose": "INFORMATIONAL realistic-model divergence (DR-0005); not an M1 gate",
+  "gmat_version": "R2026a",
+  "gmat_build_date": "Mar 26 2026  19:40:08",
+  "gmat_console": "/Users/guillermomartin/Applications/GMAT R2026a/bin/GmatConsole",
+  "gmat_console_sha256": "1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2",
+  "command": [
+    "/Users/guillermomartin/Applications/GMAT R2026a/bin/GmatConsole",
+    "--run",
+    "<temp copy of <case>.script>"
+  ],
+  "host_platform": "macOS-26.2-x86_64-i386-64bit",
+  "tars_git_revision": "afad5099027a3f6289bc874fa04c4df22020b6db",
+  "generated_utc": "2026-10-06T02:16:38+00:00",
+  "replace_reason": null,
+  "scenario": "m1_leo_250km",
+  "scenario_hash": "603152ad308651aed1bc5193a81cb249b7d5770fb0f0fb76ab0356c44ff281bd",
+  "gravity_file": "JGM3.cof (GMAT-bundled)",
+  "atmosphere": "JacchiaRoberts, ConstantFluxAndGeoMag (F10.7 = F10.7A, Kp = 3)",
+  "spacecraft": {
+    "DryMass": 850.0,
+    "DragArea": 15.0,
+    "Cd": 2.2
+  },
+  "integrator": "PrinceDormand78, Accuracy 1e-12, MaxStep = report interval",
+  "cases": {
+    "j2_only": {
+      "degree": 2,
+      "order": 0,
+      "drag": false,
+      "f107": null,
+      "kp": 3.0,
+      "script_sha256": "5ebccc3502595c8c94f135ffabee27c44b3af86f20fcbb1468cca617a10a80d8",
+      "report_sha256": "28feb9dda1d8680f3c525df39aea04deb6fc4dbc7eac828661706e29da56632c"
+    },
+    "gravity_4x4": {
+      "degree": 4,
+      "order": 4,
+      "drag": false,
+      "f107": null,
+      "kp": 3.0,
+      "script_sha256": "1a2ce377b7eefdaaef16e19e27d65cdf5fae08c617ba0226fd091746ffcb4593",
+      "report_sha256": "4786619b75f55f666a6b08a96adfc8219dc81d281997f575a293aa28a74dbd01"
+    },
+    "realistic_f70": {
+      "degree": 4,
+      "order": 4,
+      "drag": true,
+      "f107": 70.0,
+      "kp": 3.0,
+      "script_sha256": "8671e44007b5f743da9157048af45ed9081878c3f22f05a1929c367fdeacf994",
+      "report_sha256": "97ead569676fed99f844560229ebc185597ff2a7e69725394ffada651fbe2fc2"
+    },
+    "realistic_f150": {
+      "degree": 4,
+      "order": 4,
+      "drag": true,
+      "f107": 150.0,
+      "kp": 3.0,
+      "script_sha256": "1667005dd2b77db43c8c0bf8ff595db37579400809e385e202e38e3c8821a3c3",
+      "report_sha256": "9493bd886ce5634db3c7f39c6fff2f1aeb36f838eee5b5695fb6a3d78f2d34ba"
+    },
+    "realistic_f250": {
+      "degree": 4,
+      "order": 4,
+      "drag": true,
+      "f107": 250.0,
+      "kp": 3.0,
+      "script_sha256": "93205767eb12f4e919b7f902ddb31656dd77502601868daefef7004a0df41cf8",
+      "report_sha256": "ed4ee13137666e8e785de2ea54e6f1316c1c893174ccfd77c7bde7b813b5d665"
+    }
+  }
+}

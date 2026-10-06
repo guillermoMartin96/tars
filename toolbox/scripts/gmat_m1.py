@@ -1,0 +1,296 @@
+"""GMAT reference workflow for Milestone 1 (DR-0005).
+
+Subcommands:
+  generate  Write toolbox/references/gmat/m1_two_body.script from the scenario.
+  run       Generate the script, run GmatConsole, and store the report plus
+            provenance metadata in toolbox/references/gmat/.
+  compare   Compare the committed GMAT report with our simulation (JSON output;
+            exit 1 if a gated threshold in proof/thresholds/m1.json fails).
+  realistic         INFORMATIONAL (DR-0005, not a gate): run J2 / 4x4 / drag cases in GMAT
+                    and store reports in toolbox/references/gmat/informational/.
+  realistic-summary Recompute the informational divergence summary from committed reports.
+
+Examples:
+  uv run python toolbox/scripts/gmat_m1.py generate
+  uv run python toolbox/scripts/gmat_m1.py run --gmat-console "$HOME/Applications/GMAT R2026a/bin/GmatConsole" --gmat-version R2026a
+  uv run python toolbox/scripts/gmat_m1.py compare
+"""  # noqa: E501
+
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import hashlib
+import json
+import platform
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+from tars.sim.runner import run_scenario
+from tars.sim.scenario import load_scenario
+from tars.validation import gmat_realistic
+from tars.validation.gmat import (
+    compare,
+    m1_script,
+    parse_report,
+    provenance_problems,
+    script_state_difference,
+)
+from tars.validation.thresholds import REPO_ROOT, Check, load_thresholds
+
+REF_DIR = REPO_ROOT / "toolbox" / "references" / "gmat"
+SCRIPT = REF_DIR / "m1_two_body.script"
+REPORT = REF_DIR / "m1_two_body_report.txt"
+METADATA = REF_DIR / "m1_two_body_metadata.json"
+DEFAULT_SCENARIO = REPO_ROOT / "scenarios" / "m1_leo_250km.json"
+INFO_DIR = REF_DIR / "informational"
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def cmd_generate(args: argparse.Namespace) -> int:
+    scenario = load_scenario(args.scenario)
+    SCRIPT.write_text(m1_script(scenario))
+    print(f"wrote {SCRIPT.relative_to(REPO_ROOT)} (scenario_hash {scenario.config_hash()[:16]}...)")
+    return 0
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    scenario = load_scenario(args.scenario)
+    # The committed reference is evidence, not a fixture: it is never regenerated to make
+    # a failing comparison pass. Replacing it needs an explicit, reviewed reason (DR-0009).
+    if REPORT.exists() and not args.replace_reason:
+        print(
+            "a committed GMAT reference exists; replacing it requires --replace-reason and "
+            "explicit Tech Lead review (toolbox/references/gmat/README.md)",
+            file=sys.stderr,
+        )
+        return 2
+    console = Path(args.gmat_console).expanduser()
+    if not console.exists():
+        print(f"GmatConsole not found: {console}", file=sys.stderr)
+        return 2
+    SCRIPT.write_text(m1_script(scenario))
+    with tempfile.TemporaryDirectory() as tmp:
+        report = Path(tmp) / "m1_two_body_report.txt"
+        run_script = Path(tmp) / "m1_two_body.script"
+        run_script.write_text(m1_script(scenario, report_path=str(report)))
+        command = [str(console), *args.console_args, str(run_script)]
+        proc = subprocess.run(
+            command,
+            cwd=console.parent,
+            capture_output=True,
+            text=True,
+            timeout=args.timeout,
+        )
+        (REF_DIR / "m1_gmat_console.log").write_text(proc.stdout + proc.stderr)
+        if proc.returncode != 0 or not report.exists():
+            print(
+                f"GMAT run failed (exit {proc.returncode}); see m1_gmat_console.log",
+                file=sys.stderr,
+            )
+            return 1
+        # Validate completeness before trusting and hashing the new report (REV-002).
+        try:
+            compare(parse_report(report.read_text()), run_scenario(scenario).samples, scenario)
+        except ValueError as exc:
+            print(f"GMAT report rejected: {exc}", file=sys.stderr)
+            return 1
+        shutil.copyfile(report, REPORT)
+    build = re.search(r"Build Date: (.+)", proc.stdout)
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True
+    ).stdout.strip()
+    metadata = {
+        "gmat_version": args.gmat_version,
+        "gmat_build_date": build.group(1).strip() if build else None,
+        "gmat_console": str(console),
+        "gmat_console_sha256": _sha256(console),
+        "command": [*command[:-1], "<temp copy of m1_two_body.script with absolute report path>"],
+        "host_platform": platform.platform(),
+        "tars_git_revision": revision,
+        "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+        "replace_reason": args.replace_reason,
+        "scenario": scenario.name,
+        "scenario_hash": scenario.config_hash(),
+        "script_sha256": _sha256(SCRIPT),
+        "report_sha256": _sha256(REPORT),
+        "constants": {
+            "name": scenario.constants.name,
+            "mu_km3_s2": scenario.constants.mu / 1e9,
+            "equatorial_radius_km": scenario.constants.equatorial_radius / 1000.0,
+        },
+        "force_model": "Earth point mass only; no drag, SRP, third body, relativity",
+        "integrator": "PrinceDormand78, Accuracy 1e-13, MaxStep = report interval",
+    }
+    METADATA.write_text(json.dumps(metadata, indent=2) + "\n")
+    print(f"GMAT reference stored: {REPORT.relative_to(REPO_ROOT)}")
+    return 0
+
+
+def cmd_compare(args: argparse.Namespace) -> int:
+    scenario = load_scenario(args.scenario)
+    if not (REPORT.exists() and METADATA.exists()):
+        print("no committed GMAT reference; run the 'run' subcommand first", file=sys.stderr)
+        return 2
+    metadata = json.loads(METADATA.read_text())
+    thresholds = load_thresholds()
+    gates = thresholds.for_validator("gmat_reference")
+    problems = provenance_problems(
+        metadata,
+        scenario,
+        SCRIPT.read_text(),
+        gates["script_initial_position_difference_m"],  # DR-0009 (REV-014)
+        gates["script_initial_velocity_difference_mps"],
+    )
+    if metadata["report_sha256"] != _sha256(REPORT):
+        problems.append("GMAT report does not match its recorded sha256")
+    if metadata["script_sha256"] != _sha256(SCRIPT):
+        problems.append("GMAT script does not match its recorded sha256")
+    if problems:
+        print("GMAT reference rejected: " + "; ".join(problems), file=sys.stderr)
+        return 2
+
+    run = run_scenario(scenario)
+    metrics = compare(parse_report(REPORT.read_text()), run.samples, scenario)
+    metrics.update(script_state_difference(SCRIPT.read_text(), scenario))
+    check = Check(
+        "gmat_reference",
+        metrics,
+        thresholds.for_validator("gmat_reference"),
+        thresholds.status,
+        f"GMAT {metadata['gmat_version']}",
+    )
+    print(json.dumps(check.to_event().model_dump(mode="json"), indent=2))
+    return 0 if check.passed else 1
+
+
+def cmd_realistic(args: argparse.Namespace) -> int:
+    scenario = load_scenario(args.scenario)
+    console = Path(args.gmat_console).expanduser()
+    if not console.exists():
+        print(f"GmatConsole not found: {console}", file=sys.stderr)
+        return 2
+    if (INFO_DIR / "metadata.json").exists() and not args.replace_reason:
+        print("informational GMAT results exist; replacing them requires --replace-reason "
+              "and explicit review (DR-0009 policy)", file=sys.stderr)  # fmt: skip
+        return 2
+    INFO_DIR.mkdir(parents=True, exist_ok=True)
+    build = None
+    cases = {}
+    for case in gmat_realistic.CASES:
+        script_path = INFO_DIR / f"{case.name}.script"
+        report_path = INFO_DIR / f"{case.name}_report.txt"
+        script_path.write_text(
+            gmat_realistic.realistic_script(scenario, case, f"{case.name}_report.txt")
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "report.txt"
+            run_script = Path(tmp) / "case.script"
+            run_script.write_text(gmat_realistic.realistic_script(scenario, case, str(report)))
+            command = [str(console), "--run", str(run_script)]
+            proc = subprocess.run(
+                command, cwd=console.parent, capture_output=True, text=True, timeout=args.timeout
+            )
+            if proc.returncode != 0 or not report.exists():
+                (INFO_DIR / f"{case.name}_console.log").write_text(proc.stdout + proc.stderr)
+                print(f"GMAT case {case.name} failed; see its console log", file=sys.stderr)
+                return 1
+            found = re.search(r"Build Date: (.+)", proc.stdout)
+            build = found.group(1).strip() if found else build
+            shutil.copyfile(report, report_path)
+        cases[case.name] = {
+            "degree": case.degree,
+            "order": case.order,
+            "drag": case.drag,
+            "f107": case.f107,
+            "kp": case.kp,
+            "script_sha256": _sha256(script_path),
+            "report_sha256": _sha256(report_path),
+        }
+        print(f"{case.name}: done")
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True
+    ).stdout.strip()
+    metadata = {
+        "purpose": "INFORMATIONAL realistic-model divergence (DR-0005); not an M1 gate",
+        "gmat_version": args.gmat_version,
+        "gmat_build_date": build,
+        "gmat_console": str(console),
+        "gmat_console_sha256": _sha256(console),
+        "command": [str(console), "--run", "<temp copy of <case>.script>"],
+        "host_platform": platform.platform(),
+        "tars_git_revision": revision,
+        "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+        "replace_reason": args.replace_reason,
+        "scenario": scenario.name,
+        "scenario_hash": scenario.config_hash(),
+        "gravity_file": "JGM3.cof (GMAT-bundled)",
+        "atmosphere": "JacchiaRoberts, ConstantFluxAndGeoMag (F10.7 = F10.7A, Kp = 3)",
+        "spacecraft": gmat_realistic.SPACECRAFT,
+        "integrator": "PrinceDormand78, Accuracy 1e-12, MaxStep = report interval",
+        "cases": cases,
+    }
+    (INFO_DIR / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
+    return cmd_realistic_summary(args)
+
+
+def cmd_realistic_summary(args: argparse.Namespace) -> int:
+    scenario = load_scenario(args.scenario)
+    metadata = json.loads((INFO_DIR / "metadata.json").read_text())
+    if metadata["scenario_hash"] != scenario.config_hash():
+        print("informational results are stale: scenario hash differs", file=sys.stderr)
+        return 2
+    run = run_scenario(scenario)
+    summary = {"purpose": metadata["purpose"], "gmat_version": metadata["gmat_version"]}
+    for case in gmat_realistic.CASES:
+        report_path = INFO_DIR / f"{case.name}_report.txt"
+        if _sha256(report_path) != metadata["cases"][case.name]["report_sha256"]:
+            print(f"{case.name}: report does not match recorded sha256", file=sys.stderr)
+            return 2
+        rows = gmat_realistic.parse_report(report_path.read_text())
+        summary[case.name] = gmat_realistic.divergence(rows, run.samples, scenario)
+    (INFO_DIR / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    print(json.dumps(summary, indent=2))
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--scenario", type=Path, default=DEFAULT_SCENARIO)
+    sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("generate").set_defaults(func=cmd_generate)
+    run = sub.add_parser("run")
+    run.add_argument("--gmat-console", required=True)
+    run.add_argument("--gmat-version", required=True)
+    run.add_argument(
+        "--console-args", nargs="*", default=["--run"], help="arguments before the script path"
+    )
+    run.add_argument("--timeout", type=float, default=600.0)
+    run.add_argument(
+        "--replace-reason",
+        default=None,
+        help="required to replace an existing committed reference; must cite the reviewed "
+        "decision or record that authorizes it",
+    )
+    run.set_defaults(func=cmd_run)
+    sub.add_parser("compare").set_defaults(func=cmd_compare)
+    real = sub.add_parser("realistic")
+    real.add_argument("--gmat-console", required=True)
+    real.add_argument("--gmat-version", required=True)
+    real.add_argument("--timeout", type=float, default=900.0)
+    real.add_argument("--replace-reason", default=None)
+    real.set_defaults(func=cmd_realistic)
+    sub.add_parser("realistic-summary").set_defaults(func=cmd_realistic_summary)
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

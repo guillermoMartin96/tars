@@ -1,0 +1,41 @@
+[project]
+name = "tars"
+version = "0.1.0"
+description = "AI Spacecraft — deterministic headless simulation core"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy>=2.1",
+    "pydantic>=2.9",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.7",
+    # Independent high-accuracy reference integrator (DOP853) used only in tests.
+    "scipy>=1.14",
+]
+
+[build-system]
+requires = ["uv_build>=0.12,<0.13"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: long-running physics validation (still runs in CI)",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["runs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
+ignore = [
+    "N803", "N806",  # physics notation: single-letter / uppercase math names (T, J2, Re)
+    "RUF001", "RUF002", "RUF003",  # Greek letters in docstrings/comments are intentional
+]

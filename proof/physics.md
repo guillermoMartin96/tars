@@ -20,3 +20,8 @@ When Milestone 1 (Earth + spacecraft + gravity) is implemented, its Proof should
 - no unexplained numerical instability.
 
 Exact tolerances must be established from justified model/validation work, not invented here in advance.
+
+## Milestone 1 implementation
+- Thresholds (versioned): `proof/thresholds/m1.json` (status and approval recorded in the file; see DR-0008).
+- Validators: `toolbox/validators/m1_proof.py`, `toolbox/validators/determinism.py`, `toolbox/scripts/gmat_m1.py compare`.
+- Proof record: `proof/records/M1-orbit.md`.

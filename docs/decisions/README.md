@@ -5,3 +5,6 @@ Store significant architecture, dependency, process, and engineering decisions h
 Suggested naming: `0001-short-decision-name.md`.
 
 Do not create ADRs for trivial implementation details. Create them when future engineers/agents are likely to ask "why did we choose this?" or when reversing the decision would be meaningful.
+
+## Decision Requests
+Decision Requests (`toolbox/templates/decision-request.md`) live in `docs/decisions/requests/` as `DR-XXXX-short-name.md`. Once resolved, the Resolution section is filled in, and an ADR records any lasting decision.

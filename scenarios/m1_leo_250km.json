@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "name": "m1_leo_250km",
+  "description": "Milestone 1: circular 250 km LEO, i=51.6 deg, point-mass Earth, 10 orbits (DR-0002, DR-0007).",
+  "epoch": "2026-01-01T00:00:00",
+  "time_scale": "TT",
+  "seed": 0,
+  "earth_constants": "WGS84",
+  "force_models": ["point_mass_gravity"],
+  "integrator": "rk4",
+  "dt_s": 10.0,
+  "initial_orbit": {
+    "kind": "circular",
+    "altitude_m": 250000.0,
+    "inclination_deg": 51.6,
+    "raan_deg": 0.0,
+    "arg_latitude_deg": 0.0
+  },
+  "stop": {"orbits": 10, "max_duration_periods": 1.1},
+  "telemetry": {"sample_interval_s": 60.0}
+}

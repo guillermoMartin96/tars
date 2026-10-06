@@ -1,0 +1,211 @@
+{
+  "milestone": "M1",
+  "scenario": "m1_leo_250km",
+  "scenario_hash": "603152ad308651aed1bc5193a81cb249b7d5770fb0f0fb76ab0356c44ff281bd",
+  "software_version": "0.1.0",
+  "platform": {
+    "system": "Darwin",
+    "machine": "x86_64",
+    "cpu": "Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+    "python": "3.12.15",
+    "numpy": "2.5.3"
+  },
+  "threshold_status": "approved",
+  "final_state": {
+    "t": 53710.0,
+    "r": [
+      6627911.932082806,
+      33927.84970651596,
+      42806.292931138334
+    ],
+    "v": [
+      -63.90621138121021,
+      4816.7415049250185,
+      6077.215314764872
+    ]
+  },
+  "results": [
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "mission",
+      "passed": true,
+      "metrics": {
+        "failed": 0.0,
+        "orbits_short_of_target": 0.0
+      },
+      "thresholds": {
+        "failed": 0.0,
+        "orbits_short_of_target": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": "failure_cause=None"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "invariants",
+      "passed": true,
+      "metrics": {
+        "energy_rel_drift_max": 3.826932125635499e-10,
+        "angular_momentum_rel_drift_max": 1.9134674501693308e-10,
+        "eccentricity_vector_drift_max": 5.855891809636858e-10,
+        "sma_drift_max_m": 0.0025365427136421204
+      },
+      "thresholds": {
+        "energy_rel_drift_max": 1e-09,
+        "angular_momentum_rel_drift_max": 5e-10,
+        "eccentricity_vector_drift_max": 1.2e-09,
+        "sma_drift_max_m": 0.006
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "kepler_reference",
+      "passed": true,
+      "metrics": {
+        "position_error_max_m": 0.2983640531674597,
+        "position_error_final_m": 0.2983640531674597,
+        "velocity_error_max_mps": 0.00034909183340287427,
+        "velocity_error_final_mps": 0.00034909183340287427
+      },
+      "thresholds": {
+        "position_error_max_m": 0.6,
+        "velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "period",
+      "passed": true,
+      "metrics": {
+        "analytic_period_s": 5370.295646313363,
+        "measured_mean_period_s": 5370.295642466336,
+        "period_error_max_s": 5.234065611148253e-06,
+        "node_crossing_time_error_max_s": 3.8470272556878626e-05,
+        "orbits_measured": 10.0
+      },
+      "thresholds": {
+        "period_error_max_s": 1e-05,
+        "node_crossing_time_error_max_s": 8e-05
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "convergence",
+      "passed": true,
+      "metrics": {
+        "fitted_order": 4.328932672372799,
+        "order_deviation_from_4": 0.3289326723727992
+      },
+      "thresholds": {
+        "order_deviation_from_4": 0.5
+      },
+      "threshold_status": "approved",
+      "notes": "fit over dt=[20.0, 10.0, 5.0, 2.5] s"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism",
+      "passed": true,
+      "metrics": {
+        "distinct_hashes_minus_one": 0.0
+      },
+      "thresholds": {
+        "distinct_hashes_minus_one": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": "sha256=7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "architecture",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    }
+  ],
+  "convergence_table": [
+    {
+      "dt_s": 60.0,
+      "steps": 895,
+      "position_error_m": 1161.2306296358422,
+      "velocity_error_mps": 1.3584726116731283,
+      "energy_rel_error": 2.9782431624068945e-06
+    },
+    {
+      "dt_s": 30.0,
+      "steps": 1790,
+      "position_error_m": 43.52223742690364,
+      "velocity_error_mps": 0.05091606386346555,
+      "energy_rel_error": 9.299872654299268e-08
+    },
+    {
+      "dt_s": 20.0,
+      "steps": 2685,
+      "position_error_m": 6.685118346750145,
+      "velocity_error_mps": 0.007820955153667083,
+      "energy_rel_error": 1.2245039525199304e-08
+    },
+    {
+      "dt_s": 10.0,
+      "steps": 5370,
+      "position_error_m": 0.29833164577041166,
+      "velocity_error_mps": 0.0003490273504841738,
+      "energy_rel_error": 3.8262234624915726e-10
+    },
+    {
+      "dt_s": 5.0,
+      "steps": 10740,
+      "position_error_m": 0.014905370837850387,
+      "velocity_error_mps": 1.7438446113266487e-05,
+      "energy_rel_error": 1.1941469543792403e-11
+    },
+    {
+      "dt_s": 2.5,
+      "steps": 21480,
+      "position_error_m": 0.0008224307391763594,
+      "velocity_error_mps": 9.621909283024818e-07,
+      "energy_rel_error": 3.9744604295733855e-13
+    },
+    {
+      "dt_s": 1.0,
+      "steps": 53700,
+      "position_error_m": 1.5233309448527596e-05,
+      "velocity_error_mps": 1.7794611012401558e-08,
+      "energy_rel_error": 1.0283049116414932e-14
+    }
+  ],
+  "passed": true
+}
