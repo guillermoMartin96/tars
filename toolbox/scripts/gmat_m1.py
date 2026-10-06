@@ -19,6 +19,8 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -59,8 +61,9 @@ def cmd_run(args: argparse.Namespace) -> int:
         report = Path(tmp) / "m1_two_body_report.txt"
         run_script = Path(tmp) / "m1_two_body.script"
         run_script.write_text(m1_script(scenario, report_path=str(report)))
+        command = [str(console), *args.console_args, str(run_script)]
         proc = subprocess.run(
-            [str(console), *args.console_args, str(run_script)],
+            command,
             cwd=console.parent,
             capture_output=True,
             text=True,
@@ -74,9 +77,18 @@ def cmd_run(args: argparse.Namespace) -> int:
             )
             return 1
         shutil.copyfile(report, REPORT)
+    build = re.search(r"Build Date: (.+)", proc.stdout)
+    revision = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True
+    ).stdout.strip()
     metadata = {
         "gmat_version": args.gmat_version,
+        "gmat_build_date": build.group(1).strip() if build else None,
         "gmat_console": str(console),
+        "gmat_console_sha256": _sha256(console),
+        "command": [*command[:-1], "<temp copy of m1_two_body.script with absolute report path>"],
+        "host_platform": platform.platform(),
+        "tars_git_revision": revision,
         "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
         "scenario": scenario.name,
         "scenario_hash": scenario.config_hash(),

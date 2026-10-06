@@ -55,3 +55,27 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - Final-state difference ≤ 2.9e-6 m and ≤ 3.4e-9 m/s after 10 orbits.
   - Repeat runs on the same platform are byte-identical.
 - **Classification:** numerical (floating-point, platform-dependent rounding). Status: expected; bound proposed in DR-0008.
+
+## VAL-0004 — M1 against GMAT R2026a (two-body, matched constants)
+- **Date / revision:** 2026-10-06 / reference generated at `336b3b1`
+- **Configuration:**
+  - Scenario `m1_leo_250km` (hash `603152ad…`), RK4 dt = 10 s.
+  - GMAT script `toolbox/references/gmat/m1_two_body.script`: point-mass Earth, Mu = 398600.4418 km³/s², R = 6378.137 km, EarthMJ2000Eq, PrinceDormand78 at Accuracy 1e-13 with MaxStep 60 s.
+  - 896 states, every 60 s over 0–53 700 s.
+- **Reference:** GMAT R2026a, build Mar 26 2026. Provenance is in `toolbox/references/gmat/README.md` and `m1_two_body_metadata.json`.
+- **Results:**
+
+| Comparison | Max position diff | Max velocity diff |
+|---|---|---|
+| Ours vs GMAT | 0.29832 m | 3.490e-4 m/s |
+| GMAT vs exact Kepler | 7.2e-6 m | 8.4e-9 m/s |
+| Ours vs exact Kepler | 0.29833 m | 3.490e-4 m/s |
+
+  - Initial SMA difference: 1.9e-9 m, confirming GMAT used the WGS 84 μ. GMAT's default μ would have given about 5 mm.
+  - Period difference: 9e-13 s.
+  - Initial states are identical.
+- **Discrepancy classification:** numerical error (our RK4 truncation, along-track phase lag).
+  - Ours-vs-GMAT equals ours-vs-Kepler to 7 µm, and GMAT agrees with the exact solution to 7 µm.
+  - There is no modelling or configuration disagreement.
+- **Status:** accepted; within the approved 0.6 m (DR-0008).
+- **Linked:** ADR-0006, DR-0005, DR-0008, SCI-0001, SCI-0004, SCI-0005

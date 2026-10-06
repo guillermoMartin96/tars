@@ -53,6 +53,14 @@ def test_report_schedule_matches_telemetry(m1_scenario):
     assert count * interval <= 10 * keplerian_period(6628137.0, m1_scenario.constants.mu)
 
 
+def test_parse_skips_repeated_header_lines(m1_scenario):
+    """Observed in GMAT R2026a output: the header is written again inside the loop."""
+    text = _synthetic_report(m1_scenario, n_rows=3)
+    lines = text.splitlines()
+    repeated = "\n".join([lines[0], lines[1], lines[0], *lines[2:]]) + "\n"
+    assert len(gmat.parse_report(repeated)) == len(gmat.parse_report(text)) == 4
+
+
 def test_parse_rejects_unexpected_columns():
     with pytest.raises(ValueError):
         gmat.parse_report("A B C\n1 2 3\n")

@@ -153,6 +153,8 @@ def parse_report(text: str) -> list[GmatRow]:
         raise ValueError(f"unexpected GMAT report columns: {header}")
     rows = []
     for line in lines[1:]:
+        if line.split() == header:
+            continue  # GMAT repeats the header when the first in-loop Report executes
         f = [float(x) for x in line.split()]
         rows.append(
             GmatRow(

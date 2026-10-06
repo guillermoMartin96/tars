@@ -31,3 +31,20 @@ uv run python toolbox/scripts/gmat_m1.py compare
 - ours vs the exact Kepler solution
 
 It also checks the constants match (initial SMA and period differences) and that the starting states are identical.
+
+## Installed reference tool (provenance)
+| Item | Value |
+|---|---|
+| Release | GMAT R2026a. Build date Mar 26 2026 19:40:08 (`GmatConsole --version`). |
+| Source | https://sourceforge.net/projects/gmat/files/GMAT/GMAT-R2026a/gmat-mac-x64-R2026a-signed.dmg (official NASA GSFC project) |
+| DMG | 455 494 809 bytes. MD5 `94763b2599e4e71c4ceb917464433855` matches the SourceForge-published hash. SHA-1 `5dcbf29f34a7dbdf2633974d05ee32cf0b9b8ce9`. |
+| Signature | `GmatConsole` is signed by "Developer ID Application: NASA (82A95CK2HC)", identifier `gov.nasa.gsfc.gmat.console`; `codesign --verify` passes. |
+| Install | Copied with `ditto` to `~/Applications/GMAT R2026a` (user-level; no admin rights, no system directories). |
+| Binary | Universal x86_64/arm64. `GmatConsole` sha256 is recorded in `m1_two_body_metadata.json`. |
+| Host | macOS 26.2 x86_64 |
+
+**Startup noise:** at startup GMAT reports that the optional Python 3.12, MATLAB and proprietary plugins (CSALT, EMTG, MarsGRAM, MSISE86) failed to load. The M1 case uses none of them; the script interprets and runs fully (see `m1_gmat_console.log`).
+
+**Reproducibility:** two consecutive runs produced byte-identical reports (sha256 `9ac597c6…`).
+
+**Report format note:** GMAT R2026a writes the header line again when the first Report inside the `For` loop runs. The parser skips repeated headers.
