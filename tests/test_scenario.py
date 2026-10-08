@@ -58,3 +58,23 @@ def test_equatorial_orbits_rejected(inc):
     data["initial_orbit"]["inclination_deg"] = inc
     with pytest.raises(ValidationError):
         Scenario.model_validate(data)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+@pytest.mark.parametrize(
+    "section,field",
+    [
+        ("initial_orbit", "altitude_m"),
+        ("stop", "max_duration_periods"),
+        ("telemetry", "sample_interval_s"),
+        (None, "dt_s"),
+    ],
+)
+def test_non_finite_scenario_numbers_rejected(section, field, value):
+    data = json.loads(M1_SCENARIO.read_text())
+    target = data if section is None else data[section]
+    target[field] = value
+    with pytest.raises(ValidationError):
+        Scenario.model_validate(data)
+    with pytest.raises(ValidationError):
+        Scenario.model_validate_json(json.dumps(data))

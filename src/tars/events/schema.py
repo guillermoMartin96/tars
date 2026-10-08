@@ -13,7 +13,7 @@ Vec3 = Annotated[list[float], Field(min_length=3, max_length=3)]
 
 
 class _EventBase(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
     schema_version: Literal[1] = SCHEMA_VERSION
     tick: int = Field(ge=0)

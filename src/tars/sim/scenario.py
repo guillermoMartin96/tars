@@ -14,7 +14,7 @@ from tars.sim.constants import EARTH_CONSTANTS, EarthConstants
 
 
 class _Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
 
 class CircularOrbit(_Strict):

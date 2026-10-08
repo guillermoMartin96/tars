@@ -4,6 +4,8 @@ import json
 import subprocess
 import sys
 
+import pytest
+
 from tests.conftest import M1_SCENARIO, REPO_ROOT
 
 
@@ -31,6 +33,21 @@ def test_run_mission_rejects_invalid_scenario(tmp_path):
     bad = tmp_path / "bad.json"
     bad.write_text('{"name": "x"}')
     assert _run("toolbox/scripts/run_mission.py", "--scenario", bad).returncode == 2
+
+
+@pytest.mark.parametrize(
+    "section,field", [("initial_orbit", "altitude_m"), ("stop", "max_duration_periods")]
+)
+def test_run_mission_rejects_infinite_input_without_traceback(tmp_path, section, field):
+    data = json.loads(M1_SCENARIO.read_text())
+    data[section][field] = float("inf")
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps(data))
+    out = tmp_path / "mission"
+    proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", out)
+    assert proc.returncode == 2
+    assert "invalid scenario:" in proc.stderr and "Traceback" not in proc.stderr
+    assert not out.exists()
 
 
 def test_cross_process_determinism_validator():
