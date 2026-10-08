@@ -44,7 +44,10 @@ class StateSampled(_EventBase):
 
 
 class OrbitCompleted(_EventBase):
-    """Emitted at the first tick at/after an ascending-node crossing."""
+    """Emitted at the first tick at/after an ascending-node crossing.
+
+    Counts node passages; full revolutions coincide only for an ascending-node start.
+    """
 
     type: Literal["OrbitCompleted"] = "OrbitCompleted"
     orbit_number: int = Field(ge=1)
