@@ -1,5 +1,7 @@
 """GMAT tooling tests using a synthetic report built from the exact Kepler solution."""
 
+from dataclasses import replace
+
 import numpy as np
 import pytest
 
@@ -62,6 +64,58 @@ def test_parse_skips_repeated_header_lines(m1_scenario):
 def test_parse_rejects_unexpected_columns():
     with pytest.raises(ValueError):
         gmat.parse_report("A B C\n1 2 3\n")
+
+
+@pytest.mark.parametrize("column", range(len(gmat.REPORT_COLUMNS)))
+@pytest.mark.parametrize("value", ["nan", "inf", "-inf"])
+def test_parse_rejects_non_finite_report_fields(m1_scenario, column, value):
+    lines = _synthetic_report(m1_scenario, n_rows=2).splitlines()
+    fields = lines[2].split()  # Interior row, after a valid initial state.
+    fields[column] = value
+    lines[2] = " ".join(fields)
+    with pytest.raises(ValueError, match="non-finite"):
+        gmat.parse_report("\n".join(lines))
+
+
+@pytest.mark.parametrize("width", [11, 13])
+def test_parse_rejects_incorrect_row_width(m1_scenario, width):
+    lines = _synthetic_report(m1_scenario, n_rows=2).splitlines()
+    fields = lines[2].split()
+    lines[2] = " ".join(fields[:width] if width < len(fields) else [*fields, "0"])
+    with pytest.raises(ValueError, match="columns"):
+        gmat.parse_report("\n".join(lines))
+
+
+def test_parse_rejects_empty_report():
+    with pytest.raises(ValueError, match="empty"):
+        gmat.parse_report("\n  \n")
+
+
+@pytest.fixture(scope="module")
+def reference_comparison_inputs(m1_scenario):
+    return gmat.parse_report(_synthetic_report(m1_scenario)), run_scenario(m1_scenario)
+
+
+@pytest.mark.parametrize("field", ["r", "v", "sma", "ecc", "inc_deg", "period"])
+@pytest.mark.parametrize("value", [np.nan, np.inf, -np.inf])
+def test_compare_rejects_non_finite_in_memory_rows(
+    m1_scenario, reference_comparison_inputs, field, value
+):
+    original, run = reference_comparison_inputs
+    rows = list(original)
+    changed = np.full(3, value) if field in ("r", "v") else value
+    rows[100] = replace(rows[100], **{field: changed})
+    with pytest.raises(ValueError, match="non-finite"):
+        gmat.compare(rows, run.samples, m1_scenario)
+
+
+@pytest.mark.parametrize("field", ["r", "v"])
+def test_compare_rejects_incorrect_vector_shape(m1_scenario, reference_comparison_inputs, field):
+    original, run = reference_comparison_inputs
+    rows = list(original)
+    rows[100] = replace(rows[100], **{field: np.zeros(2)})
+    with pytest.raises(ValueError, match="shape"):
+        gmat.compare(rows, run.samples, m1_scenario)
 
 
 def test_compare_against_exact_reference(m1_scenario):
