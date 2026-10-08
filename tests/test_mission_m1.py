@@ -87,3 +87,20 @@ def test_final_state_is_sampled_and_validated(m1_run):
     assert m1_run.samples[-1].tick == m1_run.final.tick == m1_run.completed.tick
     sampled = [e for e in m1_run.events if e.type == "StateSampled"]
     assert sampled[-1].tick == m1_run.final.tick
+
+
+@pytest.mark.parametrize("phase", [90.0, 180.0, 270.0])
+def test_non_node_start_counts_passages_not_full_revolutions(m1_scenario, phase):
+    """F3: retain the existing node-passage semantics for nonzero starting phase."""
+    data = m1_scenario.model_dump()
+    data["initial_orbit"]["arg_latitude_deg"] = phase
+    scenario = type(m1_scenario).model_validate(data)
+    result = runner.run_scenario(scenario)
+    c = scenario.constants
+    period = keplerian_period(c.equatorial_radius + scenario.initial_orbit.altitude_m, c.mu)
+    assert result.status == "success"
+    assert result.completed.orbits_completed == scenario.stop.orbits
+    assert len(result.crossing_times) == scenario.stop.orbits
+    # The first passage completes a partial revolution; later ones complete full ones.
+    assert 0.0 < result.crossing_times[0] < period
+    assert (scenario.stop.orbits - 1) * period < result.final.t < scenario.stop.orbits * period

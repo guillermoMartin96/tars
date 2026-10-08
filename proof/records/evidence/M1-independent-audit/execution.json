@@ -1,0 +1,133 @@
+{
+  "revision": "e5f5e536a37240d379c6370130f4c03d40ff48f7",
+  "branch": "review/m1-independent-audit",
+  "date_utc": "2026-10-08T21:11:26+00:00",
+  "working_tree_clean": true,
+  "python": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+  "python_executable": "/Users/guillermomartin/projects/tars/.venv/bin/python",
+  "packages": {
+    "numpy": "2.5.3",
+    "pydantic": "2.13.5",
+    "scipy": "1.18.1",
+    "pytest": "9.1.1",
+    "ruff": "0.16.10"
+  },
+  "locked_packages_match": true,
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "/Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8/src:/Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8"
+  },
+  "commands": [
+    {
+      "name": "lint",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/ruff",
+        "check",
+        "--no-cache",
+        "."
+      ],
+      "exit_code": 0,
+      "duration_s": 0.061
+    },
+    {
+      "name": "format",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/ruff",
+        "format",
+        "--check",
+        "--no-cache",
+        "."
+      ],
+      "exit_code": 0,
+      "duration_s": 0.03
+    },
+    {
+      "name": "tests",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "exit_code": 0,
+      "duration_s": 22.041
+    },
+    {
+      "name": "determinism",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/python",
+        "toolbox/validators/determinism.py"
+      ],
+      "exit_code": 0,
+      "duration_s": 2.059
+    },
+    {
+      "name": "cross_platform",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/python",
+        "toolbox/validators/cross_platform.py"
+      ],
+      "exit_code": 0,
+      "duration_s": 1.134
+    },
+    {
+      "name": "m1_proof",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/python",
+        "toolbox/validators/m1_proof.py",
+        "--out",
+        "/Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8/proof/records/evidence/M1-independent-audit/m1_non_gmat.json"
+      ],
+      "exit_code": 0,
+      "duration_s": 9.16
+    },
+    {
+      "name": "gmat_reference",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/python",
+        "toolbox/scripts/gmat_m1.py",
+        "compare"
+      ],
+      "exit_code": 0,
+      "duration_s": 1.033
+    },
+    {
+      "name": "mission",
+      "argv": [
+        "/Users/guillermomartin/projects/tars/.venv/bin/python",
+        "toolbox/scripts/run_mission.py",
+        "--scenario",
+        "scenarios/m1_leo_250km.json",
+        "--out",
+        "/tmp/tars-m1-remediation-mission"
+      ],
+      "exit_code": 0,
+      "duration_s": 0.969
+    }
+  ],
+  "passed": true,
+  "platform": {
+    "system": "Darwin",
+    "machine": "x86_64",
+    "cpu": "Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+    "python": "3.12.15",
+    "numpy": "2.5.3"
+  },
+  "independent_circular_passed": true,
+  "reference_integrity": {
+    "rows": 896,
+    "columns": 12,
+    "all_finite": true,
+    "hashes": {
+      "m1_two_body.script": "f6bc397e4c72367d35885d58637fb52f3b56e0643dfc44a6d32e16491b321d1a",
+      "m1_two_body_report.txt": "9ac597c6922d3c8d1c089add3f22a081aa69c20fbfa56181f12768d36f15fd71"
+    }
+  },
+  "not_executed": [
+    "dependency installation or uv sync",
+    "fresh GMAT execution",
+    "Linux or arm64 execution on this host"
+  ]
+}

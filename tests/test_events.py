@@ -46,3 +46,29 @@ def test_events_round_trip_through_jsonl():
 def test_invalid_events_rejected(line):
     with pytest.raises(ValidationError):
         parse_event(line)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+@pytest.mark.parametrize("field", ["r", "v", "t", "altitude_m"])
+def test_non_finite_telemetry_rejected(field, value):
+    data = dict(tick=1, t=10.0, r=[1.0, 2.0, 3.0], v=[4.0, 5.0, 6.0], altitude_m=1.0)
+    data[field] = [value, 0.0, 0.0] if field in ("r", "v") else value
+    with pytest.raises(ValidationError):
+        StateSampled(**data)
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), -float("inf")])
+@pytest.mark.parametrize("field", ["metrics", "thresholds"])
+def test_non_finite_validation_event_numbers_rejected(field, value):
+    data = dict(
+        tick=0,
+        t=0.0,
+        validator="x",
+        passed=False,
+        metrics={"m": 1.0},
+        thresholds={"m": 2.0},
+        threshold_status="approved",
+    )
+    data[field] = {"m": value}
+    with pytest.raises(ValidationError):
+        ValidationResult(**data)

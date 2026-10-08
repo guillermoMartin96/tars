@@ -149,14 +149,22 @@ class GmatRow:
 
 def parse_report(text: str) -> list[GmatRow]:
     lines = [line for line in text.splitlines() if line.strip()]
+    if not lines:
+        raise ValueError("empty GMAT report")
     header = lines[0].split()
     if tuple(header) != REPORT_COLUMNS:
         raise ValueError(f"unexpected GMAT report columns: {header}")
     rows = []
-    for line in lines[1:]:
+    for line_number, line in enumerate(lines[1:], start=2):
         if line.split() == header:
             continue  # GMAT repeats the header when the first in-loop Report executes
         f = [float(x) for x in line.split()]
+        if len(f) != len(REPORT_COLUMNS):
+            raise ValueError(
+                f"GMAT report line {line_number}: {len(f)} columns, expected {len(REPORT_COLUMNS)}"
+            )
+        if not all(math.isfinite(value) for value in f):
+            raise ValueError(f"GMAT report line {line_number}: non-finite value")
         rows.append(
             GmatRow(
                 t=f[0],
@@ -193,7 +201,17 @@ def compare(
         return float(np.linalg.norm(a - b))
 
     ours_gmat_r, ours_gmat_v, gmat_kep_r, gmat_kep_v, ours_kep_r = [], [], [], [], []
-    for row in rows:
+    for index, row in enumerate(rows):
+        # Also validate callers that construct rows directly or mutate their arrays.
+        # Python max() can silently ignore an interior NaN, hiding invalid evidence.
+        if np.shape(row.r) != (3,) or np.shape(row.v) != (3,):
+            raise ValueError(f"GMAT row {index}: position and velocity must have shape (3,)")
+        if not (
+            np.all(np.isfinite(row.r))
+            and np.all(np.isfinite(row.v))
+            and all(math.isfinite(x) for x in (row.t, row.sma, row.ecc, row.inc_deg, row.period))
+        ):
+            raise ValueError(f"GMAT row {index}: non-finite value")
         s = ours[row.t]
         r_k, v_k = kepler.propagate(initial.r, initial.v, row.t - initial.t, mu)
         ours_gmat_r.append(err(s.r, row.r))

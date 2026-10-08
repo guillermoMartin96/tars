@@ -14,7 +14,7 @@ from tars.sim.constants import EARTH_CONSTANTS, EarthConstants
 
 
 class _Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False)
 
 
 class CircularOrbit(_Strict):
@@ -30,7 +30,7 @@ class CircularOrbit(_Strict):
 
 
 class StopCondition(_Strict):
-    orbits: int = Field(gt=0)
+    orbits: int = Field(gt=0, description="Number of ascending-node passages after the start")
     # Guard against non-termination, as a multiple of the nominal Keplerian period.
     max_duration_periods: float = Field(default=1.1, gt=1.0)
 
