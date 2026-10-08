@@ -52,4 +52,6 @@ Start with [CLAUDE.md](CLAUDE.md), the [playbook](playbook/PLAYBOOK.md), and
 [Proof requirements](proof/PROOF.md). See the [original M1 Proof record](proof/records/M1-orbit.md),
 [GMAT reference workflow](toolbox/references/gmat/README.md), and
 [current-behavior clarifications](docs/decisions/M1-implementation-clarifications.md).
+The [independent-audit follow-up](docs/reviews/M1-independent-audit-02.md) and
+[remediation Proof record](proof/records/M1-independent-audit.md) describe the latest corrections.
 Historical approvals and review records remain authoritative for their stated revisions.

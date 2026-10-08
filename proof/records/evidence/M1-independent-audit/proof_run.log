@@ -1,0 +1,114 @@
+{
+  "revision": "e5f5e536a37240d379c6370130f4c03d40ff48f7",
+  "branch": "review/m1-independent-audit",
+  "date_utc": "2026-10-08T21:11:26+00:00",
+  "working_tree_clean": true,
+  "python": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+  "python_executable": "/Users/guillermomartin/projects/tars/.venv/bin/python",
+  "packages": {
+    "numpy": "2.5.3",
+    "pydantic": "2.13.5",
+    "scipy": "1.18.1",
+    "pytest": "9.1.1",
+    "ruff": "0.16.10"
+  },
+  "locked_packages_match": true,
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "/Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8/src:/Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8"
+  }
+}
+
+== lint: ["/Users/guillermomartin/projects/tars/.venv/bin/ruff", "check", "--no-cache", "."]
+All checks passed!
+
+exit=0
+
+== format: ["/Users/guillermomartin/projects/tars/.venv/bin/ruff", "format", "--check", "--no-cache", "."]
+90 files already formatted
+
+exit=0
+
+== tests: ["/Users/guillermomartin/projects/tars/.venv/bin/python", "-m", "pytest", "-q", "-p", "no:cacheprovider"]
+........................................................................ [ 33%]
+........................................................................ [ 67%]
+....................................................................     [100%]
+212 passed in 21.22s
+
+exit=0
+
+== determinism: ["/Users/guillermomartin/projects/tars/.venv/bin/python", "toolbox/validators/determinism.py"]
+{"validator": "determinism_cross_process", "passed": true, "sha256": ["7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4", "7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4"]}
+
+exit=0
+
+== cross_platform: ["/Users/guillermomartin/projects/tars/.venv/bin/python", "toolbox/validators/cross_platform.py"]
+{"schema_version": 1, "tick": 0, "t": 0.0, "type": "ValidationResult", "validator": "cross_platform", "passed": true, "metrics": {"final_position_difference_m": 0.0, "final_velocity_difference_mps": 0.0, "bit_identical_to_golden": 1.0, "script_initial_position_difference_m": 0.0, "script_initial_velocity_difference_mps": 0.0}, "thresholds": {"final_position_difference_m": 0.0001, "final_velocity_difference_mps": 1e-07}, "threshold_status": "approved", "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz', 'python': '3.12.15', 'numpy': '2.5.3'}; golden platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz', 'python': '3.12.15', 'numpy': '2.5.3'}"}
+
+exit=0
+
+== m1_proof: ["/Users/guillermomartin/projects/tars/.venv/bin/python", "toolbox/validators/m1_proof.py", "--out", "/Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8/proof/records/evidence/M1-independent-audit/m1_non_gmat.json"]
+[PASS] mission: failed=0, orbits_short_of_target=0
+[PASS] invariants: energy_rel_drift_max=3.82693e-10, angular_momentum_rel_drift_max=1.91347e-10, eccentricity_vector_drift_max=5.85589e-10, sma_drift_max_m=0.00253654
+[PASS] kepler_reference: position_error_max_m=0.298364, position_error_final_m=0.298364, velocity_error_max_mps=0.000349092, velocity_error_final_mps=0.000349092
+[PASS] period: analytic_period_s=5370.3, measured_mean_period_s=5370.3, period_error_max_s=5.23407e-06, node_crossing_time_error_max_s=3.84703e-05, orbits_measured=10
+[PASS] convergence: fitted_order=4.32893, order_deviation_from_4=0.328933
+[PASS] determinism: distinct_hashes_minus_one=0
+[PASS] architecture: violations=0
+convergence (dt s -> position error m, |dE/E|):
+       60 -> 1.1612e+03, 2.978e-06
+       30 -> 4.3522e+01, 9.300e-08
+       20 -> 6.6851e+00, 1.225e-08
+       10 -> 2.9833e-01, 3.826e-10
+        5 -> 1.4905e-02, 1.194e-11
+      2.5 -> 8.2243e-04, 3.974e-13
+        1 -> 1.5233e-05, 1.028e-14
+thresholds: approved; overall: PASS -> /Users/guillermomartin/.superset/worktrees/tars/incandescent-flute-e5ed26d8/proof/records/evidence/M1-independent-audit/m1_non_gmat.json
+
+exit=0
+
+== gmat_reference: ["/Users/guillermomartin/projects/tars/.venv/bin/python", "toolbox/scripts/gmat_m1.py", "compare"]
+{
+  "schema_version": 1,
+  "tick": 0,
+  "t": 0.0,
+  "type": "ValidationResult",
+  "validator": "gmat_reference",
+  "passed": true,
+  "metrics": {
+    "position_error_max_m": 0.29832448307873355,
+    "velocity_error_max_mps": 0.000349018981716166,
+    "gmat_vs_kepler_position_error_max_m": 7.163255259112716e-06,
+    "gmat_vs_kepler_velocity_error_max_mps": 8.368966729779964e-09,
+    "ours_vs_kepler_position_error_max_m": 0.29833164577041166,
+    "initial_sma_difference_m": 1.862645149230957e-09,
+    "initial_state_difference_m": 0.0,
+    "period_difference_s": 9.094947017729282e-13,
+    "rows_compared": 896.0,
+    "script_initial_position_difference_m": 0.0,
+    "script_initial_velocity_difference_mps": 0.0
+  },
+  "thresholds": {
+    "position_error_max_m": 0.6,
+    "velocity_error_max_mps": 0.0007,
+    "gmat_vs_kepler_position_error_max_m": 0.0001,
+    "gmat_vs_kepler_velocity_error_max_mps": 1e-07,
+    "initial_sma_difference_m": 1e-06,
+    "initial_state_difference_m": 1e-06,
+    "period_difference_s": 1e-08,
+    "script_initial_position_difference_m": 1e-06,
+    "script_initial_velocity_difference_mps": 1e-09
+  },
+  "threshold_status": "approved",
+  "notes": "GMAT R2026a"
+}
+
+exit=0
+
+== mission: ["/Users/guillermomartin/projects/tars/.venv/bin/python", "toolbox/scripts/run_mission.py", "--scenario", "scenarios/m1_leo_250km.json", "--out", "/tmp/tars-m1-remediation-mission"]
+m1_leo_250km: success, 10 orbits, events sha256 7a4e18777ccd134b... -> /tmp/tars-m1-remediation-mission
+
+exit=0
+
+independent circular: {"method": "Closed-form circular r(t), v(t) at every tick; no universal-variable oracle", "ticks_checked": 5371, "scenario_hash": "603152ad308651aed1bc5193a81cb249b7d5770fb0f0fb76ab0356c44ff281bd", "schema_version": 1, "tick": 0, "t": 0.0, "type": "ValidationResult", "validator": "kepler_reference", "passed": true, "metrics": {"position_error_max_m": 0.2983640985561329, "velocity_error_max_mps": 0.0003490918865226262}, "thresholds": {"position_error_max_m": 0.6, "velocity_error_max_mps": 0.0007}, "threshold_status": "approved", "notes": ""}
+overall: PASS

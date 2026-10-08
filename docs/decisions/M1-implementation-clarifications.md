@@ -1,6 +1,7 @@
 # Milestone 1 implementation clarifications
 
-**Date:** 2026-10-08  
+**Date:** 2026-10-08
+
 **Scope:** F3 and F4 from the independent audit of `6cf072a`. This follow-up describes
 existing M1 behavior; it does not amend an approval or introduce a new decision.
 
