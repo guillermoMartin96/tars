@@ -200,3 +200,24 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   3. **The residual 1.2 cm is explained by burn timing.** The mass difference implies GMAT burned 1.85e-7 s less. One ulp of GMAT's Modified Julian epoch near MJD 31 041 is 3.14e-7 s. A 1.85e-7 s shorter burn changes Δv by about 7e-8 m/s, giving ΔSMA ≈ 0.12 mm and an along-track drift of about 1.1 cm over 9.9 orbits, as measured. Working hypothesis: epoch quantization in GMAT's stopping logic. This is the same family as the deferred REV-012 epoch-column drift, and it is **not verified against GMAT internals**.
   4. GMAT throws an exception at tank depletion by default (`AllowNegativeFuelMass = false`). Our propellant-exhaustion behavior therefore cannot be validated against GMAT; only analytically.
 - **Classification:** finding 1: reference-documentation discrepancy, resolved by measurement. Finding 2: reference configuration trap. Finding 3: reference-tool numerical resolution (hypothesis). **Status:** informational. Feeds DR-0011 and DR-0015. GMAT evidence for M2 gates must come from a committed, provenance-tracked reference generated from the approved scenario, not from this probe.
+
+## VAL-0011 — T1 standalone propulsion model vs analytic and independent references (M2; unit level, not a Proof gate)
+- **Date / revision:** 2026-10-09 / `de23600` (`src/tars/sim/propulsion.py`, `tests/test_propulsion.py`)
+- **Configuration:** DR-0010 reference case (490 N, 312 s, 1000 kg dry + 300 kg propellant, 77.3 s burn). The project RK4 is composed with the model functions in tests; the simulator is not involved (T2 not authorized). VAL-0010 is reserved for the REV-012 investigation.
+- **Results:**
+
+| Check | Reference | Measured |
+|---|---|---|
+| Mass flow, propellant used | F/(Isp·g0) by hand | ṁ = 0.1601477385766618 kg/s; 12.379420191975958 kg (= VAL-0008) |
+| O2 rocket equation vs adaptive quadrature of F/m(t) (SciPy `quad`, epsrel 1e-13) | Tsiolkovsky | 29.275767297714708 m/s; relative difference −6.3e-15 |
+| O3 free-space velocity, RK4 dt = 10 / 5 / 2.5 s | closed form, 40-digit decimal | 5.3e-13 / 4.2e-14 / 1.3e-14 m/s (≤ 1.8e-14 relative: round-off) |
+| O3 free-space displacement, RK4 dt = 10 / 5 / 2.5 s | closed form, 40-digit decimal | 4.29e-9 / 2.79e-10 / 1.72e-11 m on 1130 m; order 3.94, 4.02 |
+| Mass conservation (RK4) | linear law | ≤ 2.8e-13 kg |
+| Powered arc in orbit, RK4 dt = 20 / 10 / 5 s at cutoff | SciPy DOP853 rtol 1e-13 | 1.37e-3 / 8.89e-5 / 5.80e-6 m; order 3.95, 3.94 |
+
+- **Finding (test design, corrected before commit):**
+  - The first version of the free-space test assumed position agreement at round-off. The measured 4.3e-9 m is real 4th-order RK4 truncation, because for x″ = a(t) the position's local error depends on a‴, not a⁗. The a-priori estimate was wrong by about 10³.
+  - The float64 closed form also loses about 1.5e-9 m to cancellation.
+  - The test now uses a 40-digit decimal reference, a round-off bound for velocity, and the approved convergence-order policy (|p − 4| ≤ 0.5, DR-0008) for position. No new numerical tolerance was introduced.
+- **Mutation check:** six deliberate physics mutants were each detected by the suite: g0 = 9.81, wrong mass in F/m, negative residual propellant, a 1 % slack in the sufficiency check (needed a new boundary test), retrograde = prograde, and a cutoff shifted 5 s.
+- **Classification:** no discrepancy. **Status:** informational; Proof-level gates come from DR-0015 after T5/T6 and REV-012.
