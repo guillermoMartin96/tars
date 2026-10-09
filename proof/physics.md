@@ -25,3 +25,9 @@ Exact tolerances must be established from justified model/validation work, not i
 - Thresholds (versioned): `proof/thresholds/m1.json` (status and approval recorded in the file; see DR-0008).
 - Validators: `toolbox/validators/m1_proof.py`, `toolbox/validators/determinism.py`, `toolbox/scripts/gmat_m1.py compare`.
 - Proof record: `proof/records/M1-orbit.md`.
+
+## Milestone 2 draft scaffold (pending approval)
+The draft M2 Proof requirements P1–P12 are in [`docs/milestones/M2-propulsion.md`](../docs/milestones/M2-propulsion.md) §10. Oracles and threshold method are in DR-0015.
+- Nothing here is approved yet.
+- M2 thresholds will live in `proof/thresholds/m2.json` after a measurement-based threshold DR.
+- M1 thresholds and gates are unchanged and remain required (P10).
