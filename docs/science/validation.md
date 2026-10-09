@@ -152,3 +152,51 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
 - This confirms SCI-0001 and SCI-0004 as stated and quantifies them. J2 and drag must precede any mission that depends on real ground tracks, node timing, or orbit lifetime.
 
 - **Status:** informational; no gate. GMAT epoch-column drift REV-012 is deferred (see the GMAT README).
+
+## VAL-0008 — PLANNING: finite-burn numerics with RK4 (M2; not a gate)
+- **Date / revision:** 2026-10-09 / `63bec8d` (research scripts; no project propulsion code exists)
+- **Purpose:** measure whether fixed-step RK4 at the approved dt = 10 s can model a finite burn with changing mass, and what step handling is required, before choosing the M2 architecture (DR-0013) and candidate tolerances (DR-0015).
+- **Configuration:** M1 initial state. Illustrative spacecraft: 1000 kg dry, 300 kg propellant, 490 N, Isp 312 s, g0 = 9.80665 m/s². Velocity-tracking prograde burn at t = 600 s for 77.3 s. Propagated to 53 700 s. Artifacts: `docs/science/experiments/m2-planning/`.
+- **Reference:** SciPy DOP853 (rtol 1e-13), integrated segment by segment across the burn boundaries. The post-burn coast agrees with the exact Kepler oracle (VAL-0001) to 5.7e-6 m, and propellant use agrees with ṁ·T exactly.
+- **Results:**
+
+| Quantity | Measured |
+|---|---|
+| Propellant used (analytic ṁ·T) | 12.3794 kg; Δv (rocket equation) 29.2758 m/s |
+| Orbit change | SMA +50 521 m; apoapsis altitude 351.03 km, periapsis 250.02 km, e = 0.00756 |
+| RK4 dt = 10 s, step **split** at cutoff: error at the first tick after cutoff | 7.7e-4 m, 1.2e-6 m/s |
+| Same, at 53 700 s | 0.290 m, 3.35e-4 m/s (M1 coast-only RK4 error: 0.298 m) |
+| RK4 dt = 10 s, step **not** split (thrust switched off inside the RK4 stages) | **168 km**, 193 m/s; propellant error 0.43 kg |
+| Convergence, split, dt 20 → 10 → 5 → 2.5 s | Observed order 4.47, 4.31, 4.18 |
+| RK4 propellant mass error | ≤ 5e-12 kg (RK4 integrates the linear mass law exactly; round-off only) |
+| Integrated sensed Δv vs rocket equation (RK4 dt = 10 s) | 3.5e-13 m/s |
+| Finite − impulsive SMA (impulsive Δv from the rocket equation, applied at burn midpoint) | −0.131 m (2.6e-6 of ΔSMA) |
+| Impulsive limit: finite − impulsive SMA ratio when burn duration halves (fixed Δv) | 3.987, 3.997, 3.9992, 3.9998, 3.99995 → **second order in burn duration** |
+| Fixed inertial direction (velocity at ignition) − velocity-tracking | SMA −69.3 m; 4.63 km apart at 53 700 s |
+
+- **Conclusions:**
+  - RK4 at dt = 10 s keeps 4th-order accuracy through a finite burn **only if steps are split at engine on/off times**. Straddling the discontinuity is not acceptable (DR-0013).
+  - The burn itself adds about 1 mm; end-of-run error is dominated by the same coast error as M1.
+  - The pointing model (tracking vs fixed inertial) is a material physical choice (DR-0012).
+  - Finite burns converge to the impulsive textbook result as burn duration² (DR-0015 analytic gate).
+- **Classification:** planning measurement; no discrepancy. **Status:** informational; to be re-measured on the implemented code and approved scenario before any threshold is approved.
+
+## VAL-0009 — PLANNING: GMAT R2026a finite-burn probe (M2; not a gate)
+- **Date / revision:** 2026-10-09 / `63bec8d`
+- **Purpose:**
+  - Determine which equation of motion GMAT actually integrates for a finite burn. The GMAT Mathematical Specification (R2026a draft, Eq. 4.2–4.3) writes d(mv)/dt = ΣF, which implies an extra ṁ/m·ṙ term; the correct variable-mass form gives a = F/m (Plastino & Muzzio 1992).
+  - Identify configuration traps and the agreement level achievable with GMAT as a gated M2 reference.
+- **Configuration:** same case as VAL-0008. GMAT `ChemicalThruster` C1 = 490 N, K1 = 312 s, `DecrementMass = true`, `CoordinateSystem = Local`, `Origin = Earth`, `Axes = VNB`, direction (1, 0, 0). `ChemicalTank` 300 kg, `DryMass` 1000 kg. Point-mass Earth with WGS 84 μ and radius. PrinceDormand78, Accuracy 1e-13. `BeginFiniteBurn` / `Propagate {ElapsedSecs = 77.3}` / `EndFiniteBurn`.
+- **Results (vs the DOP853 reference of VAL-0008):**
+
+| GMAT `GravitationalAccel` | Mass after burn − analytic | SMA after burn | Final position / velocity at 53 700 s |
+|---|---|---|---|
+| **9.80665** (override) | +3.0e-8 kg | −0.12 mm | 1.17 cm, 1.3e-5 m/s |
+| 9.81 (GMAT default) | +4.2e-3 kg | −83 mm | 7.85 m, 9.0e-3 m/s |
+
+- **Findings:**
+  1. **GMAT integrates a = F/m, not the Math Spec's d(mv)/dt form.** The extra term would be about ṁ·v/m ≈ 0.95 m/s² here, larger than the thrust acceleration itself (0.38 m/s²). The measured 0.12 mm SMA agreement excludes it.
+  2. **GMAT's default `GravitationalAccel` is 9.81 m/s²** (GMAT help, `ChemicalThruster`), not standard gravity g0 = 9.80665 m/s². Like the Earth μ in M1 (SCI-0005), it must be overridden and gated, or the comparison measures a configuration mismatch (7.85 m here).
+  3. **The residual 1.2 cm is explained by burn timing.** The mass difference implies GMAT burned 1.85e-7 s less. One ulp of GMAT's Modified Julian epoch near MJD 31 041 is 3.14e-7 s. A 1.85e-7 s shorter burn changes Δv by about 7e-8 m/s, giving ΔSMA ≈ 0.12 mm and an along-track drift of about 1.1 cm over 9.9 orbits, as measured. Working hypothesis: epoch quantization in GMAT's stopping logic. This is the same family as the deferred REV-012 epoch-column drift, and it is **not verified against GMAT internals**.
+  4. GMAT throws an exception at tank depletion by default (`AllowNegativeFuelMass = false`). Our propellant-exhaustion behavior therefore cannot be validated against GMAT; only analytically.
+- **Classification:** finding 1: reference-documentation discrepancy, resolved by measurement. Finding 2: reference configuration trap. Finding 3: reference-tool numerical resolution (hypothesis). **Status:** informational. Feeds DR-0011 and DR-0015. GMAT evidence for M2 gates must come from a committed, provenance-tracked reference generated from the approved scenario, not from this probe.
