@@ -28,3 +28,14 @@ def test_wgs84_literals_only_in_constants_module():
         if path.name != "constants.py" and pattern.search(path.read_text())
     ]
     assert offenders == []
+
+
+def test_standard_gravity_literal_only_in_constants_module():
+    """SCI-0009: g0 is defined once; a stray 9.81 or 9.80665 would bypass it."""
+    pattern = re.compile(r"9\.80665|\b9\.81\b")
+    offenders = [
+        path.relative_to(REPO_ROOT)
+        for path in (REPO_ROOT / "src").rglob("*.py")
+        if path.name != "constants.py" and pattern.search(path.read_text())
+    ]
+    assert offenders == []
