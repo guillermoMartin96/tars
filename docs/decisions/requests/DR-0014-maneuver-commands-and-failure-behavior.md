@@ -1,6 +1,6 @@
 # Decision Request: Maneuver command interface, failure behavior, and event contract
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion ([plan](../../milestones/M2-propulsion.md))
@@ -104,6 +104,16 @@ The same `submit(BurnCommand) -> CommandReceipt` is the single entry point a Pil
 Per item: `1A|1B|1C`, `2A|2B`, `3A|3B|3C`; accept or amend §4–§6.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ...
+**Decision:** APPROVED — 1A, 2A, 3C (Tech Lead, 2026-10-09):
+- duration-based burns;
+- arbitrary valid start times;
+- insufficient propellant rejected by default;
+- explicit `burn_to_depletion` opt-in.
+
+**Reasoning/notes:**
+- §4–§6 accepted as the design basis.
+- Δv-target cutoff (1B) and cancel/abort remain unapproved follow-ups.
+- No permission model is introduced.
+
+**Follow-up:** T1 provides the propellant-sufficiency check and burn-schedule representation. Command/event schemas are T3.
+

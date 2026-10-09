@@ -1,6 +1,6 @@
 # Decision Request: Propulsion physical model
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion ([plan](../../milestones/M2-propulsion.md))
@@ -81,9 +81,14 @@ M2 needs a defined engine and mass model before any propulsion code is written (
 `A` / `A+B` / `C` / `discuss`.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ...
+**Decision:** APPROVED — A (Tech Lead, 2026-10-09): ideal constant-thrust, constant-Isp engine, with coupled spacecraft mass and trajectory dynamics.  
+**Reasoning/notes:**
+- Throttling (B) and pressure/temperature models (C) remain reconsider triggers.
+- `STANDARD_GRAVITY = 9.80665` m/s² is a single named constant.
+
+**Follow-up:**
+- SCI-0008…SCI-0012 set to Active; SCI-0002 wording revised.
+- T1 authorized.
 
 ## Sources
 - **[SUT]** G. P. Sutton, O. Biblarz, *Rocket Propulsion Elements*, 9th ed., Wiley, 2017. Ch. 2 (Isp, F = ṁ·Isp·g0), ch. 4 (flight performance, rocket equation).

@@ -1,6 +1,6 @@
 # Decision Request: Milestone 2 scope, roadmap gap, and reference scenario
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion & Orbital Maneuvers ([plan](../../milestones/M2-propulsion.md))
@@ -83,9 +83,15 @@ Option **A**, with the scope and non-goals in the M2 plan (§2), and resolutions
 `A` / `B` / `C` / `A with changes: …`; plus confirm or amend resolutions 1–7.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ...
+**Decision:** APPROVED — A, with resolutions 1–7 (Tech Lead, 2026-10-09).  
+**Reasoning/notes:**
+- The R-4D-11-class engine (490 N, 312 s), 1000 kg dry + 300 kg propellant, and the 77.3 s prograde burn from the M1 orbit are approved as the **reference case**.
+- They are **configurable reference-case parameters, not universal assumptions.** Engine, tank and burn values are inputs to the propulsion model (EngineSpec/TankSpec), never constants in physics code. Scenario files supply them.
+- Thresholds measured on this case apply to this case only, as with M1.
+
+**Follow-up:**
+- T1 implements configurable specs.
+- The scenario file is created in T4 (needs separate authorization).
 
 ## Sources
 - L3Harris (Aerojet Rocketdyne), *Bipropellant Rocket Engines* spec sheet (2024/2025), R-4D-11: Isp 311 s (164:1) / 315.5 s (300:1); thrust range 378–511 N. https://www.l3harris.com/sites/default/files/2025-05/l3harris-ar-bipropellant-rocket-engines.pdf

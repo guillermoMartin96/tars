@@ -42,3 +42,12 @@ A re-run at `63bec8d` reproduced all three JSON outputs byte-for-byte. The GMAT 
 local GMAT install: substitute the placeholders, then run `GmatConsole --run <script>` from GMAT's `bin/`.
 
 The scripts carry a file-level `# ruff: noqa` so the code that produced the results is kept exactly as it ran.
+
+## Proposed cleanup (not applied; Tech Lead instruction 2026-10-09: keep scripts and exemptions unchanged for now)
+The file-level `# ruff: noqa` hides real lint findings: late-binding closures in loops (B023), unused unpacked values, and unclosed file handles. None of them affects the recorded outputs, which were reproduced byte-for-byte. They are still poor examples to keep in the repository.
+
+Proposal, once M2 validators (T5) supersede these planning measurements:
+- Either move the directory to `docs/science/experiments/archive/` with a per-directory exclusion in `pyproject.toml` (`extend-exclude`), keeping the scripts exactly as run;
+- or rewrite the scripts to pass lint, re-run them, and confirm byte-identical JSON outputs before replacing the originals.
+
+Recommendation: the first. It preserves provenance and makes the exemption explicit in one place instead of in each file.

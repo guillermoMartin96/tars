@@ -1,6 +1,10 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** PLANNING CHECKPOINT. Awaiting Tech Lead approval of DR-0010…DR-0015. No propulsion code has been written.  
+**Status:** T1 AUTHORIZED (2026-10-09).
+- DR-0010…DR-0014 are approved.
+- DR-0015 is conditionally approved: no tolerance or GMAT gate is final until REV-012 is investigated and implementation measurements exist.
+- The REV-012 investigation is authorized in parallel (isolated branch `investigation/rev-012-gmat-epoch`).
+- T2 and later tasks need separate approval.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  
 **Definition of done:** prototype phase (proof/definition-of-done.md), unless the Tech Lead sets a stricter bar.
@@ -227,7 +231,7 @@ The Proof record is written only after the work it describes is committed (playb
 
 ---
 
-## 12. Decision Requests (all OPEN)
+## 12. Decision Requests (resolved 2026-10-09; DR-0015 conditional)
 | DR | Topic | Recommendation |
 |---|---|---|
 | [DR-0010](../decisions/requests/DR-0010-m2-scope-and-reference-scenario.md) | Scope, roadmap gap, reference spacecraft/scenario | A: R-4D-11-class 490 N/312 s, 1000+300 kg, 77.3 s prograde from the M1 orbit |

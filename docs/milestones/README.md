@@ -7,4 +7,4 @@ The repository has no multi-milestone roadmap. Milestones are authorized one at 
 | Milestone | Plan | Status |
 |---|---|---|
 | M1 Orbit | (predates this directory) [Proof record](../../proof/records/M1-orbit.md) | PASS, merged |
-| M2 Propulsion & Orbital Maneuvers | [M2-propulsion.md](M2-propulsion.md) | Planning checkpoint; DR-0010…0015 open |
+| M2 Propulsion & Orbital Maneuvers | [M2-propulsion.md](M2-propulsion.md) | T1 + REV-012 investigation authorized; DR-0010…0014 approved, DR-0015 conditional |

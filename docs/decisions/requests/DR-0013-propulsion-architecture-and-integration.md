@@ -1,6 +1,6 @@
 # Decision Request: Propulsion architecture, simulator state, and integration across engine events
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion ([plan](../../milestones/M2-propulsion.md))
@@ -105,6 +105,13 @@ A new ADR records the result after approval. ADR-0003's reconsider trigger is an
 `Recommended (1A+2A+3A+4A+5)` / alternatives per item / `discuss`.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ADR-0007 (propulsion architecture) after approval.
+**Decision:** APPROVED — 1A + 2A + 3A + 4A + 5 (Tech Lead, 2026-10-09):
+- separate propulsion subsystem;
+- exact engine-event step splitting;
+- M1 execution path preserved (golden hash unchanged).
+
+**Reasoning/notes:** As recommended.  
+**Follow-up:**
+- ADR-0007 records the architecture.
+- T1 (standalone model) is authorized. Simulator integration (T2) needs separate approval.
+

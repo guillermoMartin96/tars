@@ -1,6 +1,6 @@
 # Decision Request: Burn direction, pointing model, and frames
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion ([plan](../../milestones/M2-propulsion.md))
@@ -75,9 +75,13 @@ The direction is +v̂ (or −v̂) at the ignition instant, held constant in iner
 `A` / `B` / `C` / `discuss`.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ...
+**Decision:** APPROVED — A (Tech Lead, 2026-10-09): velocity-tracking prograde thrust for the reference scenario.  
+**Reasoning/notes:**
+- **Preserve an extensible direction interface for future guidance modes.**
+- Direction laws are implemented behind a `DirectionLaw` protocol: a function of the read-only (t, r, v) returning a unit vector. Prograde and retrograde are two implementations.
+- Inertial hold or guidance-commanded vectors can be added later without changing the propulsion model or the command path.
+
+**Follow-up:** T1.
 
 ## Sources
 - **[GMATMS]** GMAT R2026a Mathematical Specification (draft) §4.2.7, "VNB Thruster System"; GMAT help `ChemicalThruster` (Axes = VNB).

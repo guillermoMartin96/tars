@@ -1,6 +1,6 @@
 # Decision Request: M2 validation strategy, GMAT finite-burn reference, REV-012, and candidate tolerances
 
-**Status:** OPEN  
+**Status:** CONDITIONALLY APPROVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion ([plan](../../milestones/M2-propulsion.md))
@@ -104,6 +104,18 @@ Measured values are from VAL-0008/0009 on the reference host, using the research
 `A` / `B` / `C`; approve or amend the oracle set and the threshold method.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** threshold DR after measurement; `proof/thresholds/m2.json`.
+**Decision:** CONDITIONALLY APPROVED (Tech Lead, 2026-10-09).
+
+**Approved now:**
+- the validation **methodology**: oracles O1–O9, converging evidence, and the threshold method (re-measure on the implementation across platforms, then a threshold DR);
+- GMAT as a gated reference in principle (option A).
+
+**Not approved / conditions:**
+- **No numerical tolerance is final.** The "Candidate" column above remains candidate values only.
+- **No GMAT acceptance gate is final.**
+- Neither may be finalized until (1) REV-012 has been investigated and its findings reviewed, and (2) measurements on the implemented code are available.
+- GMAT validation thresholds and the M1 baseline must not be modified silently.
+
+**Reasoning/notes:** The REV-012 investigation was authorized the same day in an isolated worktree.  
+**Follow-up:** REV-012 findings (VAL-0010); threshold DR after T5/T6 measurements; `proof/thresholds/m2.json` only after that approval.
+

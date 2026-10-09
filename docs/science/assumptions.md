@@ -6,17 +6,17 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 | ID | Title | Status | Applies to |
 |---|---|---|---|
 | SCI-0001 | Earth gravity is a Newtonian point mass | Active | M1 force model |
-| SCI-0002 | Restricted two-body: spacecraft is a massless point | Active | M1 dynamics |
+| SCI-0002 | Restricted two-body: spacecraft mass negligible relative to Earth | Revised (2026-10-09, DR-0011) | M1/M2 dynamics |
 | SCI-0003 | Earth-centred J2000-aligned frame treated as inertial | Active | M1 state/frame |
 | SCI-0004 | No perturbing forces (drag, SRP, third body, tides, relativity) | Active | M1 force model |
 | SCI-0005 | Earth constants from WGS 84 | Active | All physics |
 | SCI-0006 | Altitude measured above a spherical Earth | Active | Reporting/initial conditions |
 | SCI-0007 | Uniform simulation time from a labelled epoch | Active | Time propagation |
-| SCI-0008 | Ideal constant-thrust, constant-Isp engine; instantaneous on/off | Proposed (DR-0011) | M2 propulsion |
-| SCI-0009 | Standard gravity g0 = 9.80665 m/s² converts Isp to exhaust velocity | Proposed (DR-0011) | M2 propulsion |
-| SCI-0010 | Variable-mass equation of motion a = F/m (no ṁ·v term) | Proposed (DR-0011) | M2 dynamics |
-| SCI-0011 | Instantaneous ideal pointing through the centre of mass; no attitude dynamics | Proposed (DR-0011, DR-0012) | M2 thrust direction |
-| SCI-0012 | Single tank, all propellant usable, instantaneous flame-out at depletion | Proposed (DR-0011, DR-0014) | M2 propellant |
+| SCI-0008 | Ideal constant-thrust, constant-Isp engine; instantaneous on/off | Active (DR-0011) | M2 propulsion |
+| SCI-0009 | Standard gravity g0 = 9.80665 m/s² converts Isp to exhaust velocity | Active (DR-0011) | M2 propulsion |
+| SCI-0010 | Variable-mass equation of motion a = F/m (no ṁ·v term) | Active (DR-0011) | M2 dynamics |
+| SCI-0011 | Instantaneous ideal pointing through the centre of mass; no attitude dynamics | Active (DR-0011, DR-0012) | M2 thrust direction |
+| SCI-0012 | Single tank, all propellant usable, instantaneous flame-out at depletion | Active (DR-0011, DR-0014) | M2 propellant |
 
 ## Sources used throughout
 - **[NGA]** NGA.STND.0036_1.0.0_WGS84, *Department of Defense World Geodetic System 1984*, National Geospatial-Intelligence Agency, 2014. https://earth-info.nga.mil/GandG/wgs84/index.html
@@ -79,9 +79,9 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 
 ---
 
-# SCI-0002: Restricted two-body — spacecraft is a massless point
+# SCI-0002: Restricted two-body — spacecraft mass negligible relative to Earth (originally "spacecraft is a massless point")
 
-**Status:** Active  
+**Status:** Revised (2026-10-09, DR-0011; originally Active 2026-10-05)  
 **Introduced:** 2026-10-05  
 **Applies to:** M1 dynamics
 
@@ -89,6 +89,7 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 - The spacecraft's mass is negligible compared with Earth's. Earth's acceleration toward the spacecraft is ignored.
 - The equation of motion uses μ = G·M_Earth, not G(M_Earth + m).
 - The spacecraft is a point (no attitude, no extent).
+- **Revision (M2, DR-0011):** the spacecraft now has a finite, time-varying mass m = m_dry + m_prop. It is used only to compute thrust acceleration F/m (SCI-0010). The restricted two-body approximation for gravity is unchanged: μ = G·M_Earth, and Earth's reaction is neglected.
 
 ## Why we are making it
 For any spacecraft, m/M_Earth is of order 10⁻²¹, so the correction is far below numerical precision.
@@ -321,13 +322,15 @@ Not applicable.
 
 ---
 
-# Proposed M2 assumptions (pending DR-0011, DR-0012, DR-0014)
+# M2 propulsion assumptions
 
-These entries are drafts written at the M2 planning checkpoint (2026-10-09). They become **Active** only when the referenced Decision Requests are approved. Until then, no code depends on them. On approval, SCI-0002 is revised: the spacecraft remains negligible relative to Earth (μ, not G(M+m)), but its mass now determines thrust acceleration.
+Drafted at the M2 planning checkpoint and approved by the Tech Lead on 2026-10-09 (DR-0011, DR-0012, DR-0014).
+- Engine, tank and burn **values** are configurable reference-case parameters (DR-0010), not assumptions. The assumptions below concern the *model form*.
+- Numerical tolerances referenced as "per the approved M2 threshold DR" are **not yet set**: DR-0015 is conditionally approved, and REV-012 plus implementation measurements come first.
 
 # SCI-0008: Ideal constant-thrust, constant-Isp engine; instantaneous on/off
 
-**Status:** Proposed (DR-0011)  
+**Status:** Active (approved via DR-0011, 2026-10-09)  
 **Introduced:** 2026-10-09  
 **Applies to:** M2 propulsion model
 
@@ -365,7 +368,7 @@ Per the approved M2 threshold DR.
 
 # SCI-0009: Standard gravity converts Isp to exhaust velocity
 
-**Status:** Proposed (DR-0011)  
+**Status:** Active (approved via DR-0011, 2026-10-09)  
 **Introduced:** 2026-10-09  
 **Applies to:** M2 propulsion model
 
@@ -402,7 +405,7 @@ Zero: the constant must match exactly in reference comparisons.
 
 # SCI-0010: Variable-mass equation of motion a = F/m
 
-**Status:** Proposed (DR-0011)  
+**Status:** Active (approved via DR-0011, 2026-10-09)  
 **Introduced:** 2026-10-09  
 **Applies to:** M2 dynamics
 
@@ -441,7 +444,7 @@ Per the approved M2 threshold DR.
 
 # SCI-0011: Instantaneous ideal pointing through the centre of mass
 
-**Status:** Proposed (DR-0011, DR-0012)  
+**Status:** Active (approved via DR-0011, DR-0012, 2026-10-09)  
 **Introduced:** 2026-10-09  
 **Applies to:** M2 thrust direction
 
@@ -479,7 +482,7 @@ Per the approved M2 threshold DR.
 
 # SCI-0012: Single tank, all propellant usable, instantaneous flame-out
 
-**Status:** Proposed (DR-0011, DR-0014)  
+**Status:** Active (approved via DR-0011, DR-0014, 2026-10-09)  
 **Introduced:** 2026-10-09  
 **Applies to:** M2 propellant accounting
 
