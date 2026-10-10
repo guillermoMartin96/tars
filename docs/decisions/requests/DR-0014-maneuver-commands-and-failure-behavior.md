@@ -63,6 +63,7 @@ Rejected commands produce `CommandRejected` with a stable reason code and **no s
 - `insufficient_propellant` (policy `reject`)
 - `duplicate_command_id`
 - `no_propulsion_configured`
+- `burn_unschedulable` *(added by amendment, 2026-10-10; see Resolution)*
 
 **Out of M2 scope:** abort/cancel commands. Proposed as a follow-up once the interface is approved (a `CancelBurn` with its own validation), not in the slice.
 
@@ -117,3 +118,11 @@ Per item: `1A|1B|1C`, `2A|2B`, `3A|3B|3C`; accept or amend §4–§6.
 
 **Follow-up:** T1 provides the propellant-sufficiency check and burn-schedule representation. Command/event schemas are T3.
 
+**Amendment — rejection vocabulary (Tech Lead, 2026-10-10; escalated from M2-T1-review-01):**
+- `schema_invalid` is retained as defined in §4. It covers non-real or non-finite numbers, unknown enums (direction, policy), and extra or malformed fields.
+- `invalid_input` is **not** introduced. The T1 code that used it is migrated.
+- New code **`burn_unschedulable`**: a structurally valid burn command that cannot be scheduled with an exact, representable plan. Examples:
+  - the cutoff is not finite, or not strictly after ignition;
+  - the depletion time underflows the clock;
+  - the planned propellant consumption underflows to zero.
+- The approved vocabulary is §4 plus `burn_unschedulable`. T3 must use exactly these stable, machine-readable codes.
