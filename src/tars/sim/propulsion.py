@@ -68,6 +68,9 @@ class EngineSpec:
     def __post_init__(self) -> None:
         object.__setattr__(self, "thrust_n", _require_positive("thrust_n", self.thrust_n))
         object.__setattr__(self, "isp_s", _require_positive("isp_s", self.isp_s))
+        # Finite inputs can still overflow or underflow the derived physics (REV-T1-02).
+        _require_positive("exhaust velocity Isp*g0", self.exhaust_velocity_mps)
+        _require_positive("mass flow F/(Isp*g0)", self.mass_flow_kgps)
 
     @property
     def exhaust_velocity_mps(self) -> float:
@@ -105,6 +108,7 @@ class SpacecraftSpec:
         object.__setattr__(self, "dry_mass_kg", _require_positive("dry_mass_kg", self.dry_mass_kg))
         if not isinstance(self.engine, EngineSpec) or not isinstance(self.tank, TankSpec):
             raise PropulsionSpecError("engine and tank must be EngineSpec and TankSpec")
+        _require_positive("initial mass dry + propellant", self.initial_mass_kg)
 
     @property
     def initial_mass_kg(self) -> float:
@@ -114,17 +118,20 @@ class SpacecraftSpec:
 def thrust_acceleration(engine: EngineSpec, direction: object, total_mass_kg: float) -> Vector:
     """Thrust acceleration a = (F / m) u_hat [m/s^2] (SCI-0010), returned read-only.
 
-    Raises ValueError for a non-positive or non-finite mass, or a direction that is
-    not a finite 3-vector of unit length.
+    Raises ValueError (never TypeError) for a mass that is not a finite positive real,
+    a direction that is not a finite 3-vector of unit length, or a result that
+    overflows (REV-T1-06).
     """
-    if not (math.isfinite(total_mass_kg) and total_mass_kg > 0.0):
-        raise ValueError(f"total mass must be finite and positive, got {total_mass_kg!r}")
+    mass = _require_positive("total mass", total_mass_kg)
     u = np.asarray(direction, dtype=np.float64)
     if u.shape != (3,) or not np.all(np.isfinite(u)):
         raise ValueError("thrust direction must be a finite 3-vector")
     if abs(float(np.linalg.norm(u)) - 1.0) > _UNIT_NORM_TOLERANCE:
         raise ValueError("thrust direction must be a unit vector")
-    a = (engine.thrust_n / total_mass_kg) * u
+    magnitude = engine.thrust_n / mass
+    if not math.isfinite(magnitude):
+        raise ValueError(f"thrust acceleration F/m overflows for mass {mass!r}")
+    a = magnitude * u
     a.flags.writeable = False
     return a
 
@@ -134,11 +141,22 @@ def rocket_equation_delta_v(exhaust_velocity_mps: float, m0_kg: float, mf_kg: fl
 
     It holds for any pointing history and any gravity field, so it is an exact oracle
     for the integrated thrust acceleration (DR-0015 O2).
+
+    Evaluated as c log1p((m0 - mf)/mf). This stays accurate for tiny mass changes,
+    where m0/mf would round to 1 + ulp. If the ratio overflows it falls back to
+    c (ln m0 - ln mf), so wide ratios stay finite (REV-T1-04).
     """
-    values = (exhaust_velocity_mps, m0_kg, mf_kg)
-    if not all(math.isfinite(x) and x > 0.0 for x in values) or mf_kg > m0_kg:
-        raise ValueError("require finite c > 0 and m0 >= mf > 0")
-    return exhaust_velocity_mps * math.log(m0_kg / mf_kg)
+    c = _require_positive("exhaust velocity", exhaust_velocity_mps)
+    m0 = _require_positive("m0", m0_kg)
+    mf = _require_positive("mf", mf_kg)
+    if mf > m0:
+        raise ValueError("require m0 >= mf")
+    excess = (m0 - mf) / mf
+    log_ratio = math.log1p(excess) if math.isfinite(excess) else math.log(m0) - math.log(mf)
+    dv = c * log_ratio
+    if not math.isfinite(dv):
+        raise ValueError("delta-v overflows")
+    return dv
 
 
 # ------------------------------------------------------------------- direction laws
@@ -157,11 +175,19 @@ class DirectionLaw(Protocol):
 
 
 def _velocity_unit(v: Vector) -> Vector:
+    """v/|v| as a new array, never aliasing the caller's state.
+
+    The vector is pre-scaled by its largest component so |v| cannot overflow or
+    underflow for any finite, nonzero 3-vector (REV-T1-06).
+    """
     v = np.asarray(v, dtype=np.float64)
-    speed = float(np.linalg.norm(v))
-    if not (math.isfinite(speed) and speed > 0.0):
-        raise ValueError("velocity-tracking direction needs a finite, nonzero velocity")
-    return v / speed  # new array; never aliases the caller's state
+    if v.shape != (3,) or not np.all(np.isfinite(v)):
+        raise ValueError("velocity-tracking direction needs a finite 3-vector velocity")
+    scale = float(np.max(np.abs(v)))
+    if scale == 0.0:
+        raise ValueError("velocity-tracking direction is undefined for zero velocity")
+    w = v / scale
+    return w / float(np.linalg.norm(w))
 
 
 class Prograde:
@@ -267,8 +293,14 @@ def plan_burn(
 ) -> BurnPlan:
     """Validate a duration-based burn and compute its exact schedule (DR-0014 1A, 2A, 3C).
 
+    Sufficiency is decided in the time domain against the depletion time
+    t_dep = fl(propellant / mdot). A burn is sufficient iff duration <= t_dep, and its
+    consumption is clamped to the loaded propellant. A burn one ulp longer is
+    insufficient. This rule is exact, not a tolerance (REV-T1-03).
+
     Raises:
-        BurnRejected: with a machine-readable reason. No plan exists for a rejected burn.
+        BurnRejectedError: with a machine-readable reason. No plan exists for a
+            rejected burn.
     """
     numbers = {
         "propellant_kg": propellant_kg,
@@ -281,6 +313,13 @@ def plan_burn(
             raise BurnRejectedError(
                 BurnRejection.INVALID_INPUT, f"{name} must be finite, got {value!r}"
             )
+    # All arithmetic below is float64, whatever scalar type was passed (REV-T1-01).
+    propellant_kg, ignition_t_s, duration_s, earliest_t_s = (
+        float(propellant_kg),
+        float(ignition_t_s),
+        float(duration_s),
+        float(earliest_t_s),
+    )
     if propellant_kg < 0.0:
         raise BurnRejectedError(BurnRejection.INVALID_INPUT, "propellant_kg must be >= 0")
     try:
@@ -297,22 +336,32 @@ def plan_burn(
         raise BurnRejectedError(BurnRejection.NO_PROPELLANT, "tank is empty")
 
     mdot = engine.mass_flow_kgps
-    required = mdot * duration_s
-    if required <= propellant_kg:
-        burn, used, cause = duration_s, required, BurnEndCause.COMPLETED
+    depletion_s = propellant_kg / mdot
+    if duration_s <= depletion_s:
+        burn, cause = duration_s, BurnEndCause.COMPLETED
+        used = min(mdot * duration_s, propellant_kg)
     elif policy is InsufficientPropellantPolicy.REJECT:
         raise BurnRejectedError(
             BurnRejection.INSUFFICIENT_PROPELLANT,
-            f"needs {required!r} kg, {propellant_kg!r} kg loaded",
+            f"duration {duration_s!r} s exceeds depletion time {depletion_s!r} s "
+            f"({propellant_kg!r} kg loaded)",
         )
     else:
         # Flame-out at the exact depletion time (SCI-0012).
-        burn, used, cause = propellant_kg / mdot, propellant_kg, BurnEndCause.PROPELLANT_DEPLETED
+        burn, used, cause = depletion_s, propellant_kg, BurnEndCause.PROPELLANT_DEPLETED
+
+    # Step splitting needs a finite cutoff strictly after ignition (DR-0013, REV-T1-01).
+    cutoff_s = ignition_t_s + burn
+    if not (math.isfinite(cutoff_s) and cutoff_s > ignition_t_s):
+        raise BurnRejectedError(
+            BurnRejection.INVALID_INPUT,
+            f"cutoff {cutoff_s!r} is not representable after ignition {ignition_t_s!r}",
+        )
     return BurnPlan(
-        ignition_t_s=float(ignition_t_s),
-        commanded_duration_s=float(duration_s),
+        ignition_t_s=ignition_t_s,
+        commanded_duration_s=duration_s,
         burn_duration_s=burn,
-        cutoff_t_s=ignition_t_s + burn,
+        cutoff_t_s=cutoff_s,
         propellant_used_kg=used,
         mass_flow_kgps=mdot,
         end_cause=cause,

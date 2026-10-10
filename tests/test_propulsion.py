@@ -60,12 +60,12 @@ def test_engine_exhaust_velocity_and_mass_flow():
     # c = Isp g0; mdot = F / c (SCI-0008, SCI-0009). Hand values for 490 N / 312 s.
     assert REF_ENGINE.exhaust_velocity_mps == 312.0 * 9.80665
     assert REF_ENGINE.mass_flow_kgps == 490.0 / (312.0 * 9.80665)
-    assert REF_ENGINE.mass_flow_kgps == pytest.approx(0.16014773857666, rel=1e-13)
+    assert REF_ENGINE.mass_flow_kgps == pytest.approx(0.16014773857666, rel=1e-13, abs=0)
 
 
 def test_engine_is_configurable_and_immutable():
     small = EngineSpec(thrust_n=22.0, isp_s=220.0)
-    assert small.mass_flow_kgps == pytest.approx(22.0 / (220.0 * 9.80665), rel=1e-15)
+    assert small.mass_flow_kgps == pytest.approx(22.0 / (220.0 * 9.80665), rel=1e-15, abs=0)
     with pytest.raises(AttributeError):
         small.thrust_n = 1.0  # type: ignore[misc]
 
@@ -209,7 +209,7 @@ def test_burn_plan_for_completed_burn_has_exact_times_and_propellant():
     assert plan.cutoff_t_s == 600.0 + 77.3
     assert plan.end_cause is BurnEndCause.COMPLETED
     assert plan.propellant_used_kg == REF_ENGINE.mass_flow_kgps * 77.3
-    assert plan.propellant_used_kg == pytest.approx(12.379420191975958, rel=1e-14)
+    assert plan.propellant_used_kg == pytest.approx(12.379420191975958, rel=1e-14, abs=0)
 
 
 def test_insufficient_propellant_is_rejected_by_default():
@@ -252,7 +252,7 @@ def test_exactly_sufficient_propellant_is_accepted():
     duration = 12.0 / REF_ENGINE.mass_flow_kgps
     plan = plan_burn(REF_ENGINE, propellant_kg=12.0, ignition_t_s=0.0, duration_s=duration)
     assert plan.propellant_used_kg <= 12.0
-    assert plan.propellant_used_kg == pytest.approx(12.0, rel=1e-15)
+    assert plan.propellant_used_kg == pytest.approx(12.0, rel=1e-15, abs=0)
 
 
 def test_propellant_just_short_of_requirement_is_rejected():
@@ -345,7 +345,7 @@ def test_propellant_used_at_time_is_piecewise_linear_and_bounded():
     mdot = REF_ENGINE.mass_flow_kgps
     assert plan.propellant_used_by(0.0) == 0.0
     assert plan.propellant_used_by(600.0) == 0.0
-    assert plan.propellant_used_by(610.0) == pytest.approx(mdot * 10.0, rel=1e-13)
+    assert plan.propellant_used_by(610.0) == pytest.approx(mdot * 10.0, rel=1e-13, abs=0)
     assert plan.propellant_used_by(plan.cutoff_t_s) == 10.0
     assert plan.propellant_used_by(1e9) == 10.0
     samples = np.linspace(0.0, 800.0, 4001)
@@ -368,11 +368,11 @@ def test_burn_plan_is_immutable():
 def test_rocket_equation_known_values():
     c = REF_ENGINE.exhaust_velocity_mps
     assert rocket_equation_delta_v(c, 1300.0, 1300.0) == 0.0
-    assert rocket_equation_delta_v(c, math.e, 1.0) == pytest.approx(c, rel=1e-15)
+    assert rocket_equation_delta_v(c, math.e, 1.0) == pytest.approx(c, rel=1e-15, abs=0)
     # Reference burn (VAL-0008): 12.379 kg from 1300 kg -> 29.2758 m/s.
     used = REF_ENGINE.mass_flow_kgps * REF_DURATION_S
     assert rocket_equation_delta_v(c, 1300.0, 1300.0 - used) == pytest.approx(
-        29.275767297714708, rel=1e-13
+        29.275767297714708, rel=1e-13, abs=0
     )
 
 
@@ -402,7 +402,7 @@ def test_integrated_thrust_acceleration_equals_rocket_equation_independent_quadr
     expected = rocket_equation_delta_v(
         sc.engine.exhaust_velocity_mps, m0, m0 - plan.propellant_used_kg
     )
-    assert sensed == pytest.approx(expected, rel=1e-12)
+    assert sensed == pytest.approx(expected, rel=1e-12, abs=0)
 
 
 def _powered_free_space_rhs(sc, law):
@@ -482,8 +482,8 @@ def test_free_space_powered_motion_matches_closed_form():
     assert abs(math.log2(x_errs[0] / x_errs[1]) - 4.0) <= 0.5
     # Mass conservation: RK4 integrates the linear mass law exactly (round-off only).
     used = sc.engine.mass_flow_kgps * REF_DURATION_S
-    assert y[6] == pytest.approx(sc.tank.propellant_kg - used, rel=1e-15)
-    assert sc.dry_mass_kg + y[6] == pytest.approx(sc.initial_mass_kg - used, rel=1e-15)
+    assert y[6] == pytest.approx(sc.tank.propellant_kg - used, rel=1e-15, abs=0)
+    assert sc.dry_mass_kg + y[6] == pytest.approx(sc.initial_mass_kg - used, rel=1e-15, abs=0)
 
 
 def _powered_orbit_rhs(sc, law):
@@ -496,23 +496,69 @@ def _powered_orbit_rhs(sc, law):
     return f
 
 
-def test_prograde_burn_in_orbit_converges_to_independent_dop853_at_fourth_order():
-    """Independent integrator (SciPy DOP853) for gravity + velocity-tracking thrust.
+def _independent_tracking_rhs(sc, sign):
+    """Reference RHS written without any production propulsion code (REV-T1-05).
 
-    No new tolerance is introduced: the check is RK4's convergence order (|p - 4| <= 0.5,
-    the M1 policy, DR-0008) against a reference integrated with rtol 1e-13.
+    Pointing is the instantaneous inertial velocity direction (sign +1 prograde,
+    -1 retrograde); mass flow is F/(Isp g0) from the spec's raw inputs.
+    """
+    thrust, mdot = sc.engine.thrust_n, sc.engine.thrust_n / (sc.engine.isp_s * STANDARD_GRAVITY)
+
+    def f(t, y):
+        r, v, m_prop = y[:3], y[3:6], y[6]
+        speed = math.sqrt(float(v @ v))
+        a = -WGS84.mu * r / math.sqrt(float(r @ r)) ** 3
+        a = a + (sign * thrust / (sc.dry_mass_kg + m_prop) / speed) * v
+        return np.concatenate([v, a, [-mdot]])
+
+    return f
+
+
+@pytest.mark.parametrize(("law", "sign"), [(Prograde(), 1.0), (Retrograde(), -1.0)])
+def test_powered_arc_converges_at_fourth_order_to_independent_reference(law, sign):
+    """Production model + RK4 vs SciPy DOP853 on an independently written RHS.
+
+    If the production law deviated from velocity tracking (e.g. held its first
+    direction), RK4 would converge to a different trajectory and the error would stop
+    shrinking. Convergence order |p - 4| <= 0.5 is the M1 policy (DR-0008); no new
+    tolerance is introduced.
     """
     sc = _ref_spacecraft()
     r0, v0 = _orbit_state()
     y0 = np.concatenate([r0, v0, [sc.tank.propellant_kg]])
-    f = _powered_orbit_rhs(sc, Prograde())
-    ref = solve_ivp(f, (0.0, REF_DURATION_S), y0, method="DOP853", rtol=1e-13, atol=1e-9)
+    ref = solve_ivp(
+        _independent_tracking_rhs(sc, sign),
+        (0.0, REF_DURATION_S),
+        y0,
+        method="DOP853",
+        rtol=1e-13,
+        atol=1e-9,
+    )
     y_ref = ref.y[:, -1]
+    f = _powered_orbit_rhs(sc, law)
     errs = [
-        np.linalg.norm(_rk4_to(f, y0, REF_DURATION_S, dt)[:3] - y_ref[:3]) for dt in (20.0, 10.0)
+        np.linalg.norm(_rk4_to(f, y0, REF_DURATION_S, dt)[:3] - y_ref[:3])
+        for dt in (20.0, 10.0, 5.0)
     ]
-    order = math.log2(errs[0] / errs[1])
-    assert abs(order - 4.0) <= 0.5
+    for coarse, fine in pairwise(errs):
+        assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+
+
+@pytest.mark.parametrize("law", [Prograde(), Retrograde()])
+def test_direction_law_tracks_each_new_velocity(law):
+    """One law instance must follow the velocity it is given at every call (REV-T1-05)."""
+    sign = 1.0 if law.name == "prograde" else -1.0
+    r = np.array([7.0e6, 0.0, 0.0])
+    velocities = [
+        np.array([0.0, 7.5e3, 0.0]),
+        np.array([0.0, 4.0e3, 6.0e3]),
+        np.array([-1.0e3, 0.0, 7.0e3]),
+        np.array([0.0, 7.5e3, 0.0]),
+    ]
+    for v in velocities:
+        np.testing.assert_allclose(
+            law.direction(0.0, r, v), sign * v / np.linalg.norm(v), rtol=0, atol=1e-15
+        )
 
 
 def test_prograde_raises_and_retrograde_lowers_orbital_energy():
@@ -524,3 +570,150 @@ def test_prograde_raises_and_retrograde_lowers_orbital_energy():
     for law, sign in ((Prograde(), 1.0), (Retrograde(), -1.0)):
         y = _rk4_to(_powered_orbit_rhs(sc, law), y0, REF_DURATION_S, 10.0)
         assert sign * (specific_energy(y[:3], y[3:6], WGS84.mu) - e0) > 0.0
+
+
+# ----------------------------------------------- review M2-T1-review-01 regressions
+
+
+@pytest.mark.parametrize("propellant", [0.1, 0.3, 1.0, 7.77, 12.0, 299.9])
+@pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+def test_burn_lasting_exactly_the_depletion_time_completes(propellant, policy):
+    """REV-T1-03: sufficiency is decided in time; consumption is clamped at the boundary."""
+    duration = propellant / REF_ENGINE.mass_flow_kgps
+    plan = plan_burn(REF_ENGINE, propellant, 0.0, duration, policy=policy)
+    assert plan.end_cause is BurnEndCause.COMPLETED
+    assert plan.burn_duration_s == duration
+    assert plan.propellant_used_kg <= propellant
+    assert plan.propellant_used_kg == pytest.approx(propellant, rel=2.3e-16, abs=0)
+
+
+@pytest.mark.parametrize("propellant", [0.1, 0.3, 1.0, 7.77, 12.0, 299.9])
+def test_one_ulp_past_the_depletion_time_is_insufficient(propellant):
+    t_dep = propellant / REF_ENGINE.mass_flow_kgps
+    longer = math.nextafter(t_dep, math.inf)
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(REF_ENGINE, propellant, 0.0, longer)
+    assert err.value.reason is BurnRejection.INSUFFICIENT_PROPELLANT
+    plan = plan_burn(
+        REF_ENGINE, propellant, 0.0, longer, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION
+    )
+    assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+    assert plan.burn_duration_s == t_dep
+    assert plan.propellant_used_kg == propellant
+    shorter = plan_burn(REF_ENGINE, propellant, 0.0, math.nextafter(t_dep, 0.0))
+    assert shorter.end_cause is BurnEndCause.COMPLETED
+    assert shorter.propellant_used_kg <= propellant
+
+
+def test_numpy_scalar_inputs_are_normalized_to_float64():
+    """REV-T1-01: NumPy scalars give exactly the plan of the equivalent Python floats."""
+    args = (np.float32(300.0), np.float32(600.0), np.float32(77.3))
+    plan = plan_burn(REF_ENGINE, *args)
+    expected = plan_burn(REF_ENGINE, *(float(x) for x in args))
+    assert plan == expected
+    for value in (
+        plan.ignition_t_s,
+        plan.commanded_duration_s,
+        plan.burn_duration_s,
+        plan.cutoff_t_s,
+        plan.propellant_used_kg,
+        plan.mass_flow_kgps,
+    ):
+        assert type(value) is float
+    tiny = plan_burn(REF_ENGINE, np.float32(300), np.float32(600), np.float32(1e-5))
+    assert tiny.cutoff_t_s > tiny.ignition_t_s
+    assert tiny.propellant_used_by(tiny.cutoff_t_s) > 0.0
+    spec = EngineSpec(thrust_n=np.float32(490.0), isp_s=np.int64(312))
+    assert type(spec.thrust_n) is float and type(spec.isp_s) is float
+
+
+@pytest.mark.parametrize(
+    ("engine", "ignition", "duration"),
+    [
+        (REF_ENGINE, 1e16, 1.0),  # cutoff rounds back onto ignition
+        (EngineSpec(thrust_n=1e-308, isp_s=312.0), 1e308, 1e308),  # t_dep and cutoff overflow
+    ],
+)
+def test_unrepresentable_cutoff_is_rejected(engine, ignition, duration):
+    """REV-T1-01: a plan must have a finite cutoff strictly after ignition (DR-0013)."""
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(engine, 300.0, ignition, duration)
+    assert err.value.reason is BurnRejection.INVALID_INPUT
+
+
+def test_depletion_time_that_underflows_the_clock_is_rejected():
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(
+            REF_ENGINE,
+            5e-324,
+            600.0,
+            10.0,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+    assert err.value.reason is BurnRejection.INVALID_INPUT
+
+
+@pytest.mark.parametrize(
+    ("thrust", "isp"),
+    [(490.0, 1e308), (1e308, 1e-308), (5e-324, 312.0)],  # c overflows; mdot inf; mdot underflows
+)
+def test_engine_rejects_specs_with_invalid_derived_quantities(thrust, isp):
+    """REV-T1-02: exhaust velocity and mass flow must be finite and positive."""
+    with pytest.raises(PropulsionSpecError):
+        EngineSpec(thrust_n=thrust, isp_s=isp)
+
+
+def test_spacecraft_rejects_overflowing_total_mass():
+    with pytest.raises(PropulsionSpecError):
+        SpacecraftSpec(dry_mass_kg=1e308, engine=REF_ENGINE, tank=TankSpec(propellant_kg=1e308))
+
+
+def _ln_ratio_reference(m0, mf):
+    with localcontext() as ctx:
+        ctx.prec = 50
+        return float((Decimal(m0) / Decimal(mf)).ln())
+
+
+@pytest.mark.parametrize(
+    ("m0", "mf"),
+    [
+        (1.0, math.nextafter(1.0, 0.0)),
+        (1300.0, math.nextafter(1300.0, 0.0)),
+        (1300.0, 1287.620579808024),
+        (1300.0, 1000.0),
+        (1e300, 1e-300),
+        (1e308, 1e-308),
+    ],
+)
+def test_rocket_equation_is_accurate_from_tiny_to_extreme_mass_ratios(m0, mf):
+    """REV-T1-04: within a few ulp of a 50-digit reference, never overflowing."""
+    c = 3000.0
+    expected = c * _ln_ratio_reference(m0, mf)
+    assert rocket_equation_delta_v(c, m0, mf) == pytest.approx(expected, rel=4.5e-16, abs=0)
+
+
+@pytest.mark.parametrize("mass", [True, "1300", None])
+def test_thrust_acceleration_rejects_non_numeric_mass(mass):
+    """REV-T1-06: same scalar validation as the specs; ValueError, never TypeError."""
+    with pytest.raises(ValueError):
+        thrust_acceleration(REF_ENGINE, np.array([1.0, 0.0, 0.0]), total_mass_kg=mass)
+
+
+def test_thrust_acceleration_rejects_an_overflowing_result():
+    with pytest.raises(ValueError):
+        thrust_acceleration(EngineSpec(1e308, 312.0), np.array([1.0, 0.0, 0.0]), 1e-10)
+
+
+@pytest.mark.parametrize("v", [[1.0, 0.0], [1.0, 0.0, 0.0, 0.0], [[1.0, 0.0, 0.0]]])
+def test_velocity_tracking_requires_a_three_vector(v):
+    with pytest.raises(ValueError):
+        Prograde().direction(0.0, np.array([7e6, 0.0, 0.0]), np.array(v))
+
+
+@pytest.mark.parametrize("scale", [1e200, 1e-200, 1e-310])
+def test_velocity_tracking_is_scale_invariant(scale):
+    v = scale * np.array([0.0, 0.6, 0.8])
+    for law, sign in ((Prograde(), 1.0), (Retrograde(), -1.0)):
+        np.testing.assert_allclose(
+            law.direction(0.0, np.zeros(3), v), sign * np.array([0.0, 0.6, 0.8]), atol=1e-15
+        )
