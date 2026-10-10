@@ -181,12 +181,40 @@ At `af4de18`:
 
 Mutation re-check: the reviewer's frozen-Prograde mutant and ten implementer mutants (one per fix plus the original T1 set) are each killed.
 
+## Addendum: reviewer re-verification of fixes
+**Reviewer:** the same provider, OpenAI Codex `gpt-6.1-sol`, session `01a1247c-feb7-7e13-a861-fd38967098e4`.  
+**Revision:** `af4de18`, as a git-archive snapshot (no git metadata, so the reviewer could not verify the SHA).  
+**Raw:** `raw/M2-T1-codex-reverify.md` (prompt: `raw/M2-T1-codex-reverify-prompt.md`).  
+**Verdict:** CONDITIONAL PASS.
+- The reviewer re-ran its original reproductions: 118 targeted tests and 327 in the full suite pass, and both ruff checks are clean.
+- Under the frozen-Prograde mutation, 2 tests fail as expected; the orbital error stalls at about 34 m.
+
+| Finding | Re-verification |
+|---|---|
+| REV-T1-01 | RESOLVED |
+| REV-T1-02 | RESOLVED |
+| REV-T1-03 | RESOLVED |
+| REV-T1-04 | RESOLVED (independent 100-digit references agree within about 1 ulp) |
+| REV-T1-05 | RESOLVED |
+| REV-T1-06 | RESOLVED |
+
+The reviewer also confirmed that the ruff exclusion keeps the verbatim evidence unchanged.
+
+### N1 — Positive burn consumption can underflow to zero (raised in re-verification)
+**Severity:** Low  
+**Reviewer claim:** `plan_burn(EngineSpec(1e-308, 312), 300, 0, 1e-100)` is accepted as completed with `propellant_used_kg = 0.0`, because ṁ·duration underflows.  
+**Implementer disposition:** `ACCEPTED`  
+**Implementer reasoning:** Same class as REV-T1-02. A burn with thrust must consume a representable, positive mass. Not a regression from the fix.  
+**Resolution/evidence:** Fixed in `b015c54`. `plan_burn` rejects (`invalid_input`) a plan whose consumption is not > 0. Test `test_positive_burn_with_underflowing_consumption_is_rejected` failed before the fix and passes after. Re-test at `b015c54`: 328 passed; M1 determinism hash `7a4e1877…`; M1 Proof PASS.
+
+### Rejection vocabulary (escalated; the reviewer concurs)
+The reviewer confirms that `invalid_input` is absent from the approved DR-0014 §4 list. The test's permissive allowed-set does not amount to approval. The decision must be made before T3 freezes the command and event schemas.
+
 ## Proof gate
 - [x] All Critical findings resolved (none raised)
-- [x] All High findings resolved: REV-T1-01 and REV-T1-05 fixed in `af4de18`
-- [x] Every substantive finding has an explicit disposition
-- [x] Accepted fixes have been re-tested by the implementer (above)
-- [ ] Reviewer re-verification of the fixes: requested from the same provider; recorded below when complete
+- [x] All High findings resolved: REV-T1-01 and REV-T1-05 (`af4de18`), re-verified by the reviewer
+- [x] Every substantive finding has an explicit disposition, including N1
+- [x] Accepted fixes re-tested by the implementer and re-verified by the reviewer (N1 by the implementer only; it is a one-line rule with a failing-then-passing test)
 - [ ] Escalated item (rejection vocabulary) has a Tech Lead decision
 
-**Review gate result:** BLOCKED, pending reviewer re-verification and the vocabulary decision. All accepted fixes are implemented and pass.
+**Review gate result:** PASS for T1's code findings. The only open item is the escalated rejection-vocabulary decision. It does not block T1 behavior, but it must be settled before T3 defines the command/event schema.
