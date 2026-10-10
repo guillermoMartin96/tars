@@ -73,8 +73,13 @@ The committed GMAT script, report and metadata are the reference our simulator i
 - Recompute the summary from the committed reports: `uv run python toolbox/scripts/gmat_m1.py realistic-summary`.
 - Re-running GMAT (`realistic`) is subject to the same replacement policy (`--replace-reason`).
 
-## Deferred: REV-012 epoch-column drift
-The ~0.1 ms drift between GMAT's `TTModJulian` column and the `ElapsedS` label is **explicitly deferred** (Tech Lead, 2026-10-05). It is not an M1 blocker.
-- **Trigger:** investigate it **before the first time-dependent force model** (Earth rotation, ephemerides, drag in gated validation).
-- **Then:** align comparisons on GMAT's epoch rather than the script counter.
-- **Note:** the informational drag runs are time-dependent but not gated. A 0.1 ms timing difference is negligible at their km scale (about 0.8 m).
+## REV-012 epoch-column drift: RESOLVED (2026-10-10)
+The drift was deferred by the Tech Lead on 2026-10-05, then investigated before M2's first time-dependent (scheduled-thrust) force model. The root cause is verified GMAT behavior: **VAL-0010**, DR-0016 (approved), evidence in `docs/science/experiments/rev-012/`, CI-reproduced by `tests/test_rev012_evidence.py`.
+- **Epoch drift (M-a).** Each `Propagate` command re-rounds the double A.1 MJD epoch, so drift grows with the number of commands. For M1 (895 × 60 s) this gives −1.063e-4 s, reproduced bit-exactly on all rows.
+  - The integrated states are at the requested elapsed times (9e-10 s), so **M1's approved comparison, which aligns on the `ElapsedS` labels, is unaffected**.
+  - The committed M1 reference still reproduces byte-for-byte.
+- **Stop-time rounding (M-b).** GMAT rounds the final step to a time stop condition to 1 µs (`TIME_ROUNDOFF`). This, not epoch quantization, explains the M2 probe's 1.85e-7 s burn shortfall.
+- **Method for M2 burn references (DR-0016).**
+  - Use aligned stepping (`InitialStepSize = MaxStep` dividing every stop time), with mandatory alignment verification, and stream report rows from one `Propagate` per arc.
+  - Do **not** align comparisons on GMAT's epoch or `Sat.ElapsedSecs` columns: both carry the M-a drift. The earlier guidance in this section said the opposite and is superseded.
+- Measured on the reference burn at 53 700 s: GMAT vs independent DOP853 is 1.17 cm with natural stepping and 12 µm with aligned stepping.

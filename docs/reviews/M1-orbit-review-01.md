@@ -227,3 +227,6 @@ It also found hardening gaps (force models could mutate state; scan bypasses), a
 - [x] No escalated scientific claims remain without authoritative evidence. REV-001's physics was independently re-derived by the implementer.
 
 **Review gate result:** PASS. REV-001 was resolved via DR-0009, every finding is dispositioned, and accepted fixes were re-tested and re-verified.
+
+## Post-merge note (2026-10-10): REV-012 root cause
+REV-012's "cause unverified" hypothesis is now verified: per-command double-MJD epoch re-rounding in GMAT (VAL-0010, DR-0016). M1 is unaffected. The disposition above is unchanged.
