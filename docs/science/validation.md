@@ -221,3 +221,9 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - The test now uses a 40-digit decimal reference, a round-off bound for velocity, and the approved convergence-order policy (|p − 4| ≤ 0.5, DR-0008) for position. No new numerical tolerance was introduced.
 - **Mutation check:** six deliberate physics mutants were each detected by the suite: g0 = 9.81, wrong mass in F/m, negative residual propellant, a 1 % slack in the sufficiency check (needed a new boundary test), retrograde = prograde, and a cutoff shifted 5 s.
 - **Classification:** no discrepancy. **Status:** informational; Proof-level gates come from DR-0015 after T5/T6 and REV-012.
+- **Correction (2026-10-10, external review M2-T1-review-01):**
+  - **The "independent" orbit row is overstated.** The DOP853 reference above used the same production right-hand side, including the production pointing law, as the RK4 run. It therefore checked the integrator, not the velocity-tracking model. A frozen-pointing mutant passed every test (REV-T1-05).
+  - Since `af4de18` the reference uses an independently written right-hand side, and the mutant fails.
+  - **A mutation was missing.** The mutation list above omitted stateful pointing mutants, and its "1 % slack" boundary test only probed a favourable value. The exact-boundary rule is now time-domain and tested in both directions (REV-T1-03).
+  - **Some assertions were weaker than stated.** `pytest.approx`'s default absolute floor (1e-12) made several small-quantity relative checks looser than written. All checks now use `abs=0`.
+  - The measured values in the table are unaffected.

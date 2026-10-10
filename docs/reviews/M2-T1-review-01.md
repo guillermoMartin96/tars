@@ -36,7 +36,14 @@ The two reviews' findings are consolidated below. When they disagree on severity
 
 **Implementer reasoning:** Confirmed by reading the code. Validation checked type and finiteness but not the arithmetic result, and only two of the outputs were converted to float. A burn whose cutoff does not lie strictly after ignition, as a finite float64, cannot be integrated by step splitting.
 
-**Resolution/evidence:** pending (to cite the fix commit).
+**Resolution/evidence:** Fixed in `af4de18`.
+- `plan_burn` converts every numeric input to float64 before any arithmetic.
+- It rejects (`invalid_input`) any cutoff that is non-finite or not strictly after ignition.
+- Tests:
+  - `test_numpy_scalar_inputs_are_normalized_to_float64`: a float32 plan equals the plan from the equivalent floats, all fields are `float`, and the reviewer's 1e-5 s case now has cutoff > ignition;
+  - `test_unrepresentable_cutoff_is_rejected`: ignition 1e16 s with duration 1 s, and the reviewer's 1e-308 N engine with 1e308 s values;
+  - `test_depletion_time_that_underflows_the_clock_is_rejected`.
+- Mutants that remove the normalization or the cutoff check fail 1 and 3 tests respectively.
 
 ---
 
@@ -53,7 +60,12 @@ The two reviews' findings are consolidated below. When they disagree on severity
 
 **Implementer reasoning:** Input-level validation is necessary but not sufficient. Derived physical quantities must also be finite and positive. This is the same class as M1 audit F2.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `af4de18`.
+- `EngineSpec` validates that exhaust velocity and mass flow are finite and positive.
+- `SpacecraftSpec` validates the total mass.
+- Tests: `test_engine_rejects_specs_with_invalid_derived_quantities` (c overflow, ṁ overflow, ṁ underflow to 0) and `test_spacecraft_rejects_overflowing_total_mass`.
+- A mutant removing the mass-flow check fails 2 tests.
+- Implementer correction: one test case was first written with thrust 1e-320 N. That gives a valid subnormal ṁ, so the case was corrected to 5e-324 N, which does underflow to 0.
 
 ---
 
@@ -71,7 +83,13 @@ The two reviews' findings are consolidated below. When they disagree on severity
 
 **Implementer reasoning:** Confirmed. The sufficiency rule compared a rounded product with the loaded propellant, while the depletion duration was computed as a quotient. The two are not consistent at the boundary. The correct fix is a single, consistent boundary in the time domain (commanded duration vs depletion duration ṁ⁻¹·m_prop), with consumption clamped at the boundary. This is not a tolerance, so genuinely insufficient neighbours (one ulp longer) must still be rejected.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `af4de18`.
+- A burn is sufficient iff `duration ≤ fl(propellant/ṁ)`. Consumption is `min(ṁ·duration, propellant)`.
+- Tests for six propellant amounts, including the reviewer's 0.1 kg, under both policies:
+  - a burn of exactly the depletion time completes and never exceeds the loaded propellant;
+  - one ulp longer is rejected (`reject`) or depleted with used = loaded (`burn_to_depletion`);
+  - one ulp shorter completes.
+- Mutants restoring the product comparison, or removing the clamp, fail 3 and 2 tests.
 
 ---
 
@@ -88,7 +106,14 @@ The two reviews' findings are consolidated below. When they disagree on severity
 
 **Implementer reasoning:** Physically irrelevant at the reference case, where agreement is 6e-15. However, an oracle must not lose accuracy where a stable formulation costs nothing. Small mass changes (short burns, pulses) are a realistic future regime.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `af4de18`.
+- `c·log1p((m0 − mf)/mf)`, with fallback `c·(ln m0 − ln mf)` when the ratio overflows; overflowing results are rejected.
+- Test `test_rocket_equation_is_accurate_from_tiny_to_extreme_mass_ratios` compares six cases with a 50-digit `decimal` reference, at ≤ 4.5e-16 relative and `abs=0`. The cases include the reviewer's nextafter, 1e300/1e-300 and 1e308/1e-308 inputs.
+- The naive-log mutant fails 5 tests.
+- **Implementer finding while fixing:**
+  - The near-equal case initially *passed* against the unfixed code, because `pytest.approx` adds a default absolute tolerance of 1e-12 to `rel`.
+  - That floor had also weakened earlier T1 assertions on small quantities (mass flow ≈ 0.16 kg/s; propellant at 10 s).
+  - All relative comparisons in `tests/test_propulsion.py` now pass `abs=0` explicitly. The previously weakened assertions still pass at their stated relative bounds.
 
 ---
 
@@ -109,7 +134,11 @@ The two reviews' findings are consolidated below. When they disagree on severity
 
 **Lesson:** an independent reference must not share the code path it is meant to check.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `af4de18` (tests).
+- `test_direction_law_tracks_each_new_velocity` calls one law instance with four successive non-parallel velocities, for prograde and retrograde.
+- `test_powered_arc_converges_at_fourth_order_to_independent_reference` compares production model + RK4 with DOP853 on `_independent_tracking_rhs`. That reference uses no production propulsion code: pointing `±v/√(v·v)` inline, ṁ from raw spec inputs. Convergence order over dt 20 → 10 → 5 must satisfy |p − 4| ≤ 0.5 (the DR-0008 policy), for both directions.
+- **The reviewer's exact frozen-Prograde monkeypatch now fails 2 tests** (it previously passed all 73).
+- VAL-0011's description of the old DOP853 test as an independent reference is corrected in the validation log.
 
 ---
 
@@ -127,7 +156,12 @@ The two reviews' findings are consolidated below. When they disagree on severity
 
 **Implementer reasoning:** Consistent scalar and vector validation should apply everywhere, and normalization should be scale-invariant. Low impact: no physical state reaches these magnitudes.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `af4de18`.
+- `thrust_acceleration` uses the shared scalar validator, so `True`, strings and `None` raise `ValueError`.
+- It checks F/m for overflow before multiplying by the vector. This avoids an inf·0 = NaN `RuntimeWarning`, which the tests run with `-W error` to catch.
+- `_velocity_unit` enforces a finite 3-vector shape and pre-scales by the largest component.
+- Tests cover non-numeric mass, overflow, 2-, 4- and 1×3-shaped inputs, and scales 1e200, 1e-200 and 1e-310.
+- The unscaled-norm mutant fails 3 tests.
 
 ---
 
@@ -137,11 +171,22 @@ The two reviews' findings are consolidated below. When they disagree on severity
 - **Escalated to the Tech Lead** as a proposed vocabulary amendment rather than changed silently: keep `schema_invalid` for type/finiteness, and add `unrepresentable_schedule`, or keep a single `invalid_input`.
 - Disposition: `ESCALATED_FOR_INVESTIGATION` (decision needed).
 
-## Proof gate
-- [ ] All Critical findings resolved (none raised)
-- [ ] All High findings resolved (REV-T1-01, REV-T1-05)
-- [x] Every substantive finding has an explicit disposition
-- [ ] Accepted fixes have been re-tested
-- [ ] Escalated items have a Tech Lead decision (rejection vocabulary)
+## Re-test (implementer)
+At `af4de18`:
+- full suite: **327 passed**;
+- `ruff check` and `ruff format --check` clean (after `c48f789`, which excludes `docs/reviews/raw/` so verbatim reviewer evidence is not reformatted; CI had failed on `d07337a` for this reason);
+- CI green on ubuntu-latest x86_64 and macos-latest arm64 (run 38030869877);
+- M1 Proof PASS on all checks against approved thresholds, GMAT compare PASS, cross-process determinism and cross-platform bit-identical to the golden `7a4e1877…`;
+- no diff to M1 simulator, runner, event, force, integrator, state or scenario code since `63bec8d`.
 
-**Review gate result:** BLOCKED. Fixes are in progress; this record will be updated with commit evidence.
+Mutation re-check: the reviewer's frozen-Prograde mutant and ten implementer mutants (one per fix plus the original T1 set) are each killed.
+
+## Proof gate
+- [x] All Critical findings resolved (none raised)
+- [x] All High findings resolved: REV-T1-01 and REV-T1-05 fixed in `af4de18`
+- [x] Every substantive finding has an explicit disposition
+- [x] Accepted fixes have been re-tested by the implementer (above)
+- [ ] Reviewer re-verification of the fixes: requested from the same provider; recorded below when complete
+- [ ] Escalated item (rejection vocabulary) has a Tech Lead decision
+
+**Review gate result:** BLOCKED, pending reviewer re-verification and the vocabulary decision. All accepted fixes are implemented and pass.
