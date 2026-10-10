@@ -357,6 +357,12 @@ def plan_burn(
             BurnRejection.INVALID_INPUT,
             f"cutoff {cutoff_s!r} is not representable after ignition {ignition_t_s!r}",
         )
+    # A burn with thrust must consume propellant; mdot*duration can underflow (N1).
+    if not used > 0.0:
+        raise BurnRejectedError(
+            BurnRejection.INVALID_INPUT,
+            f"propellant consumption {used!r} kg is not representable for this burn",
+        )
     return BurnPlan(
         ignition_t_s=ignition_t_s,
         commanded_duration_s=duration_s,

@@ -717,3 +717,10 @@ def test_velocity_tracking_is_scale_invariant(scale):
         np.testing.assert_allclose(
             law.direction(0.0, np.zeros(3), v), sign * np.array([0.0, 0.6, 0.8]), atol=1e-15
         )
+
+
+def test_positive_burn_with_underflowing_consumption_is_rejected():
+    """Reviewer re-verification N1: a planned burn must consume a positive mass."""
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(EngineSpec(thrust_n=1e-308, isp_s=312.0), 300.0, 0.0, 1e-100)
+    assert err.value.reason is BurnRejection.INVALID_INPUT
