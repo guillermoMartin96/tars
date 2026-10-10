@@ -1,6 +1,6 @@
 # Decision Request: GMAT time-alignment method for M2 finite-burn references, and REV-012 disposition
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** M2 Propulsion; REV-012 (M1 review); DR-0015 (conditional); VAL-0009, VAL-0010
@@ -83,6 +83,18 @@ Two decisions are needed:
 `A` / `B` / `C`; `R1` / `R2`.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ...
+**Decision:** APPROVED, A + R1 (Tech Lead, 2026-10-10).
+- **Aligned GMAT stepping** with mandatory alignment verification is approved for M2 burn reference comparisons.
+- **The VAL-0010 investigation is accepted:** per-command epoch re-rounding (M-a) and final-step microsecond rounding (M-b).
+
+**Conditions:**
+- Preserve the original reproduction and document why aligned stepping is appropriate.
+- Keep reproducible verification of the reported improvement (≈ 1.2 cm → 12 µm).
+- Mark REV-012 resolved **only after** evidence, tests and documentation are integrated into the M2 branch and verified.
+- Do not silently loosen any physics accuracy threshold.
+
+**Follow-up:**
+- The investigation branch was merged into M2 in `391985f`, with its original commits `e47ce31` and `ba42395` preserved.
+- A verification test and the REV-012 status update follow in the M2 branch.
+- T6 must generate the M2 GMAT reference with aligned stepping.
+- DR-0015 O9 candidate values are re-derived under this method in the threshold DR.

@@ -1,10 +1,10 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T1 AUTHORIZED (2026-10-09).
-- DR-0010…DR-0014 are approved.
-- DR-0015 is conditionally approved: no tolerance or GMAT gate is final until REV-012 is investigated and implementation measurements exist.
-- The REV-012 investigation is authorized in parallel (isolated branch `investigation/rev-012-gmat-epoch`).
-- T2 and later tasks need separate approval.  
+**Status:** T2 AUTHORIZED (2026-10-10).
+- T1 is complete and reviewed (`docs/reviews/M2-T1-review-01.md`).
+- DR-0010…0014 are approved. DR-0014 was amended with the rejection vocabulary: `schema_invalid` kept, `burn_unschedulable` added.
+- DR-0015 is conditionally approved. DR-0016 is approved: aligned GMAT stepping; REV-012 to be resolved once integrated and verified.
+- T3 and later tasks need separate approval. No merge to `main` without Tech Lead approval.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  
 **Definition of done:** prototype phase (proof/definition-of-done.md), unless the Tech Lead sets a stricter bar.
