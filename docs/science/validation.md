@@ -199,7 +199,43 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   2. **GMAT's default `GravitationalAccel` is 9.81 m/s²** (GMAT help, `ChemicalThruster`), not standard gravity g0 = 9.80665 m/s². Like the Earth μ in M1 (SCI-0005), it must be overridden and gated, or the comparison measures a configuration mismatch (7.85 m here).
   3. **The residual 1.2 cm is explained by burn timing.** The mass difference implies GMAT burned 1.85e-7 s less. One ulp of GMAT's Modified Julian epoch near MJD 31 041 is 3.14e-7 s. A 1.85e-7 s shorter burn changes Δv by about 7e-8 m/s, giving ΔSMA ≈ 0.12 mm and an along-track drift of about 1.1 cm over 9.9 orbits, as measured. Working hypothesis: epoch quantization in GMAT's stopping logic. This is the same family as the deferred REV-012 epoch-column drift, and it is **not verified against GMAT internals**.
   4. GMAT throws an exception at tank depletion by default (`AllowNegativeFuelMass = false`). Our propellant-exhaustion behavior therefore cannot be validated against GMAT; only analytically.
-- **Classification:** finding 1: reference-documentation discrepancy, resolved by measurement. Finding 2: reference configuration trap. Finding 3: reference-tool numerical resolution (hypothesis). **Status:** informational. Feeds DR-0011 and DR-0015. GMAT evidence for M2 gates must come from a committed, provenance-tracked reference generated from the approved scenario, not from this probe.
+- **Classification:** finding 1: reference-documentation discrepancy, resolved by measurement. Finding 2: reference configuration trap. Finding 3: reference-tool numerical resolution (hypothesis).
+- **Addendum (2026-10-09, VAL-0010):** the finding 3 hypothesis is **refuted**. The 1.85e-7 s shortfall is GMAT rounding the final step to a time stop condition to whole microseconds (`TIME_ROUNDOFF = 1e-6`). It is not epoch-ulp quantization; the 3.1e-7 s ulp was a coincidence. Findings 1, 2 and 4 stand. **Status:** informational. Feeds DR-0011 and DR-0015. GMAT evidence for M2 gates must come from a committed, provenance-tracked reference generated from the approved scenario, not from this probe.
+
+## VAL-0010 — REV-012: GMAT epoch bookkeeping and stop-time quantization (root cause)
+- **Date / revision:** 2026-10-09 / harness `e47ce31`; results committed on branch `investigation/rev-012-gmat-epoch`
+- **Who:** investigation by a separate agent in an isolated worktree, as authorized by the Tech Lead. The agent is the same model family as the implementer, not a different provider. It was interrupted before writing this record. The implementing engineer completed the record after independently verifying:
+  - `rev012.py analyze` reproduces `results.json` byte-for-byte from the committed reports;
+  - `rev012.py reproduce` re-runs GMAT and reproduces the committed M1 reference report and the VAL-0009 probe report byte-for-byte;
+  - the cited GMAT R2026a source lines exist as described: `PropagationEnabledCommand.hpp` defines `TIME_ROUNDOFF 1.0e-6`; `Propagate.cpp` l. 5501/5640 round `secsToStep`; l. 4610/4617 set `currEpoch = baseEpoch + elapsedTime/86400`.
+- **Questions:** REV-012 (M1 epoch-column drift) and VAL-0009 finding 3 (M2 probe burn shortfall). Root cause, origin, impact, comparison method, and M1 compatibility.
+- **Artifacts:** `docs/science/experiments/rev-012/`: README, `rev012.py`, 61 generated scripts, reports, `results.json`, `run_provenance.json`, `reproduce.json`.
+- **Root cause: verified (GMAT source + bit-exact reproduction).** Both effects are **GMAT behavior**. Our timestamp handling is not involved. There are two distinct mechanisms:
+  - **M-a, epoch drift (REV-012).**
+    - GMAT stores the spacecraft epoch as a double A.1 MJD.
+    - Each `Propagate` command re-rounds it once (`currEpoch = baseEpoch + elapsedTime/86400`; the two-part `GmatTime` path is off by default).
+    - The rounding error per command is constant for a given epoch and segment, so drift grows linearly with the number of commands. M1 (895 × 60 s at the M1 epoch): −1.063e-4 s, reproduced bit-exactly on all 896 rows.
+    - `Sat.ElapsedSecs` is derived from the same double, so it drifts too.
+    - **The integrated states are at the labelled elapsed times** (vs Kepler: 7.2 µm, 9e-10 s). M1's comparison used the labels, so it was never affected.
+  - **M-b, stop-time rounding (VAL-0009 shortfall).**
+    - When a time stop condition triggers, GMAT rounds the remaining step to a whole microsecond.
+    - After adaptive steps, each time-stopped `Propagate` (ignition, burn end, coast end) therefore ends up to about 0.5 µs (+ |q| ≤ 0.31 µs epoch term) off the requested time.
+    - The model predicts all 35 measured burn durations (5 epochs × 7 durations) to the mass resolution, ≤ 2.3e-12 s. The 77.3 s case reproduces −1.847e-7 s.
+- **Impact (measured, reference burn, at 53 700 s):**
+  - Sensitivity per µs: burn duration 6.2 cm; final stop time 7.7 mm; ignition shift 0.1 mm.
+  - Re-running the DOP853 reference with GMAT's three measured offsets reduces GMAT − reference from **1.17 cm → 6.8 µm**. The VAL-0009 residual is fully explained.
+  - Time-dependent forces (Earth rotation, ephemerides, drag) would see the M-a epoch error as a time offset. That impact is an order-of-magnitude estimate only, not measured.
+- **Methods tested:**
+  - *Aligned stepping:* coast `InitialStepSize = MaxStep = 60 s`; burn `InitialStepSize = MaxStep = 1 s`, so every stop lands on the step grid and no rounding is applied. Result: burn duration ≤ 6e-10 s, ignition 2e-13 s, final stop ≤ 1e-9 s. GMAT vs independent DOP853 **without correction: 12 µm, 1.4e-8 m/s**, identical at three epochs.
+  - *Single-step burn:* unreliable; the integrator still cut the step for 77.3 s.
+  - *Streaming output:* one `Propagate` with a row per step gives single rounding per row. It matches the committed M1 reference to 1.3e-9 m.
+- **M1 compatibility:** no change to M1 is needed or proposed. M1's approved comparison aligns on `ElapsedS` labels at states verified to 9e-10 s. The committed M1 reference reproduces byte-for-byte. No threshold, reference, scenario, or M1 code was modified.
+- **Consequences for DR-0015 candidates:**
+  - The O9 basis "1 MJD ulp per burn boundary", including the 1e-7 kg mass candidate, rests on the refuted hypothesis.
+  - The 2.5e-2 m GMAT-vs-reference candidate reflects the unaligned method.
+  - Both need re-derivation under the method chosen in **DR-0016**. Nothing has been changed.
+- **Limits:** point-mass Earth, one host, GMAT R2026a only. Aligned stepping depends on steps being MaxStep-limited, so each generated reference must verify this (per-step rows, mass, Kepler timing).
+- **Classification:** reference-tool numerical behavior (verified), not an implementation error. **Status:** REV-012 root cause resolved for evidence purposes. The comparison method for gated M2 GMAT validation awaits DR-0016.
 
 ## VAL-0011 — T1 standalone propulsion model vs analytic and independent references (M2; unit level, not a Proof gate)
 - **Date / revision:** 2026-10-09 / `de23600` (`src/tars/sim/propulsion.py`, `tests/test_propulsion.py`)
