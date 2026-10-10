@@ -215,6 +215,6 @@ The reviewer confirms that `invalid_input` is absent from the approved DR-0014 Â
 - [x] All High findings resolved: REV-T1-01 and REV-T1-05 (`af4de18`), re-verified by the reviewer
 - [x] Every substantive finding has an explicit disposition, including N1
 - [x] Accepted fixes re-tested by the implementer and re-verified by the reviewer (N1 by the implementer only; it is a one-line rule with a failing-then-passing test)
-- [ ] Escalated item (rejection vocabulary) has a Tech Lead decision
+- [x] Escalated item (rejection vocabulary) has a Tech Lead decision: 2026-10-10. `schema_invalid` is kept, `burn_unschedulable` is added, and `invalid_input` is not introduced (DR-0014 amendment). Implemented in the commit following this record update.
 
-**Review gate result:** PASS for T1's code findings. The only open item is the escalated rejection-vocabulary decision. It does not block T1 behavior, but it must be settled before T3 defines the command/event schema.
+**Review gate result:** PASS. All findings are resolved and re-verified, and the escalated vocabulary item is decided and implemented.

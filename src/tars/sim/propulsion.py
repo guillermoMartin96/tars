@@ -226,9 +226,15 @@ class InsufficientPropellantPolicy(StrEnum):
 
 
 class BurnRejection(StrEnum):
-    """Stable reason codes; a subset of the DR-0014 command vocabulary."""
+    """Stable reason codes; a subset of the DR-0014 vocabulary (incl. 2026-10-10 amendment).
 
-    INVALID_INPUT = "invalid_input"
+    ``SCHEMA_INVALID``: non-real/non-finite numbers, unknown enums, malformed values.
+    ``BURN_UNSCHEDULABLE``: a structurally valid burn that has no exact, representable
+    plan (cutoff not finite or not after ignition; consumption underflows).
+    """
+
+    SCHEMA_INVALID = "schema_invalid"
+    BURN_UNSCHEDULABLE = "burn_unschedulable"
     NON_POSITIVE_DURATION = "non_positive_duration"
     IGNITION_IN_PAST = "ignition_in_past"
     NO_PROPELLANT = "no_propellant"
@@ -311,7 +317,7 @@ def plan_burn(
     for name, value in numbers.items():
         if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value):
             raise BurnRejectedError(
-                BurnRejection.INVALID_INPUT, f"{name} must be finite, got {value!r}"
+                BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {value!r}"
             )
     # All arithmetic below is float64, whatever scalar type was passed (REV-T1-01).
     propellant_kg, ignition_t_s, duration_s, earliest_t_s = (
@@ -321,11 +327,13 @@ def plan_burn(
         float(earliest_t_s),
     )
     if propellant_kg < 0.0:
-        raise BurnRejectedError(BurnRejection.INVALID_INPUT, "propellant_kg must be >= 0")
+        raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, "propellant_kg must be >= 0")
     try:
         policy = InsufficientPropellantPolicy(policy)
     except ValueError:
-        raise BurnRejectedError(BurnRejection.INVALID_INPUT, f"unknown policy {policy!r}") from None
+        raise BurnRejectedError(
+            BurnRejection.SCHEMA_INVALID, f"unknown policy {policy!r}"
+        ) from None
     if not duration_s > 0.0:
         raise BurnRejectedError(BurnRejection.NON_POSITIVE_DURATION, f"duration_s = {duration_s!r}")
     if ignition_t_s < earliest_t_s:
@@ -354,13 +362,13 @@ def plan_burn(
     cutoff_s = ignition_t_s + burn
     if not (math.isfinite(cutoff_s) and cutoff_s > ignition_t_s):
         raise BurnRejectedError(
-            BurnRejection.INVALID_INPUT,
+            BurnRejection.BURN_UNSCHEDULABLE,
             f"cutoff {cutoff_s!r} is not representable after ignition {ignition_t_s!r}",
         )
     # A burn with thrust must consume propellant; mdot*duration can underflow (N1).
     if not used > 0.0:
         raise BurnRejectedError(
-            BurnRejection.INVALID_INPUT,
+            BurnRejection.BURN_UNSCHEDULABLE,
             f"propellant consumption {used!r} kg is not representable for this burn",
         )
     return BurnPlan(

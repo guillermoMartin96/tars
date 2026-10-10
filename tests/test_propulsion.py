@@ -308,7 +308,7 @@ def test_non_finite_or_invalid_burn_inputs_are_rejected(field, value):
     kwargs = {"propellant_kg": 1.0, "ignition_t_s": 0.0, "duration_s": 1.0, field: value}
     with pytest.raises(BurnRejectedError) as err:
         plan_burn(REF_ENGINE, **kwargs)
-    assert err.value.reason is BurnRejection.INVALID_INPUT
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
 
 
 def test_unknown_policy_is_rejected():
@@ -316,13 +316,14 @@ def test_unknown_policy_is_rejected():
         plan_burn(
             REF_ENGINE, propellant_kg=1.0, ignition_t_s=0.0, duration_s=1.0, policy="sometimes"
         )
-    assert err.value.reason is BurnRejection.INVALID_INPUT
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
 
 
-def test_rejection_codes_match_dr0014_vocabulary():
-    assert {r.value for r in BurnRejection} <= {
+# DR-0014 section 4 plus the 2026-10-10 amendment (burn_unschedulable). T3 must use
+# exactly these stable codes; anything else is an unapproved vocabulary change.
+APPROVED_REJECTION_CODES = frozenset(
+    {
         "schema_invalid",
-        "invalid_input",
         "non_positive_duration",
         "ignition_in_past",
         "overlaps_scheduled_burn",
@@ -331,7 +332,16 @@ def test_rejection_codes_match_dr0014_vocabulary():
         "insufficient_propellant",
         "duplicate_command_id",
         "no_propulsion_configured",
+        "burn_unschedulable",
     }
+)
+
+
+def test_rejection_codes_are_the_approved_dr0014_vocabulary():
+    codes = {r.value for r in BurnRejection}
+    assert codes <= APPROVED_REJECTION_CODES
+    assert "invalid_input" not in codes
+    assert {"schema_invalid", "burn_unschedulable"} <= codes
 
 
 def test_propellant_used_at_time_is_piecewise_linear_and_bounded():
@@ -638,7 +648,7 @@ def test_unrepresentable_cutoff_is_rejected(engine, ignition, duration):
     """REV-T1-01: a plan must have a finite cutoff strictly after ignition (DR-0013)."""
     with pytest.raises(BurnRejectedError) as err:
         plan_burn(engine, 300.0, ignition, duration)
-    assert err.value.reason is BurnRejection.INVALID_INPUT
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
 
 
 def test_depletion_time_that_underflows_the_clock_is_rejected():
@@ -650,7 +660,7 @@ def test_depletion_time_that_underflows_the_clock_is_rejected():
             10.0,
             policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
         )
-    assert err.value.reason is BurnRejection.INVALID_INPUT
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
 
 
 @pytest.mark.parametrize(
@@ -723,4 +733,4 @@ def test_positive_burn_with_underflowing_consumption_is_rejected():
     """Reviewer re-verification N1: a planned burn must consume a positive mass."""
     with pytest.raises(BurnRejectedError) as err:
         plan_burn(EngineSpec(thrust_n=1e-308, isp_s=312.0), 300.0, 0.0, 1e-100)
-    assert err.value.reason is BurnRejection.INVALID_INPUT
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
