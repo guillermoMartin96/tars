@@ -40,10 +40,11 @@ Any of these may be revisited by a later decision.
   - This keeps every accepted plan exact and immutable, since later plans were computed from the propellant left by earlier ones. Gap insertion would need re-planning and is not supported.
 - **Propellant accounting.** Sufficiency is checked against the analytic propellant remaining after all accepted burns. The integrated propellant tracks it to round-off (≤ 3e-13 kg, VAL-0012).
 - **Represented burn interval (REV-T2-03, `03f6e4b`).** Event times are absolute float64 values, so the engine runs for exactly `cutoff − ignition`. The plan's `burn_duration_s` and consumption describe that represented interval.
-  - A burn whose represented interval differs from the intended duration by more than `EVENT_TIME_RESOLUTION_S = 1 µs` is rejected as `burn_unschedulable`.
-  - 1 µs is the stop-time granularity GMAT and STK use (VAL-0010). Its Δv effect (≈ 4e-7 m/s for the reference engine) is below the burn's integration error at dt = 10 s (1.2e-6 m/s, VAL-0008).
-  - Float64 time keeps sub-µs resolution for t < 2³³ s.
-  - **Provisional.** The reviewer recommended escalation, and the acceptance rule is decided in **DR-0017** (recommended: a Δv-error budget). The 1 µs bound stays until then.
+  - **Timing budget (DR-0017 B, `0e64717`).** This replaces the provisional 1 µs bound.
+    - A burn is `burn_unschedulable` if the exact rocket-equation Δv difference between the executed and intended intervals exceeds `TIMING_DELTA_V_BUDGET_MPS = 1e-7 m/s` per burn.
+    - It is computed from the actual end-mass acceleration (`c·log1p(ṁ·|D − d|/m_end)`), and the plan records it (`timing_delta_v_error_mps`).
+    - `schedule_burn` always applies it with the spacecraft's dry mass.
+    - It bounds Δv, not trajectory error.
   - **Never past depletion (N1, `9789603`; N4/N5, `87f217d`):** if rounding puts the cutoff after the depletion time, it steps back to the latest representable time not after depletion.
     - Consumption follows the executed interval for both outcomes, and the residual (≤ ṁ·2·ulp(cutoff)) is retained.
     - RK4 stages use the non-negative propellant.

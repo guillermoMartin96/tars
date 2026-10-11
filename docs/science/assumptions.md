@@ -507,7 +507,8 @@ Per the approved M2 threshold DR.
 - Mission test `burn_to_depletion`
 
 ## Accepted discrepancy / tolerance
-Exact to round-off for the depletion time and propellant floor.
+- Exact to round-off for the depletion time and propellant floor.
+- **DR-0017 D1a (2026-10-10):** event times are float64. A depletion cutoff is the latest representable time not after depletion, so a burn-to-depletion can leave a residual of at most ṁ·2·ulp(cutoff). The residual is retained, not discarded, and its Δv effect is bounded by the DR-0017 timing budget (1e-7 m/s per burn). At mission times the residual is ~1e-14 kg.
 
 ## Revisit when
 - Residual budgets, multiple tanks, or bipropellant mixture ratios matter.
