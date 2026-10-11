@@ -384,7 +384,7 @@ All 10 approved rejection codes are exercised.
 | Ignition state vs DOP853 | 6.9e-4 m, 1.03e-6 m/s; invalid cmds 7.9e-3 m, 9.9e-6 m/s | cutoff limits (ignition precedes cutoff) |
 | Thrust direction vs reference velocity, every burning sample | 1.3–1.5e-10; invalid cmds 1.15e-9 | O4 cutoff velocity limit / orbital speed: 4e-10; 2.6e-9 |
 | Node-crossing time vs independently located crossings (DOP853 + Kepler bisection) | ≤ 4.0e-5 s | 8e-5 s (≈ 2× measured; the approved M1 node-crossing limit) |
-| Altitude extrema beyond reference apsides | ≤ 6.3e-3 m | 0.6 m (O4 sample limit) |
+| Completion altitude extrema vs reference extrema over every tick (both directions) | ≤ 6.3e-3 m (sample-only extrema would err by about 2 m) | 0.013 m (≈ 2× measured) |
 | Per-sample propellant / sensed Δv vs prediction | ≤ 8.8e-17 / ≤ 5e-14 (relative) | 1e-12 |
 | Coast-only missions vs DOP853 (empty tank, no propulsion) | 0.298 m, 3.49e-4 m/s | 0.6 m, 7e-4 m/s |
 

@@ -1,0 +1,1167 @@
+FFFFFFFFFFFFFFFFFFFFFFF..FFFFFFFF.FF..FFFF                               [100%]
+=================================== FAILURES ===================================
+____________________ test_o3_detects_a_wrong_burn_duration _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106c7d010>
+
+    def test_o3_detects_a_wrong_burn_duration(monkeypatch):
+        """F5: the closed form uses the requested interval, not the reported cutoff."""
+        veh = m2.vehicle(BY_NAME["m2_prograde_burn"].build())
+        original = simulator_module.Simulator.schedule_burn
+    
+        def doubled(self, direction, ignition_t_s, duration_s, *a, **k):
+            return original(self, direction, ignition_t_s, 2 * duration_s, *a, **k)
+    
+        monkeypatch.setattr(simulator_module.Simulator, "schedule_burn", doubled)
+>       assert m2.free_space_metrics(veh, 77.3)["timing_violations"] > 0
+E       assert 0.0 > 0
+
+tests/test_m2_validation.py:687: AssertionError
+_______________________ test_auxiliary_runs_are_audited ________________________
+
+    def test_auxiliary_runs_are_audited():
+        """F6: an O8 variant keeps the mission's telemetry grid, so every sample has a
+        reference state; a corrupted sample in it fails like in the mission."""
+        mission = BY_NAME["m2_prograde_burn"]
+        variant = m2.convergence_variant(mission.build(), 5.0)
+        assert variant.telemetry.sample_interval_s == 60.0
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(
+                run, lambda e: e.type == "StateSampled" and e.t == 660.0, r=(1.0, 2.0, 3.0)
+            ),
+            scenario=variant,
+        )
+>       assert "o4_reference.sample_position_error_max_m" in _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert 'o4_reference.sample_position_error_max_m' in []
+E        +  where [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': ['returned samples differ from ...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:703: AssertionError
+_ test_missions_without_burns_have_a_trajectory_gate[m2_invalid_commands_empty_tank] _
+
+name = 'm2_invalid_commands_empty_tank'
+
+    @pytest.mark.parametrize(
+        "name", ["m2_invalid_commands_empty_tank", "m2_invalid_commands_no_propulsion"]
+    )
+    def test_missions_without_burns_have_a_trajectory_gate(name):
+        """F7: doubling every reported state of a coast-only mission fails O4."""
+    
+        def double(run):
+            _edit(run, lambda e: e.type in ("StateSampled", "SimulationCompleted"), r=(0.0, 0.0, 1.0))
+    
+        audit, _ = _audit(name, double)
+>       assert any(f.startswith("o4_reference.") for f in _gate_failures(audit, name))
+E       assert False
+E        +  where False = any(<generator object test_missions_without_burns_have_a_trajectory_gate.<locals>.<genexpr> at 0x10a824e10>)
+
+tests/test_m2_validation.py:716: AssertionError
+_ test_missions_without_burns_have_a_trajectory_gate[m2_invalid_commands_no_propulsion] _
+
+name = 'm2_invalid_commands_no_propulsion'
+
+    @pytest.mark.parametrize(
+        "name", ["m2_invalid_commands_empty_tank", "m2_invalid_commands_no_propulsion"]
+    )
+    def test_missions_without_burns_have_a_trajectory_gate(name):
+        """F7: doubling every reported state of a coast-only mission fails O4."""
+    
+        def double(run):
+            _edit(run, lambda e: e.type in ("StateSampled", "SimulationCompleted"), r=(0.0, 0.0, 1.0))
+    
+        audit, _ = _audit(name, double)
+>       assert any(f.startswith("o4_reference.") for f in _gate_failures(audit, name))
+E       assert False
+E        +  where False = any(<generator object test_missions_without_burns_have_a_trajectory_gate.<locals>.<genexpr> at 0x10a80cc70>)
+
+tests/test_m2_validation.py:716: AssertionError
+___________ test_returned_result_is_reconciled_with_events[receipts] ___________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'receipts'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6af420>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6af420> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+___________ test_returned_result_is_reconciled_with_events[samples] ____________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'samples'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6ae200>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6ae200> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+________ test_returned_result_is_reconciled_with_events[crossing_times] ________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'crossing_times'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6ad800>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6ad800> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+___________ test_returned_result_is_reconciled_with_events[initial] ____________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'initial'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6af1a0>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6af1a0> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+____________ test_returned_result_is_reconciled_with_events[status] ____________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'status'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6adda0>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6adda0> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+___________ test_returned_result_is_reconciled_with_events[final_t] ____________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'final_t'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6afe20>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6afe20> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+______ test_returned_result_is_reconciled_with_events[final_propulsion_t] ______
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'final_propulsion_t'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6ae3e0>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6ae3e0> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+____________ test_returned_result_is_reconciled_with_events[plans] _____________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'plans'
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "receipts",
+            "samples",
+            "crossing_times",
+            "initial",
+            "status",
+            "final_t",
+            "final_propulsion_t",
+            "plans",
+        ],
+    )
+    def test_returned_result_is_reconciled_with_events(runs, field):
+        """F8: every RunResult field agrees with the event log."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        bad = {
+            "receipts": lambda r: dataclasses.replace(r, receipts=r.receipts[:-1]),
+            "samples": lambda r: dataclasses.replace(r, samples=r.samples[:-1]),
+            "crossing_times": lambda r: dataclasses.replace(r, crossing_times=[-999.0]),
+            "initial": lambda r: dataclasses.replace(r, initial=r.final),
+            "status": lambda r: dataclasses.replace(r, status="failure", failure_cause="impact"),
+            "final_t": lambda r: dataclasses.replace(r, final=dataclasses.replace(r.final, t=1.0)),
+            "final_propulsion_t": lambda r: dataclasses.replace(
+                r, final_propulsion=dataclasses.replace(r.final_propulsion, t=1.0)
+            ),
+            "plans": lambda r: dataclasses.replace(
+                r, receipts=[dataclasses.replace(x, plan=None) for x in r.receipts]
+            ),
+        }[field](run)
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad)
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6af6a0>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6af6a0> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:750: AssertionError
+__________________ test_cli_summary_is_reconciled_with_events __________________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x106bad940>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+
+    def test_cli_summary_is_reconciled_with_events(runs):
+        """F8: a CLI summary without the commands fails."""
+        _, _, run = _slice(runs)
+        good = {
+            "commands": [
+                {"command_id": "slice-prograde-001", "status": "accepted", "reason": None,
+                 "burn_id": "burn#000001", "submit_tick": 0}
+            ],
+            "final_propellant_kg": run.final_propulsion.propellant_kg,
+            "final_total_mass_kg": run.final_propulsion.total_mass_kg,
+            "final_engine_state": "idle",
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good) == []
+>       assert m2.cli_summary_violations(run.events, {**good, "commands": []})
+E       AssertionError: assert []
+E        +  where [] = <function revert_fix.<locals>.<lambda> at 0x10a6ae3e0>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn', scenar...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...], {'commands': [], 'final_propellant_kg': 287.62057980802416, 'final_total_mass_kg': 1287.620579808024, 'final_engine_state': 'idle', ...})
+E        +    where <function revert_fix.<locals>.<lambda> at 0x10a6ae3e0> = m2.cli_summary_violations
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn', scenar...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:768: AssertionError
+________ test_intermediate_propulsion_samples_are_predicted[12-update0] ________
+
+tick = 12, update = {'pending_burn_ids': ('burn#000009',)}
+
+    @pytest.mark.parametrize(
+        ("tick", "update"),
+        [
+            (12, {"pending_burn_ids": ("burn#000009",)}),
+            (64, {"delta_v_sensed_mps": 999.0}),
+            (64, {"propellant_kg": 290.0, "total_mass_kg": 1290.0}),
+            (
+                64,
+                {
+                    "engine_state": "idle",
+                    "active_burn_id": None,
+                    "thrust_acceleration_mps2": (0.0, 0.0, 0.0),
+                },
+            ),
+        ],
+    )
+    def test_intermediate_propulsion_samples_are_predicted(tick, update):
+        """F9: schedule, propellant and sensed delta-v are predicted at every sample."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(
+                run, lambda e: e.type == "PropulsionSampled" and e.tick == tick, **update
+            ),
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:795: AssertionError
+________ test_intermediate_propulsion_samples_are_predicted[64-update1] ________
+
+tick = 64, update = {'delta_v_sensed_mps': 999.0}
+
+    @pytest.mark.parametrize(
+        ("tick", "update"),
+        [
+            (12, {"pending_burn_ids": ("burn#000009",)}),
+            (64, {"delta_v_sensed_mps": 999.0}),
+            (64, {"propellant_kg": 290.0, "total_mass_kg": 1290.0}),
+            (
+                64,
+                {
+                    "engine_state": "idle",
+                    "active_burn_id": None,
+                    "thrust_acceleration_mps2": (0.0, 0.0, 0.0),
+                },
+            ),
+        ],
+    )
+    def test_intermediate_propulsion_samples_are_predicted(tick, update):
+        """F9: schedule, propellant and sensed delta-v are predicted at every sample."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(
+                run, lambda e: e.type == "PropulsionSampled" and e.tick == tick, **update
+            ),
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:795: AssertionError
+________ test_intermediate_propulsion_samples_are_predicted[64-update2] ________
+
+tick = 64, update = {'propellant_kg': 290.0, 'total_mass_kg': 1290.0}
+
+    @pytest.mark.parametrize(
+        ("tick", "update"),
+        [
+            (12, {"pending_burn_ids": ("burn#000009",)}),
+            (64, {"delta_v_sensed_mps": 999.0}),
+            (64, {"propellant_kg": 290.0, "total_mass_kg": 1290.0}),
+            (
+                64,
+                {
+                    "engine_state": "idle",
+                    "active_burn_id": None,
+                    "thrust_acceleration_mps2": (0.0, 0.0, 0.0),
+                },
+            ),
+        ],
+    )
+    def test_intermediate_propulsion_samples_are_predicted(tick, update):
+        """F9: schedule, propellant and sensed delta-v are predicted at every sample."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(
+                run, lambda e: e.type == "PropulsionSampled" and e.tick == tick, **update
+            ),
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:795: AssertionError
+________ test_intermediate_propulsion_samples_are_predicted[64-update3] ________
+
+tick = 64
+update = {'engine_state': 'idle', 'active_burn_id': None, 'thrust_acceleration_mps2': (0.0, 0.0, 0.0)}
+
+    @pytest.mark.parametrize(
+        ("tick", "update"),
+        [
+            (12, {"pending_burn_ids": ("burn#000009",)}),
+            (64, {"delta_v_sensed_mps": 999.0}),
+            (64, {"propellant_kg": 290.0, "total_mass_kg": 1290.0}),
+            (
+                64,
+                {
+                    "engine_state": "idle",
+                    "active_burn_id": None,
+                    "thrust_acceleration_mps2": (0.0, 0.0, 0.0),
+                },
+            ),
+        ],
+    )
+    def test_intermediate_propulsion_samples_are_predicted(tick, update):
+        """F9: schedule, propellant and sensed delta-v are predicted at every sample."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(
+                run, lambda e: e.type == "PropulsionSampled" and e.tick == tick, **update
+            ),
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:795: AssertionError
+____________ test_reversed_thrust_between_state_samples_is_detected ____________
+
+    def test_reversed_thrust_between_state_samples_is_detected():
+        """F10: direction is checked at every burning sample against the reference."""
+    
+        def reverse(run):
+            _edit(
+                run,
+                lambda e: e.type == "PropulsionSampled" and e.tick == 61,
+                thrust_acceleration_mps2=tuple(-x for x in next(
+                    p for p in run.events if p.type == "PropulsionSampled" and p.tick == 61
+                ).thrust_acceleration_mps2),
+            )  # fmt: skip
+    
+        audit, _ = _audit("m2_prograde_burn", reverse)
+>       assert "o4_reference.thrust_direction_vs_reference_max" in _gate_failures(
+            audit, "m2_prograde_burn"
+        )
+E       AssertionError: assert 'o4_reference.thrust_direction_vs_reference_max' in []
+E        +  where [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:811: AssertionError
+__________ test_transition_payloads_are_checked[BurnStarted-update0] ___________
+
+event = 'BurnStarted', update = {'r': None}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("BurnStarted", {"r": None}),
+            ("BurnStarted", {"thrust_unit_vector": (0.0, 0.0, 0.0)}),
+            ("BurnStarted", {"total_mass_kg": 999.0}),
+            ("BurnEnded", {"total_mass_kg": 999.0}),
+            ("PropellantDepleted", {"residual_propellant_kg": 999.0}),
+        ],
+    )
+    def test_transition_payloads_are_checked(event, update):
+        """F11: ignition state, thrust vector, transition masses and residuals."""
+    
+        def mutate(run):
+            e = next(x for x in run.events if x.type == event)
+            upd = dict(update)
+            if upd.get("r", 1) is None:
+                upd["r"] = tuple(1.000001 * x for x in e.r)
+            _edit(run, lambda x: x is e, **upd)
+    
+        audit, _ = _audit("m2_burn_to_depletion", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:837: AssertionError
+__________ test_transition_payloads_are_checked[BurnStarted-update1] ___________
+
+event = 'BurnStarted', update = {'thrust_unit_vector': (0.0, 0.0, 0.0)}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("BurnStarted", {"r": None}),
+            ("BurnStarted", {"thrust_unit_vector": (0.0, 0.0, 0.0)}),
+            ("BurnStarted", {"total_mass_kg": 999.0}),
+            ("BurnEnded", {"total_mass_kg": 999.0}),
+            ("PropellantDepleted", {"residual_propellant_kg": 999.0}),
+        ],
+    )
+    def test_transition_payloads_are_checked(event, update):
+        """F11: ignition state, thrust vector, transition masses and residuals."""
+    
+        def mutate(run):
+            e = next(x for x in run.events if x.type == event)
+            upd = dict(update)
+            if upd.get("r", 1) is None:
+                upd["r"] = tuple(1.000001 * x for x in e.r)
+            _edit(run, lambda x: x is e, **upd)
+    
+        audit, _ = _audit("m2_burn_to_depletion", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:837: AssertionError
+__________ test_transition_payloads_are_checked[BurnStarted-update2] ___________
+
+event = 'BurnStarted', update = {'total_mass_kg': 999.0}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("BurnStarted", {"r": None}),
+            ("BurnStarted", {"thrust_unit_vector": (0.0, 0.0, 0.0)}),
+            ("BurnStarted", {"total_mass_kg": 999.0}),
+            ("BurnEnded", {"total_mass_kg": 999.0}),
+            ("PropellantDepleted", {"residual_propellant_kg": 999.0}),
+        ],
+    )
+    def test_transition_payloads_are_checked(event, update):
+        """F11: ignition state, thrust vector, transition masses and residuals."""
+    
+        def mutate(run):
+            e = next(x for x in run.events if x.type == event)
+            upd = dict(update)
+            if upd.get("r", 1) is None:
+                upd["r"] = tuple(1.000001 * x for x in e.r)
+            _edit(run, lambda x: x is e, **upd)
+    
+        audit, _ = _audit("m2_burn_to_depletion", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:837: AssertionError
+___________ test_transition_payloads_are_checked[BurnEnded-update3] ____________
+
+event = 'BurnEnded', update = {'total_mass_kg': 999.0}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("BurnStarted", {"r": None}),
+            ("BurnStarted", {"thrust_unit_vector": (0.0, 0.0, 0.0)}),
+            ("BurnStarted", {"total_mass_kg": 999.0}),
+            ("BurnEnded", {"total_mass_kg": 999.0}),
+            ("PropellantDepleted", {"residual_propellant_kg": 999.0}),
+        ],
+    )
+    def test_transition_payloads_are_checked(event, update):
+        """F11: ignition state, thrust vector, transition masses and residuals."""
+    
+        def mutate(run):
+            e = next(x for x in run.events if x.type == event)
+            upd = dict(update)
+            if upd.get("r", 1) is None:
+                upd["r"] = tuple(1.000001 * x for x in e.r)
+            _edit(run, lambda x: x is e, **upd)
+    
+        audit, _ = _audit("m2_burn_to_depletion", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:837: AssertionError
+_______ test_transition_payloads_are_checked[PropellantDepleted-update4] _______
+
+event = 'PropellantDepleted', update = {'residual_propellant_kg': 999.0}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("BurnStarted", {"r": None}),
+            ("BurnStarted", {"thrust_unit_vector": (0.0, 0.0, 0.0)}),
+            ("BurnStarted", {"total_mass_kg": 999.0}),
+            ("BurnEnded", {"total_mass_kg": 999.0}),
+            ("PropellantDepleted", {"residual_propellant_kg": 999.0}),
+        ],
+    )
+    def test_transition_payloads_are_checked(event, update):
+        """F11: ignition state, thrust vector, transition masses and residuals."""
+    
+        def mutate(run):
+            e = next(x for x in run.events if x.type == event)
+            upd = dict(update)
+            if upd.get("r", 1) is None:
+                upd["r"] = tuple(1.000001 * x for x in e.r)
+            _edit(run, lambda x: x is e, **upd)
+    
+        audit, _ = _audit("m2_burn_to_depletion", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:837: AssertionError
+______ test_plans_and_timing_claims_are_checked[CommandAccepted-update2] _______
+
+event = 'CommandAccepted', update = {'timing_delta_v_error_mps': 999.0}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("CommandAccepted", {"planned_burn_duration_s": 999.0}),
+            ("CommandAccepted", {"planned_propellant_used_kg": 999.0}),
+            ("CommandAccepted", {"timing_delta_v_error_mps": 999.0}),
+            ("BurnStarted", {"planned_end_cause": "completed"}),
+            ("SpacecraftConfigured", {"timing_delta_v_budget_mps": 1.0}),
+        ],
+    )
+    def test_plans_and_timing_claims_are_checked(event, update):
+        """F12: complete plans, the DR-0017 timing bound and the configured budget."""
+        audit, _ = _audit(
+            "m2_burn_to_depletion", lambda run: _edit(run, lambda e: e.type == event, **update)
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:855: AssertionError
+________ test_plans_and_timing_claims_are_checked[BurnStarted-update3] _________
+
+event = 'BurnStarted', update = {'planned_end_cause': 'completed'}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("CommandAccepted", {"planned_burn_duration_s": 999.0}),
+            ("CommandAccepted", {"planned_propellant_used_kg": 999.0}),
+            ("CommandAccepted", {"timing_delta_v_error_mps": 999.0}),
+            ("BurnStarted", {"planned_end_cause": "completed"}),
+            ("SpacecraftConfigured", {"timing_delta_v_budget_mps": 1.0}),
+        ],
+    )
+    def test_plans_and_timing_claims_are_checked(event, update):
+        """F12: complete plans, the DR-0017 timing bound and the configured budget."""
+        audit, _ = _audit(
+            "m2_burn_to_depletion", lambda run: _edit(run, lambda e: e.type == event, **update)
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:855: AssertionError
+____ test_plans_and_timing_claims_are_checked[SpacecraftConfigured-update4] ____
+
+event = 'SpacecraftConfigured', update = {'timing_delta_v_budget_mps': 1.0}
+
+    @pytest.mark.parametrize(
+        ("event", "update"),
+        [
+            ("CommandAccepted", {"planned_burn_duration_s": 999.0}),
+            ("CommandAccepted", {"planned_propellant_used_kg": 999.0}),
+            ("CommandAccepted", {"timing_delta_v_error_mps": 999.0}),
+            ("BurnStarted", {"planned_end_cause": "completed"}),
+            ("SpacecraftConfigured", {"timing_delta_v_budget_mps": 1.0}),
+        ],
+    )
+    def test_plans_and_timing_claims_are_checked(event, update):
+        """F12: complete plans, the DR-0017 timing bound and the configured budget."""
+        audit, _ = _audit(
+            "m2_burn_to_depletion", lambda run: _edit(run, lambda e: e.type == event, **update)
+        )
+>       assert _violations(audit) or _gate_failures(audit, "m2_burn_to_depletion")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...16e+05, -4.20707672e+06, -5.30800979e+06,  7.58020350e+03,\n        4.75967220e+02,  6.00521177e+02,  4.71844785e-15])}), 'm2_burn_to_depletion')
+
+tests/test_m2_validation.py:855: AssertionError
+___________________ test_depletion_cutoff_shift_is_detected ____________________
+
+    def test_depletion_cutoff_shift_is_detected():
+        """F12: the D1a cutoff is predicted exactly; a 10 us shift of every copy fails."""
+    
+        def shift(run):
+            t = next(e for e in run.events if e.type == "BurnEnded").event_t_s
+            _edit(run, lambda e: getattr(e, "event_t_s", None) == t, event_t_s=t + 1e-5)
+            _edit(
+                run, lambda e: getattr(e, "planned_cutoff_t_s", None) == t, planned_cutoff_t_s=t + 1e-5
+            )
+    
+        audit, _ = _audit("m2_burn_to_depletion", shift)
+>       assert any("D1a" in v or "predicted" in v for v in _violations(audit))
+E       assert False
+E        +  where False = any(<generator object test_depletion_cutoff_shift_is_detected.<locals>.<genexpr> at 0x10a80e8e0>)
+
+tests/test_m2_validation.py:869: AssertionError
+__________________ test_start_provenance_is_checked[update0] ___________________
+
+update = {'scenario_name': 'x'}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"scenario_name": "x"}, {"seed": 7}, {"integrator": "euler"}, {"software_version": "9"}],
+    )
+    def test_start_provenance_is_checked(update):
+        """F13: SimulationStarted identity against the scenario."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(run, lambda e: e.type == "SimulationStarted", **update),
+        )
+>       assert _violations(audit)
+E       AssertionError: assert []
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+
+tests/test_m2_validation.py:882: AssertionError
+__________________ test_start_provenance_is_checked[update1] ___________________
+
+update = {'seed': 7}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"scenario_name": "x"}, {"seed": 7}, {"integrator": "euler"}, {"software_version": "9"}],
+    )
+    def test_start_provenance_is_checked(update):
+        """F13: SimulationStarted identity against the scenario."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(run, lambda e: e.type == "SimulationStarted", **update),
+        )
+>       assert _violations(audit)
+E       AssertionError: assert []
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+
+tests/test_m2_validation.py:882: AssertionError
+__________________ test_start_provenance_is_checked[update2] ___________________
+
+update = {'integrator': 'euler'}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"scenario_name": "x"}, {"seed": 7}, {"integrator": "euler"}, {"software_version": "9"}],
+    )
+    def test_start_provenance_is_checked(update):
+        """F13: SimulationStarted identity against the scenario."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(run, lambda e: e.type == "SimulationStarted", **update),
+        )
+>       assert _violations(audit)
+E       AssertionError: assert []
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+
+tests/test_m2_validation.py:882: AssertionError
+__________________ test_start_provenance_is_checked[update3] ___________________
+
+update = {'software_version': '9'}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"scenario_name": "x"}, {"seed": 7}, {"integrator": "euler"}, {"software_version": "9"}],
+    )
+    def test_start_provenance_is_checked(update):
+        """F13: SimulationStarted identity against the scenario."""
+        audit, _ = _audit(
+            "m2_prograde_burn",
+            lambda run: _edit(run, lambda e: e.type == "SimulationStarted", **update),
+        )
+>       assert _violations(audit)
+E       AssertionError: assert []
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+
+tests/test_m2_validation.py:882: AssertionError
+________________ test_rejection_provenance_is_checked[update1] _________________
+
+update = {'schema_errors': ()}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"issuer": "someone"}, {"schema_errors": ()}, {"commanded_duration_s": 10.0}],
+    )
+    def test_rejection_provenance_is_checked(update):
+        """F13: issuer, diagnostics and the schema-invalid intent contract."""
+        audit, _ = _audit(
+            "m2_invalid_commands",
+            lambda run: _edit(
+                run, lambda e: e.type == "CommandRejected" and e.reason == "schema_invalid", **update
+            ),
+        )
+>       assert _violations(audit)
+E       AssertionError: assert []
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...04e+06, -3.90850674e+04, -4.93130823e+04,  6.37135171e+01,\n        4.82716047e+03,  6.09036078e+03,  2.90391136e+02])}))
+
+tests/test_m2_validation.py:897: AssertionError
+________________ test_rejection_provenance_is_checked[update2] _________________
+
+update = {'commanded_duration_s': 10.0}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"issuer": "someone"}, {"schema_errors": ()}, {"commanded_duration_s": 10.0}],
+    )
+    def test_rejection_provenance_is_checked(update):
+        """F13: issuer, diagnostics and the schema-invalid intent contract."""
+        audit, _ = _audit(
+            "m2_invalid_commands",
+            lambda run: _edit(
+                run, lambda e: e.type == "CommandRejected" and e.reason == "schema_invalid", **update
+            ),
+        )
+>       assert _violations(audit)
+E       AssertionError: assert []
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...04e+06, -3.90850674e+04, -4.93130823e+04,  6.37135171e+01,\n        4.82716047e+03,  6.09036078e+03,  2.90391136e+02])}))
+
+tests/test_m2_validation.py:897: AssertionError
+_____________ test_orbit_and_altitude_reporting_is_checked[number] _____________
+
+change = 'number'
+
+    @pytest.mark.parametrize("change", ["delete", "crossing", "number", "count", "altitude", "extrema"])
+    def test_orbit_and_altitude_reporting_is_checked(change):
+        """F14: orbit events vs independent node crossings; altitude vs position."""
+    
+        def mutate(run):
+            if change == "delete":
+                run.events[:] = [e for e in run.events if e.type != "OrbitCompleted"]
+            elif change == "crossing":
+                _edit(
+                    run,
+                    lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3,
+                    crossing_t=e_shift(run),
+                )
+            elif change == "number":
+                _edit(
+                    run, lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3, orbit_number=999
+                )
+            elif change == "count":
+                _edit(run, lambda e: e.type == "SimulationCompleted", orbits_completed=999)
+            elif change == "altitude":
+                _edit(run, lambda e: e.type == "StateSampled" and e.tick == 600, altitude_m=1.0)
+            else:
+                _edit(run, lambda e: e.type == "SimulationCompleted", min_altitude_m=1000.0)
+    
+        def e_shift(run):
+            o = next(e for e in run.events if e.type == "OrbitCompleted" and e.orbit_number == 3)
+            return o.crossing_t - 1e-3
+    
+        audit, _ = _audit("m2_prograde_burn", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:929: AssertionError
+_____________ test_orbit_and_altitude_reporting_is_checked[count] ______________
+
+change = 'count'
+
+    @pytest.mark.parametrize("change", ["delete", "crossing", "number", "count", "altitude", "extrema"])
+    def test_orbit_and_altitude_reporting_is_checked(change):
+        """F14: orbit events vs independent node crossings; altitude vs position."""
+    
+        def mutate(run):
+            if change == "delete":
+                run.events[:] = [e for e in run.events if e.type != "OrbitCompleted"]
+            elif change == "crossing":
+                _edit(
+                    run,
+                    lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3,
+                    crossing_t=e_shift(run),
+                )
+            elif change == "number":
+                _edit(
+                    run, lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3, orbit_number=999
+                )
+            elif change == "count":
+                _edit(run, lambda e: e.type == "SimulationCompleted", orbits_completed=999)
+            elif change == "altitude":
+                _edit(run, lambda e: e.type == "StateSampled" and e.tick == 600, altitude_m=1.0)
+            else:
+                _edit(run, lambda e: e.type == "SimulationCompleted", min_altitude_m=1000.0)
+    
+        def e_shift(run):
+            o = next(e for e in run.events if e.type == "OrbitCompleted" and e.orbit_number == 3)
+            return o.crossing_t - 1e-3
+    
+        audit, _ = _audit("m2_prograde_burn", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:929: AssertionError
+____________ test_orbit_and_altitude_reporting_is_checked[altitude] ____________
+
+change = 'altitude'
+
+    @pytest.mark.parametrize("change", ["delete", "crossing", "number", "count", "altitude", "extrema"])
+    def test_orbit_and_altitude_reporting_is_checked(change):
+        """F14: orbit events vs independent node crossings; altitude vs position."""
+    
+        def mutate(run):
+            if change == "delete":
+                run.events[:] = [e for e in run.events if e.type != "OrbitCompleted"]
+            elif change == "crossing":
+                _edit(
+                    run,
+                    lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3,
+                    crossing_t=e_shift(run),
+                )
+            elif change == "number":
+                _edit(
+                    run, lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3, orbit_number=999
+                )
+            elif change == "count":
+                _edit(run, lambda e: e.type == "SimulationCompleted", orbits_completed=999)
+            elif change == "altitude":
+                _edit(run, lambda e: e.type == "StateSampled" and e.tick == 600, altitude_m=1.0)
+            else:
+                _edit(run, lambda e: e.type == "SimulationCompleted", min_altitude_m=1000.0)
+    
+        def e_shift(run):
+            o = next(e for e in run.events if e.type == "OrbitCompleted" and e.orbit_number == 3)
+            return o.crossing_t - 1e-3
+    
+        audit, _ = _audit("m2_prograde_burn", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:929: AssertionError
+____________ test_orbit_and_altitude_reporting_is_checked[extrema] _____________
+
+change = 'extrema'
+
+    @pytest.mark.parametrize("change", ["delete", "crossing", "number", "count", "altitude", "extrema"])
+    def test_orbit_and_altitude_reporting_is_checked(change):
+        """F14: orbit events vs independent node crossings; altitude vs position."""
+    
+        def mutate(run):
+            if change == "delete":
+                run.events[:] = [e for e in run.events if e.type != "OrbitCompleted"]
+            elif change == "crossing":
+                _edit(
+                    run,
+                    lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3,
+                    crossing_t=e_shift(run),
+                )
+            elif change == "number":
+                _edit(
+                    run, lambda e: e.type == "OrbitCompleted" and e.orbit_number == 3, orbit_number=999
+                )
+            elif change == "count":
+                _edit(run, lambda e: e.type == "SimulationCompleted", orbits_completed=999)
+            elif change == "altitude":
+                _edit(run, lambda e: e.type == "StateSampled" and e.tick == 600, altitude_m=1.0)
+            else:
+                _edit(run, lambda e: e.type == "SimulationCompleted", min_altitude_m=1000.0)
+    
+        def e_shift(run):
+            o = next(e for e in run.events if e.type == "OrbitCompleted" and e.orbit_number == 3)
+            return o.crossing_t - 1e-3
+    
+        audit, _ = _audit("m2_prograde_burn", mutate)
+>       assert _violations(audit) or _gate_failures(audit, "m2_prograde_burn")
+E       AssertionError: assert ([] or [])
+E        +  where [] = _violations(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}))
+E        +  and   [] = _gate_failures(Audit(violations={'event_order': [], 'traceability': [], 'outcomes': [], 'identities': [], 'orbit_events': []}, metric...89e+06, -2.73809120e+06, -3.45461134e+06,  5.06369282e+03,\n        3.62935481e+03,  4.57910615e+03,  2.87620580e+02])}), 'm2_prograde_burn')
+
+tests/test_m2_validation.py:929: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_o3_detects_a_wrong_burn_duration - a...
+FAILED tests/test_m2_validation.py::test_auxiliary_runs_are_audited - Asserti...
+FAILED tests/test_m2_validation.py::test_missions_without_burns_have_a_trajectory_gate[m2_invalid_commands_empty_tank]
+FAILED tests/test_m2_validation.py::test_missions_without_burns_have_a_trajectory_gate[m2_invalid_commands_no_propulsion]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[receipts]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[samples]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[crossing_times]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[initial]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[status]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[final_t]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[final_propulsion_t]
+FAILED tests/test_m2_validation.py::test_returned_result_is_reconciled_with_events[plans]
+FAILED tests/test_m2_validation.py::test_cli_summary_is_reconciled_with_events
+FAILED tests/test_m2_validation.py::test_intermediate_propulsion_samples_are_predicted[12-update0]
+FAILED tests/test_m2_validation.py::test_intermediate_propulsion_samples_are_predicted[64-update1]
+FAILED tests/test_m2_validation.py::test_intermediate_propulsion_samples_are_predicted[64-update2]
+FAILED tests/test_m2_validation.py::test_intermediate_propulsion_samples_are_predicted[64-update3]
+FAILED tests/test_m2_validation.py::test_reversed_thrust_between_state_samples_is_detected
+FAILED tests/test_m2_validation.py::test_transition_payloads_are_checked[BurnStarted-update0]
+FAILED tests/test_m2_validation.py::test_transition_payloads_are_checked[BurnStarted-update1]
+FAILED tests/test_m2_validation.py::test_transition_payloads_are_checked[BurnStarted-update2]
+FAILED tests/test_m2_validation.py::test_transition_payloads_are_checked[BurnEnded-update3]
+FAILED tests/test_m2_validation.py::test_transition_payloads_are_checked[PropellantDepleted-update4]
+FAILED tests/test_m2_validation.py::test_plans_and_timing_claims_are_checked[CommandAccepted-update2]
+FAILED tests/test_m2_validation.py::test_plans_and_timing_claims_are_checked[BurnStarted-update3]
+FAILED tests/test_m2_validation.py::test_plans_and_timing_claims_are_checked[SpacecraftConfigured-update4]
+FAILED tests/test_m2_validation.py::test_depletion_cutoff_shift_is_detected
+FAILED tests/test_m2_validation.py::test_start_provenance_is_checked[update0]
+FAILED tests/test_m2_validation.py::test_start_provenance_is_checked[update1]
+FAILED tests/test_m2_validation.py::test_start_provenance_is_checked[update2]
+FAILED tests/test_m2_validation.py::test_start_provenance_is_checked[update3]
+FAILED tests/test_m2_validation.py::test_rejection_provenance_is_checked[update1]
+FAILED tests/test_m2_validation.py::test_rejection_provenance_is_checked[update2]
+FAILED tests/test_m2_validation.py::test_orbit_and_altitude_reporting_is_checked[number]
+FAILED tests/test_m2_validation.py::test_orbit_and_altitude_reporting_is_checked[count]
+FAILED tests/test_m2_validation.py::test_orbit_and_altitude_reporting_is_checked[altitude]
+FAILED tests/test_m2_validation.py::test_orbit_and_altitude_reporting_is_checked[extrema]
+37 failed, 5 passed, 71 deselected in 80.39s (0:01:20)

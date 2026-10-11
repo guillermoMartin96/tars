@@ -595,7 +595,7 @@ def test_corrupted_powered_sample_fails_o4(runs):
     """F3: every StateSampled, including those during a burn, is checked."""
     mission, scenario, run = _slice(runs)
     events = [
-        e.model_copy(update={"r": tuple(2 * x for x in e.r)})
+        e.model_copy(update={"r": [2 * x for x in e.r]})
         if e.type == "StateSampled" and e.t == 660.0
         else e
         for e in run.events
@@ -606,7 +606,7 @@ def test_corrupted_powered_sample_fails_o4(runs):
 def test_inconsistent_final_state_is_detected(runs):
     """F3: SimulationCompleted, the final samples and RunResult must agree."""
     _, _, run = _slice(runs)
-    done = run.events[-1].model_copy(update={"r": (1e9, 0.0, 0.0), "v": (1e6, 0.0, 0.0)})
+    done = run.events[-1].model_copy(update={"r": [1e9, 0.0, 0.0], "v": [1e6, 0.0, 0.0]})
     events = [*run.events[:-1], done]
     assert m2.check_final_consistency(run.events, run) == []
     assert m2.check_final_consistency(events, run)
@@ -623,7 +623,7 @@ def test_bogus_completion_at_an_active_stop_is_detected():
     variant = m2.boundary_variant(base, case)
     longer = run_scenario(m2.boundary_variant(base, case, stop_s=base.stop.duration_s))
     run = run_scenario(variant)
-    run.events[-1] = run.events[-1].model_copy(update={"r": (1e9, 0.0, 0.0)})
+    run.events[-1] = run.events[-1].model_copy(update={"r": [1e9, 0.0, 0.0]})
     assert m2.boundary_violations(variant, run, longer, (ACCEPT,))
 
 
@@ -696,7 +696,7 @@ def test_auxiliary_runs_are_audited():
     audit, _ = _audit(
         "m2_prograde_burn",
         lambda run: _edit(
-            run, lambda e: e.type == "StateSampled" and e.t == 660.0, r=(1.0, 2.0, 3.0)
+            run, lambda e: e.type == "StateSampled" and e.t == 660.0, r=[1.0, 2.0, 3.0]
         ),
         scenario=variant,
     )
@@ -710,7 +710,7 @@ def test_missions_without_burns_have_a_trajectory_gate(name):
     """F7: doubling every reported state of a coast-only mission fails O4."""
 
     def double(run):
-        _edit(run, lambda e: e.type in ("StateSampled", "SimulationCompleted"), r=(0.0, 0.0, 1.0))
+        _edit(run, lambda e: e.type in ("StateSampled", "SimulationCompleted"), r=[0.0, 0.0, 1.0])
 
     audit, _ = _audit(name, double)
     assert any(f.startswith("o4_reference.") for f in _gate_failures(audit, name))
@@ -984,3 +984,80 @@ def test_m2_proof_audits_auxiliary_and_boundary_runs():
     boundary, _ = module.boundary_checks(gates)
     assert any(c.validator.startswith("o4_reference[dr0018/") for c in boundary)
     assert all(c.passed for c in boundary)
+
+
+# ------------------------------------------------------------------ re-verification 2 mutants
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+     "plan_timing", "final_plan_policy", "scenario"],
+)  # fmt: skip
+def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+    """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+    _, scenario, run = runs["m2_invalid_commands"]
+    rec = run.receipts
+    acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+    rej = next(i for i, r in enumerate(rec) if r.plan is None)
+
+    def at(i, **kw):
+        return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+
+    def plan(**kw):
+        return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+
+    bad = {
+        "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+        "schema_errors": lambda: dataclasses.replace(
+            run, receipts=at(rej, schema_errors=("x: y",))
+        ),
+        "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+        "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+        "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+        "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+        "plan_timing": lambda: dataclasses.replace(
+            run, receipts=plan(timing_delta_v_error_mps=999.0)
+        ),
+        "final_plan_policy": None,
+        "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+    }
+    if change == "final_plan_policy":
+        base = BY_NAME["m2_prograde_burn"].build()
+        variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+        brun = run_scenario(variant)
+        fp = brun.final_propulsion
+        tampered = dataclasses.replace(
+            brun,
+            final_propulsion=dataclasses.replace(
+                fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+            ),
+        )
+        assert m2.check_result_consistency(variant, brun.events, brun) == []
+        assert m2.check_result_consistency(variant, brun.events, tampered)
+        return
+    assert m2.check_result_consistency(scenario, run.events, run) == []
+    assert m2.check_result_consistency(scenario, run.events, bad[change]())
+
+
+def test_sample_only_altitude_extrema_are_detected():
+    """F17: extrema must cover every executed tick, not only the telemetry samples."""
+
+    def sample_extrema(run):
+        alts = [e.altitude_m for e in run.events if e.type == "StateSampled"]
+        _edit(
+            run,
+            lambda e: e.type == "SimulationCompleted",
+            min_altitude_m=min(alts),
+            max_altitude_m=max(alts),
+        )
+
+    audit, _ = _audit("m2_burn_to_depletion", sample_extrema)
+    assert any(f.startswith("orbit_events.") for f in _gate_failures(audit, "m2_burn_to_depletion"))
+
+
+def test_event_schema_version_is_enforced(runs):
+    """F18: every event must carry the integer schema version 1 and re-validate."""
+    _, scenario, run = _slice(runs)
+    events = [e.model_copy(update={"schema_version": 999}) for e in run.events]
+    assert any("schema_version" in v for v in m2.check_event_order(scenario, events))

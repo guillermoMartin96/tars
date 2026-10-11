@@ -87,8 +87,8 @@
     "orbit_events": {
       "all": {
         "node_crossing_time_error_max_s": 8e-05,
-        "min_altitude_below_reference_periapsis_m": 0.6,
-        "max_altitude_above_reference_apoapsis_m": 0.6
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
       }
     }
   },
@@ -102,6 +102,6 @@
     "o7_direction": "Signs exact. Plane rotation and inclination change: round-off class 1e-12 rad (measured <= 1.5e-16).",
     "o8_convergence": "DR-0008 policy |p - 4| <= 0.5 on dt 10 -> 5 -> 2.5 s (DR-0015 candidate). 20 -> 10 is pre-asymptotic; dt = 1 s approaches the DOP853 cross-platform floor.",
     "accounting": "Round-off class 1e-12 (relative to initial mass, or to the mission's total predicted delta-v). Includes per-sample propellant and sensed delta-v predicted from accepted commands and elapsed burn time, transition propellant, planned consumption and the thrust unit vector (reviews F9, F11, F12). Exact relations (mass = dry + propellant, idle intervals bit-identical, schedule, plan cutoffs, D1a cutoff, timing bound) are contract checks, not tolerances.",
-    "orbit_events": "Node-crossing time vs independently located reference crossings (DOP853 + Kepler bisection): 8e-5 s, ~2x measured (<= 4.0e-5 s) and equal to the approved M1 node-crossing limit for the same dt and horizon. Altitude extrema vs reference apsides: the O4 sample-position limit 0.6 m (review F14)."
+    "orbit_events": "Node-crossing time vs independently located reference crossings (DOP853 + Kepler bisection): 8e-5 s, ~2x measured (<= 4.0e-5 s) and equal to the approved M1 node-crossing limit for the same dt and horizon. Completion altitude extrema vs the reference's extrema over every executed tick (DOP853 dense output), both directions: 0.013 m, ~2x measured (<= 6.3e-3 m). Reporting sample-only extrema errs by about 2 m (review F14, F17)."
   }
 }

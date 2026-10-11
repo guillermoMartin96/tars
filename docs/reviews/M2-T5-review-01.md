@@ -108,4 +108,25 @@ Also corrected, as noted by the reviewer:
 - This is flagged for the T7 threshold DR.
 
 ## Re-verification 2
+**Reviewer:** Codex, session `01a12c88-6130-7400-b78d-62449b436a32`, at `344f95a`. **Raw:** `raw/M2-T5-codex-reverify2.md`, with probes and an updated field inventory in `raw/M2-T5-codex-reverify2-scratch/`.
+
+**Verdict: FAIL.**
+- F5, F6, F7, F9, F10, F11, F12, F13 and F15 are resolved. F8 and F14 are partly resolved, and their remainders are F16 and F17.
+- The reviewer confirmed that the Simpson bound is correctly derived, independently computed and tight (ratios 0.62–0.99). 1 ppm mass-flow and 1 ppm sensed-integrand mutants are still rejected.
+- The changed gate is disclosed and justified.
+- All gates passed: 818 tests, a 206-check M2 Proof, M1, determinism, golden, GMAT.
+
+**All three are `ACCEPTED`.** Each fix is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F16 | Med | Returned receipts and plans incompletely reconciled | Returned command = scenario payload (None if schema-invalid); detail and `schema_errors` = event; no plan or burn ID on rejections; **every** `BurnPlan` field against the prediction and `CommandAccepted` (ignition, commanded and executed duration, cutoff, consumption, mass flow, cause, policy, timing bound), for receipts and final-snapshot plans; returned scenario = audited scenario | `test_returned_receipts_and_plans_are_fully_reconciled` (9 cases) |
+| F17 | Med | Completion extrema could omit inter-sample extrema | The reference's extrema over **every executed tick** (DOP853 dense output), compared in both directions. Limit 0.013 m, ≈ 2× measured (≤ 6.3e-3 m); sample-only extrema err by about 2 m | `test_sample_only_altitude_extrema_are_detected` |
+| F18 | Low | Event schema version unchecked | Every event must have integer `schema_version` 1 and re-validate after serialization | `test_event_schema_version_is_enforced` |
+
+**Defect found in the validator itself while closing F17.**
+- The DOP853 reference used to integrate up to each predicted cutoff even when the scenario stopped earlier. That was harmless for the end states, but it pushed the new tick extrema past the observation stop in DR-0018 variants (50.6 m).
+- The reference now integrates only to the last requested time. The new check exposed the defect, and the check is kept.
+
+## Re-verification 3
 See below.

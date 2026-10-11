@@ -40,7 +40,7 @@ import numpy as np
 
 from tars.astro import kepler
 from tars.astro.elements import rv_to_elements, specific_energy
-from tars.events.schema import to_jsonl
+from tars.events.schema import parse_event, to_jsonl
 from tars.sim.constants import STANDARD_GRAVITY
 from tars.sim.integrators import RK4
 from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
@@ -270,6 +270,15 @@ def check_event_order(scenario: ScenarioV2, events: Sequence[Any]) -> list[str]:
         v.append(f"SpacecraftConfigured at {has_cfg}, expected {[1] if configured else []}")
     final_tick = events[-1].tick
     for i, e in enumerate(events):
+        # Schema contract (review F18): integer version 1 and a strict re-validation of
+        # the serialized event, which in-memory copies could otherwise bypass.
+        if type(e.schema_version) is not int or e.schema_version != 1:
+            v.append(f"event {i} {e.type}: schema_version {e.schema_version!r}")
+        try:
+            if parse_event(e.model_dump_json()) != e:
+                v.append(f"event {i} {e.type}: does not round-trip through the schema")
+        except ValueError as err:
+            v.append(f"event {i} {e.type}: invalid against the schema ({type(err).__name__})")
         if e.t != e.tick * dt:
             v.append(f"event {i} {e.type}: t {e.t!r} != tick*dt")
         if i and e.tick < events[i - 1].tick:
@@ -831,39 +840,75 @@ def _independent_rhs(mu: float, veh: Vehicle | None, sign: float) -> Any:
     return f
 
 
+class Reference(dict):
+    """Reference states by mark time, plus the reference's altitude extrema over every
+    tick of the executed grid (review M2-T5 F17)."""
+
+    alt_min: float = math.inf
+    alt_max: float = -math.inf
+
+
 def dop853_reference(
     scenario: ScenarioV2,
     r0: Sequence[float],
     v0: Sequence[float],
     predicted: Sequence[PredictedBurn],
     marks: Sequence[float],
-) -> dict[float, np.ndarray]:
+) -> Reference:
     """States [r, v, m_p] at each mark time, integrated segment by segment.
 
     Segment boundaries are the predicted ignition and cutoff times (scenario inputs),
     so no step straddles a thrust discontinuity. SciPy DOP853, rtol 1e-13, atol 1e-9
-    (VAL-0008 settings).
+    (VAL-0008 settings). The altitude at every tick k*dt up to the last mark is taken
+    from each segment's dense output (7th-order interpolant).
     """
     from scipy.integrate import solve_ivp  # dev-only dependency (DR-0015)
 
     veh = vehicle(scenario)
     mu = scenario.constants.mu
+    # Integrate only up to the last requested time: a burn predicted to end after an
+    # observation stop must not extend the reference (or its extrema) past it.
+    horizon = max(marks)
     bounds = sorted(
-        {0.0, *marks, *(b.ignition_t_s for b in predicted), *(b.cutoff_t_s for b in predicted)}
+        t
+        for t in {
+            0.0,
+            *marks,
+            *(b.ignition_t_s for b in predicted),
+            *(b.cutoff_t_s for b in predicted),
+        }
+        if t <= horizon
     )
     y = np.concatenate(
         [np.asarray(r0, float), np.asarray(v0, float), [0.0 if veh is None else veh.propellant_kg]]
     )
-    out = {0.0: y.copy()} if 0.0 in marks else {}
+    out = Reference()
+    if 0.0 in marks:
+        out[0.0] = y.copy()
+    dt, radius = scenario.dt_s, scenario.constants.equatorial_radius
+    alt0 = float(np.linalg.norm(y[:3])) - radius
+    out.alt_min = out.alt_max = alt0
     for a, b in pairwise(bounds):
         burn = next((p for p in predicted if p.ignition_t_s <= a and b <= p.cutoff_t_s), None)
         sign = 0.0 if burn is None else SIGN[burn.direction]
         sol = solve_ivp(
-            _independent_rhs(mu, veh, sign), (a, b), y, method="DOP853", rtol=1e-13, atol=1e-9
+            _independent_rhs(mu, veh, sign),
+            (a, b),
+            y,
+            method="DOP853",
+            rtol=1e-13,
+            atol=1e-9,
+            dense_output=True,
         )
         if not sol.success:
             raise RuntimeError(f"DOP853 failed on [{a}, {b}]: {sol.message}")
         y = sol.y[:, -1].copy()
+        ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
+        ticks = ticks[(ticks > a) & (ticks <= b)]
+        if ticks.size:
+            alts = np.linalg.norm(sol.sol(ticks)[:3], axis=0) - radius
+            out.alt_min = min(out.alt_min, float(alts.min()))
+            out.alt_max = max(out.alt_max, float(alts.max()))
         if b in marks:
             out[b] = y.copy()
     return out
@@ -1566,7 +1611,32 @@ def check_result_consistency(
     receipts = _of(events, *COMMAND_EVENTS)
     if len(result.receipts) != len(receipts):
         v.append(f"{len(result.receipts)} returned receipts, {len(receipts)} receipt events")
-    for r, e in zip(result.receipts, receipts, strict=False):
+    if result.scenario is not scenario and result.scenario.config_hash() != scenario.config_hash():
+        v.append("returned scenario differs from the audited scenario")
+    veh = vehicle(scenario)
+    by_burn = {b.burn_id: b for b in predict_burns_or_empty(scenario, receipts)}
+    for i, (r, e) in enumerate(zip(result.receipts, receipts, strict=False)):
+        payload = scenario.commands[i].command if i < len(scenario.commands) else {}
+        schema_invalid = getattr(e, "reason", None) == "schema_invalid"
+        if schema_invalid:
+            if r.command is not None:
+                v.append(f"receipt {i}: schema-invalid receipt carries a command")
+        else:
+            want_cmd = {**payload}
+            want_cmd.setdefault("on_insufficient_propellant", "reject")
+            if r.command is None or r.command.model_dump(mode="json") != want_cmd:
+                v.append(f"receipt {i}: returned command differs from the scenario payload")
+        want_detail = getattr(e, "detail", "accepted")  # accepted receipts: "accepted"
+        if (r.detail, tuple(r.schema_errors)) != (
+            want_detail,
+            tuple(getattr(e, "schema_errors", ())),
+        ):
+            v.append(f"receipt {i}: detail or schema_errors differ from the event")
+        if e.type == "CommandRejected" and (r.plan is not None or r.burn_id is not None):
+            v.append(f"receipt {i}: rejected receipt carries a plan or burn ID")
+        if e.type == "CommandAccepted" and r.plan is not None:
+            v += _plan_violations(f"receipt {i}", r.plan, e, by_burn.get(e.burn_id), veh)
+
         status = "accepted" if e.type == "CommandAccepted" else "rejected"
         got = (
             str(r.status),
@@ -1640,15 +1710,61 @@ def check_result_consistency(
         else:
             for burn_id, plan in zip(ids, plans, strict=True):
                 acc = accepted.get(burn_id)
-                if acc is None or (plan.cutoff_t_s, plan.propellant_used_kg) != (
-                    acc.planned_cutoff_t_s,
-                    acc.planned_propellant_used_kg,
-                ):
-                    v.append(f"final_propulsion plan for {burn_id} differs from CommandAccepted")
+                if acc is None:
+                    v.append(f"final_propulsion plan for {burn_id} has no CommandAccepted")
+                    continue
+                v += _plan_violations(
+                    f"final_propulsion {burn_id}", plan, acc, by_burn.get(burn_id), veh
+                )
         want_dir = starts[fp.active_burn_id].direction if fp.active_burn_id in starts else None
         if fp.active_direction != want_dir:
             v.append(f"final_propulsion active_direction {fp.active_direction!r} != {want_dir!r}")
     return v
+
+
+def predict_burns_or_empty(scenario: ScenarioV2, receipts: Sequence[Any]) -> list[PredictedBurn]:
+    """Burn predictions from the receipts' accept/reject pattern (declared outcomes are
+    checked separately against the receipts by check_traceability)."""
+    declared = [
+        Expected("accepted") if e.type == "CommandAccepted" else Expected("rejected", e.reason)
+        for e in receipts
+    ]
+    declared += [Expected("rejected")] * (len(scenario.commands) - len(declared))
+    try:
+        return predict_burns(scenario, declared)
+    except ValueError:
+        return []
+
+
+def _plan_violations(
+    where: str, plan: Any, acc: Any, b: PredictedBurn | None, veh: Vehicle | None
+) -> list[str]:
+    """Every BurnPlan field against the prediction and the CommandAccepted event."""
+    if b is None or veh is None:
+        return [f"{where}: plan without a predicted burn"]
+    got = (
+        plan.ignition_t_s,
+        plan.commanded_duration_s,
+        plan.burn_duration_s,
+        plan.cutoff_t_s,
+        plan.propellant_used_kg,
+        plan.mass_flow_kgps,
+        str(plan.end_cause),
+        str(plan.policy),
+        plan.timing_delta_v_error_mps,
+    )
+    want = (
+        b.ignition_t_s,
+        b.commanded_duration_s,
+        b.executed_s,
+        b.cutoff_t_s,
+        acc.planned_propellant_used_kg,
+        veh.mass_flow_kgps,
+        b.end_cause,
+        b.policy,
+        acc.timing_delta_v_error_mps,
+    )
+    return [] if got == want else [f"{where}: plan {got} != expected {want}"]
 
 
 def cli_summary_violations(events: Sequence[Any], summary: dict[str, Any]) -> list[str]:
@@ -1702,7 +1818,7 @@ def orbit_checks(
       on exact Kepler propagation of the reference state (coast intervals). Their
       count must equal N; the crossing-time error is a metric.
     - altitude_m = |r| - R exactly; the completion extrema bracket every sample and
-      lie within the reference's apsides widened by the O4 sample-position limit.
+      match the reference's extrema over every executed tick (dense output).
     """
     v: list[str] = []
     mu, radius = scenario.constants.mu, scenario.constants.equatorial_radius
@@ -1751,15 +1867,14 @@ def orbit_checks(
     alts = [s.altitude_m for s in states]
     if not (done.min_altitude_m <= min(alts) and done.max_altitude_m >= max(alts)):
         v.append("completion altitude extrema do not bracket the samples")
-    rp, ra = [], []
-    for t in times:
-        el = rv_to_elements(ref[t][:3], ref[t][3:6], mu)
-        rp.append(el.a * (1 - el.e) - radius)
-        ra.append(el.a * (1 + el.e) - radius)
+    # Extrema over every executed tick, against the reference's tick-grid extrema, in
+    # both directions (review F17).
+    alt_min = getattr(ref, "alt_min", math.inf)
+    alt_max = getattr(ref, "alt_max", -math.inf)
     return {
         "node_crossing_time_error_max_s": err,
-        "min_altitude_below_reference_periapsis_m": max(min(rp) - done.min_altitude_m, 0.0),
-        "max_altitude_above_reference_apoapsis_m": max(done.max_altitude_m - max(ra), 0.0),
+        "min_altitude_error_m": abs(done.min_altitude_m - alt_min),
+        "max_altitude_error_m": abs(done.max_altitude_m - alt_max),
     }, v
 
 

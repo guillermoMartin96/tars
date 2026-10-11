@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_missing_threshold_group_is_reported ___________________
+
+    def test_missing_threshold_group_is_reported():
+        """F15: a metric without a threshold is reported as ungated, not passed."""
+        import importlib.util
+    
+        from tars.validation.thresholds import REPO_ROOT, ScopedThresholds
+    
+        spec = importlib.util.spec_from_file_location(
+            "m2_proof", REPO_ROOT / "toolbox" / "validators" / "m2_proof.py"
+        )
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        data = json.loads(M2_THRESHOLDS.read_text())
+        del data["limits"]["o4_reference"]
+        gates = module.Gates(ScopedThresholds(status="provisional", limits=data["limits"]))
+        gates.check("o4_reference", "o4", "m2_prograde_burn", {"final_position_error_m": 0.3})
+>       assert gates.missing == ["o4: final_position_error_m"]
+E       AssertionError: assert [] == ['o4: final_position_error_m']
+E         
+E         Right contains one more item: 'o4: final_position_error_m'
+E         Use -v to get more diff
+
+tests/test_m2_validation.py:947: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_missing_threshold_group_is_reported
+1 failed, 112 deselected in 0.12s
