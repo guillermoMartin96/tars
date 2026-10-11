@@ -1,0 +1,15 @@
+input -inf BurnRejectedError ignition_in_past: ignition -inf < now 10.0
+input '-1' BurnRejectedError ignition_in_past: ignition -1.0 < now 10.0
+input True BurnRejectedError ignition_in_past: ignition 1.0 < now 10.0
+input array(-1) BurnRejectedError ignition_in_past: ignition -1.0 < now 10.0
+input np.float32(1.0) BurnRejectedError ignition_in_past: ignition 1.0 < now 10.0
+input np.True_ BurnRejectedError ignition_in_past: ignition 1.0 < now 10.0
+duration rounding 0.1 0.125 planned used 0.01601477385766618 actual used 0.020018467322074684
+transition mutable [999.   0.   0.] physical [14.20403964  0.          0.        ]
+failed step ValueError tick 0 state PropulsionSnapshot(tick=0, t=0.0, propellant_kg=300.0, total_mass_kg=1300.0, delta_v_sensed_mps=0.0, engine_state=<EngineState.BURNING: 'burning'>, active_plan=BurnPlan(ignition_t_s=1.0, commanded_duration_s=2.0, burn_duration_s=2.0, cutoff_t_s=3.0, propellant_used_kg=0.3202954771533236, mass_flow_kgps=0.1601477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>), pending_plans=())
+retried events [('cutoff', 3.0)] used 0.48044321572996296 expected 0.3202954771533236
+huge integer OverflowError
+multi-events [('ignition', 1.0), ('cutoff', 3.0), ('ignition', 3.0), ('cutoff', 4.0), ('ignition', 5.0), ('cutoff', 7.0)] errors x/v/prop 6.0782596733588434e-09 -7.496225862269057e-13 1.7053025658242404e-13
+mid-burn future plan 27.0 used 3.5232502486865087 expected 3.52325024868656
+rounded depletion interval 0.25 floor residual removed kg 0.008007386928833094 dv 0.12249852867668712 rocket 0.0979984305852549
+VAL0012 rerun fields identical True

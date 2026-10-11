@@ -1,0 +1,74 @@
+........................FFF............................................. [ 46%]
+........................................................................ [ 92%]
+...........                                                              [100%]
+=================================== FAILURES ===================================
+_______________ test_sensed_delta_v_matches_the_rocket_equation ________________
+
+    def test_sensed_delta_v_matches_the_rocket_equation():
+        """O2: integral of F/m over the burn equals c ln(m0/mf). Round-off bound 1e-12
+        relative (measured 1.2e-14, VAL-0008)."""
+        sim, plan, dv0 = _burn_run(10.0)
+        sensed = sim.propulsion_snapshot().delta_v_sensed_mps - dv0
+        m0 = DRY + PROP
+        expected = rocket_equation_delta_v(
+            ENGINE.exhaust_velocity_mps, m0, m0 - plan.propellant_used_kg
+        )
+>       assert sensed == pytest.approx(expected, rel=1e-12, abs=0)
+E       assert 29.13615384615383 == 29.275767297714378 ± 2.9e-11
+E         
+E         comparison failed
+E         Obtained: 29.13615384615383
+E         Expected: 29.275767297714378 ± 2.9e-11
+
+tests/test_simulator_propulsion.py:345: AssertionError
+_______ test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0] ________
+
+direction = 'prograde', sign = 1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 3.998160784642648 <= 0.5
+E            +  where 3.998160784642648 = abs((0.0018392153573519258 - 4.0))
+E            +    where 0.0018392153573519258 = <built-in function log2>((np.float64(5.99573755877802) / np.float64(5.988098781272449)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:382: AssertionError
+______ test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0] ______
+
+direction = 'retrograde', sign = -1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 4.001821416405356 <= 0.5
+E            +  where 4.001821416405356 = abs((-0.0018214164053561705 - 4.0))
+E            +    where -0.0018214164053561705 = <built-in function log2>((np.float64(5.979491591335307) / np.float64(5.98704552460097)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:382: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_sensed_delta_v_matches_the_rocket_equation
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0]
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0]
+3 failed, 152 passed in 1.58s
