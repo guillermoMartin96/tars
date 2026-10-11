@@ -126,3 +126,17 @@ Per item: `1A|1B|1C`, `2A|2B`, `3A|3B|3C`; accept or amend §4–§6.
   - the depletion time underflows the clock;
   - the planned propellant consumption underflows to zero.
 - The approved vocabulary is §4 plus `burn_unschedulable`. T3 must use exactly these stable, machine-readable codes.
+
+**Amendment — T3 semantics confirmed (Tech Lead, 2026-10-11; T2/T3 checkpoint):** the three semantics proposed at the checkpoint are approved as contract. They are recorded in `docs/contracts/m2-commands-and-events.md`.
+1. **Command-ID consumption.** A command ID is consumed only when its command is accepted. A rejected submission does not mutate simulator state: physical state, engine schedule, burn counter and command-ID registry are all unchanged. A corrected command may be resubmitted under the same ID.
+2. **Strict input.** Only an exact `BurnCommand` or a plain mapping of approved primitive values (exact `str`, `int`, `float`) is accepted.
+   - `bool` is rejected where an `int` or `float` is required.
+   - The protections against subclass, `model_copy` and serializer-hook validation bypasses are preserved.
+3. **Rejection precedence.** `no_propulsion_configured` precedes the command-level checks, consistent with the approved T2 behavior. The exact order is:
+   1. schema;
+   2. duplicate command ID;
+   3. `no_propulsion_configured`;
+   4. `non_positive_duration`;
+   5. `ignition_in_past`;
+   6. engine conflicts;
+   7. propellant and schedulability.

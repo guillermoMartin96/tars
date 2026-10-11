@@ -52,6 +52,8 @@ The schema is strict: no bool, string or None coercion into numbers, no NaN or i
 
 Engine-level `schedule_burn` (the T2 interface, unchanged) follows the same order from step 3.
 
+Command-ID consumption, strict input and this precedence were confirmed as contract by the Tech Lead on 2026-10-11 (DR-0014, amendment "T3 semantics confirmed").
+
 ## Correlation IDs
 | ID | Assigned by | Stability |
 |---|---|---|
