@@ -382,3 +382,17 @@ def test_timeout_ticks_matches_the_m1_guard():
     period = keplerian_period(s.constants.equatorial_radius + 250000.0, s.constants.mu)
     assert s.timeout_ticks == math.ceil(1.1 * 10 * period / 10.0)
     assert load_scenario(M2_SLICE_SCENARIO).timeout_ticks is None
+
+
+@pytest.mark.parametrize("stop", [{"duration_s": 10.0}, {"orbits": 1}])
+def test_unrepresentable_initial_orbit_is_a_validation_error(stop):
+    """Re-verification 2, M1: a finite altitude whose r^3 overflows used to crash the
+    first gravity evaluation of a duration-stop run."""
+    data = {**_slice(), "commands": [], "stop": stop}
+    data["initial_orbit"] = {**data["initial_orbit"], "altitude_m": 1e103}
+    with pytest.raises(ValidationError, match="not numerically representable"):
+        _parse(data)
+    v1 = json.loads(M1_SCENARIO.read_text())
+    v1["initial_orbit"]["altitude_m"] = 1e103
+    with pytest.raises(ValidationError, match="not numerically representable"):
+        Scenario.model_validate(v1)

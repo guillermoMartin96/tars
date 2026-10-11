@@ -1,0 +1,123 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+______ test_unrepresentable_orbits_timeout_is_a_validation_error[patch0] _______
+
+patch = {'stop': {'orbits': 2, 'max_duration_periods': 1e+308}}
+
+    @pytest.mark.parametrize(
+        "patch",
+        [
+            {"stop": {"orbits": 2, "max_duration_periods": 1e308}},
+            {"stop": {"orbits": 2}, "dt_s": 1e-308, "telemetry": {"sample_interval_s": 1e-308}},
+        ],
+    )
+    def test_unrepresentable_orbits_timeout_is_a_validation_error(patch):
+        """Re-verification N1: the orbits-stop tick limit must be representable."""
+        data = {**_slice(), "commands": [], **patch}
+>       with pytest.raises(ValidationError, match="tick limit is not representable"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+../../tests/test_scenario_v2.py:364: Failed
+______ test_unrepresentable_orbits_timeout_is_a_validation_error[patch1] _______
+
+patch = {'stop': {'orbits': 2}, 'dt_s': 1e-308, 'telemetry': {'sample_interval_s': 1e-308}}
+
+    @pytest.mark.parametrize(
+        "patch",
+        [
+            {"stop": {"orbits": 2, "max_duration_periods": 1e308}},
+            {"stop": {"orbits": 2}, "dt_s": 1e-308, "telemetry": {"sample_interval_s": 1e-308}},
+        ],
+    )
+    def test_unrepresentable_orbits_timeout_is_a_validation_error(patch):
+        """Re-verification N1: the orbits-stop tick limit must be representable."""
+        data = {**_slice(), "commands": [], **patch}
+>       with pytest.raises(ValidationError, match="tick limit is not representable"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+../../tests/test_scenario_v2.py:364: Failed
+_____ test_version_1_unrepresentable_orbits_timeout_is_a_validation_error ______
+
+    def test_version_1_unrepresentable_orbits_timeout_is_a_validation_error():
+        data = json.loads(M1_SCENARIO.read_text())
+        data["stop"] = {"orbits": 10, "max_duration_periods": 1e308}
+>       with pytest.raises(ValidationError, match="tick limit is not representable"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+../../tests/test_scenario_v2.py:371: Failed
+___________________ test_timeout_ticks_matches_the_m1_guard ____________________
+
+    def test_timeout_ticks_matches_the_m1_guard():
+        """The runner's M1 timeout limit is unchanged: ceil(1.1 * 10 * T / dt)."""
+        import math
+    
+        from tars.astro.elements import keplerian_period
+    
+        s = load_scenario(M1_SCENARIO)
+        period = keplerian_period(s.constants.equatorial_radius + 250000.0, s.constants.mu)
+>       assert s.timeout_ticks == math.ceil(1.1 * 10 * period / 10.0)
+               ^^^^^^^^^^^^^^^
+
+../../tests/test_scenario_v2.py:383: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Scenario(schema_version=1, name='m1_leo_250km', description='Milestone 1: circular 250 km LEO, i=51.6 deg, point-mass ...atitude_deg=0.0), stop=StopCondition(orbits=10, max_duration_periods=1.1), telemetry=Telemetry(sample_interval_s=60.0))
+item = 'timeout_ticks'
+
+    def __getattr__(self, item: str) -> Any:
+        private_attributes = object.__getattribute__(self, '__private_attributes__')
+        if item in private_attributes:
+            attribute = private_attributes[item]
+            if hasattr(attribute, '__get__'):
+                return attribute.__get__(self, type(self))  # type: ignore
+    
+            try:
+                # Note: self.__pydantic_private__ cannot be None if self.__private_attributes__ has items
+                return self.__pydantic_private__[item]  # type: ignore
+            except KeyError as exc:
+                raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}') from exc
+        else:
+            # `__pydantic_extra__` can fail to be set if the model is not yet fully initialized.
+            # See `BaseModel.__repr_args__` for more details
+            try:
+                pydantic_extra = object.__getattribute__(self, '__pydantic_extra__')
+            except AttributeError:
+                pydantic_extra = None
+    
+            if pydantic_extra and item in pydantic_extra:
+                return pydantic_extra[item]
+            else:
+                if hasattr(self.__class__, item):
+                    return super().__getattribute__(item)  # Raises AttributeError if appropriate
+                else:
+                    # this is the current error
+>                   raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+E                   AttributeError: 'Scenario' object has no attribute 'timeout_ticks'
+
+../../.venv/lib/python3.12/site-packages/pydantic/main.py:1042: AttributeError
+__ test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback ___
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-14/test_run_mission_rejects_unrep0')
+
+    def test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback(tmp_path):
+        """Re-verification N1: exit 2 (invalid input), not an OverflowError traceback."""
+        data = json.loads(M1_SCENARIO.read_text())
+        data["stop"] = {"orbits": 2, "max_duration_periods": 1e308}
+        bad = tmp_path / "bad.json"
+        bad.write_text(json.dumps(data))
+        proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+>       assert proc.returncode == 2 and "Traceback" not in proc.stderr
+E       AssertionError: assert (1 == 2)
+E        +  where 1 = CompletedProcess(args=['/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9b...io\n    max_ticks = math.ceil(\n                ^^^^^^^^^^\nOverflowError: cannot convert float infinity to integer\n').returncode
+
+../../tests/test_cli.py:284: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_scenario_v2.py::test_unrepresentable_orbits_timeout_is_a_validation_error[patch0]
+FAILED tests/test_scenario_v2.py::test_unrepresentable_orbits_timeout_is_a_validation_error[patch1]
+FAILED tests/test_scenario_v2.py::test_version_1_unrepresentable_orbits_timeout_is_a_validation_error
+FAILED tests/test_scenario_v2.py::test_timeout_ticks_matches_the_m1_guard - A...
+FAILED tests/test_cli.py::test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback
+5 failed, 94 deselected in 0.45s

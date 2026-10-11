@@ -119,3 +119,24 @@ All five are **`ACCEPTED`**. Each fix is mutation-tested: the new test fails wit
 **Reviewer note:**
 - Some new tests (the integer-payload runner check, infinity rejection, two orbits-stop serialization cases) pass against the old code as well.
 - These are intended as positive coverage. The defect-specific tests catch each original finding.
+
+## Re-verification 2 (`354914d`)
+**Reviewer:** Codex, session `01a12be1-14e9-77d3-af10-a893e08b94b0`. **Raw:** `raw/M2-T4-codex-reverify2.md`; probes in `raw/M2-T4-codex-reverify2-scratch/`.
+
+**Verdict: CONDITIONAL PASS.**
+- **N1 RESOLVED:**
+  - both probes now exit 2;
+  - the new tests fail against `5098f8a`;
+  - the M1 timeout limit is unchanged (5908 ticks).
+- No Critical, High or Medium issue remains across the full T4 diff.
+
+### M1: Extreme duration-scenario altitude still causes runtime overflow
+**Severity:** Low. **Disposition:** `ACCEPTED`.
+
+**Implementer reasoning:** Correct, and it predates T4. A finite altitude whose r³ overflows (1e103 m) passed validation. In a duration-stop scenario the first gravity evaluation then raised `OverflowError` inside the unchanged M1 force model. In an orbits stop, the N1 check already rejected it.
+
+**Resolution:**
+- Scenario validation now requires the initial orbit's Keplerian period, which involves the same r³, to be representable for every stop kind, in v1 and v2.
+- The M1 force model is untouched.
+- **Tests:** v1 and v2 for both stop kinds, plus CLI exit 2.
+- **Mutation:** removing the check fails the duration-stop cases.

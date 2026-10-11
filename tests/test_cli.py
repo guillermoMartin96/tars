@@ -282,3 +282,15 @@ def test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback(tm
     bad.write_text(json.dumps(data))
     proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
     assert proc.returncode == 2 and "Traceback" not in proc.stderr
+
+
+def test_run_mission_rejects_unrepresentable_initial_orbit_without_traceback(tmp_path):
+    from tests.conftest import M2_SLICE_SCENARIO
+
+    data = json.loads(M2_SLICE_SCENARIO.read_text())
+    data.update(commands=[], stop={"duration_s": 10.0})
+    data["initial_orbit"]["altitude_m"] = 1e103
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps(data))
+    proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+    assert proc.returncode == 2 and "Traceback" not in proc.stderr

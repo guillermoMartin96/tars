@@ -1,0 +1,43 @@
+/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap3/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2767: RuntimeWarning: overflow encountered in dot
+  sqnorm = x.dot(x)
+guard_product 2 invalid scenario: 1 validation error for ScenarioV2
+  Value error, the orbits-stop tick limit is not representable [type=value_error, input_value={'schema_version': 2, 'na...mple_interval_s': 60.0}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+orbit_tick_ratio 2 invalid scenario: 1 validation error for ScenarioV2
+  Value error, the orbits-stop tick limit is not representable [type=value_error, input_value={'schema_version': 2, 'na...le_interval_s': 1e-308}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+M1 limit 5908 5908
+extreme 1e+103 {'orbits': 1} ValidationError 1 validation error for ScenarioV2
+  Value error, the orbits-stop tick limit is not representable [type=value_error, input_value={'schema_version': 2, 'na...mple
+extreme 1e+103 {'duration_s': 10.0} OverflowError (34, 'Result too large')
+extreme 1e+308 {'orbits': 1} ValidationError 1 validation error for ScenarioV2
+  Value error, the orbits-stop tick limit is not representable [type=value_error, input_value={'schema_version': 2, 'na...mple
+extreme 1e+308 {'duration_s': 10.0} ValidationError 1 validation error for StateSampled
+altitude_m
+  Input should be a finite number [type=finite_number, input_value=inf, input_type=float]
+    For further informa
+reconstruct 0 patching file 'src/tars/sim/runner.py'
+patching file 'src/tars/sim/scenario.py'
+
+old tests 1 47x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-14/test_run_mission_rejects_unrep0')
+
+    def test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback(tmp_path):
+        """Re-verification N1: exit 2 (invalid input), not an OverflowError traceback."""
+        data = json.loads(M1_SCENARIO.read_text())
+        data["stop"] = {"orbits": 2, "max_duration_periods": 1e308}
+        bad = tmp_path / "bad.json"
+        bad.write_text(json.dumps(data))
+        proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+>       assert proc.returncode == 2 and "Traceback" not in proc.stderr
+E       AssertionError: assert (1 == 2)
+E        +  where 1 = CompletedProcess(args=['/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9b...io\n    max_ticks = math.ceil(\n                ^^^^^^^^^^\nOverflowError: cannot convert float infinity to integer\n').returncode
+
+../../tests/test_cli.py:284: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_scenario_v2.py::test_unrepresentable_orbits_timeout_is_a_validation_error[patch0]
+FAILED tests/test_scenario_v2.py::test_unrepresentable_orbits_timeout_is_a_validation_error[patch1]
+FAILED tests/test_scenario_v2.py::test_version_1_unrepresentable_orbits_timeout_is_a_validation_error
+FAILED tests/test_scenario_v2.py::test_timeout_ticks_matches_the_m1_guard - A...
+FAILED tests/test_cli.py::test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback
+5 failed, 94 deselected in 0.45s
+

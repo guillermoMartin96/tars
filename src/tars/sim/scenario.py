@@ -79,8 +79,24 @@ class Scenario(_Strict):
             raise ValueError("telemetry.sample_interval_s must be a positive multiple of dt_s")
         if len(set(self.force_models)) != len(self.force_models):
             raise ValueError("force_models must not repeat")
+        self._nominal_period()  # initial orbit representable (re-verification 2, M1)
         self.timeout_ticks  # noqa: B018 -- validates the orbits-stop guard (review N1)
         return self
+
+    def _nominal_period(self) -> float:
+        """Keplerian period of the initial circular orbit.
+
+        Raises ValueError if it is not representable: then neither r^3 in point-mass
+        gravity nor the period is, and the run would overflow at its first step.
+        """
+        c = self.constants
+        try:
+            period = keplerian_period(c.equatorial_radius + self.initial_orbit.altitude_m, c.mu)
+        except OverflowError:
+            period = math.inf
+        if not math.isfinite(period):
+            raise ValueError("initial orbit is not numerically representable (r^3 overflows)")
+        return period
 
     @property
     def timeout_ticks(self) -> int | None:
@@ -93,12 +109,7 @@ class Scenario(_Strict):
         orbits = getattr(self.stop, "orbits", None)
         if orbits is None:
             return None
-        c = self.constants
-        try:
-            period = keplerian_period(c.equatorial_radius + self.initial_orbit.altitude_m, c.mu)
-            ticks = self.stop.max_duration_periods * orbits * period / self.dt_s
-        except OverflowError:
-            ticks = math.inf
+        ticks = self.stop.max_duration_periods * orbits * self._nominal_period() / self.dt_s
         if not math.isfinite(ticks):
             raise ValueError("the orbits-stop tick limit is not representable")
         return math.ceil(ticks)
