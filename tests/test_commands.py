@@ -717,3 +717,97 @@ def test_unforeseen_payload_failures_are_contained_but_interrupts_propagate(monk
     monkeypatch.setattr(simulator_module, "parse_command", interrupt)
     with pytest.raises(KeyboardInterrupt):
         _sim().submit(_cmd())
+
+
+# ---------------------------------- second re-verification (M2-T3-review-01) N5, N6
+
+
+class _SelfSerializer:
+    def __init__(self, payload):
+        self.payload = payload
+
+    def to_python(self, *args, **kwargs):
+        return self.payload
+
+
+class _ThrowSerializer:
+    def to_python(self, *args, **kwargs):
+        raise RuntimeError("hostile serializer")
+
+
+class _HashBomb(str):
+    def __hash__(self):
+        raise RuntimeError("caller hash escaped")
+
+
+class _HostileKey:
+    __hash__ = object.__hash__
+
+    def __repr__(self):
+        raise RuntimeError("repr")
+
+    def __eq__(self, other):
+        raise RuntimeError("eq")
+
+
+def _forged(update, serializer=None):
+    payload = BurnCommand(**_cmd()).model_copy(update=update)
+    object.__setattr__(payload, "__pydantic_serializer__", serializer or _SelfSerializer(payload))
+    return payload
+
+
+def test_instance_serializer_hooks_cannot_bypass_validation():
+    """N5: no pydantic serialization hook of the untrusted instance is used."""
+    sim = _sim()
+    forged = _forged({"schema_version": 2, "issuer": []})
+    receipt = sim.submit(forged)
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    assert sim.propulsion_snapshot().pending_plans == ()
+    # A per-instance serializer means tampering: rejected, and its hook is never called.
+    receipt = sim.submit(_forged({}, _ThrowSerializer()))
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    assert receipt.schema_errors == ("<payload>: tampered_instance",)
+
+
+def test_receipt_intent_cannot_be_changed_through_the_submitted_instance():
+    payload = BurnCommand(**_cmd())
+    receipt = _sim().submit(payload)
+    payload.__dict__["duration_s"] = 1.0  # mutate the caller's object afterwards
+    assert receipt.command.duration_s == 77.3
+
+
+@pytest.mark.parametrize(
+    "payload_factory",
+    [
+        lambda: _forged({"command_id": _HashBomb("burn-001")}),
+        lambda: {**_cmd(), "command_id": _HashBomb("burn-001")},
+        lambda: {**_cmd(), "issuer": _HashBomb("x")},
+        lambda: {**_cmd(), _HostileKey(): 1},
+        lambda: {**_cmd(), "duration_s": type("F", (float,), {})(77.3)},
+    ],
+)
+def test_non_builtin_values_and_keys_are_rejected_without_escaping(payload_factory):
+    """N5: only exact str/int/float values and str keys reach validation; nothing echoed
+    into the receipt is a caller-defined object."""
+    sim = _sim()
+    receipt = sim.submit(payload_factory())
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    assert sim.propulsion_snapshot().pending_plans == ()
+    assert receipt.command_id is None or type(receipt.command_id) is str
+    assert receipt.issuer is None or type(receipt.issuer) is str
+    command_event(receipt).model_dump_json()
+
+
+def test_non_string_keys_are_rejected_explicitly():
+    receipt = _sim().submit({**_cmd(), _HostileKey(): 1})
+    assert receipt.schema_errors == ("<payload>: non_string_key",)
+
+
+def test_any_mapping_type_is_accepted():
+    """N6: the contract accepts mappings; they are copied into a plain dict."""
+    from collections import UserDict
+    from types import MappingProxyType
+
+    for payload in (UserDict(_cmd(command_id="u")), MappingProxyType(_cmd(command_id="m"))):
+        sim = _sim()
+        assert sim.submit(payload).status is CommandStatus.ACCEPTED

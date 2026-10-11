@@ -10,6 +10,7 @@ in front of ``submit()`` (DR-0014 section 6).
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Literal
@@ -116,30 +117,49 @@ class PayloadTypeError(ValueError):
         self.errors = (entry,)
 
 
-def parse_command(payload: object) -> BurnCommand:
-    """Validate a payload into a fresh, canonical BurnCommand (REV-T3-02; re-verification N1).
+_BUILTIN_VALUE_TYPES = (str, int, float)
 
-    Only an *exact* ``BurnCommand`` or a mapping is accepted.
-    - A command instance is read through the exact class's ``model_dump`` (never a
-      caller-overridable method) and re-validated, which also catches
-      ``model_copy(update=...)`` values that skipped validation.
-    - Any other model, including a subclass, is rejected.
-    - A mapping is copied into a plain dict before validation.
-    The result never aliases caller-owned objects.
+
+def parse_command(payload: object) -> BurnCommand:
+    """Validate a payload into a fresh, canonical BurnCommand (REV-T3-02; N1, N5, N6).
+
+    Accepted payloads are an *exact* ``BurnCommand`` or any ``Mapping``. No pydantic
+    serialization hook of an untrusted instance is used, not even through the exact
+    class: hooks such as ``__pydantic_serializer__`` can be replaced per instance.
+    - **Instance.** Its stored field values are read directly from the instance
+      ``__dict__``; ``type(payload) is BurnCommand`` is checked exactly, so no class
+      override is possible.
+    - **Other models,** including subclasses: rejected without calling their methods.
+    - **Mapping.** Copied into a plain dict.
+    - Every key must be an exact ``str`` and every value an exact ``str``/``int``/
+      ``float``. The fresh command therefore never holds caller-defined objects (e.g. a
+      ``str`` subclass with a hostile ``__hash__``) and never aliases the caller.
 
     Raises:
         ValidationError: for any schema violation.
-        PayloadTypeError: for a model that is not an exact BurnCommand.
-        Exception: any error raised by a hostile payload object; ``submit`` contains it.
+        PayloadTypeError: for a non-exact model, or a non-builtin key or value.
+        Exception: errors raised by a hostile mapping; ``submit`` contains them.
     """
     if type(payload) is BurnCommand:
-        data: object = BurnCommand.model_dump(payload, warnings=False)
+        stored = dict(object.__getattribute__(payload, "__dict__"))
+        if object.__getattribute__(payload, "__pydantic_extra__") or not set(stored) <= set(
+            BurnCommand.model_fields
+        ):
+            # Attributes beyond the declared fields (e.g. a per-instance
+            # __pydantic_serializer__) mean the instance was tampered with.
+            raise PayloadTypeError("<payload>: tampered_instance")
+        data = stored
     elif isinstance(payload, BaseModel):
         raise PayloadTypeError("<payload>: not_an_exact_BurnCommand")
-    elif isinstance(payload, dict):
+    elif isinstance(payload, Mapping):
         data = dict(payload)
     else:
-        data = payload  # non-mappings fail validation with a structured error
+        return BurnCommand.model_validate(payload)  # structured error for non-mappings
+    for key, value in data.items():
+        if type(key) is not str:
+            raise PayloadTypeError("<payload>: non_string_key")
+        if type(value) not in _BUILTIN_VALUE_TYPES:
+            raise PayloadTypeError(safe_text(f"{key}: not_a_builtin_value", 80))
     return BurnCommand.model_validate(data)
 
 
@@ -151,7 +171,7 @@ def readable_field(payload: object, name: str) -> str | None:
     if not isinstance(payload, dict):
         return None
     value = payload.get(name)
-    if not isinstance(value, str) or not _is_valid_utf8(value):
+    if type(value) is not str or not _is_valid_utf8(value):  # exact str: never alias
         return None
     if name == "command_id":
         return value if _COMMAND_ID_RE.fullmatch(value) else None
