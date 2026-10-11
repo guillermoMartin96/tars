@@ -23,6 +23,18 @@ See DR-0013 (state, derivative boundary, discontinuity handling, M1 preservation
   - ticks split at engine events;
   - M1 6-state path unchanged when no propulsion is configured.
 
+## Implementation notes (T2, `f4b9774`)
+These clarify how T2 implements the approved decisions. They are surfaced for Tech Lead review; none changes an approved boundary.
+- **Single command entry point.** `Simulator.schedule_burn(direction, ignition_t_s, duration_s, policy)` is the engine-level entry point (DR-0013 §5). It changes only the engine schedule, never r, v, mass or propellant. T3's `submit(BurnCommand) -> CommandReceipt` will wrap it, so there remains a single entry point. M1's public-API allowlist test was extended for this method and two read-only views (`propulsion_snapshot`, `engine_transitions`).
+- **Burn ordering on one engine.** Burns execute in submission order. A new burn may not ignite before the cutoff of any burn already scheduled or in progress:
+  - `engine_busy` if the conflict is with the burn in progress;
+  - `overlaps_scheduled_burn` otherwise, including a burn that would fit in an earlier gap.
+  - This keeps every accepted plan exact and immutable, since later plans were computed from the propellant left by earlier ones. Gap insertion would need re-planning and is not supported.
+- **Propellant accounting.** Sufficiency is checked against the analytic propellant remaining after all accepted burns. The integrated propellant tracks it to round-off (≤ 3e-13 kg, VAL-0012).
+- **Propellant floor (SCI-0012).** At a cutoff that empties the tank, the integrated propellant is set to exactly 0, absorbing ≤ 1e-12 kg of integration round-off. Otherwise it is clamped at ≥ 0. This is the only point where the simulator adjusts an integrated value, and it enforces a physical constraint.
+- **Ticks without engine events** integrate exactly `h = dt`, as M1 does. Coasts are therefore bit-identical to the M1 path for any dt (tested at dt = 10, 0.1, 7/3).
+- **Event times** are exact floats. A tick containing events is split into RK4 sub-steps `[t0, e1, …, t1]`; at a shared instant, cutoff is processed before ignition (back-to-back burns).
+
 ## Reasoning
 - Keeps every approved M1 boundary and byte-identical M1 output.
 - Gives exact analytic oracles (mass law, rocket equation, free-space motion).

@@ -263,3 +263,29 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - **A mutation was missing.** The mutation list above omitted stateful pointing mutants, and its "1 % slack" boundary test only probed a favourable value. The exact-boundary rule is now time-domain and tested in both directions (REV-T1-03).
   - **Some assertions were weaker than stated.** `pytest.approx`'s default absolute floor (1e-12) made several small-quantity relative checks looser than written. All checks now use `abs=0`.
   - The measured values in the table are unaffected.
+
+## VAL-0012 — T2: production simulator on the reference burn (M2; measurement, not a Proof gate)
+- **Date / revision:** 2026-10-10 / `f4b9774` (simulator); script `docs/science/experiments/m2-t2/measure_t2.py`, output `results.json`. A rerun is byte-identical on the reference host.
+- **Configuration:** DR-0010 reference case from the M1 initial state, run through the production `Simulator`:
+  - spacecraft 1000 kg dry + 300 kg propellant;
+  - 490 N / 312 s engine;
+  - prograde burn scheduled at 600 s for 77.3 s; coast to 53 700 s.
+- **References:**
+  - the VAL-0008 SciPy DOP853 final state (rtol 1e-13), whose right-hand side shares no production code;
+  - the exact Kepler propagation of the simulator's own cutoff state;
+  - analytic mass law and rocket equation.
+- **Results:**
+
+| dt [s] | vs DOP853 at 53 700 s | Coast vs Kepler from cutoff | Propellant − ṁT | Sensed Δv − rocket eq. (rel) |
+|---|---|---|---|---|
+| 20 | 6.43 m, 7.4e-3 m/s | 6.27 m | 5e-14 kg | 2.9e-13 |
+| **10** | **0.2904 m, 3.35e-4 m/s** | 0.283 m | −1.2e-13 kg | 2.3e-14 |
+| 5 | 1.47e-2 m, 1.69e-5 m/s | 1.43e-2 m | 2.8e-13 kg | 5.8e-15 |
+| 2.5 | 8.17e-4 m, 9.4e-7 m/s | 7.9e-4 m | 2.8e-13 kg | 4.6e-15 |
+
+- **Observed order** vs DOP853: 4.47, 4.31, 4.17 (20 → 2.5 s). The 20 → 10 pair is pre-asymptotic, as in M1 (DR-0008).
+- **Cross-check against the independent planning implementation (VAL-0008):** at dt = 10 s the planning script's error was 0.290353 m; the production simulator's is 0.290351 m (Δ ≈ 1.6 µm). SMA after the burn: production 6 678 658.0324 m, planning reference 6 678 658.0325 m.
+- **Interpretation:**
+  - With exact step splitting the burn contributes negligibly. The end-of-run error is the same RK4 coast error as M1 (0.298 m on the circular orbit; 0.283 m here from the cutoff state).
+  - Mass and sensed Δv are exact to round-off.
+- **Classification:** no discrepancy. **Status:** informational evidence for the M2 threshold DR (DR-0015 method). It does not approve any tolerance.
