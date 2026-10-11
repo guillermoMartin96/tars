@@ -473,6 +473,21 @@ def test_a_failed_step_leaves_engine_schedule_and_state_unchanged():
     assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + PROP)
 
 
+def test_diverging_stage_inside_a_burn_fails_as_non_finite():
+    """T4 finding: a NaN in an *intermediate* RK4 stage during a burn reached the
+    pointing law, which raised ValueError; the runner then crashed instead of
+    reporting a non_finite failure. It now fails like the coast path, atomically."""
+    force = _FailAfter(t_fail=1.5)  # the 1 -> 3 s sub-step evaluates its midpoint at 2 s
+    sim = Simulator(R0, V0, force, RK4(), 10.0, spacecraft=_spacecraft())
+    sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+    before = (_state(sim), sim.propulsion_snapshot())
+    with pytest.raises(FloatingPointError, match="non-finite state during a burn"):
+        sim.step()
+    assert sim.tick == 0 and sim.engine_transitions == ()
+    np.testing.assert_array_equal(_state(sim), before[0])
+    assert sim.propulsion_snapshot() == before[1]
+
+
 @pytest.mark.parametrize(
     "ignition",
     [-math.inf, math.inf, math.nan, "-1", True, np.bool_(True), np.array(-1.0), None, 10**1000],

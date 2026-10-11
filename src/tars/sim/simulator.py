@@ -465,6 +465,10 @@ class Simulator:
         engine, law, mdot = spacecraft.engine, burn.law, burn.plan.mass_flow_kgps
 
         def powered(t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
+            if not np.all(np.isfinite(y)):
+                # A diverging RK4 stage must fail as on the coast path (non-finite
+                # state), not as a ValueError from the pointing law (T4 finding).
+                raise FloatingPointError(f"non-finite state during a burn at t = {t!r}")
             r, v = y[:3], y[3:6]
             # RK4 stages near depletion can carry ~1e-17 kg of negative round-off;
             # the dynamics use the physical, non-negative propellant (review N4).

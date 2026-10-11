@@ -13,9 +13,9 @@ import hashlib
 import json
 import math
 from pathlib import Path
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
 
 from tars.sim.constants import EARTH_CONSTANTS, EarthConstants
 from tars.sim.propulsion import EngineSpec, PropulsionSpecError, SpacecraftSpec, TankSpec
@@ -187,10 +187,16 @@ class StopConditionV2(_StrictV2):
         return self
 
 
+def _require_int_two(value: object) -> object:
+    if type(value) is not int:  # Literal[2] alone would accept 2.0 (cf. REV-T3-06)
+        raise ValueError("schema_version must be the integer 2")
+    return value
+
+
 class ScenarioV2(Scenario):
     """Scenario schema version 2 (M2): propulsion, command timeline, duration stop."""
 
-    schema_version: Literal[2] = 2  # type: ignore[assignment]
+    schema_version: Annotated[Literal[2], BeforeValidator(_require_int_two)] = 2  # type: ignore[assignment]
     stop: StopConditionV2  # type: ignore[assignment]
     spacecraft: SpacecraftConfig | None = None
     commands: tuple[TimelineEntry, ...] = ()
