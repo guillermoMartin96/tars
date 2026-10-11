@@ -43,7 +43,8 @@ Any of these may be revisited by a later decision.
   - **Timing budget (DR-0017 B, `0e64717`; conservative evaluation after review M2-DR0017).** This replaces the provisional 1 µs bound.
     - A burn is `burn_unschedulable` if the exact rocket-equation Δv difference between the executed and intended intervals exceeds `TIMING_DELTA_V_BUDGET_MPS = 1e-7 m/s` per burn.
     - `timing_delta_v_error_mps()` (`494fa27`) returns a **guaranteed upper bound**, `a_max·|D − d| = F·|D − d|/m_end`: the actual acceleration times the executed-interval difference. Because mass only decreases, it bounds the simulator's integral of F/m.
-      - It exceeds the exact `c·|ln(m(D)/m(d))|` by a relative x/2 (≈ 1e-11 for the reference vehicle).
+      - It exceeds the integral by a relative amount that is asymptotically x/2, with x = ṁ·|dt|/m_end (≈ 1e-11 for the reference vehicle).
+      - The integral equals `c·|ln(m(D)/m(d))|` only for an unrounded mass flow and unclamped mass. With a subnormal, rounded ṁ the coefficient is F/ṁ (review N2).
       - `m_end` is a lower bound on the smaller end mass, with the cancellation uncertainty subtracted.
       - Scaling through frexp/ldexp avoids intermediate under- and overflow.
       - Outward rounding; overflow rejects.

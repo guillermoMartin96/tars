@@ -35,9 +35,11 @@ _UNIT_NORM_TOLERANCE = 1e-12
 
 # DR-0017 B (approved 2026-10-10): largest accepted delta-v error per burn caused by
 # float64 event-time representation. The engine runs for the represented interval
-# D = fl(ignition + d) - ignition instead of the intended d. The error is the exact
-# rocket-equation difference c |ln(m(D) / m(d))|, i.e. the actual thrust acceleration
-# integrated over |D - d| (first order: a_end |D - d|). 1e-7 m/s is a per-burn absolute
+# D = fl(ignition + d) - ignition instead of the intended d. The error is the thrust
+# acceleration F/m integrated over |D - d| (authoritative definition). It is bounded by
+# a_max |D - d| = F |D - d| / m_end, which is what is evaluated. (With an unrounded
+# mass flow and unclamped mass this integral equals c |ln(m(D)/m(d))|.) 1e-7 m/s is a
+# per-burn absolute
 # allocation, ~10x below the reference burn's integration velocity error at dt = 10 s
 # (1.2e-6 m/s, VAL-0008). Limitations: it bounds thrust-integrated speed change only,
 # not trajectory error (pointing and gravity also act over the mistimed interval); it
@@ -482,12 +484,17 @@ def timing_delta_v_error_mps(
     """DR-0017 B: upper bound on the delta-v error from executing ``executed_s`` instead
     of ``intended_s`` seconds of thrust.
 
-    The error is the thrust acceleration F/m integrated over the timing difference
-    |dt|. Mass only decreases while burning, so it is at most a_max |dt| = F |dt| /
-    m_end, where m_end is the end mass after the longer interval. That is the "actual
-    acceleration and executed interval" of the decision. It exceeds the exact value
-    c |ln(m(D)/m(d))| by a relative x/2, with x = mdot |dt| / m_end (~1e-11 for the
-    reference vehicle), so it is tight in practice and never an underestimate.
+    The error is, by definition, the thrust acceleration F/m integrated over the
+    timing difference |dt|, with the simulator's mass m(t) = dry + max(propellant -
+    mdot t, 0). Mass is positive and non-increasing, so the integral is at most
+    a_max |dt| = F |dt| / m_end, with m_end the end mass after the longer interval.
+    That is the "actual acceleration and executed interval" of the decision.
+
+    Only under an unrounded mass flow (F = mdot c) and unclamped mass does the integral
+    equal c |ln(m(D)/m(d))|. With a subnormal, rounded mdot the coefficient is F/mdot
+    instead (review N2). The bound exceeds the integral by a relative x/ln(1+x)
+    - 1, asymptotically x/2 for small x = mdot |dt| / m_end (~1e-11 for the reference
+    vehicle). It is therefore tight in practice and never an underestimate.
 
     The evaluation is conservative (reviews M2-DR0017 F1/N1 and adversarial search):
 
