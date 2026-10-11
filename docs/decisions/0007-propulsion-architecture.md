@@ -18,7 +18,7 @@ See DR-0013 (state, derivative boundary, discontinuity handling, M1 preservation
 - **Burn representation** (DR-0014): an immutable `BurnPlan` holds ignition time, commanded duration, cutoff time, the propellant it will use, and how it ends (`completed` | `propellant_depleted`). It is computed exactly in advance from the specs, so the simulator can split RK4 ticks at those times (DR-0013 3A).
   - Insufficient propellant is rejected by default.
   - `burn_to_depletion` must be requested explicitly.
-- **Integration** (T2, not yet authorized):
+- **Integration** (T2, implemented in `f4b9774`):
   - augmented state y = [r, v, m_prop, Δv_sensed];
   - ticks split at engine events;
   - M1 6-state path unchanged when no propulsion is configured.
