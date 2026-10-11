@@ -479,24 +479,26 @@ def timing_delta_v_error_mps(
     intended_s: float,
     executed_s: float,
 ) -> float:
-    """DR-0017 B: conservative upper estimate of the delta-v error caused by executing
-    ``executed_s`` instead of ``intended_s`` seconds of thrust.
+    """DR-0017 B: upper bound on the delta-v error from executing ``executed_s`` instead
+    of ``intended_s`` seconds of thrust.
 
-    The exact value is c |ln(m(executed) / m(intended))| with m(x) = dry + propellant -
-    mdot x: the actual thrust acceleration integrated over the timing difference. It is
-    evaluated as c log1p((F / m_end) |dt| / c), with m_end the smaller end mass, i.e. the
-    mass after the longer interval. The evaluation is conservative (review M2-DR0017 F1):
+    The error is the thrust acceleration F/m integrated over the timing difference
+    |dt|. Mass only decreases while burning, so it is at most a_max |dt| = F |dt| /
+    m_end, where m_end is the end mass after the longer interval. That is the "actual
+    acceleration and executed interval" of the decision. It exceeds the exact value
+    c |ln(m(D)/m(d))| by a relative x/2, with x = mdot |dt| / m_end (~1e-11 for the
+    reference vehicle), so it is tight in practice and never an underestimate.
 
-    - m_end is a lower bound. The cancellation in propellant - mdot x has an absolute
-      uncertainty of about ulp(propellant) + ulp(mdot x); that slack is subtracted, so
-      an ill-conditioned end mass (a huge tank on a small dry mass) cannot shrink the
-      estimate.
-    - F / m_end is formed before multiplying by dt, so the small timing contribution is
-      not lost to underflow of mdot * dt with subnormal masses.
-    - The result is inflated by 16 ulp-scale relative units for the remaining rounding.
-      Overflow yields inf (and NaN never escapes as a pass), so the caller rejects.
+    The evaluation is conservative (reviews M2-DR0017 F1/N1 and adversarial search):
 
-    Assumes both intervals lie within the depletion time (as plan_burn guarantees).
+    - m_end is a lower bound: the rounding uncertainty of propellant - mdot x is
+      subtracted (ill-conditioned for a huge tank on a small dry mass).
+    - F |dt| / m_end is formed from frexp mantissas with a single final ldexp, so no
+      intermediate under- or overflows across the float range.
+    - Outward rounding: a relative 16 ulp, plus 4 of the smallest subnormals.
+    - Overflow returns inf, so the caller rejects.
+
+    Assumes both intervals lie within the depletion time, which plan_burn guarantees.
     Limitations (DR-0017): bounds thrust-integrated speed change only, not trajectory
     error; per burn, not cumulative.
     """
@@ -507,10 +509,29 @@ def timing_delta_v_error_mps(
     burned = engine.mass_flow_kgps * longer
     slack = 2.0 * (math.ulp(propellant_kg) + math.ulp(burned))
     end_mass = dry_mass_kg + max(propellant_kg - burned - slack, 0.0)
-    c = engine.exhaust_velocity_mps
-    x = (engine.thrust_n / end_mass) * dt / c
-    error = c * math.log1p(x) * (1.0 + 16.0 * sys.float_info.epsilon)
-    return error if not math.isnan(error) else math.inf
+    bound = _scaled_ratio((engine.thrust_n, dt), (end_mass,))  # a_max * |dt|
+    bound = bound * (1.0 + 16.0 * sys.float_info.epsilon) + 4.0 * math.ulp(0.0)
+    return bound if not math.isnan(bound) else math.inf
+
+
+def _scaled_ratio(numerators: tuple[float, ...], denominators: tuple[float, ...]) -> float:
+    """prod(numerators) / prod(denominators) without intermediate under/overflow.
+
+    Mantissas from frexp lie in [0.5, 1), so their product/quotient stays in a safe
+    range; the exponent is applied once by ldexp, a single correctly rounded step
+    (into the subnormal range if needed). Overflow returns inf.
+    """
+    mantissa, exponent = 1.0, 0
+    for value in numerators:
+        m, e = math.frexp(value)
+        mantissa, exponent = mantissa * m, exponent + e
+    for value in denominators:
+        m, e = math.frexp(value)
+        mantissa, exponent = mantissa / m, exponent - e
+    try:
+        return math.ldexp(mantissa, exponent)
+    except OverflowError:
+        return math.inf
 
 
 # ------------------------------------------------------- simulator-facing state views
