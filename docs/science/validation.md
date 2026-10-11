@@ -236,6 +236,20 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - Both need re-derivation under the method chosen in **DR-0016**. Nothing has been changed.
 - **Limits:** point-mass Earth, one host, GMAT R2026a only. Aligned stepping depends on steps being MaxStep-limited, so each generated reference must verify this (per-step rows, mass, Kepler timing).
 - **Classification:** reference-tool numerical behavior (verified), not an implementation error. **Status:** REV-012 root cause resolved for evidence purposes. The comparison method for gated M2 GMAT validation awaits DR-0016.
+- **Addendum (2026-10-10): the DOP853 reference has a cross-platform precision floor of several micrometres.**
+  - Recomputing the attribution in CI gave the following GMAT − DOP853 values at 53 700 s:
+
+    | Stepping | Ubuntu x86_64 | Reference host | macOS arm64 |
+    |---|---|---|---|
+    | Natural | 1.17245 cm | 1.17260 cm | 1.17288 cm |
+    | Aligned | ~11 µm | 12.3 µm | ~15 µm |
+
+  - The GMAT reports are committed and identical everywhere. The spread is in the SciPy DOP853 reference: its adaptive step-size decisions amplify last-bit platform differences.
+  - **Interpretation:**
+    - The ≈ 1.2 cm → ≈ 10 µm improvement from aligned stepping (DR-0016) holds on every platform.
+    - The aligned residual is at the reference's own precision floor, so it bounds GMAT's disagreement from above rather than measuring it.
+  - **Consequence for T6/T7:** any GMAT-vs-DOP853 gate must not be set below the reference's demonstrated cross-platform spread (tens of µm at this horizon), unless the reference is made platform-robust.
+  - `tests/test_rev012_evidence.py` now uses bounds derived from this measured spread. Its first version assumed last-bit agreement and failed in CI from `f8e62c4`.
 
 ## VAL-0011 — T1 standalone propulsion model vs analytic and independent references (M2; unit level, not a Proof gate)
 - **Date / revision:** 2026-10-09 / `de23600` (`src/tars/sim/propulsion.py`, `tests/test_propulsion.py`)
