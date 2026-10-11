@@ -27,11 +27,11 @@ The schema is strict: no bool, string or None coercion into numbers, no NaN or i
 `Simulator.submit(command | mapping) -> CommandReceipt` (frozen).
 - It never raises for a bad command.
 - A rejected command changes **nothing**: physical state, engine schedule, burn counter, and the command-ID registry.
-- Accepted payloads are an **exact** `BurnCommand` or a mapping.
-  - Instances are read through the exact class (never a caller-overridable method) and re-validated, which also catches `model_copy` values that skipped validation.
-  - Mappings are copied into a plain dict.
-  - Subclass instances are `schema_invalid`.
-  - Receipts never alias caller-owned objects.
+- Accepted payloads are an **exact** `BurnCommand` or any `collections.abc.Mapping` (`ffa4c3c`).
+  - **Instances.** Stored field values are read directly from the instance, with no Pydantic serialization hook. Attributes beyond the declared fields mean tampering, which is `schema_invalid`.
+  - **Mappings** are copied into a plain dict.
+  - **Subclass instances** are `schema_invalid`, and none of their methods is called.
+  - **Keys and values.** Every key must be an exact `str`, and every value an exact `str`, `int` or `float` (bool and subclasses rejected). The canonical command therefore never holds or aliases caller-defined objects.
 - Any ordinary exception while handling a payload becomes `schema_invalid` (`<payload>: unprocessable`); process-control exceptions propagate (`ef0c626`).
 - **Accepted:** `status`, `command_id`, `issuer`, `command` (verbatim intent), `burn_id`, `plan` (exact executed plan), `tick`, `t`.
 - **Rejected:** `reason`, one of the approved codes below, plus `detail`.

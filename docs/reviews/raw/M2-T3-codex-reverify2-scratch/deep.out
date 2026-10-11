@@ -1,0 +1,27 @@
+atomic schema_invalid
+atomic non_positive_duration
+atomic ignition_in_past
+atomic overlaps_scheduled_burn
+atomic duplicate_command_id
+atomic engine_busy
+atomic no_propellant
+atomic insufficient_propellant
+atomic no_propulsion_configured
+atomic burn_unschedulable
+truth RHS matches prograde
+same tick wrong time accepted 620.0 743.0
+truth RHS matches retrograde
+same tick wrong time accepted 620.0 743.0
+event hash 1de569ae2c3d2fa5ef8ce1de4d6377f6dcc01d663acf77b20c233e63cb8912b6
+M1 still accepts float version 1
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t3-reverify2/repo/review_scratch/deep.py", line 37, in <module>
+    e=SpacecraftConfigured(tick=0,t=0.,dry_mass_kg=1.,propellant_kg=1.,thrust_n=1.,isp_s=1.,standard_gravity_mps2=1.,exhaust_velocity_mps=1.,mass_flow_kgps=1.,timing_delta_v_budget_mps=1.,direction_laws=('\ud800',))
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t3-reverify2/repo/.venv/lib/python3.12/site-packages/pydantic/main.py", line 263, in __init__
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+pydantic_core._pydantic_core.ValidationError: 1 validation error for SpacecraftConfigured
+direction_laws.0
+  Value error, string must be valid Unicode [type=value_error, input_value='\ud800', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error

@@ -1,0 +1,93 @@
+import sys
+from collections import UserDict
+from types import MappingProxyType
+from collections.abc import Mapping
+sys.path.insert(0, 'tests')
+from test_commands import _sim, _cmd, _sample_events, APPROVED_REJECTION_CODES
+from tars.sim.commands import BurnCommand
+from tars.sim.burn_events import command_event, spacecraft_configured_event
+from test_commands import ENGINE, DRY, PROP
+from tars.sim.propulsion import SpacecraftSpec, TankSpec
+from pydantic import ValidationError
+
+def fingerprint(s):
+    return (s._y.tobytes(), s._tick, tuple(s._pending), s._active, s._burn_count, s._committed_propellant_kg, frozenset(s._used_command_ids), s.engine_transitions)
+def probe(name,p):
+    s=_sim(); before=fingerprint(s)
+    try:
+        r=s.submit(p)
+        print(name, 'status',r.status,'reason',r.reason,'alias',r.command is p,'canonical',type(r.command).__name__)
+        if r.reason: assert fingerprint(s)==before
+        command_event(r).model_dump_json()
+        return r,s
+    except BaseException as e:
+        print(name,'ESCAPES',type(e).__name__,'atomic',fingerprint(s)==before)
+        return None,s
+
+class Serializer:
+    def __init__(self,p): self.p=p
+    def to_python(self,*a,**k): return self.p
+p=BurnCommand(**_cmd()).model_copy(update={'schema_version':2,'issuer':[]})
+object.__setattr__(p,'__pydantic_serializer__',Serializer(p))
+r,s=probe('forged exact serializer returns self',p)
+if r and r.command:
+    p.__dict__['duration_s']=1.0
+    print('forged alias mutation',r.command.duration_s,r.plan.commanded_duration_s)
+class RaiseSerializer:
+    def to_python(self,*a,**k): raise RuntimeError('serializer')
+p=BurnCommand(**_cmd());object.__setattr__(p,'__pydantic_serializer__',RaiseSerializer());probe('raising exact serializer',p)
+for updates in ({'issuer':[]},{'schema_version':2},{'duration_s':'bad'},{'command_id':[]}):
+    probe('ordinary forged '+str(list(updates)),BurnCommand(**_cmd()).model_copy(update=updates))
+class Hostile:
+    def __getattribute__(self,n): raise RuntimeError('getattribute')
+    def __eq__(self,o): raise RuntimeError('eq')
+    def __hash__(self): raise RuntimeError('hash')
+    def __repr__(self): raise RuntimeError('repr')
+class Spoof:
+    @property
+    def __class__(self): return BurnCommand
+class BadDict(dict):
+    def keys(self): raise RuntimeError('keys')
+    def __iter__(self): raise RuntimeError('iter')
+    def __getitem__(self,k): raise RuntimeError('getitem')
+    def get(self,k,*a): raise RuntimeError('get')
+class BadMap(Mapping):
+    def __iter__(self): raise RuntimeError('iter')
+    def __len__(self): raise RuntimeError('len')
+    def __getitem__(self,k): raise RuntimeError('getitem')
+class ControlMap(Mapping):
+    def __iter__(self): raise KeyboardInterrupt()
+    def __len__(self): return 1
+    def __getitem__(self,k): raise KeyboardInterrupt()
+class S(str):
+    def __hash__(self): raise RuntimeError('hash')
+    def __eq__(self,o): raise RuntimeError('eq')
+    def __repr__(self): raise RuntimeError('repr')
+    def encode(self,*a,**k): raise RuntimeError('encode')
+class F(float):
+    def __float__(self): raise RuntimeError('float')
+    def __eq__(self,o): raise RuntimeError('eq')
+for name,p in [('hostile object',Hostile()),('spoof class',Spoof()),('dict overridden all methods',BadDict(_cmd())),('UserDict',UserDict(_cmd())),('mappingproxy',MappingProxyType(_cmd())),('hostile Mapping',BadMap()),('control Mapping',ControlMap())]: probe(name,p)
+for key in ('command_id','issuer','direction','on_insufficient_propellant','type'):
+    val=_cmd().get(key,{'on_insufficient_propellant':'reject','type':'BurnCommand'}.get(key))
+    probe('hostile str '+key,_cmd(**{key:S(val)}))
+for key in ('duration_s','ignition_t_s'): probe('hostile float '+key,_cmd(**{key:F(77.3)}))
+for key in ('issuer','command_id','duration_s','direction'): probe('hostile value '+key,_cmd(**{key:Hostile()}))
+probe('hostile key',{Hostile():1}) if False else None
+for field in ('issuer','duration_s'):
+    probe('huge value '+field,_cmd(**{field: 'a'*1000000 if field=='issuer' else 10**10000}))
+nested=[]; cur=nested
+for _ in range(2000): nxt=[];cur.append(nxt);cur=nxt
+probe('deep nested',_cmd(issuer=nested))
+probe('many extras',dict(_cmd(),**{'extra'+str(i):nested for i in range(10000)}))
+probe('precedence no propulsion',_cmd(duration_s=0,ignition_t_s=-1))
+r=_sim(spacecraft=False).submit(_cmd(duration_s=0,ignition_t_s=-1));assert r.reason.value=='no_propulsion_configured';print('N4 precedence PASS')
+events=list(_sample_events().values())+[spacecraft_configured_event(SpacecraftSpec(DRY,ENGINE,TankSpec(PROP)),tick=0,t=0.)]
+for e in events:
+    d=e.model_dump(); assert e.__class__.model_json_schema()['properties']['schema_version']['const']==1
+    for field in ('issuer','detail','schema_errors','direction_laws'):
+        if field not in d:continue
+        value=('ok','\ud800') if field in ('schema_errors','direction_laws') else '\ud800'
+        try:e.__class__.model_validate({**d,field:value});print('UNICODE FAIL',e.type,field)
+        except ValidationError:print('unicode rejected',e.type,field)
+print('all schemas generated',len(events))

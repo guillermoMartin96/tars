@@ -126,10 +126,52 @@ All seven are **`ACCEPTED`**. Resolutions are pending the fix commit.
 - M1 Proof PASS;
 - determinism `7a4e1877…`.
 
+## Addendum 2: second reviewer re-verification (`79d9d9b`)
+**Reviewer:** Codex `gpt-6.1-sol`, session `01a128a4-7f1a-7222-8571-8df963273497`.  
+**Raw:** `raw/M2-T3-codex-reverify2.md`; probes alongside.  
+**Verdict:** FAIL.
+- N3 and N4 RESOLVED; N1 and N2 PARTIAL (see N5).
+- The reviewer confirmed:
+  - every rejection path is atomic;
+  - all ten codes are exercised;
+  - intent and outcome are correct;
+  - thrust telemetry matches the RHS;
+  - M1 and T2 compatibility; no new permissions.
+
+### N5 — Instance-level serializer bypasses the exact-command boundary
+**Severity:** High  
+**Reviewer claim:**
+- `BurnCommand.model_dump(instance)` still uses the instance's own `__pydantic_serializer__`. A forged exact instance whose serializer returns itself was accepted, unvalidated and aliased.
+- A forged command ID with a hostile `__hash__` raised outside the containment.
+
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `ffa4c3c`.
+- No Pydantic serialization of untrusted instances at all. Stored fields are read from the instance `__dict__`, and extra attributes are rejected as tampering.
+- Keys must be exact `str` and values exact `str`/`int`/`float`. Echoed IDs and issuers must be exact `str`.
+- Tests:
+  - `test_instance_serializer_hooks_cannot_bypass_validation` (self-returning and throwing serializers);
+  - `test_receipt_intent_cannot_be_changed_through_the_submitted_instance`;
+  - `test_non_builtin_values_and_keys_are_rejected_without_escaping` (hash-bomb `str` subclass in instance and mapping, hostile key, `float` subclass);
+  - `test_non_string_keys_are_rejected_explicitly`.
+- The reviewer's `followup` probe no longer reaches acceptance: the forged command is rejected.
+- Mutation:
+  - removing the builtin-type check, the key check, the tamper check or the exact-`str` echo fails tests;
+  - reverting to `BurnCommand.model_dump` is equivalent once the tamper check exists, because the class is exact and per-instance hooks are rejected first.
+
+### N6 — Valid non-dict mappings contradicted the contract
+**Severity:** Medium  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `ffa4c3c`. Any `Mapping` is copied into a plain dict. Test `test_any_mapping_type_is_accepted` (`UserDict`, `MappingProxyType`); a dict-only mutant fails it.
+
+**Re-test at `ffa4c3c`:**
+- 564 tests pass; ruff clean;
+- M1 Proof PASS; GMAT compare PASS;
+- determinism and cross-platform bit-identical to `7a4e1877…`.
+
 ## Proof gate
-- [x] Every finding dispositioned (REV-T3-01…07, N1–N4)
-- [x] High findings resolved (REV-T3-01, REV-T3-02/N1)
+- [x] Every finding dispositioned (REV-T3-01…07, N1–N6)
+- [x] High findings resolved (REV-T3-01, REV-T3-02, N1, N5)
 - [x] Fixes re-tested by the implementer
-- [ ] Reviewer re-verification of N1–N4 (requested)
+- [ ] Reviewer re-verification of N5–N6 (requested)
 
 **Review gate result:** BLOCKED, pending re-verification.
