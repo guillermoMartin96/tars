@@ -86,10 +86,50 @@ All seven are **`ACCEPTED`**. Resolutions are pending the fix commit.
 - M1 Proof PASS; GMAT compare PASS;
 - determinism and cross-platform bit-identical to `7a4e1877…`.
 
-## Proof gate
-- [x] Every finding dispositioned
-- [x] High findings resolved (`defd23f`)
-- [x] Fixes re-tested by the implementer
-- [ ] Reviewer re-verification (requested)
+## Addendum: reviewer re-verification (`1b2e8ed`)
+**Reviewer:** Codex `gpt-6.1-sol`, session `01a1289e-3220-7180-9781-b42ae622670f`.  
+**Raw:** `raw/M2-T3-codex-reverify.md`; probes alongside.  
+**Verdict:** FAIL.
+- REV-T3-01, 03, 04, 05, 06 and 07 RESOLVED; REV-T3-02 PARTIAL.
+- The reviewer qualified the implementer's equivalence claim for `safe_text`: it is equivalent only on the tested rejection paths, not globally. That is why its direct contract test exists.
 
-**Review gate result:** BLOCKED.
+### N1 — Overridden `model_dump()` restores the validation and aliasing bypass
+**Severity:** High  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `ef0c626`.
+- Only an exact `BurnCommand` is accepted. It is read via `BurnCommand.model_dump(instance)`, which a subclass cannot override. Any other model is `schema_invalid`, and none of its methods is called.
+- Tests: `test_overridden_model_dump_cannot_bypass_validation`, `test_only_exact_burn_commands_or_plain_mappings_are_accepted`. Trusting `model_dump` fails 2 tests.
+
+### N2 — Payload failures could escape `submit()`
+**Severity:** Medium  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `ef0c626`.
+- Ordinary exceptions from payload handling and from diagnostic echo are contained into `schema_invalid`; process-control exceptions propagate.
+- Echo reads only from plain dicts.
+- A dict subclass is copied from its storage without calling its overridden methods, so its valid content is accepted safely.
+- Tests: `test_hostile_payloads_never_escape_submit` (4 payload kinds), and `test_unforeseen_payload_failures_are_contained_but_interrupts_propagate`, which injects a failure. Mutants that remove the containment or swallow `BaseException` fail.
+
+### N3 — M2 event strings could validate but fail serialization
+**Severity:** Medium  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `ef0c626`.
+- `SafeStr` (valid Unicode) applies to `issuer`, `detail`, `schema_errors` elements and `direction_laws` elements. M1 schemas are unchanged.
+- Tests: `test_m2_event_strings_must_be_valid_unicode` (4 cases), `test_spacecraft_event_direction_laws_must_be_valid_unicode`. Removing `SafeStr` fails 5 tests.
+
+### N4 — Documented precedence omitted the configuration check
+**Severity:** Low  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** The contract now lists `no_propulsion_configured` third, matching T2 behavior. Test `test_no_propulsion_configured_precedes_command_checks`.
+
+**Re-test at `ef0c626`:**
+- 555 tests pass; ruff clean;
+- M1 Proof PASS;
+- determinism `7a4e1877…`.
+
+## Proof gate
+- [x] Every finding dispositioned (REV-T3-01…07, N1–N4)
+- [x] High findings resolved (REV-T3-01, REV-T3-02/N1)
+- [x] Fixes re-tested by the implementer
+- [ ] Reviewer re-verification of N1–N4 (requested)
+
+**Review gate result:** BLOCKED, pending re-verification.

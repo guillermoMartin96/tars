@@ -1,0 +1,17 @@
+import sys,types
+from pathlib import Path
+from pydantic import ValidationError
+source=Path('src/tars/sim/commands.py').read_text()
+start=source.index('    @field_validator("issuer")')
+end=source.index('\n\nclass CommandStatus',start)
+mutants={'no_issuer_validator':source[:start]+source[end:], 'no_safe_text_sanitizer':source.replace('text.encode("utf-8", "backslashreplace").decode("utf-8")','text')}
+payloads=[{'issuer':'\ud800'},{'command_id':'ok','issuer':'\ud800'},{'\ud800':1},{'command_id':'ok','issuer':'x','unexpected\udfff':1}]
+for name,code in mutants.items():
+ m=types.ModuleType(name);sys.modules[name]=m;exec(compile(code,name,'exec'),m.__dict__)
+ for p in payloads:
+  try:m.parse_command(p);print(name,'UNEXPECTED ACCEPT')
+  except ValidationError as e:
+   errors=m.schema_errors(e)
+   print(name,ascii(errors));' '.join(errors).encode('utf8')
+ try:m.safe_text('\ud800').encode('utf8'); print(name,'direct sanitizer passes')
+ except UnicodeEncodeError: print(name,'direct sanitizer FAILS; not globally equivalent')

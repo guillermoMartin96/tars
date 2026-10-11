@@ -27,7 +27,12 @@ The schema is strict: no bool, string or None coercion into numbers, no NaN or i
 `Simulator.submit(command | mapping) -> CommandReceipt` (frozen).
 - It never raises for a bad command.
 - A rejected command changes **nothing**: physical state, engine schedule, burn counter, and the command-ID registry.
-- Every submission is re-validated into a fresh canonical `BurnCommand`. That includes `BurnCommand` instances, subclasses and `model_copy` results, so receipts never alias caller-owned objects.
+- Accepted payloads are an **exact** `BurnCommand` or a mapping.
+  - Instances are read through the exact class (never a caller-overridable method) and re-validated, which also catches `model_copy` values that skipped validation.
+  - Mappings are copied into a plain dict.
+  - Subclass instances are `schema_invalid`.
+  - Receipts never alias caller-owned objects.
+- Any ordinary exception while handling a payload becomes `schema_invalid` (`<payload>: unprocessable`); process-control exceptions propagate (`ef0c626`).
 - **Accepted:** `status`, `command_id`, `issuer`, `command` (verbatim intent), `burn_id`, `plan` (exact executed plan), `tick`, `t`.
 - **Rejected:** `reason`, one of the approved codes below, plus `detail`.
   - For a schema-valid command: `command` (verbatim intent).
@@ -39,10 +44,11 @@ The schema is strict: no bool, string or None coercion into numbers, no NaN or i
 **Precedence** (a command failing several rules reports the first):
 1. schema;
 2. duplicate command ID (already used by an **accepted** command);
-3. non-positive duration;
-4. ignition in the past;
-5. engine conflicts (`engine_busy`, `overlaps_scheduled_burn`);
-6. propellant and schedulability (`no_propellant`, `insufficient_propellant`, `burn_unschedulable`).
+3. no propulsion configured (`no_propulsion_configured`; checked first by the T2 engine path);
+4. non-positive duration;
+5. ignition in the past;
+6. engine conflicts (`engine_busy`, `overlaps_scheduled_burn`);
+7. propellant and schedulability (`no_propellant`, `insufficient_propellant`, `burn_unschedulable`).
 
 Engine-level `schedule_burn` (the T2 interface, unchanged) follows the same order from step 3.
 
@@ -54,7 +60,7 @@ Engine-level `schedule_burn` (the T2 interface, unchanged) follows the same orde
 
 Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries `command_id` (command-ID pattern) when the burn came from `submit()`. Burns from engine-level `schedule_burn` (the exact T2 signature, which takes no command ID) have `command_id: null`. Both ID formats are enforced in the event schemas.
 
-## Events (all `schema_version: 1`, strict, frozen, finite; vectors are 3-tuples)
+## Events (all `schema_version: 1`, strict, frozen, finite; vectors are 3-tuples; free-form strings valid Unicode)
 | Event | Built from | Commanded intent | Executed outcome |
 |---|---|---|---|
 | `SpacecraftConfigured` | `SpacecraftSpec` | — | configuration, mass flow, DR-0017 budget |
