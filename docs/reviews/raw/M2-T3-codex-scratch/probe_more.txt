@@ -1,0 +1,11 @@
+all seven + M1 round-trip: ['SpacecraftConfigured', 'CommandAccepted', 'CommandRejected', 'BurnStarted', 'BurnEnded', 'PropellantDepleted', 'PropulsionSampled', 'StateSampled']
+correctly rejects {'type': 'Unknown'}
+correctly rejects {'schema_version': 2}
+correctly rejects {'t': inf}
+correctly rejects {'tick': True}
+surrogate python rejected
+surrogate json rejected
+mutable receipt issuer: ['rewritten'] ['rewritten']
+validated subclass receipt alias: {'schema_version': 1, 'type': 'BurnCommand', 'command_id': 'burn-001', 'issuer': 'scenario_timeline', 'ignition_t_s': 600.0, 'direction': 'prograde', 'duration_s': 77.3, 'on_insufficient_propellant': 'reject', 'annotations': ['later']}
+finite replacement in non-finite test still rejects: ['extra_forbidden']
+M2 event stream sha256 e9a27284621466eb94ce4979855b06b91191d5e1478f2aa841f6817c4eeeab58
