@@ -70,11 +70,54 @@ The reviewer confirmed no bypass of the check through the public simulator path,
 - Determinism and cross-platform bit-identical to `7a4e1877…`.
 - VAL-0012 unchanged.
 
+## Addendum: reviewer re-verification (\`c64e73d\`)
+**Reviewer:** Codex \`gpt-6.1-sol\`, session \`01a1287f-3d48-73c2-a125-d00c2d533b81\`.  
+**Raw:** \`raw/M2-DR0017-codex-reverify.md\`; prompt and scripts are alongside.  
+**Verdict:** FAIL.
+- F2 and F3 RESOLVED; safeguards 3–7 MET.
+- No false rejections in 50 005 reference cases up to 1e9 s.
+- All 15 mutations caught; M1 bit-identical.
+- Safeguard 1 NOT MET and F1 PARTIAL, because of N1.
+
+### N1 — Subnormal logarithm argument defeats the conservative estimate
+**Severity:** Medium  
+**Reviewer claim:**
+- With Isp ≈ 1e307 s, `(F/m)·dt/c` is subnormal and loses relative precision.
+- A burn with exact error 1.0000000005e-7 m/s was accepted as 9.99999998e-8 m/s and executed. The excess is ~5e-17 m/s, physically negligible, but the safeguard is unconditional.
+- The reviewer's broader search also found underestimates in both interval orderings.
+
+**Implementer disposition:** \`ACCEPTED\`  
+**Implementer reasoning:**
+- The implementer's own seeded search over the full float range found 2 112 underestimates in 30 000 cases at \`c64e73d\`, and 111 after a first scaling fix.
+- Root causes:
+  - subnormal log arguments;
+  - intermediate under- and overflow;
+  - in subnormal-ṁ regimes, F/ṁ ≠ Isp·g0, so the "exact" log form is not even the quantity the simulator integrates.
+- The robust answer is the decision's own quantity. Actual acceleration × executed-interval difference, F·|dt|/m_end, is a guaranteed upper bound on ∫F/m dt, and it is tight in practice.
+
+**Resolution/evidence:** Fixed in \`494fa27\`.
+- Bound `a_max·|dt|`, with:
+  - an end-mass lower bound;
+  - frexp/ldexp scaling;
+  - outward rounding (16 ulp + 4 smallest subnormals);
+  - overflow → inf → reject.
+- Tests:
+  - the reviewer's N1 configuration is rejected through the simulator;
+  - exact ≤ bound ≤ exact·(1+x) against a 60-digit integral of F/m;
+  - a seeded adversarial property over the full float range (3 000 cases in CI; 0 underestimates in 90 000 offline over 3 seeds);
+  - no false rejection of the reference vehicle up to 1e9 s (5 000 cases; maximum 2.5e-8 m/s).
+- Mutation: removing any component of the bound (end-mass choice, slack, scaling, subnormal floor, relative inflation), or shifting the budget or comparison by 1 %, fails tests.
+- Re-test:
+  - 473 tests pass; ruff clean;
+  - M1 Proof PASS; GMAT compare PASS;
+  - determinism and cross-platform bit-identical to \`7a4e1877…\`;
+  - VAL-0012 unchanged.
+
 ## Proof gate
 - [x] No Critical findings
-- [x] High finding F1 fixed
+- [x] High finding F1 and Medium N1 fixed (\`c64e73d\`, \`494fa27\`)
 - [x] Every finding dispositioned
 - [x] Accepted fixes re-tested by the implementer
-- [ ] Reviewer re-verification (requested)
+- [ ] Reviewer re-verification of N1 (requested)
 
 **Review gate result:** BLOCKED, pending re-verification.

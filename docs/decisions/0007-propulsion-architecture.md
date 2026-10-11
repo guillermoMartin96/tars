@@ -42,11 +42,13 @@ Any of these may be revisited by a later decision.
 - **Represented burn interval (REV-T2-03, `03f6e4b`).** Event times are absolute float64 values, so the engine runs for exactly `cutoff − ignition`. The plan's `burn_duration_s` and consumption describe that represented interval.
   - **Timing budget (DR-0017 B, `0e64717`; conservative evaluation after review M2-DR0017).** This replaces the provisional 1 µs bound.
     - A burn is `burn_unschedulable` if the exact rocket-equation Δv difference between the executed and intended intervals exceeds `TIMING_DELTA_V_BUDGET_MPS = 1e-7 m/s` per burn.
-    - `timing_delta_v_error_mps()` gives a **conservative upper estimate** of `c·|ln(m(D)/m(d))|`, evaluated as `c·log1p((F/m_end)·|D − d|/c)`, and the plan records it:
-      - `m_end` is a lower bound on the smaller end mass, with the cancellation uncertainty subtracted;
-      - forming `F/m_end` first avoids underflow;
-      - a small relative inflation covers residual rounding;
-      - overflow rejects.
+    - `timing_delta_v_error_mps()` (`494fa27`) returns a **guaranteed upper bound**, `a_max·|D − d| = F·|D − d|/m_end`: the actual acceleration times the executed-interval difference. Because mass only decreases, it bounds the simulator's integral of F/m.
+      - It exceeds the exact `c·|ln(m(D)/m(d))|` by a relative x/2 (≈ 1e-11 for the reference vehicle).
+      - `m_end` is a lower bound on the smaller end mass, with the cancellation uncertainty subtracted.
+      - Scaling through frexp/ldexp avoids intermediate under- and overflow.
+      - Outward rounding; overflow rejects.
+      - Adversarial checking found 0 underestimates in 90 000 full-float-range cases, and 0 false rejections of the reference vehicle up to 1e9 s.
+    - The plan records the bound as `timing_delta_v_error_mps`.
     - `schedule_burn` always applies it with the spacecraft's dry mass.
     - It bounds Δv, not trajectory error.
   - **Never past depletion (N1, `9789603`; N4/N5, `87f217d`):** if rounding puts the cutoff after the depletion time, it steps back to the latest representable time not after depletion.

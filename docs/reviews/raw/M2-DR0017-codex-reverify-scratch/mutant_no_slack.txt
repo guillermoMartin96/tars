@@ -1,0 +1,75 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 85%]
+................................F....F                                   [100%]
+=================================== FAILURES ===================================
+_ test_timing_error_is_never_underestimated_at_arithmetic_extremes[0.0012764678484075565-0.008243078924665448-0.32186917193715897-7.460733292860184e+16-4.81793673421924e+17-4.817936734219239e+17] _
+
+thrust = 0.0012764678484075565, c = 0.008243078924665448
+dry = 0.32186917193715897, prop = 7.460733292860184e+16
+intended = 4.81793673421924e+17, executed = 4.817936734219239e+17
+
+    @pytest.mark.parametrize(
+        ("thrust", "c", "dry", "prop", "intended", "executed"),
+        [
+            # F1 cancellation (reviewer): huge tank, small dry mass, end mass ill-conditioned
+            (3e-7, 3e-7, 3.0, 1e16, 9999999999999998.0, 9999999999999996.0),
+            # F1 underflow (reviewer): subnormal masses, mdot * dt underflows
+            (1e-280, 1e20, 1e-310, 1e-310, 1e-11, 1.0000000000000004e-11),
+            # cancellation where an unslackened end mass underestimates by ~38 % (found by
+            # seeded search; the slack in the end-mass lower bound is required)
+            (
+                0.0012764678484075565,
+                0.0008405601224338024 * STANDARD_GRAVITY,
+                0.32186917193715897,
+                7.460733292860184e16,
+                4.81793673421924e17,
+                4.817936734219239e17,
+            ),
+            # dt underflow with ordinary vehicle (error is genuinely negligible)
+            (490.0, 312.0 * 9.80665, DRY, PROP, 5e-324, 1e-323),
+        ],
+    )
+    def test_timing_error_is_never_underestimated_at_arithmetic_extremes(
+        thrust, c, dry, prop, intended, executed
+    ):
+        engine = EngineSpec(thrust_n=thrust, isp_s=c / STANDARD_GRAVITY)
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+        assert not math.isnan(got)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))
+E       AssertionError: assert Decimal('0.003911278625289039100054733211209168075583875179290771484375') >= (Decimal('0.00628815008003821998987594441154325251969463350391385474714483') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0.003911278625289039100054733211209168075583875179290771484375') = Decimal(0.003911278625289039)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:981: AssertionError
+___ test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses ___
+
+    def test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses():
+        """F1 property: over seeded random huge-tank / small-dry-mass configurations near
+        depletion, the conservative estimate is never below the exact error."""
+        import random
+    
+        rng = random.Random(7)
+        checked = 0
+        while checked < 1500:
+            prop, dry = 10 ** rng.uniform(10, 17), 10 ** rng.uniform(-1, 2)
+            engine = EngineSpec(10 ** rng.uniform(-8, 2), 10 ** rng.uniform(-9, 3))
+            t_dep = prop / engine.mass_flow_kgps
+            intended = t_dep * (1 - 10 ** rng.uniform(-17, -14))
+            executed = math.nextafter(intended, 0.0)
+            if not (0.0 < executed <= t_dep and intended <= t_dep):
+                continue
+            exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+            got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+>           assert Decimal(got) >= exact * (1 - Decimal("1e-15")), (engine, dry, prop, intended)
+E           AssertionError: (EngineSpec(thrust_n=0.03231057824329872, isp_s=7.400063390597016e-09), 0.2834963826558839, 1848542133548.7454, 4151841.245870443)
+E           assert Decimal('5.287077584691967092493086973319376016544612895131649565882980823516845703125E-11') >= (Decimal('5.28793355404633115157571736099294372697062156213076022183153E-11') * (1 - Decimal('1E-15')))
+E            +  where Decimal('5.287077584691967092493086973319376016544612895131649565882980823516845703125E-11') = Decimal(5.287077584691967e-11)
+E            +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:1051: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_at_arithmetic_extremes[0.0012764678484075565-0.008243078924665448-0.32186917193715897-7.460733292860184e+16-4.81793673421924e+17-4.817936734219239e+17]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses
+2 failed, 252 passed in 1.52s

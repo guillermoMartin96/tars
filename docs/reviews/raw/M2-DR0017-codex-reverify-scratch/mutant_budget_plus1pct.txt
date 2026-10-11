@@ -1,0 +1,45 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 85%]
+...................................FF.                                   [100%]
+=================================== FAILURES ===================================
+___________________ test_timing_budget_is_the_approved_value ___________________
+
+    def test_timing_budget_is_the_approved_value():
+>       assert TIMING_DELTA_V_BUDGET_MPS == APPROVED_TIMING_BUDGET_MPS
+E       assert 1.01e-07 == 1e-07
+
+tests/test_simulator_propulsion.py:1002: AssertionError
+________________ test_classification_is_tight_around_the_budget ________________
+
+    def test_classification_is_tight_around_the_budget():
+        """F2: scan representation errors for a high-acceleration vehicle; many cases fall
+        within a factor of 2 of the 1e-7 m/s budget. Accept iff the exact error is within
+        budget, allowing only the conservative evaluation margin (1e-9 relative)."""
+        engine, dry, prop = EngineSpec(thrust_n=2.0e3, isp_s=300.0), 10.0, 50.0
+        near = 0
+        n = 4000
+        for k in range(n):
+            ignition = 10.0 ** (7.5 + k / n)  # ulp(t) ~ 4e-9 .. 1.5e-8 s
+            duration = 0.1 + k * (0.4 / n)
+            cutoff = ignition + duration
+            executed = cutoff - ignition
+            exact = float(_exact_timing_dv_error(engine, dry, prop, duration, executed))
+            if 0.5 * APPROVED_TIMING_BUDGET_MPS <= exact <= 2.0 * APPROVED_TIMING_BUDGET_MPS:
+                near += 1
+            try:
+                plan_burn(engine, prop, ignition, duration, dry_mass_kg=dry)
+                accepted = True
+            except BurnRejectedError as err:
+                assert err.reason is BurnRejection.BURN_UNSCHEDULABLE
+                accepted = False
+            if exact > APPROVED_TIMING_BUDGET_MPS:
+>               assert not accepted, (ignition, duration, exact)
+E               AssertionError: (34853789.18383514, 0.1169, 1.002686089291069e-07)
+E               assert not True
+
+tests/test_simulator_propulsion.py:1027: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_timing_budget_is_the_approved_value
+FAILED tests/test_simulator_propulsion.py::test_classification_is_tight_around_the_budget
+2 failed, 252 passed in 1.65s
