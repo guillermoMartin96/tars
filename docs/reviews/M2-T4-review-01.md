@@ -162,3 +162,19 @@ All are **`ACCEPTED`**:
 **Tests:** the four reviewer reproducers end as recorded `non_finite` failures at tick 0 with nothing committed; simulator unit tests for Python overflow and norm overflow; K2 and K5 schema tests for both versions.
 
 **Mutations:** removing each guard fails its tests (K1: 3, K3: 1, K4: 1, K2: 2, K5: 2).
+
+## Re-verification 4 (`ddf3f35`): final
+**Reviewer:** Codex, session `01a12bec-aac4-7d11-9b17-ae683ddb6f86`. **Raw:** `raw/M2-T4-codex-reverify4.md`; artifacts in `raw/M2-T4-codex-reverify4-scratch/`.
+
+**Verdict: PASS (unconditional).**
+- F1–F5, N1, M1 and K1–K5 are all **RESOLVED**. Every reproducer ends either as a validation error (exit 2) or as a recorded `non_finite` failure with a complete, hash-verified log (exit 1). None produces a traceback.
+- The 4,728-case arithmetic sweep finds no uncaught exception.
+- 705 tests pass; the M1 hash is exact; M1 Proof passes; the slice is repeatable.
+- No Critical, High or Medium issue remains.
+
+**Reviewer notes, acknowledged (no action):**
+- **Broad catch.** Catching `OverflowError`/`ZeroDivisionError` during integration could classify a future programming error of those types as `non_finite`. None exists in normal operation, other exceptions still propagate (verified), and the alternative is a crash. Kept, and documented in the contract.
+- **Norm guard.** NumPy's norm overflows for some representable extreme vectors (components above about 1e154). The guard therefore rejects states far outside any physically meaningful Earth-orbit state.
+
+## Gate
+**PASS.** All findings are dispositioned `ACCEPTED` and resolved, and the final independent verdict is an unconditional PASS. CI is green on ubuntu-latest and macos-latest at `ddf3f35` (run 38158129299).

@@ -1,4 +1,4 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T3 complete)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T4 complete)
 
 **Milestone result:** not yet claimed. M2 Proof (P1–P12, `docs/milestones/M2-propulsion.md` §10) is evaluated at T8.
 - This record collects completed task evidence only (REV-013 lesson).
@@ -42,6 +42,45 @@
   - T2 interfaces unchanged (`schedule_burn` exact signature; snapshot and transition fields additive with defaults);
   - M1 golden hash `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` unchanged; M1 Proof PASS.
 - **Out of scope / not authorized:** event emission and scenario timeline (T4); abort/cancel and Δv-target commands; crew permissions.
+
+## T4 — Scenario timeline, runner event emission, duration stop: COMPLETE (2026-10-11)
+- **Final revision:** `ddf3f35`. CI is green on ubuntu-latest x86_64 and macos-latest arm64 (run 38158129299). CI covers lint, 705 tests, cross-process determinism, cross-platform agreement with the M1 golden state, GMAT comparison and M1 Proof.
+- **Scope delivered:**
+  - scenario schema version 2 (`ScenarioV2`):
+    - an optional spacecraft;
+    - a command timeline of raw payloads passed verbatim to `submit()`;
+    - `stop.duration_s` or an orbits stop;
+    - an exact tick grid;
+  - runner emission of all seven T3 event types in a fixed, documented order and cadence;
+  - correlation of command IDs and burn IDs through every event;
+  - commanded intent kept separate from executed outcome;
+  - stop semantics: a burn crossing the stop is an observation horizon, under DR-0018 (open);
+  - numerical failures recorded as `non_finite`;
+  - CLI v2 summary with commit-marker publication;
+  - vertical-slice scenario `scenarios/m2_prograde_burn.json`.
+- **Vertical slice (DR-0010 A), evidence for P1:**
+  - ignition at 600.0 s (tick 60) and cutoff at 677.3 s (tick 68), with `end_cause: completed`;
+  - executed duration 77.29999999999995 s (the represented interval);
+  - DR-0017 timing bound 1.6e-14 m/s (a Δv bound, not a trajectory bound);
+  - propellant used 12.3794 kg, within 9e-15 of the plan;
+  - sensed Δv 29.2758 m/s, within 2.3e-14 of the rocket equation;
+  - orbit 250.0 × 351.0 km; `success` at 53 700 s with 9 node passages;
+  - events sha256 `42316356…` (1814 events), byte-identical across repeated runs and processes.
+  - Precise P2–P4 metrics are T5 validators.
+- **M1 regression:**
+  - golden event-log sha256 `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` is unchanged on the reference host;
+  - CI hosts stay within the approved cross-platform bounds;
+  - M1 Proof passes against the unchanged `proof/thresholds/m1.json`, and the GMAT comparison passes;
+  - the v1 scenario hash and the M1 timeout limit (5908 ticks) are unchanged;
+  - a v2 scenario without propulsion reproduces the M1 events.
+- **Decisions:** DR-0014 amendment (T3 semantics confirmed 2026-10-11); DR-0018 (open, blocks nothing); ADR-0007 T4 notes. **Contract:** `docs/contracts/m2-commands-and-events.md` §"Scenario timeline and emission (T4)".
+- **Review:** `docs/reviews/M2-T4-review-01.md`. Codex FAIL, then three CONDITIONAL PASS rounds, then **PASS**. 13 findings (F1–F5, N1, M1, K1–K5) were all accepted, resolved and mutation-tested; most of the K-class predates T4.
+  - **Final independent verdict: PASS** (session `01a12bec-aac4-7d11-9b17-ae683ddb6f86`).
+- **Known limitations allowed at the prototype bar:**
+  - no explicit end event for burns still active at the stop (DR-0018);
+  - the envelope tick of an ignition at its own submission tick is the next tick (documented);
+  - FU-1 remains open for T7.
+- **Not started:** T5 and later (needs authorization). The draft PR (#3) is not merged.
 
 ## REV-012 — resolved
 VAL-0010, DR-0016; CI-reproduced by `tests/test_rev012_evidence.py`.
