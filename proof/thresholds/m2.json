@@ -13,7 +13,7 @@
     },
     "o2_rocket_equation": {
       "all": {
-        "sensed_delta_v_rel_error_max": 1e-12,
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
         "reported_rocket_equation_rel_error_max": 1e-12
       }
     },
@@ -21,13 +21,17 @@
       "all": {
         "velocity_rel_error_max": 1e-12,
         "propellant_rel_error_max": 1e-12,
-        "position_order_deviation_from_4_max": 0.5
+        "position_order_deviation_from_4_max": 0.5,
+        "timing_violations": 0.0
       }
     },
     "o4_reference": {
       "all": {
         "initial_position_rel_error": 1e-12,
         "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
         "cutoff_position_error_max_m": 0.002,
         "cutoff_velocity_error_max_mps": 3e-06,
         "sample_position_error_max_m": 0.6,
@@ -36,6 +40,9 @@
         "final_velocity_error_mps": 0.0007
       },
       "m2_invalid_commands": {
+        "ignition_position_error_max_m": 0.016,
+        "ignition_velocity_error_max_mps": 2e-05,
+        "thrust_direction_vs_reference_max": 2.6e-09,
         "cutoff_position_error_max_m": 0.016,
         "cutoff_velocity_error_max_mps": 2e-05
       }
@@ -69,19 +76,32 @@
         "propellant_accounting_rel_error": 1e-12,
         "delta_v_accounting_rel_error": 1e-12,
         "thrust_acceleration_rel_error_max": 1e-12,
-        "thrust_direction_error_max": 1e-12
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      }
+    },
+    "orbit_events": {
+      "all": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_below_reference_periapsis_m": 0.6,
+        "max_altitude_above_reference_apoapsis_m": 0.6
       }
     }
   },
   "limit_basis": {
     "o1_mass_law": "DR-0015 candidate 1e-12 (round-off class, relative to initial mass). depletion_residual_over_bound_max: analytic DR-0017 D1a bound mdot * 2 ulp(cutoff); exact, not a tolerance.",
-    "o2_rocket_equation": "DR-0015 candidate 1e-12 (round-off class, relative to delta-v).",
-    "o3_free_space": "Velocity and propellant: round-off class 1e-12 (VAL-0011, T1 test bound). Position: genuine 4th-order truncation, checked by order |p - 4| <= 0.5 (DR-0008 policy), not by an absolute value.",
-    "o4_reference": "Initial state vs the independently derived circular-orbit state: round-off class 1e-12 relative (review M2-T5 F1). Every StateSampled (coast and powered): same limits as the final state, the largest error being at the end of the horizon (review M2-T5 F3). DR-0015 candidates: cutoff <= 2e-3 m / 3e-6 m/s (slice, retrograde, depletion: cutoff before 730 s), final <= 0.6 m / 7e-4 m/s at 53 700 s. m2_invalid_commands: last cutoff at 2420 s, after a longer coast; ~2x measured (8.0e-3 m, 1.0e-5 m/s). The cutoff error is dominated by the pre-burn coast, not the burn.",
+    "o2_rocket_equation": "DR-0015 candidate 1e-12 (round-off class, relative to delta-v), applied to the error in excess of the analytic RK4 (Simpson) truncation bound h^5/2880 * 24 F mdot^4 / m^5 summed over the burn's sub-steps. For the reference vehicle the bound is 5e-13 m/s (1.8e-14 relative), so the gate is effectively unchanged. The O6 high-thrust variants (up to 16x thrust, mdot^4 = 65 536x) carry a genuine truncation error up to 2.0e-11 relative, which the analytic bound predicts to 2-3 % (VAL-0013). The raw relative error is reported (sensed_delta_v_rel_error_max). Not a weakening: the round-off allowance is unchanged and the truncation term is computed, not tuned.",
+    "o3_free_space": "Velocity and propellant: round-off class 1e-12 (VAL-0011, T1 test bound). Position: genuine 4th-order truncation, checked by order |p - 4| <= 0.5 (DR-0008 policy), not by an absolute value. timing_violations: the reported ignition and cutoff must equal the requested interval exactly (review M2-T5 F5).",
+    "o4_reference": "Initial state vs the independently derived circular-orbit state: round-off class 1e-12 relative (review M2-T5 F1). Ignition states (BurnStarted) share the cutoff limits; ignition precedes cutoff, so its error is smaller (review F11). Thrust direction at every burning PropulsionSampled vs the reference velocity direction (|a/|a| - u_ref|): the O4 cutoff velocity limit divided by orbital speed (3e-6 / 7.7e3 = 4e-10; m2_invalid_commands 2e-5 / 7.7e3 = 2.6e-9), since the reference and simulated velocity directions differ by about |dv|/|v| (measured 1.3e-10..1.5e-10; 1.2e-9). Not a new independent tolerance (review F10). Every StateSampled (coast and powered, all runs including O6/O8 auxiliary runs): same limits as the final state; measured maxima 0.2906 m (prograde, at 53 400 s), 0.3127, 0.2891, 0.2973, 0.298 m (review F3/F6/F7). DR-0015 candidates: cutoff <= 2e-3 m / 3e-6 m/s (slice, retrograde, depletion: cutoff before 730 s), final <= 0.6 m / 7e-4 m/s at 53 700 s. m2_invalid_commands: last cutoff at 2420 s, after a longer coast; ~2x measured (8.0e-3 m, 1.0e-5 m/s). The cutoff error is dominated by the pre-burn coast, not the burn.",
     "o5_coast_kepler": "~2x measured (max 0.314 m, retrograde); equals the approved M1 Kepler limits for the same horizon and dt.",
     "o6_impulsive_limit": "DR-0015 candidates: |p - 2| <= 0.05 over every halving pair (5 levels); slice ratio <= 1e-5.",
     "o7_direction": "Signs exact. Plane rotation and inclination change: round-off class 1e-12 rad (measured <= 1.5e-16).",
     "o8_convergence": "DR-0008 policy |p - 4| <= 0.5 on dt 10 -> 5 -> 2.5 s (DR-0015 candidate). 20 -> 10 is pre-asymptotic; dt = 1 s approaches the DOP853 cross-platform floor.",
-    "accounting": "Round-off class 1e-12 (relative). Exact relations (mass = dry + propellant, idle intervals bit-identical) are contract checks, not tolerances."
+    "accounting": "Round-off class 1e-12 (relative to initial mass, or to the mission's total predicted delta-v). Includes per-sample propellant and sensed delta-v predicted from accepted commands and elapsed burn time, transition propellant, planned consumption and the thrust unit vector (reviews F9, F11, F12). Exact relations (mass = dry + propellant, idle intervals bit-identical, schedule, plan cutoffs, D1a cutoff, timing bound) are contract checks, not tolerances.",
+    "orbit_events": "Node-crossing time vs independently located reference crossings (DOP853 + Kepler bisection): 8e-5 s, ~2x measured (<= 4.0e-5 s) and equal to the approved M1 node-crossing limit for the same dt and horizon. Altitude extrema vs reference apsides: the O4 sample-position limit 0.6 m (review F14)."
   }
 }

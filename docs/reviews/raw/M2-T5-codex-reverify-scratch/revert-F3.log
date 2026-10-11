@@ -1,0 +1,58 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________________ test_corrupted_powered_sample_fails_o4 ____________________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10fb0aa20>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+
+    def test_corrupted_powered_sample_fails_o4(runs):
+        """F3: every StateSampled, including those during a burn, is checked."""
+        mission, scenario, run = _slice(runs)
+        events = [
+            e.model_copy(update={"r": tuple(2 * x for x in e.r)})
+            if e.type == "StateSampled" and e.t == 660.0
+            else e
+            for e in run.events
+        ]
+>       assert "sample_position_error_max_m" in _fails("o4_reference", _o4(scenario, events, mission))
+E       AssertionError: assert 'sample_position_error_max_m' in []
+E        +  where [] = _fails('o4_reference', {'initial_position_rel_error': 0.0, 'initial_velocity_rel_error': 0.0, 'cutoff_position_error_max_m': 0.0007652966632028795, 'cutoff_velocity_error_max_mps': 1.2090090054352203e-06, ...})
+E        +    where {'initial_position_rel_error': 0.0, 'initial_velocity_rel_error': 0.0, 'cutoff_position_error_max_m': 0.0007652966632028795, 'cutoff_velocity_error_max_mps': 1.2090090054352203e-06, ...} = _o4(ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0010 A): one 77.3 s ...eline', 'ignition_t_s': 600.0, 'direction': 'prograde', 'duration_s': 77.3, 'on_insufficient_propellant': 'reject'}),)), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn', scenar...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...], Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10fb0aa20>, expected=(Expected(status='accepted', reason=None),), physics=True, impulsive_limit=True, control_of=False))
+
+tests/test_m2_validation.py:593: AssertionError
+__________________ test_inconsistent_final_state_is_detected ___________________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10fb0aa20>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+
+    def test_inconsistent_final_state_is_detected(runs):
+        """F3: SimulationCompleted, the final samples and RunResult must agree."""
+        _, _, run = _slice(runs)
+        done = run.events[-1].model_copy(update={"r": (1e9, 0.0, 0.0), "v": (1e6, 0.0, 0.0)})
+        events = [*run.events[:-1], done]
+        assert m2.check_final_consistency(run.events, run) == []
+>       assert m2.check_final_consistency(events, run)
+E       AssertionError: assert []
+E        +  where [] = <function <lambda> at 0x10fb2b380>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn', scenar...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function <lambda> at 0x10fb2b380> = m2.check_final_consistency
+
+tests/test_m2_validation.py:602: AssertionError
+_____________ test_bogus_completion_at_an_active_stop_is_detected ______________
+
+    def test_bogus_completion_at_an_active_stop_is_detected():
+        """F3: the DR-0018 boundary check reconciles the completion state with the samples."""
+        base = BY_NAME["m2_prograde_burn"].build()
+        case = m2.BOUNDARY_CASES[0]
+        variant = m2.boundary_variant(base, case)
+        longer = run_scenario(m2.boundary_variant(base, case, stop_s=base.stop.duration_s))
+        run = run_scenario(variant)
+        run.events[-1] = run.events[-1].model_copy(update={"r": (1e9, 0.0, 0.0)})
+>       assert m2.boundary_violations(variant, run, longer, (ACCEPT,))
+E       AssertionError: assert []
+E        +  where [] = <function boundary_violations at 0x10fb291c0>(ScenarioV2(schema_version=2, name='m2_prograde_burn_stop_inside_burn', description='Milestone 2 vertical slice (DR-001...eline', 'ignition_t_s': 600.0, 'direction': 'prograde', 'duration_s': 77.3, 'on_insufficient_propellant': 'reject'}),)), RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn_stop_inside_burn', description='Milestone 2 ver...23689461736918e-14), pending_plans=(), active_burn_id='burn#000001', pending_burn_ids=(), active_direction='prograde')), RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn_stop_inside_burn', description='Milestone 2 ver...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)), (Expected(status='accepted', reason=None),))
+E        +    where <function boundary_violations at 0x10fb291c0> = m2.boundary_violations
+
+tests/test_m2_validation.py:617: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_corrupted_powered_sample_fails_o4 - ...
+FAILED tests/test_m2_validation.py::test_inconsistent_final_state_is_detected
+FAILED tests/test_m2_validation.py::test_bogus_completion_at_an_active_stop_is_detected
+3 failed in 8.84s

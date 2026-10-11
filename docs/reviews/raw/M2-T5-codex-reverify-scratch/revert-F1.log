@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_wrong_initial_orbit_fails_o4 _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106341a60>
+
+    def test_wrong_initial_orbit_fails_o4(monkeypatch):
+        """F1: the reference is seeded from the scenario, not from SimulationStarted."""
+        from tars.sim import runner
+    
+        original = runner.initial_state
+    
+        def rotated(scenario):
+            r, v = original(scenario)
+            rot = np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+            return rot @ r, rot @ v
+    
+        monkeypatch.setattr(runner, "initial_state", rotated)
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        failed = _fails("o4_reference", _o4(scenario, run.events, mission))
+>       assert "initial_position_rel_error" in failed and "final_position_error_m" in failed
+E       AssertionError: assert ('initial_position_rel_error' in [])
+
+tests/test_m2_validation.py:560: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_wrong_initial_orbit_fails_o4 - Asser...
+1 failed in 2.35s

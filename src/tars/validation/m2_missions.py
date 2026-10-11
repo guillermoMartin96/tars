@@ -33,13 +33,15 @@ class Expected:
 
     status: Literal["accepted", "rejected"]
     reason: str | None = None
+    # For schema_invalid: the exact "field: error_type" diagnostics (contract T3).
+    schema_errors: tuple[str, ...] = ()
 
 
 ACCEPT = Expected("accepted")
 
 
-def reject(reason: str) -> Expected:
-    return Expected("rejected", reason)
+def reject(reason: str, *schema_errors: str) -> Expected:
+    return Expected("rejected", reason, tuple(schema_errors))
 
 
 @dataclass(frozen=True)
@@ -107,9 +109,12 @@ def _no_propulsion(raw: dict[str, Any]) -> None:
 #  9 inv-retry-001 (t=60)  corrected duration 20 s            accepted burn#000003
 # 10 inv-past-001 (t=600)  ignition 300 s                     ignition_in_past
 # 11 inv-busy-001 (t=1220) ignition 1225 s while A burns      engine_busy
+_SCHEMA = (
+    reject("schema_invalid", "direction: literal_error"),
+    reject("schema_invalid", "throttle: extra_forbidden"),
+)
 _INVALID = (
-    reject("schema_invalid"),
-    reject("schema_invalid"),
+    *_SCHEMA,
     ACCEPT,
     reject("duplicate_command_id"),
     reject("non_positive_duration"),
@@ -124,8 +129,7 @@ _INVALID = (
 # Empty tank: nothing is accepted, so the repeated ID is not a duplicate. Duration and
 # chronology precede the propellant checks; overlap and busy cannot occur.
 _EMPTY_TANK = (
-    reject("schema_invalid"),
-    reject("schema_invalid"),
+    *_SCHEMA,
     reject("no_propellant"),
     reject("no_propellant"),
     reject("non_positive_duration"),
@@ -139,8 +143,7 @@ _EMPTY_TANK = (
 )
 # No spacecraft: schema first, then no_propulsion_configured for every other entry.
 _NO_PROPULSION = (
-    reject("schema_invalid"),
-    reject("schema_invalid"),
+    *_SCHEMA,
     *(reject("no_propulsion_configured"),) * 10,
 )
 

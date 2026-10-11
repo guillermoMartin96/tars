@@ -74,8 +74,11 @@ _RANK = {
 class PredictedBurn:
     """A burn as predicted from the scenario inputs alone (no simulator output).
 
-    ``burn_time_s`` is the commanded duration, or the analytic depletion time
-    P / mdot for a burn_to_depletion burn that runs the tank dry.
+    ``intended_s`` is the commanded duration, or the analytic depletion time P / mdot
+    for a burn_to_depletion burn that runs the tank dry. ``cutoff_t_s`` is the
+    represented cutoff: fl(ignition + intended), stepped back one ulp at a time while
+    it would run past depletion (DR-0017 D1a, re-implemented from the decision text).
+    ``executed_s = cutoff - ignition`` is the represented interval.
     """
 
     burn_id: str
@@ -86,13 +89,19 @@ class PredictedBurn:
     commanded_duration_s: float
     policy: str
     end_cause: str
-    burn_time_s: float
+    intended_s: float
     cutoff_t_s: float
+    executed_s: float
     propellant_before_kg: float
     propellant_used_kg: float
+    propellant_after_kg: float
     mass_before_kg: float
     mass_after_kg: float
     delta_v_mps: float
+
+    @property
+    def burn_time_s(self) -> float:
+        return self.intended_s
 
 
 @dataclass(frozen=True)
@@ -145,14 +154,20 @@ def predict_burns(scenario: ScenarioV2, expected: Sequence[Expected]) -> list[Pr
         duration = float(cmd["duration_s"])
         depletion = propellant / mdot
         if duration <= depletion:
-            cause, burn_time, used = "completed", duration, min(mdot * duration, propellant)
+            cause, burn_time = "completed", duration
         elif cmd.get("on_insufficient_propellant", "reject") == "burn_to_depletion":
-            cause, burn_time, used = "propellant_depleted", depletion, propellant
+            cause, burn_time = "propellant_depleted", depletion
         else:
             raise ValueError(f"{cmd['command_id']}: declared accepted but insufficient")
-        m0 = veh.dry_mass_kg + propellant
-        mf = m0 - used
         ignition = float(cmd["ignition_t_s"])
+        cutoff = ignition + burn_time
+        while cutoff - ignition > depletion:  # D1a: never past depletion
+            cutoff = math.nextafter(cutoff, -math.inf)
+        executed = cutoff - ignition
+        used = min(mdot * executed, propellant)
+        after = 0.0 if used >= propellant else propellant - used  # SCI-0012
+        m0 = veh.dry_mass_kg + propellant
+        mf = veh.dry_mass_kg + after
         burns.append(
             PredictedBurn(
                 burn_id=f"burn#{len(burns) + 1:06d}",
@@ -163,16 +178,18 @@ def predict_burns(scenario: ScenarioV2, expected: Sequence[Expected]) -> list[Pr
                 commanded_duration_s=duration,
                 policy=cmd.get("on_insufficient_propellant", "reject"),
                 end_cause=cause,
-                burn_time_s=burn_time,
-                cutoff_t_s=ignition + burn_time,
+                intended_s=burn_time,
+                cutoff_t_s=cutoff,
+                executed_s=executed,
                 propellant_before_kg=propellant,
                 propellant_used_kg=used,
+                propellant_after_kg=after,
                 mass_before_kg=m0,
                 mass_after_kg=mf,
                 delta_v_mps=c * math.log(m0 / mf),
             )
         )
-        propellant = max(propellant - used, 0.0)
+        propellant = after
     if any(b.ignition_t_s < a.cutoff_t_s for a, b in pairwise(burns)):
         raise ValueError("declared accepted burns overlap")
     return burns
@@ -188,6 +205,32 @@ def events_sha256(events: Sequence[Any]) -> str:
 
 def _ulp(x: float) -> float:
     return math.ulp(x)
+
+
+def simpson_bound(
+    veh: Vehicle, burn: PredictedBurn, dt: float, until: float | None = None
+) -> float:
+    """Analytic RK4 truncation bound on the sensed delta-v integral [m/s].
+
+    Sensed delta-v obeys dv/dt = f(t) = F/m(t), a function of time only, so RK4
+    reduces to Simpson's rule on each sub-step h (the tick grid split at ignition and
+    cutoff, DR-0013 3A). Its error is h^5/2880 |f|, with f = 24 F mdot^4 / m^5
+    (largest at the sub-step's end mass). Negligible for the reference vehicle
+    (5e-13 m/s), it grows as mdot^4 for the high-thrust O6 variants (VAL-0013).
+    ``until`` truncates the burn at a sample time.
+    """
+    end = burn.cutoff_t_s if until is None else min(until, burn.cutoff_t_s)
+    if end <= burn.ignition_t_s:
+        return 0.0
+    mdot = veh.mass_flow_kgps
+    first = math.ceil(burn.ignition_t_s / dt)
+    grid = [k * dt for k in range(first, math.floor(end / dt) + 1)]
+    pts = sorted({burn.ignition_t_s, end, *(g for g in grid if burn.ignition_t_s < g < end)})
+    total = 0.0
+    for a, b in pairwise(pts):
+        m_end = burn.mass_before_kg - mdot * (b - burn.ignition_t_s)
+        total += (b - a) ** 5 / 2880.0 * 24.0 * veh.thrust_n * mdot**4 / m_end**5
+    return total
 
 
 # --------------------------------------------------------------- event-log contract
@@ -618,7 +661,11 @@ def mass_and_rocket_metrics(
     ends = {e.burn_id: e for e in _of(events, "BurnEnded")}
     m0_total = veh.initial_mass_kg
     o1 = {"propellant_used_rel_error_max": 0.0, "depletion_residual_over_bound_max": 0.0}
-    o2 = {"sensed_delta_v_rel_error_max": 0.0, "reported_rocket_equation_rel_error_max": 0.0}
+    o2 = {
+        "sensed_delta_v_rel_error_max": 0.0,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 0.0,
+    }
     v: list[str] = []
     for b in predicted:
         e = ends.get(b.burn_id)
@@ -635,9 +682,14 @@ def mass_and_rocket_metrics(
             )
             if e.propellant_kg < 0.0:
                 v.append(f"{b.burn_id}: negative residual")
+        err = abs(e.sensed_delta_v_mps - b.delta_v_mps)
         o2["sensed_delta_v_rel_error_max"] = max(
-            o2["sensed_delta_v_rel_error_max"],
-            abs(e.sensed_delta_v_mps - b.delta_v_mps) / b.delta_v_mps,
+            o2["sensed_delta_v_rel_error_max"], err / b.delta_v_mps
+        )
+        # Gated: the error beyond the analytic Simpson truncation bound (round-off).
+        o2["sensed_delta_v_excess_over_simpson_rel_max"] = max(
+            o2["sensed_delta_v_excess_over_simpson_rel_max"],
+            max(err - simpson_bound(veh, b, scenario.dt_s), 0.0) / b.delta_v_mps,
         )
         o2["reported_rocket_equation_rel_error_max"] = max(
             o2["reported_rocket_equation_rel_error_max"],
@@ -686,11 +738,24 @@ def free_space_run(veh: Vehicle, direction: str, duration_s: float, dt: float) -
     )
     sim = Simulator(x0, v0, FreeSpace(), RK4(), dt, spacecraft=spec)
     sim.schedule_burn(direction, ignition_t_s=0.0, duration_s=duration_s)
-    cutoff = None
-    while cutoff is None:
+    ignition = cutoff = None
+    while cutoff is None and sim.tick * dt <= duration_s + 2 * dt:
         sim.step()
-        cutoff = next((tr for tr in sim.engine_transitions if tr.kind == "cutoff"), None)
-    burn_t = cutoff.t  # ignition at 0: the represented burn interval
+        for tr in sim.engine_transitions:
+            if tr.kind == "ignition":
+                ignition = tr
+            elif tr.kind == "cutoff":
+                cutoff = tr
+    # The expectation uses the requested interval [0, duration], never the reported
+    # cutoff time; the reported times must equal it exactly (review F5).
+    burn_t = duration_s
+    timing = 0.0
+    if ignition is None or cutoff is None or ignition.t != 0.0 or cutoff.t != burn_t:
+        timing = 1.0
+        if cutoff is None:
+            return {"timing_violations": 1.0, "velocity_rel_error": math.inf,
+                    "position_error_m": math.inf, "propellant_error_kg": math.inf,
+                    "displacement_m": 0.0}  # fmt: skip
     dv, disp = _closed_form(veh, burn_t)
     sign = Decimal(SIGN[direction])
     with localcontext() as ctx:
@@ -708,6 +773,7 @@ def free_space_run(veh: Vehicle, direction: str, duration_s: float, dt: float) -
             - Decimal(veh.thrust_n) / (Decimal(veh.isp_s) * Decimal(STANDARD_GRAVITY)) * t
         )
     return {
+        "timing_violations": timing,
         "velocity_rel_error": math.hypot(*map(float, v_err)) / float(dv),
         "position_error_m": math.hypot(*map(float, x_err)),
         "propellant_error_kg": abs(float(m_err)),
@@ -716,10 +782,15 @@ def free_space_run(veh: Vehicle, direction: str, duration_s: float, dt: float) -
 
 
 def free_space_metrics(veh: Vehicle, duration_s: float) -> dict[str, float]:
-    out: dict[str, float] = {"velocity_rel_error_max": 0.0, "propellant_rel_error_max": 0.0}
+    out: dict[str, float] = {
+        "velocity_rel_error_max": 0.0,
+        "propellant_rel_error_max": 0.0,
+        "timing_violations": 0.0,
+    }
     for direction in ("prograde", "retrograde"):
         r10 = free_space_run(veh, direction, duration_s, 10.0)
         r5 = free_space_run(veh, direction, duration_s, 5.0)
+        out["timing_violations"] += r10["timing_violations"] + r5["timing_violations"]
         out["velocity_rel_error_max"] = max(
             out["velocity_rel_error_max"], r10["velocity_rel_error"], r5["velocity_rel_error"]
         )
@@ -843,10 +914,35 @@ def reference_metrics(
     ends = {e.burn_id: e for e in _of(events, "BurnEnded")}
     samples = _of(events, "StateSampled")
     end_t = horizon_s(scenario, events)
+    starts = {e.burn_id: e for e in _of(events, "BurnStarted")}
+    burning = [p for p in _of(events, "PropulsionSampled") if p.engine_state == "burning"]
     marks = sorted(
-        {b.cutoff_t_s for b in predicted if b.burn_id in ends} | {s.t for s in samples} | {end_t}
+        {b.cutoff_t_s for b in predicted if b.burn_id in ends}
+        | {b.ignition_t_s for b in predicted if b.burn_id in starts}
+        | {s.t for s in samples}
+        | {p.t for p in burning}
+        | {end_t}
     )
     ref = dop853_reference(scenario, r0, v0, predicted, marks)
+    ign_pos = ign_vel = 0.0
+    for b in predicted:
+        st = starts.get(b.burn_id)
+        if st is None:
+            continue
+        y = ref[b.ignition_t_s]
+        ign_pos = max(ign_pos, float(np.linalg.norm(np.array(st.r) - y[:3])))
+        ign_vel = max(ign_vel, float(np.linalg.norm(np.array(st.v) - y[3:6])))
+    # Thrust direction at every burning sample against the reference velocity (F10).
+    direction = 0.0
+    for p in burning:
+        a = np.array(p.thrust_acceleration_mps2)
+        st = starts.get(p.active_burn_id)
+        norm = float(np.linalg.norm(a))
+        if st is None or norm == 0.0:
+            direction = math.pi
+            continue
+        u = SIGN[st.direction] * ref[p.t][3:6] / np.linalg.norm(ref[p.t][3:6])
+        direction = max(direction, float(np.linalg.norm(a / norm - u)))
     cut_pos = cut_vel = 0.0
     for b in predicted:
         e = ends.get(b.burn_id)
@@ -866,6 +962,9 @@ def reference_metrics(
         / float(np.linalg.norm(r0)),
         "initial_velocity_rel_error": float(np.linalg.norm(np.array(start.v) - v0))
         / float(np.linalg.norm(v0)),
+        "ignition_position_error_max_m": ign_pos,
+        "ignition_velocity_error_max_mps": ign_vel,
+        "thrust_direction_vs_reference_max": direction,
         "cutoff_position_error_max_m": cut_pos,
         "cutoff_velocity_error_max_mps": cut_vel,
         "sample_position_error_max_m": traj_pos,
@@ -960,27 +1059,22 @@ def coast_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, floa
 # --------------------------------------------------------------- O6 impulsive limit
 
 
-def impulsive_family(scenario: ScenarioV2, levels: int = 5) -> list[dict[str, float]]:
+def impulsive_variants(scenario: ScenarioV2, levels: int = 5) -> list[ScenarioV2]:
     """Runs at fixed delta-v with burn duration T/2^k and thrust F*2^k, centred on the
-    original burn midpoint (VAL-0008 method).
-
-    Impulsive reference (textbook): Kepler-propagate the simulator's ignition state to
-    the midpoint, add the rocket-equation delta-v along +-v, take the SMA.
-    """
-    from tars.sim.runner import run_scenario
-
+    original burn midpoint (VAL-0008 method). Each variant stops on the telemetry grid
+    after its burn and is audited like a reference mission (review F6)."""
     veh = vehicle(scenario)
     assert veh is not None and len(scenario.commands) == 1
     cmd = scenario.commands[0].command
-    mu = scenario.constants.mu
     duration, ignition = float(cmd["duration_s"]), float(cmd["ignition_t_s"])
     mid = ignition + duration / 2.0
-    sign = SIGN[cmd["direction"]]
-    stop = math.ceil((mid + duration) / scenario.dt_s / 6.0) * 6.0 * scenario.dt_s
-    rows = []
+    grid = scenario.telemetry.sample_interval_s
+    stop = math.ceil((mid + duration) / grid) * grid
+    out = []
     for k in range(levels):
         scale = 2.0**k
         raw = scenario.model_dump(mode="json")
+        raw["name"] += f"_o6_k{k}"
         raw["spacecraft"]["engine"]["thrust_n"] = veh.thrust_n * scale
         raw["commands"][0]["command"] = {
             **cmd,
@@ -989,26 +1083,49 @@ def impulsive_family(scenario: ScenarioV2, levels: int = 5) -> list[dict[str, fl
             "ignition_t_s": mid - duration / scale / 2.0,
         }
         raw["stop"] = {"duration_s": stop}
-        variant = ScenarioV2.model_validate(raw)
-        run = run_scenario(variant, record_samples=False)
-        s = _of(run.events, "BurnStarted")[0]
-        e = _of(run.events, "BurnEnded")[0]
-        a0 = rv_to_elements(np.array(s.r), np.array(s.v), mu).a
-        a_fin = rv_to_elements(np.array(e.r), np.array(e.v), mu).a
-        r_m, v_m = kepler.propagate(np.array(s.r), np.array(s.v), mid - s.event_t_s, mu)
-        m0 = veh.initial_mass_kg
-        dv = veh.exhaust_velocity_mps * math.log(m0 / (m0 - veh.mass_flow_kgps * duration))
-        v_imp = v_m + sign * dv * v_m / np.linalg.norm(v_m)
-        a_imp = -mu / (2.0 * specific_energy(r_m, v_imp, mu))
-        rows.append(
-            {
-                "burn_duration_s": duration / scale,
-                "sma_finite_minus_impulsive_m": a_fin - a_imp,
-                "sma_change_finite_m": a_fin - a0,
-                "sma_change_impulsive_m": a_imp - a0,
-            }
-        )
-    return rows
+        out.append(ScenarioV2.model_validate(raw))
+    return out
+
+
+def impulsive_row(base: ScenarioV2, variant: ScenarioV2, run: RunResult) -> dict[str, float]:
+    """Finite vs impulsive SMA for one variant.
+
+    Impulsive reference (textbook): Kepler-propagate the simulator's ignition state to
+    the midpoint, add the rocket-equation delta-v (from the base scenario's inputs)
+    along +-v, take the SMA. The ignition state itself is checked by O4 (audit).
+    """
+    veh = vehicle(base)
+    assert veh is not None
+    cmd = base.commands[0].command
+    vcmd = variant.commands[0].command
+    mu = base.constants.mu
+    duration = float(cmd["duration_s"])
+    mid = float(cmd["ignition_t_s"]) + duration / 2.0
+    sign = SIGN[cmd["direction"]]
+    s = _of(run.events, "BurnStarted")[0]
+    e = _of(run.events, "BurnEnded")[0]
+    a0 = rv_to_elements(np.array(s.r), np.array(s.v), mu).a
+    a_fin = rv_to_elements(np.array(e.r), np.array(e.v), mu).a
+    r_m, v_m = kepler.propagate(np.array(s.r), np.array(s.v), mid - s.event_t_s, mu)
+    m0 = veh.initial_mass_kg
+    dv = veh.exhaust_velocity_mps * math.log(m0 / (m0 - veh.mass_flow_kgps * duration))
+    v_imp = v_m + sign * dv * v_m / np.linalg.norm(v_m)
+    a_imp = -mu / (2.0 * specific_energy(r_m, v_imp, mu))
+    return {
+        "burn_duration_s": float(vcmd["duration_s"]),
+        "sma_finite_minus_impulsive_m": a_fin - a_imp,
+        "sma_change_finite_m": a_fin - a0,
+        "sma_change_impulsive_m": a_imp - a0,
+    }
+
+
+def impulsive_family(scenario: ScenarioV2, levels: int = 5) -> list[dict[str, float]]:
+    from tars.sim.runner import run_scenario
+
+    return [
+        impulsive_row(scenario, variant, run_scenario(variant, record_samples=False))
+        for variant in impulsive_variants(scenario, levels)
+    ]
 
 
 def impulsive_metrics(rows: Sequence[dict[str, float]]) -> dict[str, float]:
@@ -1076,21 +1193,31 @@ def direction_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, 
 # --------------------------------------------------------------- O8 convergence
 
 
+O8_DTS = (10.0, 5.0, 2.5)
+
+
+def convergence_variant(scenario: ScenarioV2, dt: float) -> ScenarioV2:
+    """The scenario at another step, telemetry grid unchanged, so every sample has a
+    reference state and the run is audited like a reference mission (review F6)."""
+    if dt == scenario.dt_s:
+        return scenario
+    raw = scenario.model_dump(mode="json")
+    raw["name"] += f"_o8_dt{dt:g}"
+    raw["dt_s"] = dt
+    return ScenarioV2.model_validate(raw)
+
+
 def convergence_metrics(
-    scenario: ScenarioV2, reference_final: np.ndarray, dts: Sequence[float] = (10.0, 5.0, 2.5)
+    finals: dict[float, np.ndarray], reference_final: np.ndarray
 ) -> dict[str, float]:
-    """O8: final-state error vs DOP853 at several dt; observed order per halving.
+    """O8: final-position error vs DOP853 at several dt; observed order per halving.
 
     The 20 -> 10 s pair is pre-asymptotic (VAL-0008/0012) and is not used. dt = 1 s
     is not used either: its error (~2e-5 m) approaches the DOP853 reference's
     cross-platform floor (11-15 um at 53 700 s, VAL-0010 addendum).
     """
-    from tars.sim.runner import run_scenario
-
-    errs = []
-    for dt in dts:
-        run = run_scenario(scenario.with_dt(dt), record_samples=False)
-        errs.append(float(np.linalg.norm(run.final.r - reference_final[:3])))
+    dts = sorted(finals, reverse=True)
+    errs = [float(np.linalg.norm(finals[dt][:3] - reference_final[:3])) for dt in dts]
     out = {f"position_error_dt{dt:g}_m": e for dt, e in zip(dts, errs, strict=True)}
     orders = [math.log2(a / b) for a, b in pairwise(errs)]
     for (a, b), p in zip(pairwise(dts), orders, strict=True):
@@ -1197,3 +1324,494 @@ def boundary_violations(
     if final_state is None:
         v.append("longer run has no StateSampled at the stop tick (choose a grid stop)")
     return v
+
+
+# --------------------------------------------------------------- full-output audit
+# Review M2-T5 re-verification (F5-F15): every simulator output the Proof consumes is
+# checked against an independent expectation or an exact consistency rule.
+
+# DR-0017 B (approved): per-burn timing delta-v budget, written from the decision.
+DR0017_BUDGET_MPS = 1.0e-7
+
+
+def check_start_identity(scenario: ScenarioV2, events: Sequence[Any]) -> list[str]:
+    """SimulationStarted and SpacecraftConfigured provenance against the scenario."""
+    import tars
+
+    s = events[0]
+    c = scenario.constants
+    want = {
+        "scenario_name": scenario.name,
+        "scenario_hash": scenario.config_hash(),
+        "software_version": tars.__version__,
+        "epoch": scenario.epoch,
+        "time_scale": scenario.time_scale,
+        "seed": scenario.seed,
+        "earth_constants": {"name": c.name, "mu": c.mu, "equatorial_radius": c.equatorial_radius},
+        "force_models": list(scenario.force_models),
+        "integrator": scenario.integrator,
+        "dt": scenario.dt_s,
+        "tick": 0,
+        "t": 0.0,
+    }
+    v = [
+        f"SimulationStarted.{k} {getattr(s, k)!r} != {w!r}"
+        for k, w in want.items()
+        if getattr(s, k) != w
+    ]
+    cfg = _of(events, "SpacecraftConfigured")
+    if cfg:
+        if tuple(cfg[0].direction_laws) != ("prograde", "retrograde"):
+            v.append(f"direction_laws {cfg[0].direction_laws}")
+        if cfg[0].timing_delta_v_budget_mps != DR0017_BUDGET_MPS:
+            v.append(f"timing budget {cfg[0].timing_delta_v_budget_mps!r} != DR-0017 1e-7")
+    return v
+
+
+def _timing_bound(veh: Vehicle, b: PredictedBurn) -> float:
+    """DR-0017 definition: F |D - d| / m_end, m_end after the longer interval."""
+    dt = abs(b.executed_s - b.intended_s)
+    if dt == 0.0:
+        return 0.0
+    m_end = veh.dry_mass_kg + max(
+        b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0
+    )
+    return veh.thrust_n * dt / m_end
+
+
+def check_receipt_details(
+    scenario: ScenarioV2,
+    events: Sequence[Any],
+    expected: Sequence[Expected],
+    predicted: Sequence[PredictedBurn],
+) -> tuple[dict[str, float], list[str]]:
+    """Issuer, diagnostics, schema-invalid intent, and every accepted-plan field."""
+    v: list[str] = []
+    veh = vehicle(scenario)
+    receipts = _of(events, *COMMAND_EVENTS)
+    for i, (entry, rec, exp) in enumerate(zip(scenario.commands, receipts, expected, strict=False)):
+        payload = entry.command
+        issuer = payload.get("issuer")
+        want_issuer = issuer if isinstance(issuer, str) else None
+        if rec.issuer != want_issuer:
+            v.append(f"entry {i}: issuer {rec.issuer!r} != {want_issuer!r}")
+        errors = tuple(getattr(rec, "schema_errors", ()))
+        if errors != exp.schema_errors:
+            v.append(f"entry {i}: schema_errors {errors} != declared {exp.schema_errors}")
+        if exp.reason == "schema_invalid":
+            intent = (
+                rec.direction,
+                rec.on_insufficient_propellant,
+                rec.commanded_ignition_t_s,
+                rec.commanded_duration_s,
+            )
+            if intent != (None, None, None, None):
+                v.append(f"entry {i}: schema-invalid receipt echoes intent {intent}")
+    by_burn = {b.burn_id: b for b in predicted}
+    plan_rel = 0.0
+    for acc in _of(events, "CommandAccepted"):
+        b = by_burn.get(acc.burn_id)
+        if b is None or veh is None:
+            v.append(f"{acc.burn_id}: accepted but not predicted")
+            continue
+        got = (acc.planned_cutoff_t_s, acc.planned_burn_duration_s, acc.planned_end_cause)
+        want = (b.cutoff_t_s, b.executed_s, b.end_cause)
+        if got != want:
+            v.append(f"{acc.burn_id}: plan {got} != predicted {want}")
+        plan_rel = max(
+            plan_rel,
+            abs(acc.planned_propellant_used_kg - b.propellant_used_kg) / veh.initial_mass_kg,
+        )
+        bound = _timing_bound(veh, b)
+        reported = acc.timing_delta_v_error_mps
+        if reported is None or not reported <= DR0017_BUDGET_MPS:
+            v.append(f"{acc.burn_id}: timing bound {reported!r} missing or over budget")
+        elif bound == 0.0:
+            if reported != 0.0:
+                v.append(f"{acc.burn_id}: timing bound {reported!r}, intervals equal")
+        elif not bound <= reported <= bound * (1.0 + 1e-9):
+            v.append(f"{acc.burn_id}: timing bound {reported!r} != F|D-d|/m_end {bound!r}")
+    for s in _of(events, "BurnStarted"):
+        b = by_burn.get(s.burn_id)
+        if b is not None and (s.planned_cutoff_t_s, s.planned_end_cause) != (
+            b.cutoff_t_s,
+            b.end_cause,
+        ):
+            v.append(f"{s.burn_id}: BurnStarted plan differs from prediction")
+    for e in _of(events, "BurnEnded"):
+        b = by_burn.get(e.burn_id)
+        if b is not None and e.event_t_s != b.cutoff_t_s:
+            v.append(f"{e.burn_id}: cutoff {e.event_t_s!r} != predicted {b.cutoff_t_s!r} (D1a)")
+    return {"plan_propellant_rel_error_max": plan_rel}, v
+
+
+def transition_checks(
+    scenario: ScenarioV2, events: Sequence[Any], predicted: Sequence[PredictedBurn]
+) -> tuple[dict[str, float], list[str]]:
+    """Payloads of BurnStarted, BurnEnded and PropellantDepleted (review F11)."""
+    v: list[str] = []
+    veh = vehicle(scenario)
+    out = {"transition_propellant_rel_error_max": 0.0, "thrust_unit_vector_error_max": 0.0}
+    if veh is None:
+        return out, v
+    by_burn = {b.burn_id: b for b in predicted}
+    m0 = veh.initial_mass_kg
+    for s in _of(events, "BurnStarted"):
+        b = by_burn.get(s.burn_id)
+        if b is None:
+            continue
+        out["transition_propellant_rel_error_max"] = max(
+            out["transition_propellant_rel_error_max"],
+            abs(s.propellant_kg - b.propellant_before_kg) / m0,
+        )
+        if s.total_mass_kg != veh.dry_mass_kg + s.propellant_kg:
+            v.append(f"{s.burn_id}: BurnStarted mass != dry + propellant")
+        u = SIGN[s.direction] * np.array(s.v) / np.linalg.norm(s.v)
+        out["thrust_unit_vector_error_max"] = max(
+            out["thrust_unit_vector_error_max"],
+            float(np.linalg.norm(np.array(s.thrust_unit_vector) - u)),
+        )
+    ends = {e.burn_id: e for e in _of(events, "BurnEnded")}
+    for e in ends.values():
+        b = by_burn.get(e.burn_id)
+        if b is None:
+            continue
+        out["transition_propellant_rel_error_max"] = max(
+            out["transition_propellant_rel_error_max"],
+            abs(e.propellant_kg - b.propellant_after_kg) / m0,
+        )
+        if e.total_mass_kg != veh.dry_mass_kg + e.propellant_kg:
+            v.append(f"{e.burn_id}: BurnEnded mass != dry + propellant")
+        if (
+            e.planned_propellant_used_kg != b.propellant_used_kg
+            and abs(e.planned_propellant_used_kg - b.propellant_used_kg) > 1e-12 * m0
+        ):
+            v.append(f"{e.burn_id}: BurnEnded planned consumption differs from prediction")
+    for d in _of(events, "PropellantDepleted"):
+        e = ends.get(d.burn_id)
+        if e is None or d.residual_propellant_kg != e.propellant_kg:
+            v.append(f"{d.burn_id}: depletion residual != BurnEnded propellant")
+    return out, v
+
+
+def propulsion_sample_checks(
+    scenario: ScenarioV2, events: Sequence[Any], predicted: Sequence[PredictedBurn]
+) -> tuple[dict[str, float], list[str]]:
+    """Engine schedule, propellant and sensed delta-v at every PropulsionSampled,
+    predicted from the accepted commands and elapsed burn time (review F9)."""
+    v: list[str] = []
+    veh = vehicle(scenario)
+    out = {
+        "sample_propellant_rel_error_max": 0.0,
+        "sample_delta_v_rel_error_max": 0.0,
+        "sample_delta_v_excess_over_simpson_rel_max": 0.0,
+    }
+    if veh is None:
+        return out, v
+    dt = scenario.dt_s
+    c, mdot, m0 = veh.exhaust_velocity_mps, veh.mass_flow_kgps, veh.initial_mass_kg
+    ticks = {
+        b.burn_id: (
+            b.submit_tick,
+            _expected_report_tick(b.ignition_t_s, dt, b.submit_tick * dt == b.ignition_t_s),
+            _expected_report_tick(b.cutoff_t_s, dt, False),
+        )
+        for b in predicted
+    }
+    total_dv = sum(b.delta_v_mps for b in predicted) or 1.0
+    for p in _of(events, "PropulsionSampled"):
+        k, t = p.tick, p.tick * dt
+        active, pending = None, []
+        prop, dv, allowance = veh.propellant_kg, 0.0, 0.0
+        for b in predicted:
+            sub, ign_k, cut_k = ticks[b.burn_id]
+            if sub > k:
+                continue
+            if ign_k > k:
+                pending.append(b.burn_id)
+                continue
+            if k < cut_k:
+                active = b.burn_id
+                used = mdot * (t - b.ignition_t_s)
+                prop = b.propellant_before_kg - used
+                dv += c * math.log(b.mass_before_kg / (veh.dry_mass_kg + prop))
+                allowance += simpson_bound(veh, b, dt, until=t)
+            else:
+                prop = b.propellant_after_kg
+                dv += b.delta_v_mps
+                allowance += simpson_bound(veh, b, dt)
+        state = "burning" if active else ("scheduled" if pending else "idle")
+        got = (p.engine_state, p.active_burn_id, list(p.pending_burn_ids))
+        if got != (state, active, pending):
+            v.append(f"tick {k}: schedule {got}, expected {(state, active, pending)}")
+        out["sample_propellant_rel_error_max"] = max(
+            out["sample_propellant_rel_error_max"], abs(p.propellant_kg - prop) / m0
+        )
+        err = abs(p.delta_v_sensed_mps - dv)
+        out["sample_delta_v_rel_error_max"] = max(
+            out["sample_delta_v_rel_error_max"], err / total_dv
+        )
+        out["sample_delta_v_excess_over_simpson_rel_max"] = max(
+            out["sample_delta_v_excess_over_simpson_rel_max"],
+            max(err - allowance, 0.0) / total_dv,
+        )
+    return out, v
+
+
+def check_result_consistency(
+    scenario: ScenarioV2, events: Sequence[Any], result: RunResult
+) -> list[str]:
+    """Every returned RunResult field agrees with the event log (review F8)."""
+    v = check_final_consistency(events, result)
+    receipts = _of(events, *COMMAND_EVENTS)
+    if len(result.receipts) != len(receipts):
+        v.append(f"{len(result.receipts)} returned receipts, {len(receipts)} receipt events")
+    for r, e in zip(result.receipts, receipts, strict=False):
+        status = "accepted" if e.type == "CommandAccepted" else "rejected"
+        got = (
+            str(r.status),
+            r.command_id,
+            r.issuer,
+            r.reason and str(r.reason),
+            r.burn_id,
+            r.tick,
+            r.t,
+        )
+        want = (
+            status,
+            e.command_id,
+            e.issuer,
+            getattr(e, "reason", None),
+            getattr(e, "burn_id", None),
+            e.tick,
+            e.t,
+        )
+        if got != want:
+            v.append(f"returned receipt {got} != event {want}")
+        if (
+            status == "accepted"
+            and r.plan is not None
+            and (
+                r.plan.cutoff_t_s,
+                r.plan.burn_duration_s,
+                r.plan.propellant_used_kg,
+                str(r.plan.end_cause),
+            )
+            != (
+                e.planned_cutoff_t_s,
+                e.planned_burn_duration_s,
+                e.planned_propellant_used_kg,
+                e.planned_end_cause,
+            )
+        ):
+            v.append(f"{e.burn_id}: returned plan differs from CommandAccepted")
+        if status == "accepted" and r.plan is None:
+            v.append(f"{e.burn_id}: accepted receipt without a plan")
+    states = _of(events, "StateSampled")
+    got_samples = [(s.tick, s.t, tuple(s.r), tuple(s.v)) for s in result.samples]
+    if got_samples != [(s.tick, s.t, tuple(s.r), tuple(s.v)) for s in states]:
+        v.append("returned samples differ from StateSampled events")
+    crossings = [o.crossing_t for o in _of(events, "OrbitCompleted")]
+    if list(result.crossing_times) != crossings:
+        v.append("returned crossing_times differ from OrbitCompleted events")
+    start, init = events[0], result.initial
+    if init is None or (init.tick, init.t, tuple(init.r), tuple(init.v)) != (
+        0,
+        0.0,
+        tuple(start.r),
+        tuple(start.v),
+    ):
+        v.append("returned initial state differs from SimulationStarted")
+    done = events[-1]
+    if (result.status, result.failure_cause) != (done.status, done.failure_cause):
+        v.append("returned status differs from SimulationCompleted")
+    if result.final is not None and result.final.t != done.t:
+        v.append("returned final time differs from SimulationCompleted")
+    fp = result.final_propulsion
+    if fp is not None:
+        if (fp.tick, fp.t) != (done.tick, done.t):
+            v.append("final_propulsion time differs from SimulationCompleted")
+        accepted = {e.burn_id: e for e in _of(events, "CommandAccepted")}
+        starts = {e.burn_id: e for e in _of(events, "BurnStarted")}
+        plans = ([fp.active_plan] if fp.active_burn_id else []) + list(fp.pending_plans)
+        ids = ([fp.active_burn_id] if fp.active_burn_id else []) + list(fp.pending_burn_ids)
+        if (fp.active_plan is None) != (fp.active_burn_id is None) or len(plans) != len(ids):
+            v.append("final_propulsion plans do not match its burn IDs")
+        else:
+            for burn_id, plan in zip(ids, plans, strict=True):
+                acc = accepted.get(burn_id)
+                if acc is None or (plan.cutoff_t_s, plan.propellant_used_kg) != (
+                    acc.planned_cutoff_t_s,
+                    acc.planned_propellant_used_kg,
+                ):
+                    v.append(f"final_propulsion plan for {burn_id} differs from CommandAccepted")
+        want_dir = starts[fp.active_burn_id].direction if fp.active_burn_id in starts else None
+        if fp.active_direction != want_dir:
+            v.append(f"final_propulsion active_direction {fp.active_direction!r} != {want_dir!r}")
+    return v
+
+
+def cli_summary_violations(events: Sequence[Any], summary: dict[str, Any]) -> list[str]:
+    """The CLI's propulsion summary agrees with the event log (review F8)."""
+    v: list[str] = []
+    receipts = _of(events, *COMMAND_EVENTS)
+    want = [
+        {
+            "command_id": e.command_id,
+            "status": "accepted" if e.type == "CommandAccepted" else "rejected",
+            "reason": getattr(e, "reason", None),
+            "burn_id": getattr(e, "burn_id", None),
+            "submit_tick": e.tick,
+        }
+        for e in receipts
+    ]
+    if summary.get("commands") != want:
+        v.append("CLI summary commands differ from the receipt events")
+    props = _of(events, "PropulsionSampled")
+    if props:
+        last = props[-1]
+        got = (
+            summary.get("final_propellant_kg"),
+            summary.get("final_total_mass_kg"),
+            summary.get("final_engine_state"),
+            summary.get("active_burn_id_at_stop"),
+            summary.get("pending_burn_ids_at_stop"),
+        )
+        if got != (
+            last.propellant_kg,
+            last.total_mass_kg,
+            last.engine_state,
+            last.active_burn_id,
+            list(last.pending_burn_ids),
+        ):
+            v.append("CLI summary final propulsion differs from the last PropulsionSampled")
+    return v
+
+
+def orbit_checks(
+    scenario: ScenarioV2,
+    events: Sequence[Any],
+    ref: dict[float, np.ndarray],
+    predicted: Sequence[PredictedBurn],
+) -> tuple[dict[str, float], list[str]]:
+    """Orbit events, counts and altitude reporting (review F14).
+
+    - OrbitCompleted numbers run 1..N; N equals SimulationCompleted.orbits_completed.
+    - Ascending-node crossings are located independently: upward z sign changes of
+      the DOP853 reference between consecutive reference marks, refined by bisection
+      on exact Kepler propagation of the reference state (coast intervals). Their
+      count must equal N; the crossing-time error is a metric.
+    - altitude_m = |r| - R exactly; the completion extrema bracket every sample and
+      lie within the reference's apsides widened by the O4 sample-position limit.
+    """
+    v: list[str] = []
+    mu, radius = scenario.constants.mu, scenario.constants.equatorial_radius
+    orbits = _of(events, "OrbitCompleted")
+    done = events[-1]
+    dt = scenario.dt_s
+    if [o.orbit_number for o in orbits] != list(range(1, len(orbits) + 1)):
+        v.append("orbit numbers are not 1..N")
+    if done.orbits_completed != len(orbits):
+        v.append(f"orbits_completed {done.orbits_completed} != {len(orbits)} OrbitCompleted")
+    for o in orbits:
+        if not (o.tick - 1) * dt < o.crossing_t <= o.tick * dt:
+            v.append(f"orbit {o.orbit_number}: crossing_t outside its step")
+    times = sorted(ref)
+    burning = [(b.ignition_t_s, b.cutoff_t_s) for b in predicted]
+    ref_crossings: list[float] = []
+    for a, b in pairwise(times):
+        za, zb = ref[a][2], ref[b][2]
+        if za < 0.0 <= zb:
+            if any(i < b and a < c for i, c in burning):
+                ref_crossings.append(math.nan)  # powered interval: counted, not timed
+                continue
+            r0, v0 = ref[a][:3], ref[a][3:6]
+            lo, hi = 0.0, b - a
+            for _ in range(80):
+                mid = 0.5 * (lo + hi)
+                if kepler.propagate(r0, v0, mid, mu)[0][2] < 0.0:
+                    lo = mid
+                else:
+                    hi = mid
+            ref_crossings.append(a + hi)
+    if len(ref_crossings) != len(orbits):
+        v.append(f"{len(orbits)} OrbitCompleted, reference has {len(ref_crossings)} node crossings")
+    err = max(
+        (
+            abs(o.crossing_t - c)
+            for o, c in zip(orbits, ref_crossings, strict=False)
+            if not math.isnan(c)
+        ),
+        default=0.0,
+    )
+    states = _of(events, "StateSampled")
+    for s in states:
+        if s.altitude_m != float(np.linalg.norm(s.r)) - radius:
+            v.append(f"tick {s.tick}: altitude_m != |r| - R")
+    alts = [s.altitude_m for s in states]
+    if not (done.min_altitude_m <= min(alts) and done.max_altitude_m >= max(alts)):
+        v.append("completion altitude extrema do not bracket the samples")
+    rp, ra = [], []
+    for t in times:
+        el = rv_to_elements(ref[t][:3], ref[t][3:6], mu)
+        rp.append(el.a * (1 - el.e) - radius)
+        ra.append(el.a * (1 + el.e) - radius)
+    return {
+        "node_crossing_time_error_max_s": err,
+        "min_altitude_below_reference_periapsis_m": max(min(rp) - done.min_altitude_m, 0.0),
+        "max_altitude_above_reference_apoapsis_m": max(done.max_altitude_m - max(ra), 0.0),
+    }, v
+
+
+# --------------------------------------------------------------- one audit per run
+
+
+@dataclass
+class Audit:
+    """Everything checked for one run: exact violations by check, metrics by group."""
+
+    violations: dict[str, list[str]]
+    metrics: dict[str, dict[str, float]]
+    reference: dict[float, np.ndarray]
+
+
+def audit_run(scenario: ScenarioV2, expected: Sequence[Expected], run: RunResult) -> Audit:
+    """All contract checks and trajectory oracles that apply to one run.
+
+    Used for reference missions, derived variants and the O6/O8 auxiliary runs alike,
+    so no simulator output escapes because of the run it came from (review F6, F7).
+    """
+    events = run.events
+    predicted = predict_burns(scenario, expected)
+    acc, identities = accounting_metrics(scenario, events)
+    plan_m, receipt_v = check_receipt_details(scenario, events, expected, predicted)
+    trans_m, trans_v = transition_checks(scenario, events, predicted)
+    samp_m, samp_v = propulsion_sample_checks(scenario, events, predicted)
+    o4, ref = reference_metrics(scenario, events, predicted)
+    orbit_m, orbit_v = orbit_checks(scenario, events, ref, predicted)
+    violations = {
+        "event_order": check_event_order(scenario, events),
+        "traceability": check_traceability(scenario, events, expected, run),
+        "outcomes": check_outcomes(scenario, events, predicted),
+        "identities": identities
+        + receipt_v
+        + trans_v
+        + samp_v
+        + check_start_identity(scenario, events)
+        + check_result_consistency(scenario, events, run),
+        "orbit_events": orbit_v,
+    }
+    metrics: dict[str, dict[str, float]] = {
+        "o4_reference": o4,
+        "o5_coast_kepler": coast_metrics(scenario, events),
+        "orbit_events": orbit_m,
+    }
+    if scenario.spacecraft is not None:
+        metrics["accounting"] = {**acc, **plan_m, **trans_m, **samp_m}
+    if any(e.type == "BurnEnded" for e in events):
+        o1, o2, o1_v = mass_and_rocket_metrics(scenario, events, predicted)
+        violations["identities"] += o1_v
+        metrics["o1_mass_law"] = o1
+        metrics["o2_rocket_equation"] = o2
+        metrics["o7_direction"] = direction_metrics(scenario, events)
+    return Audit(violations, metrics, ref)

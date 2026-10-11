@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -78,41 +79,76 @@ def _burn_table(scenario: ScenarioV2, run: RunResult) -> list[dict[str, Any]]:
     return rows
 
 
+# Metrics reported for evidence but deliberately not gated. Every other metric a
+# validator emits must have a threshold, or the run fails (review M2-T5 F15).
+REPORT_ONLY = frozenset(
+    {
+        "final_propellant_kg", "slice_finite_minus_impulsive_sma_m",
+        "prograde_position_error_dt10_m", "prograde_position_order",
+        "retrograde_position_error_dt10_m", "retrograde_position_order",
+        "post_burn_coast_position_error_max_m",
+        "sensed_delta_v_rel_error_max", "sample_delta_v_rel_error_max",
+    }
+)  # fmt: skip
+_REPORT_PREFIXES = ("burn0", "order_pair_", "order_10_to", "order_5_to", "position_error_dt")
+
+
+def _ungated(metrics: dict[str, float], limits: dict[str, float]) -> list[str]:
+    return sorted(
+        k
+        for k in metrics
+        if k not in limits and k not in REPORT_ONLY and not k.startswith(_REPORT_PREFIXES)
+    )
+
+
+class Gates:
+    """Builds numerical checks and records metrics that would escape gating."""
+
+    def __init__(self, thresholds: Any) -> None:
+        self.thresholds = thresholds
+        self.missing: list[str] = []
+
+    def check(
+        self, group: str, name: str, mission: str, metrics: dict[str, float], notes: str = ""
+    ) -> Check:
+        limits = self.thresholds.for_validator(group, mission)
+        self.missing += [f"{name}: {k}" for k in _ungated(metrics, limits)]
+        return Check(name, metrics, limits, self.thresholds.status, notes)
+
+
+def _audit_checks(gates: Gates, tag: str, mission: str, audit: m2.Audit) -> list[Check]:
+    checks = [_exact(f"{k}[{tag}]", v) for k, v in audit.violations.items()]
+    for group, metrics in audit.metrics.items():
+        checks.append(gates.check(group, f"{group}[{tag}]", mission, metrics))
+    return checks
+
+
+def _merge_audits(audits: list[tuple[str, m2.Audit]]) -> m2.Audit:
+    """Auxiliary runs: violations concatenated (prefixed), metrics maximized."""
+    violations: dict[str, list[str]] = {}
+    metrics: dict[str, dict[str, float]] = {}
+    for name, a in audits:
+        for k, v in a.violations.items():
+            violations.setdefault(k, []).extend(f"{name}: {x}" for x in v)
+        for g, ms in a.metrics.items():
+            dst = metrics.setdefault(g, {})
+            for k, x in ms.items():
+                dst[k] = max(dst.get(k, -math.inf), x)
+    return m2.Audit(violations, metrics, {})
+
+
 def mission_checks(
-    mission: Mission, thresholds: Any, quick: bool
+    mission: Mission, gates: Gates, quick: bool
 ) -> tuple[list[Check], dict[str, Any]]:
     scenario = mission.build()
     run = run_scenario(scenario)
     events = run.events
     tag = mission.name
-
-    def check(group: str, metrics: dict[str, float], notes: str = "") -> Check:
-        return Check(
-            f"{group}[{tag}]",
-            metrics,
-            thresholds.for_validator(group, tag),
-            thresholds.status,
-            notes,
-        )
-
-    predicted = m2.predict_burns(scenario, mission.expected)
-    checks = [
-        _exact(f"event_order[{tag}]", m2.check_event_order(scenario, events)),
-        _exact(
-            f"traceability[{tag}]",
-            m2.check_traceability(scenario, events, mission.expected, run),
-        ),
-        _exact(f"outcomes[{tag}]", m2.check_outcomes(scenario, events, predicted)),
-    ]
-    accounting, identities = m2.accounting_metrics(scenario, events)
+    audit = m2.audit_run(scenario, mission.expected, run)
+    checks = _audit_checks(gates, tag, tag, audit)
     checks.append(
-        _exact(
-            f"accounting_identities[{tag}]",
-            identities + m2.check_final_consistency(events, run),
-        )
+        _exact(f"cli_summary[{tag}]", m2.cli_summary_violations(events, _cli_summary(run)))
     )
-    if scenario.spacecraft is not None:
-        checks.append(check("accounting", accounting))
 
     first = m2.events_sha256(events)
     second = m2.events_sha256(run_scenario(scenario).events)
@@ -138,7 +174,7 @@ def mission_checks(
         "events": len(events),
         "status": run.status,
         "final_state": {"t": run.final.t, "r": run.final.r.tolist(), "v": run.final.v.tolist()},
-        "final_propellant_kg": accounting.get("final_propellant_kg"),
+        "final_propellant_kg": audit.metrics.get("accounting", {}).get("final_propellant_kg"),
         "receipts": [
             {
                 "command_id": r.command_id,
@@ -149,27 +185,52 @@ def mission_checks(
         ],
         "burns": _burn_table(scenario, run),
     }
-    if mission.physics:
-        o1, o2, residual = m2.mass_and_rocket_metrics(scenario, events, predicted)
-        checks.append(_exact(f"o1_identities[{tag}]", residual))
-        checks.append(check("o1_mass_law", o1))
-        checks.append(check("o2_rocket_equation", o2))
-        o4, ref = m2.reference_metrics(scenario, events, predicted)
-        checks.append(check("o4_reference", o4, "SciPy DOP853 rtol 1e-13, independent RHS"))
-        checks.append(check("o5_coast_kepler", m2.coast_metrics(scenario, events)))
-        o7 = m2.direction_metrics(scenario, events)
-        checks.append(check("o7_direction", o7))
-        if not quick:
-            o8 = m2.convergence_metrics(scenario, ref[m2.horizon_s(scenario, events)])
-            checks.append(check("o8_convergence", o8, "dt 10 -> 5 -> 2.5 s vs DOP853"))
+    has_burns = any(e.type == "BurnEnded" for e in events)
+    if has_burns and not quick:
+        # O8: auxiliary runs at smaller dt are audited like the mission (review F6).
+        finals = {scenario.dt_s: run.final.r}
+        aux = []
+        for dt in m2.O8_DTS[1:]:
+            variant = m2.convergence_variant(scenario, dt)
+            vrun = run_scenario(variant)
+            finals[dt] = vrun.final.r
+            aux.append((variant.name, m2.audit_run(variant, mission.expected, vrun)))
+        horizon = m2.horizon_s(scenario, events)
+        o8 = m2.convergence_metrics(finals, audit.reference[horizon])
+        checks.append(gates.check("o8_convergence", f"o8_convergence[{tag}]", tag, o8))
+        checks += _audit_checks(gates, f"{tag}/o8_aux", tag, _merge_audits(aux))
     if mission.impulsive_limit and not quick:
-        rows = m2.impulsive_family(scenario)
-        checks.append(check("o6_impulsive_limit", m2.impulsive_metrics(rows)))
+        rows, aux = [], []
+        for variant in m2.impulsive_variants(scenario):
+            vrun = run_scenario(variant)
+            rows.append(m2.impulsive_row(scenario, variant, vrun))
+            aux.append((variant.name, m2.audit_run(variant, (ACCEPT,), vrun)))
+        checks.append(
+            gates.check(
+                "o6_impulsive_limit", f"o6_impulsive_limit[{tag}]", tag, m2.impulsive_metrics(rows)
+            )
+        )
+        checks += _audit_checks(gates, f"{tag}/o6_aux", tag, _merge_audits(aux))
         info["impulsive_family"] = rows
     return checks, info
 
 
-def boundary_checks() -> tuple[list[Check], dict[str, Any]]:
+def _cli_summary(run: RunResult) -> dict[str, Any]:
+    """The CLI's own propulsion summary builder, reconciled with the events."""
+    import importlib.util
+
+    from tars.validation.thresholds import REPO_ROOT
+
+    spec = importlib.util.spec_from_file_location(
+        "run_mission", REPO_ROOT / "toolbox" / "scripts" / "run_mission.py"
+    )
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module._propulsion_summary(run)
+
+
+def boundary_checks(gates: Gates) -> tuple[list[Check], dict[str, Any]]:
     """DR-0018 option A on stop-time variants of the slice, and the same-tick rule."""
     slice_mission = next(m for m in MISSIONS if m.name == "m2_prograde_burn")
     base = slice_mission.build()
@@ -181,6 +242,9 @@ def boundary_checks() -> tuple[list[Check], dict[str, Any]]:
         run, longer_run = run_scenario(variant), run_scenario(longer)
         violations = m2.boundary_violations(variant, run, longer_run, (ACCEPT,))
         checks.append(_exact(f"dr0018_boundary[{case.name}]", violations))
+        # The variant is a run like any other: full audit (review F6).
+        audit = m2.audit_run(variant, (ACCEPT,), run)
+        checks += _audit_checks(gates, f"dr0018/{case.name}", base.name, audit)
         last = [e for e in run.events if e.type == "PropulsionSampled"][-1]
         info[case.name] = {
             "stop_s": case.stop_s,
@@ -218,28 +282,32 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     thresholds = load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS))
+    gates = Gates(thresholds)
     checks: list[Check] = []
     missions: dict[str, Any] = {}
     for mission in MISSIONS:
-        mission_checks_, info = mission_checks(mission, thresholds, args.quick)
+        mission_checks_, info = mission_checks(mission, gates, args.quick)
         checks += mission_checks_
         missions[mission.name] = info
-    boundary, boundary_info = boundary_checks()
+    boundary, boundary_info = boundary_checks(gates)
     checks += boundary
 
     veh = m2.vehicle(MISSIONS[0].build())
     assert veh is not None
     checks.append(
-        Check(
+        gates.check(
             "o3_free_space",
+            "o3_free_space",
+            "all",
             m2.free_space_metrics(veh, O3_DURATION_S),
-            thresholds.for_validator("o3_free_space"),
-            thresholds.status,
             "production Simulator, zero force, velocity tracking along v0",
         )
     )
     unused = [] if args.quick else thresholds.unused()
     checks.append(_exact("thresholds_all_consumed", [f"unused {u}" for u in unused]))
+    # Every emitted metric is gated unless declared report-only (review F15): a
+    # missing threshold group or metric fails instead of silently passing.
+    checks.append(_exact("thresholds_cover_all_metrics", [f"ungated {m}" for m in gates.missing]))
 
     report = {
         "milestone": "M2",

@@ -374,7 +374,25 @@ All 10 approved rejection codes are exercised.
 - **Classification:** no discrepancy. **Status:** provisional Proof evidence (T5); not an approval of any tolerance.
 - **Revision after review M2-T5-review-01 (2026-10-11):**
   - O4 is now seeded from an independently derived initial state, which is bit-identical to the simulator's (initial error 0). It compares every `StateSampled`, coast and powered, with the reference.
-    - Largest sample errors: 0.2906 / 0.3127 / 0.2891 / 0.2973 m (prograde, retrograde, depletion, invalid commands), all at the end of the horizon.
+    - Largest sample errors: 0.2906 / 0.3127 / 0.2891 / 0.2973 m (prograde, retrograde, depletion, invalid commands), near the end of the horizon. The prograde maximum is at 53 400 s (0.290574 m); its final error at 53 700 s is 0.290344 m (correction from re-verification).
   - The reference now restarts at each sample time. Final errors move by at most about 7 µm (slice 0.290351 → 0.290344 m), within the DOP853 cross-platform floor. Cutoff errors move by below 1e-7 m.
   - The final state is judged at the scenario's requested horizon, and the final-state consistency and depletion pairing are checked both ways.
+- **Revision after re-verification (review M2-T5-review-01, findings F5–F15, 2026-10-11).** The validators now check every simulator output against an independent expectation or an exact rule, for every run: reference missions, derived variants, DR-0018 stop-time variants and the O6/O8 auxiliary runs. New measured quantities (reference host):
+
+| Quantity | Measured | Provisional limit (basis) |
+|---|---|---|
+| Ignition state vs DOP853 | 6.9e-4 m, 1.03e-6 m/s; invalid cmds 7.9e-3 m, 9.9e-6 m/s | cutoff limits (ignition precedes cutoff) |
+| Thrust direction vs reference velocity, every burning sample | 1.3–1.5e-10; invalid cmds 1.15e-9 | O4 cutoff velocity limit / orbital speed: 4e-10; 2.6e-9 |
+| Node-crossing time vs independently located crossings (DOP853 + Kepler bisection) | ≤ 4.0e-5 s | 8e-5 s (≈ 2× measured; the approved M1 node-crossing limit) |
+| Altitude extrema beyond reference apsides | ≤ 6.3e-3 m | 0.6 m (O4 sample limit) |
+| Per-sample propellant / sensed Δv vs prediction | ≤ 8.8e-17 / ≤ 5e-14 (relative) | 1e-12 |
+| Coast-only missions vs DOP853 (empty tank, no propulsion) | 0.298 m, 3.49e-4 m/s | 0.6 m, 7e-4 m/s |
+
+  - **Finding: high-thrust sensed-Δv error is RK4 (Simpson) truncation, not round-off.**
+    - Sensed Δv obeys dv/dt = F/m(t), a function of time only, so RK4 reduces to Simpson's rule. Its error is h⁵/2880·f⁗ with f⁗ = 24·F·ṁ⁴/m⁵.
+    - For the reference vehicle, the bound is 5e-13 m/s, far below the 1e-12 relative gate.
+    - The O6 variants raise thrust up to 16×, so ṁ⁴ grows by 65 536×. Measured errors per level (×1 … ×16): 1.1e-14, 2.6e-13, 3.6e-12, 7.9e-12, 2.0e-11 relative. Against the analytic bound summed over the actual sub-steps, the ratios are 0.62, 0.97, 0.99, 0.98, 0.98.
+    - The O2 and per-sample gates therefore apply the unchanged 1e-12 round-off allowance to the error in excess of this computed bound. The raw relative error is still reported.
+    - This explains a mechanism; it does not loosen a tolerance. The reference missions' gate is unchanged in effect.
+  - **O8 auxiliary runs** keep the mission's 60 s telemetry grid (only dt changes), so their samples are compared with the same reference. The final errors are unchanged: dt = 10 / 5 / 2.5 s gives 0.29034 / 0.014658 / 0.000809 m (orders 4.31, 4.18).
 
