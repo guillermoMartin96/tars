@@ -29,6 +29,7 @@ from tars.sim.propulsion import (
     TankSpec,
     plan_burn,
     rocket_equation_delta_v,
+    timing_delta_v_error_mps,
 )
 from tars.sim.simulator import AscendingNodeDetector, Simulator
 
@@ -917,3 +918,135 @@ def test_cutoff_events_distinguish_depletion_from_normal_cutoff():
         ("ignition", None),
         ("cutoff", BurnEndCause.PROPELLANT_DEPLETED),
     ]
+
+
+# --------------------------------- DR-0017 verification (M2-DR0017 review) F1, F2
+
+
+def _exact_timing_dv_error(engine, dry, prop, intended, executed):
+    """c |ln(m(executed) / m(intended))| in 60-digit arithmetic, m(x) = dry + prop - mdot x."""
+    with localcontext() as ctx:
+        ctx.prec = 60
+        c, md = Decimal(engine.exhaust_velocity_mps), Decimal(engine.mass_flow_kgps)
+
+        def mass(t):
+            return Decimal(dry) + max(Decimal(prop) - md * Decimal(t), Decimal(0))
+
+        return abs(c * (mass(executed) / mass(intended)).ln())
+
+
+@pytest.mark.parametrize(
+    ("intended", "executed"),
+    [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+)
+def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+    """F2: the error is the exact rocket-equation difference, so the end mass must be the
+    one after the longer interval. Large interval differences make a wrong mass choice
+    visible (|ln| changes at first order in dm/m)."""
+    engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+    got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+    exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+    assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+    assert Decimal(got) <= exact * (1 + Decimal("1e-12")) + Decimal("1e-300")
+
+
+@pytest.mark.parametrize(
+    ("thrust", "c", "dry", "prop", "intended", "executed"),
+    [
+        # F1 cancellation (reviewer): huge tank, small dry mass, end mass ill-conditioned
+        (3e-7, 3e-7, 3.0, 1e16, 9999999999999998.0, 9999999999999996.0),
+        # F1 underflow (reviewer): subnormal masses, mdot * dt underflows
+        (1e-280, 1e20, 1e-310, 1e-310, 1e-11, 1.0000000000000004e-11),
+        # cancellation where an unslackened end mass underestimates by ~38 % (found by
+        # seeded search; the slack in the end-mass lower bound is required)
+        (
+            0.0012764678484075565,
+            0.0008405601224338024 * STANDARD_GRAVITY,
+            0.32186917193715897,
+            7.460733292860184e16,
+            4.81793673421924e17,
+            4.817936734219239e17,
+        ),
+        # dt underflow with ordinary vehicle (error is genuinely negligible)
+        (490.0, 312.0 * 9.80665, DRY, PROP, 5e-324, 1e-323),
+    ],
+)
+def test_timing_error_is_never_underestimated_at_arithmetic_extremes(
+    thrust, c, dry, prop, intended, executed
+):
+    engine = EngineSpec(thrust_n=thrust, isp_s=c / STANDARD_GRAVITY)
+    got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+    exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+    assert not math.isnan(got)
+    assert Decimal(got) >= exact * (1 - Decimal("1e-15"))
+
+
+def test_reviewer_over_budget_configurations_are_rejected_by_the_simulator():
+    """F1: both reviewer reproductions were accepted by schedule_burn; one executed."""
+    cases = [
+        (EngineSpec(3e-7, 3e-7 / STANDARD_GRAVITY), 3.0, 1e16, 3.0, 9999999999999998.0),
+        (EngineSpec(1e-280, 1e20 / STANDARD_GRAVITY), 1e-310, 1e-310, 1e-10, 1e-11),
+    ]
+    for engine, dry, prop, ignition, duration in cases:
+        sc = SpacecraftSpec(dry_mass_kg=dry, engine=engine, tank=TankSpec(propellant_kg=prop))
+        sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0, spacecraft=sc)
+        with pytest.raises(BurnRejectedError) as err:
+            sim.schedule_burn("prograde", ignition_t_s=ignition, duration_s=duration)
+        assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+
+APPROVED_TIMING_BUDGET_MPS = 1e-7  # DR-0017 resolution, 2026-10-10
+
+
+def test_timing_budget_is_the_approved_value():
+    assert TIMING_DELTA_V_BUDGET_MPS == APPROVED_TIMING_BUDGET_MPS
+
+
+def test_classification_is_tight_around_the_budget():
+    """F2: scan representation errors for a high-acceleration vehicle; many cases fall
+    within a factor of 2 of the 1e-7 m/s budget. Accept iff the exact error is within
+    budget, allowing only the conservative evaluation margin (1e-9 relative)."""
+    engine, dry, prop = EngineSpec(thrust_n=2.0e3, isp_s=300.0), 10.0, 50.0
+    near = 0
+    n = 4000
+    for k in range(n):
+        ignition = 10.0 ** (7.5 + k / n)  # ulp(t) ~ 4e-9 .. 1.5e-8 s
+        duration = 0.1 + k * (0.4 / n)
+        cutoff = ignition + duration
+        executed = cutoff - ignition
+        exact = float(_exact_timing_dv_error(engine, dry, prop, duration, executed))
+        if 0.5 * APPROVED_TIMING_BUDGET_MPS <= exact <= 2.0 * APPROVED_TIMING_BUDGET_MPS:
+            near += 1
+        try:
+            plan_burn(engine, prop, ignition, duration, dry_mass_kg=dry)
+            accepted = True
+        except BurnRejectedError as err:
+            assert err.reason is BurnRejection.BURN_UNSCHEDULABLE
+            accepted = False
+        if exact > APPROVED_TIMING_BUDGET_MPS:
+            assert not accepted, (ignition, duration, exact)
+        elif exact <= APPROVED_TIMING_BUDGET_MPS * (1 - 1e-9):
+            assert accepted, (ignition, duration, exact)
+    assert near >= 1000  # measured ~1870 of 4000 within a factor of 2 of the budget
+    # Includes cases within 1 % on both sides (measured 16 just over, 19 just under).
+
+
+def test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses():
+    """F1 property: over seeded random huge-tank / small-dry-mass configurations near
+    depletion, the conservative estimate is never below the exact error."""
+    import random
+
+    rng = random.Random(7)
+    checked = 0
+    while checked < 1500:
+        prop, dry = 10 ** rng.uniform(10, 17), 10 ** rng.uniform(-1, 2)
+        engine = EngineSpec(10 ** rng.uniform(-8, 2), 10 ** rng.uniform(-9, 3))
+        t_dep = prop / engine.mass_flow_kgps
+        intended = t_dep * (1 - 10 ** rng.uniform(-17, -14))
+        executed = math.nextafter(intended, 0.0)
+        if not (0.0 < executed <= t_dep and intended <= t_dep):
+            continue
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        assert Decimal(got) >= exact * (1 - Decimal("1e-15")), (engine, dry, prop, intended)
+        checked += 1

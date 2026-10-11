@@ -19,6 +19,7 @@ state.
 from __future__ import annotations
 
 import math
+import sys
 from dataclasses import dataclass, field
 from enum import StrEnum
 from numbers import Real
@@ -438,7 +439,7 @@ def plan_burn(
     intended = burn  # commanded duration, or the depletion time
     timing_error = None
     if dry_mass_kg is not None:
-        timing_error = _timing_delta_v_error(
+        timing_error = timing_delta_v_error_mps(
             engine, dry_mass_kg, propellant_kg, intended, represented
         )
         if not timing_error <= TIMING_DELTA_V_BUDGET_MPS:  # NaN is rejected too
@@ -471,18 +472,45 @@ def plan_burn(
     )
 
 
-def _timing_delta_v_error(
-    engine: EngineSpec, dry_mass_kg: float, propellant_kg: float, intended: float, executed: float
+def timing_delta_v_error_mps(
+    engine: EngineSpec,
+    dry_mass_kg: float,
+    propellant_kg: float,
+    intended_s: float,
+    executed_s: float,
 ) -> float:
-    """DR-0017 B: |delta-v(executed) - delta-v(intended)| = c |ln(m(executed)/m(intended))|.
+    """DR-0017 B: conservative upper estimate of the delta-v error caused by executing
+    ``executed_s`` instead of ``intended_s`` seconds of thrust.
 
-    Both intervals lie within the depletion time, so m(x) = dry + propellant - mdot x
-    without clamping. Evaluated as c log1p(mdot |dt| / m_end) for accuracy. intended
-    and executed are within a factor of 2, so dt is exact (Sterbenz).
+    The exact value is c |ln(m(executed) / m(intended))| with m(x) = dry + propellant -
+    mdot x: the actual thrust acceleration integrated over the timing difference. It is
+    evaluated as c log1p((F / m_end) |dt| / c), with m_end the smaller end mass, i.e. the
+    mass after the longer interval. The evaluation is conservative (review M2-DR0017 F1):
+
+    - m_end is a lower bound. The cancellation in propellant - mdot x has an absolute
+      uncertainty of about ulp(propellant) + ulp(mdot x); that slack is subtracted, so
+      an ill-conditioned end mass (a huge tank on a small dry mass) cannot shrink the
+      estimate.
+    - F / m_end is formed before multiplying by dt, so the small timing contribution is
+      not lost to underflow of mdot * dt with subnormal masses.
+    - The result is inflated by 16 ulp-scale relative units for the remaining rounding.
+      Overflow yields inf (and NaN never escapes as a pass), so the caller rejects.
+
+    Assumes both intervals lie within the depletion time (as plan_burn guarantees).
+    Limitations (DR-0017): bounds thrust-integrated speed change only, not trajectory
+    error; per burn, not cumulative.
     """
-    mdot = engine.mass_flow_kgps
-    end_mass = max(dry_mass_kg + propellant_kg - mdot * max(intended, executed), dry_mass_kg)
-    return engine.exhaust_velocity_mps * math.log1p(mdot * abs(intended - executed) / end_mass)
+    dt = abs(intended_s - executed_s)
+    if dt == 0.0:
+        return 0.0
+    longer = max(intended_s, executed_s)
+    burned = engine.mass_flow_kgps * longer
+    slack = 2.0 * (math.ulp(propellant_kg) + math.ulp(burned))
+    end_mass = dry_mass_kg + max(propellant_kg - burned - slack, 0.0)
+    c = engine.exhaust_velocity_mps
+    x = (engine.thrust_n / end_mass) * dt / c
+    error = c * math.log1p(x) * (1.0 + 16.0 * sys.float_info.epsilon)
+    return error if not math.isnan(error) else math.inf
 
 
 # ------------------------------------------------------- simulator-facing state views
