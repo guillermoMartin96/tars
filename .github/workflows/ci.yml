@@ -1,6 +1,7 @@
-# M1 CI (DR-0007, DR-0009): lint, tests, determinism, cross-platform agreement, every M1
-# Proof check, and the comparison against the committed GMAT reference. GMAT itself is
-# never installed or run in CI.
+# CI (DR-0007, DR-0009): lint, tests, determinism, cross-platform agreement, every M1
+# Proof check, the comparison against the committed GMAT reference, and the M2 Proof
+# checks O1-O8 (T5; thresholds provisional until T7). GMAT itself is never installed or
+# run in CI.
 name: ci
 
 on:
@@ -48,9 +49,19 @@ jobs:
       - name: M1 Proof (non-GMAT checks)
         run: uv run python toolbox/validators/m1_proof.py --out runs/proof/m1_non_gmat_${{ matrix.os }}.json
 
+      - name: M2 cross-process determinism (every M2 scenario)
+        shell: bash
+        run: |
+          for s in scenarios/m2_*.json; do
+            uv run python toolbox/validators/determinism.py --scenario "$s"
+          done
+
+      - name: M2 Proof (O1-O8 and contract checks; thresholds provisional)
+        run: uv run python toolbox/validators/m2_proof.py --out runs/proof/m2_${{ matrix.os }}.json
+
       - name: Upload Proof report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: m1-proof-${{ matrix.os }}
+          name: proof-${{ matrix.os }}
           path: runs/proof/

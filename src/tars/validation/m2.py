@@ -390,12 +390,15 @@ def check_traceability(
             v.append(f"{burn_id}: executed_duration_s != event_t_s - ignition_t_s")
         if e.event_t_s != acc.planned_cutoff_t_s or e.end_cause != acc.planned_end_cause:
             v.append(f"{burn_id}: execution differs from the accepted plan")
-        # Commanded vs executed (independent of the plan): a completed burn cuts off at
-        # the represented commanded time; a depleted one burns no longer than commanded.
+        # Commanded vs executed, independent of the plan: the commanded duration is the
+        # receipt's (checked against the scenario payload above), never the burn
+        # event's own copy, which comes from the plan. A completed burn cuts off at the
+        # represented commanded time; a depleted one burns no longer than commanded.
+        commanded = acc.commanded_duration_s
         if e.end_cause == "completed":
-            if e.event_t_s != e.ignition_t_s + e.commanded_duration_s:
+            if e.event_t_s != e.ignition_t_s + commanded:
                 v.append(f"{burn_id}: cutoff {e.event_t_s!r} != ignition + commanded duration")
-        elif not e.executed_duration_s < e.commanded_duration_s:
+        elif not e.executed_duration_s < commanded:
             v.append(f"{burn_id}: depleted burn not shorter than commanded")
     # DR-0018 (approved A): every accepted burn has ended, or is visibly active or
     # pending in the final propulsion sample. No fabricated end.
