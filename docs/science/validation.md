@@ -306,3 +306,69 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
 - **Re-run at `03f6e4b` (after REV-T2-03):**
   - Plans now describe the represented interval `cutoff − ignition` (77.29999999999995 s here) and its consumption.
   - Every trajectory quantity is bit-identical. Only "Propellant − ṁT" changed, by ≤ 7e-15 kg: 5.9e-14 / −1.1e-13 / 2.9e-13 / 2.9e-13 kg. `results.json` is regenerated.
+
+## VAL-0013 — T5: M2 Proof oracles O1–O8 on the reference missions (provisional thresholds; reference host)
+- **Date / revision:** 2026-10-11 / `b9bd22c` (validators); validator `toolbox/validators/m2_proof.py`, logic `src/tars/validation/m2.py`, missions `src/tars/validation/m2_missions.py`. The report from the Proof run is committed under `proof/records/evidence/M2-T5/`. CI reports for ubuntu and macOS are uploaded as artifacts (`proof-<os>`). They are evidence for T7; they are not compared here.
+- **Host:** Darwin x86_64, i9-9880H, Python 3.12.15, NumPy 2.5.3 (the M1 reference host).
+- **Missions** (all from the M1 circular 250 km orbit, dt = 10 s, stop at 53 700 s, 490 N / 312 s engine):
+
+| Mission | Burns | Outcome |
+|---|---|---|
+| `m2_prograde_burn` (slice) | 77.3 s prograde at 600 s | apoapsis 351.03 km, periapsis 250.02 km |
+| `m2_retrograde_burn` | 77.3 s retrograde at 600 s | apoapsis 249.98 km, periapsis 150.86 km |
+| `m2_burn_to_depletion` | 20 kg tank; 200 s burn_to_depletion; submitted and ignited at 600 s | flames out at 724.8847 s after 124.8847 s; residual 1.1e-14 kg; apoapsis 461.17 km |
+| `m2_invalid_commands` | 12 entries: 3 accepted (one corrected retry, one adjacent to the previous cutoff), 9 rejected | 8 distinct rejection codes |
+| `…_empty_tank` / `…_no_propulsion` (derived) | same timeline, 0 kg propellant / no spacecraft | `no_propellant` / `no_propulsion_configured`, plus precedence |
+
+All 10 approved rejection codes are exercised.
+
+- **Independence.** Expected values come from the scenario's raw inputs only: F, Isp, masses, commanded times, and the hand-declared receipts in `m2_missions.py`. The relations are textbook: ṁ = F/(Isp·g0), the rocket equation, and a closed form; the trajectory reference is SciPy DOP853 on an independently written right-hand side. Simulator outputs are only the quantities under test. Two documented exceptions:
+  - O5 propagates the simulator's own cutoff state. It tests the coast, not the burn.
+  - O6 starts the impulsive reference from the simulator's ignition state, so the pre-burn coast error cancels.
+- **Methods and units:**
+  - **O1:** |integrated propellant used − ṁ·T| / initial mass, where T is the commanded duration or the analytic depletion time P/ṁ. For a depletion burn, the residual is compared with the DR-0017 D1a bound ṁ·2·ulp(cutoff).
+  - **O2:** |sensed Δv − c·ln(m0/mf)| / Δv, with m0 and mf chained burn by burn from the scenario.
+  - **O3:** production `Simulator`, zero force, velocity tracking along v0 (prograde and retrograde). Velocity and propellant are compared with the 40-digit closed form at cutoff. Position is checked by its convergence order between dt = 10 and 5 s, because its error is genuine RK4 truncation (VAL-0011).
+  - **O4:** state at each cutoff (`BurnEnded`) and at 53 700 s, against DOP853 (rtol 1e-13, atol 1e-9, segments split at the predicted ignition and cutoff times).
+  - **O5:** every telemetry sample in each coast arc, against exact Kepler propagation of the arc's start state.
+  - **O6:** five runs at fixed Δv (thrust × 2^k, duration / 2^k, same midpoint), comparing the finite-burn SMA with the impulsive vis-viva SMA. Reported as the order per halving and as the slice ratio |ΔSMA_finite/ΔSMA_impulsive − 1|.
+  - **O7:** signs of ΔE and ΔSMA across each burn, and the rotation of the angular-momentum direction.
+  - **O8:** final position error against DOP853 at dt = 10, 5 and 2.5 s.
+- **Results (reference host):**
+
+| Oracle | Metric | Prograde | Retrograde | Depletion | Invalid cmds | Provisional limit |
+|---|---|---|---|---|---|---|
+| O1 | propellant used, rel. to initial mass | 9.2e-17 | 9.2e-17 | 1.0e-17 | 4.2e-17 | 1e-12 |
+| O1 | depletion residual / D1a bound | — | — | 0.305 | — | 1 (analytic) |
+| O2 | sensed Δv, rel. | 1.1e-14 | 1.1e-14 | 4.9e-14 | 5.6e-14 | 1e-12 |
+| O4 | at cutoff [m; m/s] | 7.65e-4; 1.21e-6 | 7.80e-4; 1.24e-6 | 8.14e-4; 1.33e-6 | 8.01e-3; 1.00e-5 | 2e-3; 3e-6 (invalid cmds: 1.6e-2; 2e-5) |
+| O4 | at 53 700 s [m; m/s] | 0.2904; 3.35e-4 | 0.3127; 3.64e-4 | 0.2891; 3.20e-4 | 0.2973; 3.50e-4 | 0.6; 7e-4 |
+| O5 | coast max [m; m/s] | 0.283; 3.26e-4 | 0.314; 3.64e-4 | 0.275; 3.04e-4 | 0.279; 3.27e-4 | 0.6; 7e-4 |
+| O6 | max \|p − 2\| over 4 pairs | 0.0041 | 0.0039 | — | — | 0.05 |
+| O6 | slice ratio deviation | 2.59e-6 | 2.56e-6 | — | — | 1e-5 |
+| O6 | finite − impulsive SMA (77.3 s) | −0.131 m | −0.127 m | — | — | reported |
+| O7 | sign violations; plane rotation [rad] | 0; 1.4e-19 | 0; 7.5e-17 | 0; 1.5e-16 | 0; 1.0e-16 | 0; 1e-12 |
+| O8 | orders 10→5, 5→2.5 | 4.31, 4.17 | 4.33, 4.19 | 4.28, 4.14 | 4.32, 4.21 | \|p − 4\| ≤ 0.5 |
+| Accounting | propellant, Δv bookkeeping (rel.) | 0, 0 | 0, 0 | 0, 0 | 0, 0 | 1e-12 |
+| Accounting | \|thrust accel\| vs F/m; direction vs ±v̂ | 1.5e-16; 1.7e-16 | 1.5e-16; 1.7e-16 | 1.2e-16; 1.1e-16 | 1.5e-16; 1.2e-16 | 1e-12 |
+
+  - **O3 (free space, slice burn):** velocity rel. error 1.8e-14; propellant 2.1e-16 of the initial mass; position error at dt = 10 s 4.26e-9 m (prograde) and 4.25e-9 m (retrograde); orders 3.80 and 3.88 (limits 1e-12, 1e-12, |p − 4| ≤ 0.5).
+  - **Contract checks** (exact; no tolerance) all hold on every mission:
+    - event order and cadence;
+    - traceability, including commanded against executed values;
+    - declared receipts and the predicted burn lifecycle;
+    - mass bookkeeping identities;
+    - rejected commands change nothing: each run is bit-identical to a control run with only the accepted entries;
+    - in-process and cross-process determinism;
+    - the DR-0018 boundary at four stop times (inside a burn, before ignition, at ignition, at cutoff).
+- **Cross-checks with earlier records.**
+  - The slice values reproduce VAL-0012 at dt = 10 s: 0.2904 m against DOP853; coast 0.283 m; orders 4.31 and 4.17.
+  - O6 reproduces the VAL-0008 planning values: −0.131 m; ratio 2.6e-6.
+  - The slice events sha256 is unchanged from T4 (`42316356…`).
+- **Observations:**
+  - **O4 at cutoff is dominated by the coast before the burn.** The invalid-command mission's last cutoff is at 2420 s, and its error (8.0e-3 m) is ten times the slice's at 677 s. A single horizon-independent cutoff limit would be meaningless, so the provisional limit for that mission is scoped (≈ 2× measured).
+  - **Sensed Δv cannot see a thrust-vector error.** It integrates the scalar F/m separately from the trajectory. A 1e-5 thrust-vector mutant passes O2 and is caught only by O4, which the test suite pins.
+  - **Depletion leaves the DR-0017 D1a residual,** so the tank is not empty. A later reject-policy burn is `insufficient_propellant`. A later `burn_to_depletion` burn is `burn_unschedulable`: the depletion time of the residual (~7e-14 s) is below the clock resolution at 1800 s. `no_propellant` therefore needs a tank loaded empty.
+  - **The DR-0017 timing bound is separate from trajectory error.** The validators report each burn's `timing_delta_v_error_mps` from `CommandAccepted` as a per-burn timing quantity. They never use it as a trajectory-error bound. The trajectory error is O4/O5/O8.
+- **Thresholds.** `proof/thresholds/m2.json` is **provisional**: the DR-0015 candidates, or the DR-0015 method applied to these measurements (basis per group in the file). No threshold was set or changed to make a check pass. Final values come from T7 (three platforms, threshold DR). FU-1 (GMAT gates; 11–15 µm DOP853 floor) is untouched. O8 excludes dt = 1 s, whose error (~2e-5 m) approaches that floor.
+- **Classification:** no discrepancy. **Status:** provisional Proof evidence (T5); not an approval of any tolerance.

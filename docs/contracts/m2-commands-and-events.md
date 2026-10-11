@@ -77,6 +77,7 @@ Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries
   - **Precisely:** the envelope is the **end tick of the step that executed the transition**, so `t − dt ≤ event_t_s ≤ t`.
   - An event exactly on a tick boundary is executed at the end of the step reaching it: ignition at 600 s gives tick 60.
   - The one exception is an event at the very start of a step that no earlier step reached: a burn submitted at tick k with ignition at k·dt, including t = 0. It is executed at the start of the next step, so it is reported at tick k + 1 with `event_t_s = k·dt`.
+  - This same-tick rule is approved T3 behavior and is verified, not changed, by T5: the validators predict every report tick independently (`tars.validation.m2._expected_report_tick`), and `m2_burn_to_depletion` submits and ignites at 600 s, reported at tick 61 (`m2_proof.py` check `same_tick_submission_reporting`; `tests/test_m2_validation.py`).
 - Converters are pure and deterministic, so identical scenarios and commands give byte-identical JSONL on the same platform (tested).
 
 ## Scenario timeline and emission (T4)

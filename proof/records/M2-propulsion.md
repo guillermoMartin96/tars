@@ -54,7 +54,7 @@
   - runner emission of all seven T3 event types in a fixed, documented order and cadence;
   - correlation of command IDs and burn IDs through every event;
   - commanded intent kept separate from executed outcome;
-  - stop semantics: a burn crossing the stop is an observation horizon, under DR-0018 (open);
+  - stop semantics: a burn crossing the stop is an observation horizon (DR-0018, approved option A on 2026-10-11);
   - numerical failures recorded as `non_finite`;
   - CLI v2 summary with commit-marker publication;
   - vertical-slice scenario `scenarios/m2_prograde_burn.json`.
@@ -73,11 +73,11 @@
   - M1 Proof passes against the unchanged `proof/thresholds/m1.json`, and the GMAT comparison passes;
   - the v1 scenario hash and the M1 timeout limit (5908 ticks) are unchanged;
   - a v2 scenario without propulsion reproduces the M1 events.
-- **Decisions:** DR-0014 amendment (T3 semantics confirmed 2026-10-11); DR-0018 (open, blocks nothing); ADR-0007 T4 notes. **Contract:** `docs/contracts/m2-commands-and-events.md` §"Scenario timeline and emission (T4)".
+- **Decisions:** DR-0014 amendment (T3 semantics confirmed 2026-10-11); DR-0018 (approved option A, 2026-10-11); ADR-0007 T4 notes. **Contract:** `docs/contracts/m2-commands-and-events.md` §"Scenario timeline and emission (T4)".
 - **Review:** `docs/reviews/M2-T4-review-01.md`. Codex FAIL, then three CONDITIONAL PASS rounds, then **PASS**. 13 findings (F1–F5, N1, M1, K1–K5) were all accepted, resolved and mutation-tested; most of the K-class predates T4.
   - **Final independent verdict: PASS** (session `01a12bec-aac4-7d11-9b17-ae683ddb6f86`).
 - **Known limitations allowed at the prototype bar:**
-  - no explicit end event for burns still active at the stop (DR-0018);
+  - no explicit end event for burns still active at the stop (DR-0018 option A, approved: by design);
   - the envelope tick of an ignition at its own submission tick is the next tick (documented);
   - FU-1 remains open for T7.
 - **Not started:** T5 and later (needs authorization). The draft PR (#3) is not merged.
