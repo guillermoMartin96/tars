@@ -7,7 +7,6 @@ the golden-hash validators.
 """
 
 import json
-import math
 from collections import Counter
 
 import numpy as np
@@ -534,10 +533,7 @@ def test_failure_right_after_a_submission_reports_the_new_schedule(monkeypatch, 
 def test_no_submission_at_a_timeout_tick(monkeypatch):
     """A tick at which the run times out ends the run: its submissions are not made."""
     s = _scenario(commands=[], stop_s={"orbits": 1, "max_duration_periods": 1.01})
-    period = runner.keplerian_period(
-        s.constants.equatorial_radius + s.initial_orbit.altitude_m, s.constants.mu
-    )
-    max_ticks = math.ceil(1.01 * period / s.dt_s)
+    max_ticks = s.timeout_ticks
     at_timeout = {"submit_t_s": max_ticks * s.dt_s, "command": _cmd("late", ignition=1e5)}
     s = _scenario(commands=[at_timeout], stop_s={"orbits": 1, "max_duration_periods": 1.01})
     # A strong prograde push raises the orbit, so one orbit cannot finish in time.

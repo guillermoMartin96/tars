@@ -94,5 +94,28 @@ All five are **`ACCEPTED`**. Each fix is mutation-tested: the new test fails wit
 - **Tests:** schema tests for each ratio, plus CLI exit-code tests.
 - **Mutation:** removing the guard fails.
 
-## Re-verification
-Pending: independent Codex re-verification of the fix commit.
+## Re-verification 1 (`5098f8a`)
+**Reviewer:** Codex, session `01a12bdb-ef2f-7872-b42b-c912e934395b`. **Raw:** `raw/M2-T4-codex-reverify.md`; probes in `raw/M2-T4-codex-reverify-scratch/`.
+
+**Verdict: CONDITIONAL PASS.**
+- F1–F5 are all **RESOLVED**. The reviewer re-ran each original probe and confirmed that each defect-specific test fails against the old code.
+- No regressions:
+  - 687 tests pass;
+  - M1 hash is exact; M1 Proof passes;
+  - slice JSONL is byte-identical across repeats;
+  - no new event types, codes, permissions or scope.
+
+### N1: Orbits-stop timeout arithmetic can still overflow
+**Severity:** Low. **Disposition:** `ACCEPTED`.
+
+**Implementer reasoning:** Correct, and it predates T4. The M1 runner computed `ceil(max_duration_periods · orbits · T / dt)` unchecked, so finite inputs such as a 1e308 guard factor or dt = 1e-308 crashed with `OverflowError` instead of being rejected as invalid input.
+
+**Resolution:**
+- `Scenario.timeout_ticks` computes the limit with the same expression and order as before, so the M1 limit is unchanged (tested). Scenario validation raises a `ValidationError` when the limit is not representable, for v1 and v2.
+- The runner uses the validated value.
+- **Tests:** guard-product and dt-quotient overflow (v2), the v1 guard, CLI exit 2, and equality with the M1 formula.
+- **Mutation:** removing the validation fails 4 tests.
+
+**Reviewer note:**
+- Some new tests (the integer-payload runner check, infinity rejection, two orbits-stop serialization cases) pass against the old code as well.
+- These are intended as positive coverage. The defect-specific tests catch each original finding.

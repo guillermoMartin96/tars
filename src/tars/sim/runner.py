@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 import tars
-from tars.astro.elements import circular_orbit_state, keplerian_period, specific_energy
+from tars.astro.elements import circular_orbit_state, specific_energy
 from tars.events.schema import OrbitCompleted, SimulationCompleted, SimulationStarted, StateSampled
 from tars.sim.burn_events import (
     burn_ended_event,
@@ -157,13 +157,8 @@ def run_scenario(scenario: Scenario, record_samples: bool = True) -> RunResult:
     )
     stop_tick = None if v2 is None else v2.stop_tick
     if stop_tick is None:
-        nominal_period = keplerian_period(
-            constants.equatorial_radius + scenario.initial_orbit.altitude_m, constants.mu
-        )
         target_orbits = scenario.stop.orbits
-        max_ticks = math.ceil(
-            scenario.stop.max_duration_periods * target_orbits * nominal_period / scenario.dt_s
-        )
+        max_ticks = scenario.timeout_ticks  # validated representable (review N1)
     radius = constants.equatorial_radius
     # Timeline in submission order. Payloads are exact JSON types (TimelineEntry), so a
     # deep copy is exact; the run cannot alias the scenario.

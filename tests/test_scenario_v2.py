@@ -349,3 +349,36 @@ def test_version_1_sampling_ratio_overflow_is_a_validation_error():
     data.update(dt_s=1e-300, telemetry={"sample_interval_s": 1e300})
     with pytest.raises(ValidationError, match="not representable"):
         Scenario.model_validate(data)
+
+
+@pytest.mark.parametrize(
+    "patch",
+    [
+        {"stop": {"orbits": 2, "max_duration_periods": 1e308}},
+        {"stop": {"orbits": 2}, "dt_s": 1e-308, "telemetry": {"sample_interval_s": 1e-308}},
+    ],
+)
+def test_unrepresentable_orbits_timeout_is_a_validation_error(patch):
+    """Re-verification N1: the orbits-stop tick limit must be representable."""
+    data = {**_slice(), "commands": [], **patch}
+    with pytest.raises(ValidationError, match="tick limit is not representable"):
+        _parse(data)
+
+
+def test_version_1_unrepresentable_orbits_timeout_is_a_validation_error():
+    data = json.loads(M1_SCENARIO.read_text())
+    data["stop"] = {"orbits": 10, "max_duration_periods": 1e308}
+    with pytest.raises(ValidationError, match="tick limit is not representable"):
+        Scenario.model_validate(data)
+
+
+def test_timeout_ticks_matches_the_m1_guard():
+    """The runner's M1 timeout limit is unchanged: ceil(1.1 * 10 * T / dt)."""
+    import math
+
+    from tars.astro.elements import keplerian_period
+
+    s = load_scenario(M1_SCENARIO)
+    period = keplerian_period(s.constants.equatorial_radius + 250000.0, s.constants.mu)
+    assert s.timeout_ticks == math.ceil(1.1 * 10 * period / 10.0)
+    assert load_scenario(M2_SLICE_SCENARIO).timeout_ticks is None

@@ -93,7 +93,7 @@ Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries
       - The canonical form, and therefore `scenario_hash`, is unambiguous.
       - The scenario stores a private deep copy, and the runner submits an exact copy of it, so direct `submit()` and the timeline behave identically.
   - `stop`: exactly one of `orbits` (M1 semantics, including the `max_duration_periods` timeout, default 1.1) or `duration_s`. For a duration stop, `max_duration_periods` is `null`, so serialized scenarios validate again (review F4).
-- **Tick grid.** `submit_t_s` and `stop.duration_s` must be exactly `n · dt_s` for an integer n, because time is `tick · dt` (ADR-0002). For example, 0.3 with dt = 0.1 is rejected, because 3 · 0.1 ≠ 0.3. A ratio to `dt_s` that is not representable is a validation error (review F5).
+- **Tick grid.** `submit_t_s` and `stop.duration_s` must be exactly `n · dt_s` for an integer n, because time is `tick · dt` (ADR-0002). For example, 0.3 with dt = 0.1 is rejected, because 3 · 0.1 ≠ 0.3. A ratio to `dt_s` that is not representable is a validation error (review F5). So is an orbits-stop tick limit (`max_duration_periods · orbits · T / dt_s`) that is not representable (re-verification N1).
 - **Timeline order.**
   - `submit_t_s` is non-decreasing; entries at the same time are submitted in file order.
   - With a duration stop, every `submit_t_s` must be earlier than the stop.

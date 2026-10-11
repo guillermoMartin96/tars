@@ -1,0 +1,21 @@
+F1 0 non_finite scheduled ('burn#000001',) PropulsionSnapshot(tick=0, t=0.0, propellant_kg=300.0, total_mass_kg=1300.0, delta_v_sensed_mps=0.0, engine_state=<EngineState.SCHEDULED: 'scheduled'>, active_plan=None, pending_plans=(BurnPlan(ignition_t_s=600.0, commanded_duration_s=77.3, burn_duration_s=77.29999999999995, cutoff_t_s=677.3, propellant_used_kg=12.379420191975951, mass_flow_kgps=0.1601477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>, timing_delta_v_error_mps=1.6223689461736918e-14),), active_burn_id=None, pending_burn_ids=('burn#000001',), active_direction=None)
+F2 rejected {'x': (nan,)}
+F2 rejected {'x': b'abc'}
+F2 rejected {'x': {1, 2}}
+F2 rejected {'x': 5}
+F2 direct equals timeline 5 accepted
+F2 direct equals timeline 5.0 accepted
+F2 direct equals timeline True rejected
+F2 direct equals timeline '5' rejected
+F2 direct equals timeline None rejected
+F2 direct equals timeline -1 rejected
+F2 direct equals timeline 0 rejected
+F4 roundtrip orbits=None max_duration_periods=None duration_s=30.0 with_dt 6
+F4 orbits hash 096f376847ea5baa756110a41886880078d125c27fe526255b9d9efe68df4d19
+F4 orbits hash 096f376847ea5baa756110a41886880078d125c27fe526255b9d9efe68df4d19
+F4 orbits hash 096f376847ea5baa756110a41886880078d125c27fe526255b9d9efe68df4d19
+F5 ValidationError
+F3 events changed True summary exists False
+N1 validation accepted guard_product
+N1 guard_product OverflowError cannot convert float infinity to integer
+N1 validation accepted orbit_tick_ratio

@@ -1,0 +1,93 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________ test_interrupted_publication_never_leaves_a_mismatched_pair[1] ________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-10/test_interrupted_publication_n0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f2671a0>
+failing_rename = 1
+
+    @pytest.mark.parametrize("failing_rename", [1, 2])
+    def test_interrupted_publication_never_leaves_a_mismatched_pair(
+        tmp_path, monkeypatch, failing_rename
+    ):
+        """T4 review F3: a failure at either rename leaves the previous complete pair or an
+        events file without a summary (incomplete), never a summary of other events."""
+        import hashlib
+        import os
+    
+        mod = _load_cli_module()
+        out = tmp_path / "mission"
+        _previous_pair(out)
+        real_replace, calls = os.replace, []
+    
+        def flaky_replace(src, dst):
+            calls.append(dst)
+            if len(calls) == failing_rename:
+                raise OSError("disk full")
+            real_replace(src, dst)
+    
+        monkeypatch.setattr(os, "replace", flaky_replace)
+        summary = json.dumps({"events_sha256": hashlib.sha256(b"new\n").hexdigest()}).encode()
+        with pytest.raises(OSError):
+            mod._publish(out, b"new\n", summary)
+>       assert _pair_is_consistent(out) == ["events.jsonl"]  # no commit marker
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError
+
+tests/test_cli.py:233: AssertionError
+________ test_interrupted_publication_never_leaves_a_mismatched_pair[2] ________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-10/test_interrupted_publication_n1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f32b500>
+failing_rename = 2
+
+    @pytest.mark.parametrize("failing_rename", [1, 2])
+    def test_interrupted_publication_never_leaves_a_mismatched_pair(
+        tmp_path, monkeypatch, failing_rename
+    ):
+        """T4 review F3: a failure at either rename leaves the previous complete pair or an
+        events file without a summary (incomplete), never a summary of other events."""
+        import hashlib
+        import os
+    
+        mod = _load_cli_module()
+        out = tmp_path / "mission"
+        _previous_pair(out)
+        real_replace, calls = os.replace, []
+    
+        def flaky_replace(src, dst):
+            calls.append(dst)
+            if len(calls) == failing_rename:
+                raise OSError("disk full")
+            real_replace(src, dst)
+    
+        monkeypatch.setattr(os, "replace", flaky_replace)
+        summary = json.dumps({"events_sha256": hashlib.sha256(b"new\n").hexdigest()}).encode()
+        with pytest.raises(OSError):
+            mod._publish(out, b"new\n", summary)
+>       assert _pair_is_consistent(out) == ["events.jsonl"]  # no commit marker
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+out = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-10/test_interrupted_publication_n1/mission')
+
+    def _pair_is_consistent(out):
+        """A summary.json, when present, always describes the events.jsonl next to it."""
+        import hashlib
+    
+        names = sorted(p.name for p in out.iterdir())
+        assert all(not n.startswith(".") for n in names), f"temporary file left: {names}"
+        if "summary.json" in names:
+            summary = json.loads((out / "summary.json").read_text())
+            log = (out / "events.jsonl").read_bytes()
+>           assert summary["events_sha256"] == hashlib.sha256(log).hexdigest()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError
+
+tests/test_cli.py:180: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_cli.py::test_interrupted_publication_never_leaves_a_mismatched_pair[1]
+FAILED tests/test_cli.py::test_interrupted_publication_never_leaves_a_mismatched_pair[2]
+2 failed, 16 deselected in 0.11s

@@ -1,0 +1,597 @@
+FFFFFFFF.F.F..FFFFFFFF                                                   [100%]
+=================================== FAILURES ===================================
+__________ test_python_payloads_must_be_exact_standard_json[payload0] __________
+
+payload = {'x': (1.0,)}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload1] __________
+
+payload = {'x': (nan,)}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload2] __________
+
+payload = {'x': b'abc'}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload3] __________
+
+payload = {'x': {1, 2}}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload4] __________
+
+payload = {'x': 77}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload5] __________
+
+payload = {'x': 'a'}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload6] __________
+
+payload = {'x': {1: 'non-string key'}}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+__________ test_python_payloads_must_be_exact_standard_json[payload7] __________
+
+payload = {'x': [<object object at 0x10adb8560>]}
+
+    @pytest.mark.parametrize(
+        "payload",
+        [
+            {"x": (1.0,)},
+            {"x": (float("nan"),)},
+            {"x": b"abc"},
+            {"x": {1, 2}},
+            {"x": _IntSubclass(77)},
+            {"x": _StrSubclass("a")},
+            {"x": {1: "non-string key"}},
+            {"x": [object()]},
+            {"x": float("inf")},
+        ],
+    )
+    def test_python_payloads_must_be_exact_standard_json(payload):
+        """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+        unambiguous and the runner submits exactly what the scenario holds."""
+        data = _slice()
+        data["commands"] = [{"command": payload}]
+>       with pytest.raises(ValidationError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+tests/test_scenario_v2.py:270: Failed
+___________________ test_python_payload_is_privately_copied ____________________
+
+    def test_python_payload_is_privately_copied():
+        data = _slice()
+        nested = {"k": [1, 2]}
+        data["commands"] = [{"command": {"x": nested}}]
+        s = ScenarioV2.model_validate(data)
+        before = s.config_hash()
+        nested["k"].append(3)
+>       assert s.commands[0].command == {"x": {"k": [1, 2]}} and s.config_hash() == before
+E       AssertionError: assert ({'x': {'k': [1, 2, 3]}} == {'x': {'k': [1, 2]}}
+E         
+E         Differing items:
+E         {'x': {'k': [1, 2, 3]}} != {'x': {'k': [1, 2]}}
+E         Use -v to get more diff)
+
+tests/test_scenario_v2.py:281: AssertionError
+_______________ test_serialized_scenarios_validate_again[stop0] ________________
+
+stop = {'duration_s': 53700.0}
+
+    @pytest.mark.parametrize(
+        "stop",
+        [{"duration_s": 53700.0}, {"orbits": 2}, {"orbits": 2, "max_duration_periods": 1.5}],
+    )
+    def test_serialized_scenarios_validate_again(stop):
+        """F4: canonical JSON and Python dumps round-trip to an equal scenario."""
+        s = _parse({**_slice(), "stop": stop})
+>       assert parse_scenario(s.canonical_json()) == s
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_scenario_v2.py:306: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = '{"commands":[{"command":{"command_id":"slice-prograde-001","direction":"prograde","duration_s":77.3,"ignition_t_s":60...uration_s":53700.0,"max_duration_periods":1.1,"orbits":null},"telemetry":{"sample_interval_s":60.0},"time_scale":"TT"}'
+
+    def parse_scenario(text: str) -> Scenario:
+        """Validate scenario JSON; ``"schema_version": 2`` (the integer) selects version 2."""
+        try:
+            version = json.loads(text).get("schema_version")
+        except (ValueError, AttributeError):  # not JSON or not an object: v1 reports it
+            version = None
+        if type(version) is int and version == 2:
+>           return ScenarioV2.model_validate_json(text)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           pydantic_core._pydantic_core.ValidationError: 1 validation error for ScenarioV2
+E           stop
+E             Value error, max_duration_periods applies only to an orbits stop [type=value_error, input_value={'duration_s': 53700.0, '...s': 1.1, 'orbits': None}, input_type=dict]
+E               For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+review_scratch/old/src/tars/sim/scenario.py:236: ValidationError
+_________________ test_orbits_stop_guard_default_is_canonical __________________
+
+    def test_orbits_stop_guard_default_is_canonical():
+        implicit = _parse({**_slice(), "stop": {"orbits": 2}})
+        explicit = _parse({**_slice(), "stop": {"orbits": 2, "max_duration_periods": 1.1}})
+>       null = _parse({**_slice(), "stop": {"orbits": 2, "max_duration_periods": None}})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_scenario_v2.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_scenario_v2.py:20: in _parse
+    return parse_scenario(json.dumps(data))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = '{"schema_version": 2, "name": "m2_prograde_burn", "description": "Milestone 2 vertical slice (DR-0010 A): one 77.3 s ...opellant": "reject"}}], "stop": {"orbits": 2, "max_duration_periods": null}, "telemetry": {"sample_interval_s": 60.0}}'
+
+    def parse_scenario(text: str) -> Scenario:
+        """Validate scenario JSON; ``"schema_version": 2`` (the integer) selects version 2."""
+        try:
+            version = json.loads(text).get("schema_version")
+        except (ValueError, AttributeError):  # not JSON or not an object: v1 reports it
+            version = None
+        if type(version) is int and version == 2:
+>           return ScenarioV2.model_validate_json(text)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           pydantic_core._pydantic_core.ValidationError: 1 validation error for ScenarioV2
+E           stop.max_duration_periods
+E             Input should be a valid number [type=float_type, input_value=None, input_type=NoneType]
+E               For further information visit https://errors.pydantic.dev/2.13/v/float_type
+
+review_scratch/old/src/tars/sim/scenario.py:236: ValidationError
+__________________________ test_with_dt_on_version_2 ___________________________
+
+    def test_with_dt_on_version_2():
+        """F4: the inherited helper works when the timeline fits the new grid."""
+        s = load_scenario(M2_SLICE_SCENARIO)
+>       fine = s.with_dt(5.0)
+               ^^^^^^^^^^^^^^
+
+tests/test_scenario_v2.py:325: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0010 A): one 77.3 s ...eline', 'ignition_t_s': 600.0, 'direction': 'prograde', 'duration_s': 77.3, 'on_insufficient_propellant': 'reject'}),))
+dt_s = 5.0
+
+    def with_dt(self, dt_s: float) -> Scenario:
+        """Copy with a different step (used by the convergence study)."""
+>       return self.model_validate(
+            {**self.model_dump(), "dt_s": dt_s, "telemetry": {"sample_interval_s": dt_s}}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for ScenarioV2
+E       stop
+E         Value error, max_duration_periods applies only to an orbits stop [type=value_error, input_value={'orbits': None, 'max_dur..., 'duration_s': 53700.0}, input_type=dict]
+E           For further information visit https://errors.pydantic.dev/2.13/v/value_error
+
+review_scratch/old/src/tars/sim/scenario.py:90: ValidationError
+________ test_unrepresentable_tick_ratios_are_validation_errors[patch0] ________
+
+patch = {'stop': {'duration_s': 1e+308}}
+
+    @pytest.mark.parametrize(
+        "patch",
+        [
+            {"stop": {"duration_s": 1e308}},
+            {"stop": {"duration_s": 1.0}, "commands": [{"submit_t_s": 1e308, "command": {}}]},
+        ],
+    )
+    def test_unrepresentable_tick_ratios_are_validation_errors(patch):
+        """F5: finite inputs whose ratio to dt overflows raise ValidationError, not
+        OverflowError."""
+        data = {**_slice(), "dt_s": 1e-10, "telemetry": {"sample_interval_s": 1e-10}, **patch}
+        data.setdefault("commands", [])
+        with pytest.raises(ValidationError, match="not representable"):
+>           _parse(data)
+
+tests/test_scenario_v2.py:344: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_scenario_v2.py:20: in _parse
+    return parse_scenario(json.dumps(data))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/old/src/tars/sim/scenario.py:236: in parse_scenario
+    return ScenarioV2.model_validate_json(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/old/src/tars/sim/scenario.py:207: in _timeline_on_tick_grid
+    _tick_count(self.stop.duration_s, self.dt_s, "stop.duration_s")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = 1e+308, dt_s = 1e-10, name = 'stop.duration_s'
+
+    def _tick_count(value: float, dt_s: float, name: str) -> int:
+        """Number of ticks n with n * dt_s == value exactly (time is tick * dt; ADR-0002)."""
+>       n = round(value / dt_s)
+            ^^^^^^^^^^^^^^^^^^^
+E       OverflowError: cannot convert float infinity to integer
+
+review_scratch/old/src/tars/sim/scenario.py:106: OverflowError
+________ test_unrepresentable_tick_ratios_are_validation_errors[patch1] ________
+
+patch = {'stop': {'duration_s': 1.0}, 'commands': [{'submit_t_s': 1e+308, 'command': {}}]}
+
+    @pytest.mark.parametrize(
+        "patch",
+        [
+            {"stop": {"duration_s": 1e308}},
+            {"stop": {"duration_s": 1.0}, "commands": [{"submit_t_s": 1e308, "command": {}}]},
+        ],
+    )
+    def test_unrepresentable_tick_ratios_are_validation_errors(patch):
+        """F5: finite inputs whose ratio to dt overflows raise ValidationError, not
+        OverflowError."""
+        data = {**_slice(), "dt_s": 1e-10, "telemetry": {"sample_interval_s": 1e-10}, **patch}
+        data.setdefault("commands", [])
+        with pytest.raises(ValidationError, match="not representable"):
+>           _parse(data)
+
+tests/test_scenario_v2.py:344: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_scenario_v2.py:20: in _parse
+    return parse_scenario(json.dumps(data))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/old/src/tars/sim/scenario.py:236: in parse_scenario
+    return ScenarioV2.model_validate_json(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/old/src/tars/sim/scenario.py:210: in _timeline_on_tick_grid
+    _tick_count(entry.submit_t_s, self.dt_s, f"commands[{i}].submit_t_s")
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = 1e+308, dt_s = 1e-10, name = 'commands[0].submit_t_s'
+
+    def _tick_count(value: float, dt_s: float, name: str) -> int:
+        """Number of ticks n with n * dt_s == value exactly (time is tick * dt; ADR-0002)."""
+>       n = round(value / dt_s)
+            ^^^^^^^^^^^^^^^^^^^
+E       OverflowError: cannot convert float infinity to integer
+
+review_scratch/old/src/tars/sim/scenario.py:106: OverflowError
+_________ test_version_1_sampling_ratio_overflow_is_a_validation_error _________
+
+    def test_version_1_sampling_ratio_overflow_is_a_validation_error():
+        data = json.loads(M1_SCENARIO.read_text())
+        data.update(dt_s=1e-300, telemetry={"sample_interval_s": 1e300})
+        with pytest.raises(ValidationError, match="not representable"):
+>           Scenario.model_validate(data)
+
+tests/test_scenario_v2.py:351: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Scenario(schema_version=1, name='m1_leo_250km', description='Milestone 1: circular 250 km LEO, i=51.6 deg, point-mass ...itude_deg=0.0), stop=StopCondition(orbits=10, max_duration_periods=1.1), telemetry=Telemetry(sample_interval_s=1e+300))
+
+    @model_validator(mode="after")
+    def _sampling_on_tick_grid(self) -> Scenario:
+        ratio = self.telemetry.sample_interval_s / self.dt_s
+>       if ratio < 1.0 or not math.isclose(ratio, round(ratio), rel_tol=0.0, abs_tol=1e-9):
+                                                  ^^^^^^^^^^^^
+E       OverflowError: cannot convert float infinity to integer
+
+review_scratch/old/src/tars/sim/scenario.py:68: OverflowError
+_____ test_failure_right_after_a_submission_reports_the_new_schedule[0.0] ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b01daf0>
+fail_after_t = 0.0
+
+    @pytest.mark.parametrize("fail_after_t", [0.0, 60.0])
+    def test_failure_right_after_a_submission_reports_the_new_schedule(monkeypatch, fail_after_t):
+        """T4 review F1: a step failing just after a submission (at tick 0, or at a sampled
+        tick) must not leave final telemetry that predates the submission."""
+        _with_extra_force(
+            monkeypatch,
+            lambda t, r, v: np.array([np.nan, 0, 0]) if t > fail_after_t else np.zeros(3),
+        )
+        entry = {"submit_t_s": fail_after_t, "command": _cmd(ignition=600.0)}
+        result = _run(_scenario(commands=[entry]))
+>       _check_log_invariants(result)
+
+tests/test_mission_m2.py:527: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0..._v_error_mps=1.6223689461736918e-14),), active_burn_id=None, pending_burn_ids=('burn#000001',), active_direction=None))
+
+    def _check_log_invariants(result):
+        """Properties every M2 log must have, whatever the scenario."""
+        events, dt = result.events, result.scenario.dt_s
+        assert events[0].type == "SimulationStarted" and events[-1].type == "SimulationCompleted"
+        ticks = [e.tick for e in events]
+        assert ticks == sorted(ticks), "envelope ticks never go backwards"
+        for e in events:
+            assert e.t == e.tick * dt  # envelope time is the tick time
+            if e.type in BURN_EVENTS:
+                # The envelope is the end of the step that executed the transition.
+                assert e.t - dt <= e.event_t_s <= e.t
+        for kind in ("StateSampled", "PropulsionSampled"):
+            counts = Counter(e.tick for e in _of(result, kind))
+            assert not counts or max(counts.values()) == 1, f"duplicate {kind}"
+        assert read_jsonl(to_jsonl(events)) == events  # JSONL round trip
+        started = Counter(e.burn_id for e in _of(result, "BurnStarted"))
+        ended = Counter(e.burn_id for e in _of(result, "BurnEnded"))
+        assert set(started.values()) <= {1} and set(ended.values()) <= {1}
+        assert set(ended) <= set(started)
+        # The final telemetry is authoritative: it equals the final propulsion state
+        # (T4 review F1), including after a failure that follows a submission.
+        final = result.final_propulsion
+        if final is not None:
+            last = _of(result, "PropulsionSampled")[-1]
+            assert last.tick == final.tick == result.completed.tick
+>           assert (last.engine_state, last.active_burn_id, last.pending_burn_ids) == (
+                final.engine_state.value,
+                final.active_burn_id,
+                final.pending_burn_ids,
+            )
+E           AssertionError: assert ('idle', None, ()) == ('scheduled',...urn#000001',))
+E             
+E             At index 0 diff: 'idle' != 'scheduled'
+E             Use -v to get more diff
+
+tests/test_mission_m2.py:91: AssertionError
+_____ test_failure_right_after_a_submission_reports_the_new_schedule[60.0] _____
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b08ea80>
+fail_after_t = 60.0
+
+    @pytest.mark.parametrize("fail_after_t", [0.0, 60.0])
+    def test_failure_right_after_a_submission_reports_the_new_schedule(monkeypatch, fail_after_t):
+        """T4 review F1: a step failing just after a submission (at tick 0, or at a sampled
+        tick) must not leave final telemetry that predates the submission."""
+        _with_extra_force(
+            monkeypatch,
+            lambda t, r, v: np.array([np.nan, 0, 0]) if t > fail_after_t else np.zeros(3),
+        )
+        entry = {"submit_t_s": fail_after_t, "command": _cmd(ignition=600.0)}
+        result = _run(_scenario(commands=[entry]))
+>       _check_log_invariants(result)
+
+tests/test_mission_m2.py:527: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0..._v_error_mps=1.6223689461736918e-14),), active_burn_id=None, pending_burn_ids=('burn#000001',), active_direction=None))
+
+    def _check_log_invariants(result):
+        """Properties every M2 log must have, whatever the scenario."""
+        events, dt = result.events, result.scenario.dt_s
+        assert events[0].type == "SimulationStarted" and events[-1].type == "SimulationCompleted"
+        ticks = [e.tick for e in events]
+        assert ticks == sorted(ticks), "envelope ticks never go backwards"
+        for e in events:
+            assert e.t == e.tick * dt  # envelope time is the tick time
+            if e.type in BURN_EVENTS:
+                # The envelope is the end of the step that executed the transition.
+                assert e.t - dt <= e.event_t_s <= e.t
+        for kind in ("StateSampled", "PropulsionSampled"):
+            counts = Counter(e.tick for e in _of(result, kind))
+            assert not counts or max(counts.values()) == 1, f"duplicate {kind}"
+        assert read_jsonl(to_jsonl(events)) == events  # JSONL round trip
+        started = Counter(e.burn_id for e in _of(result, "BurnStarted"))
+        ended = Counter(e.burn_id for e in _of(result, "BurnEnded"))
+        assert set(started.values()) <= {1} and set(ended.values()) <= {1}
+        assert set(ended) <= set(started)
+        # The final telemetry is authoritative: it equals the final propulsion state
+        # (T4 review F1), including after a failure that follows a submission.
+        final = result.final_propulsion
+        if final is not None:
+            last = _of(result, "PropulsionSampled")[-1]
+            assert last.tick == final.tick == result.completed.tick
+>           assert (last.engine_state, last.active_burn_id, last.pending_burn_ids) == (
+                final.engine_state.value,
+                final.active_burn_id,
+                final.pending_burn_ids,
+            )
+E           AssertionError: assert ('idle', None, ()) == ('scheduled',...urn#000001',))
+E             
+E             At index 0 diff: 'idle' != 'scheduled'
+E             Use -v to get more diff
+
+tests/test_mission_m2.py:91: AssertionError
+_____________________ test_no_submission_at_a_timeout_tick _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b08fad0>
+
+    def test_no_submission_at_a_timeout_tick(monkeypatch):
+        """A tick at which the run times out ends the run: its submissions are not made."""
+        s = _scenario(commands=[], stop_s={"orbits": 1, "max_duration_periods": 1.01})
+        period = runner.keplerian_period(
+            s.constants.equatorial_radius + s.initial_orbit.altitude_m, s.constants.mu
+        )
+        max_ticks = math.ceil(1.01 * period / s.dt_s)
+        at_timeout = {"submit_t_s": max_ticks * s.dt_s, "command": _cmd("late", ignition=1e5)}
+        s = _scenario(commands=[at_timeout], stop_s={"orbits": 1, "max_duration_periods": 1.01})
+        # A strong prograde push raises the orbit, so one orbit cannot finish in time.
+        _with_extra_force(monkeypatch, lambda t, r, v: 2e-2 * v / np.linalg.norm(v))
+        result = _run(s)
+        _check_log_invariants(result)
+        assert result.completed.failure_cause == "timeout"
+        assert result.completed.tick == max_ticks
+>       assert result.receipts == [] and result.unsubmitted_command_ids == ["late"]
+E       AssertionError: assert ([CommandRecei...ma_errors=())] == []
+E         
+E         Left contains one more item: CommandReceipt(status=<CommandStatus.ACCEPTED: 'accepted'>, command_id='late', issuer='scenario_timeline', command=Bur...ellantPolicy.REJECT: 'reject'>, timing_delta_v_error_mps=1.1086187798853566e-12), tick=543, t=5430.0, schema_errors=())
+E         Use -v to get more diff)
+
+tests/test_mission_m2.py:549: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload0]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload1]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload2]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload3]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload4]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload5]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload6]
+FAILED tests/test_scenario_v2.py::test_python_payloads_must_be_exact_standard_json[payload7]
+FAILED tests/test_scenario_v2.py::test_python_payload_is_privately_copied - A...
+FAILED tests/test_scenario_v2.py::test_serialized_scenarios_validate_again[stop0]
+FAILED tests/test_scenario_v2.py::test_orbits_stop_guard_default_is_canonical
+FAILED tests/test_scenario_v2.py::test_with_dt_on_version_2 - pydantic_core._...
+FAILED tests/test_scenario_v2.py::test_unrepresentable_tick_ratios_are_validation_errors[patch0]
+FAILED tests/test_scenario_v2.py::test_unrepresentable_tick_ratios_are_validation_errors[patch1]
+FAILED tests/test_scenario_v2.py::test_version_1_sampling_ratio_overflow_is_a_validation_error
+FAILED tests/test_mission_m2.py::test_failure_right_after_a_submission_reports_the_new_schedule[0.0]
+FAILED tests/test_mission_m2.py::test_failure_right_after_a_submission_reports_the_new_schedule[60.0]
+FAILED tests/test_mission_m2.py::test_no_submission_at_a_timeout_tick - Asser...
+18 failed, 4 passed, 89 deselected in 0.44s

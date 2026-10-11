@@ -272,3 +272,13 @@ def test_run_mission_rejects_a_binary_file_without_traceback(tmp_path):
     bad.write_bytes(b"\xff\xfe\x00")
     proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
     assert proc.returncode == 2 and "Traceback" not in proc.stderr
+
+
+def test_run_mission_rejects_unrepresentable_orbits_timeout_without_traceback(tmp_path):
+    """Re-verification N1: exit 2 (invalid input), not an OverflowError traceback."""
+    data = json.loads(M1_SCENARIO.read_text())
+    data["stop"] = {"orbits": 2, "max_duration_periods": 1e308}
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps(data))
+    proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+    assert proc.returncode == 2 and "Traceback" not in proc.stderr

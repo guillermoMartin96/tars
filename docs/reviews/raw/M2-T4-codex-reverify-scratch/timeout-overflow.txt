@@ -1,0 +1,24 @@
+guard_product validation accepted orbits=2 max_duration_periods=1e+308 duration_s=None exit 1 stderr Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap2/toolbox/scripts/run_mission.py", line 143, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap2/toolbox/scripts/run_mission.py", line 108, in main
+    result = run_scenario(scenario, record_samples=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap2/src/tars/sim/runner.py", line 164, in run_scenario
+    max_ticks = math.ceil(
+                ^^^^^^^^^^
+OverflowError: cannot convert float infinity to integer
+
+orbit_tick_ratio validation accepted orbits=2 max_duration_periods=1.1 duration_s=None exit 1 stderr Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap2/toolbox/scripts/run_mission.py", line 143, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap2/toolbox/scripts/run_mission.py", line 108, in main
+    result = run_scenario(scenario, record_samples=False)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap2/src/tars/sim/runner.py", line 164, in run_scenario
+    max_ticks = math.ceil(
+                ^^^^^^^^^^
+OverflowError: cannot convert float infinity to integer
+

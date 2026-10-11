@@ -24,6 +24,7 @@ from pydantic import (
     model_validator,
 )
 
+from tars.astro.elements import keplerian_period
 from tars.sim.constants import EARTH_CONSTANTS, EarthConstants
 from tars.sim.propulsion import EngineSpec, PropulsionSpecError, SpacecraftSpec, TankSpec
 
@@ -78,7 +79,29 @@ class Scenario(_Strict):
             raise ValueError("telemetry.sample_interval_s must be a positive multiple of dt_s")
         if len(set(self.force_models)) != len(self.force_models):
             raise ValueError("force_models must not repeat")
+        self.timeout_ticks  # noqa: B018 -- validates the orbits-stop guard (review N1)
         return self
+
+    @property
+    def timeout_ticks(self) -> int | None:
+        """Tick limit of an orbits stop: max_duration_periods x orbits nominal Keplerian
+        periods (M1 semantics). None for a duration stop.
+
+        Raises ValueError if the limit is not representable (e.g. a huge guard factor
+        or a tiny dt), so such input is invalid rather than a runtime overflow.
+        """
+        orbits = getattr(self.stop, "orbits", None)
+        if orbits is None:
+            return None
+        c = self.constants
+        try:
+            period = keplerian_period(c.equatorial_radius + self.initial_orbit.altitude_m, c.mu)
+            ticks = self.stop.max_duration_periods * orbits * period / self.dt_s
+        except OverflowError:
+            ticks = math.inf
+        if not math.isfinite(ticks):
+            raise ValueError("the orbits-stop tick limit is not representable")
+        return math.ceil(ticks)
 
     @property
     def sample_every_ticks(self) -> int:
