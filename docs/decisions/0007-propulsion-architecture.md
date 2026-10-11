@@ -40,9 +40,13 @@ Any of these may be revisited by a later decision.
   - This keeps every accepted plan exact and immutable, since later plans were computed from the propellant left by earlier ones. Gap insertion would need re-planning and is not supported.
 - **Propellant accounting.** Sufficiency is checked against the analytic propellant remaining after all accepted burns. The integrated propellant tracks it to round-off (≤ 3e-13 kg, VAL-0012).
 - **Represented burn interval (REV-T2-03, `03f6e4b`).** Event times are absolute float64 values, so the engine runs for exactly `cutoff − ignition`. The plan's `burn_duration_s` and consumption describe that represented interval.
-  - **Timing budget (DR-0017 B, `0e64717`).** This replaces the provisional 1 µs bound.
+  - **Timing budget (DR-0017 B, `0e64717`; conservative evaluation after review M2-DR0017).** This replaces the provisional 1 µs bound.
     - A burn is `burn_unschedulable` if the exact rocket-equation Δv difference between the executed and intended intervals exceeds `TIMING_DELTA_V_BUDGET_MPS = 1e-7 m/s` per burn.
-    - It is computed from the actual end-mass acceleration (`c·log1p(ṁ·|D − d|/m_end)`), and the plan records it (`timing_delta_v_error_mps`).
+    - `timing_delta_v_error_mps()` gives a **conservative upper estimate** of `c·|ln(m(D)/m(d))|`, evaluated as `c·log1p((F/m_end)·|D − d|/c)`, and the plan records it:
+      - `m_end` is a lower bound on the smaller end mass, with the cancellation uncertainty subtracted;
+      - forming `F/m_end` first avoids underflow;
+      - a small relative inflation covers residual rounding;
+      - overflow rejects.
     - `schedule_burn` always applies it with the spacecraft's dry mass.
     - It bounds Δv, not trajectory error.
   - **Never past depletion (N1, `9789603`; N4/N5, `87f217d`):** if rounding puts the cutoff after the depletion time, it steps back to the latest representable time not after depletion.
@@ -50,7 +54,8 @@ Any of these may be revisited by a later decision.
     - RK4 stages use the non-negative propellant.
     - Retain vs snap-to-empty is a DR-0017 choice (D1a vs D1b).
 - **Propellant floor (SCI-0012).** At a cutoff whose plan uses the entire tank, the integrated propellant is set to exactly 0. Otherwise it is clamped at ≥ 0.
-  - The floor absorbs only round-off plus at most ṁ × 1 µs from interval representation. That is ≤ 1.6e-7 kg for the reference engine at extreme times, and ≤ 3e-13 kg measured at mission times (VAL-0012).
+  - The floor only corrects integration round-off: ≤ 3e-13 kg measured at mission times (VAL-0012).
+  - It is separate from the D1a timing residual. A depletion cutoff stepped back before depletion leaves a positive residual (≤ ṁ·2·ulp(cutoff)), which is **retained**, not absorbed. Its Δv effect is bounded by the DR-0017 budget.
   - This is the only point where the simulator adjusts an integrated value, and it enforces a physical constraint.
 - **Atomic ticks (REV-T2-01, `03f6e4b`).** The engine schedule advances on a local cursor within a tick and is committed together with the state only when integration succeeds. A failed step changes nothing.
 - **Schema first (REV-T2-02).** `schedule_burn` validates ignition and duration (`burn_scalar`) before chronology and engine-conflict checks.
