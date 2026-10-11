@@ -396,3 +396,21 @@ def test_unrepresentable_initial_orbit_is_a_validation_error(stop):
     v1["initial_orbit"]["altitude_m"] = 1e103
     with pytest.raises(ValidationError, match="not numerically representable"):
         Scenario.model_validate(v1)
+
+
+@pytest.mark.parametrize("version", [1, 2])
+def test_huge_orbit_count_is_a_validation_error(version):
+    """Re-verification 3, K2: an int too large for a float is invalid input."""
+    data = json.loads(M1_SCENARIO.read_text()) if version == 1 else _slice()
+    data["stop"] = {"orbits": 10**309}
+    with pytest.raises(ValidationError, match="tick limit is not representable"):
+        _parse(data)
+
+
+@pytest.mark.parametrize("version", [1, 2])
+def test_empty_force_model_list_is_a_validation_error(version):
+    """Re-verification 3, K5: the runner needs at least one force model."""
+    data = json.loads(M1_SCENARIO.read_text()) if version == 1 else _slice()
+    data["force_models"] = []
+    with pytest.raises(ValidationError):
+        _parse(data)

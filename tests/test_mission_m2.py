@@ -592,3 +592,75 @@ def test_runner_uses_only_the_command_entry_point():
     source = inspect.getsource(runner)
     assert "schedule_burn" not in source
     assert "sim._" not in source
+
+
+# ------------------------------------------------------------------ numerical extremes
+# Re-verification 3 (K1, K3, K4): schema-valid but numerically extreme inputs must end as
+# the recorded non_finite failure, atomically, never as an uncaught exception.
+
+_ENGINE = {"thrust_n": 490.0, "isp_s": 312.0}
+EXTREMES = {
+    # |r| rounds above the nominal radius and r^3 overflows in gravity (K1).
+    "initial_norm": {
+        "dt_s": 10.0,
+        "initial_orbit": {
+            "kind": "circular",
+            "altitude_m": 5.643803094122361e102,
+            "inclination_deg": 179.0,
+            "raan_deg": 315.0,
+            "arg_latitude_deg": 310.0,
+        },
+        "stop": {"duration_s": 10.0},
+        "telemetry": {"sample_interval_s": 60.0},
+    },
+    # An RK4 stage radius overflows r^3 (K1).
+    "huge_dt": {
+        "dt_s": 1e100,
+        "stop": {"duration_s": 1e100},
+        "telemetry": {"sample_interval_s": 1e100},
+    },
+    # Finite components whose norm overflows (K3).
+    "norm_overflow": {
+        "dt_s": 1e200,
+        "initial_orbit": {
+            "kind": "circular",
+            "altitude_m": 1e100,
+            "inclination_deg": 51.6,
+            "raan_deg": 0.0,
+            "arg_latitude_deg": 0.0,
+        },
+        "stop": {"duration_s": 1e200},
+        "telemetry": {"sample_interval_s": 1e200},
+    },
+    # Representable engine rates, unrepresentable F/m (K4).
+    "thrust_overflow": {
+        "dt_s": 1e-300,
+        "stop": {"duration_s": 1e-300},
+        "telemetry": {"sample_interval_s": 1e-300},
+        "spacecraft": {
+            "dry_mass_kg": 1e-300,
+            "propellant_kg": 1e-300,
+            "engine": {"thrust_n": 1e100, "isp_s": 1e100},
+        },
+        "commands": [
+            {
+                "command": _cmd(
+                    "probe",
+                    ignition=0.0,
+                    duration=1e-300,
+                    on_insufficient_propellant="burn_to_depletion",
+                )
+            }
+        ],
+    },
+}
+
+
+@pytest.mark.parametrize("name", sorted(EXTREMES))
+def test_numerical_extremes_end_as_recorded_failures(name):
+    data = {**_slice(), "commands": [], **EXTREMES[name]}
+    result = _run(parse_scenario(json.dumps(data)))
+    _check_log_invariants(result)
+    done = result.completed
+    assert (done.status, done.failure_cause, done.tick) == ("failure", "non_finite", 0)
+    np.testing.assert_array_equal(result.final.r, result.initial.r)  # nothing committed

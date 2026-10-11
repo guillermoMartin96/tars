@@ -9,6 +9,7 @@ engine activity, after validation (DR-0013, DR-0014).
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 from itertools import pairwise
@@ -473,6 +474,8 @@ class Simulator:
             # RK4 stages near depletion can carry ~1e-17 kg of negative round-off;
             # the dynamics use the physical, non-negative propellant (review N4).
             mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)
+            if not math.isfinite(engine.thrust_n / mass):  # F/m overflows (K4)
+                raise FloatingPointError(f"thrust acceleration overflows at t = {t!r}")
             thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)
             a = force_model.acceleration(t, r, v) + thrust
             return np.concatenate([v, a, [-mdot, engine.thrust_n / mass]])
@@ -486,13 +489,17 @@ class Simulator:
         schedule or the recorded transitions (REV-T2-01).
         """
         prev = self.snapshot()
-        if self._spacecraft is None:
-            y_next = self._integrator.step(self._derivative, prev.t, self._y, self._dt)
-            if not np.all(np.isfinite(y_next)):
-                raise FloatingPointError(f"non-finite state produced at tick {self._tick + 1}")
-            engine = (self._active, self._pending, ())
-        else:
-            y_next, engine = self._step_with_propulsion(prev.t)
+        try:
+            if self._spacecraft is None:
+                y_next = self._integrator.step(self._derivative, prev.t, self._y, self._dt)
+                engine = (self._active, self._pending, ())
+            else:
+                y_next, engine = self._step_with_propulsion(prev.t)
+        except (OverflowError, ZeroDivisionError) as err:
+            # Python float arithmetic raises where NumPy would return inf: the same
+            # numerical failure, reported the same way (T4 re-verification 3, K1).
+            raise FloatingPointError(f"numerical overflow at tick {self._tick + 1}: {err}") from err
+        self._require_finite(y_next)
         # Commit point. Read-only so no force model can mutate simulator-owned state
         # through the r/v views it receives (REV-004); only step() replaces the state.
         self._y = _read_only(y_next)
@@ -532,5 +539,14 @@ class Simulator:
         return y, (engine.active, engine.pending, tuple(events))
 
     def _require_finite(self, y: NDArray[np.float64]) -> None:
-        if not np.all(np.isfinite(y)):
+        """The state and its magnitudes |r|, |v| must be finite.
+
+        A state whose components are finite but whose norm overflows cannot be used by
+        gravity, telemetry or events, so it is a numerical failure too (K3).
+        """
+        if not (
+            np.all(np.isfinite(y))
+            and math.isfinite(np.linalg.norm(y[:3]))
+            and math.isfinite(np.linalg.norm(y[3:6]))
+        ):
             raise FloatingPointError(f"non-finite state produced at tick {self._tick + 1}")

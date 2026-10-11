@@ -122,3 +122,39 @@ def test_force_models_cannot_mutate_simulator_state():
     with pytest.raises(ValueError):
         sim.step()
     np.testing.assert_array_equal(sim.snapshot().v, V0)
+
+
+def test_python_overflow_in_a_force_model_is_a_non_finite_failure():
+    """Re-verification 3, K1: Python float overflow (OverflowError) fails the step like
+    a NumPy inf does, atomically."""
+
+    class Overflowing:
+        name = "overflowing"
+
+        def acceleration(self, t, r, v):
+            return np.full(3, 1e300**2)  # raises OverflowError
+
+    sim = Simulator(R0, V0, Overflowing(), RK4(), 10.0)
+    with pytest.raises(FloatingPointError, match="numerical overflow"):
+        sim.step()
+    assert sim.tick == 0
+    np.testing.assert_array_equal(sim.snapshot().r, R0)
+
+
+def test_state_with_overflowing_norm_is_a_non_finite_failure():
+    """Re-verification 3, K3: finite components whose |r| overflows are not committed."""
+
+    class Fling:
+        name = "fling"
+
+        def acceleration(self, t, r, v):
+            return np.full(3, 1e190)  # after 100 s: |r| ~ 1e194 per component, finite
+
+    sim = Simulator(R0, V0, Fling(), RK4(), 1e2)
+    y = RK4().step(
+        lambda t, y: np.concatenate([y[3:], np.full(3, 1e190)]), 0.0, np.concatenate([R0, V0]), 1e2
+    )
+    assert np.all(np.isfinite(y)) and not np.isfinite(np.linalg.norm(y[:3]))  # the case
+    with pytest.raises(FloatingPointError, match="non-finite state"):
+        sim.step()
+    assert sim.tick == 0

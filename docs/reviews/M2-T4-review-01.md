@@ -140,3 +140,25 @@ All five are **`ACCEPTED`**. Each fix is mutation-tested: the new test fails wit
 - The M1 force model is untouched.
 - **Tests:** v1 and v2 for both stop kinds, plus CLI exit 2.
 - **Mutation:** removing the check fails the duration-stop cases.
+
+## Re-verification 3 (`b820588`)
+**Reviewer:** Codex, session `01a12be4-3347-76f2-844e-ec5aa50f23b0`. **Raw:** `raw/M2-T4-codex-reverify3.md`; probes and the 4,728-case arithmetic sweep in `raw/M2-T4-codex-reverify3-scratch/`.
+
+**Verdict: CONDITIONAL PASS.**
+- No Critical, High or Medium issue in T4; 695 tests pass; M1 hash exact; M1 Proof passes; slice repeatable.
+- **M1: NOT RESOLVED.** An altitude of 5.64e102 m passed the period check but still overflowed: the Cartesian |r| rounds above the nominal radius.
+- At my request the reviewer swept all scenario-derived arithmetic and reported the whole class together, K1–K5, all Low. Most predate T4 (M1 gravity, M1 schema).
+
+**Implementer reasoning:** Patching validation one input at a time does not converge: RK4 stages can reach radii no validation can predict. The systematic rule is that **a numerical failure during a step is the existing recorded `non_finite` mission failure**, atomic and never an uncaught exception. Validation rejects only structurally invalid input.
+
+All are **`ACCEPTED`**:
+- **M1 / K1 (gravity r³ overflow, initial state or RK4 stage).** `Simulator.step` converts Python `OverflowError`/`ZeroDivisionError` raised while integrating into `FloatingPointError`, the same failure NumPy reports as inf. The step is atomic. The M1 force model and the arithmetic of successful steps are unchanged.
+- **K3 (finite components, overflowing norm).** A committed state must also have finite |r| and |v|, otherwise it is `non_finite`. This is checked in the simulator, so telemetry and events can always be built.
+- **K4 (representable rates, unrepresentable F/m).** The powered RHS checks F/m and raises `FloatingPointError`.
+- **K2 (orbits = 10³⁰⁹).** The timeout expression's int-to-float overflow is a validation error.
+- **K5 (`force_models: []`).** Schema `min_length=1`, in v1 and v2. `model_dump` and the M1 hash are unchanged.
+- The period-representability check from re-verification 2 is kept as an early, clearer rejection of absurd orbits.
+
+**Tests:** the four reviewer reproducers end as recorded `non_finite` failures at tick 0 with nothing committed; simulator unit tests for Python overflow and norm overflow; K2 and K5 schema tests for both versions.
+
+**Mutations:** removing each guard fails its tests (K1: 3, K3: 1, K4: 1, K2: 2, K5: 2).

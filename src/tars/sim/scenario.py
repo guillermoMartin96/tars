@@ -63,7 +63,9 @@ class Scenario(_Strict):
     time_scale: Literal["TT"] = "TT"
     seed: int = Field(ge=0, description="Recorded for replay; M1 has no stochastic behavior")
     earth_constants: Literal["WGS84"] = "WGS84"
-    force_models: tuple[Literal["point_mass_gravity"], ...] = ("point_mass_gravity",)
+    force_models: tuple[Literal["point_mass_gravity"], ...] = Field(
+        default=("point_mass_gravity",), min_length=1
+    )
     integrator: Literal["rk4"] = "rk4"
     dt_s: float = Field(gt=0.0)
     initial_orbit: CircularOrbit
@@ -109,7 +111,10 @@ class Scenario(_Strict):
         orbits = getattr(self.stop, "orbits", None)
         if orbits is None:
             return None
-        ticks = self.stop.max_duration_periods * orbits * self._nominal_period() / self.dt_s
+        try:
+            ticks = self.stop.max_duration_periods * orbits * self._nominal_period() / self.dt_s
+        except OverflowError:  # e.g. orbits = 10**309 cannot become a float (K2)
+            ticks = math.inf
         if not math.isfinite(ticks):
             raise ValueError("the orbits-stop tick limit is not representable")
         return math.ceil(ticks)

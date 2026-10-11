@@ -125,7 +125,7 @@ Submissions precede the samples of their tick, so **every sample shows the sched
   - The final `PropulsionSampled` shows the active or pending burns.
   - Cutoffs and ignitions exactly at the stop time are emitted.
   - The representation is pending decision **DR-0018** (recommended: keep as is).
-- **Failures.** On a non-finite step, nothing from that step is emitted, because the simulator commits nothing. Engine transitions are read only after a committed step, so no event is ever duplicated. The run ends with `failure_cause: non_finite`.
+- **Failures.** A step that produces a non-finite state, a state whose |r| or |v| overflows, a Python arithmetic overflow (e.g. r³ in gravity), or an unrepresentable thrust acceleration F/m is one numerical failure, `non_finite` (re-verification 3, K1/K3/K4). Nothing from that step is emitted, because the simulator commits nothing. Engine transitions are read only after a committed step, so no event is ever duplicated. The run ends with `failure_cause: non_finite`.
 - **Unsubmitted entries.** Entries not yet submitted when the run ends are listed in `RunResult.unsubmitted_command_ids` and the CLI summary.
 - **No partial results.**
   - `run_scenario` returns only after the whole run, and any unexpected exception propagates with no result.
