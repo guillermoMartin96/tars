@@ -239,6 +239,9 @@ class BurnRejection(StrEnum):
     IGNITION_IN_PAST = "ignition_in_past"
     NO_PROPELLANT = "no_propellant"
     INSUFFICIENT_PROPELLANT = "insufficient_propellant"
+    OVERLAPS_SCHEDULED_BURN = "overlaps_scheduled_burn"
+    ENGINE_BUSY = "engine_busy"
+    NO_PROPULSION_CONFIGURED = "no_propulsion_configured"
 
 
 class BurnRejectedError(ValueError):
@@ -381,3 +384,68 @@ def plan_burn(
         end_cause=cause,
         policy=policy,
     )
+
+
+# ------------------------------------------------------- simulator-facing state views
+
+
+class EngineState(StrEnum):
+    """Engine state machine: IDLE -> SCHEDULED -> BURNING -> IDLE (or SCHEDULED)."""
+
+    IDLE = "idle"
+    SCHEDULED = "scheduled"
+    BURNING = "burning"
+
+
+@dataclass(frozen=True)
+class PropulsionSnapshot:
+    """Read-only view of simulator-owned propulsion state at the end of a tick.
+
+    Attributes:
+        tick: Integer step counter.
+        t: Elapsed time [s].
+        propellant_kg: Propellant remaining (integrated state; never negative).
+        total_mass_kg: Dry mass plus propellant.
+        delta_v_sensed_mps: Cumulative ideal-accelerometer delta-v (integral of F/m)
+            since the start of the simulation [m/s].
+        engine_state: Current engine state.
+        active_plan: The burn in progress, if any.
+        pending_plans: Accepted burns not yet ignited, in execution order.
+    """
+
+    tick: int
+    t: float
+    propellant_kg: float
+    total_mass_kg: float
+    delta_v_sensed_mps: float
+    engine_state: EngineState
+    active_plan: BurnPlan | None
+    pending_plans: tuple[BurnPlan, ...]
+
+
+@dataclass(frozen=True)
+class EngineTransition:
+    """An engine event at its exact time, which may lie inside a tick (DR-0013 3A).
+
+    The state is the integrated state at ``t``, the boundary of an RK4 sub-step.
+    T3 maps these to BurnStarted / BurnEnded events.
+    """
+
+    kind: str  # "ignition" | "cutoff"
+    t: float
+    plan: BurnPlan
+    direction: str
+    r: Vector
+    v: Vector
+    propellant_kg: float
+    delta_v_sensed_mps: float
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "r", _frozen3(self.r))
+        object.__setattr__(self, "v", _frozen3(self.v))
+
+
+def _frozen3(values: object) -> Vector:
+    arr = np.array(values, dtype=np.float64, copy=True)
+    arr.flags.writeable = False
+    return arr

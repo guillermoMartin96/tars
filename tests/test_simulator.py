@@ -30,7 +30,18 @@ def test_no_public_api_mutates_physical_state():
     """Architecture invariant 1: state changes only through step()."""
     sim = _sim()
     public = {name for name in dir(sim) if not name.startswith("_")}
-    assert public == {"dt", "tick", "t", "snapshot", "step"}
+    # M2/T2 (DR-0013 5) adds the engine-scheduling entry point and read-only views;
+    # tests/test_simulator_propulsion.py proves none of them changes physical state.
+    assert public == {
+        "dt",
+        "tick",
+        "t",
+        "snapshot",
+        "step",
+        "schedule_burn",
+        "propulsion_snapshot",
+        "engine_transitions",
+    }
     for prop in ("dt", "tick", "t"):
         with pytest.raises(AttributeError):
             setattr(sim, prop, 0)
