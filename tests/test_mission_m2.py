@@ -202,11 +202,22 @@ def test_slice_is_deterministic_and_repeatable(slice_run):
     assert scenario.config_hash() == load_scenario(M2_SLICE_SCENARIO).config_hash()
 
 
-def test_m1_scenario_is_byte_identical():
-    import hashlib
+def test_m1_scenario_is_unchanged_by_the_m2_runner():
+    """P10 through the M2 runner: bit-identical to the golden log on the reference host
+    (DR-0006); elsewhere within the approved cross-platform bounds (DR-0008), like the
+    cross-platform validator. CI hosts differ from the reference CPU in the last bits."""
+    from tars.validation.cross_platform import compare_to_golden, load_golden, platform_info
+    from tars.validation.thresholds import load_thresholds
 
-    log = to_jsonl(_run(load_scenario(M1_SCENARIO)).events).encode()
-    assert hashlib.sha256(log).hexdigest() == M1_GOLDEN_SHA256
+    result = _run(load_scenario(M1_SCENARIO))
+    golden = load_golden()
+    metrics = compare_to_golden(result, golden)
+    for name, limit in load_thresholds().for_validator("cross_platform").items():
+        assert metrics[name] <= limit, name
+    here, ref = platform_info(), golden["platform"]
+    if all(here[k] == ref[k] for k in ("system", "machine", "cpu")):
+        assert golden["events_sha256"] == M1_GOLDEN_SHA256
+        assert metrics["bit_identical_to_golden"] == 1.0
 
 
 def test_version_2_without_propulsion_reproduces_m1_events():
