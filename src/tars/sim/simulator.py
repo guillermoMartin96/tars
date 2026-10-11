@@ -21,6 +21,7 @@ from tars.sim.commands import (
     BurnCommand,
     CommandReceipt,
     CommandStatus,
+    PayloadTypeError,
     parse_command,
     readable_field,
     safe_text,
@@ -371,8 +372,10 @@ class Simulator:
             cmd = parse_command(command)
         except ValidationError as err:
             return self._schema_rejection(command, schema_errors(err), tick, t)
-        except (TypeError, ValueError, AttributeError):  # unparseable payload object
-            return self._schema_rejection(command, ("<payload>: unparseable",), tick, t)
+        except PayloadTypeError as err:
+            return self._schema_rejection(command, err.errors, tick, t)
+        except Exception:  # hostile payload object; process-control exceptions propagate
+            return self._schema_rejection(command, ("<payload>: unprocessable",), tick, t)
 
         def rejected(reason: BurnRejection, detail: str) -> CommandReceipt:
             return CommandReceipt(
@@ -421,10 +424,16 @@ class Simulator:
     def _schema_rejection(
         payload: object, errors: tuple[str, ...], tick: int, t: float
     ) -> CommandReceipt:
+        def echo(name: str) -> str | None:
+            try:
+                return readable_field(payload, name) if type(payload) is dict else None
+            except Exception:  # never let diagnostics escape (re-verification N2)
+                return None
+
         return CommandReceipt(
             status=CommandStatus.REJECTED,
-            command_id=readable_field(payload, "command_id"),
-            issuer=readable_field(payload, "issuer"),
+            command_id=echo("command_id"),
+            issuer=echo("issuer"),
             command=None,
             reason=BurnRejection.SCHEMA_INVALID,
             detail="; ".join(errors),

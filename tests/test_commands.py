@@ -607,3 +607,113 @@ def test_safe_text_escapes_invalid_unicode_and_bounds_length():
     json.dumps(safe_text("x\udfff")).encode("utf-8")
     assert safe_text("é ok") == "é ok"
     assert len(safe_text("y" * 500, limit=50)) == 50
+
+
+# ------------------------------------------ re-verification (M2-T3-review-01) N1-N4
+
+
+class _SelfDumpingCommand(BurnCommand):
+    """N1: a subclass whose model_dump returns itself (caller-controlled serialization)."""
+
+    def model_dump(self, *args, **kwargs):  # type: ignore[override]
+        return self
+
+
+class _RaisingDumpCommand(BurnCommand):
+    def model_dump(self, *args, **kwargs):  # type: ignore[override]
+        raise RuntimeError("hostile dump")
+
+
+class _RaisingDict(dict):
+    def get(self, *args, **kwargs):
+        raise RuntimeError("hostile get")
+
+    def keys(self):
+        raise RuntimeError("hostile keys")
+
+
+def test_overridden_model_dump_cannot_bypass_validation():
+    sim = _sim()
+    forged = _SelfDumpingCommand(**_cmd()).model_copy(update={"schema_version": 2, "issuer": []})
+    receipt = sim.submit(forged)
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    assert receipt.command is None
+    assert sim.propulsion_snapshot().pending_plans == ()
+
+
+def test_only_exact_burn_commands_or_plain_mappings_are_accepted():
+    """A well-formed subclass instance is still not an exact BurnCommand."""
+    receipt = _sim().submit(_SelfDumpingCommand(**_cmd()))
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+
+
+@pytest.mark.parametrize(
+    ("payload_factory", "expected"),
+    [
+        (lambda: _RaisingDumpCommand(**_cmd()), "schema_invalid"),
+        (lambda: object(), "schema_invalid"),
+        (lambda: 42, "schema_invalid"),
+        # dict(payload) copies a dict subclass's storage without calling its overridden
+        # methods, so its (valid) content is read safely and accepted.
+        (lambda: _RaisingDict(_cmd()), None),
+    ],
+)
+def test_hostile_payloads_never_escape_submit(payload_factory, expected):
+    """N2: no ordinary exception escapes payload handling; every outcome is a writable
+    record."""
+    sim = _sim()
+    receipt = sim.submit(payload_factory())
+    assert (receipt.reason.value if receipt.reason else None) == expected
+    command_event(receipt).model_dump_json()
+
+
+@pytest.mark.parametrize(
+    ("event_type", "field", "value"),
+    [
+        (CommandAccepted, "issuer", "x\ud800"),
+        (CommandRejected, "issuer", "x\ud800"),
+        (CommandRejected, "detail", "d\udfff"),
+        (CommandRejected, "schema_errors", ("ok", "bad\ud800")),
+    ],
+)
+def test_m2_event_strings_must_be_valid_unicode(event_type, field, value):
+    """N3: an event that validates must also serialize."""
+    data = _sample_events()[event_type].model_dump()
+    with pytest.raises(ValidationError):
+        event_type.model_validate({**data, field: value})
+
+
+def test_spacecraft_event_direction_laws_must_be_valid_unicode():
+    sc = SpacecraftSpec(DRY, ENGINE, TankSpec(PROP))
+    data = spacecraft_configured_event(sc, tick=0, t=0.0).model_dump()
+    with pytest.raises(ValidationError):
+        SpacecraftConfigured.model_validate({**data, "direction_laws": ("prograde", "\ud800")})
+
+
+def test_no_propulsion_configured_precedes_command_checks():
+    """N4: documented precedence: without a spacecraft, every schema-valid, non-duplicate
+    command is no_propulsion_configured (T2 behavior)."""
+    receipt = _sim(spacecraft=False).submit(_cmd(duration_s=-1.0, ignition_t_s=-5.0))
+    assert receipt.reason is BurnRejection.NO_PROPULSION_CONFIGURED
+
+
+def test_unforeseen_payload_failures_are_contained_but_interrupts_propagate(monkeypatch):
+    """N2 contract: any ordinary exception while handling a payload becomes a
+    schema_invalid receipt; process-control exceptions are not swallowed."""
+    import tars.sim.simulator as simulator_module
+
+    def boom(payload):
+        raise RuntimeError("unforeseen")
+
+    monkeypatch.setattr(simulator_module, "parse_command", boom)
+    receipt = _sim().submit(_cmd())
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    assert receipt.schema_errors == ("<payload>: unprocessable",)
+    assert receipt.command_id == "burn-001"  # still echoed from a plain dict
+
+    def interrupt(payload):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(simulator_module, "parse_command", interrupt)
+    with pytest.raises(KeyboardInterrupt):
+        _sim().submit(_cmd())

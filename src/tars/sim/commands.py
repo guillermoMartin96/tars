@@ -108,19 +108,39 @@ class CommandReceipt:
     schema_errors: tuple[str, ...] = ()
 
 
-def parse_command(payload: object) -> BurnCommand:
-    """Validate a payload into a fresh, canonical BurnCommand (review REV-T3-02).
+class PayloadTypeError(ValueError):
+    """The payload is neither an exact BurnCommand nor a plain mapping."""
 
-    Model instances, including subclasses and ``model_copy(update=...)`` results that
-    skipped validation, are dumped and re-validated against the exact schema, so the
-    result never aliases caller-owned objects.
+    def __init__(self, entry: str) -> None:
+        super().__init__(entry)
+        self.errors = (entry,)
+
+
+def parse_command(payload: object) -> BurnCommand:
+    """Validate a payload into a fresh, canonical BurnCommand (REV-T3-02; re-verification N1).
+
+    Only an *exact* ``BurnCommand`` or a mapping is accepted.
+    - A command instance is read through the exact class's ``model_dump`` (never a
+      caller-overridable method) and re-validated, which also catches
+      ``model_copy(update=...)`` values that skipped validation.
+    - Any other model, including a subclass, is rejected.
+    - A mapping is copied into a plain dict before validation.
+    The result never aliases caller-owned objects.
 
     Raises:
         ValidationError: for any schema violation.
+        PayloadTypeError: for a model that is not an exact BurnCommand.
+        Exception: any error raised by a hostile payload object; ``submit`` contains it.
     """
-    if isinstance(payload, BaseModel):
-        payload = payload.model_dump(warnings=False)
-    return BurnCommand.model_validate(payload)
+    if type(payload) is BurnCommand:
+        data: object = BurnCommand.model_dump(payload, warnings=False)
+    elif isinstance(payload, BaseModel):
+        raise PayloadTypeError("<payload>: not_an_exact_BurnCommand")
+    elif isinstance(payload, dict):
+        data = dict(payload)
+    else:
+        data = payload  # non-mappings fail validation with a structured error
+    return BurnCommand.model_validate(data)
 
 
 def readable_field(payload: object, name: str) -> str | None:

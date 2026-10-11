@@ -5,7 +5,15 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, TypeAdapter
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    TypeAdapter,
+)
 
 SCHEMA_VERSION = 1
 
@@ -115,6 +123,18 @@ def _require_int_one(value: object) -> object:
 StrictVersion1 = Annotated[Literal[1], BeforeValidator(_require_int_one)]
 
 
+def _valid_unicode(value: str) -> str:
+    """A record that validates must also serialize: reject lone surrogates (re-verification N3)."""
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise ValueError("string must be valid Unicode") from None
+    return value
+
+
+SafeStr = Annotated[str, AfterValidator(_valid_unicode)]
+
+
 class _StrictEventBase(_EventBase):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False, strict=True)
 
@@ -133,7 +153,7 @@ class SpacecraftConfigured(_StrictEventBase):
     exhaust_velocity_mps: float
     mass_flow_kgps: float
     timing_delta_v_budget_mps: float
-    direction_laws: tuple[str, ...]
+    direction_laws: tuple[SafeStr, ...]
 
 
 class CommandAccepted(_StrictEventBase):
@@ -141,7 +161,7 @@ class CommandAccepted(_StrictEventBase):
 
     type: Literal["CommandAccepted"] = "CommandAccepted"
     command_id: CommandId
-    issuer: str
+    issuer: SafeStr
     burn_id: BurnId
     direction: Direction
     on_insufficient_propellant: Policy
@@ -164,14 +184,14 @@ class CommandRejected(_StrictEventBase):
 
     type: Literal["CommandRejected"] = "CommandRejected"
     command_id: CommandId | None
-    issuer: str | None
+    issuer: SafeStr | None
     reason: RejectionCode
-    detail: str
+    detail: SafeStr
     direction: Direction | None
     on_insufficient_propellant: Policy | None
     commanded_ignition_t_s: float | None
     commanded_duration_s: float | None
-    schema_errors: tuple[str, ...]
+    schema_errors: tuple[SafeStr, ...]
 
 
 class BurnStarted(_StrictEventBase):
