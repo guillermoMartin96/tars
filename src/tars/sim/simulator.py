@@ -29,6 +29,7 @@ from tars.sim.propulsion import (
     InsufficientPropellantPolicy,
     PropulsionSnapshot,
     SpacecraftSpec,
+    burn_scalar,
     plan_burn,
     thrust_acceleration,
 )
@@ -115,6 +116,48 @@ class _ScheduledBurn:
     direction: str
     law: DirectionLaw
     propellant_after_kg: float  # analytic remaining propellant once this burn ends
+
+
+class _EngineCursor:
+    """Engine schedule being advanced within one tick (local until step() commits)."""
+
+    def __init__(self, active: _ScheduledBurn | None, pending: list[_ScheduledBurn]) -> None:
+        self.active = active
+        self.pending = pending
+
+    def transitions_at(
+        self, t: float, y: NDArray[np.float64], events: list[EngineTransition]
+    ) -> NDArray[np.float64]:
+        """Apply engine transitions at time t: cutoff first, then ignition."""
+        if self.active is not None and self.active.plan.cutoff_t_s == t:
+            burn = self.active
+            # Propellant floor (SCI-0012): an emptied tank is exactly empty, and
+            # integration round-off can never leave it negative.
+            floor = 0.0 if burn.propellant_after_kg == 0.0 else max(float(y[_PROP]), 0.0)
+            if floor != y[_PROP]:
+                y = y.copy()
+                y[_PROP] = floor
+            events.append(_transition("cutoff", t, burn, y))
+            self.active = None
+        if self.pending and self.pending[0].plan.ignition_t_s == t:
+            self.active = self.pending.pop(0)
+            events.append(_transition("ignition", t, self.active, y))
+        return y
+
+
+def _transition(
+    kind: str, t: float, burn: _ScheduledBurn, y: NDArray[np.float64]
+) -> EngineTransition:
+    return EngineTransition(
+        kind=kind,
+        t=t,
+        plan=burn.plan,
+        direction=burn.direction,
+        r=y[:3],
+        v=y[3:6],
+        propellant_kg=float(y[_PROP]),
+        delta_v_sensed_mps=float(y[_DV]),
+    )
 
 
 class Simulator:
@@ -226,13 +269,11 @@ class Simulator:
             raise BurnRejectedError(
                 BurnRejection.SCHEMA_INVALID, f"unknown direction {direction!r}"
             )
-        # Full numeric validation and planning happen in plan_burn; these early
-        # checks only order the rejection reasons (past, then engine conflicts).
-        try:
-            ignition = float(ignition_t_s)
-        except (TypeError, ValueError):
-            ignition = float("nan")
-        if ignition == ignition and ignition < self.t:  # finite-or-inf, not NaN
+        # Schema first (DR-0014 amendment): type and finiteness precede chronology
+        # and engine-conflict checks (REV-T2-02).
+        ignition = burn_scalar("ignition_t_s", ignition_t_s)
+        duration = burn_scalar("duration_s", duration_s)
+        if ignition < self.t:
             raise BurnRejectedError(
                 BurnRejection.IGNITION_IN_PAST, f"ignition {ignition!r} < now {self.t!r}"
             )
@@ -250,8 +291,8 @@ class Simulator:
         plan = plan_burn(
             self._spacecraft.engine,
             self._committed_propellant_kg,
-            ignition_t_s,
-            duration_s,
+            ignition,
+            duration,
             policy=policy,
             earliest_t_s=self.t,
         )
@@ -295,17 +336,23 @@ class Simulator:
         return powered
 
     def step(self) -> list[AscendingNodeCrossing]:
-        """Advance one tick; return detections that occurred during the step."""
+        """Advance one tick atomically; return detections that occurred during the step.
+
+        If integration fails, nothing changes: not the state, the tick, the engine
+        schedule or the recorded transitions (REV-T2-01).
+        """
         prev = self.snapshot()
         if self._spacecraft is None:
             y_next = self._integrator.step(self._derivative, prev.t, self._y, self._dt)
             if not np.all(np.isfinite(y_next)):
                 raise FloatingPointError(f"non-finite state produced at tick {self._tick + 1}")
+            engine = (self._active, self._pending, ())
         else:
-            y_next = self._step_with_propulsion(prev.t)
-        # Read-only so no force model can mutate simulator-owned state through the
-        # r/v views it receives (REV-004); only step() replaces the state.
+            y_next, engine = self._step_with_propulsion(prev.t)
+        # Commit point. Read-only so no force model can mutate simulator-owned state
+        # through the r/v views it receives (REV-004); only step() replaces the state.
         self._y = _read_only(y_next)
+        self._active, self._pending, self._engine_events = engine
         self._tick += 1
         curr = self.snapshot()
         detections = []
@@ -315,59 +362,30 @@ class Simulator:
                 detections.append(found)
         return detections
 
-    def _step_with_propulsion(self, t0: float) -> NDArray[np.float64]:
+    def _step_with_propulsion(
+        self, t0: float
+    ) -> tuple[NDArray[np.float64], tuple[_ScheduledBurn | None, list[_ScheduledBurn], tuple]]:
+        """Integrate one tick on local copies of the engine schedule (nothing is
+        committed here; step() commits the result only if integration succeeded)."""
         t1 = (self._tick + 1) * self._dt
         events: list[EngineTransition] = []
-        y = self._engine_events_at(t0, self._y, events)
-        burns = [*self._pending, *([self._active] if self._active else [])]
+        engine = _EngineCursor(self._active, list(self._pending))
+        y = engine.transitions_at(t0, self._y, events)
+        burns = [*engine.pending, *([engine.active] if engine.active else [])]
         inside = sorted(
             {t for b in burns for t in (b.plan.ignition_t_s, b.plan.cutoff_t_s) if t0 < t < t1}
         )
         if not inside:
             # No engine event in this tick: one full step of exactly dt, as in M1.
-            y = self._integrator.step(self._powered_derivative(self._active), t0, y, self._dt)
+            y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
             self._require_finite(y)
-            y = self._engine_events_at(t1, y, events)
+            y = engine.transitions_at(t1, y, events)
         else:
             for a, b in pairwise([t0, *inside, t1]):
-                y = self._integrator.step(self._powered_derivative(self._active), a, y, b - a)
+                y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
                 self._require_finite(y)
-                y = self._engine_events_at(b, y, events)
-        self._engine_events = tuple(events)
-        return y
-
-    def _engine_events_at(
-        self, t: float, y: NDArray[np.float64], events: list[EngineTransition]
-    ) -> NDArray[np.float64]:
-        """Apply engine transitions at time t: cutoff first, then ignition."""
-        if self._active is not None and self._active.plan.cutoff_t_s == t:
-            burn = self._active
-            # Propellant floor (SCI-0012): an emptied tank is exactly empty, and
-            # integration round-off can never leave it negative.
-            floor = 0.0 if burn.propellant_after_kg == 0.0 else max(float(y[_PROP]), 0.0)
-            if floor != y[_PROP]:
-                y = y.copy()
-                y[_PROP] = floor
-            events.append(self._transition("cutoff", t, burn, y))
-            self._active = None
-        if self._pending and self._pending[0].plan.ignition_t_s == t:
-            self._active = self._pending.pop(0)
-            events.append(self._transition("ignition", t, self._active, y))
-        return y
-
-    def _transition(
-        self, kind: str, t: float, burn: _ScheduledBurn, y: NDArray[np.float64]
-    ) -> EngineTransition:
-        return EngineTransition(
-            kind=kind,
-            t=t,
-            plan=burn.plan,
-            direction=burn.direction,
-            r=y[:3],
-            v=y[3:6],
-            propellant_kg=float(y[_PROP]),
-            delta_v_sensed_mps=float(y[_DV]),
-        )
+                y = engine.transitions_at(b, y, events)
+        return y, (engine.active, engine.pending, tuple(events))
 
     def _require_finite(self, y: NDArray[np.float64]) -> None:
         if not np.all(np.isfinite(y)):

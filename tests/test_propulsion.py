@@ -17,6 +17,7 @@ from tars.sim.constants import STANDARD_GRAVITY, WGS84
 from tars.sim.integrators import RK4
 from tars.sim.propulsion import (
     DIRECTION_LAWS,
+    EVENT_TIME_RESOLUTION_S,
     BurnEndCause,
     BurnRejectedError,
     BurnRejection,
@@ -205,10 +206,12 @@ def test_burn_plan_for_completed_burn_has_exact_times_and_propellant():
     plan = plan_burn(REF_ENGINE, propellant_kg=REF_PROP_KG, ignition_t_s=600.0, duration_s=77.3)
     assert plan.ignition_t_s == 600.0
     assert plan.commanded_duration_s == 77.3
-    assert plan.burn_duration_s == 77.3
     assert plan.cutoff_t_s == 600.0 + 77.3
+    # The plan describes the interval float64 event times represent (REV-T2-03).
+    assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
+    assert abs(plan.burn_duration_s - 77.3) <= EVENT_TIME_RESOLUTION_S
     assert plan.end_cause is BurnEndCause.COMPLETED
-    assert plan.propellant_used_kg == REF_ENGINE.mass_flow_kgps * 77.3
+    assert plan.propellant_used_kg == REF_ENGINE.mass_flow_kgps * plan.burn_duration_s
     assert plan.propellant_used_kg == pytest.approx(12.379420191975958, rel=1e-14, abs=0)
 
 
@@ -231,8 +234,9 @@ def test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion():
     t_dep = 10.0 / REF_ENGINE.mass_flow_kgps
     assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
     assert plan.commanded_duration_s == 77.3
-    assert plan.burn_duration_s == t_dep
     assert plan.cutoff_t_s == 600.0 + t_dep
+    assert plan.burn_duration_s == plan.cutoff_t_s - 600.0
+    assert abs(plan.burn_duration_s - t_dep) <= EVENT_TIME_RESOLUTION_S
     assert plan.propellant_used_kg == 10.0  # exactly: propellant never goes negative
 
 

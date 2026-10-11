@@ -32,6 +32,14 @@ from tars.sim.state import Vector
 # A direction law must return a unit vector; allow only round-off in its norm.
 _UNIT_NORM_TOLERANCE = 1e-12
 
+# Largest accepted difference between a burn's intended duration and the interval
+# that float64 event times can represent, cutoff - ignition (REV-T2-03). 1 us is the
+# stop-time granularity GMAT and STK use (GMAT TIME_ROUNDOFF; VAL-0010). For the
+# reference engine its delta-v effect, a * 1 us ~ 4e-7 m/s, is below the burn's own
+# integration error (1.2e-6 m/s at dt = 10 s, VAL-0008). Float64 time keeps
+# sub-microsecond resolution for t < 2**33 s (~272 years).
+EVENT_TIME_RESOLUTION_S = 1.0e-6
+
 
 class PropulsionSpecError(ValueError):
     """Invalid engine, tank, or spacecraft configuration."""
@@ -265,8 +273,10 @@ class BurnPlan:
     Attributes:
         ignition_t_s: Engine-on time [s since epoch].
         commanded_duration_s: Duration requested by the command [s].
-        burn_duration_s: Duration the engine actually runs [s]. It is shorter than
-            commanded only for ``PROPELLANT_DEPLETED``.
+        burn_duration_s: Interval the engine actually runs, cutoff - ignition [s], as
+            represented by float64 event times. It equals the commanded duration to
+            within ``EVENT_TIME_RESOLUTION_S``; it is shorter only for
+            ``PROPELLANT_DEPLETED``.
         cutoff_t_s: Engine-off time, ignition + burn duration [s].
         propellant_used_kg: Propellant consumed [kg]. Equals the loaded amount exactly
             on depletion, so propellant never goes negative.
@@ -292,6 +302,25 @@ class BurnPlan:
         return min(self.mass_flow_kgps * (t - self.ignition_t_s), self.propellant_used_kg)
 
 
+def burn_scalar(name: str, value: object) -> float:
+    """Validate one numeric burn input and normalize it to float64 (DR-0014 amendment).
+
+    Non-real values (bool, str, None, arrays, numpy bools), non-finite values and
+    values that overflow float64 (e.g. 10**1000) are ``schema_invalid``.
+    """
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, f"{name} must be real, got {value!r}")
+    try:
+        number = float(value)
+    except (OverflowError, ValueError, TypeError):
+        number = math.nan
+    if not math.isfinite(number):
+        raise BurnRejectedError(
+            BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {value!r}"
+        )
+    return number
+
+
 def plan_burn(
     engine: EngineSpec,
     propellant_kg: float,
@@ -311,24 +340,11 @@ def plan_burn(
         BurnRejectedError: with a machine-readable reason. No plan exists for a
             rejected burn.
     """
-    numbers = {
-        "propellant_kg": propellant_kg,
-        "ignition_t_s": ignition_t_s,
-        "duration_s": duration_s,
-        "earliest_t_s": earliest_t_s,
-    }
-    for name, value in numbers.items():
-        if isinstance(value, bool) or not isinstance(value, Real) or not math.isfinite(value):
-            raise BurnRejectedError(
-                BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {value!r}"
-            )
     # All arithmetic below is float64, whatever scalar type was passed (REV-T1-01).
-    propellant_kg, ignition_t_s, duration_s, earliest_t_s = (
-        float(propellant_kg),
-        float(ignition_t_s),
-        float(duration_s),
-        float(earliest_t_s),
-    )
+    propellant_kg = burn_scalar("propellant_kg", propellant_kg)
+    ignition_t_s = burn_scalar("ignition_t_s", ignition_t_s)
+    duration_s = burn_scalar("duration_s", duration_s)
+    earliest_t_s = burn_scalar("earliest_t_s", earliest_t_s)
     if propellant_kg < 0.0:
         raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, "propellant_kg must be >= 0")
     try:
@@ -368,6 +384,18 @@ def plan_burn(
             BurnRejection.BURN_UNSCHEDULABLE,
             f"cutoff {cutoff_s!r} is not representable after ignition {ignition_t_s!r}",
         )
+    # The simulator integrates exactly the represented interval, so the plan describes
+    # that interval and its consumption (REV-T2-03).
+    represented = cutoff_s - ignition_t_s
+    if abs(represented - burn) > EVENT_TIME_RESOLUTION_S:
+        raise BurnRejectedError(
+            BurnRejection.BURN_UNSCHEDULABLE,
+            f"event times represent {represented!r} s for a {burn!r} s burn at t = "
+            f"{ignition_t_s!r} (resolution limit {EVENT_TIME_RESOLUTION_S} s)",
+        )
+    burn = represented
+    if cause is BurnEndCause.COMPLETED:
+        used = min(mdot * burn, propellant_kg)
     # A burn with thrust must consume propellant; mdot*duration can underflow (N1).
     if not used > 0.0:
         raise BurnRejectedError(
@@ -446,6 +474,9 @@ class EngineTransition:
 
 
 def _frozen3(values: object) -> Vector:
-    arr = np.array(values, dtype=np.float64, copy=True)
-    arr.flags.writeable = False
-    return arr
+    """Read-only copy backed by immutable bytes: the writeable flag cannot be
+    re-enabled, so retained event evidence cannot be rewritten (REV-T2-04)."""
+    data = np.asarray(values, dtype=np.float64)
+    if data.shape != (3,):
+        raise ValueError(f"expected a 3-vector, got shape {data.shape}")
+    return np.frombuffer(data.tobytes(), dtype=np.float64)

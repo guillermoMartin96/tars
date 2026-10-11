@@ -6,6 +6,7 @@ rejections, and M1 preservation.
 """
 
 import math
+from decimal import Decimal, localcontext
 from itertools import pairwise
 
 import numpy as np
@@ -17,6 +18,7 @@ from tars.sim.constants import STANDARD_GRAVITY, WGS84
 from tars.sim.forces import PointMassGravity
 from tars.sim.integrators import RK4
 from tars.sim.propulsion import (
+    EVENT_TIME_RESOLUTION_S,
     BurnEndCause,
     BurnRejectedError,
     BurnRejection,
@@ -25,6 +27,7 @@ from tars.sim.propulsion import (
     InsufficientPropellantPolicy,
     SpacecraftSpec,
     TankSpec,
+    plan_burn,
     rocket_equation_delta_v,
 )
 from tars.sim.simulator import AscendingNodeDetector, Simulator
@@ -162,7 +165,9 @@ def test_schedule_returns_the_exact_plan():
     plan = sim.schedule_burn("prograde", ignition_t_s=605.5, duration_s=77.3)
     assert plan.ignition_t_s == 605.5
     assert plan.cutoff_t_s == 605.5 + 77.3
-    assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * 77.3
+    assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
+    assert abs(plan.burn_duration_s - 77.3) <= EVENT_TIME_RESOLUTION_S
+    assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
     p = sim.propulsion_snapshot()
     assert p.engine_state is EngineState.SCHEDULED
     assert p.pending_plans == (plan,)
@@ -414,3 +419,196 @@ def test_propulsion_runs_are_deterministic():
         p = sim.propulsion_snapshot()
         runs.append((_state(sim).tobytes(), p.propellant_kg, p.delta_v_sensed_mps))
     assert runs[0] == runs[1]
+
+
+# ------------------------------------------------- review M2-T2-review-01 regressions
+
+
+class _ZeroForce:
+    name = "zero"
+
+    def acceleration(self, t, r, v):
+        return np.zeros(3)
+
+
+class _FailAfter:
+    """Gravity that returns NaN for t in (t_fail, ...) while armed (REV-T2-01)."""
+
+    name = "fail_after"
+
+    def __init__(self, t_fail):
+        self.t_fail, self.armed, self.gravity = t_fail, True, PointMassGravity(WGS84.mu)
+
+    def acceleration(self, t, r, v):
+        if self.armed and t > self.t_fail:
+            return np.full(3, np.nan)
+        return self.gravity.acceleration(t, r, v)
+
+
+def test_a_failed_step_leaves_engine_schedule_and_state_unchanged():
+    """REV-T2-01: a tick is atomic; a retry after a failure burns the planned amount."""
+    force = _FailAfter(t_fail=2.0)
+    sim = Simulator(R0, V0, force, RK4(), 10.0, spacecraft=_spacecraft())
+    plan = sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+    before = (_state(sim), sim.propulsion_snapshot())
+    with pytest.raises(FloatingPointError):
+        sim.step()
+    assert sim.tick == 0
+    np.testing.assert_array_equal(_state(sim), before[0])
+    assert sim.propulsion_snapshot() == before[1]
+    assert sim.engine_transitions == ()
+    force.armed = False
+    sim.step()
+    assert [(e.kind, e.t) for e in sim.engine_transitions] == [("ignition", 1.0), ("cutoff", 3.0)]
+    used = PROP - sim.propulsion_snapshot().propellant_kg
+    assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + PROP)
+
+
+@pytest.mark.parametrize(
+    "ignition",
+    [-math.inf, math.inf, math.nan, "-1", True, np.bool_(True), np.array(-1.0), None, 10**1000],
+)
+def test_malformed_ignition_is_schema_invalid_whatever_the_time_or_schedule(ignition):
+    """REV-T2-02: schema validation precedes chronology and engine-conflict checks."""
+    sim = _sim()
+    _run_until(sim, 10.0)
+    sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=50.0)
+    with pytest.raises(BurnRejectedError) as err:
+        sim.schedule_burn("prograde", ignition_t_s=ignition, duration_s=5.0)
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
+
+
+@pytest.mark.parametrize("duration", ["5", True, None, math.inf, 10**1000])
+def test_malformed_duration_is_schema_invalid(duration):
+    sim = _sim()
+    with pytest.raises(BurnRejectedError) as err:
+        sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=duration)
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
+
+
+def test_burn_whose_represented_interval_differs_materially_is_unschedulable():
+    """REV-T2-03: at t ~ 1e15 s, float64 event times are 0.125 s apart; a 0.1 s burn
+    cannot be represented and must be rejected, not silently stretched."""
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(ENGINE, PROP, 1e15, 0.1)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(ENGINE, 0.032, 1e15, 1.0, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+
+@pytest.mark.parametrize(
+    ("ignition", "duration", "propellant", "policy"),
+    [
+        (600.0, 77.3, PROP, InsufficientPropellantPolicy.REJECT),
+        (605.5, 77.3, PROP, InsufficientPropellantPolicy.REJECT),
+        (603.7, 60.0, 5.0, InsufficientPropellantPolicy.BURN_TO_DEPLETION),
+    ],
+)
+def test_plan_describes_exactly_the_interval_that_is_integrated(
+    ignition, duration, propellant, policy
+):
+    """REV-T2-03: plan duration = cutoff - ignition; consumption follows it, so the
+    integrated propellant matches the plan to round-off and the floor only absorbs
+    round-off."""
+    plan = plan_burn(ENGINE, propellant, ignition, duration, policy=policy)
+    assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
+    if plan.end_cause is BurnEndCause.COMPLETED:
+        assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
+    sim = _sim(spacecraft=_spacecraft(propellant=propellant))
+    sim.schedule_burn("prograde", ignition_t_s=ignition, duration_s=duration, policy=policy)
+    cutoffs = []
+    while sim.t < ignition + duration + 20.0:
+        sim.step()
+        cutoffs.extend(e for e in sim.engine_transitions if e.kind == "cutoff")
+    assert [e.t for e in cutoffs] == [plan.cutoff_t_s]
+    used = propellant - sim.propulsion_snapshot().propellant_kg
+    assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + propellant)
+
+
+def test_transition_arrays_cannot_be_made_writable():
+    """REV-T2-04: retained event evidence is immutable."""
+    sim = _sim()
+    sim.schedule_burn("prograde", ignition_t_s=0.0, duration_s=5.0)
+    sim.step()
+    event = sim.engine_transitions[0]
+    for arr in (event.r, event.v):
+        with pytest.raises(ValueError):
+            arr.flags.writeable = True
+        with pytest.raises(ValueError):
+            arr[0] = 999.0
+
+
+def test_transition_states_in_free_space_match_the_closed_form():
+    """REV-T2-05: event r, v are checked against exact free-space motion.
+
+    Zero force, prograde burn: velocity direction is constant, so
+    v = v0 + c ln(m0/m) u and x = x0 + v0 T + c [T - (m/mdot) ln(m0/m)] u after ignition.
+    Coast before ignition is linear motion (exact under RK4). Ignition and cutoff
+    share one tick here (601 s, 604 s) to exercise interior events.
+    """
+    v0 = np.array([30.0, 40.0, 0.0])
+    u = v0 / 50.0
+    sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+    sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+    _run_until(sim, 600.0)
+    sim.step()
+    ign, cut = sim.engine_transitions
+    np.testing.assert_allclose(ign.r, v0 * 601.0, rtol=1e-15, atol=0)
+    np.testing.assert_array_equal(ign.v, v0)
+    mdot = ENGINE.mass_flow_kgps
+    burn = cut.t - ign.t
+    with localcontext() as ctx:  # 40 digits: the float64 closed form loses ~1e-9 m
+        ctx.prec = 40
+        c, md = Decimal(ENGINE.exhaust_velocity_mps), Decimal(mdot)
+        m0, b = Decimal(DRY + PROP), Decimal(burn)
+        m = m0 - md * b
+        ln = (m0 / m).ln()
+        dv, disp = c * ln, c * (b - (m / md) * ln)
+        v_exact = [float(Decimal(v0[k]) + dv * Decimal(u[k])) for k in range(3)]
+        r_exact = [float(Decimal(v0[k]) * Decimal(604) + disp * Decimal(u[k])) for k in range(3)]
+    # Velocity: Simpson-exact to round-off. Position: one 3 s RK4 sub-step has a
+    # truncation error ~1e-14 m; the bound is a few ulp of |r| (~2.4e4 m, ulp 3.6e-12).
+    np.testing.assert_allclose(cut.v, v_exact, rtol=1e-14, atol=0)
+    np.testing.assert_allclose(cut.r, r_exact, rtol=1e-14, atol=0)
+    assert cut.propellant_kg == pytest.approx(PROP - mdot * burn, rel=1e-15, abs=0)
+
+
+def test_transition_states_in_orbit_converge_to_independent_references():
+    """REV-T2-05: interior ignition (605.5 s) vs exact Kepler; cutoff vs independent
+    DOP853. Both converge at order 4 (|p - 4| <= 0.5, DR-0008), which a wrong or
+    zeroed event state cannot satisfy."""
+    from tars.astro import kepler
+
+    r_k, _ = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+    ref = _independent_reference(605.5, 77.3, 1.0, 605.5 + 77.3)
+    errs = {"ign_r": [], "cut_r": [], "cut_v": []}
+    for dt in (20.0, 10.0, 5.0):
+        sim = _sim(dt=dt)
+        sim.schedule_burn("prograde", ignition_t_s=605.5, duration_s=77.3)
+        events = {}
+        while sim.t < 700.0:
+            sim.step()
+            events.update({e.kind: e for e in sim.engine_transitions})
+        errs["ign_r"].append(np.linalg.norm(events["ignition"].r - r_k))
+        errs["cut_r"].append(np.linalg.norm(events["cutoff"].r - ref[:3]))
+        errs["cut_v"].append(np.linalg.norm(events["cutoff"].v - ref[3:6]))
+    for series in errs.values():
+        for coarse, fine in pairwise(series):
+            assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+
+
+def test_boundary_event_state_equals_the_tick_snapshot_and_records_stay_stable():
+    sim = _sim()
+    sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=20.0)
+    _run_until(sim, 590.0)
+    sim.step()  # ignition at the end of this tick, t = 600
+    (ign,) = sim.engine_transitions
+    snap = sim.snapshot()
+    np.testing.assert_array_equal(ign.r, snap.r)
+    np.testing.assert_array_equal(ign.v, snap.v)
+    kept = (ign.r.copy(), ign.v.copy(), ign.propellant_kg)
+    _run_until(sim, 700.0)
+    np.testing.assert_array_equal(ign.r, kept[0])
+    np.testing.assert_array_equal(ign.v, kept[1])
+    assert ign.propellant_kg == kept[2]
