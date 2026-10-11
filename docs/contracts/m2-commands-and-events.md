@@ -17,9 +17,9 @@
 | `command_id` | string `^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$` | Issuer-chosen and single use. `#` is reserved for burn IDs. |
 | `issuer` | string, 1–64 characters | Recorded provenance, **no authority**. Permission checks belong in front of `submit()` (future crew layer). |
 | `ignition_t_s` | finite real | Any time ≥ now (DR-0014 2A). |
-| `direction` | `"prograde"` \\| `"retrograde"` | |
+| `direction` | `"prograde"` \| `"retrograde"` | |
 | `duration_s` | finite real | Its sign is checked as `non_positive_duration`, not as a schema error. |
-| `on_insufficient_propellant` | `"reject"` (default) \\| `"burn_to_depletion"` | DR-0014 3C. |
+| `on_insufficient_propellant` | `"reject"` (default) \| `"burn_to_depletion"` | DR-0014 3C. |
 
 The schema is strict: no bool, string or None coercion into numbers, no NaN or inf, no extra fields.
 
@@ -56,7 +56,7 @@ Every burn event carries `burn_id`. It also carries `command_id` when the burn c
 | `CommandAccepted` | receipt | `commanded_ignition_t_s`, `commanded_duration_s`, direction, policy | `planned_*` (exact plan), `timing_delta_v_error_mps` |
 | `CommandRejected` | receipt | `command_id`, `issuer` (if readable) | `reason`, `detail` |
 | `BurnStarted` | ignition transition | `commanded_ignition_t_s`, `commanded_duration_s`, `planned_cutoff_t_s`, `planned_end_cause` | `event_t_s` (exact, may lie inside a tick), r, v, thrust unit vector, propellant, mass |
-| `BurnEnded` | ignition + cutoff transitions | `commanded_duration_s`, `planned_propellant_used_kg` | `end_cause` (`completed` \\| `propellant_depleted`), `executed_duration_s`, integrated `propellant_used_kg`, `sensed_delta_v_mps`, `rocket_equation_delta_v_mps`, r, v, mass |
+| `BurnEnded` | ignition + cutoff transitions | `commanded_duration_s`, `planned_propellant_used_kg` | `end_cause` (`completed` \| `propellant_depleted`), `executed_duration_s`, integrated `propellant_used_kg`, `sensed_delta_v_mps`, `rocket_equation_delta_v_mps`, r, v, mass |
 | `PropellantDepleted` | depletion cutoff only | — | `residual_propellant_kg` (DR-0017 D1a) |
 | `PropulsionSampled` | `PropulsionSnapshot` | — | propellant, mass, sensed Δv, engine state, active and pending burn IDs |
 
