@@ -124,7 +124,7 @@ Submissions precede the samples of their tick, so **every sample shows the sched
   - No `BurnEnded` is emitted; the engine is not cut off by an observation horizon.
   - The final `PropulsionSampled` shows the active or pending burns.
   - Cutoffs and ignitions exactly at the stop time are emitted.
-  - The representation is pending decision **DR-0018** (recommended: keep as is).
+  - This representation is **approved: DR-0018 option A** (Tech Lead, 2026-10-11). A stop is an observation boundary, not a burn termination.
 - **Failures.** A step that produces a non-finite state, a state whose |r| or |v| overflows, a Python arithmetic overflow (e.g. r³ in gravity), or an unrepresentable thrust acceleration F/m is one numerical failure, `non_finite` (re-verification 3, K1/K3/K4). Nothing from that step is emitted, because the simulator commits nothing. Engine transitions are read only after a committed step, so no event is ever duplicated. The run ends with `failure_cause: non_finite`.
 - **Unsubmitted entries.** Entries not yet submitted when the run ends are listed in `RunResult.unsubmitted_command_ids` and the CLI summary.
 - **No partial results.**
@@ -138,4 +138,4 @@ Submissions precede the samples of their tick, so **every sample shows the sched
 ## Explicitly out of scope
 - Abort/cancel and Δv-target commands (DR-0014: unapproved follow-ups).
 - Crew permissions and authority checks.
-- An explicit event for burns still active when a scenario stops (DR-0018, open).
+- An explicit event for burns still active when a scenario stops (DR-0018 chose option A; option C would need a new DR).

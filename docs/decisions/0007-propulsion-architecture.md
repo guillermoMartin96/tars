@@ -82,7 +82,7 @@ Any of these may be revisited by a later decision.
 - **Raw command payloads in the timeline.** The scenario does not validate them; `submit()` does. There is one validator, and invalid-command missions are expressible.
 - **Runner uses only `submit()`.** It never calls `schedule_burn` or private simulator state (tested).
   - It reads `engine_transitions` only after a committed step, which together with atomic ticks rules out duplicate or partial burn events.
-- **Stop is an observation horizon.** The engine is not cut off at the stop time; the representation of burns still in progress is DR-0018 (open; current behavior uses only approved semantics).
+- **Stop is an observation horizon.** The engine is not cut off at the stop time; the representation of burns still in progress is DR-0018, approved option A (2026-10-11): no fabricated `BurnEnded`; the final `PropulsionSampled` preserves the active-burn state.
 - **Fix found by T4 tests (`c78ecf3`).** A NaN in an intermediate RK4 stage during a burn reached the pointing law and raised `ValueError`. The powered RHS now raises `FloatingPointError`, as the coast path's finiteness check does, so the runner reports `non_finite` instead of crashing.
 - **Contract:** emission order, cadence, envelope ticks and stop semantics are in `docs/contracts/m2-commands-and-events.md`.
 

@@ -1,6 +1,6 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T1–T4 COMPLETE (final independent PASS each); awaiting authorization for T5 (2026-10-11). T3 semantics confirmed (DR-0014 amendment); DR-0018 open. Draft PR #3, not merged.
+**Status:** T1–T4 COMPLETE (final independent PASS each); T5 IN PROGRESS (authorized 2026-10-11). T3 semantics confirmed (DR-0014 amendment); DR-0018 approved (option A). Draft PR #3, not merged.
 - See `proof/records/M2-propulsion.md`.
 - Merge to `main` needs separate authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
@@ -242,7 +242,7 @@ The Proof record is written only after the work it describes is committed (playb
 Later Decision Requests:
 - **DR-0016** GMAT aligned stepping: resolved.
 - **DR-0017** burn timing fidelity and the depletion boundary: resolved.
-- **[DR-0018](../decisions/requests/DR-0018-burns-in-progress-at-simulation-end.md)** burns in progress or pending when a scenario stops: **OPEN**. It blocks nothing; T4 implements recommended option A within the approved contract.
+- **[DR-0018](../decisions/requests/DR-0018-burns-in-progress-at-simulation-end.md)** burns in progress or pending when a scenario stops: **APPROVED, option A** (2026-10-11). A stop is an observation boundary; no fabricated `BurnEnded`.
 
 ## 12a. Tracked follow-ups
 | ID | Follow-up | Constraint |

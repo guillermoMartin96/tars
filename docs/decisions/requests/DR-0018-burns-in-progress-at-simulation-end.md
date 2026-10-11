@@ -1,6 +1,6 @@
 # Decision Request: Burns in progress or pending when a scenario stops
 
-**Status:** OPEN  
+**Status:** APPROVED — option A (Tech Lead, 2026-10-11)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-11  
 **Related milestone/issue:** M2 T4 (runner timeline, `stop.duration_s`); DR-0010 #4; DR-0014 §5; T3 contract
@@ -84,6 +84,14 @@ The stop is an **observation horizon, not an engine command**.
 `A` / `B` / `C` / `D` / discuss.
 
 ## Resolution
-**Decision:** <pending>  
-**Reasoning/notes:**  
+**Decision:** APPROVED — option A (Tech Lead, 2026-10-11).
+
+**Reasoning/notes:**
+- A simulation stop is an **observation boundary, not a physical burn termination**.
+- No fabricated `BurnEnded` (or any other "ended" event) is emitted for a burn that is still active at the stop.
+- The final `PropulsionSampled` must preserve the active-burn state: `engine_state: "burning"` and `active_burn_id`, plus any `pending_burn_ids`.
+- No event type, rejection code or enum value changes.
+
 **Follow-up:**
+- T5 validators check this explicitly: no `BurnEnded` for a burn active at the stop, a matching final sample, and physics identical to a longer run up to the stop.
+- Option C (an explicit end-of-observation event) remains the clean extension if a crew or analysis consumer later needs explicit pairing; it would need a new DR.
