@@ -1,16 +1,19 @@
 """GMAT finite-burn reference workflow for Milestone 2 (T6; DR-0015 A, DR-0016 A).
 
 Subcommands:
-  generate  Write toolbox/references/gmat/m2/<mission>.script for each GMAT mission.
-  run       Generate, run GmatConsole, verify alignment, and store report, console log
-            and provenance metadata. Refuses to replace a committed reference without
-            --replace-reason (DR-0009 policy: references are evidence, not fixtures).
+  generate  Write preview scripts to --out (never into the committed references).
+  run       Run GmatConsole and stage script, report, console log, metadata and an
+            updated approved-digest manifest; validate the staged reference completely
+            (provenance, alignment, coverage, every O9 gate, gate coverage, a clean
+            audit of the simulator run); only then commit it atomically, manifest last.
+            Refuses to touch an existing reference without --replace-reason (DR-0009:
+            references are evidence, not fixtures).
   compare   Verify provenance and alignment of the committed references and compute
-            O9 (JSON; exit 1 if a gate in proof/thresholds/m2.json fails, 2 if a
-            reference is rejected). GMAT is not needed.
+            O9 (JSON; exit 1 if a gate fails, 2 if a reference, the simulator audit or
+            the threshold coverage is rejected). GMAT is not needed.
 
 Examples:
-  uv run python toolbox/scripts/gmat_m2.py generate
+  uv run python toolbox/scripts/gmat_m2.py generate --out runs/gmat_m2_preview
   uv run python toolbox/scripts/gmat_m2.py run --gmat-console "$HOME/Applications/GMAT R2026a/bin/GmatConsole" --gmat-version R2026a
   uv run python toolbox/scripts/gmat_m2.py compare
 """  # noqa: E501
@@ -50,20 +53,53 @@ def _script(name: str, report_path: str) -> str:
 
 
 def cmd_generate(args: argparse.Namespace) -> int:
-    gmat_m2.reference_dir().mkdir(parents=True, exist_ok=True)
+    out = Path(args.out).resolve()
+    if out == gmat_m2.reference_dir().resolve():
+        print("generate never writes into the committed references; use run", file=sys.stderr)
+        return 2
+    out.mkdir(parents=True, exist_ok=True)
     for name in args.missions:
-        path = gmat_m2.reference_files(name)["script"]
+        path = out / f"{name}.script"
         path.write_text(_script(name, f"{name}_report.txt"))
-        print(f"wrote {path.relative_to(REPO_ROOT)}")
+        print(f"wrote preview {path}")
     return 0
 
 
 def _script_tolerances() -> tuple[float, float]:
     # DR-0009 (approved): bounds on platform-dependent last bits of the state literals.
     gates = load_thresholds().for_validator("gmat_reference")
-    return gates["script_initial_position_difference_m"], gates[
-        "script_initial_velocity_difference_mps"
-    ]
+    return (
+        gates["script_initial_position_difference_m"],
+        gates["script_initial_velocity_difference_mps"],
+    )
+
+
+def _evaluate(name: str, base: Path | None = None) -> tuple[list[str], Check | None]:
+    """Full O9 evaluation: simulator audit, reference verification, gate coverage."""
+    mission = BY_NAME[name]
+    scenario = mission.build()
+    run = run_scenario(scenario)
+    audit = m2.audit_run(scenario, mission.expected, run)
+    rejected = [f"simulator audit {k}: {x}" for k, xs in audit.violations.items() for x in xs]
+    result = gmat_m2.compare_committed(
+        name, scenario, mission.expected, run.events, *_script_tolerances(), base=base
+    )
+    rejected += result.violations
+    if rejected:
+        return rejected, None
+    thresholds = load_scoped_thresholds(missions=frozenset(BY_NAME))
+    limits = thresholds.for_validator("o9_gmat", name)
+    missing = gmat_m2.missing_gates(result.metrics, limits)
+    if missing:
+        return [f"O9 metrics without a threshold: {missing}"], None
+    check = Check(
+        f"o9_gmat[{name}]",
+        result.metrics,
+        limits,
+        thresholds.status,
+        "GMAT R2026a, aligned stepping (DR-0016)",
+    )
+    return [], check
 
 
 def cmd_run(args: argparse.Namespace) -> int:
@@ -71,10 +107,13 @@ def cmd_run(args: argparse.Namespace) -> int:
     if not console.exists():
         print(f"GmatConsole not found: {console}", file=sys.stderr)
         return 2
+    ref = gmat_m2.reference_dir()
+    approved = gmat_m2.load_approved() or {}
     status = 0
     for name in args.missions:
         files = gmat_m2.reference_files(name)
-        if files["report"].exists() and not args.replace_reason:
+        exists = any(p.exists() for p in files.values()) or name in approved
+        if exists and not args.replace_reason:
             print(
                 f"{name}: a committed GMAT reference exists; replacing it requires "
                 "--replace-reason and explicit Tech Lead review (DR-0009)",
@@ -82,101 +121,121 @@ def cmd_run(args: argparse.Namespace) -> int:
             )
             status = 2
             continue
-        mission = BY_NAME[name]
-        scenario = mission.build()
-        files["script"].parent.mkdir(parents=True, exist_ok=True)
-        files["script"].write_text(_script(name, f"{name}_report.txt"))
         with tempfile.TemporaryDirectory() as tmp:
+            stage = Path(tmp) / "stage"
+            stage.mkdir()
+            staged = gmat_m2.reference_files(name, stage)
+            staged["script"].write_text(_script(name, f"{name}_report.txt"))
             report = Path(tmp) / f"{name}_report.txt"
             run_script = Path(tmp) / f"{name}.script"
             run_script.write_text(_script(name, str(report)))
-            command = [str(console), "--run", str(run_script)]
             proc = subprocess.run(
-                command, cwd=console.parent, capture_output=True, text=True, timeout=args.timeout
+                [str(console), "--run", str(run_script)],
+                cwd=console.parent,
+                capture_output=True,
+                text=True,
+                timeout=args.timeout,
             )
             log = proc.stdout + proc.stderr
             # Paths are scrubbed: the log is evidence of the run, not of the host layout.
-            files["console"].write_text(log.replace(tmp, "<tmp>").replace(str(Path.home()), "~"))
+            staged["console"].write_text(log.replace(tmp, "<tmp>").replace(str(Path.home()), "~"))
             if proc.returncode != 0 or "Execution Failed" in log or not report.exists():
                 print(f"{name}: GMAT run failed (exit {proc.returncode})", file=sys.stderr)
                 status = 1
                 continue
-            shutil.copyfile(report, files["report"])
-        build = re.search(r"Build Date: (.+)", proc.stdout)
-        revision = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True
-        ).stdout.strip()
-        veh = m2.vehicle(scenario)
-        c = scenario.constants
-        metadata = {
-            "mission": name,
-            "gmat_version": args.gmat_version,
-            "gmat_build_date": build.group(1).strip() if build else None,
-            "gmat_console_sha256": _sha256(console),
-            "command": [
-                "GmatConsole",
-                "--run",
-                f"<temp copy of {name}.script, absolute report path>",
-            ],
-            "host_platform": platform.platform(),
-            "tars_git_revision": revision,
-            "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
-            "replace_reason": args.replace_reason,
-            "scenario": scenario.name,
-            "scenario_hash": scenario.config_hash(),
-            "script_sha256": _sha256(files["script"]),
-            "report_sha256": _sha256(files["report"]),
-            "constants": {
-                "name": c.name,
-                "mu_km3_s2": c.mu / 1e9,
-                "equatorial_radius_km": c.equatorial_radius / 1000.0,
-                "standard_gravity_mps2": STANDARD_GRAVITY,
-                "thrust_n": veh.thrust_n,
-                "isp_s": veh.isp_s,
-                "dry_mass_kg": veh.dry_mass_kg,
-                "propellant_kg": veh.propellant_kg,
-            },
-            "model": "Earth point mass; ChemicalThruster VNB +-1, C1 = F, K1 = Isp, other "
-            "coefficients 0, GravitationalAccel = g0, DecrementMass; PrinceDormand78, "
-            "Accuracy 1e-13; aligned stepping (DR-0016): coasts 60 s, burns 1 s, "
-            "realignment arcs one step",
-        }
-        files["metadata"].write_text(json.dumps(metadata, indent=2) + "\n")
-        # Verify before trusting (DR-0016 mandatory alignment verification).
-        result = _compare(name)
-        if result.violations:
-            print(f"{name}: reference rejected: {result.violations}", file=sys.stderr)
-            status = 1
-            continue
-        rows = int(result.metrics["gmat_rows"])
-        print(f"{name}: GMAT reference stored ({rows} rows)")
+            shutil.copyfile(report, staged["report"])
+            mission = BY_NAME[name]
+            scenario = mission.build()
+            veh = m2.vehicle(scenario)
+            c = scenario.constants
+            build = re.search(r"Build Date: (.+)", proc.stdout)
+            metadata = {
+                "mission": name,
+                "gmat_version": args.gmat_version,
+                "gmat_build_date": build.group(1).strip() if build else None,
+                "gmat_console_sha256": _sha256(console),
+                "command": [
+                    "GmatConsole",
+                    "--run",
+                    f"<temp copy of {name}.script, absolute report path>",
+                ],
+                "host_platform": platform.platform(),
+                "tars_git_revision": subprocess.run(
+                    ["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True
+                ).stdout.strip(),
+                "generated_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
+                "replace_reason": args.replace_reason,
+                "scenario": scenario.name,
+                "scenario_hash": scenario.config_hash(),
+                "script_sha256": _sha256(staged["script"]),
+                "report_sha256": _sha256(staged["report"]),
+                "console_sha256": _sha256(staged["console"]),
+                "constants": {
+                    "name": c.name,
+                    "mu_km3_s2": c.mu / 1e9,
+                    "equatorial_radius_km": c.equatorial_radius / 1000.0,
+                    "standard_gravity_mps2": STANDARD_GRAVITY,
+                    "thrust_n": veh.thrust_n,
+                    "isp_s": veh.isp_s,
+                    "dry_mass_kg": veh.dry_mass_kg,
+                    "propellant_kg": veh.propellant_kg,
+                },
+                "model": gmat_m2.MODEL,
+            }
+            staged["metadata"].write_text(json.dumps(metadata, indent=2) + "\n")
+            manifest_path = gmat_m2.approved_manifest_path()
+            manifest = (
+                json.loads(manifest_path.read_text())
+                if manifest_path.exists()
+                else {"references": {}, "history": []}
+            )
+            manifest["references"][name] = {
+                "script_sha256": metadata["script_sha256"],
+                "report_sha256": metadata["report_sha256"],
+                "console_sha256": metadata["console_sha256"],
+            }
+            manifest["history"].append(
+                {
+                    "mission": name,
+                    "generated_utc": metadata["generated_utc"],
+                    "tars_git_revision": metadata["tars_git_revision"],
+                    "reason": args.replace_reason or "initial reference",
+                    "report_sha256": metadata["report_sha256"],
+                }
+            )
+            staged_manifest = gmat_m2.approved_manifest_path(stage)
+            staged_manifest.write_text(json.dumps(manifest, indent=2) + "\n")
+            # Validate the complete staged reference before anything is committed (F1).
+            rejected, check = _evaluate(name, base=stage)
+            if rejected or check is None or not check.passed:
+                why = rejected or (check.failures if check else ["no check"])
+                print(
+                    f"{name}: staged reference rejected; nothing replaced: {why}", file=sys.stderr
+                )
+                status = 1
+                continue
+            ref.mkdir(parents=True, exist_ok=True)
+            for key in ("script", "report", "console", "metadata"):
+                tmp_dst = files[key].with_suffix(files[key].suffix + ".new")
+                shutil.copyfile(staged[key], tmp_dst)
+                tmp_dst.replace(files[key])
+            tmp_manifest = manifest_path.with_suffix(".json.new")
+            shutil.copyfile(staged_manifest, tmp_manifest)
+            tmp_manifest.replace(manifest_path)  # commit marker: the approved digests
+            approved = manifest["references"]
+            rows = int(check.metrics["gmat_rows"])
+            print(f"{name}: GMAT reference validated and stored ({rows} rows)")
     return status
 
 
-def _compare(name: str) -> gmat_m2.O9Result:
-    mission = BY_NAME[name]
-    scenario = mission.build()
-    run = run_scenario(scenario)
-    pos_tol, vel_tol = _script_tolerances()
-    return gmat_m2.compare_committed(name, scenario, mission.expected, run.events, pos_tol, vel_tol)
-
-
 def cmd_compare(args: argparse.Namespace) -> int:
-    thresholds = load_scoped_thresholds(missions=frozenset(BY_NAME))
     status = 0
     for name in args.missions:
-        result = _compare(name)
-        if result.violations:
-            print(json.dumps({"mission": name, "rejected": result.violations}, indent=2))
+        rejected, check = _evaluate(name)
+        if rejected or check is None:
+            print(json.dumps({"mission": name, "rejected": rejected}, indent=2))
             status = max(status, 2)
             continue
-        check = Check(
-            f"o9_gmat[{name}]",
-            result.metrics,
-            thresholds.for_validator("o9_gmat", name),
-            thresholds.status,
-            "GMAT R2026a, aligned stepping (DR-0016)",
-        )
         print(json.dumps(check.to_event().model_dump(mode="json"), indent=2))
         if not check.passed:
             status = max(status, 1)
@@ -190,6 +249,8 @@ def main(argv: list[str] | None = None) -> int:
         p = sub.add_parser(cmd)
         p.add_argument("--missions", nargs="+", default=list(gmat_m2.GMAT_MISSIONS))
         p.set_defaults(fn=fn)
+        if cmd == "generate":
+            p.add_argument("--out", default="runs/gmat_m2_preview")
         if cmd == "run":
             p.add_argument("--gmat-console", required=True)
             p.add_argument("--gmat-version", required=True)

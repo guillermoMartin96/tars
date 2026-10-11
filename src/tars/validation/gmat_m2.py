@@ -277,20 +277,31 @@ def parse_stream(text: str) -> list[Row]:
 
 
 _STATE_LINE = re.compile(r"^GMAT Sat\.(X|Y|Z|VX|VY|VZ) = (.+);$")
+_STATE_KEYS = ("X", "Y", "Z", "VX", "VY", "VZ")
 
 
 def split_script(script: str) -> tuple[list[str], np.ndarray, np.ndarray]:
-    """Non-state lines, and the initial r [m], v [m/s] literals."""
-    other, values = [], {}
+    """Script lines with the six initial-state literals replaced *in place* by a
+    placeholder, and those literals as r [m], v [m/s].
+
+    Positions are preserved, so moving or duplicating a state assignment changes the
+    normalized lines (review M2-T6 F2). Missing or repeated components raise.
+    """
+    lines, values = [], {}
     for line in script.splitlines():
         m = _STATE_LINE.match(line)
         if m:
+            if m.group(1) in values:
+                raise ValueError(f"Sat.{m.group(1)} assigned more than once")
             values[m.group(1)] = float(m.group(2))
+            lines.append(f"GMAT Sat.{m.group(1)} = <initial state>;")
         else:
-            other.append(line)
+            lines.append(line)
+    if set(values) != set(_STATE_KEYS):
+        raise ValueError(f"initial-state assignments {sorted(values)} incomplete")
     r = np.array([values["X"], values["Y"], values["Z"]]) * 1e3
     v = np.array([values["VX"], values["VY"], values["VZ"]]) * 1e3
-    return other, r, v
+    return lines, r, v
 
 
 # --------------------------------------------------------------- labelling and checks
@@ -478,29 +489,91 @@ def o9_metrics(
     }
 
 
+# Approved GMAT install (toolbox/references/gmat/README.md, "Installed reference tool"):
+# GMAT R2026a, NASA-signed GmatConsole. Its sha256 is pinned; a reference produced by
+# any other binary is rejected (review M2-T6 F3).
+APPROVED_GMAT = {
+    "gmat_version": "R2026a",
+    "gmat_build_date": "Mar 26 2026  19:40:08",
+    "gmat_console_sha256": "1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2",
+}
+CONSOLE_SUCCESS = "*** GMAT Integration test (Console version) successful! ***"
+MODEL = (
+    "Earth point mass; ChemicalThruster VNB +-1, C1 = F, K1 = Isp, other coefficients 0, "
+    "GravitationalAccel = g0, DecrementMass; PrinceDormand78, Accuracy 1e-13; aligned "
+    "stepping (DR-0016): coasts 60 s, burns 1 s, realignment arcs one step"
+)
+
+
 def provenance_problems(
+    name: str,
     metadata: dict,
+    files: dict,
     scenario: ScenarioV2,
-    committed_script: str,
     regenerated_script: str,
     position_tol_m: float,
     velocity_tol_mps: float,
+    approved: dict | None,
 ) -> list[str]:
-    """The committed reference matches what the scenario generates (DR-0009 pattern).
+    """The committed reference is what the scenario generates, produced by the approved
+    GMAT binary, with a successful bound console log and approved digests.
 
-    Every non-state line must equal the regenerated script exactly (constants, engine
-    C1/K1/C2..K16, GravitationalAccel = g0, masses, VNB direction, arcs and steps).
-    The six initial-state literals carry platform-dependent last bits and are compared
-    within the approved M1 script bounds (DR-0009).
+    What this can and cannot establish (review M2-T6 F3): it makes silent or accidental
+    substitution detectable (a different generator, binary, script, report or log, or
+    an unreviewed digest change). It cannot prove the rows came from GMAT: a deliberate
+    forger could fabricate every artifact. External origin is established by the
+    reproduction test, which re-runs the approved GMAT and requires byte-identical
+    reports wherever GMAT is installed, and by review of the approved-digest manifest.
     """
+    import datetime as _dt
+    import hashlib
+
     problems = []
-    if metadata.get("scenario_hash") != scenario.config_hash():
-        problems.append("scenario hash differs (stale reference)")
-    other_c, r_c, v_c = split_script(committed_script)
+    digests = {
+        key: hashlib.sha256(files[key].read_bytes()).hexdigest()
+        for key in ("script", "report", "console")
+    }
+    expected_meta = {
+        "mission": name,
+        "scenario": scenario.name,
+        "scenario_hash": scenario.config_hash(),
+        "script_sha256": digests["script"],
+        "report_sha256": digests["report"],
+        "console_sha256": digests["console"],
+        "model": MODEL,
+        "command": ["GmatConsole", "--run", f"<temp copy of {name}.script, absolute report path>"],
+        **APPROVED_GMAT,
+    }
+    for key, want in expected_meta.items():
+        if metadata.get(key) != want:
+            problems.append(f"metadata {key} {metadata.get(key)!r} != {want!r}")
+    if not re.fullmatch(r"[0-9a-f]{40}", str(metadata.get("tars_git_revision", ""))):
+        problems.append("metadata tars_git_revision missing")
+    try:
+        _dt.datetime.fromisoformat(str(metadata.get("generated_utc")))
+    except ValueError:
+        problems.append("metadata generated_utc missing")
+    if "replace_reason" not in metadata or not metadata.get("host_platform"):
+        problems.append("metadata replace_reason or host_platform missing")
+    log = files["console"].read_text()
+    if CONSOLE_SUCCESS not in log or "Execution Failed" in log or "Exception" in log:
+        problems.append("console log does not record a successful GMAT run")
+    # Approved digests (reviewed manifest): a changed reference must change the manifest.
+    if approved is None or approved.get(name) != {
+        "script_sha256": digests["script"],
+        "report_sha256": digests["report"],
+        "console_sha256": digests["console"],
+    }:
+        problems.append("reference digests are not in the approved manifest")
+    try:
+        other_c, r_c, v_c = split_script(files["script"].read_text())
+    except ValueError as err:
+        return [*problems, f"committed script: {err}"]
     other_n, r_n, v_n = split_script(regenerated_script)
     if other_c != other_n:
         diff = [f"{a!r} != {b!r}" for a, b in zip(other_c, other_n, strict=False) if a != b]
-        problems.append(f"GMAT script differs from regenerated script: {diff[:3]}")
+        counts = f"{len(other_c)} vs {len(other_n)} lines"
+        problems.append(f"GMAT script differs from regenerated script: {diff[:3]} ({counts})")
     if not (
         np.linalg.norm(r_c - r_n) <= position_tol_m
         and np.linalg.norm(v_c - v_n) <= velocity_tol_mps
@@ -508,7 +581,7 @@ def provenance_problems(
         problems.append("GMAT script initial state differs beyond the approved bound")
     veh = vehicle(scenario)
     c = scenario.constants
-    expected = {
+    constants = {
         "name": c.name,
         "mu_km3_s2": c.mu / 1e9,
         "equatorial_radius_km": c.equatorial_radius / 1000.0,
@@ -518,8 +591,8 @@ def provenance_problems(
         "dry_mass_kg": None if veh is None else veh.dry_mass_kg,
         "propellant_kg": None if veh is None else veh.propellant_kg,
     }
-    if metadata.get("constants") != expected:
-        problems.append(f"metadata constants {metadata.get('constants')} != {expected}")
+    if metadata.get("constants") != constants:
+        problems.append(f"metadata constants {metadata.get('constants')} != {constants}")
     return problems
 
 
@@ -538,8 +611,21 @@ def reference_dir():
     return REPO_ROOT / "toolbox" / "references" / "gmat" / "m2"
 
 
-def reference_files(name: str) -> dict[str, object]:
-    d = reference_dir()
+def approved_manifest_path(base=None):
+    return (reference_dir() if base is None else base) / "APPROVED_DIGESTS.json"
+
+
+def load_approved(base=None) -> dict | None:
+    import json
+
+    path = approved_manifest_path(base)
+    if not path.exists():
+        return None
+    return json.loads(path.read_text()).get("references")
+
+
+def reference_files(name: str, base=None) -> dict[str, object]:
+    d = reference_dir() if base is None else base
     return {
         "script": d / f"{name}.script",
         "report": d / f"{name}_report.txt",
@@ -555,6 +641,48 @@ class O9Result:
     alignment: dict[str, float]
 
 
+O9_REPORT_ONLY = frozenset({"gmat_rows", "mass_samples_compared"})
+
+
+def coverage_problems(
+    scenario: ScenarioV2,
+    predicted: Sequence[PredictedBurn],
+    events: Sequence,
+    labelled: dict[float, Row],
+    horizon: float,
+) -> list[str]:
+    """Every observation O9 must compare exists (review M2-T6 F5), from the scenario:
+    each telemetry time and the horizon; each predicted ignition and cutoff up to the
+    horizon (DR-0018: no cutoff expected after it); each propulsion sample on a GMAT
+    row at the contract cadence."""
+    from tars.validation.m2 import _expected_report_tick
+
+    v: list[str] = []
+    dt, grid = scenario.dt_s, scenario.telemetry.sample_interval_s
+    want_states = {k * grid for k in range(int(horizon // grid) + 1)} | {horizon}
+    got_states = {e.t for e in events if e.type == "StateSampled"}
+    if got_states != want_states:
+        v.append(
+            f"StateSampled times differ from the grid ({len(got_states)} vs {len(want_states)})"
+        )
+    want_bounds = {("BurnStarted", b.ignition_t_s) for b in predicted if b.ignition_t_s <= horizon}
+    want_bounds |= {("BurnEnded", b.cutoff_t_s) for b in predicted if b.cutoff_t_s <= horizon}
+    got_bounds = {(e.type, e.event_t_s) for e in events if e.type in ("BurnStarted", "BurnEnded")}
+    if got_bounds != want_bounds:
+        v.append(f"burn boundaries {sorted(got_bounds)} != predicted {sorted(want_bounds)}")
+    want_prop = {t for t in want_states}
+    for b in predicted:
+        same = b.submit_tick * dt == b.ignition_t_s
+        k0 = _expected_report_tick(b.ignition_t_s, dt, same)
+        k1 = _expected_report_tick(b.cutoff_t_s, dt, False)
+        want_prop |= {k * dt for k in range(k0, k1 + 1) if k * dt <= horizon}
+    want_prop &= set(labelled)
+    got_prop = {e.t for e in events if e.type == "PropulsionSampled"} & set(labelled)
+    if got_prop != want_prop:
+        v.append(f"PropulsionSampled on GMAT rows: {len(got_prop)}, expected {len(want_prop)}")
+    return v
+
+
 def compare_committed(
     name: str,
     scenario: ScenarioV2,
@@ -562,34 +690,31 @@ def compare_committed(
     events: Sequence,
     position_tol_m: float,
     velocity_tol_mps: float,
+    base=None,
 ) -> O9Result:
-    """Verify and compare one committed GMAT reference (no GMAT needed)."""
-    import hashlib
+    """Verify and compare one committed (or staged, ``base``) GMAT reference."""
     import json
 
     from tars.validation.m2 import dop853_reference, horizon_s, predict_burns
 
-    files = reference_files(name)
+    files = reference_files(name, base)
     missing = [str(p) for p in files.values() if not p.exists()]
     if missing:
         return O9Result({}, [f"missing reference files: {missing}"], {})
     metadata = json.loads(files["metadata"].read_text())
     predicted = predict_burns(scenario, expected)
     horizon = horizon_s(scenario, events)
-    script = files["script"].read_text()
     regenerated = m2_script(scenario, predicted, horizon, f"{name}_report.txt")
     v = provenance_problems(
-        metadata, scenario, script, regenerated, position_tol_m, velocity_tol_mps
-    )
-    for key in ("script", "report"):
-        digest = hashlib.sha256(files[key].read_bytes()).hexdigest()
-        if metadata.get(f"{key}_sha256") != digest:
-            v.append(f"GMAT {key} does not match its recorded sha256")
+        name, metadata, files, scenario, regenerated, position_tol_m, velocity_tol_mps,
+        load_approved(base),
+    )  # fmt: skip
     arcs = plan_arcs(scenario, predicted, horizon)
     labelled, label_v = label_rows(parse_stream(files["report"].read_text()), arcs)
     v += label_v
     if label_v or not labelled:
         return O9Result({}, v, {})
+    v += coverage_problems(scenario, predicted, events, labelled, horizon)
     veh = vehicle(scenario)
     assert veh is not None
     alignment = alignment_metrics(
@@ -599,3 +724,8 @@ def compare_committed(
     reference = dop853_reference(scenario, r0, v0, predicted, sorted(labelled))
     metrics = {**alignment, **o9_metrics(scenario, predicted, events, labelled, reference)}
     return O9Result(metrics, v, alignment)
+
+
+def missing_gates(metrics: dict[str, float], limits: dict[str, float]) -> list[str]:
+    """O9 metrics without a limit (review F6): fail closed, as m2_proof does."""
+    return sorted(k for k in metrics if k not in limits and k not in O9_REPORT_ONLY)

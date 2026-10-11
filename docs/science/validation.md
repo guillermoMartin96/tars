@@ -444,6 +444,22 @@ All 10 approved rejection codes are exercised.
 - **Negative and mutation tests** (`tests/test_gmat_m2.py`).
   - **Rejected references:** a tampered report, g0 = 9.81, a C1 change, K3 ≠ 0, a changed Accuracy, wrong metadata constants, a missing row, an unaligned step, and a 1 mm GMAT state or 1 mg GMAT mass error (caught by the independent references).
   - **Simulator mutants that fail O9:** thrust × (1 + 1e-5), g0 = 9.81, frozen pointing, swapped retrograde direction, cutoff timing × (1 + 1e-9).
-  - **Each O9 check disabled in turn** makes a test fail.
+  - **Each O9 check disabled in turn makes a test fail.** As first written, this claim was false for the coast-vs-Kepler gate (review M2-T6 F7). It is now verified by a harness over all 15 gated metrics and the F1/F3/F5/F6 checks, each with its own targeted test.
+- **Cross-platform (CI, `805d789`).** The committed GMAT reports are identical everywhere; only our simulator and the DOP853 reference vary by platform.
+
+  | Platform | GMAT vs DOP853 (max, prograde / retrograde / invalid cmds) | Ours vs GMAT at 53 700 s, prograde |
+  |---|---|---|
+  | Reference host (macOS x86_64) | 4.7 / 3.6 / 0.6 µm | 0.2903419 m |
+  | ubuntu-latest x86_64 | 3.0 / 2.2 / 3.4 µm | 0.290346 m |
+  | macos-latest arm64 | 5.7 / 2.0 / 5.5 µm | 0.290349 m |
+
+  All values are within the 30 µm provisional limit, which is set from the DOP853 floor, not from these values (FU-1). The T7 measurement will formalize this.
+- **Provenance (review M2-T6 F3).** Each reference must have:
+  - the approved GMAT binary digest;
+  - a successful console log bound by its hash;
+  - complete metadata;
+  - an entry in the approved-digest manifest.
+
+  These controls detect silent or accidental substitution. They cannot prove GMAT origin against deliberate fabrication. Origin is established by the reproduction test, which re-runs the approved GMAT for byte-identical reports wherever GMAT is installed, and by review of manifest changes.
 - **Classification:** no discrepancy. **Status:** provisional Proof evidence (T6); thresholds remain provisional until the T7 three-platform measurement and threshold DR.
 

@@ -147,7 +147,7 @@ def test_tampered_report_is_rejected(tmp_path, monkeypatch):
     report = dst / f"{name}_report.txt"
     report.write_text(report.read_text().replace("1300 ", "1299 ", 1))
     monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
-    assert any("sha256" in v for v in _compare(name).violations)
+    assert any("report_sha256" in v or "approved manifest" in v for v in _compare(name).violations)
 
 
 @pytest.mark.parametrize(
@@ -235,9 +235,12 @@ def test_corrupted_gmat_rows_fail_against_independent_references(field, delta):
 
 
 def _mutant_failures(name, monkeypatch, apply):
+    """Gate failures, plus coverage violations (e.g. a burn boundary at the wrong time)."""
     apply(monkeypatch)
     result = _compare(name)
-    assert result.violations == []  # the reference itself is untouched
+    if result.violations:
+        assert all("!=" in v or "expected" in v or "differ" in v for v in result.violations)
+        return ["coverage", *result.violations]
     return _failures(name, result.metrics)
 
 
@@ -295,10 +298,7 @@ def test_cutoff_timing_mutant_fails_o9(monkeypatch):
     failures = _mutant_failures(
         "m2_prograde_burn", monkeypatch, lambda mp: mp.setattr(simulator_module, "plan_burn", late)
     )
-    assert (
-        "ours_vs_gmat_mass_error_max_kg" in failures
-        or "ours_vs_gmat_burn_boundary_position_error_max_m" in failures
-    )
+    assert {"ours_vs_gmat_mass_error_max_kg", "coverage"} & set(failures)
 
 
 # ------------------------------------------------------------------ workflow
@@ -339,3 +339,296 @@ def test_gmat_reproduces_the_committed_report(tmp_path, name):
         check=True,
     )
     assert report.read_bytes() == files["report"].read_bytes()
+
+
+# ------------------------------------------------------------------ review M2-T6 fixes
+
+
+def _cli():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("gmat_m2_cli", CLI)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _copy_refs(tmp_path):
+    dst = tmp_path / "m2"
+    shutil.copytree(gmat_m2.reference_dir(), dst)
+    return dst
+
+
+def _rehash(dst, name, manifest=True):
+    """Make metadata (and optionally the approved manifest) consistent with edited files."""
+    import hashlib
+
+    files = gmat_m2.reference_files(name, dst)
+    meta = json.loads(files["metadata"].read_text())
+    for key in ("script", "report", "console"):
+        meta[f"{key}_sha256"] = hashlib.sha256(files[key].read_bytes()).hexdigest()
+    files["metadata"].write_text(json.dumps(meta))
+    if manifest:
+        man = json.loads((dst / "APPROVED_DIGESTS.json").read_text())
+        man["references"][name] = {
+            k: meta[k] for k in ("script_sha256", "report_sha256", "console_sha256")
+        }
+        (dst / "APPROVED_DIGESTS.json").write_text(json.dumps(man))
+
+
+def test_run_validates_a_staged_reference_and_replaces_nothing_on_failure(tmp_path, monkeypatch):
+    """F1: a numerically bad GMAT output is rejected before anything is committed."""
+    name = "m2_prograde_burn"
+    dst = _copy_refs(tmp_path)
+    before = {p.name: p.read_bytes() for p in dst.iterdir()}
+    bad = tmp_path / "bad_report.txt"
+    lines = gmat_m2.reference_files(name)["report"].read_text().splitlines()
+    fields = lines[400].split()
+    fields[2] = repr(float(fields[2]) + 1e-3)  # +1 m in x (km)
+    lines[400] = " ".join(fields)
+    bad.write_text("\n".join(lines) + "\n")
+    console = tmp_path / "GmatConsole"
+    console.write_text(
+        "#!/bin/sh\n"
+        'out=$(sed -n "s/^GMAT S.Filename = \'\\(.*\\)\';$/\\1/p" "$2")\n'
+        f"cp '{bad}' \"$out\"\n"
+        "echo '*** GMAT Integration test (Console version) successful! ***'\n"
+    )
+    console.chmod(0o755)
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    cli = _cli()
+    args = ["run", "--missions", name, "--gmat-console", str(console)]
+    code = cli.main([*args, "--gmat-version", "R2026a", "--replace-reason", "test"])
+    assert code == 1
+    assert {p.name: p.read_bytes() for p in dst.iterdir()} == before
+
+
+def test_numerical_gates_apply_to_a_consistent_but_wrong_reference(tmp_path, monkeypatch):
+    """F1: the evaluation used by run and compare applies the numerical O9 gates."""
+    name = "m2_prograde_burn"
+    dst = _copy_refs(tmp_path)
+    report = dst / f"{name}_report.txt"
+    lines = report.read_text().splitlines()
+    fields = lines[400].split()
+    fields[2] = repr(float(fields[2]) + 1e-3)
+    lines[400] = " ".join(fields)
+    report.write_text("\n".join(lines) + "\n")
+    _rehash(dst, name)
+    rejected, check = _cli()._evaluate(name, base=dst)
+    assert rejected == [] and check is not None and not check.passed
+
+
+@pytest.mark.parametrize("edit", ["move", "duplicate", "drop"])
+def test_state_assignments_must_stay_in_place_once(tmp_path, monkeypatch, edit):
+    """F2: moving, duplicating or dropping an initial-state assignment is rejected."""
+    name = "m2_prograde_burn"
+    dst = _copy_refs(tmp_path)
+    script = dst / f"{name}.script"
+    lines = script.read_text().splitlines()
+    state = [
+        ln
+        for ln in lines
+        if ln.startswith("GMAT Sat.") and ln.split()[1][4:] in gmat_m2._STATE_KEYS
+    ]
+    if edit == "move":
+        lines = [ln for ln in lines if ln not in state] + state
+    elif edit == "duplicate":
+        lines.append(state[0])
+    else:
+        lines.remove(state[0])
+    script.write_text("\n".join(lines) + "\n")
+    _rehash(dst, name)
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    assert _compare(name).violations
+
+
+@pytest.mark.parametrize(
+    "change", ["drop_fields", "failed_console", "other_binary", "unapproved_digest"]
+)
+def test_provenance_is_required(tmp_path, monkeypatch, change):
+    """F3: provenance fields, the approved binary, a successful bound console log and the
+    approved-digest manifest are all required."""
+    name = "m2_retrograde_burn"
+    dst = _copy_refs(tmp_path)
+    files = gmat_m2.reference_files(name, dst)
+    if change == "drop_fields":
+        meta = json.loads(files["metadata"].read_text())
+        keep = ("scenario_hash", "constants", "script_sha256", "report_sha256")
+        files["metadata"].write_text(json.dumps({k: meta[k] for k in keep}))
+    elif change == "failed_console":
+        files["console"].write_text("Execution Failed: not GMAT\n")
+        _rehash(dst, name)
+    elif change == "other_binary":
+        meta = json.loads(files["metadata"].read_text())
+        meta["gmat_console_sha256"] = "0" * 64
+        files["metadata"].write_text(json.dumps(meta))
+    else:
+        lines = files["report"].read_text().splitlines()
+        files["report"].write_text("\n".join(lines) + "\n\n")  # same rows, new digest
+        _rehash(dst, name, manifest=False)
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    assert _compare(name).violations
+
+
+def test_fabricated_reference_needs_a_manifest_change(tmp_path, monkeypatch):
+    """F3: DOP853 rows passed off as GMAT are numerically consistent; the reviewed
+    manifest (and the reproduction test, where GMAT exists) are what reject them."""
+    name = "m2_prograde_burn"
+    dst = _copy_refs(tmp_path)
+    scenario, predicted, arcs, rows = _labelled(name)
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    ref = m2.dop853_reference(
+        scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+    )
+    veh = m2.vehicle(scenario)
+    out = []
+    for t, row in sorted(labelled.items()):
+        y = ref[t]
+        mass = gmat_m2._expected_mass(t, veh, predicted)
+        vals = [row.arc, row.a1mjd, *(y[:3] / 1e3), *(y[3:6] / 1e3), mass]
+        out.append(" ".join(repr(float(x)) for x in vals))
+    (dst / f"{name}_report.txt").write_text("\n".join(out) + "\n")
+    _rehash(dst, name, manifest=False)
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    violations = _compare(name).violations
+    assert violations == ["reference digests are not in the approved manifest"]
+
+
+def test_generate_never_writes_into_the_references(tmp_path, monkeypatch):
+    """F4: generate writes previews only; run guards every existing artifact."""
+    cli = _cli()
+    assert cli.main(["generate", "--out", str(gmat_m2.reference_dir())]) == 2
+    out = tmp_path / "preview"
+    assert cli.main(["generate", "--out", str(out), "--missions", "m2_prograde_burn"]) == 0
+    assert (out / "m2_prograde_burn.script").exists()
+    dst = tmp_path / "m2"
+    dst.mkdir()
+    shutil.copy(gmat_m2.reference_files("m2_prograde_burn")["script"], dst)  # script only
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    code = cli.main(
+        [
+            "run",
+            "--missions",
+            "m2_prograde_burn",
+            "--gmat-console",
+            sys.executable,
+            "--gmat-version",
+            "x",
+        ]
+    )
+    assert code == 2
+
+
+@pytest.mark.parametrize("drop", ["StateSampled", "BurnEnded", "PropulsionSampled"])
+def test_missing_observations_are_not_vacuous_passes(drop):
+    """F5: O9 requires every expected observation, from the scenario."""
+    name = "m2_prograde_burn"
+    run = run_scenario(BY_NAME[name].build())
+    keep_first = drop == "PropulsionSampled"
+    events, seen = [], False
+    for e in run.events:
+        if e.type == drop and (not keep_first or seen):
+            continue
+        seen = seen or e.type == drop
+        events.append(e)
+    assert any(
+        "expected" in v or "differ" in v or "!=" in v for v in _compare(name, events).violations
+    )
+
+
+def test_standalone_compare_fails_closed_without_thresholds(tmp_path, monkeypatch):
+    """F6: missing O9 limits reject the comparison instead of passing it."""
+    from tars.validation.thresholds import ScopedThresholds
+
+    data = json.loads(M2_THRESHOLDS.read_text())
+    del data["limits"]["o9_gmat"]["all"]["coast_vs_kepler_position_error_max_m"]
+    cli = _cli()
+    monkeypatch.setattr(
+        cli, "load_scoped_thresholds", lambda **_: ScopedThresholds("provisional", data["limits"])
+    )
+    rejected, check = cli._evaluate("m2_prograde_burn")
+    assert check is None and any("without a threshold" in r for r in rejected)
+
+
+def _event_edit(events, kind, **update):
+    first = next(i for i, e in enumerate(events) if kind(e))
+    return [e.model_copy(update=update) if i == first else e for i, e in enumerate(events)]
+
+
+ROW_CASES = {
+    "step_spacing_error_max_s": ("a1mjd", 300, 1.0 / 86400.0),
+    "burn_duration_from_mass_error_max_s": ("mass_kg", 88, -1e-6),  # burn-end row, 677.3 s
+    "coast_vs_kepler_position_error_max_m": ("r", 300, 1e-3),
+    "gmat_vs_dop853_position_error_max_m": ("r", 500, 1e-3),
+    "gmat_vs_dop853_velocity_error_max_mps": ("v", 500, 1e-6),
+    "gmat_vs_dop853_final_position_error_m": ("r", -1, 1e-3),
+    "gmat_mass_vs_analytic_error_max_kg": ("mass_kg", 500, 1e-6),
+}
+
+
+def _at(kind, tick=None):
+    return lambda e: e.type == kind and (tick is None or e.tick == tick)
+
+
+_FAR = [1e7, 0.0, 0.0]
+_FAST = [1e4, 0.0, 0.0]
+EVENT_CASES = {
+    "ours_vs_gmat_sample_position_error_max_m": (_at("StateSampled", 600), {"r": _FAR}),
+    "ours_vs_gmat_sample_velocity_error_max_mps": (_at("StateSampled", 600), {"v": _FAST}),
+    "ours_vs_gmat_burn_boundary_position_error_max_m": (_at("BurnEnded"), {"r": tuple(_FAR)}),
+    "ours_vs_gmat_burn_boundary_velocity_error_max_mps": (_at("BurnEnded"), {"v": tuple(_FAST)}),
+    "ours_vs_gmat_final_position_error_m": (_at("SimulationCompleted"), {"r": _FAR}),
+    "ours_vs_gmat_final_velocity_error_mps": (_at("SimulationCompleted"), {"v": _FAST}),
+    "ours_vs_gmat_mass_error_max_kg": (_at("PropulsionSampled", 64), {"total_mass_kg": 1290.0}),
+    "ours_vs_gmat_node_crossing_error_max_s": (_at("OrbitCompleted"), {"crossing_t": 5000.0}),
+}
+
+
+def test_every_o9_metric_has_a_targeted_test():
+    """F7: each gated O9 metric is exercised by its own corruption below."""
+    assert set(ROW_CASES) | set(EVENT_CASES) == set(LIMITS["all"])
+
+
+@pytest.mark.parametrize("metric", sorted(ROW_CASES))
+def test_each_reference_metric_fails_on_its_corruption(metric):
+    name = "m2_prograde_burn"
+    scenario, predicted, arcs, rows = _labelled(name)
+    field, index, delta = ROW_CASES[metric]
+    index = index % len(rows)
+    rows = [
+        dataclasses.replace(r, **{field: getattr(r, field) + delta}) if i == index else r
+        for i, r in enumerate(rows)
+    ]
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    metrics = gmat_m2.alignment_metrics(
+        labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+    )
+    ref = m2.dop853_reference(
+        scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+    )
+    metrics |= gmat_m2.o9_metrics(scenario, predicted, run_scenario(scenario).events, labelled, ref)
+    assert metrics[metric] > _limits(name)[metric]
+
+
+@pytest.mark.parametrize("metric", sorted(EVENT_CASES))
+def test_each_simulator_metric_fails_on_its_corruption(metric):
+    name = "m2_prograde_burn"
+    kind, update = EVENT_CASES[metric]
+    events = _event_edit(run_scenario(BY_NAME[name].build()).events, kind, **update)
+    scenario, predicted, arcs, rows = _labelled(name)
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    ref = m2.dop853_reference(
+        scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+    )
+    metrics = gmat_m2.o9_metrics(scenario, predicted, events, labelled, ref)
+    assert metrics[metric] > _limits(name)[metric]
+
+
+def test_split_script_requires_each_state_component_exactly_once():
+    """F2 defense in depth: the position-preserving comparison also rejects these."""
+    script = gmat_m2.reference_files("m2_prograde_burn")["script"].read_text()
+    x_line = next(ln for ln in script.splitlines() if ln.startswith("GMAT Sat.X = "))
+    with pytest.raises(ValueError, match="more than once"):
+        gmat_m2.split_script(script + x_line + "\n")
+    with pytest.raises(ValueError, match="incomplete"):
+        gmat_m2.split_script(script.replace(x_line + "\n", ""))
