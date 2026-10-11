@@ -465,4 +465,9 @@ All 10 approved rejection codes are exercised.
   - **Origin.** None of these controls proves GMAT origin against deliberate fabrication.
 - **Reproduction.** The reproduction test authenticates the executable (approved sha256) and its success marker, and requires byte-identical reports. That is authenticated, independent reproducibility evidence. It does not by itself prove the historical origin of stored bytes (review M2-T6 F10).
 - **Classification:** no discrepancy. **Status:** provisional Proof evidence (T6); thresholds remain provisional until the T7 three-platform measurement and threshold DR.
+- **T5 corrections made during T6 review (documented, tested, independently reviewed in M2-T6-review-01).**
+  - NaN-safe reductions (`worst`) in O4 and O5, plus rejection of non-finite reference states (F16).
+  - Exact threshold-file structure and finite, nonnegative limits in both loaders (F15, F17).
+  - A distinct name for the orbit-event contract check.
+  - No gate, limit or measured value changed: the 212 Proof metric values are bit-identical before and after.
 

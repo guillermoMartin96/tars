@@ -1,0 +1,18 @@
+load_thresholds inf rejected threshold limits.kepler_reference.position_error_max_m must be finite and nonnegative: inf
+load_thresholds -inf rejected threshold limits.kepler_reference.position_error_max_m must be finite and nonnegative: -inf
+load_thresholds nan rejected threshold limits.kepler_reference.position_error_max_m must be finite and nonnegative: nan
+load_thresholds -1 rejected threshold limits.kepler_reference.position_error_max_m must be finite and nonnegative: -1
+load_thresholds '0.6' rejected threshold limits.kepler_reference.position_error_max_m is not a number: '0.6'
+load_thresholds True rejected threshold limits.kepler_reference.position_error_max_m is not a number: True
+load_thresholds [] rejected threshold limits.kepler_reference.position_error_max_m is not a number: []
+load_thresholds {} ACCEPTED
+load_thresholds disabled tests fail True
+load_scoped_thresholds inf rejected threshold limits.o9_gmat.all.step_spacing_error_max_s must be finite and nonnegative: inf
+load_scoped_thresholds -inf rejected threshold limits.o9_gmat.all.step_spacing_error_max_s must be finite and nonnegative: -inf
+load_scoped_thresholds nan rejected threshold limits.o9_gmat.all.step_spacing_error_max_s must be finite and nonnegative: nan
+load_scoped_thresholds -1 rejected threshold limits.o9_gmat.all.step_spacing_error_max_s must be finite and nonnegative: -1
+load_scoped_thresholds '0.6' rejected threshold limits.o9_gmat.all.step_spacing_error_max_s is not a number: '0.6'
+load_scoped_thresholds True rejected threshold limits.o9_gmat.all.step_spacing_error_max_s is not a number: True
+load_scoped_thresholds [] rejected threshold limits.o9_gmat.all.step_spacing_error_max_s is not a number: []
+load_scoped_thresholds {} ACCEPTED
+load_scoped_thresholds disabled tests fail True

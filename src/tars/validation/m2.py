@@ -207,6 +207,14 @@ def _ulp(x: float) -> float:
     return math.ulp(x)
 
 
+def worst(current: float, value: float) -> float:
+    """Max that never discards an invalid value: NaN in either argument gives +inf, so
+    the gate fails (review M2-T6 F16; builtin max(x, nan) silently returns x)."""
+    if math.isnan(current) or math.isnan(value):
+        return math.inf
+    return max(current, value)
+
+
 def simpson_bound(
     veh: Vehicle, burn: PredictedBurn, dt: float, until: float | None = None
 ) -> float:
@@ -903,6 +911,8 @@ def dop853_reference(
         if not sol.success:
             raise RuntimeError(f"DOP853 failed on [{a}, {b}]: {sol.message}")
         y = sol.y[:, -1].copy()
+        if not np.all(np.isfinite(sol.y)):  # F16: never hand on an invalid reference
+            raise RuntimeError(f"DOP853 produced a non-finite state on [{a}, {b}]")
         ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
         ticks = ticks[(ticks > a) & (ticks <= b)]
         if ticks.size:
@@ -944,6 +954,15 @@ def horizon_s(scenario: ScenarioV2, events: Sequence[Any]) -> float:
     return scenario.stop.duration_s if scenario.stop.duration_s is not None else events[-1].t
 
 
+_O4_KEYS = (
+    "initial_position_rel_error", "initial_velocity_rel_error",
+    "ignition_position_error_max_m", "ignition_velocity_error_max_mps",
+    "thrust_direction_vs_reference_max", "cutoff_position_error_max_m",
+    "cutoff_velocity_error_max_mps", "sample_position_error_max_m",
+    "sample_velocity_error_max_mps", "final_position_error_m", "final_velocity_error_mps",
+)  # fmt: skip
+
+
 def reference_metrics(
     scenario: ScenarioV2, events: Sequence[Any], predicted: Sequence[PredictedBurn]
 ) -> tuple[dict[str, float], dict[float, np.ndarray]]:
@@ -969,14 +988,16 @@ def reference_metrics(
         | {end_t}
     )
     ref = dop853_reference(scenario, r0, v0, predicted, marks)
+    if any(not np.all(np.isfinite(ref[t])) for t in marks):  # F16: invalid reference
+        return {k: math.inf for k in _O4_KEYS}, ref
     ign_pos = ign_vel = 0.0
     for b in predicted:
         st = starts.get(b.burn_id)
         if st is None:
             continue
         y = ref[b.ignition_t_s]
-        ign_pos = max(ign_pos, float(np.linalg.norm(np.array(st.r) - y[:3])))
-        ign_vel = max(ign_vel, float(np.linalg.norm(np.array(st.v) - y[3:6])))
+        ign_pos = worst(ign_pos, float(np.linalg.norm(np.array(st.r) - y[:3])))
+        ign_vel = worst(ign_vel, float(np.linalg.norm(np.array(st.v) - y[3:6])))
     # Thrust direction at every burning sample against the reference velocity (F10).
     direction = 0.0
     for p in burning:
@@ -987,20 +1008,20 @@ def reference_metrics(
             direction = math.pi
             continue
         u = SIGN[st.direction] * ref[p.t][3:6] / np.linalg.norm(ref[p.t][3:6])
-        direction = max(direction, float(np.linalg.norm(a / norm - u)))
+        direction = worst(direction, float(np.linalg.norm(a / norm - u)))
     cut_pos = cut_vel = 0.0
     for b in predicted:
         e = ends.get(b.burn_id)
         if e is None:
             continue
         y = ref[b.cutoff_t_s]
-        cut_pos = max(cut_pos, float(np.linalg.norm(np.array(e.r) - y[:3])))
-        cut_vel = max(cut_vel, float(np.linalg.norm(np.array(e.v) - y[3:6])))
+        cut_pos = worst(cut_pos, float(np.linalg.norm(np.array(e.r) - y[:3])))
+        cut_vel = worst(cut_vel, float(np.linalg.norm(np.array(e.v) - y[3:6])))
     traj_pos = traj_vel = 0.0
     for smp in samples:
         y = ref[smp.t]
-        traj_pos = max(traj_pos, float(np.linalg.norm(np.array(smp.r) - y[:3])))
-        traj_vel = max(traj_vel, float(np.linalg.norm(np.array(smp.v) - y[3:6])))
+        traj_pos = worst(traj_pos, float(np.linalg.norm(np.array(smp.r) - y[:3])))
+        traj_vel = worst(traj_vel, float(np.linalg.norm(np.array(smp.v) - y[3:6])))
     y = ref[end_t]
     metrics = {
         "initial_position_rel_error": float(np.linalg.norm(np.array(start.r) - r0))
@@ -1090,10 +1111,10 @@ def coast_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, floa
             if t0 <= t <= t_end:
                 rk, vk = kepler.propagate(r0, v0, t - t0, mu)
                 dp = float(np.linalg.norm(r - rk))
-                pos = max(pos, dp)
-                vel = max(vel, float(np.linalg.norm(v - vk)))
+                pos = worst(pos, dp)
+                vel = worst(vel, float(np.linalg.norm(v - vk)))
                 if i > 0:
-                    post_pos = max(post_pos, dp)
+                    post_pos = worst(post_pos, dp)
     return {
         "coast_position_error_max_m": pos,
         "coast_velocity_error_max_mps": vel,
@@ -1914,7 +1935,7 @@ def audit_run(scenario: ScenarioV2, expected: Sequence[Expected], run: RunResult
         + samp_v
         + check_start_identity(scenario, events)
         + check_result_consistency(scenario, events, run),
-        "orbit_events": orbit_v,
+        "orbit_events_contract": orbit_v,  # distinct from the numerical orbit_events gate
     }
     metrics: dict[str, dict[str, float]] = {
         "o4_reference": o4,

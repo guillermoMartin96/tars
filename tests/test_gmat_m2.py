@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import math
 import shutil
 import subprocess
 import sys
@@ -903,3 +904,131 @@ def test_committed_thresholds_load():
 
     assert load_thresholds().status == "approved"
     assert load_scoped_thresholds(missions=frozenset(BY_NAME)).status == "provisional"
+
+
+# ------------------------------------------------------------------ re-verification 3 fixes
+
+
+def test_worst_never_discards_nan():
+    """F16: builtin max(x, nan) returns x; worst() fails instead."""
+    assert max(0.1, math.nan) == 0.1  # the hazard
+    assert m2.worst(0.1, math.nan) == math.inf
+    assert m2.worst(math.nan, 0.1) == math.inf
+    assert m2.worst(0.1, 0.2) == 0.2
+
+
+def _nan_reference(monkeypatch, at=650.0):
+    original = m2.dop853_reference
+
+    def poisoned(*a, **k):
+        ref = original(*a, **k)
+        if at in ref:
+            ref[at] = np.full_like(ref[at], math.nan)
+        return ref
+
+    monkeypatch.setattr(m2, "dop853_reference", poisoned)
+
+
+def test_nan_reference_state_fails_o9(monkeypatch):
+    """F16: an invalid intermediate GMAT-vs-DOP853 reference state fails O9."""
+    _nan_reference(monkeypatch)
+    result = _compare("m2_prograde_burn")
+    assert result.metrics["gmat_vs_dop853_position_error_max_m"] == math.inf
+    assert "gmat_vs_dop853_position_error_max_m" in _failures("m2_prograde_burn", result.metrics)
+
+
+def test_nan_reference_state_fails_o4(monkeypatch):
+    """F16 (T5 correction): the same hazard in O4 fails every O4 metric."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    events = run_scenario(scenario).events
+    _nan_reference(monkeypatch, at=660.0)
+    metrics, _ = m2.reference_metrics(
+        scenario, events, m2.predict_burns(scenario, mission.expected)
+    )
+    assert all(v == math.inf for v in metrics.values())
+
+
+def test_nan_reference_state_fails_the_integrated_proof(monkeypatch):
+    """F16: through m2_proof's mission checks, the poisoned reference fails gates."""
+    import importlib.util
+
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    spec = importlib.util.spec_from_file_location(
+        "m2_proof", REPO_ROOT / "toolbox" / "validators" / "m2_proof.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    _nan_reference(monkeypatch)
+    gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+    checks, _ = module.mission_checks(BY_NAME["m2_prograde_burn"], gates, quick=True)
+    failed = {c.validator for c in checks if not c.passed}
+    assert "o9_gmat[m2_prograde_burn]" in failed and "o4_reference[m2_prograde_burn]" in failed
+
+
+def test_dop853_reference_rejects_non_finite_integration(monkeypatch):
+    """F16: the reference never hands on a non-finite state."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def broken(*a, **k):
+        sol = original(*a, **k)
+        sol.y[:, -1] = math.nan
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", broken)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="non-finite"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])
+
+
+def test_threshold_loaders_reject_object_limits(tmp_path):
+    """F17: an object where a limit belongs is rejected at load, not a later crash."""
+    from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+
+    m2_text = M2_THRESHOLDS.read_text().replace(
+        '"gmat_vs_dop853_position_error_max_m": 3e-05', '"gmat_vs_dop853_position_error_max_m": {}'
+    )
+    (tmp_path / "m2.json").write_text(m2_text)
+    with pytest.raises(ValueError, match="not a number"):
+        load_scoped_thresholds(tmp_path / "m2.json", missions=frozenset(BY_NAME))
+    m1_text = M1_THRESHOLDS.read_text().replace(
+        '"position_error_max_m": 0.6', '"position_error_max_m": {}', 1
+    )
+    (tmp_path / "m1.json").write_text(m1_text)
+    with pytest.raises(ValueError, match="not a number"):
+        load_thresholds(tmp_path / "m1.json")
+
+
+def test_nan_in_an_unreduced_reference_component_fails_o9(monkeypatch):
+    """F16: every reference component must be finite, including the propellant entry
+    that no O9 reduction reads."""
+    original = m2.dop853_reference
+
+    def poisoned(*a, **k):
+        ref = original(*a, **k)
+        ref[650.0] = ref[650.0].copy()
+        ref[650.0][6] = math.nan
+        return ref
+
+    monkeypatch.setattr(m2, "dop853_reference", poisoned)
+    result = _compare("m2_prograde_burn")
+    assert result.metrics["gmat_vs_dop853_position_error_max_m"] == math.inf
+
+
+def test_threshold_loaders_reject_a_wrong_structure(tmp_path):
+    """F17: a value where a group or scope object belongs is rejected at load."""
+    from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+
+    data = json.loads(M2_THRESHOLDS.read_text())
+    data["limits"]["o9_gmat"]["all"] = 5
+    (tmp_path / "m2.json").write_text(json.dumps(data))
+    with pytest.raises(ValueError, match="must be an object"):
+        load_scoped_thresholds(tmp_path / "m2.json", missions=frozenset(BY_NAME))
+    data1 = json.loads(M1_THRESHOLDS.read_text())
+    data1["limits"]["kepler_reference"] = 5
+    (tmp_path / "m1.json").write_text(json.dumps(data1))
+    with pytest.raises(ValueError, match="must be an object"):
+        load_thresholds(tmp_path / "m1.json")

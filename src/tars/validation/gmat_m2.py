@@ -36,7 +36,7 @@ import numpy as np
 from tars.sim.constants import STANDARD_GRAVITY
 from tars.sim.scenario import ScenarioV2
 from tars.validation.gmat import _gmat_epoch
-from tars.validation.m2 import PredictedBurn, expected_initial_state, vehicle
+from tars.validation.m2 import PredictedBurn, expected_initial_state, vehicle, worst
 
 BURN_STEP_S = 1.0  # DR-0016: burns at 1 s steps (a divisor of the microsecond grid)
 STREAM_COLUMNS = (
@@ -349,13 +349,13 @@ def alignment_metrics(
     spacing = 0.0
     for a, b in pairwise(times):
         d = (labelled[b].a1mjd - labelled[a].a1mjd) * 86400.0
-        spacing = max(spacing, abs(d - (b - a)))
+        spacing = worst(spacing, abs(d - (b - a)))
     duration = 0.0
     for arc in arcs:
         if arc.direction is None or arc.start_s not in labelled or arc.end_s not in labelled:
             continue
         used = labelled[arc.start_s].mass_kg - labelled[arc.end_s].mass_kg
-        duration = max(duration, abs(used / mass_flow_kgps - arc.length_s))
+        duration = worst(duration, abs(used / mass_flow_kgps - arc.length_s))
     kep = 0.0
     for arc in arcs:
         if arc.direction is not None or arc.start_s not in labelled:
@@ -364,7 +364,7 @@ def alignment_metrics(
         for t in times:
             if arc.start_s < t <= arc.end_s:
                 r, _ = kepler.propagate(s0.r, s0.v, t - arc.start_s, mu)
-                kep = max(kep, float(np.linalg.norm(labelled[t].r - r)))
+                kep = worst(kep, float(np.linalg.norm(labelled[t].r - r)))
     return {
         "step_spacing_error_max_s": spacing,
         "burn_duration_from_mass_error_max_s": duration,
@@ -424,12 +424,13 @@ def o9_metrics(
     assert veh is not None
     mu = scenario.constants.mu
     times = sorted(labelled)
-    g_pos = g_vel = g_mass = 0.0
+    invalid = [t for t in times if not np.all(np.isfinite(reference[t]))]
+    g_pos = g_vel = g_mass = math.inf if invalid else 0.0  # F16: invalid reference fails
     for t in times:
         row, y = labelled[t], reference[t]
-        g_pos = max(g_pos, float(np.linalg.norm(row.r - y[:3])))
-        g_vel = max(g_vel, float(np.linalg.norm(row.v - y[3:6])))
-        g_mass = max(g_mass, abs(row.mass_kg - _expected_mass(t, veh, predicted)))
+        g_pos = worst(g_pos, float(np.linalg.norm(row.r - y[:3])))
+        g_vel = worst(g_vel, float(np.linalg.norm(row.v - y[3:6])))
+        g_mass = worst(g_mass, abs(row.mass_kg - _expected_mass(t, veh, predicted)))
     end = times[-1]
     states = [e for e in events if e.type == "StateSampled"]
     s_pos = s_vel = 0.0
@@ -438,8 +439,8 @@ def o9_metrics(
         if row is None:
             s_pos = s_vel = math.inf  # every sample time must be a GMAT row
             continue
-        s_pos = max(s_pos, float(np.linalg.norm(np.array(s.r) - row.r)))
-        s_vel = max(s_vel, float(np.linalg.norm(np.array(s.v) - row.v)))
+        s_pos = worst(s_pos, float(np.linalg.norm(np.array(s.r) - row.r)))
+        s_vel = worst(s_vel, float(np.linalg.norm(np.array(s.v) - row.v)))
     b_pos = b_vel = 0.0
     for e in events:
         if e.type in ("BurnStarted", "BurnEnded"):
@@ -447,13 +448,13 @@ def o9_metrics(
             if row is None:
                 b_pos = b_vel = math.inf
                 continue
-            b_pos = max(b_pos, float(np.linalg.norm(np.array(e.r) - row.r)))
-            b_vel = max(b_vel, float(np.linalg.norm(np.array(e.v) - row.v)))
+            b_pos = worst(b_pos, float(np.linalg.norm(np.array(e.r) - row.r)))
+            b_vel = worst(b_vel, float(np.linalg.norm(np.array(e.v) - row.v)))
     m_err = 0.0
     compared_mass = 0
     for p in events:
         if p.type == "PropulsionSampled" and p.t in labelled:
-            m_err = max(m_err, abs(p.total_mass_kg - labelled[p.t].mass_kg))
+            m_err = worst(m_err, abs(p.total_mass_kg - labelled[p.t].mass_kg))
             compared_mass += 1
     done = events[-1]
     final = labelled.get(done.t)

@@ -1061,3 +1061,11 @@ def test_event_schema_version_is_enforced(runs):
     _, scenario, run = _slice(runs)
     events = [e.model_copy(update={"schema_version": 999}) for e in run.events]
     assert any("schema_version" in v for v in m2.check_event_order(scenario, events))
+
+
+def test_audit_check_names_are_unique(runs):
+    """Every check in an audit has a distinct name (the orbit-event contract check and
+    the numerical orbit_events gate used to share one)."""
+    mission, scenario, run = runs["m2_prograde_burn"]
+    audit = m2.audit_run(scenario, mission.expected, run)
+    assert not set(audit.violations) & set(audit.metrics)

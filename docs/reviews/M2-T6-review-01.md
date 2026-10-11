@@ -143,4 +143,23 @@ All seven are **`ACCEPTED`**.
 **Test-design note.** The first F14 value probes were also caught by the chain, so disabling a single value rule went unnoticed. Each probe now re-chains after its edit, and the reordering probe keeps every mission's latest record. Each rule fails a test when disabled.
 
 ## Re-verification 3
+**Reviewer:** Codex, session `01a12d2b-4bf2-74b0-ba58-8580531a3369`, at `4cd3669`. **Raw:** `raw/M2-T6-codex-reverify3.md`, `raw/M2-T6-codex-reverify3-scratch/`.
+
+**Verdict: FAIL** (F16 is a numerical false pass).
+- F14 is resolved: all 12 history records match the committed metadata, and the documented re-chain limit is honest and reproduced.
+- F15's original exploit is resolved; object-valued limits remain (F17).
+- All gates passed: 919 tests, 212/212 Proof, 18 row mutations and 47 threshold deletions rejected, reports byte-identical to `1de827e`.
+
+**Both findings are `ACCEPTED`.** Each mechanism is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F16 | Med | A NaN intermediate DOP853 state passed O9, and the same pattern existed in T5's O4. Python's `max(x, nan)` returns `x` | `tars.validation.m2.worst()` turns NaN into +inf. It is used for every reference-dependent reduction in O9 (alignment, GMAT vs DOP853, ours vs GMAT) and, **as a documented T5 correction**, in O4 and O5. O9 and O4 also reject any non-finite reference component, including ones they do not reduce. `dop853_reference` raises on a non-finite integration. For finite inputs `worst` equals `max`: all 212 Proof metric values are bit-identical before and after | `test_worst_never_discards_nan`, `test_nan_reference_state_fails_o9`, `…_fails_o4`, `…_fails_the_integrated_proof`, `test_nan_in_an_unreduced_reference_component_fails_o9`, `test_dop853_reference_rejects_non_finite_integration` |
+| F17 | Low | Object-valued limits accepted, causing a later crash | Both loaders validate the exact nesting (M1 group → metric; M2 group → scope → metric), then each leaf | `test_threshold_loaders_reject_object_limits`, `test_threshold_loaders_reject_a_wrong_structure` |
+
+**Self-found while verifying F16 (T5 report naming).**
+- Two different checks were named `orbit_events[…]`: the exact orbit-event contract check and the numerical orbit gate.
+- Both were always evaluated, but the report had duplicate validator names. The contract check is now `orbit_events_contract[…]`; the report has 212 unique names (`test_audit_check_names_are_unique`).
+
+## Re-verification 4
 See below.

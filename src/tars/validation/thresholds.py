@@ -35,12 +35,19 @@ KNOWN_VALIDATORS = frozenset(
 )  # fmt: skip
 
 
-def _require_finite_limits(limits: object, where: str = "limits") -> None:
-    """Every non-null limit must be a finite, nonnegative real number (review M2-T6 F15):
-    JSON such as 1e999 parses as infinity and would silently disable a gate."""
-    if isinstance(limits, dict):
+def _require_finite_limits(limits: object, depth: int, where: str = "limits") -> None:
+    """Exact nesting, then every metric leaf null or a finite, nonnegative real number
+    (reviews M2-T6 F15, F17). JSON such as 1e999 parses as infinity and would disable a
+    gate; an object at a metric leaf would crash the checks.
+
+    ``depth`` is the number of mapping levels above the metric leaves: 2 for M1
+    (group -> metric), 3 for M2 (group -> scope -> metric).
+    """
+    if depth > 0:
+        if not isinstance(limits, dict):
+            raise ValueError(f"threshold {where} must be an object")
         for key, value in limits.items():
-            _require_finite_limits(value, f"{where}.{key}")
+            _require_finite_limits(value, depth - 1, f"{where}.{key}")
         return
     if limits is None:
         return
@@ -57,7 +64,7 @@ def load_thresholds(path: Path = M1_THRESHOLDS) -> Thresholds:
         raise ValueError(f"threshold groups match no validator: {unknown}")
     if data["status"] not in ("provisional", "approved"):
         raise ValueError(f"invalid threshold status {data['status']!r}")
-    _require_finite_limits(data["limits"])
+    _require_finite_limits(data["limits"], depth=2)
     return Thresholds(status=data["status"], limits=data["limits"])
 
 
@@ -113,7 +120,7 @@ def load_scoped_thresholds(
         raise ValueError(f"threshold scopes match no mission: {bad}")
     if data["status"] not in ("provisional", "approved"):
         raise ValueError(f"invalid threshold status {data['status']!r}")
-    _require_finite_limits(data["limits"])
+    _require_finite_limits(data["limits"], depth=3)
     return ScopedThresholds(status=data["status"], limits=data["limits"])
 
 

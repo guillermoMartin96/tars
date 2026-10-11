@@ -1,0 +1,96 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+______ test_threshold_loaders_reject_non_finite_or_negative_limits[1e999] ______
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-140/test_threshold_loaders_reject_0')
+bad = '1e999'
+
+    @pytest.mark.parametrize("bad", ["1e999", "-1.0", "NaN", '"0.6"'])
+    def test_threshold_loaders_reject_non_finite_or_negative_limits(tmp_path, bad):
+        """F15: an overflowing, negative, NaN or non-numeric limit cannot disable a gate."""
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        text = M2_THRESHOLDS.read_text().replace(
+            '"gmat_vs_dop853_position_error_max_m": 3e-05',
+            f'"gmat_vs_dop853_position_error_max_m": {bad}',
+        )
+        assert text != M2_THRESHOLDS.read_text()
+        path = tmp_path / "m2.json"
+        path.write_text(text)
+>       with pytest.raises(ValueError, match="threshold"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:890: Failed
+______ test_threshold_loaders_reject_non_finite_or_negative_limits[-1.0] _______
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-140/test_threshold_loaders_reject_1')
+bad = '-1.0'
+
+    @pytest.mark.parametrize("bad", ["1e999", "-1.0", "NaN", '"0.6"'])
+    def test_threshold_loaders_reject_non_finite_or_negative_limits(tmp_path, bad):
+        """F15: an overflowing, negative, NaN or non-numeric limit cannot disable a gate."""
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        text = M2_THRESHOLDS.read_text().replace(
+            '"gmat_vs_dop853_position_error_max_m": 3e-05',
+            f'"gmat_vs_dop853_position_error_max_m": {bad}',
+        )
+        assert text != M2_THRESHOLDS.read_text()
+        path = tmp_path / "m2.json"
+        path.write_text(text)
+>       with pytest.raises(ValueError, match="threshold"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:890: Failed
+_______ test_threshold_loaders_reject_non_finite_or_negative_limits[NaN] _______
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-140/test_threshold_loaders_reject_2')
+bad = 'NaN'
+
+    @pytest.mark.parametrize("bad", ["1e999", "-1.0", "NaN", '"0.6"'])
+    def test_threshold_loaders_reject_non_finite_or_negative_limits(tmp_path, bad):
+        """F15: an overflowing, negative, NaN or non-numeric limit cannot disable a gate."""
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        text = M2_THRESHOLDS.read_text().replace(
+            '"gmat_vs_dop853_position_error_max_m": 3e-05',
+            f'"gmat_vs_dop853_position_error_max_m": {bad}',
+        )
+        assert text != M2_THRESHOLDS.read_text()
+        path = tmp_path / "m2.json"
+        path.write_text(text)
+>       with pytest.raises(ValueError, match="threshold"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:890: Failed
+______ test_threshold_loaders_reject_non_finite_or_negative_limits["0.6"] ______
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-140/test_threshold_loaders_reject_3')
+bad = '"0.6"'
+
+    @pytest.mark.parametrize("bad", ["1e999", "-1.0", "NaN", '"0.6"'])
+    def test_threshold_loaders_reject_non_finite_or_negative_limits(tmp_path, bad):
+        """F15: an overflowing, negative, NaN or non-numeric limit cannot disable a gate."""
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        text = M2_THRESHOLDS.read_text().replace(
+            '"gmat_vs_dop853_position_error_max_m": 3e-05',
+            f'"gmat_vs_dop853_position_error_max_m": {bad}',
+        )
+        assert text != M2_THRESHOLDS.read_text()
+        path = tmp_path / "m2.json"
+        path.write_text(text)
+>       with pytest.raises(ValueError, match="threshold"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:890: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_threshold_loaders_reject_non_finite_or_negative_limits[1e999]
+FAILED tests/test_gmat_m2.py::test_threshold_loaders_reject_non_finite_or_negative_limits[-1.0]
+FAILED tests/test_gmat_m2.py::test_threshold_loaders_reject_non_finite_or_negative_limits[NaN]
+FAILED tests/test_gmat_m2.py::test_threshold_loaders_reject_non_finite_or_negative_limits["0.6"]
+4 failed in 0.16s
