@@ -78,7 +78,7 @@ Items 1–2 follow from approved decisions (DR-0013 3A; SCI-0012, "propellant ne
 - Disproportionate for M2.
 
 ### Depletion boundary (part of this decision)
-- **D1a (recommended; current):** step the cutoff back to the latest representable time not after depletion. Consumption follows the executed interval, and the residual (≤ ṁ·2·ulp(cutoff)) is retained in the tank. Plan = execution exactly, never negative. The burn is labelled `propellant_depleted` (depleted to within time resolution).
+- **D1a (recommended; current):** step the cutoff back to the latest representable time not after depletion. Consumption follows the executed interval, and the residual (≤ ṁ·2·ulp(cutoff)) is retained in the tank. Plan = execution to round-off, never negative. The burn is labelled `propellant_depleted` (depleted to within time resolution).
 - **D1b:** as D1a, but snap the tank to exactly 0 at a depletion cutoff. "Empty means empty", but the integrated and planned accounting then differ by up to ṁ·2·ulp(cutoff), and unburned propellant is discarded. This was the earlier behavior that review N5 objected to.
 - **D2:** reject burns whose represented interval would cross depletion. Simpler, but it rejects ordinary exact-depletion commands at some ignition times purely because of rounding.
 
@@ -90,7 +90,7 @@ Items 1–2 follow from approved decisions (DR-0013 3A; SCI-0012, "propellant ne
 
 ## Impact
 - Architecture: none (B, D1a). D would change ADR-0002.
-- Science/validation: timing representation provably sub-dominant to integration error; depletion semantics explicit.
+- Science/validation: explicit per-burn timing-error allocation; depletion semantics explicit. Sub-dominance to integration error is shown only for the measured reference case (VAL-0008, VAL-0012).
 - Dependencies: none.
 - Effort: small (B, with the check moved into schedule_burn; D1a is already implemented); large (D).
 - Reversibility: high.

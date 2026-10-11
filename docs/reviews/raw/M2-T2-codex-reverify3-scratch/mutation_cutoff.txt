@@ -1,0 +1,164 @@
+......................................................FF.F.FF.F........F [ 38%]
+..........................................F............................. [ 76%]
+............................................                             [100%]
+=================================== FAILURES ===================================
+_____ test_executed_interval_never_exceeds_the_depletion_time[reject-1.0] ______
+
+ignition = 1.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+        """N1: sufficiency must hold for the represented interval that is integrated.
+        At the exact depletion boundary the cutoff is the latest representable time
+        not after depletion, so consumption never exceeds the loaded propellant."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        t_dep = tank / ENGINE.mass_flow_kgps
+        plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 0.10000000000000009 <= 0.09999999999999999
+E        +  where 0.10000000000000009 = BurnPlan(ignition_t_s=1.0, commanded_duration_s=0.09999999999999999, burn_duration_s=0.10000000000000009, cutoff_t_s=1...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:635: AssertionError
+____ test_executed_interval_never_exceeds_the_depletion_time[reject-605.5] _____
+
+ignition = 605.5, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+        """N1: sufficiency must hold for the represented interval that is integrated.
+        At the exact depletion boundary the cutoff is the latest representable time
+        not after depletion, so consumption never exceeds the loaded propellant."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        t_dep = tank / ENGINE.mass_flow_kgps
+        plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 0.10000000000002274 <= 0.09999999999999999
+E        +  where 0.10000000000002274 = BurnPlan(ignition_t_s=605.5, commanded_duration_s=0.09999999999999999, burn_duration_s=0.10000000000002274, cutoff_t_s...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:635: AssertionError
+_ test_executed_interval_never_exceeds_the_depletion_time[reject-1000000000.0] _
+
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+        """N1: sufficiency must hold for the represented interval that is integrated.
+        At the exact depletion boundary the cutoff is the latest representable time
+        not after depletion, so consumption never exceeds the loaded propellant."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        t_dep = tank / ENGINE.mass_flow_kgps
+        plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 0.10000002384185791 <= 0.09999999999999999
+E        +  where 0.10000002384185791 = BurnPlan(ignition_t_s=1000000000.0, commanded_duration_s=0.09999999999999999, burn_duration_s=0.10000002384185791, cut...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:635: AssertionError
+_ test_executed_interval_never_exceeds_the_depletion_time[burn_to_depletion-1.0] _
+
+ignition = 1.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+        """N1: sufficiency must hold for the represented interval that is integrated.
+        At the exact depletion boundary the cutoff is the latest representable time
+        not after depletion, so consumption never exceeds the loaded propellant."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        t_dep = tank / ENGINE.mass_flow_kgps
+        plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 0.10000000000000009 <= 0.09999999999999999
+E        +  where 0.10000000000000009 = BurnPlan(ignition_t_s=1.0, commanded_duration_s=0.09999999999999999, burn_duration_s=0.10000000000000009, cutoff_t_s=1...se=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:635: AssertionError
+_ test_executed_interval_never_exceeds_the_depletion_time[burn_to_depletion-605.5] _
+
+ignition = 605.5
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+        """N1: sufficiency must hold for the represented interval that is integrated.
+        At the exact depletion boundary the cutoff is the latest representable time
+        not after depletion, so consumption never exceeds the loaded propellant."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        t_dep = tank / ENGINE.mass_flow_kgps
+        plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 0.10000000000002274 <= 0.09999999999999999
+E        +  where 0.10000000000002274 = BurnPlan(ignition_t_s=605.5, commanded_duration_s=0.09999999999999999, burn_duration_s=0.10000000000002274, cutoff_t_s...se=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:635: AssertionError
+_ test_executed_interval_never_exceeds_the_depletion_time[burn_to_depletion-1000000000.0] _
+
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+        """N1: sufficiency must hold for the represented interval that is integrated.
+        At the exact depletion boundary the cutoff is the latest representable time
+        not after depletion, so consumption never exceeds the loaded propellant."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        t_dep = tank / ENGINE.mass_flow_kgps
+        plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 0.10000002384185791 <= 0.09999999999999999
+E        +  where 0.10000002384185791 = BurnPlan(ignition_t_s=1000000000.0, commanded_duration_s=0.09999999999999999, burn_duration_s=0.10000002384185791, cut...se=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:635: AssertionError
+____________ test_conservative_depletion_cutoff_keeps_its_residual _____________
+
+    def test_conservative_depletion_cutoff_keeps_its_residual():
+        """N5: when the cutoff steps back before depletion, consumption follows the
+        executed interval for burn_to_depletion too, and the residual is retained."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        plan = plan_burn(
+            ENGINE, tank, 1.0e9, 1.0, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION
+        )
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+>       assert plan.burn_duration_s < tank / ENGINE.mass_flow_kgps
+E       AssertionError: assert 0.10000002384185791 < (0.01601477385766618 / 0.1601477385766618)
+E        +  where 0.10000002384185791 = BurnPlan(ignition_t_s=1000000000.0, commanded_duration_s=1.0, burn_duration_s=0.10000002384185791, cutoff_t_s=10000000...PELLANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+E        +  and   0.1601477385766618 = EngineSpec(thrust_n=490.0, isp_s=312.0).mass_flow_kgps
+
+tests/test_simulator_propulsion.py:767: AssertionError
+____ test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion ____
+
+    def test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion():
+        plan = plan_burn(
+            REF_ENGINE,
+            propellant_kg=10.0,
+            ignition_t_s=600.0,
+            duration_s=77.3,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+        t_dep = 10.0 / REF_ENGINE.mass_flow_kgps
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        assert plan.commanded_duration_s == 77.3
+        # Latest representable cutoff not after depletion (review N1): 600 + t_dep may round
+        # one ulp past it, in which case the cutoff steps back.
+        assert plan.cutoff_t_s <= 600.0 + t_dep
+        assert plan.burn_duration_s == plan.cutoff_t_s - 600.0
+>       assert plan.burn_duration_s <= t_dep
+E       AssertionError: assert 62.442342857142876 <= 62.442342857142854
+E        +  where 62.442342857142876 = BurnPlan(ignition_t_s=600.0, commanded_duration_s=77.3, burn_duration_s=62.442342857142876, cutoff_t_s=662.44234285714...PELLANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+
+tests/test_propulsion.py:241: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_executed_interval_never_exceeds_the_depletion_time[reject-1.0]
+FAILED tests/test_simulator_propulsion.py::test_executed_interval_never_exceeds_the_depletion_time[reject-605.5]
+FAILED tests/test_simulator_propulsion.py::test_executed_interval_never_exceeds_the_depletion_time[reject-1000000000.0]
+FAILED tests/test_simulator_propulsion.py::test_executed_interval_never_exceeds_the_depletion_time[burn_to_depletion-1.0]
+FAILED tests/test_simulator_propulsion.py::test_executed_interval_never_exceeds_the_depletion_time[burn_to_depletion-605.5]
+FAILED tests/test_simulator_propulsion.py::test_executed_interval_never_exceeds_the_depletion_time[burn_to_depletion-1000000000.0]
+FAILED tests/test_simulator_propulsion.py::test_conservative_depletion_cutoff_keeps_its_residual
+FAILED tests/test_propulsion.py::test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion
+8 failed, 180 passed in 1.49s

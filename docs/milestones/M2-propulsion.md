@@ -1,9 +1,9 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T2 AUTHORIZED (2026-10-10).
-- T1 is complete and reviewed (`docs/reviews/M2-T1-review-01.md`).
-- DR-0010…0014 are approved. DR-0014 was amended with the rejection vocabulary: `schema_invalid` kept, `burn_unschedulable` added.
-- DR-0015 is conditionally approved. DR-0016 is approved: aligned GMAT stepping; REV-012 to be resolved once integrated and verified.
+**Status:** T2 COMPLETE, pending the DR-0017 decision (2026-10-10).
+- T1 and T2 are implemented and reviewed by a separate provider (`docs/reviews/M2-T1-review-01.md`, `M2-T2-review-01.md`).
+- DR-0010…0014 and DR-0016 are approved. DR-0015 is conditionally approved. **DR-0017 is OPEN** (burn timing fidelity and depletion residual); the provisional 1 µs rule and D1a are in place until it is decided.
+- REV-012 is resolved.
 - T3 and later tasks need separate approval. No merge to `main` without Tech Lead approval.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  

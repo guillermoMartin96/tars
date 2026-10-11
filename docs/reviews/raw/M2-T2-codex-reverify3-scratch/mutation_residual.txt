@@ -1,0 +1,55 @@
+.........................................F.............................. [ 38%]
+........................................................................ [ 76%]
+..........................................F.                             [100%]
+=================================== FAILURES ===================================
+____ test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion ____
+
+    def test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion():
+        plan = plan_burn(
+            REF_ENGINE,
+            propellant_kg=10.0,
+            ignition_t_s=600.0,
+            duration_s=77.3,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+        t_dep = 10.0 / REF_ENGINE.mass_flow_kgps
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        assert plan.commanded_duration_s == 77.3
+        # Latest representable cutoff not after depletion (review N1): 600 + t_dep may round
+        # one ulp past it, in which case the cutoff steps back.
+        assert plan.cutoff_t_s <= 600.0 + t_dep
+        assert plan.burn_duration_s == plan.cutoff_t_s - 600.0
+        assert plan.burn_duration_s <= t_dep
+        assert abs(plan.burn_duration_s - t_dep) <= EVENT_TIME_RESOLUTION_S
+        # Consumption follows the executed interval (review N5); never more than loaded, and
+        # the residual left by the conservative cutoff is within mdot * 2 ulp(cutoff).
+>       assert plan.propellant_used_kg == min(REF_ENGINE.mass_flow_kgps * plan.burn_duration_s, 10.0)
+E       AssertionError: assert 10.0 == 9.999999999999986
+E        +  where 10.0 = BurnPlan(ignition_t_s=600.0, commanded_duration_s=77.3, burn_duration_s=62.44234285714276, cutoff_t_s=662.442342857142...PELLANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).propellant_used_kg
+E        +  and   9.999999999999986 = min((0.1601477385766618 * 62.44234285714276), 10.0)
+E        +    where 0.1601477385766618 = EngineSpec(thrust_n=490.0, isp_s=312.0).mass_flow_kgps
+E        +    and   62.44234285714276 = BurnPlan(ignition_t_s=600.0, commanded_duration_s=77.3, burn_duration_s=62.44234285714276, cutoff_t_s=662.442342857142...PELLANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+
+tests/test_propulsion.py:245: AssertionError
+____________ test_conservative_depletion_cutoff_keeps_its_residual _____________
+
+    def test_conservative_depletion_cutoff_keeps_its_residual():
+        """N5: when the cutoff steps back before depletion, consumption follows the
+        executed interval for burn_to_depletion too, and the residual is retained."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        plan = plan_burn(
+            ENGINE, tank, 1.0e9, 1.0, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION
+        )
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        assert plan.burn_duration_s < tank / ENGINE.mass_flow_kgps
+>       assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
+E       AssertionError: assert 0.01601477385766618 == (0.1601477385766618 * 0.09999990463256836)
+E        +  where 0.01601477385766618 = BurnPlan(ignition_t_s=1000000000.0, commanded_duration_s=1.0, burn_duration_s=0.09999990463256836, cutoff_t_s=10000000...PELLANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).propellant_used_kg
+E        +  and   0.1601477385766618 = EngineSpec(thrust_n=490.0, isp_s=312.0).mass_flow_kgps
+E        +  and   0.09999990463256836 = BurnPlan(ignition_t_s=1000000000.0, commanded_duration_s=1.0, burn_duration_s=0.09999990463256836, cutoff_t_s=10000000...PELLANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>).burn_duration_s
+
+tests/test_simulator_propulsion.py:768: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_propulsion.py::test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion
+FAILED tests/test_simulator_propulsion.py::test_conservative_depletion_cutoff_keeps_its_residual
+2 failed, 186 passed in 1.33s

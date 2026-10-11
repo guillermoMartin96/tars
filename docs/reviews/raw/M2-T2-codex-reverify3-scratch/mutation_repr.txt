@@ -1,0 +1,96 @@
+................................................................FF...... [ 38%]
+........................................................................ [ 76%]
+............................................                             [100%]
+=================================== FAILURES ===================================
+_____ test_integers_beyond_the_repr_limit_are_schema_invalid[ignition_t_s] _____
+
+field = 'ignition_t_s'
+
+    @pytest.mark.parametrize("field", ["ignition_t_s", "duration_s"])
+    def test_integers_beyond_the_repr_limit_are_schema_invalid(field):
+        """N2: building the rejection message must not itself raise."""
+        sim = _sim()
+        args = {"direction": "prograde", "ignition_t_s": 600.0, "duration_s": 10.0, field: 10**10000}
+        with pytest.raises(BurnRejectedError) as err:
+>           sim.schedule_burn(**args)
+
+tests/test_simulator_propulsion.py:666: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tars/sim/simulator.py:275: in schedule_burn
+    ignition = burn_scalar("ignition_t_s", ignition_t_s)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ignition_t_s'
+value = <[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] int object at 0x7fe408104000>
+
+    def burn_scalar(name: str, value: object) -> float:
+        """Validate one numeric burn input and normalize it to float64 (DR-0014 amendment).
+    
+        Non-real values (bool, str, None, arrays, numpy bools), non-finite values and
+        values that overflow float64 (e.g. 10**1000) are ``schema_invalid``.
+        """
+        if isinstance(value, bool) or not isinstance(value, Real):
+            raise BurnRejectedError(
+                BurnRejection.SCHEMA_INVALID, f"{name} must be real, got {_describe(value)}"
+            )
+        try:
+            number = float(value)
+        except (OverflowError, ValueError, TypeError):
+            number = math.nan
+        if not math.isfinite(number):
+            raise BurnRejectedError(
+>               BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {_describe(value)}"
+                                                                           ^^^^^^^^^
+            )
+E           ValueError: Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit
+
+src/tars/sim/propulsion.py:321: ValueError
+______ test_integers_beyond_the_repr_limit_are_schema_invalid[duration_s] ______
+
+field = 'duration_s'
+
+    @pytest.mark.parametrize("field", ["ignition_t_s", "duration_s"])
+    def test_integers_beyond_the_repr_limit_are_schema_invalid(field):
+        """N2: building the rejection message must not itself raise."""
+        sim = _sim()
+        args = {"direction": "prograde", "ignition_t_s": 600.0, "duration_s": 10.0, field: 10**10000}
+        with pytest.raises(BurnRejectedError) as err:
+>           sim.schedule_burn(**args)
+
+tests/test_simulator_propulsion.py:666: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tars/sim/simulator.py:276: in schedule_burn
+    duration = burn_scalar("duration_s", duration_s)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'duration_s'
+value = <[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] int object at 0x7fe4080fde00>
+
+    def burn_scalar(name: str, value: object) -> float:
+        """Validate one numeric burn input and normalize it to float64 (DR-0014 amendment).
+    
+        Non-real values (bool, str, None, arrays, numpy bools), non-finite values and
+        values that overflow float64 (e.g. 10**1000) are ``schema_invalid``.
+        """
+        if isinstance(value, bool) or not isinstance(value, Real):
+            raise BurnRejectedError(
+                BurnRejection.SCHEMA_INVALID, f"{name} must be real, got {_describe(value)}"
+            )
+        try:
+            number = float(value)
+        except (OverflowError, ValueError, TypeError):
+            number = math.nan
+        if not math.isfinite(number):
+            raise BurnRejectedError(
+>               BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {_describe(value)}"
+                                                                           ^^^^^^^^^
+            )
+E           ValueError: Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit
+
+src/tars/sim/propulsion.py:321: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_integers_beyond_the_repr_limit_are_schema_invalid[ignition_t_s]
+FAILED tests/test_simulator_propulsion.py::test_integers_beyond_the_repr_limit_are_schema_invalid[duration_s]
+2 failed, 186 passed in 1.63s

@@ -231,12 +231,30 @@ All applied:
 - determinism and cross-platform bit-identical to `7a4e1877…`;
 - VAL-0012 unchanged.
 
+## Addendum 3: third reviewer re-verification (`0955195`)
+**Reviewer:** OpenAI Codex `gpt-6.1-sol`, session `01a1285b-13c3-7903-980f-31fc5727421f`.  
+**Raw:** `raw/M2-T2-codex-reverify3.md`; prompt and scripts are alongside.  
+**Verdict: CONDITIONAL PASS.** "T2 implementation is complete apart from DR-0017's open decision and the minor text correction."
+
+| Finding | Re-verification |
+|---|---|
+| N1 | RESOLVED (20 080 edge/random cases never exceed depletion) |
+| N2 | RESOLVED |
+| N3 | RESOLVED |
+| N4 | RESOLVED. The clamp changes no non-depletion result: 16 comparisons byte-identical, M1 hash intact. A doubled-consumption mutant with the clamp in place still fails 17 tests, so the clamp does not mask accounting errors. |
+| N5 | RESOLVED (residual retained; actual vs planned differs by −3.5e-18 kg) |
+
+### N6 — DR-0017 retained an unsupported accuracy claim
+**Severity:** Low  
+**Reviewer claim:** DR-0017's Impact section said timing representation is "provably sub-dominant", contradicting the corrected budget discussion. D1a should say "to round-off".  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Wording corrected in the commit that records this addendum. Impact now reads "explicit per-burn timing-error allocation…; sub-dominance shown only for the measured reference case". D1a reads "Plan = execution to round-off".
+
 ## Proof gate
 - [x] All Critical findings resolved (none raised)
 - [x] All High findings resolved (none raised)
-- [x] Every substantive finding has an explicit disposition (REV-T2-01…05, N1–N5)
-- [x] Accepted fixes re-tested by the implementer (`87f217d`)
-- [ ] Reviewer re-verification of the N2/N4/N5 fixes (requested)
-- [ ] DR-0017 decision (representability rule; depletion-residual semantics)
+- [x] Every substantive finding has an explicit disposition (REV-T2-01…05, N1–N6)
+- [x] Accepted fixes re-tested by the implementer and re-verified by the reviewer (third re-verification: all RESOLVED; N6 is a text correction)
+- [ ] DR-0017 decision (representability rule; depletion-residual semantics). The provisional 1 µs rule and D1a remain in place until decided.
 
-**Review gate result:** BLOCKED, pending the final re-verification and DR-0017.
+**Review gate result:** PASS for T2's implementation, with **one open escalation (DR-0017)**. Per the reviewer, the provisional rule is not a defect while the DR is open.

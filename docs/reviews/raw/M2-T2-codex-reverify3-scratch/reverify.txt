@@ -1,0 +1,22 @@
+F2 invalid ignition/duration idle PASS
+F2 invalid ignition/duration pending PASS
+F2 invalid ignition/duration active PASS
+np.float32 past ignition_in_past
+burn_scalar all four plan inputs PASS
+huge integer > repr limit schema_invalid
+invalid policy with past ignition schema_invalid
+F3 original reject burn_unschedulable
+F3 original burn_to_depletion burn_unschedulable
+F4 r/v immutable backing PASS
+F1 rollback/retry nan PASS
+F1 rollback/retry raise PASS
+F1 rollback/retry direction PASS
+F1 rollback/retry thrust PASS
+edge rejected 1.0 1.2e-16 reject burn_unschedulable
+edge rejected 1.0 1.2e-16 burn_to_depletion burn_unschedulable
+edge 1000000000.0 0.1 reject represented 0.09999990463256836 mass discrepancy 0.0 cause completed
+edge 1000000000.0 0.1 burn_to_depletion represented 0.09999990463256836 mass discrepancy 0.0 cause propellant_depleted
+edge 1000000000.0 0.09999999 reject represented 0.09999990463256836 mass discrepancy 0.0 cause completed
+edge 1000000000.0 0.09999999 burn_to_depletion represented 0.09999990463256836 mass discrepancy 0.0 cause propellant_depleted
+original multi-event errors 6.0782596733588434e-09 -7.496225862269057e-13 1.7053025658242404e-13
+original active future consumption 3.5232502486865087 3.52325024868656

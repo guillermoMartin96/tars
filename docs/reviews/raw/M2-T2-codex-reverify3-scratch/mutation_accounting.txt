@@ -1,0 +1,507 @@
+...................F.F.FFFF...F...............FF..FF...........F...FFFFF [ 98%]
+.                                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_two_events_inside_one_tick ________________________
+
+    def test_two_events_inside_one_tick():
+        sim = _sim()
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        _run_until(sim, 600.0)
+        sim.step()  # tick 600 -> 610 contains ignition and cutoff
+        assert [(e.kind, e.t) for e in sim.engine_transitions] == [
+            ("ignition", 601.0),
+            ("cutoff", 604.0),
+        ]
+        used = PROP - sim.propulsion_snapshot().propellant_kg
+>       assert used == pytest.approx(ENGINE.mass_flow_kgps * 3.0, rel=1e-12, abs=0)
+E       assert 0.9608864314599828 == 0.48044321572998544 ± 4.8e-13
+E         
+E         comparison failed
+E         Obtained: 0.9608864314599828
+E         Expected: 0.48044321572998544 ± 4.8e-13
+
+tests/test_simulator_propulsion.py:272: AssertionError
+_ test_depletion_empties_the_tank_to_within_time_resolution_and_never_negative _
+
+    def test_depletion_empties_the_tank_to_within_time_resolution_and_never_negative():
+        sim = _sim(spacecraft=_spacecraft(propellant=5.0))
+        plan = sim.schedule_burn(
+            "prograde",
+            ignition_t_s=603.7,
+            duration_s=60.0,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        while sim.t < 700.0:
+            sim.step()
+>           assert sim.propulsion_snapshot().propellant_kg >= 0.0
+E           AssertionError: assert -0.22081627759916156 >= 0.0
+E            +  where -0.22081627759916156 = PropulsionSnapshot(tick=62, t=620.0, propellant_kg=-0.22081627759916156, total_mass_kg=999.7791837224008, delta_v_sens...propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>), pending_plans=()).propellant_kg
+E            +    where PropulsionSnapshot(tick=62, t=620.0, propellant_kg=-0.22081627759916156, total_mass_kg=999.7791837224008, delta_v_sens...propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>), pending_plans=()) = propulsion_snapshot()
+E            +      where propulsion_snapshot = <tars.sim.simulator.Simulator object at 0x104ea0d70>.propulsion_snapshot
+
+tests/test_simulator_propulsion.py:302: AssertionError
+__________________ test_propellant_used_matches_the_mass_law ___________________
+
+    def test_propellant_used_matches_the_mass_law():
+        """O1: integrated propellant equals mdot * T to round-off (RK4 is exact for a
+        linear law). Bound 1e-12 of the initial mass: measured 3.8e-15 (VAL-0008)."""
+        sim, plan, _ = _burn_run(10.0)
+        used = PROP - sim.propulsion_snapshot().propellant_kg
+>       assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + PROP)
+E       AssertionError: assert 12.379420191976068 <= (1e-12 * (1000.0 + 300.0))
+E        +  where 12.379420191976068 = abs((24.75884038395202 - 12.379420191975951))
+E        +    where 12.379420191975951 = BurnPlan(ignition_t_s=605.5, commanded_duration_s=77.3, burn_duration_s=77.29999999999995, cutoff_t_s=682.8, propellan...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).propellant_used_kg
+
+tests/test_simulator_propulsion.py:344: AssertionError
+_______________ test_sensed_delta_v_matches_the_rocket_equation ________________
+
+    def test_sensed_delta_v_matches_the_rocket_equation():
+        """O2: integral of F/m over the burn equals c ln(m0/mf). Round-off bound 1e-12
+        relative (measured 1.2e-14, VAL-0008)."""
+        sim, plan, dv0 = _burn_run(10.0)
+        sensed = sim.propulsion_snapshot().delta_v_sensed_mps - dv0
+        m0 = DRY + PROP
+        expected = rocket_equation_delta_v(
+            ENGINE.exhaust_velocity_mps, m0, m0 - plan.propellant_used_kg
+        )
+>       assert sensed == pytest.approx(expected, rel=1e-12, abs=0)
+E       assert 29.41718055839303 == 29.275767297714378 ± 2.9e-11
+E         
+E         comparison failed
+E         Obtained: 29.41718055839303
+E         Expected: 29.275767297714378 ± 2.9e-11
+
+tests/test_simulator_propulsion.py:356: AssertionError
+_______ test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0] ________
+
+direction = 'prograde', sign = 1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 4.001814668016167 <= 0.5
+E            +  where 4.001814668016167 = abs((-0.0018146680161669458 - 4.0))
+E            +    where -0.0018146680161669458 = <built-in function log2>((np.float64(6.044991071715836) / np.float64(6.052599439061667)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:393: AssertionError
+______ test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0] ______
+
+direction = 'retrograde', sign = -1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 3.998193820791149 <= 0.5
+E            +  where 3.998193820791149 = abs((0.0018061792088509164 - 4.0))
+E            +    where 0.0018061792088509164 = <built-in function log2>((np.float64(6.061203149571358) / np.float64(6.053619586355872)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:393: AssertionError
+________ test_a_failed_step_leaves_engine_schedule_and_state_unchanged _________
+
+    def test_a_failed_step_leaves_engine_schedule_and_state_unchanged():
+        """REV-T2-01: a tick is atomic; a retry after a failure burns the planned amount."""
+        force = _FailAfter(t_fail=2.0)
+        sim = Simulator(R0, V0, force, RK4(), 10.0, spacecraft=_spacecraft())
+        plan = sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+        before = (_state(sim), sim.propulsion_snapshot())
+        with pytest.raises(FloatingPointError):
+            sim.step()
+        assert sim.tick == 0
+        np.testing.assert_array_equal(_state(sim), before[0])
+        assert sim.propulsion_snapshot() == before[1]
+        assert sim.engine_transitions == ()
+        force.armed = False
+        sim.step()
+        assert [(e.kind, e.t) for e in sim.engine_transitions] == [("ignition", 1.0), ("cutoff", 3.0)]
+        used = PROP - sim.propulsion_snapshot().propellant_kg
+>       assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + PROP)
+E       AssertionError: assert 0.3202954771533505 <= (1e-12 * (1000.0 + 300.0))
+E        +  where 0.3202954771533505 = abs((0.6405909543066741 - 0.3202954771533236))
+E        +    where 0.3202954771533236 = BurnPlan(ignition_t_s=1.0, commanded_duration_s=2.0, burn_duration_s=2.0, cutoff_t_s=3.0, propellant_used_kg=0.3202954...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).propellant_used_kg
+
+tests/test_simulator_propulsion.py:470: AssertionError
+_ test_plan_describes_exactly_the_interval_that_is_integrated[600.0-77.3-300.0-reject] _
+
+ignition = 600.0, duration = 77.3, propellant = 300.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("ignition", "duration", "propellant", "policy"),
+        [
+            (600.0, 77.3, PROP, InsufficientPropellantPolicy.REJECT),
+            (605.5, 77.3, PROP, InsufficientPropellantPolicy.REJECT),
+            (603.7, 60.0, 5.0, InsufficientPropellantPolicy.BURN_TO_DEPLETION),
+        ],
+    )
+    def test_plan_describes_exactly_the_interval_that_is_integrated(
+        ignition, duration, propellant, policy
+    ):
+        """REV-T2-03: plan duration = cutoff - ignition; consumption follows it, so the
+        integrated propellant matches the plan to round-off and the floor only absorbs
+        round-off."""
+        plan = plan_burn(ENGINE, propellant, ignition, duration, policy=policy)
+        assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
+        if plan.end_cause is BurnEndCause.COMPLETED:
+            assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
+        sim = _sim(spacecraft=_spacecraft(propellant=propellant))
+        sim.schedule_burn("prograde", ignition_t_s=ignition, duration_s=duration, policy=policy)
+        cutoffs = []
+        while sim.t < ignition + duration + 20.0:
+            sim.step()
+            cutoffs.extend(e for e in sim.engine_transitions if e.kind == "cutoff")
+        assert [e.t for e in cutoffs] == [plan.cutoff_t_s]
+        used = propellant - sim.propulsion_snapshot().propellant_kg
+>       assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + propellant)
+E       AssertionError: assert 12.379420191976068 <= (1e-12 * (1000.0 + 300.0))
+E        +  where 12.379420191976068 = abs((24.75884038395202 - 12.379420191975951))
+E        +    where 12.379420191975951 = BurnPlan(ignition_t_s=600.0, commanded_duration_s=77.3, burn_duration_s=77.29999999999995, cutoff_t_s=677.3, propellan...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).propellant_used_kg
+
+tests/test_simulator_propulsion.py:532: AssertionError
+_ test_plan_describes_exactly_the_interval_that_is_integrated[605.5-77.3-300.0-reject] _
+
+ignition = 605.5, duration = 77.3, propellant = 300.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("ignition", "duration", "propellant", "policy"),
+        [
+            (600.0, 77.3, PROP, InsufficientPropellantPolicy.REJECT),
+            (605.5, 77.3, PROP, InsufficientPropellantPolicy.REJECT),
+            (603.7, 60.0, 5.0, InsufficientPropellantPolicy.BURN_TO_DEPLETION),
+        ],
+    )
+    def test_plan_describes_exactly_the_interval_that_is_integrated(
+        ignition, duration, propellant, policy
+    ):
+        """REV-T2-03: plan duration = cutoff - ignition; consumption follows it, so the
+        integrated propellant matches the plan to round-off and the floor only absorbs
+        round-off."""
+        plan = plan_burn(ENGINE, propellant, ignition, duration, policy=policy)
+        assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
+        if plan.end_cause is BurnEndCause.COMPLETED:
+            assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
+        sim = _sim(spacecraft=_spacecraft(propellant=propellant))
+        sim.schedule_burn("prograde", ignition_t_s=ignition, duration_s=duration, policy=policy)
+        cutoffs = []
+        while sim.t < ignition + duration + 20.0:
+            sim.step()
+            cutoffs.extend(e for e in sim.engine_transitions if e.kind == "cutoff")
+        assert [e.t for e in cutoffs] == [plan.cutoff_t_s]
+        used = propellant - sim.propulsion_snapshot().propellant_kg
+>       assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + propellant)
+E       AssertionError: assert 12.379420191976068 <= (1e-12 * (1000.0 + 300.0))
+E        +  where 12.379420191976068 = abs((24.75884038395202 - 12.379420191975951))
+E        +    where 12.379420191975951 = BurnPlan(ignition_t_s=605.5, commanded_duration_s=77.3, burn_duration_s=77.29999999999995, cutoff_t_s=682.8, propellan...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).propellant_used_kg
+
+tests/test_simulator_propulsion.py:532: AssertionError
+__________ test_transition_states_in_free_space_match_the_closed_form __________
+
+    def test_transition_states_in_free_space_match_the_closed_form():
+        """REV-T2-05: event r, v are checked against exact free-space motion.
+    
+        Zero force, prograde burn: velocity direction is constant, so
+        v = v0 + c ln(m0/m) u and x = x0 + v0 T + c [T - (m/mdot) ln(m0/m)] u after ignition.
+        Coast before ignition is linear motion (exact under RK4). Ignition and cutoff
+        share one tick here (601 s, 604 s) to exercise interior events.
+        """
+        v0 = np.array([30.0, 40.0, 0.0])
+        u = v0 / 50.0
+        sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        _run_until(sim, 600.0)
+        sim.step()
+        ign, cut = sim.engine_transitions
+        np.testing.assert_allclose(ign.r, v0 * 601.0, rtol=1e-15, atol=0)
+        np.testing.assert_array_equal(ign.v, v0)
+        mdot = ENGINE.mass_flow_kgps
+        burn = cut.t - ign.t
+        with localcontext() as ctx:  # 40 digits: the float64 closed form loses ~1e-9 m
+            ctx.prec = 40
+            c, md = Decimal(ENGINE.exhaust_velocity_mps), Decimal(mdot)
+            m0, b = Decimal(DRY + PROP), Decimal(burn)
+            m = m0 - md * b
+            ln = (m0 / m).ln()
+            dv, disp = c * ln, c * (b - (m / md) * ln)
+            v_exact = [float(Decimal(v0[k]) + dv * Decimal(u[k])) for k in range(3)]
+            r_exact = [float(Decimal(v0[k]) * Decimal(604) + disp * Decimal(u[k])) for k in range(3)]
+        # Velocity: Simpson-exact to round-off. Position: one 3 s RK4 sub-step has a
+        # truncation error ~1e-14 m; the bound is a few ulp of |r| (~2.4e4 m, ulp 3.6e-12).
+>       np.testing.assert_allclose(cut.v, v_exact, rtol=1e-14, atol=0)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-14, atol=0
+E       
+E       Mismatched elements: 2 / 3 (66.7%)
+E       Mismatch at indices:
+E        [0]: 30.678712402272524 (ACTUAL), 30.6785869394525 (DESIRED)
+E        [1]: 40.9049498696967 (ACTUAL), 40.904782585936665 (DESIRED)
+E       Max absolute difference among violations: 0.00016728
+E       Max relative difference among violations: 4.08958927e-06
+E        ACTUAL: array([30.678712, 40.90495 ,  0.      ])
+E        DESIRED: array([30.678587, 40.904783,  0.      ])
+
+tests/test_simulator_propulsion.py:578: AssertionError
+______ test_transition_states_in_orbit_converge_to_independent_references ______
+
+    def test_transition_states_in_orbit_converge_to_independent_references():
+        """REV-T2-05: interior ignition (605.5 s) vs exact Kepler; cutoff vs independent
+        DOP853. Both converge at order 4 (|p - 4| <= 0.5, DR-0008), which a wrong or
+        zeroed event state cannot satisfy."""
+        from tars.astro import kepler
+    
+        r_k, _ = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+        ref = _independent_reference(605.5, 77.3, 1.0, 605.5 + 77.3)
+        errs = {"ign_r": [], "cut_r": [], "cut_v": []}
+        for dt in (20.0, 10.0, 5.0):
+            sim = _sim(dt=dt)
+            sim.schedule_burn("prograde", ignition_t_s=605.5, duration_s=77.3)
+            events = {}
+            while sim.t < 700.0:
+                sim.step()
+                events.update({e.kind: e for e in sim.engine_transitions})
+            errs["ign_r"].append(np.linalg.norm(events["ignition"].r - r_k))
+            errs["cut_r"].append(np.linalg.norm(events["cutoff"].r - ref[:3]))
+            errs["cut_v"].append(np.linalg.norm(events["cutoff"].v - ref[3:6]))
+        for series in errs.values():
+            for coarse, fine in pairwise(series):
+>               assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E               assert 4.003045198759892 <= 0.5
+E                +  where 4.003045198759892 = abs((-0.003045198759892729 - 4.0))
+E                +    where -0.003045198759892729 = <built-in function log2>((np.float64(3.615895697546777) / np.float64(3.6235360858059504)))
+E                +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:604: AssertionError
+_______ test_boundary_burn_at_large_time_executes_without_negative_mass ________
+
+    def test_boundary_burn_at_large_time_executes_without_negative_mass():
+        """N1 reviewer case: ignition 1e9 s, tank = mdot * 0.1 s, tiny dry mass."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        sc = SpacecraftSpec(dry_mass_kg=1e-10, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+        sim = Simulator(
+            np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=sc
+        )
+        _run_until(sim, 9.0e8)
+        plan = sim.schedule_burn(
+            "prograde", ignition_t_s=1.0e9 + 50.0, duration_s=tank / ENGINE.mass_flow_kgps
+        )
+        while sim.t < 1.1e9:
+            sim.step()
+            assert sim.propulsion_snapshot().propellant_kg >= 0.0
+        # The cutoff is the latest representable time not after depletion, so a tiny
+        # residual (here ~1.5e-8 kg) may remain; it equals the plan's remainder.
+        remaining = sim.propulsion_snapshot().propellant_kg
+>       assert abs(remaining - (tank - plan.propellant_used_kg)) <= 1e-12 * (1e-10 + tank)
+E       AssertionError: assert 1.527287851049719e-08 <= (1e-12 * (1e-10 + 0.01601477385766618))
+E        +  where 1.527287851049719e-08 = abs((0.0 - (0.01601477385766618 - 0.01601475858478767)))
+E        +    where 0.01601475858478767 = BurnPlan(ignition_t_s=1000000050.0, commanded_duration_s=0.09999999999999999, burn_duration_s=0.09999990463256836, cut...1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).propellant_used_kg
+
+tests/test_simulator_propulsion.py:657: AssertionError
+___ test_back_to_back_prograde_then_retrograde_transitions_match_free_space ____
+
+    def test_back_to_back_prograde_then_retrograde_transitions_match_free_space():
+        """N3: every transition state, across two burns sharing an instant (604 s) and in
+        both directions, against the exact free-space solution in 40-digit arithmetic."""
+        v0 = np.array([3000.0, 4000.0, 0.0])
+        u = v0 / 5000.0
+        sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        sim.schedule_burn("retrograde", ignition_t_s=604.0, duration_s=5.0)
+        events = []
+        while sim.t < 620.0:
+            sim.step()
+            events.extend(sim.engine_transitions)
+        assert [(e.kind, e.t, e.direction) for e in events] == [
+            ("ignition", 601.0, "prograde"),
+            ("cutoff", 604.0, "prograde"),
+            ("ignition", 604.0, "retrograde"),
+            ("cutoff", 609.0, "retrograde"),
+        ]
+        with localcontext() as ctx:
+            ctx.prec = 40
+            c, md = Decimal(ENGINE.exhaust_velocity_mps), Decimal(ENGINE.mass_flow_kgps)
+            speed, pos, mass, t = Decimal(5000), Decimal(0), Decimal(DRY + PROP), Decimal(0)
+            expected = []
+            for start, length, sign in ((601, 3, 1), (604, 5, -1)):
+                pos += speed * (Decimal(start) - t)  # coast
+                expected.append((pos, speed))
+                m_end = mass - md * Decimal(length)
+                ln = (mass / m_end).ln()
+                pos += speed * Decimal(length) + sign * c * (Decimal(length) - (m_end / md) * ln)
+                speed += sign * c * ln
+                mass, t = m_end, Decimal(start + length)
+                expected.append((pos, speed))
+        for event, (s_exact, v_exact) in zip(events, expected, strict=True):
+>           np.testing.assert_allclose(event.r, float(s_exact) * u, rtol=1e-14, atol=1e-9)
+E           AssertionError: 
+E           Not equal to tolerance rtol=1e-14, atol=1e-09
+E           
+E           Mismatched elements: 2 / 3 (66.7%)
+E           Mismatch at indices:
+E            [0]: 1812001.0179431406 (ACTUAL), 1812001.017817701 (DESIRED)
+E            [1]: 2416001.357257521 (ACTUAL), 2416001.357090268 (DESIRED)
+E           Max absolute difference among violations: 0.00016725
+E           Max relative difference among violations: 6.92271803e-11
+E            ACTUAL: array([1812001.017943, 2416001.357258,       0.      ])
+E            DESIRED: array([1812001.017818, 2416001.35709 ,       0.      ])
+
+tests/test_simulator_propulsion.py:714: AssertionError
+___ test_orbital_transition_states_converge_in_both_directions[prograde-1.0] ___
+
+direction = 'prograde', sign = 1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_orbital_transition_states_converge_in_both_directions(direction, sign):
+        """N3: ignition r, v vs exact Kepler and cutoff r, v vs independent DOP853,
+        order 4 +/- 0.5 (DR-0008), for prograde and retrograde."""
+        from tars.astro import kepler
+    
+        r_k, v_k = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+        ref = _independent_reference(605.5, 77.3, sign, 605.5 + 77.3)
+        errs = {k: [] for k in ("ign_r", "ign_v", "cut_r", "cut_v")}
+        for dt in (20.0, 10.0, 5.0):
+            sim = _sim(dt=dt)
+            sim.schedule_burn(direction, ignition_t_s=605.5, duration_s=77.3)
+            ev = {}
+            while sim.t < 700.0:
+                sim.step()
+                ev.update({e.kind: e for e in sim.engine_transitions})
+            errs["ign_r"].append(np.linalg.norm(ev["ignition"].r - r_k))
+            errs["ign_v"].append(np.linalg.norm(ev["ignition"].v - v_k))
+            errs["cut_r"].append(np.linalg.norm(ev["cutoff"].r - ref[:3]))
+            errs["cut_v"].append(np.linalg.norm(ev["cutoff"].v - ref[3:6]))
+        for series in errs.values():
+            for coarse, fine in pairwise(series):
+>               assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E               assert 4.003045198759892 <= 0.5
+E                +  where 4.003045198759892 = abs((-0.003045198759892729 - 4.0))
+E                +    where -0.003045198759892729 = <built-in function log2>((np.float64(3.615895697546777) / np.float64(3.6235360858059504)))
+E                +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:740: AssertionError
+_ test_orbital_transition_states_converge_in_both_directions[retrograde--1.0] __
+
+direction = 'retrograde', sign = -1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_orbital_transition_states_converge_in_both_directions(direction, sign):
+        """N3: ignition r, v vs exact Kepler and cutoff r, v vs independent DOP853,
+        order 4 +/- 0.5 (DR-0008), for prograde and retrograde."""
+        from tars.astro import kepler
+    
+        r_k, v_k = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+        ref = _independent_reference(605.5, 77.3, sign, 605.5 + 77.3)
+        errs = {k: [] for k in ("ign_r", "ign_v", "cut_r", "cut_v")}
+        for dt in (20.0, 10.0, 5.0):
+            sim = _sim(dt=dt)
+            sim.schedule_burn(direction, ignition_t_s=605.5, duration_s=77.3)
+            ev = {}
+            while sim.t < 700.0:
+                sim.step()
+                ev.update({e.kind: e for e in sim.engine_transitions})
+            errs["ign_r"].append(np.linalg.norm(ev["ignition"].r - r_k))
+            errs["ign_v"].append(np.linalg.norm(ev["ignition"].v - v_k))
+            errs["cut_r"].append(np.linalg.norm(ev["cutoff"].r - ref[:3]))
+            errs["cut_v"].append(np.linalg.norm(ev["cutoff"].v - ref[3:6]))
+        for series in errs.values():
+            for coarse, fine in pairwise(series):
+>               assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E               assert 3.996958738206498 <= 0.5
+E                +  where 3.996958738206498 = abs((0.0030412617935021485 - 4.0))
+E                +    where 0.0030412617935021485 = <built-in function log2>((np.float64(3.6322142013555747) / np.float64(3.6245654059534984)))
+E                +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:740: AssertionError
+_______ test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass ________
+
+    def test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass():
+        """N4: RK4 stages near depletion can carry -1e-17 kg of propellant round-off; the
+        dynamics must use the physical (non-negative) propellant so the step succeeds."""
+        tank = ENGINE.mass_flow_kgps * 1.0
+        sc = SpacecraftSpec(dry_mass_kg=1e-20, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+        sim = Simulator(np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 0.1, spacecraft=sc)
+        sim.schedule_burn("prograde", ignition_t_s=0.0, duration_s=1.0)
+        while sim.t < 2.0:
+            sim.step()
+>           assert sim.propulsion_snapshot().propellant_kg >= 0.0
+E           AssertionError: assert -2.7755575615628914e-17 >= 0.0
+E            +  where -2.7755575615628914e-17 = PropulsionSnapshot(tick=5, t=0.5, propellant_kg=-2.7755575615628914e-17, total_mass_kg=-2.7745575615628914e-17, delta_...cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>), pending_plans=()).propellant_kg
+E            +    where PropulsionSnapshot(tick=5, t=0.5, propellant_kg=-2.7755575615628914e-17, total_mass_kg=-2.7745575615628914e-17, delta_...cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>), pending_plans=()) = propulsion_snapshot()
+E            +      where propulsion_snapshot = <tars.sim.simulator.Simulator object at 0x1066b4620>.propulsion_snapshot
+
+tests/test_simulator_propulsion.py:755: AssertionError
+____________ test_conservative_depletion_cutoff_keeps_its_residual _____________
+
+    def test_conservative_depletion_cutoff_keeps_its_residual():
+        """N5: when the cutoff steps back before depletion, consumption follows the
+        executed interval for burn_to_depletion too, and the residual is retained."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        plan = plan_burn(
+            ENGINE, tank, 1.0e9, 1.0, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION
+        )
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        assert plan.burn_duration_s < tank / ENGINE.mass_flow_kgps
+        assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
+        residual = tank - plan.propellant_used_kg
+        assert residual > 0.0
+    
+        sc = SpacecraftSpec(dry_mass_kg=DRY, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+        sim = Simulator(
+            np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=sc
+        )
+        _run_until(sim, 9.0e8)
+        sim.schedule_burn(
+            "prograde",
+            ignition_t_s=1.0e9,
+            duration_s=1.0,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+        _run_until(sim, 1.1e9)
+>       assert sim.propulsion_snapshot().propellant_kg == pytest.approx(residual, rel=1e-6, abs=0)
+E       assert 0.0 == 1.52728785104...e-08 ± 1.5e-14
+E         
+E         comparison failed
+E         Obtained: 0.0
+E         Expected: 1.527287851049719e-08 ± 1.5e-14
+
+tests/test_simulator_propulsion.py:784: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_two_events_inside_one_tick - ...
+FAILED tests/test_simulator_propulsion.py::test_depletion_empties_the_tank_to_within_time_resolution_and_never_negative
+FAILED tests/test_simulator_propulsion.py::test_propellant_used_matches_the_mass_law
+FAILED tests/test_simulator_propulsion.py::test_sensed_delta_v_matches_the_rocket_equation
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0]
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0]
+FAILED tests/test_simulator_propulsion.py::test_a_failed_step_leaves_engine_schedule_and_state_unchanged
+FAILED tests/test_simulator_propulsion.py::test_plan_describes_exactly_the_interval_that_is_integrated[600.0-77.3-300.0-reject]
+FAILED tests/test_simulator_propulsion.py::test_plan_describes_exactly_the_interval_that_is_integrated[605.5-77.3-300.0-reject]
+FAILED tests/test_simulator_propulsion.py::test_transition_states_in_free_space_match_the_closed_form
+FAILED tests/test_simulator_propulsion.py::test_transition_states_in_orbit_converge_to_independent_references
+FAILED tests/test_simulator_propulsion.py::test_boundary_burn_at_large_time_executes_without_negative_mass
+FAILED tests/test_simulator_propulsion.py::test_back_to_back_prograde_then_retrograde_transitions_match_free_space
+FAILED tests/test_simulator_propulsion.py::test_orbital_transition_states_converge_in_both_directions[prograde-1.0]
+FAILED tests/test_simulator_propulsion.py::test_orbital_transition_states_converge_in_both_directions[retrograde--1.0]
+FAILED tests/test_simulator_propulsion.py::test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass
+FAILED tests/test_simulator_propulsion.py::test_conservative_depletion_cutoff_keeps_its_residual
+17 failed, 56 passed in 1.44s
