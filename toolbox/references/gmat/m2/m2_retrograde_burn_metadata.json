@@ -1,0 +1,30 @@
+{
+  "mission": "m2_retrograde_burn",
+  "gmat_version": "R2026a",
+  "gmat_build_date": "Mar 26 2026  19:40:08",
+  "gmat_console_sha256": "1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2",
+  "command": [
+    "GmatConsole",
+    "--run",
+    "<temp copy of m2_retrograde_burn.script, absolute report path>"
+  ],
+  "host_platform": "macOS-26.2-x86_64-i386-64bit",
+  "tars_git_revision": "a0169e734c7d84d5a433c22efd06fe176f8b85b5",
+  "generated_utc": "2026-10-11T21:04:34+00:00",
+  "replace_reason": null,
+  "scenario": "m2_retrograde_burn",
+  "scenario_hash": "fb88efdc5da06edc8ebc120fff1dd83e7ff0514c092249a029be19516de68d84",
+  "script_sha256": "e781bb65e7fdfc3353639ad2877aba782ee0912434bd8083ec1c772e6e6ee8a8",
+  "report_sha256": "cb9021e39b141475ecdfb7afbf303768ee3e84bff318ff385068377ffe9e1ef6",
+  "constants": {
+    "name": "WGS84",
+    "mu_km3_s2": 398600.4418,
+    "equatorial_radius_km": 6378.137,
+    "standard_gravity_mps2": 9.80665,
+    "thrust_n": 490.0,
+    "isp_s": 312.0,
+    "dry_mass_kg": 1000.0,
+    "propellant_kg": 300.0
+  },
+  "model": "Earth point mass; ChemicalThruster VNB +-1, C1 = F, K1 = Isp, other coefficients 0, GravitationalAccel = g0, DecrementMass; PrinceDormand78, Accuracy 1e-13; aligned stepping (DR-0016): coasts 60 s, burns 1 s, realignment arcs one step"
+}

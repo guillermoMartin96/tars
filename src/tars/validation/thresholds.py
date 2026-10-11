@@ -50,7 +50,7 @@ M2_KNOWN_VALIDATORS = frozenset(
     {
         "o1_mass_law", "o2_rocket_equation", "o3_free_space", "o4_reference",
         "o5_coast_kepler", "o6_impulsive_limit", "o7_direction", "o8_convergence",
-        "accounting", "orbit_events",
+        "accounting", "orbit_events", "o9_gmat",
     }
 )  # fmt: skip
 

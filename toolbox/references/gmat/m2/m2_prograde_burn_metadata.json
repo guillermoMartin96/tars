@@ -1,0 +1,30 @@
+{
+  "mission": "m2_prograde_burn",
+  "gmat_version": "R2026a",
+  "gmat_build_date": "Mar 26 2026  19:40:08",
+  "gmat_console_sha256": "1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2",
+  "command": [
+    "GmatConsole",
+    "--run",
+    "<temp copy of m2_prograde_burn.script, absolute report path>"
+  ],
+  "host_platform": "macOS-26.2-x86_64-i386-64bit",
+  "tars_git_revision": "a0169e734c7d84d5a433c22efd06fe176f8b85b5",
+  "generated_utc": "2026-10-11T21:04:30+00:00",
+  "replace_reason": null,
+  "scenario": "m2_prograde_burn",
+  "scenario_hash": "f7816ee7b0c2a139e386aea2c0ecde90dc1b53ecda8be003213c751601673c19",
+  "script_sha256": "5d3c54f223393089b65a43806b233c391504a14f29ae0b47bec94307fa0e13cc",
+  "report_sha256": "e170939dfddff3edbee7f85ad18d02239d3dbdac4c5c76afd9b0aa9d814a77c1",
+  "constants": {
+    "name": "WGS84",
+    "mu_km3_s2": 398600.4418,
+    "equatorial_radius_km": 6378.137,
+    "standard_gravity_mps2": 9.80665,
+    "thrust_n": 490.0,
+    "isp_s": 312.0,
+    "dry_mass_kg": 1000.0,
+    "propellant_kg": 300.0
+  },
+  "model": "Earth point mass; ChemicalThruster VNB +-1, C1 = F, K1 = Isp, other coefficients 0, GravitationalAccel = g0, DecrementMass; PrinceDormand78, Accuracy 1e-13; aligned stepping (DR-0016): coasts 60 s, burns 1 s, realignment arcs one step"
+}
