@@ -24,11 +24,14 @@ from tars.sim.propulsion import (
     TIMING_DELTA_V_BUDGET_MPS,
     BurnEndCause,
     EngineSpec,
+    EngineState,
     EngineTransition,
     PropulsionSnapshot,
     SpacecraftSpec,
     rocket_equation_delta_v,
+    thrust_acceleration,
 )
+from tars.sim.state import StateSnapshot
 
 
 def _vec(values: object) -> tuple[float, float, float]:
@@ -40,6 +43,7 @@ def command_event(receipt: CommandReceipt) -> CommandAccepted | CommandRejected:
     """CommandAccepted or CommandRejected, at the submission time recorded in the receipt."""
     if receipt.status is CommandStatus.REJECTED:
         assert receipt.reason is not None
+        cmd = receipt.command  # None for a schema-invalid payload
         return CommandRejected(
             tick=receipt.tick,
             t=receipt.t,
@@ -47,6 +51,11 @@ def command_event(receipt: CommandReceipt) -> CommandAccepted | CommandRejected:
             issuer=receipt.issuer,
             reason=receipt.reason.value,
             detail=receipt.detail,
+            direction=None if cmd is None else cmd.direction,
+            on_insufficient_propellant=None if cmd is None else cmd.on_insufficient_propellant,
+            commanded_ignition_t_s=None if cmd is None else cmd.ignition_t_s,
+            commanded_duration_s=None if cmd is None else cmd.duration_s,
+            schema_errors=receipt.schema_errors,
         )
     cmd, plan = receipt.command, receipt.plan
     assert cmd is not None and plan is not None and receipt.burn_id is not None
@@ -170,7 +179,19 @@ def spacecraft_configured_event(
     )
 
 
-def propulsion_sampled_event(snapshot: PropulsionSnapshot) -> PropulsionSampled:
+def propulsion_sampled_event(
+    snapshot: PropulsionSnapshot, state: StateSnapshot, spacecraft: SpacecraftSpec
+) -> PropulsionSampled:
+    """Propulsion telemetry at one tick, with the truth-state thrust acceleration
+    (F/m along the active direction law; zero when not burning)."""
+    if state.tick != snapshot.tick:
+        raise ValueError("state and propulsion snapshots must be from the same tick")
+    thrust = (0.0, 0.0, 0.0)
+    if snapshot.engine_state is EngineState.BURNING:
+        assert snapshot.active_direction is not None
+        law = DIRECTION_LAWS[snapshot.active_direction]
+        unit = law.direction(state.t, state.r, state.v)
+        thrust = _vec(thrust_acceleration(spacecraft.engine, unit, snapshot.total_mass_kg))
     return PropulsionSampled(
         tick=snapshot.tick,
         t=snapshot.t,
@@ -180,4 +201,5 @@ def propulsion_sampled_event(snapshot: PropulsionSnapshot) -> PropulsionSampled:
         engine_state=snapshot.engine_state.value,
         active_burn_id=snapshot.active_burn_id,
         pending_burn_ids=snapshot.pending_burn_ids,
+        thrust_acceleration_mps2=thrust,
     )

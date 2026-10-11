@@ -7,6 +7,7 @@ Commanded intent is kept separate from executed outcome; correlation IDs are sta
 import json
 import math
 
+import numpy as np
 import pytest
 from pydantic import ValidationError
 
@@ -207,12 +208,14 @@ def test_rejected_submissions_change_nothing():
     assert (sim.snapshot().r.tobytes(), sim.propulsion_snapshot()) == before
 
 
-def test_duplicate_ids_include_previously_rejected_commands():
-    """A command ID is single use once it has been seen, accepted or rejected, so that
-    receipts and events correlate unambiguously."""
+def test_rejected_commands_do_not_consume_their_id():
+    """REV-T3-01: a rejection changes nothing, including the command-ID registry; the
+    corrected command may be resubmitted under the same ID. IDs are consumed only on
+    acceptance."""
     sim = _sim()
     _reject(sim, _cmd(command_id="once", duration_s=0.0))
-    receipt = _reject(sim, _cmd(command_id="once"))
+    assert sim.submit(_cmd(command_id="once")).status is CommandStatus.ACCEPTED
+    receipt = _reject(sim, _cmd(command_id="once", ignition_t_s=900.0))
     assert receipt.reason is BurnRejection.DUPLICATE_COMMAND_ID
 
 
@@ -315,7 +318,7 @@ def test_spacecraft_and_sample_events():
     assert configured.timing_delta_v_budget_mps == 1e-7
     sim.submit(_cmd())
     _run_until(sim, 620.0)
-    sample = propulsion_sampled_event(sim.propulsion_snapshot())
+    sample = propulsion_sampled_event(sim.propulsion_snapshot(), sim.snapshot(), sc)
     assert isinstance(sample, PropulsionSampled)
     assert sample.engine_state == "burning" and sample.active_burn_id == "burn#000001"
     assert sample.pending_burn_ids == ()
@@ -329,7 +332,9 @@ def test_new_events_round_trip_through_jsonl_and_are_immutable():
         command_event(receipt),
         burn_started_event(ign, tick=it, t=itt, dry_mass_kg=DRY),
         burn_ended_event(ign, cut, tick=ct, t=ctt, dry_mass_kg=DRY, engine=ENGINE),
-        propulsion_sampled_event(sim.propulsion_snapshot()),
+        propulsion_sampled_event(
+            sim.propulsion_snapshot(), sim.snapshot(), SpacecraftSpec(DRY, ENGINE, TankSpec(PROP))
+        ),
     ]
     text = to_jsonl(events)
     assert read_jsonl(text) == events
@@ -342,26 +347,42 @@ def test_new_events_round_trip_through_jsonl_and_are_immutable():
     assert isinstance(started.r, tuple)
 
 
-@pytest.mark.parametrize(
-    "event_type", [CommandAccepted, CommandRejected, BurnStarted, BurnEnded, PropulsionSampled]
-)
-def test_new_events_reject_non_finite_and_extra_fields(event_type):
+def _sample_events():
     sim, receipt, tr = _executed_burn()
     (ign, it, itt), (cut, ct, ctt) = tr["ignition"], tr["cutoff"]
-    sample = {
+    sc = SpacecraftSpec(DRY, ENGINE, TankSpec(PROP))
+    return {
         CommandAccepted: command_event(receipt),
         CommandRejected: command_event(sim.submit(_cmd(command_id="z", duration_s=-1.0))),
         BurnStarted: burn_started_event(ign, tick=it, t=itt, dry_mass_kg=DRY),
         BurnEnded: burn_ended_event(ign, cut, tick=ct, t=ctt, dry_mass_kg=DRY, engine=ENGINE),
-        PropulsionSampled: propulsion_sampled_event(sim.propulsion_snapshot()),
-    }[event_type]
-    data = json.loads(sample.model_dump_json())
-    with pytest.raises(ValidationError):
+        PropulsionSampled: propulsion_sampled_event(sim.propulsion_snapshot(), sim.snapshot(), sc),
+    }
+
+
+@pytest.mark.parametrize(
+    "event_type", [CommandAccepted, CommandRejected, BurnStarted, BurnEnded, PropulsionSampled]
+)
+def test_new_events_reject_extra_fields(event_type):
+    """REV-T3-07: one property per test; Python input keeps tuples (model_dump)."""
+    data = _sample_events()[event_type].model_dump()
+    assert event_type.model_validate(data) == _sample_events()[event_type]  # control
+    with pytest.raises(ValidationError) as err:
         event_type.model_validate({**data, "unexpected": 1})
-    with pytest.raises(ValidationError):
-        event_type.model_validate_json(
-            sample.model_dump_json().replace('"t":', '"t":1e999,"x":', 1)
-        )
+    assert [e["type"] for e in err.value.errors()] == ["extra_forbidden"]
+
+
+@pytest.mark.parametrize(
+    "event_type", [CommandAccepted, CommandRejected, BurnStarted, BurnEnded, PropulsionSampled]
+)
+def test_new_events_reject_non_finite_numbers_from_json(event_type):
+    sample = _sample_events()[event_type]
+    data = json.loads(sample.model_dump_json())
+    assert event_type.model_validate_json(json.dumps(data)) == sample  # control
+    text = json.dumps({**data, "t": 1.0}).replace('"t": 1.0', '"t": 1e999')
+    with pytest.raises(ValidationError) as err:
+        event_type.model_validate_json(text)
+    assert [(e["loc"], e["type"]) for e in err.value.errors()] == [(("t",), "finite_number")]
 
 
 def test_event_stream_is_deterministic():
@@ -388,7 +409,13 @@ def test_event_stream_is_deterministic():
                         )
                     )
             if sim.tick % 6 == 0:
-                out.append(propulsion_sampled_event(sim.propulsion_snapshot()))
+                out.append(
+                    propulsion_sampled_event(
+                        sim.propulsion_snapshot(),
+                        sim.snapshot(),
+                        SpacecraftSpec(DRY, ENGINE, TankSpec(PROP)),
+                    )
+                )
         return to_jsonl(out)
 
     assert stream() == stream()
@@ -440,3 +467,143 @@ def test_m2_event_fields_are_strictly_typed(bad):
         BurnStarted.model_validate({**data, "propellant_kg": bad})
     with pytest.raises(ValidationError):
         BurnStarted.model_validate({**data, "r": [1.0, 2.0, 3.0]})  # tuple required in Python
+
+
+# ------------------------------------------------- review M2-T3-review-01 regressions
+
+
+class _AnnotatedCommand(BurnCommand):
+    """A subclass carrying a mutable extra field (REV-T3-02)."""
+
+    model_config = {**BurnCommand.model_config, "extra": "allow"}  # noqa: RUF012
+    annotations: list = []  # noqa: RUF012
+
+
+@pytest.mark.parametrize(
+    "update",
+    [{"schema_version": 2}, {"command_id": []}, {"issuer": []}, {"duration_s": "5"}],
+)
+def test_prebuilt_commands_are_revalidated(update):
+    """REV-T3-02: model_copy(update=...) skips validation; submit must not trust it."""
+    sim = _sim()
+    forged = BurnCommand(**_cmd()).model_copy(update=update)
+    receipt = sim.submit(forged)  # must not raise
+    assert receipt.status is CommandStatus.REJECTED
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    assert sim.propulsion_snapshot().pending_plans == ()
+
+
+def test_subclassed_commands_with_extra_mutable_fields_are_rejected():
+    sim = _sim()
+    receipt = sim.submit(_AnnotatedCommand(**_cmd(), annotations=["x"]))
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+
+
+def test_receipt_owns_a_canonical_copy_of_the_command():
+    cmd = BurnCommand(**_cmd())
+    receipt = _sim().submit(cmd)
+    assert receipt.command == cmd
+    assert receipt.command is not cmd
+    assert type(receipt.command) is BurnCommand
+
+
+def test_rejected_event_keeps_commanded_intent_or_structured_schema_errors():
+    """REV-T3-03: intent for schema-valid rejections; bounded schema errors otherwise."""
+    sim = _sim()
+    valid = command_event(sim.submit(_cmd(command_id="neg", duration_s=-1.0)))
+    assert valid.reason == "non_positive_duration"
+    assert valid.commanded_duration_s == -1.0
+    assert valid.commanded_ignition_t_s == 600.0
+    assert valid.direction == "prograde" and valid.on_insufficient_propellant == "reject"
+    assert valid.schema_errors == ()
+    bad = command_event(sim.submit(_cmd(command_id="bad", duration_s="5", direction="up")))
+    assert bad.reason == "schema_invalid"
+    assert bad.commanded_duration_s is None and bad.direction is None
+    assert bad.schema_errors == ("direction: literal_error", "duration_s: float_type")
+
+
+def test_propulsion_sample_carries_the_truth_thrust_acceleration():
+    """REV-T3-03: F/m along the active direction law while burning; zero otherwise."""
+    sim = _sim()
+    sc = SpacecraftSpec(DRY, ENGINE, TankSpec(PROP))
+    sim.submit(_cmd(direction="retrograde"))
+    idle = propulsion_sampled_event(sim.propulsion_snapshot(), sim.snapshot(), sc)
+    assert idle.thrust_acceleration_mps2 == (0.0, 0.0, 0.0)
+    _run_until(sim, 620.0)
+    p, s = sim.propulsion_snapshot(), sim.snapshot()
+    sample = propulsion_sampled_event(p, s, sc)
+    expected = -(ENGINE.thrust_n / p.total_mass_kg) * s.v / np.linalg.norm(s.v)
+    np.testing.assert_allclose(sample.thrust_acceleration_mps2, expected, rtol=1e-15, atol=0)
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"issuer": "\ud800"},
+        {"command_id": "ok", "issuer": "\ud800"},
+        {"\ud800": 1},
+        {"command_id": "ok", "issuer": "x", "unexpected\udfff": 1},
+    ],
+)
+def test_rejection_events_from_malformed_unicode_serialize(payload):
+    """REV-T3-04: nothing echoed into receipts can break JSONL serialization."""
+    receipt = _sim().submit(payload)
+    assert receipt.reason is BurnRejection.SCHEMA_INVALID
+    line = command_event(receipt).model_dump_json()
+    assert parse_event(line) == command_event(receipt)
+
+
+def test_command_with_invalid_unicode_issuer_is_schema_invalid():
+    with pytest.raises(ValidationError):
+        BurnCommand(**_cmd(issuer="ok\ud800"))
+
+
+def test_schedule_burn_keeps_its_t2_signature_and_null_command_ids():
+    """REV-T3-05: correlation by command ID only through submit()."""
+    import inspect
+
+    params = list(inspect.signature(Simulator.schedule_burn).parameters)
+    assert params == ["self", "direction", "ignition_t_s", "duration_s", "policy"]
+    sim = _sim()
+    sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=10.0)
+    _run_until(sim, 620.0)
+    assert sim.engine_transitions == () or all(e.command_id is None for e in sim.engine_transitions)
+    assert sim.submit(_cmd(command_id="same", ignition_t_s=700.0, duration_s=5.0)).burn_id
+
+
+@pytest.mark.parametrize("version", [True, 1.0, "1", 2])
+def test_command_schema_version_must_be_the_integer_one(version):
+    """REV-T3-06: Literal[1] alone matches True and 1.0 by equality."""
+    with pytest.raises(ValidationError):
+        BurnCommand(**_cmd(schema_version=version))
+    with pytest.raises(ValidationError):
+        BurnCommand.model_validate_json(json.dumps(_cmd(schema_version=version)))
+
+
+@pytest.mark.parametrize("version", ["true", "1.0"])
+def test_m2_event_schema_version_must_be_the_integer_one(version):
+    sample = _sample_events()[BurnEnded]
+    text = sample.model_dump_json().replace('"schema_version":1', f'"schema_version":{version}')
+    with pytest.raises(ValidationError):
+        BurnEnded.model_validate_json(text)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("command_id", "bad\n#"), ("command_id", ""), ("burn_id", ""), ("burn_id", "burn#1")],
+)
+def test_m2_event_correlation_ids_are_constrained(field, value):
+    data = _sample_events()[BurnEnded].model_dump()
+    with pytest.raises(ValidationError):
+        BurnEnded.model_validate({**data, field: value})
+
+
+def test_safe_text_escapes_invalid_unicode_and_bounds_length():
+    """Contract of the echo sanitizer (defence in depth for REV-T3-04: current pydantic
+    already reports invalid-Unicode keys without echoing them)."""
+    from tars.sim.commands import safe_text
+
+    assert safe_text("a\ud800b") == "a\\ud800b"
+    json.dumps(safe_text("x\udfff")).encode("utf-8")
+    assert safe_text("é ok") == "é ok"
+    assert len(safe_text("y" * 500, limit=50)) == 50

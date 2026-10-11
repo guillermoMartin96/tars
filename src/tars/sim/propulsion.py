@@ -569,6 +569,7 @@ class PropulsionSnapshot:
         pending_plans: Accepted burns not yet ignited, in execution order.
         active_burn_id: Simulator-assigned ID of the burn in progress (T3).
         pending_burn_ids: IDs of the pending burns, in execution order (T3).
+        active_direction: Direction law name of the burn in progress (T3).
     """
 
     tick: int
@@ -581,6 +582,7 @@ class PropulsionSnapshot:
     pending_plans: tuple[BurnPlan, ...]
     active_burn_id: str | None = None
     pending_burn_ids: tuple[str, ...] = ()
+    active_direction: str | None = None
 
 
 @dataclass(frozen=True)

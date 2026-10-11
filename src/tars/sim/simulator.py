@@ -23,7 +23,8 @@ from tars.sim.commands import (
     CommandStatus,
     parse_command,
     readable_field,
-    schema_error_detail,
+    safe_text,
+    schema_errors,
 )
 from tars.sim.forces import ForceModel
 from tars.sim.integrators import Derivative, Integrator
@@ -208,7 +209,7 @@ class Simulator:
         self._pending: list[_ScheduledBurn] = []
         self._active: _ScheduledBurn | None = None
         self._burn_count = 0  # accepted burns; source of deterministic burn IDs
-        self._seen_command_ids: set[str] = set()
+        self._used_command_ids: set[str] = set()  # IDs of accepted commands
         state = [frozen_vector(r0), frozen_vector(v0)]
         if spacecraft is not None:
             state.append(np.array([spacecraft.tank.propellant_kg, 0.0]))
@@ -256,6 +257,7 @@ class Simulator:
             active_plan=None if self._active is None else self._active.plan,
             pending_plans=tuple(b.plan for b in self._pending),
             active_burn_id=None if self._active is None else self._active.burn_id,
+            active_direction=None if self._active is None else self._active.direction,
             pending_burn_ids=tuple(b.burn_id for b in self._pending),
         )
 
@@ -267,14 +269,12 @@ class Simulator:
         ignition_t_s: float,
         duration_s: float,
         policy: InsufficientPropellantPolicy | str = InsufficientPropellantPolicy.REJECT,
-        *,
-        command_id: str | None = None,
     ) -> BurnPlan:
         """Validate and schedule one burn; the engine-level command entry point.
 
-        ``command_id`` (keyword-only, T3) records the originating command for event
-        correlation; ``submit()`` passes it. Every accepted burn receives a deterministic
-        simulator-assigned burn ID (``burn#000001``, ...).
+        T2 interface, unchanged. Burns scheduled here have ``command_id = None``; command
+        correlation exists only through ``submit()`` (review REV-T3-05). Every accepted
+        burn receives a deterministic simulator-assigned burn ID (``burn#000001``, ...).
 
         It never changes r, v, mass or propellant; only the engine schedule. There
         is one engine, and burns execute in submission order: a new burn may not
@@ -286,6 +286,16 @@ class Simulator:
         Raises:
             BurnRejectedError: with a DR-0014 reason code; the schedule is unchanged.
         """
+        return self._schedule(direction, ignition_t_s, duration_s, policy, command_id=None)
+
+    def _schedule(
+        self,
+        direction: str,
+        ignition_t_s: float,
+        duration_s: float,
+        policy: InsufficientPropellantPolicy | str,
+        command_id: str | None,
+    ) -> BurnPlan:
         if self._spacecraft is None:
             raise BurnRejectedError(
                 BurnRejection.NO_PROPULSION_CONFIGURED, "simulator has no spacecraft"
@@ -349,27 +359,20 @@ class Simulator:
     def submit(self, command: BurnCommand | dict) -> CommandReceipt:
         """Validate a BurnCommand (or raw mapping) and schedule it (DR-0014; T3).
 
-        Never raises for a bad command: the receipt carries an approved reason code, and
-        a rejected command changes nothing. Checks, in order: schema (``schema_invalid``);
-        duplicate command ID (``duplicate_command_id``, single use once a schema-valid
-        command has been seen, accepted or rejected); then every ``schedule_burn`` rule.
+        Never raises for a bad command: the receipt carries an approved reason code.
+        A rejected command changes nothing, including the command-ID registry
+        (REV-T3-01). Every submission, including model instances, is re-validated into
+        a fresh canonical command (REV-T3-02). Precedence: schema
+        (``schema_invalid``), duplicate ID (``duplicate_command_id``, i.e. an ID
+        already used by an accepted command), then every ``schedule_burn`` rule.
         """
         tick, t = self._tick, self.t
         try:
             cmd = parse_command(command)
         except ValidationError as err:
-            return CommandReceipt(
-                status=CommandStatus.REJECTED,
-                command_id=readable_field(command, "command_id"),
-                issuer=readable_field(command, "issuer"),
-                command=None,
-                reason=BurnRejection.SCHEMA_INVALID,
-                detail=schema_error_detail(err),
-                burn_id=None,
-                plan=None,
-                tick=tick,
-                t=t,
-            )
+            return self._schema_rejection(command, schema_errors(err), tick, t)
+        except (TypeError, ValueError, AttributeError):  # unparseable payload object
+            return self._schema_rejection(command, ("<payload>: unparseable",), tick, t)
 
         def rejected(reason: BurnRejection, detail: str) -> CommandReceipt:
             return CommandReceipt(
@@ -378,28 +381,29 @@ class Simulator:
                 issuer=cmd.issuer,
                 command=cmd,
                 reason=reason,
-                detail=detail,
+                detail=safe_text(detail, 400),
                 burn_id=None,
                 plan=None,
                 tick=tick,
                 t=t,
             )
 
-        if cmd.command_id in self._seen_command_ids:
+        if cmd.command_id in self._used_command_ids:
             return rejected(
-                BurnRejection.DUPLICATE_COMMAND_ID, f"command_id {cmd.command_id!r} already used"
+                BurnRejection.DUPLICATE_COMMAND_ID,
+                f"command_id {cmd.command_id!r} already used by an accepted command",
             )
-        self._seen_command_ids.add(cmd.command_id)
         try:
-            plan = self.schedule_burn(
+            plan = self._schedule(
                 cmd.direction,
-                ignition_t_s=cmd.ignition_t_s,
-                duration_s=cmd.duration_s,
-                policy=cmd.on_insufficient_propellant,
+                cmd.ignition_t_s,
+                cmd.duration_s,
+                cmd.on_insufficient_propellant,
                 command_id=cmd.command_id,
             )
         except BurnRejectedError as err:
             return rejected(err.reason, err.detail)
+        self._used_command_ids.add(cmd.command_id)  # consumed only on acceptance
         return CommandReceipt(
             status=CommandStatus.ACCEPTED,
             command_id=cmd.command_id,
@@ -413,7 +417,23 @@ class Simulator:
             t=t,
         )
 
-    # ------------------------------------------------------------------ stepping
+    @staticmethod
+    def _schema_rejection(
+        payload: object, errors: tuple[str, ...], tick: int, t: float
+    ) -> CommandReceipt:
+        return CommandReceipt(
+            status=CommandStatus.REJECTED,
+            command_id=readable_field(payload, "command_id"),
+            issuer=readable_field(payload, "issuer"),
+            command=None,
+            reason=BurnRejection.SCHEMA_INVALID,
+            detail="; ".join(errors),
+            burn_id=None,
+            plan=None,
+            tick=tick,
+            t=t,
+            schema_errors=errors,
+        )
 
     def _derivative(self, t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
         r, v = y[:3], y[3:]

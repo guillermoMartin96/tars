@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, TypeAdapter
 
 SCHEMA_VERSION = 1
 
@@ -97,8 +97,28 @@ Direction = Literal["prograde", "retrograde"]
 Policy = Literal["reject", "burn_to_depletion"]
 
 
+# Correlation ID formats (T3 contract). Command IDs are issuer-chosen; burn IDs are
+# simulator-assigned. '#' appears only in burn IDs, so the two spaces cannot collide.
+COMMAND_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$"
+BURN_ID_PATTERN = r"^burn#[0-9]{6,}$"
+CommandId = Annotated[str, StringConstraints(pattern=COMMAND_ID_PATTERN)]
+BurnId = Annotated[str, StringConstraints(pattern=BURN_ID_PATTERN)]
+
+
+def _require_int_one(value: object) -> object:
+    """Literal[1] alone matches True and 1.0 by equality (review REV-T3-06)."""
+    if type(value) is not int:
+        raise ValueError("schema_version must be the integer 1")
+    return value
+
+
+StrictVersion1 = Annotated[Literal[1], BeforeValidator(_require_int_one)]
+
+
 class _StrictEventBase(_EventBase):
     model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False, strict=True)
+
+    schema_version: StrictVersion1 = SCHEMA_VERSION
 
 
 class SpacecraftConfigured(_StrictEventBase):
@@ -120,9 +140,9 @@ class CommandAccepted(_StrictEventBase):
     """A BurnCommand was accepted. Commanded intent and the resulting plan."""
 
     type: Literal["CommandAccepted"] = "CommandAccepted"
-    command_id: str
+    command_id: CommandId
     issuer: str
-    burn_id: str
+    burn_id: BurnId
     direction: Direction
     on_insufficient_propellant: Policy
     commanded_ignition_t_s: float
@@ -135,21 +155,31 @@ class CommandAccepted(_StrictEventBase):
 
 
 class CommandRejected(_StrictEventBase):
-    """A command was rejected with an approved reason code; nothing changed."""
+    """A command was rejected with an approved reason code; nothing changed.
+
+    Commanded intent is recorded when the command was schema-valid; for a schema-invalid
+    payload the intent fields are null and ``schema_errors`` lists "field: error_type"
+    entries (bounded; input values are never echoed).
+    """
 
     type: Literal["CommandRejected"] = "CommandRejected"
-    command_id: str | None
+    command_id: CommandId | None
     issuer: str | None
     reason: RejectionCode
     detail: str
+    direction: Direction | None
+    on_insufficient_propellant: Policy | None
+    commanded_ignition_t_s: float | None
+    commanded_duration_s: float | None
+    schema_errors: tuple[str, ...]
 
 
 class BurnStarted(_StrictEventBase):
     """Engine ignition at the exact event time ``event_t_s`` (may lie inside a tick)."""
 
     type: Literal["BurnStarted"] = "BurnStarted"
-    command_id: str | None
-    burn_id: str
+    command_id: CommandId | None
+    burn_id: BurnId
     direction: Direction
     commanded_ignition_t_s: float
     commanded_duration_s: float
@@ -167,8 +197,8 @@ class BurnEnded(_StrictEventBase):
     """Engine cutoff at ``event_t_s``: executed outcome next to commanded intent."""
 
     type: Literal["BurnEnded"] = "BurnEnded"
-    command_id: str | None
-    burn_id: str
+    command_id: CommandId | None
+    burn_id: BurnId
     direction: Direction
     end_cause: EndCause
     commanded_duration_s: float
@@ -189,8 +219,8 @@ class PropellantDepleted(_StrictEventBase):
     """The tank was emptied by a burn (to within event-time resolution, DR-0017 D1a)."""
 
     type: Literal["PropellantDepleted"] = "PropellantDepleted"
-    command_id: str | None
-    burn_id: str
+    command_id: CommandId | None
+    burn_id: BurnId
     event_t_s: float
     residual_propellant_kg: float
 
@@ -203,8 +233,9 @@ class PropulsionSampled(_StrictEventBase):
     total_mass_kg: float
     delta_v_sensed_mps: float
     engine_state: Literal["idle", "scheduled", "burning"]
-    active_burn_id: str | None
-    pending_burn_ids: tuple[str, ...]
+    active_burn_id: BurnId | None
+    pending_burn_ids: tuple[BurnId, ...]
+    thrust_acceleration_mps2: Vec3T  # truth state at t; zero when not burning
 
 
 Event = Annotated[
