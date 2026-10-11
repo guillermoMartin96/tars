@@ -397,13 +397,18 @@ def _node_crossings(states: dict[float, tuple[np.ndarray, np.ndarray]], mu: floa
         (ra, va), (rb, _) = states[a], states[b]
         if ra[2] < 0.0 <= rb[2]:
             lo, hi = 0.0, b - a
+            crossing = None
             for _ in range(80):
                 mid = 0.5 * (lo + hi)
-                if kepler.propagate(ra, va, mid, mu)[0][2] < 0.0:
+                z = float(kepler.propagate(ra, va, mid, mu)[0][2])
+                if not math.isfinite(z):  # F22: invalid oracle output fails, never steers
+                    crossing = math.inf
+                    break
+                if z < 0.0:
                     lo = mid
                 else:
                     hi = mid
-            out.append(a + hi)
+            out.append(a + hi if crossing is None else crossing)
     return out
 
 

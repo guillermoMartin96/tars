@@ -1,0 +1,24 @@
+import importlib.util, inspect, math
+from unittest.mock import patch
+import numpy as np
+from tars.astro import kepler
+from tars.validation.thresholds import load_scoped_thresholds
+from tars.validation.m2_missions import MISSIONS
+
+def module(n,p):
+ s=importlib.util.spec_from_file_location(n,p); x=importlib.util.module_from_spec(s); s.loader.exec_module(x); return x
+p=module('proof','toolbox/validators/m2_proof.py'); c=module('cli','toolbox/scripts/gmat_m2.py'); orig=kepler.propagate
+for val in [math.nan, math.inf, -math.inf]:
+ hits={}
+ def bad(*a,**k):
+  caller=inspect.currentframe().f_back
+  if caller.f_code.co_name in ['orbit_checks','_node_crossings'] and caller.f_locals.get('_')==79:
+   name=caller.f_code.co_name; hits[name]=hits.get(name,0)+1
+   return np.full(3,val),np.full(3,val)
+  return orig(*a,**k)
+ with patch.object(kepler,'propagate',bad):
+  rejected,check=c._evaluate('m2_prograde_burn')
+  print('node standalone',val,'hits',hits,'rejected',rejected,'passed',check and check.passed,flush=True)
+  gates=p.Gates(load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS)))
+  checks,_=p.mission_checks(c.BY_NAME['m2_prograde_burn'],gates,quick=True)
+  print('node integrated',val,'hits',hits,'checks',len(checks),'failed',[x.validator for x in checks if not x.passed],'missing',gates.missing,flush=True)

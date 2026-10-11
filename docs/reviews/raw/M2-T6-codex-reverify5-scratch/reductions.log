@@ -1,0 +1,67 @@
+toolbox/validators/m2_proof.py:184:    has_burns = any(e.type == "BurnEnded" for e in events)
+toolbox/validators/m2_proof.py:318:        "passed": all(c.passed for c in checks),
+toolbox/scripts/gmat_m2.py:133:        exists = any(p.exists() for p in files.values()) or name in approved
+toolbox/scripts/gmat_m2.py:281:            status = max(status, 2)
+toolbox/scripts/gmat_m2.py:285:            status = max(status, 1)
+src/tars/validation/thresholds.py:56:    if not math.isfinite(limits) or limits < 0:
+src/tars/validation/thresholds.py:62:    unknown = sorted(set(data["limits"]) - KNOWN_VALIDATORS)
+src/tars/validation/thresholds.py:104:        return sorted(
+src/tars/validation/thresholds.py:114:    unknown = sorted(set(data["limits"]) - M2_KNOWN_VALIDATORS)
+src/tars/validation/thresholds.py:118:    bad = sorted(scopes - missions - {"all"})
+src/tars/validation/thresholds.py:139:        missing = sorted(set(self.thresholds) - set(self.metrics))
+src/tars/validation/thresholds.py:144:            for name, limit in sorted(self.thresholds.items())
+src/tars/validation/gmat_m2.py:92:    cuts = sorted(
+src/tars/validation/gmat_m2.py:95:        | {min(b.cutoff_t_s, horizon_s) for b in predicted if b.ignition_t_s < horizon_s}
+src/tars/validation/gmat_m2.py:106:            add(a, b, min(BURN_STEP_S, b - a), burn.direction)
+src/tars/validation/gmat_m2.py:136:    steps = sorted({a.step_s for a in arcs})
+src/tars/validation/gmat_m2.py:138:    directions = sorted({a.direction for a in arcs if a.direction})
+src/tars/validation/gmat_m2.py:273:        if not all(math.isfinite(x) for x in f) or f[0] != int(f[0]):
+src/tars/validation/gmat_m2.py:301:        raise ValueError(f"initial-state assignments {sorted(values)} incomplete")
+src/tars/validation/gmat_m2.py:316:    if sorted(by_arc) != [a.index for a in arcs]:
+src/tars/validation/gmat_m2.py:317:        v.append(f"arcs in report {sorted(by_arc)} != planned {[a.index for a in arcs]}")
+src/tars/validation/gmat_m2.py:318:    if [r.arc for r in rows] != sorted(r.arc for r in rows):
+src/tars/validation/gmat_m2.py:348:    times = sorted(labelled)
+src/tars/validation/gmat_m2.py:395:    times = sorted(states)
+src/tars/validation/gmat_m2.py:426:    times = sorted(labelled)
+src/tars/validation/gmat_m2.py:427:    invalid = [t for t in times if not np.all(np.isfinite(reference[t]))]
+src/tars/validation/gmat_m2.py:784:        v.append(f"burn boundaries {sorted(got_bounds)} != predicted {sorted(want_bounds)}")
+src/tars/validation/gmat_m2.py:836:    reference = dop853_reference(scenario, r0, v0, predicted, sorted(labelled))
+src/tars/validation/gmat_m2.py:843:    return sorted(k for k in metrics if k not in limits and k not in O9_REPORT_ONLY)
+src/tars/validation/m2.py:167:        used = min(mdot * executed, propellant)
+src/tars/validation/m2.py:193:    if any(b.ignition_t_s < a.cutoff_t_s for a, b in pairwise(burns)):
+src/tars/validation/m2.py:212:    gate fails (reviews M2-T6 F16, F18, F19; builtin max(x, nan) silently returns x)."""
+src/tars/validation/m2.py:213:    if any(math.isnan(v) for v in values):
+src/tars/validation/m2.py:215:    return max(values)
+src/tars/validation/m2.py:240:    end = burn.cutoff_t_s if until is None else min(until, burn.cutoff_t_s)
+src/tars/validation/m2.py:246:    pts = sorted({burn.ignition_t_s, end, *(g for g in grid if burn.ignition_t_s < g < end)})
+src/tars/validation/m2.py:283:    if sum(e.type in ("SimulationStarted", "SimulationCompleted") for e in events) != 2:
+src/tars/validation/m2.py:313:            if any(e.type not in ("StateSampled", "PropulsionSampled") for e in tail):
+src/tars/validation/m2.py:362:    want_state = sorted({k for k in range(0, final_tick + 1, every)} | {final_tick})
+src/tars/validation/m2.py:372:        want_prop = sorted(set(want_state) | engine_ticks)
+src/tars/validation/m2.py:374:            extra = sorted(set(prop_ticks) - set(want_prop))
+src/tars/validation/m2.py:375:            missing = sorted(set(want_prop) - set(prop_ticks))
+src/tars/validation/m2.py:396:    return sum(k < final or (inclusive and k == final) for k in ticks)
+src/tars/validation/m2.py:621:            if np.any(a != 0.0):
+src/tars/validation/m2.py:641:        quiet = not any(k in engine_ticks for k in range(a.tick + 1, b.tick + 1))
+src/tars/validation/m2.py:646:    used = sum(e.propellant_used_kg for e in ends.values())
+src/tars/validation/m2.py:647:    sensed = sum(e.sensed_delta_v_mps for e in ends.values())
+src/tars/validation/m2.py:719:            max(err - simpson_bound(veh, b, scenario.dt_s), 0.0) / b.delta_v_mps,
+src/tars/validation/m2.py:889:    horizon = max(marks)
+src/tars/validation/m2.py:890:    bounds = sorted(
+src/tars/validation/m2.py:924:        if not np.all(np.isfinite(sol.y)):  # F16: never hand on an invalid reference
+src/tars/validation/m2.py:930:            if not np.all(np.isfinite(alts)):  # F18: dense output validated too
+src/tars/validation/m2.py:932:            out.alt_min = -worst(-out.alt_min, -float(alts.min()))
+src/tars/validation/m2.py:933:            out.alt_max = worst(out.alt_max, float(alts.max()))
+src/tars/validation/m2.py:995:    marks = sorted(
+src/tars/validation/m2.py:1003:    if any(not np.all(np.isfinite(ref[t])) for t in marks):  # F16: invalid reference
+src/tars/validation/m2.py:1114:    ignitions = sorted(e.event_t_s for e in _of(events, "BurnStarted"))
+src/tars/validation/m2.py:1297:    dts = sorted(finals, reverse=True)
+src/tars/validation/m2.py:1454:    m_end = veh.dry_mass_kg + max(
+src/tars/validation/m2.py:1455:        b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0
+src/tars/validation/m2.py:1599:    total_dv = sum(b.delta_v_mps for b in predicted) or 1.0
+src/tars/validation/m2.py:1634:            max(err - allowance, 0.0) / total_dv,
+src/tars/validation/m2.py:1868:    times = sorted(ref)
+src/tars/validation/m2.py:1874:            if any(i < b and a < c for i, c in burning):
+src/tars/validation/m2.py:1901:    if not (done.min_altitude_m <= min(alts) and done.max_altitude_m >= max(alts)):
+src/tars/validation/m2.py:1959:    if any(e.type == "BurnEnded" for e in events):
+src/tars/validation/m2.py:1985:    return sorted(

@@ -139,10 +139,14 @@ class Check:
         missing = sorted(set(self.thresholds) - set(self.metrics))
         if missing:
             raise KeyError(f"{self.validator}: thresholds for unknown metrics {missing}")
+        # A gated metric must be finite and within its limit: NaN, +inf and -inf all
+        # fail (review M2-T6 F20; -inf would otherwise satisfy any upper limit).
         self.failures = [
             f"{name}={self.metrics[name]:.6g} > {limit:.6g}"
+            if math.isfinite(self.metrics[name])
+            else f"{name}={self.metrics[name]!r} is not finite"
             for name, limit in sorted(self.thresholds.items())
-            if not self.metrics[name] <= limit  # NaN fails
+            if not (math.isfinite(self.metrics[name]) and self.metrics[name] <= limit)
         ]
 
     @property

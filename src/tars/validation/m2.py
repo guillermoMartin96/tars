@@ -208,21 +208,20 @@ def _ulp(x: float) -> float:
 
 
 def worst(*values: float) -> float:
-    """Max that never discards an invalid value: NaN in any argument gives +inf, so the
-    gate fails (reviews M2-T6 F16, F18, F19; builtin max(x, nan) silently returns x)."""
-    if any(math.isnan(v) for v in values):
+    """Max that never discards an invalid value: any non-finite argument (NaN, +inf or
+    -inf) gives +inf, so the gate fails (reviews M2-T6 F16, F18, F19, F20; builtin
+    max(x, nan) returns x, and max(x, -inf) returns x)."""
+    if not all(math.isfinite(v) for v in values):
         return math.inf
     return max(values)
 
 
 def worst_of(values, default: float = 0.0) -> float:
     """``worst`` over an iterable (NaN anywhere gives +inf; empty gives ``default``)."""
-    out = default
-    first = True
+    out: float | None = None
     for value in values:
-        out = value if first and not math.isnan(value) else worst(out, value)
-        first = False
-    return out
+        out = worst(value) if out is None else worst(out, value)
+    return default if out is None else out
 
 
 def simpson_bound(
@@ -1876,13 +1875,18 @@ def orbit_checks(
                 continue
             r0, v0 = ref[a][:3], ref[a][3:6]
             lo, hi = 0.0, b - a
+            crossing = None
             for _ in range(80):
                 mid = 0.5 * (lo + hi)
-                if kepler.propagate(r0, v0, mid, mu)[0][2] < 0.0:
+                z = float(kepler.propagate(r0, v0, mid, mu)[0][2])
+                if not math.isfinite(z):  # F22: invalid oracle output fails, never steers
+                    crossing = math.inf
+                    break
+                if z < 0.0:
                     lo = mid
                 else:
                     hi = mid
-            ref_crossings.append(a + hi)
+            ref_crossings.append(a + hi if crossing is None else crossing)
     if len(ref_crossings) != len(orbits):
         v.append(f"{len(orbits)} OrbitCompleted, reference has {len(ref_crossings)} node crossings")
     err = worst_of(

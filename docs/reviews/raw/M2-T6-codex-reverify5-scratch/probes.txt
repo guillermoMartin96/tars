@@ -1,0 +1,58 @@
+# Executable with PYTHONPATH=src .venv/bin/python review_scratch/probes.txt
+import importlib.util, math, re, copy
+from unittest.mock import patch
+import scipy.integrate
+from tars.validation import m2, gmat_m2 as g
+from tars.validation.thresholds import Check, load_scoped_thresholds
+from tars.validation.m2_missions import MISSIONS
+
+def module(n,p):
+ s=importlib.util.spec_from_file_location(n,p); x=importlib.util.module_from_spec(s); s.loader.exec_module(x); return x
+p=module('proof','toolbox/validators/m2_proof.py'); c=module('cli','toolbox/scripts/gmat_m2.py')
+mission=c.BY_NAME['m2_prograde_burn']; names=frozenset(m.name for m in MISSIONS)
+original=scipy.integrate.solve_ivp
+for val in [math.nan, math.inf, -math.inf]:
+ def poisoned(*a,**k):
+  sol=original(*a,**k)
+  if a[1]==(0.,60.):
+   old=sol.sol
+   def dense(t):
+    y=old(t).copy(); y[:3]=val; return y
+   sol.sol=dense
+  return sol
+ with patch.object(scipy.integrate,'solve_ivp',poisoned):
+  try:
+   rejected,check=c._evaluate(mission.name); print('dense standalone',val,rejected,check and check.passed,flush=True)
+  except Exception as e: print('dense standalone closed',val,type(e).__name__,str(e),flush=True)
+  try:
+   checks,_=p.mission_checks(mission,p.Gates(load_scoped_thresholds(missions=names)),quick=True)
+   print('dense integrated',val,[x.validator for x in checks if not x.passed],flush=True)
+  except Exception as e: print('dense integrated closed',val,type(e).__name__,str(e),flush=True)
+orig=m2.audit_run
+for val in [math.nan,-math.inf,math.inf]:
+ def audit(s,expected,run):
+  result=orig(s,expected,run)
+  if s.dt_s==2.5:
+   result.metrics['o4_reference']['sample_position_error_max_m']=val
+   result.metrics['o5_coast_kepler']['coast_position_error_max_m']=val
+  return result
+ with patch.object(m2,'audit_run',audit):
+  checks,_=p.mission_checks(c.BY_NAME['m2_burn_to_depletion'],p.Gates(load_scoped_thresholds(missions=names)),quick=False)
+  print('aux integrated',val,'checks',len(checks),'failed',[x.validator for x in checks if not x.passed],flush=True)
+ good=m2.Audit({}, {'o4_reference':{'sample_position_error_max_m':.1}}, {})
+ bad=m2.Audit({}, {'o4_reference':{'sample_position_error_max_m':val}}, {})
+ for order in [[good,bad],[bad,good]]:
+  merged=p._merge_audits([('a',order[0]),('b',order[1])]); print('merge',val,merged.metrics,flush=True)
+ print('individual Check',val,Check('x',{'x':val},{'x':.6},'provisional').passed,flush=True)
+origmetrics=g.o9_metrics
+for val in [-math.inf,math.nan,math.inf]:
+ def metrics(*a,**k):
+  out=origmetrics(*a,**k); out['ours_vs_gmat_sample_position_error_max_m']=val; return out
+ with patch.object(g,'o9_metrics',metrics):
+  rejected,check=c._evaluate(mission.name); print('O9 metric poison',val,rejected,check and check.passed,flush=True)
+pattern=re.compile(r'(\b[\w.\[\]\"\']+) = (max|min)\(\s*\1\b')
+for s in ['err = max(err, x)', 'out["err"] = max(out["err"], x)', 'dst[k] = max(dst.get(k, -math.inf), x)', 'err = max(x, err)', 'err = max(errors)', 'err = np.nanmax(errors)']:
+ print('guard',s,'detected',bool(pattern.search(s)),flush=True)
+for vals in [[],[-math.inf],[.1,-math.inf],[-math.inf,.1],[math.inf],[math.nan]]:
+ try: print('worst',vals,m2.worst(*vals),'worst_of',m2.worst_of(vals),flush=True)
+ except Exception as e: print('worst',vals,type(e).__name__,'worst_of',m2.worst_of(vals),flush=True)

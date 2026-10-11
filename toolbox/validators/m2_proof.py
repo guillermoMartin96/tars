@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -115,7 +114,8 @@ def _merge_audits(audits: list[tuple[str, m2.Audit]]) -> m2.Audit:
         for g, ms in a.metrics.items():
             dst = metrics.setdefault(g, {})
             for k, x in ms.items():
-                dst[k] = m2.worst(dst.get(k, -math.inf), x)  # NaN never discarded (F19)
+                # No -inf sentinel: any non-finite value becomes +inf (F19, F20).
+                dst[k] = m2.worst(x) if k not in dst else m2.worst(dst[k], x)
     return m2.Audit(violations, metrics, {})
 
 

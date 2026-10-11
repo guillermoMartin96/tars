@@ -1092,8 +1092,10 @@ def test_merging_auxiliary_audits_keeps_nan(monkeypatch):
 
 
 @pytest.mark.slow
-def test_nan_in_an_auxiliary_audit_fails_the_mission(monkeypatch):
-    """F19 integrated: NaN O4/O5 metrics in the dt = 2.5 s auxiliary audit fail."""
+@pytest.mark.parametrize("bad", [math.nan, -math.inf])
+def test_nan_in_an_auxiliary_audit_fails_the_mission(monkeypatch, bad):
+    """F19/F20 integrated: NaN or -inf O4/O5 metrics in the dt = 2.5 s auxiliary audit
+    fail the mission."""
     from tars.validation.thresholds import load_scoped_thresholds
 
     module = _proof_module()
@@ -1102,8 +1104,8 @@ def test_nan_in_an_auxiliary_audit_fails_the_mission(monkeypatch):
     def poisoned(scenario, expected, run):
         audit = original(scenario, expected, run)
         if scenario.dt_s == 2.5:
-            audit.metrics["o4_reference"]["sample_position_error_max_m"] = math.nan
-            audit.metrics["o5_coast_kepler"]["coast_position_error_max_m"] = math.nan
+            audit.metrics["o4_reference"]["sample_position_error_max_m"] = bad
+            audit.metrics["o5_coast_kepler"]["coast_position_error_max_m"] = bad
         return audit
 
     monkeypatch.setattr(m2, "audit_run", poisoned)
@@ -1116,16 +1118,182 @@ def test_nan_in_an_auxiliary_audit_fails_the_mission(monkeypatch):
     } <= failed
 
 
-def test_no_builtin_max_or_min_accumulators_in_the_validators():
-    """F16/F18/F19 guard: metric accumulators use worst/worst_of, never builtin max/min,
-    which silently drop NaN. Allowed: max over predicted times (scenario inputs)."""
-    import re as _re
+_GUARDED = (
+    "src/tars/validation/m2.py",
+    "src/tars/validation/gmat_m2.py",
+    "toolbox/validators/m2_proof.py",
+    "toolbox/scripts/gmat_m2.py",
+    "src/tars/validation/thresholds.py",
+)
+_REDUCERS = {"max", "min", "nanmax", "nanmin", "amax", "amin", "fmax", "fmin"}
+# Every max/min-style call in the validators, reviewed (review M2-T6 F21). Anything else
+# fails this test: metric accumulators must use worst/worst_of, which never drop
+# non-finite values.
+_ALLOWED = {
+    ("m2.py", "predict_burns", "min(mdot * executed, propellant)"): "scenario inputs",
+    ("m2.py", "worst", "max(values)"): "after its own finiteness check",
+    ("m2.py", "simpson_bound", "min(until, burn.cutoff_t_s)"): "predicted times",
+    ("m2.py", "mass_and_rocket_metrics", "max(err - simpson_bound(veh, b, scenario.dt_s), 0.0)"):
+        "result passes through worst(); max(nan, 0.0) is nan",
+    ("m2.py", "dop853_reference", "max(marks)"): "scenario and sample times",
+    ("m2.py", "dop853_reference", "alts.min()"): "after the dense-output finiteness check",
+    ("m2.py", "dop853_reference", "alts.max()"): "after the dense-output finiteness check",
+    (
+        "m2.py",
+        "_timing_bound",
+        "max(b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0)",
+    ): "predicted values",
+    ("m2.py", "_timing_bound", "max(b.executed_s, b.intended_s)"): "predicted values",
+    ("m2.py", "propulsion_sample_checks", "max(err - allowance, 0.0)"):
+        "result passes through worst(); max(nan, 0.0) is nan",
+    ("m2.py", "orbit_checks", "min(alts)"): "schema-valid event values (round-trip check)",
+    ("m2.py", "orbit_checks", "max(alts)"): "schema-valid event values (round-trip check)",
+    ("gmat_m2.py", "plan_arcs", "min(b.cutoff_t_s, horizon_s)"): "predicted times",
+    ("gmat_m2.py", "plan_arcs", "min(BURN_STEP_S, b - a)"): "predicted times",
+    ("gmat_m2.py", "cmd_compare", "max(status, 2)"): "exit codes",
+    ("gmat_m2.py", "cmd_compare", "max(status, 1)"): "exit codes",
+}  # fmt: skip
 
-    files = [
-        REPO_ROOT / "src" / "tars" / "validation" / "m2.py",
-        REPO_ROOT / "src" / "tars" / "validation" / "gmat_m2.py",
-        REPO_ROOT / "toolbox" / "validators" / "m2_proof.py",
-    ]
-    pattern = _re.compile(r"(\b[\w.\[\]\"']+) = (max|min)\(\s*\1\b")
-    offenders = [f"{f.name}: {m.group(0)}" for f in files for m in pattern.finditer(f.read_text())]
-    assert offenders == []
+
+def _reducer_calls(source: str, filename: str) -> set[tuple[str, str, str]]:
+    import ast
+
+    found: set[tuple[str, str, str]] = set()
+    stack: list[str] = []
+
+    class Visitor(ast.NodeVisitor):
+        def visit_FunctionDef(self, node):
+            stack.append(node.name)
+            self.generic_visit(node)
+            stack.pop()
+
+        def visit_Call(self, node):
+            fn = node.func
+            name = fn.id if isinstance(fn, ast.Name) else getattr(fn, "attr", None)
+            if name in _REDUCERS:
+                found.add((filename, stack[-1] if stack else "<module>", ast.unparse(node)))
+            self.generic_visit(node)
+
+    Visitor().visit(ast.parse(source))
+    return found
+
+
+def test_every_max_min_call_in_the_validators_is_reviewed():
+    """F21: an AST scan, not a regex. A new max/min-style call fails until reviewed."""
+    found = set()
+    for rel in _GUARDED:
+        path = REPO_ROOT / rel
+        found |= _reducer_calls(path.read_text(), path.name)
+    assert found == set(_ALLOWED)
+
+
+@pytest.mark.parametrize(
+    "snippet",
+    [
+        "dst[k] = max(dst.get(k, -math.inf), x)",
+        "out['k'] = max(x, out['k'])",
+        "e = max(abs(p) for p in orders)",
+        "e = np.nanmax(errors)",
+        "e = errors.max()",
+    ],
+)
+def test_the_guard_detects_common_unsafe_forms(snippet):
+    """F21: the guard flags the original F19 expression and other common forms."""
+    source = f"def merged(dst, k, x, out, orders, errors, np, math):\n    {snippet}\n"
+    assert _reducer_calls(source, "m2_proof.py")
+
+
+def test_non_finite_gated_metrics_fail_every_check():
+    """F20: NaN, +inf and -inf all fail, even below an upper limit."""
+    from tars.validation.thresholds import Check
+
+    for bad in (math.nan, math.inf, -math.inf):
+        check = Check("x", {"m": bad}, {"m": 1.0}, "provisional")
+        assert not check.passed and "not finite" in check.failures[0]
+    assert Check("x", {"m": 0.5}, {"m": 1.0}, "provisional").passed
+
+
+def test_worst_rejects_negative_infinity():
+    assert m2.worst(0.1, -math.inf) == math.inf
+    assert m2.worst_of([0.1, -math.inf]) == math.inf
+
+
+def test_merging_keeps_negative_infinity_as_failure():
+    """F20: a -inf auxiliary metric cannot vanish in the merge."""
+    module = _proof_module()
+    good = m2.Audit({}, {"o4_reference": {"sample_position_error_max_m": 0.1}}, {})
+    bad = m2.Audit({}, {"o4_reference": {"sample_position_error_max_m": -math.inf}}, {})
+    for order in ([good, bad], [bad, good]):
+        merged = module._merge_audits([(f"r{i}", a) for i, a in enumerate(order)])
+        assert merged.metrics["o4_reference"]["sample_position_error_max_m"] == math.inf
+
+
+def test_o9_rejects_a_negative_infinity_metric(monkeypatch):
+    """F20 standalone: an O9 metric poisoned with -inf fails evaluation."""
+    cli = _cli()
+    original = gmat_m2.o9_metrics
+
+    def poisoned(*a, **k):
+        out = original(*a, **k)
+        out["ours_vs_gmat_sample_position_error_max_m"] = -math.inf
+        return out
+
+    monkeypatch.setattr(gmat_m2, "o9_metrics", poisoned)
+    rejected, check = cli._evaluate("m2_prograde_burn")
+    assert rejected == [] and check is not None and not check.passed
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+def test_node_bisection_rejects_non_finite_oracle_output(monkeypatch, bad):
+    """F22: a non-finite Kepler value inside node bisection fails both O9 and T5."""
+    from tars.astro import kepler
+
+    original = kepler.propagate
+    calls = {"n": 0}
+
+    def poisoned(r, v, dt, mu):
+        calls["n"] += 1
+        rr, vv = original(r, v, dt, mu)
+        if calls["n"] % 80 == 0:  # the last bisection step of each crossing
+            rr = np.array([rr[0], rr[1], bad])
+        return rr, vv
+
+    name = "m2_prograde_burn"
+    mission = BY_NAME[name]
+    scenario = mission.build()
+    events = run_scenario(scenario).events
+    _, predicted, arcs, rows = _labelled(name)
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    monkeypatch.setattr(kepler, "propagate", poisoned)
+    states = {t: (labelled[t].r, labelled[t].v) for t in sorted(labelled)}
+    assert math.inf in gmat_m2._node_crossings(states, scenario.constants.mu)
+    calls["n"] = 0
+    ref = m2.dop853_reference(
+        scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+    )
+    metrics, _ = m2.orbit_checks(scenario, events, ref, predicted)
+    assert metrics["node_crossing_time_error_max_s"] == math.inf
+
+
+@pytest.mark.slow
+def test_poisoned_node_oracle_fails_the_integrated_mission(monkeypatch):
+    """F22 integrated: a NaN Kepler value in node bisection fails the mission checks."""
+    from tars.astro import kepler
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    module = _proof_module()
+    original = kepler.propagate
+    calls = {"n": 0}
+
+    def poisoned(r, v, dt, mu):
+        calls["n"] += 1
+        rr, vv = original(r, v, dt, mu)
+        if calls["n"] % 80 == 0:
+            rr = np.array([rr[0], rr[1], math.nan])
+        return rr, vv
+
+    monkeypatch.setattr(kepler, "propagate", poisoned)
+    gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+    checks, _ = module.mission_checks(BY_NAME["m2_prograde_burn"], gates, quick=True)
+    failed = {c.validator for c in checks if not c.passed}
+    assert "orbit_events[m2_prograde_burn]" in failed or "o9_gmat[m2_prograde_burn]" in failed

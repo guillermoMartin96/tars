@@ -181,4 +181,22 @@ All seven are **`ACCEPTED`**.
 **Behavior is preserved.** The regenerated M2 Proof report is identical to the previous one (validator names, every metric and every result) across 212 checks. Each mechanism is mutation-tested: reverting the merge, the dense-output check, or any accumulator fails a test.
 
 ## Re-verification 5
+**Reviewer:** Codex, session `01a12d4e-3dfd-7c02-950e-b0700971a7fd`, at `97071e6`. **Raw:** `raw/M2-T6-codex-reverify5.md`, `raw/M2-T6-codex-reverify5-scratch/`.
+
+**Verdict: FAIL** (F20, F22; F21 weakens regression protection).
+- F18 is resolved, and F19 is resolved for NaN.
+- The Proof report is identical to the previous one: 773 metric bits across 212 checks.
+- All 21 reference-component, 18 row and 47 threshold-deletion mutations are rejected.
+
+**All three are `ACCEPTED`.** This round fixes the non-finite class at its root rather than one site at a time:
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F20 | Med | `-inf` passed: `worst` discarded it beside finite values, and `Check` accepted an unreduced `-inf` below an upper limit | **`Check` rejects every non-finite gated metric** (NaN, +inf, −inf). It is the last gate every metric passes through, M1 included, and M1 results are unchanged because its metrics are finite. `worst`/`worst_of` turn any non-finite value into +inf. The merge no longer uses a −inf sentinel | `test_non_finite_gated_metrics_fail_every_check`, `test_worst_rejects_negative_infinity`, `test_merging_keeps_negative_infinity_as_failure`, `test_o9_rejects_a_negative_infinity_metric`, `test_nan_in_an_auxiliary_audit_fails_the_mission[-inf]` |
+| F21 | Low | The regex guard missed the original F19 expression and other common forms | An **AST scan** of all five validation files (`m2.py`, `gmat_m2.py`, `m2_proof.py`, the `gmat_m2` CLI, `thresholds.py`) for max/min-style calls (`max`, `min`, `.max()`, `.min()`, `nanmax`, `nanmin`, `amax`, `amin`, `fmax`, `fmin`). The set must equal a **reviewed allowlist of 16 calls**, each with its reason (scenario inputs, values already validated finite, results passed through `worst`, exit codes) | `test_every_max_min_call_in_the_validators_is_reviewed`, `test_the_guard_detects_common_unsafe_forms` (5 forms, including the original F19 expression) |
+| F22 | Med | Node bisection compared unchecked Kepler output with zero (T5 and O9) | Every propagated value is checked. A non-finite one ends the bisection with an +inf crossing, so the timing error is +inf and the gate fails | `test_node_bisection_rejects_non_finite_oracle_output` (NaN, ±inf; O9 and T5), `test_poisoned_node_oracle_fails_the_integrated_mission` |
+
+**Behavior is preserved:** the regenerated M2 Proof report is identical (212 checks, every metric and result). Each mechanism is mutation-tested: disabling it fails its tests, and a new unreviewed `max(...)` call fails the AST guard.
+
+## Re-verification 6
 See below.
