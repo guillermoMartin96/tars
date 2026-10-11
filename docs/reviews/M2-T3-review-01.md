@@ -68,10 +68,28 @@ All seven are **`ACCEPTED`**. Resolutions are pending the fix commit.
 **Severity:** Low  
 **Implementer reasoning:** Correct; this is the same lesson as REV-T1-05. Each negative test will change one property, use the input mode it claims (Python vs JSON), and assert the failing field.
 
+## Resolutions (fixed in `defd23f`)
+| Finding | Resolution | Tests (mutation check) |
+|---|---|---|
+| REV-T3-01 (High) | IDs registered only after acceptance; a rejection leaves registry, counter, schedule and state unchanged | `test_rejected_commands_do_not_consume_their_id`, `test_rejected_submissions_change_nothing`, `test_rejected_submissions_do_not_consume_burn_ids` (registering before scheduling fails 34 tests) |
+| REV-T3-02 (High) | `parse_command` dumps any model instance and re-validates against the exact schema into a fresh `BurnCommand`; other payload errors become `schema_invalid` | `test_prebuilt_commands_are_revalidated` (4 forged `model_copy` cases), `test_subclassed_commands_with_extra_mutable_fields_are_rejected`, `test_receipt_owns_a_canonical_copy_of_the_command` (trusting instances fails 5) |
+| REV-T3-03 (Medium) | `CommandRejected` gains intent fields and `schema_errors`; `PropulsionSampled` gains `thrust_acceleration_mps2` | `test_rejected_event_keeps_commanded_intent_or_structured_schema_errors`, `test_propulsion_sample_carries_the_truth_thrust_acceleration` (dropping either fails) |
+| REV-T3-04 (Medium) | Echoed fields must be a valid ID or valid Unicode; `safe_text` sanitizes record strings; issuer validator | `test_rejection_events_from_malformed_unicode_serialize` (4 payloads), `test_command_with_invalid_unicode_issuer_is_schema_invalid`, `test_safe_text_escapes_invalid_unicode_and_bounds_length` |
+| REV-T3-05 (Medium) | `schedule_burn` signature restored exactly; correlation internal to `submit` | `test_schedule_burn_keeps_its_t2_signature_and_null_command_ids` |
+| REV-T3-06 (Low) | `StrictVersion1` (integer only) for the command and M2 events; `CommandId`/`BurnId` constrained types; M1 event base unchanged | `test_command_schema_version_must_be_the_integer_one`, `test_m2_event_schema_version_must_be_the_integer_one`, `test_m2_event_correlation_ids_are_constrained` (each relaxation fails) |
+| REV-T3-07 (Low) | Separate extra-field (Python input, tuples kept) and non-finite (JSON input) tests, each asserting the exact error | `test_new_events_reject_extra_fields`, `test_new_events_reject_non_finite_numbers_from_json` |
+
+**Equivalent mutants (documented):** current pydantic already rejects invalid Unicode in length-constrained strings and in mapping keys (`string_unicode`, never echoing the key). The explicit issuer validator and the `safe_text` sanitizer are defence in depth. `safe_text` is pinned by a direct contract test.
+
+**Re-test at `defd23f`:**
+- 542 tests pass; ruff clean;
+- M1 Proof PASS; GMAT compare PASS;
+- determinism and cross-platform bit-identical to `7a4e1877…`.
+
 ## Proof gate
 - [x] Every finding dispositioned
-- [ ] High findings resolved
-- [ ] Fixes re-tested
-- [ ] Reviewer re-verification
+- [x] High findings resolved (`defd23f`)
+- [x] Fixes re-tested by the implementer
+- [ ] Reviewer re-verification (requested)
 
 **Review gate result:** BLOCKED.

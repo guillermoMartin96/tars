@@ -66,8 +66,10 @@ Any of these may be revisited by a later decision.
 - **Event times** are exact floats. A tick containing events is split into RK4 sub-steps `[t0, e1, …, t1]`; at a shared instant, cutoff is processed before ignition (back-to-back burns).
 
 ## Implementation notes (T3, `12d8818`)
-- **Command entry.** `Simulator.submit(BurnCommand | mapping) -> CommandReceipt` wraps `schedule_burn`; both remain public.
-  - `schedule_burn` is unchanged for T2 compatibility, apart from a keyword-only `command_id`.
+- **Command entry.** `Simulator.submit(BurnCommand | mapping) -> CommandReceipt`, alongside the unchanged T2 `schedule_burn`, which keeps its exact signature (REV-T3-05). Both share an internal `_schedule`.
+  - Command correlation exists only through `submit()`.
+  - Rejections are atomic, and IDs are consumed on acceptance (REV-T3-01).
+  - All payloads are re-validated canonically (REV-T3-02).
   - The M1 public-API allowlist test was extended with `submit`.
 - **Correlation.** Deterministic burn IDs come from one shared sequence, and only accepted burns are numbered. `EngineTransition` and `PropulsionSnapshot` gained `burn_id`/`command_id` and burn-ID fields, with defaults that keep T2 behavior.
 - **Rejection precedence** (stable): schema > duplicate ID > non-positive duration > chronology > engine conflicts > propellant and schedulability. Chronology now follows the duration check in `schedule_burn` too.
