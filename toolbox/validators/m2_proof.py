@@ -105,7 +105,12 @@ def mission_checks(
         _exact(f"outcomes[{tag}]", m2.check_outcomes(scenario, events, predicted)),
     ]
     accounting, identities = m2.accounting_metrics(scenario, events)
-    checks.append(_exact(f"accounting_identities[{tag}]", identities))
+    checks.append(
+        _exact(
+            f"accounting_identities[{tag}]",
+            identities + m2.check_final_consistency(events, run),
+        )
+    )
     if scenario.spacecraft is not None:
         checks.append(check("accounting", accounting))
 
@@ -155,7 +160,7 @@ def mission_checks(
         o7 = m2.direction_metrics(scenario, events)
         checks.append(check("o7_direction", o7))
         if not quick:
-            o8 = m2.convergence_metrics(scenario, ref[events[-1].t])
+            o8 = m2.convergence_metrics(scenario, ref[m2.horizon_s(scenario, events)])
             checks.append(check("o8_convergence", o8, "dt 10 -> 5 -> 2.5 s vs DOP853"))
     if mission.impulsive_limit and not quick:
         rows = m2.impulsive_family(scenario)

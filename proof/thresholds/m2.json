@@ -26,8 +26,12 @@
     },
     "o4_reference": {
       "all": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
         "cutoff_position_error_max_m": 0.002,
         "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
         "final_position_error_m": 0.6,
         "final_velocity_error_mps": 0.0007
       },
@@ -73,7 +77,7 @@
     "o1_mass_law": "DR-0015 candidate 1e-12 (round-off class, relative to initial mass). depletion_residual_over_bound_max: analytic DR-0017 D1a bound mdot * 2 ulp(cutoff); exact, not a tolerance.",
     "o2_rocket_equation": "DR-0015 candidate 1e-12 (round-off class, relative to delta-v).",
     "o3_free_space": "Velocity and propellant: round-off class 1e-12 (VAL-0011, T1 test bound). Position: genuine 4th-order truncation, checked by order |p - 4| <= 0.5 (DR-0008 policy), not by an absolute value.",
-    "o4_reference": "DR-0015 candidates: cutoff <= 2e-3 m / 3e-6 m/s (slice, retrograde, depletion: cutoff before 730 s), final <= 0.6 m / 7e-4 m/s at 53 700 s. m2_invalid_commands: last cutoff at 2420 s, after a longer coast; ~2x measured (8.0e-3 m, 1.0e-5 m/s). The cutoff error is dominated by the pre-burn coast, not the burn.",
+    "o4_reference": "Initial state vs the independently derived circular-orbit state: round-off class 1e-12 relative (review M2-T5 F1). Every StateSampled (coast and powered): same limits as the final state, the largest error being at the end of the horizon (review M2-T5 F3). DR-0015 candidates: cutoff <= 2e-3 m / 3e-6 m/s (slice, retrograde, depletion: cutoff before 730 s), final <= 0.6 m / 7e-4 m/s at 53 700 s. m2_invalid_commands: last cutoff at 2420 s, after a longer coast; ~2x measured (8.0e-3 m, 1.0e-5 m/s). The cutoff error is dominated by the pre-burn coast, not the burn.",
     "o5_coast_kepler": "~2x measured (max 0.314 m, retrograde); equals the approved M1 Kepler limits for the same horizon and dt.",
     "o6_impulsive_limit": "DR-0015 candidates: |p - 2| <= 0.05 over every halving pair (5 levels); slice ratio <= 1e-5.",
     "o7_direction": "Signs exact. Plane rotation and inclination change: round-off class 1e-12 rad (measured <= 1.5e-16).",

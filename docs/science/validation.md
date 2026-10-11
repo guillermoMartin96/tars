@@ -372,3 +372,9 @@ All 10 approved rejection codes are exercised.
   - **The DR-0017 timing bound is separate from trajectory error.** The validators report each burn's `timing_delta_v_error_mps` from `CommandAccepted` as a per-burn timing quantity. They never use it as a trajectory-error bound. The trajectory error is O4/O5/O8.
 - **Thresholds.** `proof/thresholds/m2.json` is **provisional**: the DR-0015 candidates, or the DR-0015 method applied to these measurements (basis per group in the file). No threshold was set or changed to make a check pass. Final values come from T7 (three platforms, threshold DR). FU-1 (GMAT gates; 11–15 µm DOP853 floor) is untouched. O8 excludes dt = 1 s, whose error (~2e-5 m) approaches that floor.
 - **Classification:** no discrepancy. **Status:** provisional Proof evidence (T5); not an approval of any tolerance.
+- **Revision after review M2-T5-review-01 (2026-10-11):**
+  - O4 is now seeded from an independently derived initial state, which is bit-identical to the simulator's (initial error 0). It compares every `StateSampled`, coast and powered, with the reference.
+    - Largest sample errors: 0.2906 / 0.3127 / 0.2891 / 0.2973 m (prograde, retrograde, depletion, invalid commands), all at the end of the horizon.
+  - The reference now restarts at each sample time. Final errors move by at most about 7 µm (slice 0.290351 → 0.290344 m), within the DOP853 cross-platform floor. Cutoff errors move by below 1e-7 m.
+  - The final state is judged at the scenario's requested horizon, and the final-state consistency and depletion pairing are checked both ways.
+

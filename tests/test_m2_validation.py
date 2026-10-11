@@ -263,6 +263,30 @@ def test_propellant_change_while_idle_is_detected(runs):
     assert any("while idle" in v for v in m2.accounting_metrics(scenario, events)[1])
 
 
+def test_missing_receipt_is_detected_independently_of_the_runner(runs):
+    """The submitted count comes from the timeline, not the runner's own list."""
+    mission, scenario, run = runs["m2_invalid_commands"]
+    i = next(i for i, e in enumerate(run.events) if e.type == "CommandRejected")
+    events = run.events[:i] + run.events[i + 1 :]
+    assert any(
+        "receipts" in v for v in m2.check_traceability(scenario, events, mission.expected, run)
+    )
+    tampered = dataclasses.replace(run, unsubmitted_command_ids=["inv-past-001"])
+    assert any(
+        "unsubmitted" in v
+        for v in m2.check_traceability(scenario, run.events, mission.expected, tampered)
+    )
+
+
+def test_run_ending_before_the_scenario_stop_is_detected(runs):
+    mission, scenario, run = _slice(runs)
+    k = next(i for i, e in enumerate(run.events) if e.type == "StateSampled" and e.tick == 600)
+    done = run.events[-1].model_copy(update={"tick": 600, "t": 6000.0})
+    events = [*run.events[: k + 2], done]
+    predicted = m2.predict_burns(scenario, mission.expected)
+    assert any("scenario stop" in v for v in m2.check_outcomes(scenario, events, predicted))
+
+
 # ------------------------------------------------------------------ DR-0018 boundary
 
 
@@ -503,3 +527,102 @@ def test_expected_helpers():
     assert Expected("accepted") == ACCEPT
     assert reject("x") == Expected("rejected", "x")
     assert dataclasses.is_dataclass(m2.PredictedBurn)
+
+
+# ------------------------------------------------------------------ review M2-T5 mutants
+
+
+def _o4(scenario, events, mission):
+    return m2.reference_metrics(scenario, events, m2.predict_burns(scenario, mission.expected))[0]
+
+
+def _fails(group, metrics, mission="all"):
+    limits = {**LIMITS[group]["all"], **LIMITS[group].get(mission, {})}
+    return [k for k, v in limits.items() if not metrics[k] <= v]
+
+
+def test_wrong_initial_orbit_fails_o4(monkeypatch):
+    """F1: the reference is seeded from the scenario, not from SimulationStarted."""
+    from tars.sim import runner
+
+    original = runner.initial_state
+
+    def rotated(scenario):
+        r, v = original(scenario)
+        rot = np.array([[0.0, -1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+        return rot @ r, rot @ v
+
+    monkeypatch.setattr(runner, "initial_state", rotated)
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    run = run_scenario(scenario)
+    failed = _fails("o4_reference", _o4(scenario, run.events, mission))
+    assert "initial_position_rel_error" in failed and "final_position_error_m" in failed
+
+
+def test_expected_initial_state_matches_the_production_state_to_round_off():
+    from tars.sim.runner import initial_state
+
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    (r, v), (r0, v0) = m2.expected_initial_state(scenario), initial_state(scenario)
+    assert np.linalg.norm(r - r0) <= 1e-15 * np.linalg.norm(r)
+    assert np.linalg.norm(v - v0) <= 1e-15 * np.linalg.norm(v)
+
+
+def test_premature_success_fails_outcomes_and_o4():
+    """F2: a run that stops early is judged at the scenario's requested horizon."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    raw = scenario.model_dump(mode="json")
+    raw["stop"] = {"duration_s": 3000.0}
+    short = run_scenario(ScenarioV2.model_validate(raw))
+    predicted = m2.predict_burns(scenario, mission.expected)
+    assert any("scenario stop" in v for v in m2.check_outcomes(scenario, short.events, predicted))
+    assert "final_position_error_m" in _fails("o4_reference", _o4(scenario, short.events, mission))
+
+
+def test_corrupted_powered_sample_fails_o4(runs):
+    """F3: every StateSampled, including those during a burn, is checked."""
+    mission, scenario, run = _slice(runs)
+    events = [
+        e.model_copy(update={"r": tuple(2 * x for x in e.r)})
+        if e.type == "StateSampled" and e.t == 660.0
+        else e
+        for e in run.events
+    ]
+    assert "sample_position_error_max_m" in _fails("o4_reference", _o4(scenario, events, mission))
+
+
+def test_inconsistent_final_state_is_detected(runs):
+    """F3: SimulationCompleted, the final samples and RunResult must agree."""
+    _, _, run = _slice(runs)
+    done = run.events[-1].model_copy(update={"r": (1e9, 0.0, 0.0), "v": (1e6, 0.0, 0.0)})
+    events = [*run.events[:-1], done]
+    assert m2.check_final_consistency(run.events, run) == []
+    assert m2.check_final_consistency(events, run)
+    stale = dataclasses.replace(
+        run, final_propulsion=runs["m2_burn_to_depletion"][2].final_propulsion
+    )
+    assert any("final_propulsion" in v for v in m2.check_final_consistency(run.events, stale))
+
+
+def test_bogus_completion_at_an_active_stop_is_detected():
+    """F3: the DR-0018 boundary check reconciles the completion state with the samples."""
+    base = BY_NAME["m2_prograde_burn"].build()
+    case = m2.BOUNDARY_CASES[0]
+    variant = m2.boundary_variant(base, case)
+    longer = run_scenario(m2.boundary_variant(base, case, stop_s=base.stop.duration_s))
+    run = run_scenario(variant)
+    run.events[-1] = run.events[-1].model_copy(update={"r": (1e9, 0.0, 0.0)})
+    assert m2.boundary_violations(variant, run, longer, (ACCEPT,))
+
+
+@pytest.mark.parametrize("change", ["delete", "mismatch"])
+def test_missing_or_mismatched_depletion_event_is_detected(runs, change):
+    """F4: every depleted BurnEnded needs its PropellantDepleted immediately before."""
+    _, scenario, run = runs["m2_burn_to_depletion"]
+    if change == "delete":
+        events = [e for e in run.events if e.type != "PropellantDepleted"]
+    else:
+        events = _replace(run.events, lambda e: e.type == "PropellantDepleted", event_t_s=724.0)
+    assert any("PropellantDepleted" in v for v in m2.check_event_order(scenario, events))

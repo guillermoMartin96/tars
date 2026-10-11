@@ -262,6 +262,17 @@ def check_event_order(scenario: ScenarioV2, events: Sequence[Any]) -> list[str]:
             and b.event_t_s == a.event_t_s
         ):
             v.append(f"event {i}: PropellantDepleted not followed by its BurnEnded")
+        if (
+            b.type == "BurnEnded"
+            and b.end_cause == "propellant_depleted"
+            and not (
+                a.type == "PropellantDepleted"
+                and (a.burn_id, a.command_id, a.event_t_s) == (b.burn_id, b.command_id, b.event_t_s)
+            )
+        ):
+            v.append(f"event {i + 1}: depleted BurnEnded without its PropellantDepleted")
+    if events and events[0].type == "BurnEnded" and events[0].end_cause == "propellant_depleted":
+        v.append("depleted BurnEnded without its PropellantDepleted")
 
     # Envelope: the report tick is computed independently of the simulator.
     submit_tick = {e.burn_id: e.tick for e in events if e.type == "CommandAccepted"}
@@ -301,8 +312,18 @@ def check_event_order(scenario: ScenarioV2, events: Sequence[Any]) -> list[str]:
     return v
 
 
-def _payload_value(payload: dict[str, Any], name: str) -> Any:
-    return payload.get(name)
+def expected_submissions(scenario: ScenarioV2, events: Sequence[Any]) -> int:
+    """Number of timeline entries the contract says were submitted, from the timeline.
+
+    Entries due at tick k are submitted only if the run continues past k (contract
+    "Emission order"). A non-finite step at k + 1 fails after the tick-k submissions,
+    so for that cause entries due at the final tick were submitted too.
+    """
+    done = events[-1]
+    final = done.tick
+    inclusive = done.failure_cause == "non_finite"
+    ticks = [scenario.submit_tick(e) for e in scenario.commands]
+    return sum(k < final or (inclusive and k == final) for k in ticks)
 
 
 def check_traceability(
@@ -315,8 +336,15 @@ def check_traceability(
     v: list[str] = []
     receipts = _of(events, *COMMAND_EVENTS)
     entries = scenario.commands
-    if len(receipts) != len(entries) - len(result.unsubmitted_command_ids):
-        v.append(f"{len(receipts)} receipts for {len(entries)} timeline entries")
+    # The submitted count is derived from the timeline, not from the runner's own
+    # unsubmitted list; that list is then checked against the remainder.
+    n = expected_submissions(scenario, events)
+    if len(receipts) != n:
+        v.append(f"{len(receipts)} receipts, {n} timeline entries due before the end")
+    rest = [e.command.get("command_id") for e in entries[n:]]
+    rest = [c if isinstance(c, str) else None for c in rest]
+    if list(result.unsubmitted_command_ids) != rest:
+        v.append(f"unsubmitted {result.unsubmitted_command_ids}, expected {rest}")
     for i, (entry, rec, exp) in enumerate(zip(entries, receipts, expected, strict=False)):
         payload = entry.command
         cid = payload.get("command_id")
@@ -430,7 +458,10 @@ def check_outcomes(
     done = events[-1]
     if done.status != "success" or done.failure_cause is not None:
         v.append(f"run ended {done.status}/{done.failure_cause}")
-    stop_t = done.t
+    # The predicted lifecycle uses the scenario's stop time, not the log's final time.
+    stop_t = scenario.stop.duration_s if scenario.stop.duration_s is not None else done.t
+    if done.t != stop_t:
+        v.append(f"run ended at {done.t!r}, scenario stop {stop_t!r}")
     starts = {e.burn_id: e for e in _of(events, "BurnStarted")}
     ends = {e.burn_id: e for e in _of(events, "BurnEnded")}
     active: str | None = None
@@ -767,15 +798,55 @@ def dop853_reference(
     return out
 
 
+def expected_initial_state(scenario: ScenarioV2) -> tuple[np.ndarray, np.ndarray]:
+    """Circular-orbit initial state from the scenario elements (textbook rotation).
+
+    r = R (cos W cos u - sin W sin u cos i, sin W cos u + cos W sin u cos i, sin u sin i)
+    v = sqrt(mu/R) (-cos W sin u - sin W cos u cos i, -sin W sin u + cos W cos u cos i,
+                    cos u sin i)
+    with R = equatorial radius + altitude, W = RAAN, u = argument of latitude.
+    Written independently of tars.astro.elements (review M2-T5 F1).
+    """
+    orbit, c = scenario.initial_orbit, scenario.constants
+    radius = c.equatorial_radius + orbit.altitude_m
+    inc, raan, u = (
+        math.radians(orbit.inclination_deg),
+        math.radians(orbit.raan_deg),
+        math.radians(orbit.arg_latitude_deg),
+    )
+    cw, sw, cu, su, ci, si = (
+        math.cos(raan), math.sin(raan), math.cos(u), math.sin(u), math.cos(inc), math.sin(inc)
+    )  # fmt: skip
+    speed = math.sqrt(c.mu / radius)
+    r = radius * np.array([cw * cu - sw * su * ci, sw * cu + cw * su * ci, su * si])
+    v = speed * np.array([-cw * su - sw * cu * ci, -sw * su + cw * cu * ci, cu * si])
+    return r, v
+
+
+def horizon_s(scenario: ScenarioV2, events: Sequence[Any]) -> float:
+    """The requested end time: the scenario's duration stop (review M2-T5 F2)."""
+    return scenario.stop.duration_s if scenario.stop.duration_s is not None else events[-1].t
+
+
 def reference_metrics(
     scenario: ScenarioV2, events: Sequence[Any], predicted: Sequence[PredictedBurn]
 ) -> tuple[dict[str, float], dict[float, np.ndarray]]:
-    """O4: simulator vs DOP853 at every cutoff (BurnEnded state) and at the final tick."""
+    """O4: simulator vs DOP853 seeded from the independently derived initial state.
+
+    Compared: the initial state, every cutoff (BurnEnded), every StateSampled (coast
+    and powered), and the final state at the scenario's requested horizon. A log that
+    ends early is compared at the horizon's reference state and fails.
+    """
     start = events[0]
     done = events[-1]
+    r0, v0 = expected_initial_state(scenario)
     ends = {e.burn_id: e for e in _of(events, "BurnEnded")}
-    marks = [b.cutoff_t_s for b in predicted if b.burn_id in ends] + [done.t]
-    ref = dop853_reference(scenario, start.r, start.v, predicted, marks)
+    samples = _of(events, "StateSampled")
+    end_t = horizon_s(scenario, events)
+    marks = sorted(
+        {b.cutoff_t_s for b in predicted if b.burn_id in ends} | {s.t for s in samples} | {end_t}
+    )
+    ref = dop853_reference(scenario, r0, v0, predicted, marks)
     cut_pos = cut_vel = 0.0
     for b in predicted:
         e = ends.get(b.burn_id)
@@ -784,14 +855,70 @@ def reference_metrics(
         y = ref[b.cutoff_t_s]
         cut_pos = max(cut_pos, float(np.linalg.norm(np.array(e.r) - y[:3])))
         cut_vel = max(cut_vel, float(np.linalg.norm(np.array(e.v) - y[3:6])))
-    y = ref[done.t]
+    traj_pos = traj_vel = 0.0
+    for smp in samples:
+        y = ref[smp.t]
+        traj_pos = max(traj_pos, float(np.linalg.norm(np.array(smp.r) - y[:3])))
+        traj_vel = max(traj_vel, float(np.linalg.norm(np.array(smp.v) - y[3:6])))
+    y = ref[end_t]
     metrics = {
+        "initial_position_rel_error": float(np.linalg.norm(np.array(start.r) - r0))
+        / float(np.linalg.norm(r0)),
+        "initial_velocity_rel_error": float(np.linalg.norm(np.array(start.v) - v0))
+        / float(np.linalg.norm(v0)),
         "cutoff_position_error_max_m": cut_pos,
         "cutoff_velocity_error_max_mps": cut_vel,
+        "sample_position_error_max_m": traj_pos,
+        "sample_velocity_error_max_mps": traj_vel,
         "final_position_error_m": float(np.linalg.norm(np.array(done.r) - y[:3])),
         "final_velocity_error_mps": float(np.linalg.norm(np.array(done.v) - y[3:6])),
     }
     return metrics, ref
+
+
+def check_final_consistency(events: Sequence[Any], result: RunResult) -> list[str]:
+    """The end of the log tells one story (review M2-T5 F3): SimulationCompleted, the
+    final StateSampled, RunResult.final, the last PropulsionSampled and
+    RunResult.final_propulsion all describe the same final tick."""
+    v: list[str] = []
+    done = events[-1]
+    last_state = _of(events, "StateSampled")[-1]
+    if last_state.tick != done.tick or (last_state.r, last_state.v) != (done.r, done.v):
+        v.append("SimulationCompleted state differs from the final StateSampled")
+    final = result.final
+    if final is None or (final.tick, tuple(final.r), tuple(final.v)) != (
+        done.tick,
+        tuple(done.r),
+        tuple(done.v),
+    ):
+        v.append("RunResult.final differs from SimulationCompleted")
+    props = _of(events, "PropulsionSampled")
+    fp = result.final_propulsion
+    if (fp is None) != (not props):
+        v.append("final propulsion presence differs between log and result")
+    elif fp is not None:
+        last = props[-1]
+        got = (
+            last.tick,
+            last.propellant_kg,
+            last.total_mass_kg,
+            last.delta_v_sensed_mps,
+            last.engine_state,
+            last.active_burn_id,
+            tuple(last.pending_burn_ids),
+        )
+        want = (
+            fp.tick,
+            fp.propellant_kg,
+            fp.total_mass_kg,
+            fp.delta_v_sensed_mps,
+            str(fp.engine_state),
+            fp.active_burn_id,
+            tuple(fp.pending_burn_ids),
+        )
+        if got != want or last.tick != done.tick:
+            v.append(f"last PropulsionSampled {got} differs from final_propulsion {want}")
+    return v
 
 
 # --------------------------------------------------------------- O5 coast arcs
@@ -1046,6 +1173,7 @@ def boundary_violations(
     v += check_traceability(variant, events, expected, run)
     predicted = predict_burns(variant, expected)
     v += check_outcomes(variant, events, predicted)
+    v += check_final_consistency(events, run)
     stop_tick = events[-1].tick
     mine = [e.model_dump_json() for e in events if e.type in ("OrbitCompleted", *ENGINE_EVENTS)]
     theirs = [
