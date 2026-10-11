@@ -1,6 +1,6 @@
 # Decision Request: Burn timing fidelity (event-time representability) and depletion boundary
 
-**Status:** OPEN  
+**Status:** RESOLVED  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-10  
 **Related milestone/issue:** M2 T2; external review M2-T2-review-01 (REV-T2-03, re-verification N1); DR-0013 3A; DR-0014; SCI-0012
@@ -105,6 +105,18 @@ Items 1–2 follow from approved decisions (DR-0013 3A; SCI-0012, "propellant ne
 `B + D1a` / `A + D1a` / `… + D1b` / `… + D2` / `C …` / `D` / `discuss`; and the budget value and scope if B.
 
 ## Resolution
-**Decision:** <fill after response>  
-**Reasoning/notes:** ...  
-**Follow-up:** ...
+**Decision:** APPROVED, **B + D1a**, with safeguards (Tech Lead, 2026-10-10).
+1. **B.** Reject a burn when the projected Δv error caused by timing representation exceeds **1e-7 m/s** (per burn).
+2. Compute the bound from the **actual acceleration and the executed interval**, and document its assumptions and limitations.
+3. Reject non-finite or unrepresentable timing inputs.
+4. Scheduling failures use `burn_unschedulable`.
+5. **D1a.** Stop at the last representable time before depletion and retain the residual propellant.
+6. Machine-readable events distinguish depletion termination from a normal cutoff.
+7. Add boundary tests for large mission times, acceleration extremes, and depletion.
+
+**Reasoning/notes:** B replaces the provisional absolute 1 µs bound. The rule bounds timing-induced Δv per burn, not trajectory error (see option B scope limit).
+
+**Follow-up:**
+- Implementation and an independent Codex verification follow in the M2 branch.
+- SCI-0012 note on the depletion residual.
+- T2 completion record.

@@ -1,10 +1,9 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T2 COMPLETE, pending the DR-0017 decision (2026-10-10).
-- T1 and T2 are implemented and reviewed by a separate provider (`docs/reviews/M2-T1-review-01.md`, `M2-T2-review-01.md`).
-- DR-0010…0014 and DR-0016 are approved. DR-0015 is conditionally approved. **DR-0017 is OPEN** (burn timing fidelity and depletion residual); the provisional 1 µs rule and D1a are in place until it is decided.
-- REV-012 is resolved.
-- T3 and later tasks need separate approval. No merge to `main` without Tech Lead approval.  
+**Status:** T3 AUTHORIZED; T2 finishing DR-0017 (2026-10-10).
+- DR-0017 approved: B + D1a, with safeguards.
+- ADR-0007 T2 choices approved as M2 design constraints.
+- T4 and merge to `main` need separate authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  
 **Definition of done:** prototype phase (proof/definition-of-done.md), unless the Tech Lead sets a stricter bar.
@@ -240,6 +239,12 @@ The Proof record is written only after the work it describes is committed (playb
 | [DR-0013](../decisions/requests/DR-0013-propulsion-architecture-and-integration.md) | Architecture and integration | 1A+2A+3A+4A+5: augmented state, separate subsystem, split steps, M1 path untouched |
 | [DR-0014](../decisions/requests/DR-0014-maneuver-commands-and-failure-behavior.md) | Commands, failure behavior, events | 1A duration, 2A any time, 3C policy default reject |
 | [DR-0015](../decisions/requests/DR-0015-m2-validation-strategy-and-tolerances.md) | Validation, GMAT, REV-012, tolerances | A: GMAT gated after REV-012; oracles O1–O9; threshold DR after measurement |
+
+## 12a. Tracked follow-ups
+| ID | Follow-up | Constraint |
+|---|---|---|
+| FU-1 | **DR-0015 GMAT gate recalibration** (O9 rows), with aligned stepping (DR-0016) | Re-derive from measurements. Account for the observed **11–15 µm cross-platform noise floor** of the DOP853 reference at 53 700 s (VAL-0010 addendum). No gate tighter than that floor unless the reference is made platform-robust. Threshold DR at T7. |
+| FU-2 | Experiment-script lint cleanup (`docs/science/experiments/m2-planning`) | **Deferred**; do not perform (Tech Lead, 2026-10-10). |
 
 ## 13. Proposed first implementation task
 **T1: propulsion pure model.** Needs DR-0011 and DR-0012; independent of DR-0013/0014.

@@ -24,7 +24,15 @@ See DR-0013 (state, derivative boundary, discontinuity handling, M1 preservation
   - M1 6-state path unchanged when no propulsion is configured.
 
 ## Implementation notes (T2, `f4b9774`)
-These clarify how T2 implements the approved decisions. They are surfaced for Tech Lead review; none changes an approved boundary.
+These clarify how T2 implements the approved decisions.
+
+**Approved by the Tech Lead on 2026-10-10 as deliberate M2 design constraints, not universal requirements:**
+- submission-order scheduling only (M2);
+- `schedule_burn` plus two read-only propulsion views in the public API;
+- the propellant floor applied at cutoff;
+- plans report executed intervals while preserving commanded intervals for audit.
+
+Any of these may be revisited by a later decision.
 - **Single command entry point.** `Simulator.schedule_burn(direction, ignition_t_s, duration_s, policy)` is the engine-level entry point (DR-0013 §5). It changes only the engine schedule, never r, v, mass or propellant. T3's `submit(BurnCommand) -> CommandReceipt` will wrap it, so there remains a single entry point. M1's public-API allowlist test was extended for this method and two read-only views (`propulsion_snapshot`, `engine_transitions`).
 - **Burn ordering on one engine.** Burns execute in submission order. A new burn may not ignite before the cutoff of any burn already scheduled or in progress:
   - `engine_busy` if the conflict is with the burn in progress;
