@@ -486,7 +486,7 @@ def test_m2_thresholds_are_provisional_and_scoped():
 @pytest.mark.parametrize(
     ("edit", "message"),
     [
-        (lambda d: d["limits"].update({"o9_gmat": {"all": {}}}), "match no validator"),
+        (lambda d: d["limits"].update({"o10_unknown": {"all": {}}}), "match no validator"),
         (lambda d: d["limits"]["o4_reference"].update({"m2_typo": {}}), "match no mission"),
         (lambda d: d.update({"status": "final"}), "invalid threshold status"),
     ],

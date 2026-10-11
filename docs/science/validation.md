@@ -396,3 +396,54 @@ All 10 approved rejection codes are exercised.
     - This explains a mechanism; it does not loosen a tolerance. The reference missions' gate is unchanged in effect.
   - **O8 auxiliary runs** keep the mission's 60 s telemetry grid (only dt changes), so their samples are compared with the same reference. The final errors are unchanged: dt = 10 / 5 / 2.5 s gives 0.29034 / 0.014658 / 0.000809 m (orders 4.31, 4.18).
 
+## VAL-0014 — T6: GMAT R2026a finite-burn references and O9 (provisional thresholds; reference host)
+- **Date / revision:** 2026-10-11. References generated and verified on the reference host (macOS x86_64, GMAT R2026a, build Mar 26 2026). Code: `src/tars/validation/gmat_m2.py`, `toolbox/scripts/gmat_m2.py`. References: `toolbox/references/gmat/m2/`.
+- **Purpose.** O9 (DR-0015): use an external, trusted tool as an independent physics reference for finite burns, generated with DR-0016 aligned stepping.
+- **Configuration.** See the GMAT README M2 section.
+  - The engine coefficients and g0 are pinned explicitly.
+  - The arcs come from the commanded times (scenario inputs).
+  - Steps are aligned: 60 s on coasts, 1 s during burns, one step on realignment arcs.
+  - Missions: prograde, retrograde, invalid commands (three burns, two of them adjacent with opposite directions). Depletion is excluded (below).
+- **Method.**
+  - **Labels.** Rows are labelled from the step schedule, never from GMAT's epoch or `ElapsedSecs` columns (VAL-0010 M-a).
+  - **Alignment verification.** Each reference is checked before storing and on every compare: row counts, step spacing, burn duration from mass, and coasts vs exact Kepler.
+  - **GMAT vs independent references.** GMAT is compared with the independent-RHS DOP853 at every row, and its mass with the analytic mass law.
+  - **The simulator vs GMAT.** Compared at every telemetry sample, at every ignition and cutoff (exact GMAT arc boundaries), in mass at every propulsion sample on a GMAT row (902 per mission), at node crossings (GMAT's located by Kepler bisection), and at 53 700 s.
+- **Results (reference host):**
+
+| Quantity | Prograde | Retrograde | Invalid cmds | Provisional limit (basis in `m2.json`) |
+|---|---|---|---|---|
+| Rows (aligned, counts exact) | 973 | 973 | 956 | exact |
+| Step spacing from GMAT epoch | 2.3e-7 s | 2.3e-7 s | 2.3e-7 s | 1e-6 s (epoch resolution) |
+| Burn duration from GMAT mass | 1.4e-10 s | 1.4e-10 s | 5.5e-11 s | 1e-9 s (≈ 2× VAL-0010) |
+| GMAT coasts vs Kepler | 4.0e-6 m | 1.6e-6 m | 3.8e-6 m | 1e-4 m (approved M1) |
+| GMAT vs DOP853, max over rows | 4.7e-6 m, 5.4e-9 m/s | 3.6e-6 m, 4.3e-9 m/s | 6.2e-7 m, 6.9e-10 m/s | 3e-5 m, 3.5e-8 m/s (2× the 15 µm DOP853 floor, FU-1) |
+| GMAT mass vs mass law | 2.3e-11 kg | 2.3e-11 kg | 1.8e-11 kg | 1.3e-9 kg (O1 round-off class) |
+| Ours vs GMAT, samples (max) | 0.291 m, 3.35e-4 m/s | 0.313 m, 3.64e-4 m/s | 0.297 m, 3.50e-4 m/s | 0.6 m, 7e-4 m/s |
+| Ours vs GMAT, ignition/cutoff states | 7.7e-4 m, 1.2e-6 m/s | 7.8e-4 m, 1.2e-6 m/s | 8.0e-3 m, 1.0e-5 m/s | O4 cutoff limits (invalid cmds scoped) |
+| Ours vs GMAT at 53 700 s | 0.290 m | 0.313 m | 0.297 m | 0.6 m |
+| Ours vs GMAT, mass | 2.3e-11 kg | 2.3e-11 kg | 1.7e-11 kg | 1.3e-9 kg |
+| Ours vs GMAT, node crossings | 3.2e-5 s | 4.0e-5 s | 3.3e-5 s | 8e-5 s |
+
+- **Classification (as M1).**
+  - Ours vs GMAT equals ours vs DOP853 (O4) to within micrometres: 0.29034 m and 0.29034 m for the slice.
+  - GMAT vs DOP853 is 5 orders of magnitude smaller.
+  - So the simulator's difference from GMAT is its own RK4 truncation error (VAL-0012), not a modelling disagreement. The burn itself (ignition and cutoff states) contributes about 1 mm.
+- **Discrepancies and uncertainty.**
+  - **Aligned stepping is better here than in REV-012.** GMAT vs DOP853 is 0.6–4.7 µm, against 12 µm measured on the REV-012 aligned case. The T6 schedule realigns to the 60 s grid after each cutoff (REV-012 coasted 53 022.7 s from the cutoff), so the comparison points differ. Either way, the value is at or below the DOP853 reference's own cross-platform floor (11–15 µm, VAL-0010 addendum). It bounds GMAT's disagreement rather than measuring it, and the gate is set from the floor, not from these values (FU-1).
+  - **Epoch column.** It carries per-command re-rounding (M-a). It is used only for spacing verification, with a resolution of about 3e-7 s per value.
+  - **Mass.** GMAT and our mass agree to 2e-11 kg, the round-off level of 1300 kg. GMAT's burn duration inferred from mass agrees to 1.4e-10 s; DR-0016's aligned stepping removed the 1.85e-7 s VAL-0009 shortfall.
+  - **The DR-0017 timing bound is not involved.** O9 measures trajectory, mass and timing differences against GMAT. It does not use, and is not bounded by, the DR-0017 per-burn timing Δv quantity.
+  - **DR-0018 is not exercised.** The GMAT missions all stop after their burns, so no burn crosses the observation stop.
+- **Depletion.**
+  - GMAT cannot propagate a burn to exact depletion with `AllowNegativeFuelMass = false`. Its stop-condition step overshoots and the tank reaches −0.0064 kg, so GMAT throws.
+  - This is the known VAL-0009 finding 4. Depletion is validated analytically (O1, O2, D1a).
+- **Reproducibility.**
+  - GMAT re-runs reproduce every report byte for byte.
+  - A replacement before review (header comment reworded) left the reports byte-identical.
+- **Negative and mutation tests** (`tests/test_gmat_m2.py`).
+  - **Rejected references:** a tampered report, g0 = 9.81, a C1 change, K3 ≠ 0, a changed Accuracy, wrong metadata constants, a missing row, an unaligned step, and a 1 mm GMAT state or 1 mg GMAT mass error (caught by the independent references).
+  - **Simulator mutants that fail O9:** thrust × (1 + 1e-5), g0 = 9.81, frozen pointing, swapped retrograde direction, cutoff timing × (1 + 1e-9).
+  - **Each O9 check disabled in turn** makes a test fail.
+- **Classification:** no discrepancy. **Status:** provisional Proof evidence (T6); thresholds remain provisional until the T7 three-platform measurement and threshold DR.
+

@@ -143,7 +143,7 @@ def m2_script(
         " -- do not edit.",
         f"%% scenario_hash: {scenario.config_hash()}",
         "%% Model: point-mass Earth; ideal constant-thrust engine, a = F/m, velocity-tracking",
-        "%% VNB pointing; standard gravity g0 overridden (GMAT default 9.81, VAL-0009).",
+        "%% VNB pointing; standard gravity g0 overridden (GMAT default differs, VAL-0009).",
         "",
         f"GMAT Earth.Mu = {c.mu / 1e9!r};",
         f"GMAT Earth.EquatorialRadius = {c.equatorial_radius / 1000.0!r};",

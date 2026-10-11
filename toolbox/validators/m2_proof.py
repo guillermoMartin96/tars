@@ -34,10 +34,10 @@ from typing import Any
 import tars
 from tars.sim.runner import RunResult, run_scenario
 from tars.sim.scenario import ScenarioV2
-from tars.validation import m2
+from tars.validation import gmat_m2, m2
 from tars.validation.cross_platform import platform_info
 from tars.validation.m2_missions import ACCEPT, MISSIONS, Mission
-from tars.validation.thresholds import Check, load_scoped_thresholds
+from tars.validation.thresholds import Check, load_scoped_thresholds, load_thresholds
 
 O3_DURATION_S = 77.3  # the slice burn, in free space
 
@@ -88,6 +88,7 @@ REPORT_ONLY = frozenset(
         "retrograde_position_error_dt10_m", "retrograde_position_order",
         "post_burn_coast_position_error_max_m",
         "sensed_delta_v_rel_error_max", "sample_delta_v_rel_error_max",
+        "gmat_rows", "mass_samples_compared",
     }
 )  # fmt: skip
 _REPORT_PREFIXES = ("burn0", "order_pair_", "order_10_to", "order_5_to", "position_error_dt")
@@ -185,6 +186,20 @@ def mission_checks(
         ],
         "burns": _burn_table(scenario, run),
     }
+    if mission.name in gmat_m2.GMAT_MISSIONS:
+        # O9 (T6): committed GMAT reference, verified before use (DR-0016, DR-0009).
+        gates_m1 = load_thresholds().for_validator("gmat_reference")
+        o9 = gmat_m2.compare_committed(
+            mission.name,
+            scenario,
+            mission.expected,
+            events,
+            gates_m1["script_initial_position_difference_m"],
+            gates_m1["script_initial_velocity_difference_mps"],
+        )
+        checks.append(_exact(f"o9_reference_integrity[{tag}]", o9.violations))
+        if not o9.violations:
+            checks.append(gates.check("o9_gmat", f"o9_gmat[{tag}]", tag, o9.metrics))
     has_burns = any(e.type == "BurnEnded" for e in events)
     if has_burns and not quick:
         # O8: auxiliary runs at smaller dt are audited like the mission (review F6).

@@ -56,7 +56,10 @@ jobs:
             uv run python toolbox/validators/determinism.py --scenario "$s"
           done
 
-      - name: M2 Proof (O1-O8 and contract checks; thresholds provisional)
+      - name: M2 GMAT reference comparison (committed artifacts only; GMAT not installed)
+        run: uv run python toolbox/scripts/gmat_m2.py compare
+
+      - name: M2 Proof (O1-O9 and contract checks; thresholds provisional)
         run: uv run python toolbox/validators/m2_proof.py --out runs/proof/m2_${{ matrix.os }}.json
 
       - name: Upload Proof report

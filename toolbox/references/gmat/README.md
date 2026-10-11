@@ -83,3 +83,61 @@ The drift was deferred by the Tech Lead on 2026-10-05, then investigated before 
   - Use aligned stepping (`InitialStepSize = MaxStep` dividing every stop time), with mandatory alignment verification, and stream report rows from one `Propagate` per arc.
   - Do **not** align comparisons on GMAT's epoch or `Sat.ElapsedSecs` columns: both carry the M-a drift. The earlier guidance in this section said the opposite and is superseded.
 - Measured on the reference burn at 53 700 s: GMAT vs independent DOP853 is 1.17 cm with natural stepping and 12 µm with aligned stepping.
+
+# GMAT reference: Milestone 2 finite burns (T6, O9)
+
+`m2/` holds committed GMAT R2026a references for the M2 missions `m2_prograde_burn`, `m2_retrograde_burn` and `m2_invalid_commands`. CI compares against them without GMAT. Authority: DR-0015 option A (GMAT as a gated reference), DR-0016 A (aligned stepping and mandatory verification), DR-0009 (references are evidence).
+
+| File (per mission) | Purpose |
+|---|---|
+| `<mission>.script` | Generated from the scenario by `toolbox/scripts/gmat_m2.py`. Do not edit. |
+| `<mission>_report.txt` | One row per GMAT integrator step: arc number, A1 MJD, r, v, total mass. |
+| `<mission>_metadata.json` | Provenance: GMAT build, console sha256, scenario hash, script/report sha256, constants, model, replace reason. |
+| `<mission>_console.log` | GmatConsole output (paths scrubbed). |
+
+## Configuration (generated from scenario inputs only)
+- **Earth:** point mass, WGS 84 `Mu` and radius, as M1.
+- **Spacecraft:** dry mass and tank fuel from the scenario; `AllowNegativeFuelMass = false`.
+- **Engine:** one `ChemicalThruster` per direction used.
+  - Local VNB axes, `ThrustDirection1 = ±1` (prograde/retrograde, DR-0012).
+  - `C1 = F` [N], `K1 = Isp` [s], and **every other C2..C16, K2..K16 explicitly 0**.
+  - `GravitationalAccel = 9.80665` (standard g0; GMAT's default differs, VAL-0009).
+  - `DecrementMass = true`, `DutyCycle = 1`, `ThrustScaleFactor = 1`.
+- **Burns:** `BeginFiniteBurn`/`EndFiniteBurn` around exactly the predicted burn arcs. The arcs come from the commanded times via `tars.validation.m2.predict_burns`, never from simulator output.
+- **Integrator:** PrinceDormand78, Accuracy 1e-13.
+- **Aligned stepping (DR-0016 A):** every arc is one `Propagate` with `InitialStepSize = MaxStep = h`:
+  - h = 60 s on grid-aligned coasts;
+  - h = 1 s during burns;
+  - h = the arc length for the short arcs that realign a cutoff to the 60 s telemetry grid (for example 677.3 → 720 s).
+  - Every stop then lands on a natural step, so GMAT's microsecond stop rounding (M-b) is a no-op.
+- **Row times** are assigned from the step schedule. GMAT R2026a writes the first arc's start state, then one row per step; later arcs do not repeat their start. GMAT's epoch and `ElapsedSecs` columns are **not** used as time labels, because they carry the per-command re-rounding (M-a).
+
+## Mandatory alignment verification (DR-0016), run before a reference is stored and on every compare
+- the row count of every arc equals the schedule;
+- step spacing from GMAT's epoch column agrees with the schedule (measured 2.3e-7 s, the epoch resolution);
+- burn duration from GMAT's own mass agrees with the predicted burn (measured ≤ 1.4e-10 s);
+- every coast row agrees with exact Kepler propagation of its arc's GMAT start state (measured ≤ 4.0e-6 m).
+
+## Workflow
+```bash
+uv run python toolbox/scripts/gmat_m2.py generate            # scripts only
+uv run python toolbox/scripts/gmat_m2.py run --gmat-console "$HOME/Applications/GMAT R2026a/bin/GmatConsole" --gmat-version R2026a
+uv run python toolbox/scripts/gmat_m2.py compare             # O9; also inside m2_proof.py
+```
+
+- **Replacement guard.** `run` refuses to overwrite a committed reference without `--replace-reason`, which is stored in the metadata.
+- **`compare` rejects a reference when:**
+  - any non-state script line differs from the regenerated script (constants, every engine coefficient, g0, masses, arcs, steps);
+  - the initial-state literals differ beyond the approved DR-0009 bound;
+  - the metadata constants differ;
+  - a sha256 does not match;
+  - the rows are not step-aligned.
+- **Reproducibility.** Re-running GMAT reproduces every committed report byte for byte (`tests/test_gmat_m2.py::test_gmat_reproduces_the_committed_report`, skipped where GMAT is not installed).
+- **Replacement history.** The first references (`1de827e`) were replaced once before review, with a recorded reason: the generator's header comment was reworded. The reports were byte-identical.
+
+## Depletion is not compared with GMAT
+- **What happens.** GMAT's stop-condition logic takes a full step past the stop before backing up.
+  - In a burn to depletion, that step drives the tank negative: −0.0064 kg in the T6 probe.
+  - With `AllowNegativeFuelMass = false`, GMAT stops with "The value of … for field FuelMass … is not an allowed value" (VAL-0009 finding 4).
+- **Not worked around.** Allowing negative fuel would change the reference model.
+- **Validated instead analytically:** O1, O2 and the DR-0017 D1a residual, as DR-0015 provides.

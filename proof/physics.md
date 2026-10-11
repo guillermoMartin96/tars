@@ -29,5 +29,6 @@ Exact tolerances must be established from justified model/validation work, not i
 ## Milestone 2 (in progress)
 The draft M2 Proof requirements P1–P12 are in [`docs/milestones/M2-propulsion.md`](../docs/milestones/M2-propulsion.md) §10. Oracles and threshold method are in DR-0015.
 - Validators (T5): `toolbox/validators/m2_proof.py` (O1–O8 and contract checks); measurements in VAL-0013.
-- `proof/thresholds/m2.json` is **provisional** (status recorded in the file). Final values come from the T7 three-platform measurement and threshold DR. O9 (GMAT) is T6.
+- `proof/thresholds/m2.json` is **provisional** (status recorded in the file). Final values come from the T7 three-platform measurement and threshold DR.
+- O9 (T6): committed GMAT R2026a finite-burn references, `toolbox/scripts/gmat_m2.py compare`; VAL-0014.
 - M1 thresholds and gates are unchanged and remain required (P10).
