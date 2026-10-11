@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_generate_refuses_symlinks_into_the_references ______________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-101/test_generate_refuses_symlinks0')
+
+    def test_generate_refuses_symlinks_into_the_references(tmp_path):
+        """F11: a preview path that is a symlink is never written through."""
+        cli = _cli()
+        out = tmp_path / "preview"
+        out.mkdir()
+        target = tmp_path / "victim.script"
+        target.write_text("committed")
+        (out / "m2_prograde_burn.script").symlink_to(target)
+>       assert cli.main(["generate", "--out", str(out), "--missions", "m2_prograde_burn"]) == 2
+E       AssertionError: assert 0 == 2
+E        +  where 0 = <function main at 0x10b951620>(['generate', '--out', '/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-101/test_generate_refuses_symlinks0/preview', '--missions', 'm2_prograde_burn'])
+E        +    where <function main at 0x10b951620> = <module 'gmat_m2_cli' from '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap3/toolbox/scripts/gmat_m2.py'>.main
+
+tests/test_gmat_m2.py:763: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_generate_refuses_symlinks_into_the_references
+1 failed in 0.13s

@@ -635,21 +635,72 @@ def reference_dir():
     return REPO_ROOT / "toolbox" / "references" / "gmat" / "m2"
 
 
+HISTORY_KEYS = frozenset(
+    {"mission", "generated_utc", "tars_git_revision", "reason", "report_sha256",
+     "previous_record_sha256"}
+)  # fmt: skip
+
+
+def record_digest(record: dict) -> str:
+    """sha256 of a history record's canonical JSON (the chain link)."""
+    import hashlib
+    import json
+
+    return hashlib.sha256(json.dumps(record, sort_keys=True).encode()).hexdigest()
+
+
 def history_problems(name: str, metadata: dict, approved: dict | None) -> list[str]:
-    """The manifest history is well formed and its latest record for this mission is the
-    committed generation (review M2-T6 F8)."""
+    """The manifest history is a valid, chained, chronological record of every
+    generation, and this reference's latest record is its committed generation
+    (reviews M2-T6 F8, F14).
+
+    Every record must name a GMAT mission and carry a plausible UTC timestamp, a
+    non-null 40-hex revision, a non-empty reason and a 64-hex report digest. Records
+    are in non-decreasing time order, and each holds the digest of the previous record
+    (the first holds null). Editing, inserting, reordering or deleting records inside
+    the history therefore breaks the chain. A wholesale rewrite of the whole chain is
+    detectable only by reviewing the manifest's version-control history.
+    """
+    import datetime as _dt
+
     if approved is None:
         return ["approved manifest missing"]
     history = approved.get("history")
-    keys = {"mission", "generated_utc", "tars_git_revision", "reason", "report_sha256"}
-    if not isinstance(history, list) or any(
-        not isinstance(h, dict) or set(h) != keys for h in history
-    ):
-        return ["approved manifest history is malformed"]
+    if not isinstance(history, list) or not history:
+        return ["approved manifest history is missing"]
+    problems: list[str] = []
+    previous: str | None = None
+    last_time = None
+    for i, h in enumerate(history):
+        if not isinstance(h, dict) or set(h) != HISTORY_KEYS:
+            return [f"history record {i} is malformed"]
+        if h["mission"] not in GMAT_MISSIONS:
+            problems.append(f"history record {i}: unknown mission {h['mission']!r}")
+        try:
+            stamp = _dt.datetime.fromisoformat(str(h["generated_utc"]))
+            if stamp.tzinfo is None or stamp.year < 2026:
+                raise ValueError
+        except ValueError:
+            problems.append(f"history record {i}: implausible generated_utc")
+            stamp = None
+        if stamp is not None:
+            if last_time is not None and stamp < last_time:
+                problems.append(f"history record {i}: out of chronological order")
+            last_time = stamp
+        rev = str(h["tars_git_revision"])
+        if not re.fullmatch(r"[0-9a-f]{40}", rev) or set(rev) == {"0"}:
+            problems.append(f"history record {i}: invalid revision")
+        if not isinstance(h["reason"], str) or not h["reason"].strip():
+            problems.append(f"history record {i}: missing reason")
+        if not re.fullmatch(r"[0-9a-f]{64}", str(h["report_sha256"])):
+            problems.append(f"history record {i}: invalid report digest")
+        if h["previous_record_sha256"] != previous:
+            problems.append(f"history record {i}: chain broken")
+        previous = record_digest(h)
     mine = [h for h in history if h["mission"] == name]
     if not mine:
-        return ["approved manifest has no history for this reference"]
-    latest = mine[-1]
+        return [*problems, "approved manifest has no history for this reference"]
+    latest = {k: v for k, v in mine[-1].items() if k != "previous_record_sha256"}
     want = {
         "mission": name,
         "generated_utc": metadata.get("generated_utc"),
@@ -657,7 +708,9 @@ def history_problems(name: str, metadata: dict, approved: dict | None) -> list[s
         "reason": metadata.get("replace_reason") or "initial reference",
         "report_sha256": metadata.get("report_sha256"),
     }
-    return [] if latest == want else [f"latest history record {latest} != metadata {want}"]
+    if latest != want:
+        problems.append(f"latest history record {latest} != metadata {want}")
+    return problems
 
 
 def approved_manifest_path(base=None):

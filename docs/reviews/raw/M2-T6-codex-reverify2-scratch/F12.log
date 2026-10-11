@@ -1,0 +1,66 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_________ test_standalone_evaluation_applies_the_audit_gates[update0] __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106d3b800>
+update = {'thrust_acceleration_mps2': (1.0, 1.0, 1.0)}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"thrust_acceleration_mps2": (1.0, 1.0, 1.0)}, {"delta_v_sensed_mps": 1000.0}],
+    )
+    def test_standalone_evaluation_applies_the_audit_gates(monkeypatch, update):
+        """F12: numerical T5 audit failures reject the standalone comparison."""
+        from tars.sim import runner as runner_module
+    
+        cli = _cli()
+        original = runner_module.run_scenario
+    
+        def corrupted(scenario, *a, **k):
+            run = original(scenario, *a, **k)
+            i = next(
+                i for i, e in enumerate(run.events) if e.type == "PropulsionSampled" and e.tick == 64
+            )
+            run.events[i] = run.events[i].model_copy(update=update)
+            return run
+    
+        monkeypatch.setattr(cli, "run_scenario", corrupted)
+        rejected, check = cli._evaluate("m2_prograde_burn")
+>       assert check is None and any("simulator audit" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:788: AssertionError
+_________ test_standalone_evaluation_applies_the_audit_gates[update1] __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x107a4fb00>
+update = {'delta_v_sensed_mps': 1000.0}
+
+    @pytest.mark.parametrize(
+        "update",
+        [{"thrust_acceleration_mps2": (1.0, 1.0, 1.0)}, {"delta_v_sensed_mps": 1000.0}],
+    )
+    def test_standalone_evaluation_applies_the_audit_gates(monkeypatch, update):
+        """F12: numerical T5 audit failures reject the standalone comparison."""
+        from tars.sim import runner as runner_module
+    
+        cli = _cli()
+        original = runner_module.run_scenario
+    
+        def corrupted(scenario, *a, **k):
+            run = original(scenario, *a, **k)
+            i = next(
+                i for i, e in enumerate(run.events) if e.type == "PropulsionSampled" and e.tick == 64
+            )
+            run.events[i] = run.events[i].model_copy(update=update)
+            return run
+    
+        monkeypatch.setattr(cli, "run_scenario", corrupted)
+        rejected, check = cli._evaluate("m2_prograde_burn")
+>       assert check is None and any("simulator audit" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:788: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_standalone_evaluation_applies_the_audit_gates[update0]
+FAILED tests/test_gmat_m2.py::test_standalone_evaluation_applies_the_audit_gates[update1]
+2 failed in 8.64s

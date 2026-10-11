@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_unapproved_executables_are_not_authenticated _______________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-100/test_unapproved_executables_ar0')
+
+    def test_unapproved_executables_are_not_authenticated(tmp_path):
+        fake = tmp_path / "GmatConsole"
+        fake.write_text(
+            "#!/bin/sh\necho '*** GMAT Integration test (Console version) successful! ***'\n"
+        )
+>       assert not gmat_m2.is_approved_console(fake)
+E       AssertionError: assert not True
+E        +  where True = <function Plugin.pytest_collection_modifyitems.<locals>.<lambda> at 0x1053f5f80>(PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-100/test_unapproved_executables_ar0/GmatConsole'))
+E        +    where <function Plugin.pytest_collection_modifyitems.<locals>.<lambda> at 0x1053f5f80> = gmat_m2.is_approved_console
+
+tests/test_gmat_m2.py:357: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_unapproved_executables_are_not_authenticated
+1 failed in 0.12s

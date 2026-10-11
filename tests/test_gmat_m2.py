@@ -393,6 +393,7 @@ def _rehash(dst, name, manifest=True):
         man["references"][name] = entry
         latest = [h for h in man["history"] if h["mission"] == name][-1]
         latest["report_sha256"] = meta["report_sha256"]
+        _rechain(man["history"])
         (dst / "APPROVED_DIGESTS.json").write_text(json.dumps(man))
 
 
@@ -706,6 +707,7 @@ def _staged_copy(tmp_path, name):
             "tars_git_revision": meta["tars_git_revision"],
             "reason": meta["replace_reason"] or "initial reference",
             "report_sha256": meta["report_sha256"],
+            "previous_record_sha256": gmat_m2.record_digest(man["history"][-1]),
         }
     )
     (stage / "APPROVED_DIGESTS.json").write_text(json.dumps(man, indent=2) + "\n")
@@ -810,3 +812,94 @@ def test_coverage_uses_the_same_tick_report_rule():
     cut = [e for e in events if e.tick <= 60]
     early = gmat_m2.coverage_problems(scenario, predicted, cut, {}, 600.0)
     assert not any("burn boundaries" in p for p in early)
+
+
+# ------------------------------------------------------------------ re-verification 2 fixes
+
+
+def _with_history(tmp_path, monkeypatch, edit):
+    dst = _copy_refs(tmp_path)
+    path = dst / "APPROVED_DIGESTS.json"
+    man = json.loads(path.read_text())
+    edit(man["history"])
+    path.write_text(json.dumps(man))
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    return _compare("m2_prograde_burn").violations
+
+
+def _rechain(history):
+    previous = None
+    for h in history:
+        h["previous_record_sha256"] = previous
+        previous = gmat_m2.record_digest(h)
+
+
+def _then_rechain(edit):
+    """Apply an edit and re-chain, so only the value check under test can catch it."""
+
+    def run(history):
+        edit(history)
+        _rechain(history)
+
+    return run
+
+
+@pytest.mark.parametrize(
+    "edit",
+    [
+        _then_rechain(lambda h: h[0].update(generated_utc="1900-01-01T00:00:00+00:00")),
+        _then_rechain(lambda h: h[0].update(tars_git_revision="0" * 40)),
+        _then_rechain(lambda h: h[0].update(reason=None)),
+        _then_rechain(lambda h: h[0].update(report_sha256="not-a-digest")),
+        _then_rechain(lambda h: h.append({**h[-1], "mission": "invented"})),
+        _then_rechain(lambda h: h.__setitem__(slice(0, 2), [h[1], h[0]])),  # latest kept
+        lambda h: h.__delitem__(slice(0, 3)),  # deletion without re-chaining: chain breaks
+        lambda h: h[0].update(reason="edited"),  # any unchained edit: chain breaks
+    ],
+    ids=["old-timestamp", "zero-revision", "null-reason", "bad-digest", "unknown-mission",
+         "reordered", "deleted", "edited"],
+)  # fmt: skip
+def test_every_history_record_is_validated(tmp_path, monkeypatch, edit):
+    """F14: each value rule, chronology, and the chain itself reject their case."""
+    assert _with_history(tmp_path, monkeypatch, edit)
+
+
+def test_wholesale_history_rewrite_is_the_documented_limit(tmp_path, monkeypatch):
+    """F14 limit, made executable: deleting superseded records AND re-chaining the rest
+    consistently passes; only version-control review of the manifest reveals it."""
+
+    def rewrite(history):
+        del history[:3]
+        _rechain(history)
+
+    assert _with_history(tmp_path, monkeypatch, rewrite) == []
+
+
+@pytest.mark.parametrize("bad", ["1e999", "-1.0", "NaN", '"0.6"'])
+def test_threshold_loaders_reject_non_finite_or_negative_limits(tmp_path, bad):
+    """F15: an overflowing, negative, NaN or non-numeric limit cannot disable a gate."""
+    from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+
+    text = M2_THRESHOLDS.read_text().replace(
+        '"gmat_vs_dop853_position_error_max_m": 3e-05',
+        f'"gmat_vs_dop853_position_error_max_m": {bad}',
+    )
+    assert text != M2_THRESHOLDS.read_text()
+    path = tmp_path / "m2.json"
+    path.write_text(text)
+    with pytest.raises(ValueError, match="threshold"):
+        load_scoped_thresholds(path, missions=frozenset(BY_NAME))
+    m1 = M1_THRESHOLDS.read_text().replace(
+        '"position_error_max_m": 0.6', f'"position_error_max_m": {bad}', 1
+    )
+    path1 = tmp_path / "m1.json"
+    path1.write_text(m1)
+    with pytest.raises(ValueError, match="threshold"):
+        load_thresholds(path1)
+
+
+def test_committed_thresholds_load():
+    from tars.validation.thresholds import load_scoped_thresholds, load_thresholds
+
+    assert load_thresholds().status == "approved"
+    assert load_scoped_thresholds(missions=frozenset(BY_NAME)).status == "provisional"

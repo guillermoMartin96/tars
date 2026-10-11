@@ -143,7 +143,19 @@ uv run python toolbox/scripts/gmat_m2.py compare             # O9; also inside m
   - a sha256 does not match;
   - the rows are not step-aligned.
 - **Reproducibility.** Re-running GMAT reproduces every committed report byte for byte (`tests/test_gmat_m2.py::test_gmat_reproduces_the_committed_report`, skipped where GMAT is not installed).
-- **Replacement history.** The references were replaced twice before approval, each with a recorded reason: the header comment was reworded, then provenance fields and the manifest were added (review M2-T6). Both times the reports were byte-identical to the first run (`1de827e`).
+- **Replacement history.** There have been four generations of each reference, all with byte-identical reports:
+  1. `1de827e`, the initial reference;
+  2. `a346fbe`, after the header comment was reworded;
+  3. `94f0e75`, after provenance fields were added (review M2-T6 F1/F3);
+  4. `2d33617`, after the manifest began binding metadata (review M2-T6 F8/F9).
+
+  Every generation is a record in the manifest history, reconstructed from the committed metadata.
+- **History semantics** (review M2-T6 F14):
+  - Each record must name a GMAT mission and carry a plausible UTC timestamp, a non-null revision, a non-empty reason and a report digest.
+  - Records are in time order. Each holds the sha256 of the previous record, so the history is a hash chain; the first record holds null.
+  - Editing, inserting, reordering or deleting records breaks the chain or the ordering and is rejected.
+  - **Limit:** deleting records *and* consistently re-chaining the remainder passes the checks. Only review of the manifest's version-control history reveals that (executable as `test_wholesale_history_rewrite_is_the_documented_limit`).
+- **Thresholds.** Every non-null limit must be finite and nonnegative. An overflowing JSON number such as `1e999`, which parses as infinity, is rejected at load (review M2-T6 F15).
 - **What provenance can and cannot prove.** The checks above make silent or accidental substitution detectable. They cannot prove GMAT origin against deliberate fabrication.
 - **The reproduction test** verifies that the installed executable *is* the approved GMAT (sha256), that it reports success, and that it reproduces the committed reports byte for byte. That is authenticated, independent reproducibility evidence. Together with review of `APPROVED_DIGESTS.json` changes, it is the basis for trusting the references; by itself it cannot prove the historical origin of stored bytes.
 - `generate` refuses symlinked or protected destinations.

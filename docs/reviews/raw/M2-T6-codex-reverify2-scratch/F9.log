@@ -1,0 +1,196 @@
+.FFFF..                                                                  [100%]
+=================================== FAILURES ===================================
+_________ test_interrupted_publication_never_leaves_an_accepted_mix[1] _________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-99/test_interrupted_publication_n1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x110d28d70>
+fail_at = 1
+
+    @pytest.mark.parametrize("fail_at", range(7))
+    def test_interrupted_publication_never_leaves_an_accepted_mix(tmp_path, monkeypatch, fail_at):
+        """F9: interrupt publication at every step; the result is the old reference intact,
+        the new one complete, or rejected -- never an accepted partial replacement."""
+        name = "m2_prograde_burn"
+        live = _copy_refs(tmp_path / "live")
+        old = {p.name: p.read_bytes() for p in live.iterdir()}
+        stage, staged_files, manifest = _staged_copy(tmp_path, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: live)
+        cli = _cli()
+        calls = {"n": 0}
+        original = cli._atomic_write
+    
+        def flaky(dst, data):
+            if calls["n"] == fail_at:
+                raise OSError("interrupted")
+            calls["n"] += 1
+            original(dst, data)
+    
+        monkeypatch.setattr(cli, "_atomic_write", flaky)
+        try:
+            cli._publish(name, staged_files, stage / "APPROVED_DIGESTS.json", manifest)
+            interrupted = False
+        except OSError:
+            interrupted = True
+        now = {p.name: p.read_bytes() for p in live.iterdir() if not p.name.startswith(".")}
+        violations = _compare(name).violations
+        if not interrupted:
+            assert violations == []  # complete new generation
+        elif now == old:
+            assert violations == []  # nothing changed
+        else:
+            assert violations  # any partial state is rejected
+        if interrupted and fail_at >= 1:
+            # Withdraw-first: approval is gone as soon as publication starts (defense in
+            # depth beyond the metadata digest binding).
+            man = json.loads((live / "APPROVED_DIGESTS.json").read_text())
+>           assert name not in man["references"]
+E           AssertionError: assert 'm2_prograde_burn' not in {'m2_prograde_burn': {'script_sha256': 'dea2530a35d56c5f0bd94ff37495c72e6185db327472a2f9d3bd93ad53a1966e', 'report_sha...b15e4aee198b12a4540b849efcfda', 'metadata_sha256': '5392bb948e49603ce244621a84fd90852fb3447ad8a28334dab94fb7c1e755c3'}}
+
+tests/test_gmat_m2.py:752: AssertionError
+_________ test_interrupted_publication_never_leaves_an_accepted_mix[2] _________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-99/test_interrupted_publication_n2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1132233e0>
+fail_at = 2
+
+    @pytest.mark.parametrize("fail_at", range(7))
+    def test_interrupted_publication_never_leaves_an_accepted_mix(tmp_path, monkeypatch, fail_at):
+        """F9: interrupt publication at every step; the result is the old reference intact,
+        the new one complete, or rejected -- never an accepted partial replacement."""
+        name = "m2_prograde_burn"
+        live = _copy_refs(tmp_path / "live")
+        old = {p.name: p.read_bytes() for p in live.iterdir()}
+        stage, staged_files, manifest = _staged_copy(tmp_path, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: live)
+        cli = _cli()
+        calls = {"n": 0}
+        original = cli._atomic_write
+    
+        def flaky(dst, data):
+            if calls["n"] == fail_at:
+                raise OSError("interrupted")
+            calls["n"] += 1
+            original(dst, data)
+    
+        monkeypatch.setattr(cli, "_atomic_write", flaky)
+        try:
+            cli._publish(name, staged_files, stage / "APPROVED_DIGESTS.json", manifest)
+            interrupted = False
+        except OSError:
+            interrupted = True
+        now = {p.name: p.read_bytes() for p in live.iterdir() if not p.name.startswith(".")}
+        violations = _compare(name).violations
+        if not interrupted:
+            assert violations == []  # complete new generation
+        elif now == old:
+            assert violations == []  # nothing changed
+        else:
+            assert violations  # any partial state is rejected
+        if interrupted and fail_at >= 1:
+            # Withdraw-first: approval is gone as soon as publication starts (defense in
+            # depth beyond the metadata digest binding).
+            man = json.loads((live / "APPROVED_DIGESTS.json").read_text())
+>           assert name not in man["references"]
+E           AssertionError: assert 'm2_prograde_burn' not in {'m2_prograde_burn': {'script_sha256': 'dea2530a35d56c5f0bd94ff37495c72e6185db327472a2f9d3bd93ad53a1966e', 'report_sha...b15e4aee198b12a4540b849efcfda', 'metadata_sha256': '5392bb948e49603ce244621a84fd90852fb3447ad8a28334dab94fb7c1e755c3'}}
+
+tests/test_gmat_m2.py:752: AssertionError
+_________ test_interrupted_publication_never_leaves_an_accepted_mix[3] _________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-99/test_interrupted_publication_n3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x110cf0170>
+fail_at = 3
+
+    @pytest.mark.parametrize("fail_at", range(7))
+    def test_interrupted_publication_never_leaves_an_accepted_mix(tmp_path, monkeypatch, fail_at):
+        """F9: interrupt publication at every step; the result is the old reference intact,
+        the new one complete, or rejected -- never an accepted partial replacement."""
+        name = "m2_prograde_burn"
+        live = _copy_refs(tmp_path / "live")
+        old = {p.name: p.read_bytes() for p in live.iterdir()}
+        stage, staged_files, manifest = _staged_copy(tmp_path, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: live)
+        cli = _cli()
+        calls = {"n": 0}
+        original = cli._atomic_write
+    
+        def flaky(dst, data):
+            if calls["n"] == fail_at:
+                raise OSError("interrupted")
+            calls["n"] += 1
+            original(dst, data)
+    
+        monkeypatch.setattr(cli, "_atomic_write", flaky)
+        try:
+            cli._publish(name, staged_files, stage / "APPROVED_DIGESTS.json", manifest)
+            interrupted = False
+        except OSError:
+            interrupted = True
+        now = {p.name: p.read_bytes() for p in live.iterdir() if not p.name.startswith(".")}
+        violations = _compare(name).violations
+        if not interrupted:
+            assert violations == []  # complete new generation
+        elif now == old:
+            assert violations == []  # nothing changed
+        else:
+            assert violations  # any partial state is rejected
+        if interrupted and fail_at >= 1:
+            # Withdraw-first: approval is gone as soon as publication starts (defense in
+            # depth beyond the metadata digest binding).
+            man = json.loads((live / "APPROVED_DIGESTS.json").read_text())
+>           assert name not in man["references"]
+E           AssertionError: assert 'm2_prograde_burn' not in {'m2_prograde_burn': {'script_sha256': 'dea2530a35d56c5f0bd94ff37495c72e6185db327472a2f9d3bd93ad53a1966e', 'report_sha...b15e4aee198b12a4540b849efcfda', 'metadata_sha256': '5392bb948e49603ce244621a84fd90852fb3447ad8a28334dab94fb7c1e755c3'}}
+
+tests/test_gmat_m2.py:752: AssertionError
+_________ test_interrupted_publication_never_leaves_an_accepted_mix[4] _________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-99/test_interrupted_publication_n4')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1131da480>
+fail_at = 4
+
+    @pytest.mark.parametrize("fail_at", range(7))
+    def test_interrupted_publication_never_leaves_an_accepted_mix(tmp_path, monkeypatch, fail_at):
+        """F9: interrupt publication at every step; the result is the old reference intact,
+        the new one complete, or rejected -- never an accepted partial replacement."""
+        name = "m2_prograde_burn"
+        live = _copy_refs(tmp_path / "live")
+        old = {p.name: p.read_bytes() for p in live.iterdir()}
+        stage, staged_files, manifest = _staged_copy(tmp_path, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: live)
+        cli = _cli()
+        calls = {"n": 0}
+        original = cli._atomic_write
+    
+        def flaky(dst, data):
+            if calls["n"] == fail_at:
+                raise OSError("interrupted")
+            calls["n"] += 1
+            original(dst, data)
+    
+        monkeypatch.setattr(cli, "_atomic_write", flaky)
+        try:
+            cli._publish(name, staged_files, stage / "APPROVED_DIGESTS.json", manifest)
+            interrupted = False
+        except OSError:
+            interrupted = True
+        now = {p.name: p.read_bytes() for p in live.iterdir() if not p.name.startswith(".")}
+        violations = _compare(name).violations
+        if not interrupted:
+            assert violations == []  # complete new generation
+        elif now == old:
+            assert violations == []  # nothing changed
+        else:
+            assert violations  # any partial state is rejected
+        if interrupted and fail_at >= 1:
+            # Withdraw-first: approval is gone as soon as publication starts (defense in
+            # depth beyond the metadata digest binding).
+            man = json.loads((live / "APPROVED_DIGESTS.json").read_text())
+>           assert name not in man["references"]
+E           AssertionError: assert 'm2_prograde_burn' not in {'m2_prograde_burn': {'script_sha256': 'dea2530a35d56c5f0bd94ff37495c72e6185db327472a2f9d3bd93ad53a1966e', 'report_sha...b15e4aee198b12a4540b849efcfda', 'metadata_sha256': '5392bb948e49603ce244621a84fd90852fb3447ad8a28334dab94fb7c1e755c3'}}
+
+tests/test_gmat_m2.py:752: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_interrupted_publication_never_leaves_an_accepted_mix[1]
+FAILED tests/test_gmat_m2.py::test_interrupted_publication_never_leaves_an_accepted_mix[2]
+FAILED tests/test_gmat_m2.py::test_interrupted_publication_never_leaves_an_accepted_mix[3]
+FAILED tests/test_gmat_m2.py::test_interrupted_publication_never_leaves_an_accepted_mix[4]
+4 failed, 3 passed in 17.73s

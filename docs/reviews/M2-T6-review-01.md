@@ -126,4 +126,21 @@ All seven are **`ACCEPTED`**.
 **References regenerated** (third recorded replacement, so the manifest binds the metadata digest): the reports are byte-identical to `1de827e`.
 
 ## Re-verification 2
+**Reviewer:** Codex, session `01a12d16-04c0-7ee3-8ef6-ebc862ffd697`, at `2d33617`. **Raw:** `raw/M2-T6-codex-reverify2.md`, `raw/M2-T6-codex-reverify2-scratch/`.
+
+**Verdict: FAIL.**
+- F9, F10, F11, F12 and F13 are resolved. F8 is partly resolved; its remainder is F14.
+- Disabling each fix fails its targeted tests.
+- All gates passed, and the reports are byte-identical to `1de827e`.
+
+**Both findings are `ACCEPTED`.** Each fix is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F14 | Med | Older history records unchecked: they could be corrupted, invented or deleted; the README count was wrong | Every record is validated (GMAT mission, plausible UTC time, non-null revision, reason, digest). Records are in chronological order and hash-chained (`previous_record_sha256`). The history was **reconstructed from the committed metadata of all four generations** (12 records). Documented limit: a consistent wholesale re-chain is visible only in version control. README and VAL-0014 corrected | `test_every_history_record_is_validated` (8 cases; value probes re-chain so only the rule under test can fire); `test_wholesale_history_rewrite_is_the_documented_limit` |
+| F15 | Med | A non-finite limit (`1e999` → inf) silently disabled a gate | Both threshold loaders (`load_thresholds` for M1, `load_scoped_thresholds` for M2) require every non-null limit to be a finite, nonnegative number. The committed `m1.json` and `m2.json` load unchanged; no M1 value or gating result changes | `test_threshold_loaders_reject_non_finite_or_negative_limits` (1e999, −1, NaN, string; both loaders); `test_committed_thresholds_load` |
+
+**Test-design note.** The first F14 value probes were also caught by the chain, so disabling a single value rule went unnoticed. Each probe now re-chains after its edit, and the reordering probe keeps every mission's latest record. Each rule fails a test when disabled.
+
+## Re-verification 3
 See below.

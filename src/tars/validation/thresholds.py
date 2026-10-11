@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal
@@ -34,6 +35,21 @@ KNOWN_VALIDATORS = frozenset(
 )  # fmt: skip
 
 
+def _require_finite_limits(limits: object, where: str = "limits") -> None:
+    """Every non-null limit must be a finite, nonnegative real number (review M2-T6 F15):
+    JSON such as 1e999 parses as infinity and would silently disable a gate."""
+    if isinstance(limits, dict):
+        for key, value in limits.items():
+            _require_finite_limits(value, f"{where}.{key}")
+        return
+    if limits is None:
+        return
+    if isinstance(limits, bool) or not isinstance(limits, (int, float)):
+        raise ValueError(f"threshold {where} is not a number: {limits!r}")
+    if not math.isfinite(limits) or limits < 0:
+        raise ValueError(f"threshold {where} must be finite and nonnegative: {limits!r}")
+
+
 def load_thresholds(path: Path = M1_THRESHOLDS) -> Thresholds:
     data = json.loads(path.read_text())
     unknown = sorted(set(data["limits"]) - KNOWN_VALIDATORS)
@@ -41,6 +57,7 @@ def load_thresholds(path: Path = M1_THRESHOLDS) -> Thresholds:
         raise ValueError(f"threshold groups match no validator: {unknown}")
     if data["status"] not in ("provisional", "approved"):
         raise ValueError(f"invalid threshold status {data['status']!r}")
+    _require_finite_limits(data["limits"])
     return Thresholds(status=data["status"], limits=data["limits"])
 
 
@@ -96,6 +113,7 @@ def load_scoped_thresholds(
         raise ValueError(f"threshold scopes match no mission: {bad}")
     if data["status"] not in ("provisional", "approved"):
         raise ValueError(f"invalid threshold status {data['status']!r}")
+    _require_finite_limits(data["limits"])
     return ScopedThresholds(status=data["status"], limits=data["limits"])
 
 

@@ -213,13 +213,19 @@ def cmd_run(args: argparse.Namespace) -> int:
                 "console_sha256": metadata["console_sha256"],
                 "metadata_sha256": _sha256(staged["metadata"]),
             }
-            manifest["history"].append(
+            history = manifest["history"]
+            history.append(
                 {
                     "mission": name,
                     "generated_utc": metadata["generated_utc"],
                     "tars_git_revision": metadata["tars_git_revision"],
                     "reason": args.replace_reason or "initial reference",
                     "report_sha256": metadata["report_sha256"],
+                    # Hash chain (review M2-T6 F14): edits or deletions inside the
+                    # history break it.
+                    "previous_record_sha256": gmat_m2.record_digest(history[-1])
+                    if history
+                    else None,
                 }
             )
             staged_manifest = gmat_m2.approved_manifest_path(stage)
