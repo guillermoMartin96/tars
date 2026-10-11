@@ -39,7 +39,10 @@ It found:
 **Evidence:** `raw/M2-T2-codex-scratch/probes.py`.  
 **Implementer disposition:** `ACCEPTED`  
 **Implementer reasoning:** Correct. A tick must be atomic: either everything (state, tick, engine schedule, transitions) advances, or nothing does. This is the simulator-owns-reality invariant applied to the engine state.  
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `03f6e4b`.
+- `_step_with_propulsion` advances a local `_EngineCursor`. `step()` commits the state, tick, engine schedule and transitions together after integration succeeds.
+- Test `test_a_failed_step_leaves_engine_schedule_and_state_unchanged` reproduces the reviewer's scenario (failure at t > 2 s inside a [1, 3] s burn). It checks that state and snapshot are unchanged after the failure, and that the retry burns the planned 2 s.
+- A mutant sharing the live pending list fails it.
 
 ### REV-T2-02 — Scheduling classifies malformed inputs before validating them (F2)
 **Severity:** Medium  
@@ -50,7 +53,12 @@ It found:
 **Evidence:** `raw/M2-T2-codex-scratch/probes.py`, `extra_checks.py`.  
 **Implementer disposition:** `ACCEPTED`  
 **Implementer reasoning:** Correct. The early-ordering checks coerced with `float()` before schema validation. The DR-0014 amendment assigns non-real and non-finite inputs to `schema_invalid`, which must take precedence. The overflow also affects `plan_burn` (`math.isfinite` on a huge int).  
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `03f6e4b`.
+- New `burn_scalar()` is shared by `plan_burn` and `schedule_burn`: bool, str, None, arrays, numpy bools, non-finite values and float overflow all map to `schema_invalid`. It runs before the in-past and conflict checks.
+- Tests:
+  - nine malformed ignitions, including the reviewer's five plus `10**1000`, at t = 10 s with a scheduled burn present;
+  - five malformed durations.
+- Re-running the reviewer's `probes.py` now gives `schema_invalid` for every malformed input. `np.float32(1.0)` is a valid real and is correctly rejected as `ignition_in_past`.
 
 ### REV-T2-03 — Represented event interval can disagree materially with planned consumption (F3)
 **Severity:** Medium  
@@ -66,7 +74,13 @@ It found:
 - Fix: the plan's burn duration and consumption are computed from the represented interval, so plan, integration and propellant accounting agree to round-off.
 - A burn whose represented interval differs materially from the intended duration is rejected as `burn_unschedulable`. "Materially" needs an explicit representability rule; see the resolution.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `03f6e4b`.
+- The plan's `burn_duration_s` is `cutoff − ignition`, and consumption is `min(ṁ·burn_duration, propellant)`. Plan, integration and accounting agree to round-off.
+- A burn whose represented interval differs from the intended duration by more than `EVENT_TIME_RESOLUTION_S = 1 µs` is `burn_unschedulable`. The reviewer's 1e15 s cases, both completed and depleted, are rejected. Basis: GMAT/STK stop granularity (VAL-0010), and a Δv effect below the burn's integration error. The constant is surfaced for Tech Lead confirmation (ADR-0007 T2 notes).
+- Test `test_plan_describes_exactly_the_interval_that_is_integrated` covers boundary, interior and depletion cases. Integrated vs planned consumption agrees within the round-off bound.
+- Mutants removing the rule, or computing consumption from the commanded duration, fail.
+- T1 tests asserting `burn_duration_s == 77.3` were updated to the represented-interval contract (within 1 µs).
+- VAL-0012 re-run: trajectories are bit-identical; the plan consumption reference moved by ≤ 7e-15 kg.
 
 ### REV-T2-04 — Retained transition arrays can be made writable and rewritten (F4)
 **Severity:** Low  
@@ -74,7 +88,9 @@ It found:
 **Evidence:** reviewer snippet in `raw/M2-T2-codex.md`.  
 **Implementer disposition:** `ACCEPTED`  
 **Implementer reasoning:** Evidence records must be immutable (machine-readable from day one). Back the arrays with immutable storage, so the flag cannot be re-enabled.  
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `03f6e4b`.
+- `EngineTransition` arrays are `np.frombuffer` views of immutable `bytes`, so `flags.writeable = True` raises.
+- Test `test_transition_arrays_cannot_be_made_writable`. The flag-based mutant fails it.
 
 ### REV-T2-05 — Tests do not validate transition position and velocity (F5)
 **Severity:** Medium  
@@ -86,13 +102,26 @@ It found:
 - T3 will publish these states as BurnStarted/BurnEnded events.
 - Fix: check transition states against the free-space closed form (zero force model) and an independent orbital DOP853 reference, at boundary, interior and multiple-event ticks, and verify that retained records stay stable.
 
-**Resolution/evidence:** pending.
+**Resolution/evidence:** Fixed in `03f6e4b`.
+- `test_transition_states_in_free_space_match_the_closed_form`: zero force; ignition and cutoff inside one tick; 40-digit closed form; velocity and position within 1e-14 relative.
+- `test_transition_states_in_orbit_converge_to_independent_references`: interior ignition vs exact Kepler, and cutoff r and v vs independent DOP853, each at order 4 ± 0.5. Measured ratios are about 16.
+- `test_boundary_event_state_equals_the_tick_snapshot_and_records_stay_stable`.
+- The reviewer's zero-transition mutation (adapted to the refactored code) now fails 3 tests; it previously passed all 155.
+
+## Re-test (implementer)
+At `03f6e4b`:
+- full suite: **384 passed**; T2/T1 targeted suites pass with `-W error`; ruff check and format clean;
+- M1 Proof PASS on all checks; GMAT compare PASS;
+- cross-process determinism and cross-platform bit-identical to the golden `7a4e1877…`.
+
+Mutation re-check: the reviewer's four mutations (zero transition state, double sensed Δv, constant mass, no interior splits) and one mutant per fix are each killed.
 
 ## Proof gate
 - [x] All Critical findings resolved (none raised)
-- [ ] All High findings resolved (none raised; Medium findings block T2 completion per Tech Lead instruction "fix blocking review findings")
+- [x] All High findings resolved (none raised); all Medium/Low findings fixed in `03f6e4b`
 - [x] Every substantive finding has an explicit disposition
-- [ ] Accepted fixes re-tested
-- [ ] Reviewer re-verification
+- [x] Accepted fixes re-tested by the implementer
+- [ ] Reviewer re-verification (requested)
+- [ ] Tech Lead confirmation of the new `EVENT_TIME_RESOLUTION_S = 1 µs` scheduling rule
 
-**Review gate result:** BLOCKED. Fixes in progress.
+**Review gate result:** BLOCKED, pending reviewer re-verification.

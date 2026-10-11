@@ -289,3 +289,6 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
   - With exact step splitting the burn contributes negligibly. The end-of-run error is the same RK4 coast error as M1 (0.298 m on the circular orbit; 0.283 m here from the cutoff state).
   - Mass and sensed Δv are exact to round-off.
 - **Classification:** no discrepancy. **Status:** informational evidence for the M2 threshold DR (DR-0015 method). It does not approve any tolerance.
+- **Re-run at `03f6e4b` (after REV-T2-03):**
+  - Plans now describe the represented interval `cutoff − ignition` (77.29999999999995 s here) and its consumption.
+  - Every trajectory quantity is bit-identical. Only "Propellant − ṁT" changed, by ≤ 7e-15 kg: 5.9e-14 / −1.1e-13 / 2.9e-13 / 2.9e-13 kg. `results.json` is regenerated.

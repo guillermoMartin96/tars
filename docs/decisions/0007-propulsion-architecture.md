@@ -31,7 +31,16 @@ These clarify how T2 implements the approved decisions. They are surfaced for Te
   - `overlaps_scheduled_burn` otherwise, including a burn that would fit in an earlier gap.
   - This keeps every accepted plan exact and immutable, since later plans were computed from the propellant left by earlier ones. Gap insertion would need re-planning and is not supported.
 - **Propellant accounting.** Sufficiency is checked against the analytic propellant remaining after all accepted burns. The integrated propellant tracks it to round-off (≤ 3e-13 kg, VAL-0012).
-- **Propellant floor (SCI-0012).** At a cutoff that empties the tank, the integrated propellant is set to exactly 0, absorbing ≤ 1e-12 kg of integration round-off. Otherwise it is clamped at ≥ 0. This is the only point where the simulator adjusts an integrated value, and it enforces a physical constraint.
+- **Represented burn interval (REV-T2-03, `03f6e4b`).** Event times are absolute float64 values, so the engine runs for exactly `cutoff − ignition`. The plan's `burn_duration_s` and consumption describe that represented interval.
+  - A burn whose represented interval differs from the intended duration by more than `EVENT_TIME_RESOLUTION_S = 1 µs` is rejected as `burn_unschedulable`.
+  - 1 µs is the stop-time granularity GMAT and STK use (VAL-0010). Its Δv effect (≈ 4e-7 m/s for the reference engine) is below the burn's integration error at dt = 10 s (1.2e-6 m/s, VAL-0008).
+  - Float64 time keeps sub-µs resolution for t < 2³³ s.
+  - **This constant is new and is surfaced for Tech Lead confirmation.**
+- **Propellant floor (SCI-0012).** At a cutoff that empties the tank, the integrated propellant is set to exactly 0. Otherwise it is clamped at ≥ 0.
+  - The floor absorbs only round-off plus at most ṁ × 1 µs from interval representation. That is ≤ 1.6e-7 kg for the reference engine at extreme times, and ≤ 3e-13 kg measured at mission times (VAL-0012).
+  - This is the only point where the simulator adjusts an integrated value, and it enforces a physical constraint.
+- **Atomic ticks (REV-T2-01, `03f6e4b`).** The engine schedule advances on a local cursor within a tick and is committed together with the state only when integration succeeds. A failed step changes nothing.
+- **Schema first (REV-T2-02).** `schedule_burn` validates ignition and duration (`burn_scalar`) before chronology and engine-conflict checks.
 - **Ticks without engine events** integrate exactly `h = dt`, as M1 does. Coasts are therefore bit-identical to the M1 path for any dt (tested at dt = 10, 0.1, 7/3).
 - **Event times** are exact floats. A tick containing events is split into RK4 sub-steps `[t0, e1, …, t1]`; at a shared instant, cutoff is processed before ignition (back-to-back burns).
 
