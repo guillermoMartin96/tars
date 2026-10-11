@@ -177,12 +177,66 @@ The reviewer's retrograde-only zero-state mutant now fails 2 tests.
 - determinism and cross-platform bit-identical to `7a4e1877…`;
 - VAL-0012 `results.json` unchanged.
 
+## Addendum 2: second reviewer re-verification (`7af2fd8`)
+**Reviewer:** OpenAI Codex `gpt-6.1-sol`, session `01a12855-5a08-7723-b3ff-3e6a0a7c22c0`.  
+**Raw:** `raw/M2-T2-codex-reverify2.md`; prompt and scripts are alongside.  
+**Verdict:** FAIL.
+
+| Finding | Re-verification |
+|---|---|
+| N1 (past depletion) | PARTIAL: the reviewer's case executes; negative RK4 stage propellant remained possible (N4) |
+| N2 | PARTIAL: `plan_burn(policy=10**10000)` still escaped |
+| N3 | RESOLVED: the retrograde-only mutant fails 2 tests |
+
+The reviewer also verified that the cutoff step-down terminates over 20 080 edge/random cases (at most one iteration). It judged DR-0017 appropriately framed, subject to text corrections.
+
+### N4 — Accepted depletion plans can evaluate negative propellant during RK4
+**Severity:** Medium  
+**Reviewer claim:** at the cutoff, an RK4 stage evaluates propellant at −5.2e-17 kg. With dry mass 1e-20 kg, the total mass becomes negative and the accepted plan raises.  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `87f217d`.
+- The powered right-hand side uses `max(m_prop, 0)` for mass, so the dynamics see the physical propellant.
+- Test `test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass` (1e-20 kg dry, dt = 0.1 s). The mutant fails it.
+
+### N5 — Conservative depletion cutoff discarded unburned propellant
+**Severity:** Medium  
+**Reviewer claim:**
+- For `burn_to_depletion`, the step-down shortened the executed interval but the planned consumption stayed at the full tank, and the simulator zeroed the real residual (1.5e-8 kg at t = 1e9 s).
+- This contradicts DR-0017's description.
+
+**Implementer disposition:** `ACCEPTED`  
+**Implementer reasoning:**
+- Plan = execution must hold for both outcomes. The depletion-residual semantics (retain vs snap) are now an explicit DR-0017 choice: D1a retains and is implemented; D1b snaps.
+
+**Resolution/evidence:** Fixed in `87f217d`.
+- Consumption = `min(ṁ·D, propellant)` for both outcomes, and the residual is retained.
+- Test `test_conservative_depletion_cutoff_keeps_its_residual`.
+- Depletion tests in T1 and T2 now assert the residual contract (0 ≤ residual ≤ ṁ·2·ulp(cutoff) + 2·ulp(propellant)) instead of an exactly empty tank.
+- The full-tank mutant fails 2 tests.
+
+### N2 (remainder)
+**Resolution/evidence:** Fixed in `87f217d`. The `plan_burn` policy rejection uses `_describe()`. Test `test_huge_integer_policy_is_schema_invalid_in_plan_burn`; the unsafe-repr mutant fails it.
+
+### DR-0017 text corrections (reviewer)
+All applied:
+- D1 split into D1a (retain; current) and D1b (snap);
+- the budget is a per-burn absolute allocation, not a proof that timing is never dominant;
+- `m_min` is defined over both intervals, including queued burns;
+- the check must live in `schedule_burn`, which knows the mass;
+- explicit scope: the rule bounds Δv, not trajectory error.
+
+**Re-test at `87f217d`:**
+- 404 tests pass; ruff clean;
+- M1 Proof PASS; GMAT compare PASS;
+- determinism and cross-platform bit-identical to `7a4e1877…`;
+- VAL-0012 unchanged.
+
 ## Proof gate
 - [x] All Critical findings resolved (none raised)
 - [x] All High findings resolved (none raised)
-- [x] Every substantive finding has an explicit disposition, including N1–N3
-- [x] Accepted fixes re-tested by the implementer (`9789603`)
-- [ ] Reviewer re-verification of the N1–N3 fixes (requested)
-- [ ] DR-0017 decision on the representability rule (escalated)
+- [x] Every substantive finding has an explicit disposition (REV-T2-01…05, N1–N5)
+- [x] Accepted fixes re-tested by the implementer (`87f217d`)
+- [ ] Reviewer re-verification of the N2/N4/N5 fixes (requested)
+- [ ] DR-0017 decision (representability rule; depletion-residual semantics)
 
-**Review gate result:** BLOCKED, pending the N1–N3 re-verification and DR-0017. T2 functionality is otherwise complete; only the representability acceptance rule is provisional.
+**Review gate result:** BLOCKED, pending the final re-verification and DR-0017.

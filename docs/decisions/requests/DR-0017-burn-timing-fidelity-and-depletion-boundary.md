@@ -12,20 +12,16 @@ Engine events are absolute float64 times, while simulation time is `tick·dt` (A
 
 T2 must decide which burns are acceptable and how the depletion boundary is executed. The reviewer judged the provisional rule plausible but insufficiently justified as a universal rule, and recommended this DR, rather than a request to confirm the constant.
 
-## Current implementation (provisional, `9789603`)
-1. **Plan = executed interval.** `burn_duration_s = D`, and consumption = `min(ṁ·D, propellant)`. Plan, integration and accounting agree to round-off (REV-T2-03).
-2. **Never past depletion.** If rounding puts the cutoff after the depletion time, the cutoff steps back to the latest representable time not after depletion. Propellant never goes negative; a residual of at most ṁ·ulp(t) can remain (N1).
+## Current implementation (provisional, `87f217d`)
+1. **Plan = executed interval, for both outcomes.** `burn_duration_s = D`, and consumption = `min(ṁ·D, propellant)`. Plan, integration and accounting agree to round-off (REV-T2-03, N5).
+2. **Never past depletion.** If rounding puts the cutoff after the depletion time, it steps back to the latest representable time not after depletion.
+   - A `burn_to_depletion` burn can then leave a residual of at most ṁ·2·ulp(cutoff) (≈ 1e-14 kg at mission times; 1.5e-8 kg at t = 1e9 s). The residual is **retained**, not discarded (N1, N5).
+   - RK4 stages use the non-negative physical propellant (N4).
 3. **Representability bound.** Reject (`burn_unschedulable`) if |D − d| > `EVENT_TIME_RESOLUTION_S = 1 µs`.
 
-Items 1–2 follow directly from approved decisions (DR-0013 3A; SCI-0012, "propellant never negative"). **Item 3 is a new acceptance rule, and it is the subject of this DR.** Its current basis:
-- 1 µs is the stop-time granularity GMAT and STK use (VAL-0010);
-- for the reference engine, its Δv effect (≈ 4e-7 m/s) is below the burn's integration error at dt = 10 s (1.2e-6 m/s, VAL-0008).
-
-Reviewer critique (`raw/M2-T2-codex-reverify.md`):
-- GMAT granularity does not establish TARS acceptance semantics;
-- engines and masses are configurable;
-- integration error shrinks with dt;
-- an absolute bound does not bound relative error for tiny burns. For example, 1.2e-16 s at t = 1 s is represented as 2.2e-16 s, 85 % longer, although the Δv effect is ~1e-17 m/s.
+Items 1–2 follow from approved decisions (DR-0013 3A; SCI-0012, "propellant never negative"). **Item 3, and the depletion-residual semantics in item 2, are the subject of this DR.** The basis for item 3:
+- 1 µs is the GMAT/STK stop-time granularity (VAL-0010);
+- for the reference engine its Δv effect (≈ 4e-7 m/s) is below the burn's integration velocity error at dt = 10 s (1.2e-6 m/s, VAL-0008).
 
 ## Constraints
 - Never invent physics; tolerances must be justified (playbook/testing.md).
@@ -42,17 +38,26 @@ Reviewer critique (`raw/M2-T2-codex-reverify.md`):
 - Says nothing about physical significance.
 
 ### B — Δv-error budget (recommended)
-- Reject if `a_max · |D − d| > Δv_budget`, where `a_max = F/m_min` is the largest thrust acceleration during the burn (at end mass).
-- Proposed `Δv_budget = 1e-7 m/s`: about 10× below the reference burn's own integration velocity error at dt = 10 s (1.2e-6 m/s, VAL-0008), so timing representation is never the dominant error.
+**Rule:** reject if `a_max · |D − d| > Δv_budget`.
+- **Budget scope:** the budget is **per burn** and is an **absolute allocation**, not a cumulative mission budget.
+- **Definition of `a_max`:** `a_max = F / m_min`, where `m_min` is the smallest total mass reached over **both** the intended and the represented interval. That is dry mass + propellant remaining after the longer of the two, with propellant accounted after all previously accepted burns.
+- **Implementation:** `plan_burn` does not receive dry mass today. B therefore needs the check in `Simulator.schedule_burn`, which knows the spacecraft and the queue, or a mass argument to `plan_burn`. It is small, but more than a one-line predicate.
+- **Proposed value: `Δv_budget = 1e-7 m/s`, per burn.** It is about 10× below the reference burn's integration velocity error at dt = 10 s (1.2e-6 m/s, VAL-0008).
+  - This is a proposed allocation, not a proof that timing representation is never dominant.
+  - At finer dt, or for other engines, integration error can fall below 1e-7 m/s. The budget must be revisited if dt, the engine envelope, or mission accuracy requirements change.
+  - No mission-level accuracy requirement exists yet against which to derive it.
+
+**Scope limit:** the rule bounds the *thrust-integrated speed change* caused by timing. It does **not** by itself bound trajectory error. Pointing (velocity-tracking) and gravity act over the mistimed interval, so the trajectory effect also depends on duration and geometry. For the reference case the timing-induced trajectory error is far below the RK4 error (VAL-0012), but that is a measured case, not a general bound.
 
 **Pros**
 - Physically meaningful and engine-aware.
-- Tiny burns are judged by their real effect, so the reviewer's 85 % example is accepted correctly: its Δv effect is ~1e-17 m/s.
-- Reference case: accepted at every mission time up to t ≈ 2e9 s; the 1e15 s case is rejected.
+- Tiny burns are judged by their real effect: the reviewer's 85 % example has a Δv effect of ~1e-17 m/s and is accepted correctly.
+- Reference case: accepted up to t ≈ 2e9 s (≈ 60 years); the 1e15 s case is rejected.
 
 **Cons**
-- Needs a budget value (proposed above).
-- The budget is tied to a dt = 10 s integration error and would need revisiting if dt or accuracy requirements change.
+- Needs a budget value with no mission-level requirement to derive it from yet.
+- Tied to the dt = 10 s reference accuracy.
+- Bounds Δv, not trajectory error.
 
 ### C — Relative bound |D − d| ≤ ε·d, plus a minimum burn duration
 **Pros**
@@ -73,17 +78,21 @@ Reviewer critique (`raw/M2-T2-codex-reverify.md`):
 - Disproportionate for M2.
 
 ### Depletion boundary (part of this decision)
-- **D1 (recommended; current):** step the cutoff back to the latest representable time not after depletion. The burn is labelled by its policy outcome. A residual of at most ṁ·ulp(t) may remain. It is conservative and never negative.
+- **D1a (recommended; current):** step the cutoff back to the latest representable time not after depletion. Consumption follows the executed interval, and the residual (≤ ṁ·2·ulp(cutoff)) is retained in the tank. Plan = execution exactly, never negative. The burn is labelled `propellant_depleted` (depleted to within time resolution).
+- **D1b:** as D1a, but snap the tank to exactly 0 at a depletion cutoff. "Empty means empty", but the integrated and planned accounting then differ by up to ṁ·2·ulp(cutoff), and unburned propellant is discarded. This was the earlier behavior that review N5 objected to.
 - **D2:** reject burns whose represented interval would cross depletion. Simpler, but it rejects ordinary exact-depletion commands at some ignition times purely because of rounding.
 
 ## Recommendation
-**B (Δv-error budget, 1e-7 m/s) + D1**, replacing the provisional absolute 1 µs bound. If B is approved, the change is local: one predicate in `plan_burn`, tests of the boundary on both sides, and a SCI-0012 note on the depletion residual.
+**B (Δv-error budget, 1e-7 m/s per burn, `a_max` over intended and represented intervals) + D1a.**
+- B replaces the provisional absolute 1 µs bound.
+- If B is approved, the change is contained: the check moves into `schedule_burn`, which has the mass and queue information, plus boundary tests on both sides and a SCI-0012 note on the depletion residual.
+- Also record explicitly that B bounds timing-induced Δv, not trajectory error.
 
 ## Impact
-- Architecture: none (B, D1). D would change ADR-0002.
+- Architecture: none (B, D1a). D would change ADR-0002.
 - Science/validation: timing representation provably sub-dominant to integration error; depletion semantics explicit.
 - Dependencies: none.
-- Effort: small (B/D1); large (D).
+- Effort: small (B, with the check moved into schedule_burn; D1a is already implemented); large (D).
 - Reversibility: high.
 
 ## Blocked work
@@ -93,7 +102,7 @@ Reviewer critique (`raw/M2-T2-codex-reverify.md`):
 - T3 command/event schema: the rejection codes are already approved. T4 onward when authorized.
 
 ## Requested response
-`B + D1` / `A + D1` / `C …` / `D` / `D2 instead of D1` / `discuss`; and the budget value if B.
+`B + D1a` / `A + D1a` / `… + D1b` / `… + D2` / `C …` / `D` / `discuss`; and the budget value and scope if B.
 
 ## Resolution
 **Decision:** <fill after response>  
