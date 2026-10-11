@@ -426,7 +426,7 @@ All 10 approved rejection codes are exercised.
 | Ours vs GMAT, node crossings | 3.2e-5 s | 4.0e-5 s | 3.3e-5 s | 8e-5 s |
 
 - **Classification (as M1).**
-  - Ours vs GMAT equals ours vs DOP853 (O4) to within micrometres: 0.29034 m and 0.29034 m for the slice.
+  - Ours vs GMAT equals ours vs DOP853 (O4) to within micrometres. At 53 700 s: 0.2903419 m vs 0.2903434 m (slice), 0.3127435 m vs 0.3127443 m (retrograde), 0.2972918 m vs 0.2972946 m (invalid commands). The 0.7–2.8 µm differences match GMAT vs DOP853.
   - GMAT vs DOP853 is 5 orders of magnitude smaller.
   - So the simulator's difference from GMAT is its own RK4 truncation error (VAL-0012), not a modelling disagreement. The burn itself (ignition and cutoff states) contributes about 1 mm.
 - **Discrepancies and uncertainty.**
