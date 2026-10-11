@@ -1,4 +1,4 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T3 complete)
 
 **Milestone result:** not yet claimed. M2 Proof (P1–P12, `docs/milestones/M2-propulsion.md` §10) is evaluated at T8.
 - This record collects completed task evidence only (REV-013 lesson).
@@ -28,6 +28,20 @@
   - the DR-0017 bound covers thrust-integrated Δv, not trajectory error;
   - the DOP853 reference's cross-platform floor (~11–15 µm at 53 700 s) limits GMAT gate tightness (FU-1).
 - **Merge:** not merged; `main` requires separate Tech Lead authorization.
+
+## T3 — Command and event schema: COMPLETE (2026-10-10)
+- **Final revision:** `7f8597e`. CI green on ubuntu-latest x86_64 and macos-latest arm64 (run 38112957337): lint, 564 tests, determinism, cross-platform agreement with the M1 golden state, GMAT comparison, M1 Proof.
+- **Scope delivered:**
+  - `BurnCommand` (schema_version 1; strict; exact payload boundary);
+  - `Simulator.submit()` with an immutable `CommandReceipt` (atomic rejections, approved codes, stable precedence);
+  - deterministic burn IDs and command-ID correlation;
+  - seven additive M2 event types (strict, frozen, valid Unicode) and pure converters keeping commanded intent separate from executed outcome.
+- **Contract:** `docs/contracts/m2-commands-and-events.md`. **Decisions:** DR-0014 (amended), ADR-0007 T3 notes.
+- **Review:** `docs/reviews/M2-T3-review-01.md`. REV-T3-01…07 and N1–N6 resolved. **Final independent verdict: PASS** (Codex `gpt-6.1-sol`, session `01a1294e-fbc4-7741-97bc-3ed3e3937f73`).
+- **Compatibility:**
+  - T2 interfaces unchanged (`schedule_burn` exact signature; snapshot and transition fields additive with defaults);
+  - M1 golden hash `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` unchanged; M1 Proof PASS.
+- **Out of scope / not authorized:** event emission and scenario timeline (T4); abort/cancel and Δv-target commands; crew permissions.
 
 ## REV-012 — resolved
 VAL-0010, DR-0016; CI-reproduced by `tests/test_rev012_evidence.py`.

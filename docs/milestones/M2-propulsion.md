@@ -1,8 +1,8 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T2 COMPLETE (final independent PASS, `d8829a2`); T3 in progress (2026-10-10).
+**Status:** T1–T3 COMPLETE (final independent PASS each); awaiting authorization for T4 (2026-10-10).
 - See `proof/records/M2-propulsion.md`.
-- T4 and merge to `main` need separate authorization.  
+- Merge to `main` needs separate authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  
 **Definition of done:** prototype phase (proof/definition-of-done.md), unless the Tech Lead sets a stricter bar.

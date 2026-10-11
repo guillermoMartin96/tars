@@ -1,0 +1,11 @@
+all seven + M1 round-trip: ['SpacecraftConfigured', 'CommandAccepted', 'CommandRejected', 'BurnStarted', 'BurnEnded', 'PropellantDepleted', 'PropulsionSampled', 'StateSampled']
+correctly rejects {'type': 'Unknown'}
+correctly rejects {'schema_version': 2}
+correctly rejects {'t': inf}
+correctly rejects {'tick': True}
+surrogate python rejected
+surrogate json rejected
+mutable issuer rejected: schema_invalid None None
+validated subclass rejected: schema_invalid None
+finite replacement in non-finite test still rejects: ['extra_forbidden']
+M2 event stream sha256 581fc353aa4edada3802880dbfe1079663e29babebd2c0bcc4f4a90aab9e07ad

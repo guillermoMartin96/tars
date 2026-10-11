@@ -1,0 +1,27 @@
+import runpy,json,hashlib
+from pathlib import Path
+from pydantic import ValidationError
+ns=runpy.run_path('review_scratch/probe_more.py.txt')
+events=ns['events']
+from tars.sim.commands import BurnCommand
+for e in events[:-1]:
+    assert e.model_config['frozen']
+    for v in (True,1.0,2):
+        try:e.__class__.model_validate(e.model_dump()|{'schema_version':v})
+        except ValidationError:pass
+        else:raise AssertionError((e.type,v))
+    try:e.t=3.
+    except ValidationError:pass
+    else:raise AssertionError(e.type)
+Path('review_scratch/schemas.json').write_text(json.dumps({e.type:e.__class__.model_json_schema() for e in events[:-1]}|{'BurnCommand':BurnCommand.model_json_schema()},sort_keys=True))
+print('ALL 8 COMMAND/M2 SCHEMAS EXPORTED; ALL 7 EVENTS FROZEN/STRICT VERSION PASS')
+# Observed modified internals are ignored rather than copied, safe even when hostile.
+ns=runpy.run_path('review_scratch/boundary.py.txt')
+for slot in ('__pydantic_extra__',):
+    for exc in (KeyboardInterrupt,SystemExit,GeneratorExit):
+        class Control:
+            def __bool__(self):raise exc()
+        p=BurnCommand(**ns['_cmd']());object.__setattr__(p,slot,Control())
+        ns['check']('slot-control:'+exc.__name__,p,exc)
+ns=runpy.run_path('review_scratch/probe_more.py.txt')
+Path('review_scratch/schemas.json').write_text(json.dumps({e.type:e.__class__.model_json_schema() for e in ns['events'][:-1]}|{'BurnCommand':BurnCommand.model_json_schema()},sort_keys=True))

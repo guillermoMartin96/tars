@@ -1,0 +1,35 @@
+exec(open('review_scratch/adversarial.py.txt').read().split('class Serializer:')[0])
+from tars.sim.commands import parse_command
+class SelfSerializer:
+    def __init__(self,p):self.p=p
+    def to_python(self,*a,**k):return self.p
+p=BurnCommand(**_cmd()).model_copy(update={'schema_version':2,'issuer':[]})
+object.__setattr__(p,'__pydantic_serializer__',SelfSerializer(p))
+s=_sim();r=s.submit(p)
+print('N5 rejected',r.reason,r.schema_errors);assert r.command is None
+for ex in (RuntimeError,KeyboardInterrupt,SystemExit,GeneratorExit):
+    class ThrowSerializer:
+        def to_python(self,*a,**k):raise ex('probe')
+    p=BurnCommand(**_cmd());object.__setattr__(p,'__pydantic_serializer__',ThrowSerializer());probe(ex.__name__,p)
+for name,p in [('UserDict',UserDict(_cmd())),('MappingProxyType',MappingProxyType(_cmd()))]:
+    try:print(name,parse_command(p))
+    except Exception as e:print(name,type(e).__name__, e.errors()[0]['type'])
+class K:
+    __hash__ = object.__hash__
+    def __repr__(self):raise RuntimeError('repr')
+    def __eq__(self,o):raise RuntimeError('eq')
+    def __str__(self):raise RuntimeError('str')
+probe('hostile unknown key',dict(_cmd(),**{})|{K():1})
+class DK(dict):
+    def __iter__(self):raise KeyboardInterrupt()
+    def keys(self):raise KeyboardInterrupt()
+probe('dict control hooks',DK(_cmd()))
+for events in [_sample_events()]:
+    from tars.events import to_jsonl,read_jsonl
+    import hashlib
+    print('roundtrips',len(read_jsonl(to_jsonl(events.values()))),'hash',hashlib.sha256(to_jsonl(events.values()).encode()).hexdigest())
+class HashBomb(str):
+    def __hash__(self):raise RuntimeError('caller hash escaped')
+p=BurnCommand(**_cmd()).model_copy(update={'command_id':HashBomb('burn-001')})
+object.__setattr__(p,'__pydantic_serializer__',SelfSerializer(p))
+probe('forged exact hash exception',p)

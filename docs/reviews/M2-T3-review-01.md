@@ -168,10 +168,20 @@ All seven are **`ACCEPTED`**. Resolutions are pending the fix commit.
 - M1 Proof PASS; GMAT compare PASS;
 - determinism and cross-platform bit-identical to `7a4e1877…`.
 
+## Addendum 3: final reviewer re-verification (`7f8597e`)
+**Reviewer:** Codex `gpt-6.1-sol`, session `01a1294e-fbc4-7741-97bc-3ed3e3937f73`.  
+**Raw:** `raw/M2-T3-codex-reverify3.md`; probes alongside.  
+**Verdict: PASS.**
+- Every finding RESOLVED: REV-T3-01…07 and N1–N6.
+- An expanded boundary attack of 242 cases passed. It covered field and dictionary tampering, Pydantic internals, class reassignment, hostile mappings, subclass keys and values, bool, huge integers and NaN.
+- All ten rejection codes are atomic and produce serializable events.
+- All T3 requirements PASS, and the contract is accurate.
+- No new findings.
+
 ## Proof gate
 - [x] Every finding dispositioned (REV-T3-01…07, N1–N6)
-- [x] High findings resolved (REV-T3-01, REV-T3-02, N1, N5)
-- [x] Fixes re-tested by the implementer
-- [ ] Reviewer re-verification of N5–N6 (requested)
+- [x] All High findings resolved and re-verified
+- [x] Fixes re-tested by the implementer and re-verified by the reviewer
+- [x] CI green on ubuntu-latest and macos-latest at `7f8597e` (run 38112957337)
 
-**Review gate result:** BLOCKED, pending re-verification.
+**Review gate result: PASS** (final reviewer verdict for T3: PASS).

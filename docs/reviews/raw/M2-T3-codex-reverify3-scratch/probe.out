@@ -1,0 +1,57 @@
+rejection registry set() {'burn-001'} burn count 0 retry None
+id 'a\n' ValidationError 1 validation error for BurnCommand
+command_id
+  String should match pattern '^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$' [type=string_pattern_mismatch, input_value='a\n', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch
+id 'é' ValidationError 1 validation error for BurnCommand
+command_id
+  String should match pattern '^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$' [type=string_pattern_mismatch, input_value='é', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch
+id 'a\x00' ValidationError 1 validation error for BurnCommand
+command_id
+  String should match pattern '^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$' [type=string_pattern_mismatch, input_value='a\x00', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/string_pattern_mismatch
+id 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' ValidationError 1 validation error for BurnCommand
+command_id
+  String should match pattern '^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$' [type=string_pattern_mismatch, input_value='aaaaaaaaaaaaaaaaaaaaaaaa...aaaaaaaaaaaaaaaaaaaaaaa', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/strin
+version True ValidationError 1 validation error for BurnCommand
+schema_version
+  Value error, schema_version must be the integer 1 [type=value_error, input_value=True, input_type=bool]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+version 1.0 ValidationError 1 validation error for BurnCommand
+schema_version
+  Value error, schema_version must be the integer 1 [type=value_error, input_value=1.0, input_type=float]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+version '1' ValidationError 1 validation error for BurnCommand
+schema_version
+  Value error, schema_version must be the integer 1 [type=value_error, input_value='1', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.13/v/value_error
+duration 100000000000000000000000000000 <BurnRejection.SCHEMA_INVALID: 'schema_invalid'>
+duration 1e+308 <BurnRejection.INSUFFICIENT_PROPELLANT: 'insufficient_propellant'>
+duration -1e+308 <BurnRejection.NON_POSITIVE_DURATION: 'non_positive_duration'>
+duration 5e-324 <BurnRejection.BURN_UNSCHEDULABLE: 'burn_unschedulable'>
+issuer '\ud800' (<CommandStatus.REJECTED: 'rejected'>, '{"schema_version":1,"tick":0,"t":0.0,"type":"CommandRejected","command_id":"burn-001","issuer":null,"reason":"schema_invalid","detail":"issuer: string_unicode","direction":null,"on_insufficient_propellant":null,"commanded_ignition_t_s":null,"commanded_duration_s":null,"schema_errors":["issuer: string_unicode"]}')
+issuer '\x00\n' (<CommandStatus.ACCEPTED: 'accepted'>, '{"schema_version":1,"tick":0,"t":0.0,"type":"CommandAccepted","command_id":"burn-001","issuer":"\\u0000\\n","burn_id":"burn#000001","direction":"prograde","on_insufficient_propellant":"reject","commanded_ignition_t_s":600.0,"commanded_duration_s":77.3,"planned_burn_duration_s":77.29999999999995,"planned_cutoff_t_s":677.3,"planned_propellant_used_kg":12.379420191975951,"planned_end_cause":"completed","timing_delta_v_error_mps":1.6223689461736918e-14}')
+issuer '\xe9' (<CommandStatus.ACCEPTED: 'accepted'>, '{"schema_version":1,"tick":0,"t":0.0,"type":"CommandAccepted","command_id":"burn-001","issuer":"é","burn_id":"burn#000001","direction":"prograde","on_insufficient_propellant":"reject","commanded_ignition_t_s":600.0,"commanded_duration_s":77.3,"planned_burn_duration_s":77.29999999999995,"planned_cutoff_t_s":677.3,"planned_propellant_used_kg":12.379420191975951,"planned_end_cause":"completed","timing_delta_v_error_mps":1.6223689461736918e-14}')
+receipt alias False 77.3 77.3 77.3 77.3
+model_copy {'issuer': []} CommandReceipt(status=<CommandStatus.REJECTED: 'rejected'>, command_id=None, issuer=None, command=None, reason=<BurnRejection.SCHEMA_INVALID: 'schema_invalid'>, detail='issuer: not_a_builtin_value', burn_id=None, plan=None, tick=0, t=0.0, schema_errors=('issuer: not_a_builtin_value',))
+model_copy {'command_id': []} CommandReceipt(status=<CommandStatus.REJECTED: 'rejected'>, command_id=None, issuer=None, command=None, reason=<BurnRejection.SCHEMA_INVALID: 'schema_invalid'>, detail='command_id: not_a_builtin_value', burn_id=None, plan=None, tick=0, t=0.0, schema_errors=('command_id: not_a_builtin_value',))
+model_copy {'duration_s': 'bad'} CommandReceipt(status=<CommandStatus.REJECTED: 'rejected'>, command_id=None, issuer=None, command=None, reason=<BurnRejection.SCHEMA_INVALID: 'schema_invalid'>, detail='duration_s: float_type', burn_id=None, plan=None, tick=0, t=0.0, schema_errors=('duration_s: float_type',))
+model_copy {'schema_version': 2} CommandReceipt(status=<CommandStatus.REJECTED: 'rejected'>, command_id=None, issuer=None, command=None, reason=<BurnRejection.SCHEMA_INVALID: 'schema_invalid'>, detail='schema_version: literal_error', burn_id=None, plan=None, tick=0, t=0.0, schema_errors=('schema_version: literal_error',))
+model_copy {'direction': 'bad'} CommandReceipt(status=<CommandStatus.REJECTED: 'rejected'>, command_id=None, issuer=None, command=None, reason=<BurnRejection.SCHEMA_INVALID: 'schema_invalid'>, detail='direction: literal_error', burn_id=None, plan=None, tick=0, t=0.0, schema_errors=('direction: literal_error',))
+duplicate low-level correlation [('burn#000001', None), ('burn#000002', 'same')] accepted
+outcome mutation [('executed_duration_s', 77.29999999999995, 78.29999999999995), ('propellant_used_kg', 12.37942019197584, 13.37942019197584), ('sensed_delta_v_mps', 29.275767297715042, 31.275767297715042), ('planned_propellant_used_kg', 12.379420191975951, 12.379420191975951)]
+event JSON {'schema_version': True} ValidationError 1 validation error for tagged-union[SimulationStarted,StateSampled,OrbitCompleted,SimulationCompleted,ValidationResult,SpacecraftConfigured,CommandAccepted,CommandRejected,BurnStarted,BurnEnded,PropellantDepleted,PropulsionSampled]
+BurnEnded.schema_version
+  Value error, schema_version must be the i
+event JSON {'schema_version': 1.0} ValidationError 1 validation error for tagged-union[SimulationStarted,StateSampled,OrbitCompleted,SimulationCompleted,ValidationResult,SpacecraftConfigured,CommandAccepted,CommandRejected,BurnStarted,BurnEnded,PropellantDepleted,PropulsionSampled]
+BurnEnded.schema_version
+  Value error, schema_version must be the i
+event JSON {'command_id': 'bad\n#'} ValidationError 1 validation error for tagged-union[SimulationStarted,StateSampled,OrbitCompleted,SimulationCompleted,ValidationResult,SpacecraftConfigured,CommandAccepted,CommandRejected,BurnStarted,BurnEnded,PropellantDepleted,PropulsionSampled]
+BurnEnded.command_id
+  String should match pattern '^[A-Za-z0-9][A-Z
+event JSON {'burn_id': ''} ValidationError 1 validation error for tagged-union[SimulationStarted,StateSampled,OrbitCompleted,SimulationCompleted,ValidationResult,SpacecraftConfigured,CommandAccepted,CommandRejected,BurnStarted,BurnEnded,PropellantDepleted,PropulsionSampled]
+BurnEnded.burn_id
+  String should match pattern '^burn#[0-9]{6,}$' [
+sample keys dict_keys(['schema_version', 'tick', 't', 'type', 'propellant_kg', 'total_mass_kg', 'delta_v_sensed_mps', 'engine_state', 'active_burn_id', 'pending_burn_ids', 'thrust_acceleration_mps2'])
