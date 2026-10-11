@@ -158,6 +158,7 @@ def _transition(
         v=y[3:6],
         propellant_kg=float(y[_PROP]),
         delta_v_sensed_mps=float(y[_DV]),
+        end_cause=burn.plan.end_cause if kind == "cutoff" else None,
     )
 
 
@@ -302,6 +303,7 @@ class Simulator:
             duration,
             policy=policy,
             earliest_t_s=self.t,
+            dry_mass_kg=self._spacecraft.dry_mass_kg,
         )
         if plan.propellant_used_kg >= self._committed_propellant_kg:
             after = 0.0  # tank exactly empty at cutoff (SCI-0012)

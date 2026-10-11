@@ -17,7 +17,6 @@ from tars.sim.constants import STANDARD_GRAVITY, WGS84
 from tars.sim.integrators import RK4
 from tars.sim.propulsion import (
     DIRECTION_LAWS,
-    EVENT_TIME_RESOLUTION_S,
     BurnEndCause,
     BurnRejectedError,
     BurnRejection,
@@ -209,7 +208,7 @@ def test_burn_plan_for_completed_burn_has_exact_times_and_propellant():
     assert plan.cutoff_t_s == 600.0 + 77.3
     # The plan describes the interval float64 event times represent (REV-T2-03).
     assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
-    assert abs(plan.burn_duration_s - 77.3) <= EVENT_TIME_RESOLUTION_S
+    assert abs(plan.burn_duration_s - 77.3) <= math.ulp(plan.cutoff_t_s)
     assert plan.end_cause is BurnEndCause.COMPLETED
     assert plan.propellant_used_kg == REF_ENGINE.mass_flow_kgps * plan.burn_duration_s
     assert plan.propellant_used_kg == pytest.approx(12.379420191975958, rel=1e-14, abs=0)
@@ -239,7 +238,7 @@ def test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion():
     assert plan.cutoff_t_s <= 600.0 + t_dep
     assert plan.burn_duration_s == plan.cutoff_t_s - 600.0
     assert plan.burn_duration_s <= t_dep
-    assert abs(plan.burn_duration_s - t_dep) <= EVENT_TIME_RESOLUTION_S
+    assert abs(plan.burn_duration_s - t_dep) <= 2 * math.ulp(plan.cutoff_t_s)
     # Consumption follows the executed interval (review N5); never more than loaded, and
     # the residual left by the conservative cutoff is within mdot * 2 ulp(cutoff).
     assert plan.propellant_used_kg == min(REF_ENGINE.mass_flow_kgps * plan.burn_duration_s, 10.0)

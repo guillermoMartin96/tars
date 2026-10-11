@@ -18,7 +18,7 @@ from tars.sim.constants import STANDARD_GRAVITY, WGS84
 from tars.sim.forces import PointMassGravity
 from tars.sim.integrators import RK4
 from tars.sim.propulsion import (
-    EVENT_TIME_RESOLUTION_S,
+    TIMING_DELTA_V_BUDGET_MPS,
     BurnEndCause,
     BurnRejectedError,
     BurnRejection,
@@ -166,7 +166,7 @@ def test_schedule_returns_the_exact_plan():
     assert plan.ignition_t_s == 605.5
     assert plan.cutoff_t_s == 605.5 + 77.3
     assert plan.burn_duration_s == plan.cutoff_t_s - plan.ignition_t_s
-    assert abs(plan.burn_duration_s - 77.3) <= EVENT_TIME_RESOLUTION_S
+    assert abs(plan.burn_duration_s - 77.3) <= math.ulp(plan.cutoff_t_s)
     assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
     p = sim.propulsion_snapshot()
     assert p.engine_state is EngineState.SCHEDULED
@@ -495,11 +495,12 @@ def test_malformed_duration_is_schema_invalid(duration):
 def test_burn_whose_represented_interval_differs_materially_is_unschedulable():
     """REV-T2-03: at t ~ 1e15 s, float64 event times are 0.125 s apart; a 0.1 s burn
     cannot be represented and must be rejected, not silently stretched."""
+    depletion = InsufficientPropellantPolicy.BURN_TO_DEPLETION
     with pytest.raises(BurnRejectedError) as err:
-        plan_burn(ENGINE, PROP, 1e15, 0.1)
+        plan_burn(ENGINE, PROP, 1e15, 0.1, dry_mass_kg=DRY)
     assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
     with pytest.raises(BurnRejectedError) as err:
-        plan_burn(ENGINE, 0.032, 1e15, 1.0, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION)
+        plan_burn(ENGINE, 0.032, 1e15, 1.0, policy=depletion, dry_mass_kg=DRY)
     assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
 
 
@@ -638,23 +639,29 @@ def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
 
 
 def test_boundary_burn_at_large_time_executes_without_negative_mass():
-    """N1 reviewer case: ignition 1e9 s, tank = mdot * 0.1 s, tiny dry mass."""
+    """N1 case under DR-0017: ignition ~1e9 s, tank = mdot * 0.1 s, exact-depletion
+    command. The step-back residual (~1.5e-8 kg) is a negligible delta-v error for the
+    1000 kg reference vehicle, which executes with propellant never negative; for a
+    1e-10 kg dry mass the same residual is a large delta-v error and is rejected."""
     tank = ENGINE.mass_flow_kgps * 0.1
-    sc = SpacecraftSpec(dry_mass_kg=1e-10, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
-    sim = Simulator(
-        np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=sc
-    )
+    duration = tank / ENGINE.mass_flow_kgps
+    tiny = SpacecraftSpec(dry_mass_kg=1e-10, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+    sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=tiny)
     _run_until(sim, 9.0e8)
-    plan = sim.schedule_burn(
-        "prograde", ignition_t_s=1.0e9 + 50.0, duration_s=tank / ENGINE.mass_flow_kgps
-    )
+    with pytest.raises(BurnRejectedError) as err:
+        sim.schedule_burn("prograde", ignition_t_s=1.0e9 + 50.0, duration_s=duration)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+    sc = SpacecraftSpec(dry_mass_kg=DRY, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+    sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=sc)
+    _run_until(sim, 9.0e8)
+    plan = sim.schedule_burn("prograde", ignition_t_s=1.0e9 + 50.0, duration_s=duration)
+    assert plan.timing_delta_v_error_mps <= TIMING_DELTA_V_BUDGET_MPS
     while sim.t < 1.1e9:
         sim.step()
         assert sim.propulsion_snapshot().propellant_kg >= 0.0
-    # The cutoff is the latest representable time not after depletion, so a tiny
-    # residual (here ~1.5e-8 kg) may remain; it equals the plan's remainder.
     remaining = sim.propulsion_snapshot().propellant_kg
-    assert abs(remaining - (tank - plan.propellant_used_kg)) <= 1e-12 * (1e-10 + tank)
+    assert abs(remaining - (tank - plan.propellant_used_kg)) <= 1e-12 * (DRY + tank)
 
 
 @pytest.mark.parametrize("field", ["ignition_t_s", "duration_s"])
@@ -788,3 +795,125 @@ def test_huge_integer_policy_is_schema_invalid_in_plan_burn():
     with pytest.raises(BurnRejectedError) as err:
         plan_burn(ENGINE, PROP, 0.0, 1.0, policy=10**10000)
     assert err.value.reason is BurnRejection.SCHEMA_INVALID
+
+
+# ------------------------------------------------- DR-0017 (B + D1a, approved 2026-10-10)
+
+
+def _independent_timing_dv_error(engine, dry, prop, ignition, duration, policy):
+    """Delta-v difference between the executed and intended intervals, from first
+    principles in 40-digit arithmetic (not using production helpers)."""
+    mdot = engine.thrust_n / (engine.isp_s * STANDARD_GRAVITY)
+    t_dep = prop / mdot
+    intended = duration if duration <= t_dep else t_dep
+    cutoff = ignition + intended
+    while cutoff - ignition > t_dep:  # D1a: never past depletion
+        cutoff = math.nextafter(cutoff, -math.inf)
+    executed = cutoff - ignition
+    with localcontext() as ctx:
+        ctx.prec = 40
+        c = Decimal(engine.isp_s) * Decimal(STANDARD_GRAVITY)
+
+        def mass(t):
+            return Decimal(dry) + max(Decimal(prop) - Decimal(mdot) * Decimal(t), Decimal(0))
+
+        return float(abs(c * (mass(executed) / mass(intended)).ln())), executed > 0
+
+
+@pytest.mark.parametrize(
+    ("engine", "dry"),
+    [
+        (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+        (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+        (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+    ],
+)
+@pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+@pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+    engine, dry, ignition, policy
+):
+    """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+    across mission times and acceleration extremes, for both policies."""
+    prop, duration = 50.0, 0.1
+    if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+        duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+    expected_dv_err, representable = _independent_timing_dv_error(
+        engine, dry, prop, ignition, duration, policy
+    )
+    accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+    if accept:
+        plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+        assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+    else:
+        with pytest.raises(BurnRejectedError) as err:
+            plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+        assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+
+def test_timing_budget_boundary_on_both_sides():
+    """Reference engine: accepted at 1e9 s (error ~5e-8 m/s), rejected at 1e15 s."""
+    ok = plan_burn(ENGINE, PROP, 1.0e9, 0.1, dry_mass_kg=DRY)
+    assert 0.0 <= ok.timing_delta_v_error_mps <= TIMING_DELTA_V_BUDGET_MPS
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(ENGINE, PROP, 1.0e15, 0.1, dry_mass_kg=DRY)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+
+def test_extreme_acceleration_is_rejected_where_the_reference_vehicle_is_accepted():
+    """Same timing error, different physics: a 1e5 N engine on a 1 kg vehicle cannot
+    tolerate the representation error that is negligible for the reference vehicle."""
+    hot = EngineSpec(thrust_n=1.0e5, isp_s=300.0)
+    ignition, duration = 1.0e7, 0.1  # reference error ~1.4e-10 m/s at this time
+    plan_burn(ENGINE, PROP, ignition, duration, dry_mass_kg=DRY)  # accepted
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(hot, 50.0, ignition, duration, dry_mass_kg=1.0)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+
+def test_depletion_residual_counts_toward_the_timing_budget():
+    """D1a retains the residual; with a tiny dry mass that residual is a large share of
+    the end mass, so the burn is rejected rather than silently mis-delivering delta-v."""
+    tank = ENGINE.mass_flow_kgps * 0.1
+    policy = InsufficientPropellantPolicy.BURN_TO_DEPLETION
+    plan = plan_burn(ENGINE, tank, 1.0e9, 1.0, policy=policy, dry_mass_kg=DRY)
+    assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+    assert plan.timing_delta_v_error_mps <= TIMING_DELTA_V_BUDGET_MPS
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(ENGINE, tank, 1.0e9, 1.0, policy=policy, dry_mass_kg=1e-10)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+
+
+def test_schedule_burn_always_enforces_the_timing_budget():
+    """The simulator passes the spacecraft's dry mass; no burn bypasses DR-0017."""
+    hot = SpacecraftSpec(
+        dry_mass_kg=1.0, engine=EngineSpec(thrust_n=1.0e5, isp_s=300.0), tank=TankSpec(50.0)
+    )
+    sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e10, spacecraft=hot)
+    _run_until(sim, 7.0e10)
+    with pytest.raises(BurnRejectedError) as err:
+        sim.schedule_burn("prograde", ignition_t_s=7.7e10, duration_s=0.1)
+    assert err.value.reason is BurnRejection.BURN_UNSCHEDULABLE
+    assert sim.propulsion_snapshot().pending_plans == ()
+
+
+def test_cutoff_events_distinguish_depletion_from_normal_cutoff():
+    """DR-0017 safeguard 6: machine-readable end cause on every cutoff transition."""
+    sim = _sim(spacecraft=_spacecraft(propellant=5.0))
+    sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=10.0)
+    sim.schedule_burn(
+        "retrograde",
+        ignition_t_s=620.0,
+        duration_s=100.0,
+        policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+    )
+    events = []
+    while sim.t < 700.0:
+        sim.step()
+        events.extend(sim.engine_transitions)
+    assert [(e.kind, e.end_cause) for e in events] == [
+        ("ignition", None),
+        ("cutoff", BurnEndCause.COMPLETED),
+        ("ignition", None),
+        ("cutoff", BurnEndCause.PROPELLANT_DEPLETED),
+    ]

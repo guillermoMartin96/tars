@@ -32,13 +32,17 @@ from tars.sim.state import Vector
 # A direction law must return a unit vector; allow only round-off in its norm.
 _UNIT_NORM_TOLERANCE = 1e-12
 
-# Largest accepted difference between a burn's intended duration and the interval
-# that float64 event times can represent, cutoff - ignition (REV-T2-03). 1 us is the
-# stop-time granularity GMAT and STK use (GMAT TIME_ROUNDOFF; VAL-0010). For the
-# reference engine its delta-v effect, a * 1 us ~ 4e-7 m/s, is below the burn's own
-# integration error (1.2e-6 m/s at dt = 10 s, VAL-0008). Float64 time keeps
-# sub-microsecond resolution for t < 2**33 s (~272 years).
-EVENT_TIME_RESOLUTION_S = 1.0e-6
+# DR-0017 B (approved 2026-10-10): largest accepted delta-v error per burn caused by
+# float64 event-time representation. The engine runs for the represented interval
+# D = fl(ignition + d) - ignition instead of the intended d. The error is the exact
+# rocket-equation difference c |ln(m(D) / m(d))|, i.e. the actual thrust acceleration
+# integrated over |D - d| (first order: a_end |D - d|). 1e-7 m/s is a per-burn absolute
+# allocation, ~10x below the reference burn's integration velocity error at dt = 10 s
+# (1.2e-6 m/s, VAL-0008). Limitations: it bounds thrust-integrated speed change only,
+# not trajectory error (pointing and gravity also act over the mistimed interval); it
+# is not cumulative over burns; revisit if dt, the engine envelope or mission accuracy
+# requirements change (DR-0017).
+TIMING_DELTA_V_BUDGET_MPS = 1.0e-7
 
 
 class PropulsionSpecError(ValueError):
@@ -274,14 +278,19 @@ class BurnPlan:
         ignition_t_s: Engine-on time [s since epoch].
         commanded_duration_s: Duration requested by the command [s].
         burn_duration_s: Interval the engine actually runs, cutoff - ignition [s], as
-            represented by float64 event times. It equals the commanded duration to
-            within ``EVENT_TIME_RESOLUTION_S``; it is shorter only for
-            ``PROPELLANT_DEPLETED``.
+            represented by float64 event times. It differs from the intended
+            duration (commanded, or the depletion time) by at most one ulp of the
+            cutoff, and its delta-v effect is within the DR-0017 budget when planned
+            with a dry mass.
         cutoff_t_s: Engine-off time, ignition + burn duration [s].
-        propellant_used_kg: Propellant consumed [kg]. Equals the loaded amount exactly
-            on depletion, so propellant never goes negative.
+        propellant_used_kg: Propellant consumed over the executed interval [kg], never
+            more than loaded. A depletion burn may leave a residual of at most
+            mdot * 2 ulp(cutoff) (DR-0017 D1a).
         mass_flow_kgps: Mass flow while burning [kg/s].
         end_cause: How the burn ends.
+        policy: Insufficient-propellant policy the burn was planned under.
+        timing_delta_v_error_mps: Delta-v error from event-time representation
+            (DR-0017 B); None if planned without a vehicle dry mass.
     """
 
     ignition_t_s: float
@@ -292,6 +301,7 @@ class BurnPlan:
     mass_flow_kgps: float
     end_cause: BurnEndCause
     policy: InsufficientPropellantPolicy = field(default=InsufficientPropellantPolicy.REJECT)
+    timing_delta_v_error_mps: float | None = None
 
     def propellant_used_by(self, t: float) -> float:
         """Analytic cumulative propellant used at time ``t`` [kg] (oracle O1)."""
@@ -342,8 +352,15 @@ def plan_burn(
     duration_s: float,
     policy: InsufficientPropellantPolicy | str = InsufficientPropellantPolicy.REJECT,
     earliest_t_s: float = 0.0,
+    *,
+    dry_mass_kg: float | None = None,
 ) -> BurnPlan:
     """Validate a duration-based burn and compute its exact schedule (DR-0014 1A, 2A, 3C).
+
+    With ``dry_mass_kg`` the DR-0017 timing budget is enforced. Without it, the
+    vehicle-dependent budget cannot be evaluated and is not applied. A plan is not
+    executable on its own: ``Simulator.schedule_burn`` always passes the spacecraft's
+    dry mass, so no executed burn bypasses DR-0017.
 
     Sufficiency is decided in the time domain against the depletion time
     t_dep = fl(propellant / mdot). A burn is sufficient iff duration <= t_dep, and its
@@ -359,6 +376,10 @@ def plan_burn(
     ignition_t_s = burn_scalar("ignition_t_s", ignition_t_s)
     duration_s = burn_scalar("duration_s", duration_s)
     earliest_t_s = burn_scalar("earliest_t_s", earliest_t_s)
+    if dry_mass_kg is not None:
+        dry_mass_kg = burn_scalar("dry_mass_kg", dry_mass_kg)
+        if not dry_mass_kg > 0.0:
+            raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, "dry_mass_kg must be > 0")
     if propellant_kg < 0.0:
         raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, "propellant_kg must be >= 0")
     try:
@@ -414,12 +435,19 @@ def plan_burn(
             BurnRejection.BURN_UNSCHEDULABLE,
             f"no representable cutoff after ignition {ignition_t_s!r} within depletion",
         )
-    if abs(represented - burn) > EVENT_TIME_RESOLUTION_S:
-        raise BurnRejectedError(
-            BurnRejection.BURN_UNSCHEDULABLE,
-            f"event times represent {represented!r} s for a {burn!r} s burn at t = "
-            f"{ignition_t_s!r} (resolution limit {EVENT_TIME_RESOLUTION_S} s)",
+    intended = burn  # commanded duration, or the depletion time
+    timing_error = None
+    if dry_mass_kg is not None:
+        timing_error = _timing_delta_v_error(
+            engine, dry_mass_kg, propellant_kg, intended, represented
         )
+        if not timing_error <= TIMING_DELTA_V_BUDGET_MPS:  # NaN is rejected too
+            raise BurnRejectedError(
+                BurnRejection.BURN_UNSCHEDULABLE,
+                f"event times at t = {ignition_t_s!r} represent {represented!r} s for "
+                f"{intended!r} s: timing delta-v error {timing_error!r} m/s exceeds "
+                f"{TIMING_DELTA_V_BUDGET_MPS} m/s (DR-0017)",
+            )
     burn = represented
     # Consumption follows the executed interval for both outcomes (review N5): a
     # conservative depletion cutoff keeps its tiny residual instead of discarding it.
@@ -439,7 +467,22 @@ def plan_burn(
         mass_flow_kgps=mdot,
         end_cause=cause,
         policy=policy,
+        timing_delta_v_error_mps=timing_error,
     )
+
+
+def _timing_delta_v_error(
+    engine: EngineSpec, dry_mass_kg: float, propellant_kg: float, intended: float, executed: float
+) -> float:
+    """DR-0017 B: |delta-v(executed) - delta-v(intended)| = c |ln(m(executed)/m(intended))|.
+
+    Both intervals lie within the depletion time, so m(x) = dry + propellant - mdot x
+    without clamping. Evaluated as c log1p(mdot |dt| / m_end) for accuracy. intended
+    and executed are within a factor of 2, so dt is exact (Sterbenz).
+    """
+    mdot = engine.mass_flow_kgps
+    end_mass = max(dry_mass_kg + propellant_kg - mdot * max(intended, executed), dry_mass_kg)
+    return engine.exhaust_velocity_mps * math.log1p(mdot * abs(intended - executed) / end_mass)
 
 
 # ------------------------------------------------------- simulator-facing state views
@@ -495,6 +538,9 @@ class EngineTransition:
     v: Vector
     propellant_kg: float
     delta_v_sensed_mps: float
+    # Cutoff transitions: COMPLETED (normal cutoff) or PROPELLANT_DEPLETED (DR-0017
+    # safeguard 6). Ignitions: None.
+    end_cause: BurnEndCause | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "r", _frozen3(self.r))
