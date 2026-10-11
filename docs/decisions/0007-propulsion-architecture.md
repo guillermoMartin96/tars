@@ -65,6 +65,15 @@ Any of these may be revisited by a later decision.
 - **Ticks without engine events** integrate exactly `h = dt`, as M1 does. Coasts are therefore bit-identical to the M1 path for any dt (tested at dt = 10, 0.1, 7/3).
 - **Event times** are exact floats. A tick containing events is split into RK4 sub-steps `[t0, e1, …, t1]`; at a shared instant, cutoff is processed before ignition (back-to-back burns).
 
+## Implementation notes (T3, `12d8818`)
+- **Command entry.** `Simulator.submit(BurnCommand | mapping) -> CommandReceipt` wraps `schedule_burn`; both remain public.
+  - `schedule_burn` is unchanged for T2 compatibility, apart from a keyword-only `command_id`.
+  - The M1 public-API allowlist test was extended with `submit`.
+- **Correlation.** Deterministic burn IDs come from one shared sequence, and only accepted burns are numbered. `EngineTransition` and `PropulsionSnapshot` gained `burn_id`/`command_id` and burn-ID fields, with defaults that keep T2 behavior.
+- **Rejection precedence** (stable): schema > duplicate ID > non-positive duration > chronology > engine conflicts > propellant and schedulability. Chronology now follows the duration check in `schedule_burn` too.
+- **Events.** Seven additive types in a strict, frozen sub-base; M1 classes are untouched. Converters (`tars.sim.burn_events`) are pure, and emission is runner scope (T4).
+- **Contract:** `docs/contracts/m2-commands-and-events.md`.
+
 ## Reasoning
 - Keeps every approved M1 boundary and byte-identical M1 output.
 - Gives exact analytic oracles (mass law, rocket equation, free-space motion).
