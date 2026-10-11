@@ -11,6 +11,7 @@ from tars.events.schema import ValidationResult
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 M1_THRESHOLDS = REPO_ROOT / "proof" / "thresholds" / "m1.json"
+M2_THRESHOLDS = REPO_ROOT / "proof" / "thresholds" / "m2.json"
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,61 @@ def load_thresholds(path: Path = M1_THRESHOLDS) -> Thresholds:
     if data["status"] not in ("provisional", "approved"):
         raise ValueError(f"invalid threshold status {data['status']!r}")
     return Thresholds(status=data["status"], limits=data["limits"])
+
+
+# M2 groups (DR-0015 oracles O1-O8 and telemetry accounting). Limits are scoped per
+# mission: "all", or a reference-mission name; a mission entry overrides "all".
+M2_KNOWN_VALIDATORS = frozenset(
+    {
+        "o1_mass_law", "o2_rocket_equation", "o3_free_space", "o4_reference",
+        "o5_coast_kepler", "o6_impulsive_limit", "o7_direction", "o8_convergence",
+        "accounting",
+    }
+)  # fmt: skip
+
+
+@dataclass
+class ScopedThresholds:
+    """M2 thresholds: ``limits[group][scope][metric]``, scope "all" or a mission name.
+
+    Every (group, scope) entry must be consumed by a validator; ``unused()`` lists
+    those that were not, so a misspelt mission cannot silently disable a gate.
+    """
+
+    status: Literal["provisional", "approved"]
+    limits: dict[str, dict[str, dict[str, float | None]]]
+    _used: set[tuple[str, str]] = field(default_factory=set)
+
+    def for_validator(self, name: str, mission: str = "all") -> dict[str, float]:
+        group = self.limits.get(name, {})
+        merged: dict[str, float | None] = {}
+        for scope in ("all", mission):
+            if scope in group:
+                self._used.add((name, scope))
+                merged.update(group[scope])
+        return {k: v for k, v in merged.items() if v is not None}
+
+    def unused(self) -> list[str]:
+        return sorted(
+            f"{g}/{s}" for g, scopes in self.limits.items() for s in scopes
+            if (g, s) not in self._used
+        )  # fmt: skip
+
+
+def load_scoped_thresholds(
+    path: Path = M2_THRESHOLDS, missions: frozenset[str] = frozenset()
+) -> ScopedThresholds:
+    data = json.loads(path.read_text())
+    unknown = sorted(set(data["limits"]) - M2_KNOWN_VALIDATORS)
+    if unknown:
+        raise ValueError(f"threshold groups match no validator: {unknown}")
+    scopes = {s for group in data["limits"].values() for s in group}
+    bad = sorted(scopes - missions - {"all"})
+    if bad:
+        raise ValueError(f"threshold scopes match no mission: {bad}")
+    if data["status"] not in ("provisional", "approved"):
+        raise ValueError(f"invalid threshold status {data['status']!r}")
+    return ScopedThresholds(status=data["status"], limits=data["limits"])
 
 
 @dataclass
