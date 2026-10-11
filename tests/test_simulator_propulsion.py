@@ -612,3 +612,123 @@ def test_boundary_event_state_equals_the_tick_snapshot_and_records_stay_stable()
     np.testing.assert_array_equal(ign.r, kept[0])
     np.testing.assert_array_equal(ign.v, kept[1])
     assert ign.propellant_kg == kept[2]
+
+
+# ------------------------------------- re-verification (M2-T2-review-01 addendum) N1-N3
+
+
+@pytest.mark.parametrize("ignition", [0.0, 1.0, 605.5, 1.0e6, 1.0e9])
+@pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+def test_executed_interval_never_exceeds_the_depletion_time(ignition, policy):
+    """N1: sufficiency must hold for the represented interval that is integrated.
+    At the exact depletion boundary the cutoff is the latest representable time
+    not after depletion, so consumption never exceeds the loaded propellant."""
+    tank = ENGINE.mass_flow_kgps * 0.1
+    t_dep = tank / ENGINE.mass_flow_kgps
+    plan = plan_burn(ENGINE, tank, ignition, t_dep, policy=policy)
+    assert plan.burn_duration_s <= t_dep
+    assert ENGINE.mass_flow_kgps * plan.burn_duration_s <= tank
+    assert plan.propellant_used_kg <= tank
+
+
+def test_boundary_burn_at_large_time_executes_without_negative_mass():
+    """N1 reviewer case: ignition 1e9 s, tank = mdot * 0.1 s, tiny dry mass."""
+    tank = ENGINE.mass_flow_kgps * 0.1
+    sc = SpacecraftSpec(dry_mass_kg=1e-10, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+    sim = Simulator(
+        np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=sc
+    )
+    _run_until(sim, 9.0e8)
+    plan = sim.schedule_burn(
+        "prograde", ignition_t_s=1.0e9 + 50.0, duration_s=tank / ENGINE.mass_flow_kgps
+    )
+    while sim.t < 1.1e9:
+        sim.step()
+        assert sim.propulsion_snapshot().propellant_kg >= 0.0
+    # The cutoff is the latest representable time not after depletion, so a tiny
+    # residual (here ~1.5e-8 kg) may remain; it equals the plan's remainder.
+    remaining = sim.propulsion_snapshot().propellant_kg
+    assert remaining == pytest.approx(tank - plan.propellant_used_kg, rel=0, abs=1e-15)
+
+
+@pytest.mark.parametrize("field", ["ignition_t_s", "duration_s"])
+def test_integers_beyond_the_repr_limit_are_schema_invalid(field):
+    """N2: building the rejection message must not itself raise."""
+    sim = _sim()
+    args = {"direction": "prograde", "ignition_t_s": 600.0, "duration_s": 10.0, field: 10**10000}
+    with pytest.raises(BurnRejectedError) as err:
+        sim.schedule_burn(**args)
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(ENGINE, 10**10000, 0.0, 1.0)
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
+
+
+def test_invalid_policy_is_schema_invalid_before_chronology():
+    sim = _sim()
+    _run_until(sim, 100.0)
+    with pytest.raises(BurnRejectedError) as err:
+        sim.schedule_burn("prograde", ignition_t_s=50.0, duration_s=10.0, policy="sometimes")
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID
+
+
+def test_back_to_back_prograde_then_retrograde_transitions_match_free_space():
+    """N3: every transition state, across two burns sharing an instant (604 s) and in
+    both directions, against the exact free-space solution in 40-digit arithmetic."""
+    v0 = np.array([3000.0, 4000.0, 0.0])
+    u = v0 / 5000.0
+    sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+    sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+    sim.schedule_burn("retrograde", ignition_t_s=604.0, duration_s=5.0)
+    events = []
+    while sim.t < 620.0:
+        sim.step()
+        events.extend(sim.engine_transitions)
+    assert [(e.kind, e.t, e.direction) for e in events] == [
+        ("ignition", 601.0, "prograde"),
+        ("cutoff", 604.0, "prograde"),
+        ("ignition", 604.0, "retrograde"),
+        ("cutoff", 609.0, "retrograde"),
+    ]
+    with localcontext() as ctx:
+        ctx.prec = 40
+        c, md = Decimal(ENGINE.exhaust_velocity_mps), Decimal(ENGINE.mass_flow_kgps)
+        speed, pos, mass, t = Decimal(5000), Decimal(0), Decimal(DRY + PROP), Decimal(0)
+        expected = []
+        for start, length, sign in ((601, 3, 1), (604, 5, -1)):
+            pos += speed * (Decimal(start) - t)  # coast
+            expected.append((pos, speed))
+            m_end = mass - md * Decimal(length)
+            ln = (mass / m_end).ln()
+            pos += speed * Decimal(length) + sign * c * (Decimal(length) - (m_end / md) * ln)
+            speed += sign * c * ln
+            mass, t = m_end, Decimal(start + length)
+            expected.append((pos, speed))
+    for event, (s_exact, v_exact) in zip(events, expected, strict=True):
+        np.testing.assert_allclose(event.r, float(s_exact) * u, rtol=1e-14, atol=1e-9)
+        np.testing.assert_allclose(event.v, float(v_exact) * u, rtol=1e-14, atol=1e-12)
+
+
+@pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+def test_orbital_transition_states_converge_in_both_directions(direction, sign):
+    """N3: ignition r, v vs exact Kepler and cutoff r, v vs independent DOP853,
+    order 4 +/- 0.5 (DR-0008), for prograde and retrograde."""
+    from tars.astro import kepler
+
+    r_k, v_k = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+    ref = _independent_reference(605.5, 77.3, sign, 605.5 + 77.3)
+    errs = {k: [] for k in ("ign_r", "ign_v", "cut_r", "cut_v")}
+    for dt in (20.0, 10.0, 5.0):
+        sim = _sim(dt=dt)
+        sim.schedule_burn(direction, ignition_t_s=605.5, duration_s=77.3)
+        ev = {}
+        while sim.t < 700.0:
+            sim.step()
+            ev.update({e.kind: e for e in sim.engine_transitions})
+        errs["ign_r"].append(np.linalg.norm(ev["ignition"].r - r_k))
+        errs["ign_v"].append(np.linalg.norm(ev["ignition"].v - v_k))
+        errs["cut_r"].append(np.linalg.norm(ev["cutoff"].r - ref[:3]))
+        errs["cut_v"].append(np.linalg.norm(ev["cutoff"].v - ref[3:6]))
+    for series in errs.values():
+        for coarse, fine in pairwise(series):
+            assert abs(math.log2(coarse / fine) - 4.0) <= 0.5

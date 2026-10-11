@@ -234,8 +234,11 @@ def test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion():
     t_dep = 10.0 / REF_ENGINE.mass_flow_kgps
     assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
     assert plan.commanded_duration_s == 77.3
-    assert plan.cutoff_t_s == 600.0 + t_dep
+    # Latest representable cutoff not after depletion (review N1): 600 + t_dep may round
+    # one ulp past it, in which case the cutoff steps back.
+    assert plan.cutoff_t_s <= 600.0 + t_dep
     assert plan.burn_duration_s == plan.cutoff_t_s - 600.0
+    assert plan.burn_duration_s <= t_dep
     assert abs(plan.burn_duration_s - t_dep) <= EVENT_TIME_RESOLUTION_S
     assert plan.propellant_used_kg == 10.0  # exactly: propellant never goes negative
 

@@ -309,16 +309,30 @@ def burn_scalar(name: str, value: object) -> float:
     values that overflow float64 (e.g. 10**1000) are ``schema_invalid``.
     """
     if isinstance(value, bool) or not isinstance(value, Real):
-        raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, f"{name} must be real, got {value!r}")
+        raise BurnRejectedError(
+            BurnRejection.SCHEMA_INVALID, f"{name} must be real, got {_describe(value)}"
+        )
     try:
         number = float(value)
     except (OverflowError, ValueError, TypeError):
         number = math.nan
     if not math.isfinite(number):
         raise BurnRejectedError(
-            BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {value!r}"
+            BurnRejection.SCHEMA_INVALID, f"{name} must be finite, got {_describe(value)}"
         )
     return number
+
+
+def _describe(value: object, limit: int = 80) -> str:
+    """Bounded, exception-safe repr for rejection details (review N2): repr of a huge
+    int raises ValueError beyond Python's digit limit."""
+    if isinstance(value, int) and not isinstance(value, bool) and value.bit_length() > 256:
+        return f"<int of {value.bit_length()} bits>"
+    try:
+        text = repr(value)
+    except Exception:  # any repr failure must not escape a structured rejection
+        return f"<unprintable {type(value).__name__}>"
+    return text if len(text) <= limit else text[: limit - 3] + "..."
 
 
 def plan_burn(
@@ -385,8 +399,18 @@ def plan_burn(
             f"cutoff {cutoff_s!r} is not representable after ignition {ignition_t_s!r}",
         )
     # The simulator integrates exactly the represented interval, so the plan describes
-    # that interval and its consumption (REV-T2-03).
+    # that interval and its consumption (REV-T2-03). It must never run past depletion
+    # (SCI-0012; review N1): if rounding the cutoff overshoots the depletion time, use
+    # the latest representable cutoff that does not.
     represented = cutoff_s - ignition_t_s
+    while represented > depletion_s:
+        cutoff_s = math.nextafter(cutoff_s, -math.inf)
+        represented = cutoff_s - ignition_t_s
+    if not represented > 0.0:
+        raise BurnRejectedError(
+            BurnRejection.BURN_UNSCHEDULABLE,
+            f"no representable cutoff after ignition {ignition_t_s!r} within depletion",
+        )
     if abs(represented - burn) > EVENT_TIME_RESOLUTION_S:
         raise BurnRejectedError(
             BurnRejection.BURN_UNSCHEDULABLE,

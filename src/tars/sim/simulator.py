@@ -29,6 +29,7 @@ from tars.sim.propulsion import (
     InsufficientPropellantPolicy,
     PropulsionSnapshot,
     SpacecraftSpec,
+    _describe,
     burn_scalar,
     plan_burn,
     thrust_acceleration,
@@ -273,6 +274,12 @@ class Simulator:
         # and engine-conflict checks (REV-T2-02).
         ignition = burn_scalar("ignition_t_s", ignition_t_s)
         duration = burn_scalar("duration_s", duration_s)
+        try:
+            policy = InsufficientPropellantPolicy(policy)
+        except ValueError:
+            raise BurnRejectedError(
+                BurnRejection.SCHEMA_INVALID, f"unknown policy {_describe(policy)}"
+            ) from None
         if ignition < self.t:
             raise BurnRejectedError(
                 BurnRejection.IGNITION_IN_PAST, f"ignition {ignition!r} < now {self.t!r}"
