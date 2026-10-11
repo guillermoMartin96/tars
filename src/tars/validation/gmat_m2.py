@@ -36,7 +36,7 @@ import numpy as np
 from tars.sim.constants import STANDARD_GRAVITY
 from tars.sim.scenario import ScenarioV2
 from tars.validation.gmat import _gmat_epoch
-from tars.validation.m2 import PredictedBurn, expected_initial_state, vehicle, worst
+from tars.validation.m2 import PredictedBurn, expected_initial_state, vehicle, worst, worst_of
 
 BURN_STEP_S = 1.0  # DR-0016: burns at 1 s steps (a divisor of the microsecond grid)
 STREAM_COLUMNS = (
@@ -461,7 +461,7 @@ def o9_metrics(
     ours_crossings = [e.crossing_t for e in events if e.type == "OrbitCompleted"]
     gmat_crossings = _node_crossings({t: (labelled[t].r, labelled[t].v) for t in times}, mu)
     if len(ours_crossings) == len(gmat_crossings):
-        node = max(
+        node = worst_of(
             (abs(a - b) for a, b in zip(ours_crossings, gmat_crossings, strict=True)), default=0.0
         )
     else:

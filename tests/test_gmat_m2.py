@@ -1032,3 +1032,100 @@ def test_threshold_loaders_reject_a_wrong_structure(tmp_path):
     (tmp_path / "m1.json").write_text(json.dumps(data1))
     with pytest.raises(ValueError, match="must be an object"):
         load_thresholds(tmp_path / "m1.json")
+
+
+# ------------------------------------------------------------------ re-verification 4 fixes
+
+
+def test_worst_of_never_discards_nan():
+    assert m2.worst_of([0.1, math.nan, 0.2]) == math.inf
+    assert m2.worst_of([math.nan]) == math.inf
+    assert m2.worst_of([], default=0.0) == 0.0
+    assert m2.worst_of([0.3, 0.1]) == 0.3
+    assert max([0.1, math.nan]) == 0.1  # the builtin hazard it replaces
+
+
+def test_dense_output_must_be_finite(monkeypatch):
+    """F18: non-finite dense-output altitudes are rejected at the source."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        dense = sol.sol
+
+        class Bad:
+            def __call__(self, t):
+                out = dense(t)
+                out[0, :] = math.nan
+                return out
+
+        sol.sol = Bad()
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="dense output"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])
+
+
+def _proof_module():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "m2_proof", REPO_ROOT / "toolbox" / "validators" / "m2_proof.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_merging_auxiliary_audits_keeps_nan(monkeypatch):
+    """F19: a NaN metric in any auxiliary run survives merging as a failure."""
+    module = _proof_module()
+    good = m2.Audit({}, {"o4_reference": {"sample_position_error_max_m": 0.1}}, {})
+    bad = m2.Audit({}, {"o4_reference": {"sample_position_error_max_m": math.nan}}, {})
+    for order in ([good, bad], [bad, good]):
+        merged = module._merge_audits([(f"r{i}", a) for i, a in enumerate(order)])
+        assert merged.metrics["o4_reference"]["sample_position_error_max_m"] == math.inf
+
+
+@pytest.mark.slow
+def test_nan_in_an_auxiliary_audit_fails_the_mission(monkeypatch):
+    """F19 integrated: NaN O4/O5 metrics in the dt = 2.5 s auxiliary audit fail."""
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    module = _proof_module()
+    original = m2.audit_run
+
+    def poisoned(scenario, expected, run):
+        audit = original(scenario, expected, run)
+        if scenario.dt_s == 2.5:
+            audit.metrics["o4_reference"]["sample_position_error_max_m"] = math.nan
+            audit.metrics["o5_coast_kepler"]["coast_position_error_max_m"] = math.nan
+        return audit
+
+    monkeypatch.setattr(m2, "audit_run", poisoned)
+    gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+    checks, _ = module.mission_checks(BY_NAME["m2_burn_to_depletion"], gates, quick=False)
+    failed = {c.validator for c in checks if not c.passed}
+    assert {
+        "o4_reference[m2_burn_to_depletion/o8_aux]",
+        "o5_coast_kepler[m2_burn_to_depletion/o8_aux]",
+    } <= failed
+
+
+def test_no_builtin_max_or_min_accumulators_in_the_validators():
+    """F16/F18/F19 guard: metric accumulators use worst/worst_of, never builtin max/min,
+    which silently drop NaN. Allowed: max over predicted times (scenario inputs)."""
+    import re as _re
+
+    files = [
+        REPO_ROOT / "src" / "tars" / "validation" / "m2.py",
+        REPO_ROOT / "src" / "tars" / "validation" / "gmat_m2.py",
+        REPO_ROOT / "toolbox" / "validators" / "m2_proof.py",
+    ]
+    pattern = _re.compile(r"(\b[\w.\[\]\"']+) = (max|min)\(\s*\1\b")
+    offenders = [f"{f.name}: {m.group(0)}" for f in files for m in pattern.finditer(f.read_text())]
+    assert offenders == []

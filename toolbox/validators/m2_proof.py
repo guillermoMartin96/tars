@@ -115,7 +115,7 @@ def _merge_audits(audits: list[tuple[str, m2.Audit]]) -> m2.Audit:
         for g, ms in a.metrics.items():
             dst = metrics.setdefault(g, {})
             for k, x in ms.items():
-                dst[k] = max(dst.get(k, -math.inf), x)
+                dst[k] = m2.worst(dst.get(k, -math.inf), x)  # NaN never discarded (F19)
     return m2.Audit(violations, metrics, {})
 
 

@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________ test_worst_never_discards_nan _________________________
+
+    def test_worst_never_discards_nan():
+        """F16: builtin max(x, nan) returns x; worst() fails instead."""
+        assert max(0.1, math.nan) == 0.1  # the hazard
+>       assert m2.worst(0.1, math.nan) == math.inf
+E       assert 0.1 == inf
+E        +  where 0.1 = <built-in function max>(0.1, nan)
+E        +    where <built-in function max> = m2.worst
+E        +    and   nan = math.nan
+E        +  and   inf = math.inf
+
+tests/test_gmat_m2.py:915: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_worst_never_discards_nan - assert 0.1 == inf
+1 failed in 0.13s

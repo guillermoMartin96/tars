@@ -207,12 +207,22 @@ def _ulp(x: float) -> float:
     return math.ulp(x)
 
 
-def worst(current: float, value: float) -> float:
-    """Max that never discards an invalid value: NaN in either argument gives +inf, so
-    the gate fails (review M2-T6 F16; builtin max(x, nan) silently returns x)."""
-    if math.isnan(current) or math.isnan(value):
+def worst(*values: float) -> float:
+    """Max that never discards an invalid value: NaN in any argument gives +inf, so the
+    gate fails (reviews M2-T6 F16, F18, F19; builtin max(x, nan) silently returns x)."""
+    if any(math.isnan(v) for v in values):
         return math.inf
-    return max(current, value)
+    return max(values)
+
+
+def worst_of(values, default: float = 0.0) -> float:
+    """``worst`` over an iterable (NaN anywhere gives +inf; empty gives ``default``)."""
+    out = default
+    first = True
+    for value in values:
+        out = value if first and not math.isnan(value) else worst(out, value)
+        first = False
+    return out
 
 
 def simpson_bound(
@@ -612,12 +622,12 @@ def accounting_metrics(
                 v.append(f"tick {p.tick}: thrust acceleration while not burning")
             continue
         want = veh.thrust_n / p.total_mass_kg
-        thrust_rel = max(thrust_rel, abs(float(np.linalg.norm(a)) - want) / want)
+        thrust_rel = worst(thrust_rel, abs(float(np.linalg.norm(a)) - want) / want)
         st = states.get(p.tick)
         if st is not None and p.active_burn_id in starts:
             sign = SIGN[starts[p.active_burn_id].direction]
             u = sign * np.array(st.v) / np.linalg.norm(st.v)
-            dir_err = max(dir_err, float(np.linalg.norm(a / np.linalg.norm(a) - u)))
+            dir_err = worst(dir_err, float(np.linalg.norm(a / np.linalg.norm(a) - u)))
     # Propellant and sensed delta-v change only while the engine runs.
     engine_ticks: set[int] = set()
     final_tick = events[-1].tick
@@ -688,27 +698,27 @@ def mass_and_rocket_metrics(
         e = ends.get(b.burn_id)
         if e is None:
             continue
-        o1["propellant_used_rel_error_max"] = max(
+        o1["propellant_used_rel_error_max"] = worst(
             o1["propellant_used_rel_error_max"],
             abs(e.propellant_used_kg - b.propellant_used_kg) / m0_total,
         )
         if b.end_cause == "propellant_depleted":
             bound = veh.mass_flow_kgps * 2.0 * _ulp(b.cutoff_t_s)
-            o1["depletion_residual_over_bound_max"] = max(
+            o1["depletion_residual_over_bound_max"] = worst(
                 o1["depletion_residual_over_bound_max"], e.propellant_kg / bound
             )
             if e.propellant_kg < 0.0:
                 v.append(f"{b.burn_id}: negative residual")
         err = abs(e.sensed_delta_v_mps - b.delta_v_mps)
-        o2["sensed_delta_v_rel_error_max"] = max(
+        o2["sensed_delta_v_rel_error_max"] = worst(
             o2["sensed_delta_v_rel_error_max"], err / b.delta_v_mps
         )
         # Gated: the error beyond the analytic Simpson truncation bound (round-off).
-        o2["sensed_delta_v_excess_over_simpson_rel_max"] = max(
+        o2["sensed_delta_v_excess_over_simpson_rel_max"] = worst(
             o2["sensed_delta_v_excess_over_simpson_rel_max"],
             max(err - simpson_bound(veh, b, scenario.dt_s), 0.0) / b.delta_v_mps,
         )
-        o2["reported_rocket_equation_rel_error_max"] = max(
+        o2["reported_rocket_equation_rel_error_max"] = worst(
             o2["reported_rocket_equation_rel_error_max"],
             abs(e.rocket_equation_delta_v_mps - b.delta_v_mps) / b.delta_v_mps,
         )
@@ -808,10 +818,10 @@ def free_space_metrics(veh: Vehicle, duration_s: float) -> dict[str, float]:
         r10 = free_space_run(veh, direction, duration_s, 10.0)
         r5 = free_space_run(veh, direction, duration_s, 5.0)
         out["timing_violations"] += r10["timing_violations"] + r5["timing_violations"]
-        out["velocity_rel_error_max"] = max(
+        out["velocity_rel_error_max"] = worst(
             out["velocity_rel_error_max"], r10["velocity_rel_error"], r5["velocity_rel_error"]
         )
-        out["propellant_rel_error_max"] = max(
+        out["propellant_rel_error_max"] = worst(
             out["propellant_rel_error_max"],
             r10["propellant_error_kg"] / veh.initial_mass_kg,
             r5["propellant_error_kg"] / veh.initial_mass_kg,
@@ -819,7 +829,7 @@ def free_space_metrics(veh: Vehicle, duration_s: float) -> dict[str, float]:
         order = math.log2(r10["position_error_m"] / r5["position_error_m"])
         out[f"{direction}_position_error_dt10_m"] = r10["position_error_m"]
         out[f"{direction}_position_order"] = order
-    out["position_order_deviation_from_4_max"] = max(
+    out["position_order_deviation_from_4_max"] = worst(
         abs(out["prograde_position_order"] - 4.0), abs(out["retrograde_position_order"] - 4.0)
     )
     return out
@@ -917,8 +927,10 @@ def dop853_reference(
         ticks = ticks[(ticks > a) & (ticks <= b)]
         if ticks.size:
             alts = np.linalg.norm(sol.sol(ticks)[:3], axis=0) - radius
-            out.alt_min = min(out.alt_min, float(alts.min()))
-            out.alt_max = max(out.alt_max, float(alts.max()))
+            if not np.all(np.isfinite(alts)):  # F18: dense output validated too
+                raise RuntimeError(f"DOP853 dense output non-finite on [{a}, {b}]")
+            out.alt_min = -worst(-out.alt_min, -float(alts.min()))
+            out.alt_max = worst(out.alt_max, float(alts.max()))
         if b in marks:
             out[b] = y.copy()
     return out
@@ -1201,7 +1213,7 @@ def impulsive_metrics(rows: Sequence[dict[str, float]]) -> dict[str, float]:
     ]
     r0 = rows[0]
     out = {
-        "order_deviation_from_2_max": max(abs(p - 2.0) for p in orders),
+        "order_deviation_from_2_max": worst_of(abs(p - 2.0) for p in orders),
         "slice_sma_change_ratio_deviation": abs(
             r0["sma_change_finite_m"] / r0["sma_change_impulsive_m"] - 1.0
         ),
@@ -1240,13 +1252,13 @@ def direction_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, 
             out["sign_violations"] += 1.0
         h0, h1 = np.cross(r0, v0), np.cross(r1, v1)
         cosang = float(h0 @ h1) / float(np.linalg.norm(h0) * np.linalg.norm(h1))
-        out["plane_rotation_max_rad"] = max(
+        out["plane_rotation_max_rad"] = worst(
             out["plane_rotation_max_rad"],
             float(np.linalg.norm(np.cross(h0, h1)) / (np.linalg.norm(h0) * np.linalg.norm(h1)))
             if cosang > 0
             else math.pi,
         )
-        out["inclination_change_max_rad"] = max(
+        out["inclination_change_max_rad"] = worst(
             out["inclination_change_max_rad"], abs(el1.i - el0.i)
         )
         tag = e.burn_id.replace("#", "")
@@ -1288,7 +1300,7 @@ def convergence_metrics(
     orders = [math.log2(a / b) for a, b in pairwise(errs)]
     for (a, b), p in zip(pairwise(dts), orders, strict=True):
         out[f"order_{a:g}_to_{b:g}"] = p
-    out["order_deviation_from_4_max"] = max(abs(p - 4.0) for p in orders)
+    out["order_deviation_from_4_max"] = worst_of(abs(p - 4.0) for p in orders)
     return out
 
 
@@ -1484,7 +1496,7 @@ def check_receipt_details(
         want = (b.cutoff_t_s, b.executed_s, b.end_cause)
         if got != want:
             v.append(f"{acc.burn_id}: plan {got} != predicted {want}")
-        plan_rel = max(
+        plan_rel = worst(
             plan_rel,
             abs(acc.planned_propellant_used_kg - b.propellant_used_kg) / veh.initial_mass_kg,
         )
@@ -1526,14 +1538,14 @@ def transition_checks(
         b = by_burn.get(s.burn_id)
         if b is None:
             continue
-        out["transition_propellant_rel_error_max"] = max(
+        out["transition_propellant_rel_error_max"] = worst(
             out["transition_propellant_rel_error_max"],
             abs(s.propellant_kg - b.propellant_before_kg) / m0,
         )
         if s.total_mass_kg != veh.dry_mass_kg + s.propellant_kg:
             v.append(f"{s.burn_id}: BurnStarted mass != dry + propellant")
         u = SIGN[s.direction] * np.array(s.v) / np.linalg.norm(s.v)
-        out["thrust_unit_vector_error_max"] = max(
+        out["thrust_unit_vector_error_max"] = worst(
             out["thrust_unit_vector_error_max"],
             float(np.linalg.norm(np.array(s.thrust_unit_vector) - u)),
         )
@@ -1542,7 +1554,7 @@ def transition_checks(
         b = by_burn.get(e.burn_id)
         if b is None:
             continue
-        out["transition_propellant_rel_error_max"] = max(
+        out["transition_propellant_rel_error_max"] = worst(
             out["transition_propellant_rel_error_max"],
             abs(e.propellant_kg - b.propellant_after_kg) / m0,
         )
@@ -1610,14 +1622,14 @@ def propulsion_sample_checks(
         got = (p.engine_state, p.active_burn_id, list(p.pending_burn_ids))
         if got != (state, active, pending):
             v.append(f"tick {k}: schedule {got}, expected {(state, active, pending)}")
-        out["sample_propellant_rel_error_max"] = max(
+        out["sample_propellant_rel_error_max"] = worst(
             out["sample_propellant_rel_error_max"], abs(p.propellant_kg - prop) / m0
         )
         err = abs(p.delta_v_sensed_mps - dv)
-        out["sample_delta_v_rel_error_max"] = max(
+        out["sample_delta_v_rel_error_max"] = worst(
             out["sample_delta_v_rel_error_max"], err / total_dv
         )
-        out["sample_delta_v_excess_over_simpson_rel_max"] = max(
+        out["sample_delta_v_excess_over_simpson_rel_max"] = worst(
             out["sample_delta_v_excess_over_simpson_rel_max"],
             max(err - allowance, 0.0) / total_dv,
         )
@@ -1873,7 +1885,7 @@ def orbit_checks(
             ref_crossings.append(a + hi)
     if len(ref_crossings) != len(orbits):
         v.append(f"{len(orbits)} OrbitCompleted, reference has {len(ref_crossings)} node crossings")
-    err = max(
+    err = worst_of(
         (
             abs(o.crossing_t - c)
             for o, c in zip(orbits, ref_crossings, strict=False)

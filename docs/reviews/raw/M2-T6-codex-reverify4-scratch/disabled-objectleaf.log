@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_threshold_loaders_reject_object_limits __________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-154/test_threshold_loaders_reject_0')
+
+    def test_threshold_loaders_reject_object_limits(tmp_path):
+        """F17: an object where a limit belongs is rejected at load, not a later crash."""
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        m2_text = M2_THRESHOLDS.read_text().replace(
+            '"gmat_vs_dop853_position_error_max_m": 3e-05', '"gmat_vs_dop853_position_error_max_m": {}'
+        )
+        (tmp_path / "m2.json").write_text(m2_text)
+>       with pytest.raises(ValueError, match="not a number"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:995: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_threshold_loaders_reject_object_limits - F...
+1 failed in 0.13s

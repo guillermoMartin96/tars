@@ -162,4 +162,23 @@ All seven are **`ACCEPTED`**.
 - Both were always evaluated, but the report had duplicate validator names. The contract check is now `orbit_events_contract[…]`; the report has 212 unique names (`test_audit_check_names_are_unique`).
 
 ## Re-verification 4
+**Reviewer:** Codex, session `01a12d3d-a2b3-75b1-88e6-de9ca76d39b4`, at `7467d42`. **Raw:** `raw/M2-T6-codex-reverify4.md`, `raw/M2-T6-codex-reverify4-scratch/`.
+
+**Verdict: FAIL.**
+- F16 is resolved for intermediate states; dense output remains (F18). F17 is resolved.
+- Disabling each of the 8 mechanisms fails its test.
+- The T5 corrections preserve behavior: **all 773 scalar metric values across 212 checks are bit-identical**, with thresholds, statuses and results unchanged.
+- O9 rejects all 21 reference-component NaN/±inf mutations, and O5 rejects NaN Kepler outputs.
+
+**Both findings are `ACCEPTED`.** Instead of closing only the two flagged reductions, every remaining accumulator was swept:
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F18 | Med | Non-finite DOP853 dense output silently passed (altitude extrema) | Dense-output altitudes are validated at the source (`dop853_reference` raises); the extrema use `worst` | `test_dense_output_must_be_finite` |
+| F19 | Med | `_merge_audits` used builtin `max`, so an auxiliary NaN disappeared | The merge uses `m2.worst` | `test_merging_auxiliary_audits_keeps_nan` (both orders), `test_nan_in_an_auxiliary_audit_fails_the_mission` (the real dt = 2.5 s auxiliary audit, O4 and O5) |
+| sweep | — | Remaining builtin `max`/`min` accumulators in T5/T6 validators (O1, O2, O3, O6, O7, O8, accounting, plans, transitions, samples, orbit and node errors) | All use `worst` (now variadic) or `worst_of` (NaN-safe over an iterable). A static guard fails if a builtin `max`/`min` accumulator reappears | `test_worst_of_never_discards_nan`, `test_no_builtin_max_or_min_accumulators_in_the_validators` |
+
+**Behavior is preserved.** The regenerated M2 Proof report is identical to the previous one (validator names, every metric and every result) across 212 checks. Each mechanism is mutation-tested: reverting the merge, the dense-output check, or any accumulator fails a test.
+
+## Re-verification 5
 See below.

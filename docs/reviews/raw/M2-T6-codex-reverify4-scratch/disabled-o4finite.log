@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_nan_reference_state_fails_o4 _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e8ed760>
+
+    def test_nan_reference_state_fails_o4(monkeypatch):
+        """F16 (T5 correction): the same hazard in O4 fails every O4 metric."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        events = run_scenario(scenario).events
+        _nan_reference(monkeypatch, at=660.0)
+        metrics, _ = m2.reference_metrics(
+            scenario, events, m2.predict_burns(scenario, mission.expected)
+        )
+>       assert all(v == math.inf for v in metrics.values())
+E       assert False
+E        +  where False = all(<generator object test_nan_reference_state_fails_o4.<locals>.<genexpr> at 0x111a87510>)
+
+tests/test_gmat_m2.py:949: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_nan_reference_state_fails_o4 - assert False
+1 failed in 3.01s
