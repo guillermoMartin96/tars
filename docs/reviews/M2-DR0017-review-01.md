@@ -113,11 +113,28 @@ The reviewer confirmed no bypass of the check through the public simulator path,
   - determinism and cross-platform bit-identical to \`7a4e1877…\`;
   - VAL-0012 unchanged.
 
+## Addendum 2: final re-verifications
+**Re-verification 2** (`fd2c418`; session `01a12889-ab04-77e1-97ac-e1ffedb43d14`; raw `raw/M2-DR0017-codex-reverify2.md`): **CONDITIONAL PASS.**
+- N1/F1 RESOLVED; safeguards 1 and 3–7 MET.
+- Zero underestimates in 92 874 new adversarial cases plus 12 225 repeated cases.
+- The reviewer independently confirmed the a_max·|dt| argument, including the dynamics clamp and the propellant floor.
+- Zero false rejections in 50 005 reference cases.
+- M1 bit-identical.
+- New: **N2 (Low)**. Documentation retained a universal c·|ln| identity and an unqualified x/2 excess.
+
+### N2 — Documentation retained an invalid exact logarithmic identity
+**Severity:** Low  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `d8829a2` (documentation only).
+- ∫F/m dt is stated as authoritative. The c·|ln| identity is qualified (unrounded ṁ, unclamped mass). The excess is given as x/ln(1+x) − 1, asymptotically x/2.
+- While writing the fix, the implementer first wrote the excess formula incorrectly and corrected it before commit (numerically checked).
+
+**Final verification** (`d8829a2`; session `01a1288c-911d-7cd1-8cc0-5121fd2aabbd`; raw `raw/M2-DR0017-codex-final.md`): N2 RESOLVED; diff is documentation-only (identical executable AST); 473 passed; ruff clean; determinism `7a4e1877…`; safeguards 1–7 MET; no new findings. **Final T2 verdict: PASS.**
+
 ## Proof gate
 - [x] No Critical findings
-- [x] High finding F1 and Medium N1 fixed (\`c64e73d\`, \`494fa27\`)
+- [x] All findings (F1 High, F2, F3, N1, N2) resolved and re-verified by the reviewer
 - [x] Every finding dispositioned
-- [x] Accepted fixes re-tested by the implementer
-- [ ] Reviewer re-verification of N1 (requested)
+- [x] CI green on ubuntu-latest and macos-latest at `d8829a2` (run 38101527076)
 
-**Review gate result:** BLOCKED, pending re-verification.
+**Review gate result: PASS** (reviewer final verdict for T2: PASS).

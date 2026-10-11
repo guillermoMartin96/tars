@@ -1,8 +1,7 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T3 AUTHORIZED; T2 finishing DR-0017 (2026-10-10).
-- DR-0017 approved: B + D1a, with safeguards.
-- ADR-0007 T2 choices approved as M2 design constraints.
+**Status:** T2 COMPLETE (final independent PASS, `d8829a2`); T3 in progress (2026-10-10).
+- See `proof/records/M2-propulsion.md`.
 - T4 and merge to `main` need separate authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  

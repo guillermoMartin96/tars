@@ -255,6 +255,6 @@ All applied:
 - [x] All High findings resolved (none raised)
 - [x] Every substantive finding has an explicit disposition (REV-T2-01…05, N1–N6)
 - [x] Accepted fixes re-tested by the implementer and re-verified by the reviewer (third re-verification: all RESOLVED; N6 is a text correction)
-- [ ] DR-0017 decision (representability rule; depletion-residual semantics). The provisional 1 µs rule and D1a remain in place until decided.
+- [x] DR-0017 decision: APPROVED B + D1a (2026-10-10). Implemented and verified in `docs/reviews/M2-DR0017-review-01.md`; final reviewer verdict for T2 is **PASS** (`d8829a2`).
 
-**Review gate result:** PASS for T2's implementation, with **one open escalation (DR-0017)**. Per the reviewer, the provisional rule is not a defect while the DR is open.
+**Review gate result: PASS.**
