@@ -15,7 +15,14 @@ import math
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from tars.sim.constants import EARTH_CONSTANTS, EarthConstants
 from tars.sim.propulsion import EngineSpec, PropulsionSpecError, SpacecraftSpec, TankSpec
@@ -65,6 +72,8 @@ class Scenario(_Strict):
     @model_validator(mode="after")
     def _sampling_on_tick_grid(self) -> Scenario:
         ratio = self.telemetry.sample_interval_s / self.dt_s
+        if not math.isfinite(ratio):  # finite inputs can overflow (T4 review F5)
+            raise ValueError("telemetry.sample_interval_s / dt_s is not representable")
         if ratio < 1.0 or not math.isclose(ratio, round(ratio), rel_tol=0.0, abs_tol=1e-9):
             raise ValueError("telemetry.sample_interval_s must be a positive multiple of dt_s")
         if len(set(self.force_models)) != len(self.force_models):
@@ -103,7 +112,10 @@ class _StrictV2(BaseModel):
 
 def _tick_count(value: float, dt_s: float, name: str) -> int:
     """Number of ticks n with n * dt_s == value exactly (time is tick * dt; ADR-0002)."""
-    n = round(value / dt_s)
+    ratio = value / dt_s
+    if not math.isfinite(ratio):  # e.g. 1e308 / 1e-10 (T4 review F5)
+        raise ValueError(f"{name} = {value!r} / dt_s is not representable")
+    n = round(ratio)
     if n * dt_s != value:
         raise ValueError(
             f"{name} = {value!r} is not on the tick grid: no integer n gives n * dt_s == {name}"
@@ -139,35 +151,53 @@ class SpacecraftConfig(_StrictV2):
         )
 
 
-def _require_finite_json(value: Any, where: str) -> None:
-    """Payloads must be standard JSON: NaN or infinity would serialize ambiguously in
-    the canonical form and so weaken the scenario hash."""
-    if isinstance(value, float) and not math.isfinite(value):
-        raise ValueError(f"{where}: non-finite number")
-    if isinstance(value, dict):
+def _standard_json_copy(value: Any, where: str) -> Any:
+    """A deep copy of ``value`` made of exact standard-JSON types only (T4 review F2).
+
+    Allowed: ``dict`` with ``str`` keys, ``list``, ``str``, ``int``, finite ``float``,
+    ``bool`` and ``None``, exact types only (no subclasses, tuples, sets or bytes).
+    Anything else could serialize ambiguously in the canonical form, and so weaken the
+    scenario hash, or be changed by copying. A copy of exact JSON types is
+    type-preserving, so the runner submits exactly what the scenario holds.
+    """
+    kind = type(value)
+    if kind is float:
+        if not math.isfinite(value):
+            raise ValueError(f"{where}: non-finite number")
+        return value
+    if kind in (str, int, bool) or value is None:
+        return value
+    if kind is list:
+        return [_standard_json_copy(item, f"{where}[{i}]") for i, item in enumerate(value)]
+    if kind is dict:
+        out = {}
         for key, item in value.items():
-            _require_finite_json(item, f"{where}.{key}")
-    elif isinstance(value, list):
-        for i, item in enumerate(value):
-            _require_finite_json(item, f"{where}[{i}]")
+            if type(key) is not str:
+                raise ValueError(f"{where}: keys must be strings")
+            out[key] = _standard_json_copy(item, f"{where}.{key}")
+        return out
+    raise ValueError(f"{where}: {kind.__name__} is not a standard JSON value")
 
 
 class TimelineEntry(_StrictV2):
     """One timeline submission (DR-0014): ``command`` is passed to ``Simulator.submit()``
     verbatim at ``submit_t_s``.
 
-    The payload is deliberately *not* validated here: the simulator is the only
-    command validator, so a scenario can contain an invalid command and observe its
-    rejection (invalid-command missions).
+    The payload is deliberately *not* validated as a command here: the simulator is the
+    only command validator, so a scenario can contain an invalid command and observe
+    its rejection (invalid-command missions). It must only be standard JSON, and it is
+    stored as a private deep copy, so the caller cannot change it after validation.
     """
 
     submit_t_s: float = Field(default=0.0, ge=0.0)
     command: dict[str, Any]
 
-    @model_validator(mode="after")
-    def _standard_json(self) -> TimelineEntry:
-        _require_finite_json(self.command, "command")
-        return self
+    @field_validator("command", mode="before")
+    @classmethod
+    def _standard_json(cls, value: Any) -> Any:
+        if type(value) is not dict:
+            raise ValueError("command must be a JSON object")
+        return _standard_json_copy(value, "command")
 
 
 class StopConditionV2(_StrictV2):
@@ -175,14 +205,24 @@ class StopConditionV2(_StrictV2):
     ``duration_s`` (stop at simulation time ``duration_s``; DR-0010 #4)."""
 
     orbits: int | None = Field(default=None, gt=0)
-    max_duration_periods: float = Field(default=1.1, gt=1.0)
+    # Timeout guard of an orbits stop; null for a duration stop, so the serialized form
+    # validates again (T4 review F4).
+    max_duration_periods: float | None = Field(default=None, gt=1.0)
     duration_s: float | None = Field(default=None, gt=0.0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _orbits_default_guard(cls, data: Any) -> Any:
+        orbits_stop = isinstance(data, dict) and data.get("orbits") is not None
+        if orbits_stop and data.get("max_duration_periods") is None:
+            return {**data, "max_duration_periods": 1.1}  # M1 default
+        return data
 
     @model_validator(mode="after")
     def _exactly_one(self) -> StopConditionV2:
         if (self.orbits is None) == (self.duration_s is None):
             raise ValueError("stop needs exactly one of orbits or duration_s")
-        if self.duration_s is not None and "max_duration_periods" in self.model_fields_set:
+        if self.duration_s is not None and self.max_duration_periods is not None:
             raise ValueError("max_duration_periods applies only to an orbits stop")
         return self
 

@@ -7,6 +7,7 @@ the golden-hash validators.
 """
 
 import json
+import math
 from collections import Counter
 
 import numpy as np
@@ -81,6 +82,18 @@ def _check_log_invariants(result):
     ended = Counter(e.burn_id for e in _of(result, "BurnEnded"))
     assert set(started.values()) <= {1} and set(ended.values()) <= {1}
     assert set(ended) <= set(started)
+    # The final telemetry is authoritative: it equals the final propulsion state
+    # (T4 review F1), including after a failure that follows a submission.
+    final = result.final_propulsion
+    if final is not None:
+        last = _of(result, "PropulsionSampled")[-1]
+        assert last.tick == final.tick == result.completed.tick
+        assert (last.engine_state, last.active_burn_id, last.pending_burn_ids) == (
+            final.engine_state.value,
+            final.active_burn_id,
+            final.pending_burn_ids,
+        )
+        assert last.propellant_kg == final.propellant_kg
 
 
 @pytest.fixture(scope="module")
@@ -97,9 +110,9 @@ def test_slice_event_sequence(slice_run):
     assert head == [
         "SimulationStarted",
         "SpacecraftConfigured",
+        "CommandAccepted",
         "StateSampled",
         "PropulsionSampled",
-        "CommandAccepted",
     ]
     milestones = [
         e.type for e in slice_run.events if e.type not in ("StateSampled", "PropulsionSampled")
@@ -175,7 +188,7 @@ def test_propulsion_sampled_every_tick_while_burning(slice_run):
     assert np.linalg.norm(burning.thrust_acceleration_mps2) == pytest.approx(
         490.0 / burning.total_mass_kg, rel=1e-12, abs=0
     )
-    assert samples[0].pending_burn_ids == ()  # sampled before the tick-0 submission
+    assert samples[0].pending_burn_ids == ("burn#000001",)  # after the tick-0 submission
     assert samples[6].pending_burn_ids == ("burn#000001",)
     state_ticks = {e.tick for e in _of(slice_run, "StateSampled")}
     assert state_ticks == set(range(0, 5371, 6)) | {5370}
@@ -499,6 +512,41 @@ def test_non_finite_step_during_a_burn_emits_no_partial_or_duplicate_events(monk
     assert len(_of(result, "BurnStarted")) == 1 and not _of(result, "BurnEnded")
     assert max(e.tick for e in result.events) == 62  # nothing from the failed step
     assert result.final_propulsion.tick == 62
+
+
+@pytest.mark.parametrize("fail_after_t", [0.0, 60.0])
+def test_failure_right_after_a_submission_reports_the_new_schedule(monkeypatch, fail_after_t):
+    """T4 review F1: a step failing just after a submission (at tick 0, or at a sampled
+    tick) must not leave final telemetry that predates the submission."""
+    _with_extra_force(
+        monkeypatch,
+        lambda t, r, v: np.array([np.nan, 0, 0]) if t > fail_after_t else np.zeros(3),
+    )
+    entry = {"submit_t_s": fail_after_t, "command": _cmd(ignition=600.0)}
+    result = _run(_scenario(commands=[entry]))
+    _check_log_invariants(result)
+    done = result.completed
+    assert (done.failure_cause, done.t) == ("non_finite", fail_after_t)
+    last = _of(result, "PropulsionSampled")[-1]
+    assert (last.engine_state, last.pending_burn_ids) == ("scheduled", ("burn#000001",))
+
+
+def test_no_submission_at_a_timeout_tick(monkeypatch):
+    """A tick at which the run times out ends the run: its submissions are not made."""
+    s = _scenario(commands=[], stop_s={"orbits": 1, "max_duration_periods": 1.01})
+    period = runner.keplerian_period(
+        s.constants.equatorial_radius + s.initial_orbit.altitude_m, s.constants.mu
+    )
+    max_ticks = math.ceil(1.01 * period / s.dt_s)
+    at_timeout = {"submit_t_s": max_ticks * s.dt_s, "command": _cmd("late", ignition=1e5)}
+    s = _scenario(commands=[at_timeout], stop_s={"orbits": 1, "max_duration_periods": 1.01})
+    # A strong prograde push raises the orbit, so one orbit cannot finish in time.
+    _with_extra_force(monkeypatch, lambda t, r, v: 2e-2 * v / np.linalg.norm(v))
+    result = _run(s)
+    _check_log_invariants(result)
+    assert result.completed.failure_cause == "timeout"
+    assert result.completed.tick == max_ticks
+    assert result.receipts == [] and result.unsubmitted_command_ids == ["late"]
 
 
 def test_failure_before_a_submission_leaves_it_unsubmitted(monkeypatch):

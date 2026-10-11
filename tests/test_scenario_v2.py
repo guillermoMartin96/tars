@@ -235,3 +235,117 @@ def test_config_hash_covers_the_timeline_and_spacecraft():
 def test_malformed_files_raise_validation_errors(text):
     with pytest.raises(ValidationError):
         parse_scenario(text)
+
+
+# ------------------------------------------------------------------ review M2-T4-review-01
+
+
+class _IntSubclass(int):
+    pass
+
+
+class _StrSubclass(str):
+    pass
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"x": (1.0,)},
+        {"x": (float("nan"),)},
+        {"x": b"abc"},
+        {"x": {1, 2}},
+        {"x": _IntSubclass(77)},
+        {"x": _StrSubclass("a")},
+        {"x": {1: "non-string key"}},
+        {"x": [object()]},
+        {"x": float("inf")},
+    ],
+)
+def test_python_payloads_must_be_exact_standard_json(payload):
+    """F2: Python input gets the same standard-JSON guarantee as a file, so the hash is
+    unambiguous and the runner submits exactly what the scenario holds."""
+    data = _slice()
+    data["commands"] = [{"command": payload}]
+    with pytest.raises(ValidationError):
+        ScenarioV2.model_validate(data)
+
+
+def test_python_payload_is_privately_copied():
+    data = _slice()
+    nested = {"k": [1, 2]}
+    data["commands"] = [{"command": {"x": nested}}]
+    s = ScenarioV2.model_validate(data)
+    before = s.config_hash()
+    nested["k"].append(3)
+    assert s.commands[0].command == {"x": {"k": [1, 2]}} and s.config_hash() == before
+
+
+def test_runner_submits_exactly_the_validated_payload():
+    """F2: the timeline copy must not change a payload's types (an int subclass used to
+    become a plain int, turning a rejection into an acceptance)."""
+    from tars.sim.runner import run_scenario
+
+    data = _slice()
+    data["stop"] = {"duration_s": 100.0}
+    command = {**data["commands"][0]["command"], "duration_s": 77, "ignition_t_s": 50}
+    data["commands"] = [{"command": command}]
+    result = run_scenario(ScenarioV2.model_validate(data), record_samples=False)
+    (receipt,) = result.receipts
+    assert receipt.status.value == "accepted"
+    assert type(receipt.command.duration_s) is float and receipt.command.duration_s == 77.0
+
+
+@pytest.mark.parametrize(
+    "stop",
+    [{"duration_s": 53700.0}, {"orbits": 2}, {"orbits": 2, "max_duration_periods": 1.5}],
+)
+def test_serialized_scenarios_validate_again(stop):
+    """F4: canonical JSON and Python dumps round-trip to an equal scenario."""
+    s = _parse({**_slice(), "stop": stop})
+    assert parse_scenario(s.canonical_json()) == s
+    assert ScenarioV2.model_validate(s.model_dump()) == s
+    assert parse_scenario(s.model_dump_json()).config_hash() == s.config_hash()
+
+
+def test_orbits_stop_guard_default_is_canonical():
+    implicit = _parse({**_slice(), "stop": {"orbits": 2}})
+    explicit = _parse({**_slice(), "stop": {"orbits": 2, "max_duration_periods": 1.1}})
+    null = _parse({**_slice(), "stop": {"orbits": 2, "max_duration_periods": None}})
+    assert implicit.config_hash() == explicit.config_hash() == null.config_hash()
+    assert implicit.stop.max_duration_periods == 1.1
+    assert _parse(_slice()).stop.max_duration_periods is None
+    with pytest.raises(ValidationError):
+        _parse({**_slice(), "stop": {"orbits": 2, "max_duration_periods": 1.0}})
+
+
+def test_with_dt_on_version_2():
+    """F4: the inherited helper works when the timeline fits the new grid."""
+    s = load_scenario(M2_SLICE_SCENARIO)
+    fine = s.with_dt(5.0)
+    assert type(fine) is ScenarioV2 and fine.stop_tick == 10740 and fine.commands == s.commands
+    with pytest.raises(ValidationError, match="tick grid"):
+        s.with_dt(7.0)  # 53700 is not a multiple of 7
+
+
+@pytest.mark.parametrize(
+    "patch",
+    [
+        {"stop": {"duration_s": 1e308}},
+        {"stop": {"duration_s": 1.0}, "commands": [{"submit_t_s": 1e308, "command": {}}]},
+    ],
+)
+def test_unrepresentable_tick_ratios_are_validation_errors(patch):
+    """F5: finite inputs whose ratio to dt overflows raise ValidationError, not
+    OverflowError."""
+    data = {**_slice(), "dt_s": 1e-10, "telemetry": {"sample_interval_s": 1e-10}, **patch}
+    data.setdefault("commands", [])
+    with pytest.raises(ValidationError, match="not representable"):
+        _parse(data)
+
+
+def test_version_1_sampling_ratio_overflow_is_a_validation_error():
+    data = json.loads(M1_SCENARIO.read_text())
+    data.update(dt_s=1e-300, telemetry={"sample_interval_s": 1e300})
+    with pytest.raises(ValidationError, match="not representable"):
+        Scenario.model_validate(data)

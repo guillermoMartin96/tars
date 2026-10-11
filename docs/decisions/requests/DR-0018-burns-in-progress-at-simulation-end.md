@@ -15,13 +15,13 @@ The approved event contract (DR-0014 §5, T3) has `BurnEnded.end_cause ∈ {comp
 ## Current implementation (T4, within the approved contract)
 The stop is an **observation horizon, not an engine command**.
 - **Physics.** The engine is not cut off at the stop; the simulation simply ends. Physics up to the stop is identical to a longer run (tested).
-- **Active burn.** It has `CommandAccepted` and `BurnStarted` but **no `BurnEnded`**. The final `PropulsionSampled` (always emitted at the final tick) shows `engine_state: "burning"` and `active_burn_id`. `RunResult.final_propulsion` and the CLI summary report `final_engine_state` and `active_burn_id_at_stop`.
+- **Active burn.** It has `CommandAccepted` and `BurnStarted` but **no `BurnEnded`**. The final `PropulsionSampled` (always emitted at the final tick, and always equal to the final propulsion state; review M2-T4-review-01 F1) shows `engine_state: "burning"` and `active_burn_id`. `RunResult.final_propulsion` and the CLI summary report `final_engine_state` and `active_burn_id_at_stop`.
 - **Pending burn.** It has `CommandAccepted` only. The final sample lists it in `pending_burn_ids` (`engine_state: "scheduled"`), and the summary has `pending_burn_ids_at_stop`.
 - **Status.** `SimulationCompleted.status` is `success` when the stop condition was reached without a failure. A burn in progress does not make the run fail.
 - **Boundary cases (tested):**
   - a cutoff exactly at the stop time is emitted (`BurnEnded`);
   - an ignition exactly at the stop time is emitted (`BurnStarted`, zero propellant used).
-- **Timeline entries never submitted.** If the run ends first (orbits stop, failure), they are not submitted, emit no event, and are listed in `RunResult.unsubmitted_command_ids` and the summary. For a `duration_s` stop, a submission at or after the stop time is a scenario validation error.
+- **Timeline entries never submitted.** If the run ends first (orbits stop, failure, timeout), including entries due at the very tick that ends the run, they are not submitted, emit no event, and are listed in `RunResult.unsubmitted_command_ids` and the summary. For a `duration_s` stop, a submission at or after the stop time is a scenario validation error.
 
 ## Constraints
 - No new event types, rejection codes or permission semantics without approval.

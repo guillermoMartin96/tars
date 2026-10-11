@@ -9,9 +9,15 @@ Writes:
     summary.json  status, failure cause, orbit count, crossing times, final state, log hash;
                   for schema-version-2 scenarios also command outcomes and final propulsion
 
-Each file is written atomically (temporary file, then rename), so an interrupted run
-never leaves a truncated file. events.jsonl is written first; summary.json records its
-sha256.
+Publication protocol (T4 review F3): summary.json is the commit marker, and it records
+the sha256 of events.jsonl.
+1. Both files are first written completely to temporary files.
+2. The old summary.json is removed.
+3. events.jsonl is replaced.
+4. summary.json is renamed into place.
+Each rename is atomic. An interrupted run therefore leaves either the previous complete
+pair, or an events.jsonl without a summary.json (incomplete). It never leaves a summary
+describing a different events.jsonl, and never a truncated file.
 
 Exit code: 0 on mission success, 1 on mission failure, 2 on invalid input.
 """
@@ -33,7 +39,8 @@ from tars.sim.runner import run_scenario
 from tars.sim.scenario import ScenarioV2, load_scenario
 
 
-def _write_atomic(path: Path, data: bytes) -> None:
+def _stage(path: Path, data: bytes) -> Path:
+    """Write ``data`` completely to a temporary file next to ``path``."""
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
     try:
         with os.fdopen(fd, "wb") as f:
@@ -41,10 +48,25 @@ def _write_atomic(path: Path, data: bytes) -> None:
         umask = os.umask(0)
         os.umask(umask)
         os.chmod(tmp, 0o666 & ~umask)  # mkstemp creates 0600; match a plain write
-        os.replace(tmp, path)
     except BaseException:
         Path(tmp).unlink(missing_ok=True)
         raise
+    return Path(tmp)
+
+
+def _publish(out: Path, events: bytes, summary: bytes) -> None:
+    """Publish the output pair with summary.json as the commit marker (module docstring)."""
+    events_path, summary_path = out / "events.jsonl", out / "summary.json"
+    staged: list[Path] = []
+    try:
+        staged.append(_stage(events_path, events))
+        staged.append(_stage(summary_path, summary))
+        summary_path.unlink(missing_ok=True)  # retract the old commit marker first
+        os.replace(staged[0], events_path)
+        os.replace(staged[1], summary_path)
+    finally:
+        for tmp in staged:
+            tmp.unlink(missing_ok=True)  # no-op once renamed
 
 
 def _propulsion_summary(result) -> dict:
@@ -77,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         scenario = load_scenario(args.scenario)
-    except (OSError, ValidationError) as exc:
+    except (OSError, UnicodeDecodeError, ValidationError) as exc:
         print(f"invalid scenario: {exc}", file=sys.stderr)
         return 2
 
@@ -85,7 +107,6 @@ def main(argv: list[str] | None = None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     result = run_scenario(scenario, record_samples=False)
     log = to_jsonl(result.events).encode()
-    _write_atomic(out / "events.jsonl", log)
 
     done = result.completed
     summary = {
@@ -108,7 +129,7 @@ def main(argv: list[str] | None = None) -> int:
         summary["schema_version"] = 2
         summary["stop_duration_s"] = scenario.stop.duration_s
         summary.update(_propulsion_summary(result))
-    _write_atomic(out / "summary.json", (json.dumps(summary, indent=2) + "\n").encode())
+    _publish(out, log, (json.dumps(summary, indent=2) + "\n").encode())
     print(
         f"{scenario.name}: {done.status}"
         + (f" ({done.failure_cause})" if done.failure_cause else "")

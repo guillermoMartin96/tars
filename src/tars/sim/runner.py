@@ -5,19 +5,20 @@ and every important transition is emitted as a structured event.
 
 Version-2 scenarios (M2 task T4) add a spacecraft, a command timeline and a duration
 stop. Emission order is fixed (contract: docs/contracts/m2-commands-and-events.md):
-- **Start (tick 0):** SimulationStarted, SpacecraftConfigured, samples, then the
-  command events of the submissions due at tick 0.
+- **Start (tick 0):** SimulationStarted, SpacecraftConfigured, command events of the
+  submissions due at tick 0, then the samples.
 - **After each committed step, at its end tick:**
   1. engine events of the step, in exact-time order;
-  2. StateSampled, then PropulsionSampled;
-  3. OrbitCompleted;
-  4. command events of the submissions due at that tick.
+  2. command events of the submissions due at that tick, unless the run ends there;
+  3. StateSampled, then PropulsionSampled;
+  4. OrbitCompleted.
+Samples therefore always show the schedule in effect after the tick's submissions.
 A version-1 scenario takes exactly the M1 path, with no new events.
 """
 
 from __future__ import annotations
 
-import json
+import copy
 import math
 from dataclasses import dataclass, field
 
@@ -164,10 +165,10 @@ def run_scenario(scenario: Scenario, record_samples: bool = True) -> RunResult:
             scenario.stop.max_duration_periods * target_orbits * nominal_period / scenario.dt_s
         )
     radius = constants.equatorial_radius
-    # Timeline in submission order; payloads are copied so the run cannot alias the
-    # scenario (submit() validates and copies them again).
+    # Timeline in submission order. Payloads are exact JSON types (TimelineEntry), so a
+    # deep copy is exact; the run cannot alias the scenario.
     entries = () if v2 is None else v2.commands
-    timeline = [(v2.submit_tick(e), json.loads(json.dumps(e.command))) for e in entries]
+    timeline = [(v2.submit_tick(e), copy.deepcopy(e.command)) for e in entries]
     next_entry = 0
     burns = None if spacecraft is None else _BurnEventEmitter(spacecraft)
 
@@ -231,9 +232,11 @@ def run_scenario(scenario: Scenario, record_samples: bool = True) -> RunResult:
             result.events.append(command_event(receipt))
             next_entry += 1
 
+    # Submissions due at a tick precede that tick's samples, so a sample always shows
+    # the schedule in effect after the tick (T4 review F1).
+    submit_due()
     sample(start)
     sample_propulsion(start)
-    submit_due()
     min_alt = max_alt = _altitude(start, radius)
     orbits = 0
     cause: str | None = None
@@ -261,6 +264,17 @@ def run_scenario(scenario: Scenario, record_samples: bool = True) -> RunResult:
             result.events.extend(burns.events(transitions, snap.tick, snap.t))
         alt = _altitude(snap, radius)
         min_alt, max_alt = min(min_alt, alt), max(max_alt, alt)
+        first_orbit = orbits + 1
+        orbits += len(detections)
+        if alt <= 0.0:
+            cause = "impact"
+        elif specific_energy(snap.r, snap.v, constants.mu) >= 0.0:
+            cause = "escape"
+        # The run continues past this tick only if no failure, stop or timeout ends it
+        # here; only then are this tick's submissions made.
+        timing_out = stop_tick is None and sim.tick >= max_ticks
+        if cause is None and not finished() and not timing_out:
+            submit_due()
         if snap.tick % scenario.sample_every_ticks == 0:
             sample(snap)
             sample_propulsion(snap)
@@ -268,22 +282,15 @@ def run_scenario(scenario: Scenario, record_samples: bool = True) -> RunResult:
             was_burning or transitions or _burning(sim.propulsion_snapshot())
         ):
             sample_propulsion(snap)  # every tick while burning (DR-0014 section 5)
-        for crossing in detections:
-            orbits += 1
+        for number, crossing in enumerate(detections, start=first_orbit):
             result.crossing_times.append(crossing.crossing_t)
             result.events.append(
                 OrbitCompleted(
-                    tick=snap.tick, t=snap.t, orbit_number=orbits, crossing_t=crossing.crossing_t
+                    tick=snap.tick, t=snap.t, orbit_number=number, crossing_t=crossing.crossing_t
                 )
             )
-        if alt <= 0.0:
-            cause = "impact"
+        if cause is not None:
             break
-        if specific_energy(snap.r, snap.v, constants.mu) >= 0.0:
-            cause = "escape"
-            break
-        if not finished():
-            submit_due()
 
     # The final state is always part of the telemetry and validated samples (REV-009).
     if snap.tick % scenario.sample_every_ticks != 0:

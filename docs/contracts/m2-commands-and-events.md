@@ -88,9 +88,12 @@ Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries
   - `spacecraft`: `{dry_mass_kg, propellant_kg, engine: {thrust_n, isp_s}}`, optional. It is converted to `SpacecraftSpec`, and derived quantities must be representable.
   - `commands`: a timeline of `{submit_t_s, command}` entries.
     - `command` is passed **verbatim** to `Simulator.submit()`. The scenario does not validate it, so the simulator stays the only validator and a scenario can contain a deliberately invalid command.
-    - It must be a JSON object of standard JSON values (no NaN or infinity anywhere), so the canonical form, and therefore `scenario_hash`, is unambiguous.
-  - `stop`: exactly one of `orbits` (M1 semantics, including the `max_duration_periods` timeout) or `duration_s`.
-- **Tick grid.** `submit_t_s` and `stop.duration_s` must be exactly `n · dt_s` for an integer n, because time is `tick · dt` (ADR-0002). For example, 0.3 with dt = 0.1 is rejected, because 3 · 0.1 ≠ 0.3.
+    - It must be a JSON object of **exact standard-JSON types**, from a file or from Python: `dict` with `str` keys, `list`, `str`, `int`, finite `float`, `bool`, `None`.
+      - No NaN or infinity; no tuples, sets, bytes or subclasses (review F2).
+      - The canonical form, and therefore `scenario_hash`, is unambiguous.
+      - The scenario stores a private deep copy, and the runner submits an exact copy of it, so direct `submit()` and the timeline behave identically.
+  - `stop`: exactly one of `orbits` (M1 semantics, including the `max_duration_periods` timeout, default 1.1) or `duration_s`. For a duration stop, `max_duration_periods` is `null`, so serialized scenarios validate again (review F4).
+- **Tick grid.** `submit_t_s` and `stop.duration_s` must be exactly `n · dt_s` for an integer n, because time is `tick · dt` (ADR-0002). For example, 0.3 with dt = 0.1 is rejected, because 3 · 0.1 ≠ 0.3. A ratio to `dt_s` that is not representable is a validation error (review F5).
 - **Timeline order.**
   - `submit_t_s` is non-decreasing; entries at the same time are submitted in file order.
   - With a duration stop, every `submit_t_s` must be earlier than the stop.
@@ -99,15 +102,17 @@ Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries
 1. **Tick 0:**
    1. `SimulationStarted`;
    2. `SpacecraftConfigured` (if configured);
-   3. `StateSampled`;
-   4. `PropulsionSampled`;
-   5. command events for the submissions due at tick 0.
+   3. command events for the submissions due at tick 0;
+   4. `StateSampled`;
+   5. `PropulsionSampled`.
 2. **After each committed step, at its end tick k:**
    1. engine events of the step in exact-time order. At equal times a cutoff precedes an ignition. A depletion cutoff emits `PropellantDepleted`, then `BurnEnded`.
-   2. `StateSampled`, then `PropulsionSampled`.
-   3. `OrbitCompleted`.
-   4. Command events for the submissions due at tick k, in file order. Submissions happen after the tick-k samples, so a tick-k sample does not yet list a burn submitted at tick k.
+   2. Command events for the submissions due at tick k, in file order. They are made only if the run continues past tick k; a tick that ends the run (stop, impact, escape, timeout) makes no submissions.
+   3. `StateSampled`, then `PropulsionSampled`.
+   4. `OrbitCompleted`.
 3. **End:** `StateSampled` and `PropulsionSampled` at the final tick if not already emitted, then `SimulationCompleted`.
+
+Submissions precede the samples of their tick, so **every sample shows the schedule in effect after its tick's submissions**. The last `PropulsionSampled` always equals the final propulsion state (`RunResult.final_propulsion`), including when a step fails right after a submission (review F1; asserted for every M2 test log). M1 order (sample, then `OrbitCompleted`) is unchanged.
 
 ### Cadence
 - `StateSampled` is emitted on the telemetry grid and at the final tick, as in M1.
@@ -124,7 +129,10 @@ Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries
 - **Unsubmitted entries.** Entries not yet submitted when the run ends are listed in `RunResult.unsubmitted_command_ids` and the CLI summary.
 - **No partial results.**
   - `run_scenario` returns only after the whole run, and any unexpected exception propagates with no result.
-  - The CLI writes `events.jsonl`, then `summary.json`, each atomically (temporary file plus rename).
+  - The CLI publishes its output pair with `summary.json` as the commit marker (review F3).
+    - Both files are staged completely, the old summary is removed, `events.jsonl` is renamed into place, then `summary.json`.
+    - An interrupted publication leaves either the previous complete pair, or an `events.jsonl` without a summary, which means incomplete.
+    - It never leaves a summary describing different events. `summary.json` records the `events_sha256` of its pair.
   - Re-running a scenario builds a fresh simulator, and logs are byte-identical.
 
 ## Explicitly out of scope

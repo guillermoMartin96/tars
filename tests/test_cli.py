@@ -142,13 +142,7 @@ def test_run_mission_rejects_invalid_v2_scenario_without_traceback(tmp_path):
 
 def test_failed_run_writes_no_outputs_and_keeps_previous_ones(tmp_path, monkeypatch):
     """Outputs are written only after the whole run; an earlier run's files survive."""
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "run_mission", REPO_ROOT / "toolbox/scripts/run_mission.py"
-    )
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
+    mod = _load_cli_module()
     out = tmp_path / "mission"
     out.mkdir()
     (out / "events.jsonl").write_text("previous\n")
@@ -163,28 +157,118 @@ def test_failed_run_writes_no_outputs_and_keeps_previous_ones(tmp_path, monkeypa
     assert (out / "events.jsonl").read_text() == "previous\n"
 
 
-def test_atomic_write_never_leaves_a_partial_file(tmp_path, monkeypatch):
+def _load_cli_module():
     import importlib.util
-    import os
 
     spec = importlib.util.spec_from_file_location(
         "run_mission", REPO_ROOT / "toolbox/scripts/run_mission.py"
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    target = tmp_path / "events.jsonl"
-    mod._write_atomic(target, b"first\n")
-    assert target.read_bytes() == b"first\n"
+    return mod
+
+
+def _pair_is_consistent(out):
+    """A summary.json, when present, always describes the events.jsonl next to it."""
+    import hashlib
+
+    names = sorted(p.name for p in out.iterdir())
+    assert all(not n.startswith(".") for n in names), f"temporary file left: {names}"
+    if "summary.json" in names:
+        summary = json.loads((out / "summary.json").read_text())
+        log = (out / "events.jsonl").read_bytes()
+        assert summary["events_sha256"] == hashlib.sha256(log).hexdigest()
+    return names
+
+
+def _previous_pair(out):
+    import hashlib
+
+    out.mkdir()
+    (out / "events.jsonl").write_bytes(b"old\n")
+    old = {"events_sha256": hashlib.sha256(b"old\n").hexdigest()}
+    (out / "summary.json").write_text(json.dumps(old))
+
+
+def test_publish_writes_a_consistent_pair_with_plain_file_modes(tmp_path):
+    mod = _load_cli_module()
+    out = tmp_path / "mission"
+    _previous_pair(out)
+    import hashlib
+
+    summary = json.dumps({"events_sha256": hashlib.sha256(b"new\n").hexdigest()}).encode()
+    mod._publish(out, b"new\n", summary)
+    assert _pair_is_consistent(out) == ["events.jsonl", "summary.json"]
+    assert (out / "events.jsonl").read_bytes() == b"new\n"
     plain = tmp_path / "plain"
     plain.write_bytes(b"")
-    assert target.stat().st_mode & 0o777 == plain.stat().st_mode & 0o777  # as a plain write
-    plain.unlink()
+    for name in ("events.jsonl", "summary.json"):
+        assert (out / name).stat().st_mode & 0o777 == plain.stat().st_mode & 0o777
 
-    def fail_replace(src, dst):
-        raise OSError("disk full")
 
-    monkeypatch.setattr(os, "replace", fail_replace)
+@pytest.mark.parametrize("failing_rename", [1, 2])
+def test_interrupted_publication_never_leaves_a_mismatched_pair(
+    tmp_path, monkeypatch, failing_rename
+):
+    """T4 review F3: a failure at either rename leaves the previous complete pair or an
+    events file without a summary (incomplete), never a summary of other events."""
+    import hashlib
+    import os
+
+    mod = _load_cli_module()
+    out = tmp_path / "mission"
+    _previous_pair(out)
+    real_replace, calls = os.replace, []
+
+    def flaky_replace(src, dst):
+        calls.append(dst)
+        if len(calls) == failing_rename:
+            raise OSError("disk full")
+        real_replace(src, dst)
+
+    monkeypatch.setattr(os, "replace", flaky_replace)
+    summary = json.dumps({"events_sha256": hashlib.sha256(b"new\n").hexdigest()}).encode()
     with pytest.raises(OSError):
-        mod._write_atomic(target, b"second\n")
-    assert target.read_bytes() == b"first\n"
-    assert [p.name for p in tmp_path.iterdir()] == ["events.jsonl"]  # temp file removed
+        mod._publish(out, b"new\n", summary)
+    assert _pair_is_consistent(out) == ["events.jsonl"]  # no commit marker
+    expected = b"old\n" if failing_rename == 1 else b"new\n"
+    assert (out / "events.jsonl").read_bytes() == expected
+
+
+def test_failure_while_staging_keeps_the_previous_pair(tmp_path, monkeypatch):
+    mod = _load_cli_module()
+    out = tmp_path / "mission"
+    _previous_pair(out)
+    real_stage, calls = mod._stage, []
+
+    def flaky_stage(path, data):
+        calls.append(path)
+        if len(calls) == 2:
+            raise OSError("disk full")
+        return real_stage(path, data)
+
+    monkeypatch.setattr(mod, "_stage", flaky_stage)
+    with pytest.raises(OSError):
+        mod._publish(out, b"new\n", b"{}")
+    assert _pair_is_consistent(out) == ["events.jsonl", "summary.json"]
+    assert (out / "events.jsonl").read_bytes() == b"old\n"
+
+
+def test_run_mission_rejects_unrepresentable_tick_ratio_without_traceback(tmp_path):
+    """T4 review F5: finite inputs whose tick ratio overflows are invalid input (exit 2)."""
+    from tests.conftest import M2_SLICE_SCENARIO
+
+    data = json.loads(M2_SLICE_SCENARIO.read_text())
+    data.update(dt_s=1e-10, telemetry={"sample_interval_s": 1e-10}, commands=[])
+    data["stop"] = {"duration_s": 1e308}
+    bad = tmp_path / "bad.json"
+    bad.write_text(json.dumps(data))
+    proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+    assert proc.returncode == 2 and "Traceback" not in proc.stderr
+
+
+def test_run_mission_rejects_a_binary_file_without_traceback(tmp_path):
+    bad = tmp_path / "bad.json"
+    bad.write_bytes(b"\xff\xfe\x00")
+    proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+    assert proc.returncode == 2 and "Traceback" not in proc.stderr
