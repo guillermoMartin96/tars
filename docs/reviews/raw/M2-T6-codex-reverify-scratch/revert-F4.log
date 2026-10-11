@@ -1,0 +1,19 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_generate_never_writes_into_the_references ________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-76/test_generate_never_writes_int0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1126dee40>
+
+    def test_generate_never_writes_into_the_references(tmp_path, monkeypatch):
+        """F4: generate writes previews only; run guards every existing artifact."""
+        cli = _cli()
+>       assert cli.main(["generate", "--out", str(gmat_m2.reference_dir())]) == 2
+E       AssertionError: assert 0 == 2
+E        +  where 0 = <function main at 0x1126ea5c0>(['generate', '--out', '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap2/review_scratch/revert-F4-refs'])
+E        +    where <function main at 0x1126ea5c0> = <module 'gmat_m2_cli' from '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap2/toolbox/scripts/gmat_m2.py'>.main
+
+tests/test_gmat_m2.py:500: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_generate_never_writes_into_the_references
+1 failed in 0.12s

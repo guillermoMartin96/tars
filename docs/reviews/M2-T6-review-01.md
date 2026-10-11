@@ -96,5 +96,34 @@ All seven are **`ACCEPTED`**.
 - The three references were regenerated through the new staged `run` with the reason recorded in the metadata and the manifest.
 - **The reports are byte-identical:** same sha256 as `1de827e`. Only the metadata (new provenance fields) and the console logs (timings) changed.
 
-## Re-verification
+## Re-verification 1
+**Reviewer:** Codex, session `01a12cfd-1fe9-7ca3-b2d8-4795a952eae5`, at `94f0e75`. **Raw:** `raw/M2-T6-codex-reverify.md`, `raw/M2-T6-codex-reverify-scratch/`.
+
+**Verdict: FAIL.**
+- F2, F6 and F7 are resolved. F1, F3, F4 and F5 are partly resolved; their remainders are F8–F13 below.
+- Confirmed:
+  - 890 tests, a 212-check Proof and all M1 gates pass;
+  - all 18 row mutations are rejected;
+  - the three reports are byte-identical to `1de827e` (git history);
+  - the installed GMAT matches the approved digest, and its three real reproductions passed;
+  - no T5 loosening; 30 µm is above the floor; DR-0017 and DR-0018 are separate; no T7 scope.
+
+**All six are `ACCEPTED`.** Each fix is mutation-tested: disabling it makes its tests fail.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F8 | Med | Metadata and manifest history not bound | The manifest binds the metadata digest as well. The history must be well formed, and this reference's latest record must equal its metadata (time, revision, reason, report digest). The revision must be non-null and the timestamp plausible | `test_metadata_and_history_are_bound_to_the_manifest` (metadata, host field bound only by the digest, history) |
+| F9 | Med | Interrupted publication left an accepted partial replacement | `_publish`: (1) withdraw the mission's approval atomically; (2) replace each artifact atomically (temp file + rename); (3) publish the new manifest last. With the metadata digest bound (F8), a partial set is rejected either way; withdraw-first is defense in depth and is pinned | `test_interrupted_publication_never_leaves_an_accepted_mix` (interruption at each of 7 steps) |
+| F10 | Med | Reproduction did not authenticate the executable | `is_approved_console` (sha256 = the pinned approved binary). The reproduction test requires it, plus GMAT's success marker. It is described as independent reproducibility evidence that cannot by itself prove the historical origin of stored bytes | `test_unapproved_executables_are_not_authenticated`; `test_gmat_reproduces_the_committed_report` |
+| F11 | Med | `generate` followed symlinks into the references | Refuses symlinked or protected destinations; writes a temporary file and renames it over the entry | `test_generate_refuses_symlinks_into_the_references` |
+| F12 | Med | Standalone evaluation ignored the T5 audit's numerical failures | Every audit metric group is gated with the T5 thresholds, failing closed on missing limits. The report-only rule moved to `tars.validation.m2.ungated_metrics`, shared with `m2_proof.py` (no behavior change there) | `test_standalone_evaluation_applies_the_audit_gates` (thrust acceleration, sensed Δv) |
+| F13 | Low | Boundary coverage ignored same-tick reporting | Inclusion by `_expected_report_tick` (same-tick submission → k + 1). A valid scenario cannot stop at its own submission tick, so the case is exercised at the function level | `test_coverage_uses_the_same_tick_report_rule` |
+
+**Test defect found while verifying F8.**
+- The first version of the F8 test copied, in its second iteration, the references from the directory already patched by the first iteration, so the history case inherited the metadata tampering. It also edited another mission's history record.
+- Fixed: the cases are parametrized separately, each history probe edits only the record under test, and a digest-only field probe was added. Each mechanism now has a test that fails without it.
+
+**References regenerated** (third recorded replacement, so the manifest binds the metadata digest): the reports are byte-identical to `1de827e`.
+
+## Re-verification 2
 See below.

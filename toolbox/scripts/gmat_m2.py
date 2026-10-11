@@ -54,13 +54,22 @@ def _script(name: str, report_path: str) -> str:
 
 def cmd_generate(args: argparse.Namespace) -> int:
     out = Path(args.out).resolve()
-    if out == gmat_m2.reference_dir().resolve():
+    ref = gmat_m2.reference_dir().resolve()
+    if out == ref or out.is_relative_to(ref):
         print("generate never writes into the committed references; use run", file=sys.stderr)
         return 2
     out.mkdir(parents=True, exist_ok=True)
     for name in args.missions:
         path = out / f"{name}.script"
-        path.write_text(_script(name, f"{name}_report.txt"))
+        # Never follow an existing destination (symlink) into protected files (F11):
+        # write a fresh temporary file and rename it over the destination entry.
+        if path.is_symlink() or path.resolve().is_relative_to(ref):
+            print(f"refusing to write through {path}", file=sys.stderr)
+            return 2
+        tmp = out / f".{name}.script.tmp"
+        tmp.unlink(missing_ok=True)
+        tmp.write_text(_script(name, f"{name}_report.txt"))
+        tmp.replace(path)
         print(f"wrote preview {path}")
     return 0
 
@@ -81,6 +90,16 @@ def _evaluate(name: str, base: Path | None = None) -> tuple[list[str], Check | N
     run = run_scenario(scenario)
     audit = m2.audit_run(scenario, mission.expected, run)
     rejected = [f"simulator audit {k}: {x}" for k, xs in audit.violations.items() for x in xs]
+    # The audit's numerical T5 gates count too, fail-closed on missing limits (F12).
+    t5 = load_scoped_thresholds(missions=frozenset(BY_NAME))
+    for group, metrics in audit.metrics.items():
+        limits = t5.for_validator(group, name)
+        missing = m2.ungated_metrics(metrics, limits)
+        if missing:
+            rejected.append(f"simulator audit {group}: metrics without a threshold {missing}")
+            continue
+        failed = Check(group, metrics, limits, t5.status).failures
+        rejected += [f"simulator audit {group}: {f}" for f in failed]
     result = gmat_m2.compare_committed(
         name, scenario, mission.expected, run.events, *_script_tolerances(), base=base
     )
@@ -107,11 +126,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     if not console.exists():
         print(f"GmatConsole not found: {console}", file=sys.stderr)
         return 2
-    ref = gmat_m2.reference_dir()
-    approved = gmat_m2.load_approved() or {}
     status = 0
     for name in args.missions:
         files = gmat_m2.reference_files(name)
+        approved = (gmat_m2.load_approved() or {}).get("references", {})
         exists = any(p.exists() for p in files.values()) or name in approved
         if exists and not args.replace_reason:
             print(
@@ -193,6 +211,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 "script_sha256": metadata["script_sha256"],
                 "report_sha256": metadata["report_sha256"],
                 "console_sha256": metadata["console_sha256"],
+                "metadata_sha256": _sha256(staged["metadata"]),
             }
             manifest["history"].append(
                 {
@@ -214,18 +233,37 @@ def cmd_run(args: argparse.Namespace) -> int:
                 )
                 status = 1
                 continue
-            ref.mkdir(parents=True, exist_ok=True)
-            for key in ("script", "report", "console", "metadata"):
-                tmp_dst = files[key].with_suffix(files[key].suffix + ".new")
-                shutil.copyfile(staged[key], tmp_dst)
-                tmp_dst.replace(files[key])
-            tmp_manifest = manifest_path.with_suffix(".json.new")
-            shutil.copyfile(staged_manifest, tmp_manifest)
-            tmp_manifest.replace(manifest_path)  # commit marker: the approved digests
-            approved = manifest["references"]
+            _publish(name, staged, staged_manifest, manifest)
             rows = int(check.metrics["gmat_rows"])
             print(f"{name}: GMAT reference validated and stored ({rows} rows)")
     return status
+
+
+def _atomic_write(dst: Path, data: bytes) -> None:
+    tmp = dst.with_name(f".{dst.name}.new")
+    tmp.write_bytes(data)
+    tmp.replace(dst)
+
+
+def _publish(name: str, staged: dict, staged_manifest: Path, manifest: dict) -> None:
+    """Publish a validated reference so that no interruption leaves an accepted mix
+    (review M2-T6 F9):
+    1. withdraw the mission's approval (manifest without its entry), atomically;
+    2. replace each artifact atomically (temp file + rename);
+    3. publish the new manifest, the commit marker, atomically.
+    Interrupted after 1, the mission is unapproved and every check rejects it, so a
+    partial artifact set can never pass; re-running ``run`` completes it."""
+    ref = gmat_m2.reference_dir()
+    ref.mkdir(parents=True, exist_ok=True)
+    path = gmat_m2.approved_manifest_path()
+    if path.exists():
+        current = json.loads(path.read_text())
+        current.get("references", {}).pop(name, None)
+        _atomic_write(path, (json.dumps(current, indent=2) + "\n").encode())
+    files = gmat_m2.reference_files(name)
+    for key in ("script", "report", "console", "metadata"):
+        _atomic_write(files[key], staged[key].read_bytes())
+    _atomic_write(path, staged_manifest.read_bytes())
 
 
 def cmd_compare(args: argparse.Namespace) -> int:

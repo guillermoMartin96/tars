@@ -126,12 +126,17 @@ uv run python toolbox/scripts/gmat_m2.py compare             # O9; also inside m
 ```
 
 - **Replacement guard.** `run` refuses to touch any existing reference artifact or manifest entry without `--replace-reason`. The reason is stored in the metadata and in the history of `APPROVED_DIGESTS.json`.
-- **Staged validation.** `run` stages every artifact and validates it completely before replacing anything: provenance, alignment, coverage, every O9 gate, gate coverage, and a clean audit of the simulator run. On failure nothing is replaced. The manifest is written last.
+- **Staged validation and publication.** `run` stages every artifact and validates it completely before replacing anything: provenance, alignment, coverage, every O9 gate and every T5 audit gate, failing closed on missing limits. On failure nothing is replaced. Publication then:
+  1. withdraws the mission's approval;
+  2. replaces each artifact atomically;
+  3. publishes the new manifest last.
+
+  An interruption at any step leaves either the old reference intact or an unapproved mission that every check rejects. It never leaves an accepted mix.
 - **`generate`** writes previews only and never touches the references.
 - **`compare` rejects a reference when** the simulator run fails its T5 audit, an expected observation is missing, an O9 metric has no threshold, or:
   - the metadata lacks a required field, or names a binary other than the approved GMAT R2026a install (pinned sha256);
   - the console log is not bound by its digest or does not record success;
-  - the digests are not in the reviewed `APPROVED_DIGESTS.json`;
+  - the digests (script, report, console log and metadata) are not in the reviewed `APPROVED_DIGESTS.json`, or this reference's latest history record disagrees with its metadata;
   - any non-state script line differs from the regenerated script (constants, every engine coefficient, g0, masses, arcs, steps);
   - the initial-state literals differ beyond the approved DR-0009 bound;
   - the metadata constants differ;
@@ -139,7 +144,9 @@ uv run python toolbox/scripts/gmat_m2.py compare             # O9; also inside m
   - the rows are not step-aligned.
 - **Reproducibility.** Re-running GMAT reproduces every committed report byte for byte (`tests/test_gmat_m2.py::test_gmat_reproduces_the_committed_report`, skipped where GMAT is not installed).
 - **Replacement history.** The references were replaced twice before approval, each with a recorded reason: the header comment was reworded, then provenance fields and the manifest were added (review M2-T6). Both times the reports were byte-identical to the first run (`1de827e`).
-- **What provenance can and cannot prove.** The checks above make silent or accidental substitution detectable. They cannot prove GMAT origin against deliberate fabrication. Origin is established by the reproduction test, which re-runs the approved GMAT and requires byte-identical reports wherever GMAT is installed, and by review of changes to `APPROVED_DIGESTS.json`.
+- **What provenance can and cannot prove.** The checks above make silent or accidental substitution detectable. They cannot prove GMAT origin against deliberate fabrication.
+- **The reproduction test** verifies that the installed executable *is* the approved GMAT (sha256), that it reports success, and that it reproduces the committed reports byte for byte. That is authenticated, independent reproducibility evidence. Together with review of `APPROVED_DIGESTS.json` changes, it is the basis for trusting the references; by itself it cannot prove the historical origin of stored bytes.
+- `generate` refuses symlinked or protected destinations.
 
 ## Depletion is not compared with GMAT
 - **What happens.** GMAT's stop-condition logic takes a full step past the stop before backing up.

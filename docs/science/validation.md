@@ -460,6 +460,7 @@ All 10 approved rejection codes are exercised.
   - complete metadata;
   - an entry in the approved-digest manifest.
 
-  These controls detect silent or accidental substitution. They cannot prove GMAT origin against deliberate fabrication. Origin is established by the reproduction test, which re-runs the approved GMAT for byte-identical reports wherever GMAT is installed, and by review of manifest changes.
+  These controls detect silent or accidental substitution, including of metadata and manifest history. They cannot prove GMAT origin against deliberate fabrication.
+- **Reproduction.** The reproduction test authenticates the executable (approved sha256) and its success marker, and requires byte-identical reports. That is authenticated, independent reproducibility evidence. It does not by itself prove the historical origin of stored bytes (review M2-T6 F10).
 - **Classification:** no discrepancy. **Status:** provisional Proof evidence (T6); thresholds remain provisional until the T7 three-platform measurement and threshold DR.
 

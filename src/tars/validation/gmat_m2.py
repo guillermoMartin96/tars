@@ -498,6 +498,20 @@ APPROVED_GMAT = {
     "gmat_console_sha256": "1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2",
 }
 CONSOLE_SUCCESS = "*** GMAT Integration test (Console version) successful! ***"
+
+
+def is_approved_console(path) -> bool:
+    """The executable is the approved GMAT install, by content digest (review F10)."""
+    import hashlib
+    from pathlib import Path
+
+    p = Path(path)
+    return (
+        p.is_file()
+        and hashlib.sha256(p.read_bytes()).hexdigest() == APPROVED_GMAT["gmat_console_sha256"]
+    )
+
+
 MODEL = (
     "Earth point mass; ChemicalThruster VNB +-1, C1 = F, K1 = Isp, other coefficients 0, "
     "GravitationalAccel = g0, DecrementMass; PrinceDormand78, Accuracy 1e-13; aligned "
@@ -547,24 +561,34 @@ def provenance_problems(
     for key, want in expected_meta.items():
         if metadata.get(key) != want:
             problems.append(f"metadata {key} {metadata.get(key)!r} != {want!r}")
-    if not re.fullmatch(r"[0-9a-f]{40}", str(metadata.get("tars_git_revision", ""))):
-        problems.append("metadata tars_git_revision missing")
+    revision = str(metadata.get("tars_git_revision", ""))
+    if not re.fullmatch(r"[0-9a-f]{40}", revision) or set(revision) == {"0"}:
+        problems.append("metadata tars_git_revision missing or invalid")
     try:
-        _dt.datetime.fromisoformat(str(metadata.get("generated_utc")))
+        stamp = _dt.datetime.fromisoformat(str(metadata.get("generated_utc")))
+        if stamp.tzinfo is None or stamp.year < 2026:  # references exist from M2 (2026)
+            problems.append("metadata generated_utc implausible")
     except ValueError:
         problems.append("metadata generated_utc missing")
-    if "replace_reason" not in metadata or not metadata.get("host_platform"):
-        problems.append("metadata replace_reason or host_platform missing")
+    if not isinstance(metadata.get("host_platform"), str) or not metadata["host_platform"]:
+        problems.append("metadata host_platform missing")
+    if "replace_reason" not in metadata:
+        problems.append("metadata replace_reason missing")
     log = files["console"].read_text()
     if CONSOLE_SUCCESS not in log or "Execution Failed" in log or "Exception" in log:
         problems.append("console log does not record a successful GMAT run")
-    # Approved digests (reviewed manifest): a changed reference must change the manifest.
-    if approved is None or approved.get(name) != {
+    # Approved digests (reviewed manifest): every artifact, metadata included, is bound;
+    # a changed reference must change the manifest (reviews M2-T6 F3, F8).
+    meta_digest = hashlib.sha256(files["metadata"].read_bytes()).hexdigest()
+    entries = None if approved is None else approved.get("references")
+    if entries is None or entries.get(name) != {
         "script_sha256": digests["script"],
         "report_sha256": digests["report"],
         "console_sha256": digests["console"],
+        "metadata_sha256": meta_digest,
     }:
         problems.append("reference digests are not in the approved manifest")
+    problems += history_problems(name, metadata, approved)
     try:
         other_c, r_c, v_c = split_script(files["script"].read_text())
     except ValueError as err:
@@ -611,6 +635,31 @@ def reference_dir():
     return REPO_ROOT / "toolbox" / "references" / "gmat" / "m2"
 
 
+def history_problems(name: str, metadata: dict, approved: dict | None) -> list[str]:
+    """The manifest history is well formed and its latest record for this mission is the
+    committed generation (review M2-T6 F8)."""
+    if approved is None:
+        return ["approved manifest missing"]
+    history = approved.get("history")
+    keys = {"mission", "generated_utc", "tars_git_revision", "reason", "report_sha256"}
+    if not isinstance(history, list) or any(
+        not isinstance(h, dict) or set(h) != keys for h in history
+    ):
+        return ["approved manifest history is malformed"]
+    mine = [h for h in history if h["mission"] == name]
+    if not mine:
+        return ["approved manifest has no history for this reference"]
+    latest = mine[-1]
+    want = {
+        "mission": name,
+        "generated_utc": metadata.get("generated_utc"),
+        "tars_git_revision": metadata.get("tars_git_revision"),
+        "reason": metadata.get("replace_reason") or "initial reference",
+        "report_sha256": metadata.get("report_sha256"),
+    }
+    return [] if latest == want else [f"latest history record {latest} != metadata {want}"]
+
+
 def approved_manifest_path(base=None):
     return (reference_dir() if base is None else base) / "APPROVED_DIGESTS.json"
 
@@ -621,7 +670,8 @@ def load_approved(base=None) -> dict | None:
     path = approved_manifest_path(base)
     if not path.exists():
         return None
-    return json.loads(path.read_text()).get("references")
+    data = json.loads(path.read_text())
+    return data if isinstance(data, dict) else None
 
 
 def reference_files(name: str, base=None) -> dict[str, object]:
@@ -665,8 +715,16 @@ def coverage_problems(
         v.append(
             f"StateSampled times differ from the grid ({len(got_states)} vs {len(want_states)})"
         )
-    want_bounds = {("BurnStarted", b.ignition_t_s) for b in predicted if b.ignition_t_s <= horizon}
-    want_bounds |= {("BurnEnded", b.cutoff_t_s) for b in predicted if b.cutoff_t_s <= horizon}
+    # Inclusion by the independently predicted report tick, so a same-tick submission
+    # whose ignition is reported at k + 1 is not expected at a stop at k (review F13).
+    final_tick = round(horizon / dt)
+    want_bounds = set()
+    for b in predicted:
+        same = b.submit_tick * dt == b.ignition_t_s
+        if _expected_report_tick(b.ignition_t_s, dt, same) <= final_tick:
+            want_bounds.add(("BurnStarted", b.ignition_t_s))
+        if _expected_report_tick(b.cutoff_t_s, dt, False) <= final_tick:
+            want_bounds.add(("BurnEnded", b.cutoff_t_s))
     got_bounds = {(e.type, e.event_t_s) for e in events if e.type in ("BurnStarted", "BurnEnded")}
     if got_bounds != want_bounds:
         v.append(f"burn boundaries {sorted(got_bounds)} != predicted {sorted(want_bounds)}")

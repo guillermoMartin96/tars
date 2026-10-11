@@ -1,0 +1,156 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+___________________ test_provenance_is_required[drop_fields] ___________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-75/test_provenance_is_required_dr0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10473b470>
+change = 'drop_fields'
+
+    @pytest.mark.parametrize(
+        "change", ["drop_fields", "failed_console", "other_binary", "unapproved_digest"]
+    )
+    def test_provenance_is_required(tmp_path, monkeypatch, change):
+        """F3: provenance fields, the approved binary, a successful bound console log and the
+        approved-digest manifest are all required."""
+        name = "m2_retrograde_burn"
+        dst = _copy_refs(tmp_path)
+        files = gmat_m2.reference_files(name, dst)
+        if change == "drop_fields":
+            meta = json.loads(files["metadata"].read_text())
+            keep = ("scenario_hash", "constants", "script_sha256", "report_sha256")
+            files["metadata"].write_text(json.dumps({k: meta[k] for k in keep}))
+        elif change == "failed_console":
+            files["console"].write_text("Execution Failed: not GMAT\n")
+            _rehash(dst, name)
+        elif change == "other_binary":
+            meta = json.loads(files["metadata"].read_text())
+            meta["gmat_console_sha256"] = "0" * 64
+            files["metadata"].write_text(json.dumps(meta))
+        else:
+            lines = files["report"].read_text().splitlines()
+            files["report"].write_text("\n".join(lines) + "\n\n")  # same rows, new digest
+            _rehash(dst, name, manifest=False)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+E       AssertionError: assert []
+E        +  where [] = O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}).violations
+E        +    where O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}) = _compare('m2_retrograde_burn')
+
+tests/test_gmat_m2.py:470: AssertionError
+_________________ test_provenance_is_required[failed_console] __________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-75/test_provenance_is_required_fa0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1068070b0>
+change = 'failed_console'
+
+    @pytest.mark.parametrize(
+        "change", ["drop_fields", "failed_console", "other_binary", "unapproved_digest"]
+    )
+    def test_provenance_is_required(tmp_path, monkeypatch, change):
+        """F3: provenance fields, the approved binary, a successful bound console log and the
+        approved-digest manifest are all required."""
+        name = "m2_retrograde_burn"
+        dst = _copy_refs(tmp_path)
+        files = gmat_m2.reference_files(name, dst)
+        if change == "drop_fields":
+            meta = json.loads(files["metadata"].read_text())
+            keep = ("scenario_hash", "constants", "script_sha256", "report_sha256")
+            files["metadata"].write_text(json.dumps({k: meta[k] for k in keep}))
+        elif change == "failed_console":
+            files["console"].write_text("Execution Failed: not GMAT\n")
+            _rehash(dst, name)
+        elif change == "other_binary":
+            meta = json.loads(files["metadata"].read_text())
+            meta["gmat_console_sha256"] = "0" * 64
+            files["metadata"].write_text(json.dumps(meta))
+        else:
+            lines = files["report"].read_text().splitlines()
+            files["report"].write_text("\n".join(lines) + "\n\n")  # same rows, new digest
+            _rehash(dst, name, manifest=False)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+E       AssertionError: assert []
+E        +  where [] = O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}).violations
+E        +    where O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}) = _compare('m2_retrograde_burn')
+
+tests/test_gmat_m2.py:470: AssertionError
+__________________ test_provenance_is_required[other_binary] ___________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-75/test_provenance_is_required_ot0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1047397f0>
+change = 'other_binary'
+
+    @pytest.mark.parametrize(
+        "change", ["drop_fields", "failed_console", "other_binary", "unapproved_digest"]
+    )
+    def test_provenance_is_required(tmp_path, monkeypatch, change):
+        """F3: provenance fields, the approved binary, a successful bound console log and the
+        approved-digest manifest are all required."""
+        name = "m2_retrograde_burn"
+        dst = _copy_refs(tmp_path)
+        files = gmat_m2.reference_files(name, dst)
+        if change == "drop_fields":
+            meta = json.loads(files["metadata"].read_text())
+            keep = ("scenario_hash", "constants", "script_sha256", "report_sha256")
+            files["metadata"].write_text(json.dumps({k: meta[k] for k in keep}))
+        elif change == "failed_console":
+            files["console"].write_text("Execution Failed: not GMAT\n")
+            _rehash(dst, name)
+        elif change == "other_binary":
+            meta = json.loads(files["metadata"].read_text())
+            meta["gmat_console_sha256"] = "0" * 64
+            files["metadata"].write_text(json.dumps(meta))
+        else:
+            lines = files["report"].read_text().splitlines()
+            files["report"].write_text("\n".join(lines) + "\n\n")  # same rows, new digest
+            _rehash(dst, name, manifest=False)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+E       AssertionError: assert []
+E        +  where [] = O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}).violations
+E        +    where O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}) = _compare('m2_retrograde_burn')
+
+tests/test_gmat_m2.py:470: AssertionError
+________________ test_provenance_is_required[unapproved_digest] ________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-75/test_provenance_is_required_un0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105ea8f20>
+change = 'unapproved_digest'
+
+    @pytest.mark.parametrize(
+        "change", ["drop_fields", "failed_console", "other_binary", "unapproved_digest"]
+    )
+    def test_provenance_is_required(tmp_path, monkeypatch, change):
+        """F3: provenance fields, the approved binary, a successful bound console log and the
+        approved-digest manifest are all required."""
+        name = "m2_retrograde_burn"
+        dst = _copy_refs(tmp_path)
+        files = gmat_m2.reference_files(name, dst)
+        if change == "drop_fields":
+            meta = json.loads(files["metadata"].read_text())
+            keep = ("scenario_hash", "constants", "script_sha256", "report_sha256")
+            files["metadata"].write_text(json.dumps({k: meta[k] for k in keep}))
+        elif change == "failed_console":
+            files["console"].write_text("Execution Failed: not GMAT\n")
+            _rehash(dst, name)
+        elif change == "other_binary":
+            meta = json.loads(files["metadata"].read_text())
+            meta["gmat_console_sha256"] = "0" * 64
+            files["metadata"].write_text(json.dumps(meta))
+        else:
+            lines = files["report"].read_text().splitlines()
+            files["report"].write_text("\n".join(lines) + "\n\n")  # same rows, new digest
+            _rehash(dst, name, manifest=False)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+E       AssertionError: assert []
+E        +  where [] = O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}).violations
+E        +    where O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624...ration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 1.5697834300551986e-06}) = _compare('m2_retrograde_burn')
+
+tests/test_gmat_m2.py:470: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_provenance_is_required[drop_fields] - Asse...
+FAILED tests/test_gmat_m2.py::test_provenance_is_required[failed_console] - A...
+FAILED tests/test_gmat_m2.py::test_provenance_is_required[other_binary] - Ass...
+FAILED tests/test_gmat_m2.py::test_provenance_is_required[unapproved_digest]
+4 failed in 9.58s

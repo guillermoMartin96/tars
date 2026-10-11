@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_standalone_compare_fails_closed_without_thresholds ____________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-77/test_standalone_compare_fails_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1094aa9c0>
+
+    def test_standalone_compare_fails_closed_without_thresholds(tmp_path, monkeypatch):
+        """F6: missing O9 limits reject the comparison instead of passing it."""
+        from tars.validation.thresholds import ScopedThresholds
+    
+        data = json.loads(M2_THRESHOLDS.read_text())
+        del data["limits"]["o9_gmat"]["all"]["coast_vs_kepler_position_error_max_m"]
+        cli = _cli()
+        monkeypatch.setattr(
+            cli, "load_scoped_thresholds", lambda **_: ScopedThresholds("provisional", data["limits"])
+        )
+        rejected, check = cli._evaluate("m2_prograde_burn")
+>       assert check is None and any("without a threshold" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:550: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_standalone_compare_fails_closed_without_thresholds
+1 failed in 4.23s

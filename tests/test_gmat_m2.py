@@ -328,17 +328,34 @@ def test_cli_refuses_missions_without_a_reference():
 )
 @pytest.mark.parametrize("name", gmat_m2.GMAT_MISSIONS)
 def test_gmat_reproduces_the_committed_report(tmp_path, name):
+    """Authenticated reproduction (review F10): the executable must be the approved GMAT
+    (pinned sha256) and must report success; its report must equal the committed bytes.
+    This is independent reproducibility evidence for the committed reference; by itself
+    it cannot prove the historical origin of stored bytes."""
+    assert gmat_m2.is_approved_console(GMAT_CONSOLE), "installed GmatConsole is not approved"
     files = gmat_m2.reference_files(name)
     report = tmp_path / "report.txt"
     script = tmp_path / "case.script"
     script.write_text(files["script"].read_text().replace(f"'{name}_report.txt'", f"'{report}'"))
-    subprocess.run(
+    proc = subprocess.run(
         [str(GMAT_CONSOLE), "--run", str(script)],
         cwd=GMAT_CONSOLE.parent,
         capture_output=True,
-        check=True,
+        text=True,
     )
+    log = proc.stdout + proc.stderr
+    assert proc.returncode == 0 and gmat_m2.CONSOLE_SUCCESS in log
+    assert "Execution Failed" not in log
     assert report.read_bytes() == files["report"].read_bytes()
+
+
+def test_unapproved_executables_are_not_authenticated(tmp_path):
+    fake = tmp_path / "GmatConsole"
+    fake.write_text(
+        "#!/bin/sh\necho '*** GMAT Integration test (Console version) successful! ***'\n"
+    )
+    assert not gmat_m2.is_approved_console(fake)
+    assert not gmat_m2.is_approved_console(sys.executable)
 
 
 # ------------------------------------------------------------------ review M2-T6 fixes
@@ -360,7 +377,8 @@ def _copy_refs(tmp_path):
 
 
 def _rehash(dst, name, manifest=True):
-    """Make metadata (and optionally the approved manifest) consistent with edited files."""
+    """Make metadata (and optionally the approved manifest, digests and latest history
+    record) consistent with edited files."""
     import hashlib
 
     files = gmat_m2.reference_files(name, dst)
@@ -370,9 +388,11 @@ def _rehash(dst, name, manifest=True):
     files["metadata"].write_text(json.dumps(meta))
     if manifest:
         man = json.loads((dst / "APPROVED_DIGESTS.json").read_text())
-        man["references"][name] = {
-            k: meta[k] for k in ("script_sha256", "report_sha256", "console_sha256")
-        }
+        entry = {k: meta[k] for k in ("script_sha256", "report_sha256", "console_sha256")}
+        entry["metadata_sha256"] = hashlib.sha256(files["metadata"].read_bytes()).hexdigest()
+        man["references"][name] = entry
+        latest = [h for h in man["history"] if h["mission"] == name][-1]
+        latest["report_sha256"] = meta["report_sha256"]
         (dst / "APPROVED_DIGESTS.json").write_text(json.dumps(man))
 
 
@@ -491,7 +511,7 @@ def test_fabricated_reference_needs_a_manifest_change(tmp_path, monkeypatch):
     _rehash(dst, name, manifest=False)
     monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
     violations = _compare(name).violations
-    assert violations == ["reference digests are not in the approved manifest"]
+    assert violations and all("manifest" in v or "history" in v for v in violations)
 
 
 def test_generate_never_writes_into_the_references(tmp_path, monkeypatch):
@@ -632,3 +652,161 @@ def test_split_script_requires_each_state_component_exactly_once():
         gmat_m2.split_script(script + x_line + "\n")
     with pytest.raises(ValueError, match="incomplete"):
         gmat_m2.split_script(script.replace(x_line + "\n", ""))
+
+
+# ------------------------------------------------------------------ re-verification fixes
+
+
+@pytest.mark.parametrize("change", ["metadata", "host", "history"])
+def test_metadata_and_history_are_bound_to_the_manifest(tmp_path, monkeypatch, change):
+    """F8: changed metadata, or this reference's latest history record disagreeing with
+    its metadata, is rejected."""
+    name = "m2_prograde_burn"
+    dst = _copy_refs(tmp_path)
+    files = gmat_m2.reference_files(name, dst)
+    if change == "metadata":
+        meta = json.loads(files["metadata"].read_text())
+        meta["tars_git_revision"] = "1" * 40
+        files["metadata"].write_text(json.dumps(meta))
+    elif change == "host":  # a field only the manifest's metadata digest binds
+        meta = json.loads(files["metadata"].read_text())
+        meta["host_platform"] = "invented"
+        files["metadata"].write_text(json.dumps(meta))
+    else:
+        man = json.loads((dst / "APPROVED_DIGESTS.json").read_text())
+        mine = [h for h in man["history"] if h["mission"] == name][-1]
+        mine["report_sha256"] = "0" * 64
+        (dst / "APPROVED_DIGESTS.json").write_text(json.dumps(man))
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+    violations = _compare(name).violations
+    assert violations
+    if change == "history":
+        assert all("history" in v for v in violations)  # only the history check fires
+    if change == "host":
+        assert violations == ["reference digests are not in the approved manifest"]
+
+
+def _staged_copy(tmp_path, name):
+    """A complete, valid new generation of the reference (new timestamp) in a stage."""
+    import hashlib
+
+    stage = _copy_refs(tmp_path / "stage")
+    files = gmat_m2.reference_files(name, stage)
+    meta = json.loads(files["metadata"].read_text())
+    meta["generated_utc"] = "2026-10-12T00:00:00+00:00"
+    files["metadata"].write_text(json.dumps(meta, indent=2) + "\n")
+    man = json.loads((stage / "APPROVED_DIGESTS.json").read_text())
+    man["references"][name]["metadata_sha256"] = hashlib.sha256(
+        files["metadata"].read_bytes()
+    ).hexdigest()
+    man["history"].append(
+        {
+            "mission": name,
+            "generated_utc": meta["generated_utc"],
+            "tars_git_revision": meta["tars_git_revision"],
+            "reason": meta["replace_reason"] or "initial reference",
+            "report_sha256": meta["report_sha256"],
+        }
+    )
+    (stage / "APPROVED_DIGESTS.json").write_text(json.dumps(man, indent=2) + "\n")
+    return stage, files, man
+
+
+@pytest.mark.parametrize("fail_at", range(7))
+def test_interrupted_publication_never_leaves_an_accepted_mix(tmp_path, monkeypatch, fail_at):
+    """F9: interrupt publication at every step; the result is the old reference intact,
+    the new one complete, or rejected -- never an accepted partial replacement."""
+    name = "m2_prograde_burn"
+    live = _copy_refs(tmp_path / "live")
+    old = {p.name: p.read_bytes() for p in live.iterdir()}
+    stage, staged_files, manifest = _staged_copy(tmp_path, name)
+    monkeypatch.setattr(gmat_m2, "reference_dir", lambda: live)
+    cli = _cli()
+    calls = {"n": 0}
+    original = cli._atomic_write
+
+    def flaky(dst, data):
+        if calls["n"] == fail_at:
+            raise OSError("interrupted")
+        calls["n"] += 1
+        original(dst, data)
+
+    monkeypatch.setattr(cli, "_atomic_write", flaky)
+    try:
+        cli._publish(name, staged_files, stage / "APPROVED_DIGESTS.json", manifest)
+        interrupted = False
+    except OSError:
+        interrupted = True
+    now = {p.name: p.read_bytes() for p in live.iterdir() if not p.name.startswith(".")}
+    violations = _compare(name).violations
+    if not interrupted:
+        assert violations == []  # complete new generation
+    elif now == old:
+        assert violations == []  # nothing changed
+    else:
+        assert violations  # any partial state is rejected
+    if interrupted and fail_at >= 1:
+        # Withdraw-first: approval is gone as soon as publication starts (defense in
+        # depth beyond the metadata digest binding).
+        man = json.loads((live / "APPROVED_DIGESTS.json").read_text())
+        assert name not in man["references"]
+
+
+def test_generate_refuses_symlinks_into_the_references(tmp_path):
+    """F11: a preview path that is a symlink is never written through."""
+    cli = _cli()
+    out = tmp_path / "preview"
+    out.mkdir()
+    target = tmp_path / "victim.script"
+    target.write_text("committed")
+    (out / "m2_prograde_burn.script").symlink_to(target)
+    assert cli.main(["generate", "--out", str(out), "--missions", "m2_prograde_burn"]) == 2
+    assert target.read_text() == "committed"
+
+
+@pytest.mark.parametrize(
+    "update",
+    [{"thrust_acceleration_mps2": (1.0, 1.0, 1.0)}, {"delta_v_sensed_mps": 1000.0}],
+)
+def test_standalone_evaluation_applies_the_audit_gates(monkeypatch, update):
+    """F12: numerical T5 audit failures reject the standalone comparison."""
+    from tars.sim import runner as runner_module
+
+    cli = _cli()
+    original = runner_module.run_scenario
+
+    def corrupted(scenario, *a, **k):
+        run = original(scenario, *a, **k)
+        i = next(
+            i for i, e in enumerate(run.events) if e.type == "PropulsionSampled" and e.tick == 64
+        )
+        run.events[i] = run.events[i].model_copy(update=update)
+        return run
+
+    monkeypatch.setattr(cli, "run_scenario", corrupted)
+    rejected, check = cli._evaluate("m2_prograde_burn")
+    assert check is None and any("simulator audit" in r for r in rejected)
+
+
+def test_coverage_uses_the_same_tick_report_rule():
+    """F13: a burn submitted and ignited at 600 s is reported at tick 61. Observed to a
+    600 s horizon (the log truncated at tick 60), no BurnStarted is expected; to 610 s it
+    is. A valid scenario cannot stop at its own submission tick, so the 600 s horizon is
+    exercised at the function level."""
+    from tars.sim.scenario import ScenarioV2
+    from tars.validation.m2 import predict_burns
+
+    mission = BY_NAME["m2_burn_to_depletion"]
+    raw = mission.build().model_dump(mode="json")
+    raw["stop"] = {"duration_s": 610.0}
+    raw["commands"] = raw["commands"][:1]
+    scenario = ScenarioV2.model_validate(raw)
+    events = run_scenario(scenario).events
+    predicted = predict_burns(scenario, mission.expected[:1])
+    started = next(e for e in events if e.type == "BurnStarted")
+    assert (started.tick, started.event_t_s) == (61, 600.0)
+    full = gmat_m2.coverage_problems(scenario, predicted, events, {}, 610.0)
+    assert not any("burn boundaries" in p for p in full)
+    cut = [e for e in events if e.tick <= 60]
+    early = gmat_m2.coverage_problems(scenario, predicted, cut, {}, 600.0)
+    assert not any("burn boundaries" in p for p in early)

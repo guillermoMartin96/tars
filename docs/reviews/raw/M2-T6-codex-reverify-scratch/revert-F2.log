@@ -1,0 +1,129 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_state_assignments_must_stay_in_place_once[move] _____________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-74/test_state_assignments_must_st0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ad36630>
+edit = 'move'
+
+    @pytest.mark.parametrize("edit", ["move", "duplicate", "drop"])
+    def test_state_assignments_must_stay_in_place_once(tmp_path, monkeypatch, edit):
+        """F2: moving, duplicating or dropping an initial-state assignment is rejected."""
+        name = "m2_prograde_burn"
+        dst = _copy_refs(tmp_path)
+        script = dst / f"{name}.script"
+        lines = script.read_text().splitlines()
+        state = [
+            ln
+            for ln in lines
+            if ln.startswith("GMAT Sat.") and ln.split()[1][4:] in gmat_m2._STATE_KEYS
+        ]
+        if edit == "move":
+            lines = [ln for ln in lines if ln not in state] + state
+        elif edit == "duplicate":
+            lines.append(state[0])
+        else:
+            lines.remove(state[0])
+        script.write_text("\n".join(lines) + "\n")
+        _rehash(dst, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+E       AssertionError: assert []
+E        +  where [] = O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624..._duration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 4.0105683859652e-06}).violations
+E        +    where O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624..._duration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 4.0105683859652e-06}) = _compare('m2_prograde_burn')
+
+tests/test_gmat_m2.py:442: AssertionError
+__________ test_state_assignments_must_stay_in_place_once[duplicate] ___________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-74/test_state_assignments_must_st1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10cda0cb0>
+edit = 'duplicate'
+
+    @pytest.mark.parametrize("edit", ["move", "duplicate", "drop"])
+    def test_state_assignments_must_stay_in_place_once(tmp_path, monkeypatch, edit):
+        """F2: moving, duplicating or dropping an initial-state assignment is rejected."""
+        name = "m2_prograde_burn"
+        dst = _copy_refs(tmp_path)
+        script = dst / f"{name}.script"
+        lines = script.read_text().splitlines()
+        state = [
+            ln
+            for ln in lines
+            if ln.startswith("GMAT Sat.") and ln.split()[1][4:] in gmat_m2._STATE_KEYS
+        ]
+        if edit == "move":
+            lines = [ln for ln in lines if ln not in state] + state
+        elif edit == "duplicate":
+            lines.append(state[0])
+        else:
+            lines.remove(state[0])
+        script.write_text("\n".join(lines) + "\n")
+        _rehash(dst, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+E       AssertionError: assert []
+E        +  where [] = O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624..._duration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 4.0105683859652e-06}).violations
+E        +    where O9Result(metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duration_from_mass_error_max_s': 1.40900624..._duration_from_mass_error_max_s': 1.4090062450122787e-10, 'coast_vs_kepler_position_error_max_m': 4.0105683859652e-06}) = _compare('m2_prograde_burn')
+
+tests/test_gmat_m2.py:442: AssertionError
+_____________ test_state_assignments_must_stay_in_place_once[drop] _____________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-74/test_state_assignments_must_st2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ad36a50>
+edit = 'drop'
+
+    @pytest.mark.parametrize("edit", ["move", "duplicate", "drop"])
+    def test_state_assignments_must_stay_in_place_once(tmp_path, monkeypatch, edit):
+        """F2: moving, duplicating or dropping an initial-state assignment is rejected."""
+        name = "m2_prograde_burn"
+        dst = _copy_refs(tmp_path)
+        script = dst / f"{name}.script"
+        lines = script.read_text().splitlines()
+        state = [
+            ln
+            for ln in lines
+            if ln.startswith("GMAT Sat.") and ln.split()[1][4:] in gmat_m2._STATE_KEYS
+        ]
+        if edit == "move":
+            lines = [ln for ln in lines if ln not in state] + state
+        elif edit == "duplicate":
+            lines.append(state[0])
+        else:
+            lines.remove(state[0])
+        script.write_text("\n".join(lines) + "\n")
+        _rehash(dst, name)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+>       assert _compare(name).violations
+               ^^^^^^^^^^^^^^
+
+tests/test_gmat_m2.py:442: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gmat_m2.py:47: in _compare
+    return gmat_m2.compare_committed(name, scenario, mission.expected, events, *TOL)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/validation/gmat_m2.py:708: in compare_committed
+    v = provenance_problems(
+src/tars/validation/gmat_m2.py:569: in provenance_problems
+    other_c, r_c, v_c = split_script(files["script"].read_text())
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+script = '%% M2 finite-burn reference case for GMAT R2026a (T6; DR-0015 A, DR-0016 A).\n%% GENERATED by toolbox/scripts/gmat_m2...nPropagate P1(Sat) {Sat.ElapsedSecs = 42.700000000000045};\nARC = 4;\nPropagate P2(Sat) {Sat.ElapsedSecs = 52980.0};\n'
+
+    def split(script):
+     values={};lines=[]
+     for line in script.splitlines():
+      m=g._STATE_LINE.match(line)
+      if m:values[m[1]]=float(m[2])
+      else:lines.append(line)
+     import numpy as np
+>    return lines,np.array([values[k] for k in g._STATE_KEYS[:3]])*1000,np.array([values[k] for k in g._STATE_KEYS[3:]])*1000
+                            ^^^^^^^^^
+E    KeyError: 'X'
+
+review_scratch/revert_tests.py:33: KeyError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_state_assignments_must_stay_in_place_once[move]
+FAILED tests/test_gmat_m2.py::test_state_assignments_must_stay_in_place_once[duplicate]
+FAILED tests/test_gmat_m2.py::test_state_assignments_must_stay_in_place_once[drop]
+3 failed in 6.32s

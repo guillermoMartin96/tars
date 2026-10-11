@@ -79,27 +79,8 @@ def _burn_table(scenario: ScenarioV2, run: RunResult) -> list[dict[str, Any]]:
     return rows
 
 
-# Metrics reported for evidence but deliberately not gated. Every other metric a
-# validator emits must have a threshold, or the run fails (review M2-T5 F15).
-REPORT_ONLY = frozenset(
-    {
-        "final_propellant_kg", "slice_finite_minus_impulsive_sma_m",
-        "prograde_position_error_dt10_m", "prograde_position_order",
-        "retrograde_position_error_dt10_m", "retrograde_position_order",
-        "post_burn_coast_position_error_max_m",
-        "sensed_delta_v_rel_error_max", "sample_delta_v_rel_error_max",
-        "gmat_rows", "mass_samples_compared",
-    }
-)  # fmt: skip
-_REPORT_PREFIXES = ("burn0", "order_pair_", "order_10_to", "order_5_to", "position_error_dt")
-
-
 def _ungated(metrics: dict[str, float], limits: dict[str, float]) -> list[str]:
-    return sorted(
-        k
-        for k in metrics
-        if k not in limits and k not in REPORT_ONLY and not k.startswith(_REPORT_PREFIXES)
-    )
+    return m2.ungated_metrics(metrics, limits)  # shared rule (review M2-T5 F15, M2-T6 F12)
 
 
 class Gates:
