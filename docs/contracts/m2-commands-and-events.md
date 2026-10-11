@@ -1,6 +1,6 @@
 # M2 command and event contract (T3)
 
-**Status:** implemented in `12d8818`; revised after review M2-T3-review-01 in `defd23f`. Authority: DR-0014 (approved; vocabulary amended 2026-10-10), DR-0017, ADR-0007.  
+**Status:** implemented in `12d8818`; revised after review M2-T3-review-01 in `defd23f`. Scenario timeline and emission added in T4 (`59f2869`, `c78ecf3`). Authority: DR-0014 (approved; vocabulary amended 2026-10-10), DR-0017, ADR-0007.  
 **Code:** `src/tars/sim/commands.py`, `Simulator.submit()`, `src/tars/events/schema.py`, `src/tars/sim/burn_events.py`.  
 **Tests:** `tests/test_commands.py`.
 
@@ -73,10 +73,61 @@ Every burn event carries `burn_id` (pattern `^burn#[0-9]{6,}$`). It also carries
 | `PropellantDepleted` | depletion cutoff only | — | `residual_propellant_kg` (DR-0017 D1a) |
 | `PropulsionSampled` | `PropulsionSnapshot` + `StateSnapshot` (same tick) + `SpacecraftSpec` | — | propellant, mass, sensed Δv, engine state, active and pending burn IDs, truth `thrust_acceleration_mps2` (zero unless burning) |
 
-- **Event times:** the envelope's `tick` and `t` are the step in which the event occurred, and `event_t_s` is the exact engine-event time (the same convention as `OrbitCompleted.crossing_t`).
-- **Emission order and cadence** belong to the runner (T4, not authorized yet). Converters are pure and deterministic, so identical scenarios and commands give byte-identical JSONL on the same platform (tested).
+- **Event times:** the envelope's `tick` and `t` identify the step in which the event occurred, and `event_t_s` is the exact engine-event time (the same convention as `OrbitCompleted.crossing_t`).
+  - **Precisely:** the envelope is the **end tick of the step that executed the transition**, so `t − dt ≤ event_t_s ≤ t`.
+  - An event exactly on a tick boundary is executed at the end of the step reaching it: ignition at 600 s gives tick 60.
+  - The one exception is an event at the very start of a step that no earlier step reached: a burn submitted at tick k with ignition at k·dt, including t = 0. It is executed at the start of the next step, so it is reported at tick k + 1 with `event_t_s = k·dt`.
+- Converters are pure and deterministic, so identical scenarios and commands give byte-identical JSONL on the same platform (tested).
+
+## Scenario timeline and emission (T4)
+**Code:** `src/tars/sim/scenario.py` (`ScenarioV2`), `src/tars/sim/runner.py`. **Tests:** `tests/test_scenario_v2.py`, `tests/test_mission_m2.py`, `tests/test_cli.py`.
+
+### Scenario schema version 2
+- `"schema_version": 2` (the integer) selects version 2. Version-1 files load into the unchanged M1 `Scenario`, so their hash and event bytes are unchanged.
+- New blocks are strict (no bool or string coercion; finite numbers only):
+  - `spacecraft`: `{dry_mass_kg, propellant_kg, engine: {thrust_n, isp_s}}`, optional. It is converted to `SpacecraftSpec`, and derived quantities must be representable.
+  - `commands`: a timeline of `{submit_t_s, command}` entries.
+    - `command` is passed **verbatim** to `Simulator.submit()`. The scenario does not validate it, so the simulator stays the only validator and a scenario can contain a deliberately invalid command.
+    - It must be a JSON object of standard JSON values (no NaN or infinity anywhere), so the canonical form, and therefore `scenario_hash`, is unambiguous.
+  - `stop`: exactly one of `orbits` (M1 semantics, including the `max_duration_periods` timeout) or `duration_s`.
+- **Tick grid.** `submit_t_s` and `stop.duration_s` must be exactly `n · dt_s` for an integer n, because time is `tick · dt` (ADR-0002). For example, 0.3 with dt = 0.1 is rejected, because 3 · 0.1 ≠ 0.3.
+- **Timeline order.**
+  - `submit_t_s` is non-decreasing; entries at the same time are submitted in file order.
+  - With a duration stop, every `submit_t_s` must be earlier than the stop.
+
+### Emission order (deterministic)
+1. **Tick 0:**
+   1. `SimulationStarted`;
+   2. `SpacecraftConfigured` (if configured);
+   3. `StateSampled`;
+   4. `PropulsionSampled`;
+   5. command events for the submissions due at tick 0.
+2. **After each committed step, at its end tick k:**
+   1. engine events of the step in exact-time order. At equal times a cutoff precedes an ignition. A depletion cutoff emits `PropellantDepleted`, then `BurnEnded`.
+   2. `StateSampled`, then `PropulsionSampled`.
+   3. `OrbitCompleted`.
+   4. Command events for the submissions due at tick k, in file order. Submissions happen after the tick-k samples, so a tick-k sample does not yet list a burn submitted at tick k.
+3. **End:** `StateSampled` and `PropulsionSampled` at the final tick if not already emitted, then `SimulationCompleted`.
+
+### Cadence
+- `StateSampled` is emitted on the telemetry grid and at the final tick, as in M1.
+- `PropulsionSampled` is emitted on the telemetry grid, at the final tick, and **at every tick whose step involved the engine**: burning at the start or end of the step, or any transition during it (DR-0014 §5). At most one per tick.
+
+### Stop and failure semantics
+- **Duration stop.** The run ends at tick `duration_s / dt_s` with `status: success` unless impact, escape or a non-finite state occurs first. Orbits are still counted.
+- **Stop inside a burn.**
+  - No `BurnEnded` is emitted; the engine is not cut off by an observation horizon.
+  - The final `PropulsionSampled` shows the active or pending burns.
+  - Cutoffs and ignitions exactly at the stop time are emitted.
+  - The representation is pending decision **DR-0018** (recommended: keep as is).
+- **Failures.** On a non-finite step, nothing from that step is emitted, because the simulator commits nothing. Engine transitions are read only after a committed step, so no event is ever duplicated. The run ends with `failure_cause: non_finite`.
+- **Unsubmitted entries.** Entries not yet submitted when the run ends are listed in `RunResult.unsubmitted_command_ids` and the CLI summary.
+- **No partial results.**
+  - `run_scenario` returns only after the whole run, and any unexpected exception propagates with no result.
+  - The CLI writes `events.jsonl`, then `summary.json`, each atomically (temporary file plus rename).
+  - Re-running a scenario builds a fresh simulator, and logs are byte-identical.
 
 ## Explicitly out of scope
 - Abort/cancel and Δv-target commands (DR-0014: unapproved follow-ups).
 - Crew permissions and authority checks.
-- Scenario timeline wiring (`submit_t_s`) and event emission (T4).
+- An explicit event for burns still active when a scenario stops (DR-0018, open).

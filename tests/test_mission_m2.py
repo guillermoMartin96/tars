@@ -290,6 +290,19 @@ def test_orbits_stop_with_a_spacecraft_records_unsubmitted_commands():
     assert result.unsubmitted_command_ids == ["late-1"]
 
 
+@pytest.mark.parametrize("submit_t,expected_tick", [(0.0, 1), (100.0, 11)])
+def test_ignition_at_the_submission_tick_is_reported_at_the_next_tick(submit_t, expected_tick):
+    """The step that reached tick k ran before the submission, so an ignition at k*dt
+    executes at the start of the next step (contract: envelope = end of that step)."""
+    command = {"submit_t_s": submit_t, "command": _cmd(ignition=submit_t, duration=5.0)}
+    result = _run(_scenario(commands=[command], stop_s=200.0))
+    _check_log_invariants(result)
+    started, ended = (e for e in result.events if e.type in BURN_EVENTS)
+    assert (started.event_t_s, started.tick) == (submit_t, expected_tick)
+    assert (ended.event_t_s, ended.tick) == (submit_t + 5.0, expected_tick)
+    assert ended.executed_duration_s == 5.0
+
+
 # ------------------------------------------------------------------ several burns
 
 

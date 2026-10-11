@@ -239,6 +239,11 @@ The Proof record is written only after the work it describes is committed (playb
 | [DR-0014](../decisions/requests/DR-0014-maneuver-commands-and-failure-behavior.md) | Commands, failure behavior, events | 1A duration, 2A any time, 3C policy default reject |
 | [DR-0015](../decisions/requests/DR-0015-m2-validation-strategy-and-tolerances.md) | Validation, GMAT, REV-012, tolerances | A: GMAT gated after REV-012; oracles O1–O9; threshold DR after measurement |
 
+Later Decision Requests:
+- **DR-0016** GMAT aligned stepping: resolved.
+- **DR-0017** burn timing fidelity and the depletion boundary: resolved.
+- **[DR-0018](../decisions/requests/DR-0018-burns-in-progress-at-simulation-end.md)** burns in progress or pending when a scenario stops: **OPEN**. It blocks nothing; T4 implements recommended option A within the approved contract.
+
 ## 12a. Tracked follow-ups
 | ID | Follow-up | Constraint |
 |---|---|---|

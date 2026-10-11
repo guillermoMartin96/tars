@@ -72,9 +72,19 @@ Any of these may be revisited by a later decision.
   - All payloads are re-validated canonically (REV-T3-02).
   - The M1 public-API allowlist test was extended with `submit`.
 - **Correlation.** Deterministic burn IDs come from one shared sequence, and only accepted burns are numbered. `EngineTransition` and `PropulsionSnapshot` gained `burn_id`/`command_id` and burn-ID fields, with defaults that keep T2 behavior.
-- **Rejection precedence** (stable): schema > duplicate ID > non-positive duration > chronology > engine conflicts > propellant and schedulability. Chronology now follows the duration check in `schedule_burn` too.
+- **Rejection precedence** (stable; confirmed by the Tech Lead 2026-10-11, DR-0014 amendment): schema > duplicate ID > no propulsion configured > non-positive duration > chronology > engine conflicts > propellant and schedulability. Chronology now follows the duration check in `schedule_burn` too.
 - **Events.** Seven additive types in a strict, frozen sub-base; M1 classes are untouched. Converters (`tars.sim.burn_events`) are pure, and emission is runner scope (T4).
 - **Contract:** `docs/contracts/m2-commands-and-events.md`.
+
+## Implementation notes (T4, `59f2869`)
+- **Scenario v2.** A separate `ScenarioV2` subclass adds `spacecraft`, the command timeline and `stop.duration_s`; version-1 files still load into the unchanged `Scenario`.
+  - Adding optional fields to `Scenario` itself would have changed `model_dump`, and so the M1 `scenario_hash` and golden bytes.
+- **Raw command payloads in the timeline.** The scenario does not validate them; `submit()` does. There is one validator, and invalid-command missions are expressible.
+- **Runner uses only `submit()`.** It never calls `schedule_burn` or private simulator state (tested).
+  - It reads `engine_transitions` only after a committed step, which together with atomic ticks rules out duplicate or partial burn events.
+- **Stop is an observation horizon.** The engine is not cut off at the stop time; the representation of burns still in progress is DR-0018 (open; current behavior uses only approved semantics).
+- **Fix found by T4 tests (`c78ecf3`).** A NaN in an intermediate RK4 stage during a burn reached the pointing law and raised `ValueError`. The powered RHS now raises `FloatingPointError`, as the coast path's finiteness check does, so the runner reports `non_finite` instead of crashing.
+- **Contract:** emission order, cadence, envelope ticks and stop semantics are in `docs/contracts/m2-commands-and-events.md`.
 
 ## Reasoning
 - Keeps every approved M1 boundary and byte-identical M1 output.
