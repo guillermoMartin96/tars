@@ -335,7 +335,9 @@ class Simulator:
 
         def powered(t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
             r, v = y[:3], y[3:6]
-            mass = spacecraft.dry_mass_kg + float(y[_PROP])
+            # RK4 stages near depletion can carry ~1e-17 kg of negative round-off;
+            # the dynamics use the physical, non-negative propellant (review N4).
+            mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)
             thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)
             a = force_model.acceleration(t, r, v) + thrust
             return np.concatenate([v, a, [-mdot, engine.thrust_n / mass]])

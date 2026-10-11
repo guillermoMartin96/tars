@@ -234,8 +234,10 @@ def test_later_burns_are_planned_against_propellant_left_by_earlier_ones():
         duration_s=40.0,
         policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
     )
-    assert second.propellant_used_kg == remaining
     assert second.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+    # Consumes what is left, up to the conservative-cutoff residual (review N5).
+    bound = ENGINE.mass_flow_kgps * 2 * math.ulp(second.cutoff_t_s) + 2 * math.ulp(remaining)
+    assert 0.0 <= remaining - second.propellant_used_kg <= bound
 
 
 # ------------------------------------------------------ engine events and step splitting
@@ -286,7 +288,7 @@ def test_events_on_tick_boundaries_and_back_to_back_burns():
     ]
 
 
-def test_depletion_ends_with_an_exactly_empty_tank_and_never_negative():
+def test_depletion_empties_the_tank_to_within_time_resolution_and_never_negative():
     sim = _sim(spacecraft=_spacecraft(propellant=5.0))
     plan = sim.schedule_burn(
         "prograde",
@@ -299,8 +301,12 @@ def test_depletion_ends_with_an_exactly_empty_tank_and_never_negative():
         sim.step()
         assert sim.propulsion_snapshot().propellant_kg >= 0.0
     p = sim.propulsion_snapshot()
-    assert p.propellant_kg == 0.0
-    assert p.total_mass_kg == DRY
+    # The engine stops at the latest representable time not after depletion, so the
+    # tank holds the plan's residual (<= mdot * 2 ulp(cutoff)), never a negative mass.
+    bound = ENGINE.mass_flow_kgps * 2 * math.ulp(plan.cutoff_t_s) + 2 * math.ulp(5.0)
+    assert 0.0 <= p.propellant_kg <= bound
+    # Same O1 round-off bound as the other mass-law checks (1e-12 of initial mass).
+    assert abs(p.propellant_kg - (5.0 - plan.propellant_used_kg)) <= 1e-12 * (DRY + 5.0)
     assert p.engine_state is EngineState.IDLE
 
 
@@ -648,7 +654,7 @@ def test_boundary_burn_at_large_time_executes_without_negative_mass():
     # The cutoff is the latest representable time not after depletion, so a tiny
     # residual (here ~1.5e-8 kg) may remain; it equals the plan's remainder.
     remaining = sim.propulsion_snapshot().propellant_kg
-    assert remaining == pytest.approx(tank - plan.propellant_used_kg, rel=0, abs=1e-15)
+    assert abs(remaining - (tank - plan.propellant_used_kg)) <= 1e-12 * (1e-10 + tank)
 
 
 @pytest.mark.parametrize("field", ["ignition_t_s", "duration_s"])
@@ -732,3 +738,53 @@ def test_orbital_transition_states_converge_in_both_directions(direction, sign):
     for series in errs.values():
         for coarse, fine in pairwise(series):
             assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+
+
+# ----------------------------------- second re-verification (M2-T2-review-01) N2, N4, N5
+
+
+def test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass():
+    """N4: RK4 stages near depletion can carry -1e-17 kg of propellant round-off; the
+    dynamics must use the physical (non-negative) propellant so the step succeeds."""
+    tank = ENGINE.mass_flow_kgps * 1.0
+    sc = SpacecraftSpec(dry_mass_kg=1e-20, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+    sim = Simulator(np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 0.1, spacecraft=sc)
+    sim.schedule_burn("prograde", ignition_t_s=0.0, duration_s=1.0)
+    while sim.t < 2.0:
+        sim.step()
+        assert sim.propulsion_snapshot().propellant_kg >= 0.0
+    assert sim.propulsion_snapshot().engine_state is EngineState.IDLE
+
+
+def test_conservative_depletion_cutoff_keeps_its_residual():
+    """N5: when the cutoff steps back before depletion, consumption follows the
+    executed interval for burn_to_depletion too, and the residual is retained."""
+    tank = ENGINE.mass_flow_kgps * 0.1
+    plan = plan_burn(
+        ENGINE, tank, 1.0e9, 1.0, policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION
+    )
+    assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+    assert plan.burn_duration_s < tank / ENGINE.mass_flow_kgps
+    assert plan.propellant_used_kg == ENGINE.mass_flow_kgps * plan.burn_duration_s
+    residual = tank - plan.propellant_used_kg
+    assert residual > 0.0
+
+    sc = SpacecraftSpec(dry_mass_kg=DRY, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+    sim = Simulator(
+        np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=sc
+    )
+    _run_until(sim, 9.0e8)
+    sim.schedule_burn(
+        "prograde",
+        ignition_t_s=1.0e9,
+        duration_s=1.0,
+        policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+    )
+    _run_until(sim, 1.1e9)
+    assert sim.propulsion_snapshot().propellant_kg == pytest.approx(residual, rel=1e-6, abs=0)
+
+
+def test_huge_integer_policy_is_schema_invalid_in_plan_burn():
+    with pytest.raises(BurnRejectedError) as err:
+        plan_burn(ENGINE, PROP, 0.0, 1.0, policy=10**10000)
+    assert err.value.reason is BurnRejection.SCHEMA_INVALID

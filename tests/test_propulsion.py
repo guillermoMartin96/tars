@@ -240,7 +240,12 @@ def test_burn_to_depletion_must_be_requested_and_ends_exactly_at_depletion():
     assert plan.burn_duration_s == plan.cutoff_t_s - 600.0
     assert plan.burn_duration_s <= t_dep
     assert abs(plan.burn_duration_s - t_dep) <= EVENT_TIME_RESOLUTION_S
-    assert plan.propellant_used_kg == 10.0  # exactly: propellant never goes negative
+    # Consumption follows the executed interval (review N5); never more than loaded, and
+    # the residual left by the conservative cutoff is within mdot * 2 ulp(cutoff).
+    assert plan.propellant_used_kg == min(REF_ENGINE.mass_flow_kgps * plan.burn_duration_s, 10.0)
+    residual = 10.0 - plan.propellant_used_kg
+    bound = REF_ENGINE.mass_flow_kgps * 2 * math.ulp(plan.cutoff_t_s) + 2 * math.ulp(10.0)
+    assert 0.0 <= residual <= bound
 
 
 def test_burn_to_depletion_with_sufficient_propellant_completes_normally():
@@ -363,11 +368,12 @@ def test_propellant_used_at_time_is_piecewise_linear_and_bounded():
     assert plan.propellant_used_by(0.0) == 0.0
     assert plan.propellant_used_by(600.0) == 0.0
     assert plan.propellant_used_by(610.0) == pytest.approx(mdot * 10.0, rel=1e-13, abs=0)
-    assert plan.propellant_used_by(plan.cutoff_t_s) == 10.0
-    assert plan.propellant_used_by(1e9) == 10.0
+    assert plan.propellant_used_by(plan.cutoff_t_s) == plan.propellant_used_kg
+    assert plan.propellant_used_by(1e9) == plan.propellant_used_kg
+    assert plan.propellant_used_kg <= 10.0
     samples = np.linspace(0.0, 800.0, 4001)
     used = [plan.propellant_used_by(float(t)) for t in samples]
-    assert all(0.0 <= u <= 10.0 for u in used)
+    assert all(0.0 <= u <= plan.propellant_used_kg for u in used)
     assert all(b >= a for a, b in pairwise(used))
 
 

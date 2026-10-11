@@ -365,7 +365,7 @@ def plan_burn(
         policy = InsufficientPropellantPolicy(policy)
     except ValueError:
         raise BurnRejectedError(
-            BurnRejection.SCHEMA_INVALID, f"unknown policy {policy!r}"
+            BurnRejection.SCHEMA_INVALID, f"unknown policy {_describe(policy)}"
         ) from None
     if not duration_s > 0.0:
         raise BurnRejectedError(BurnRejection.NON_POSITIVE_DURATION, f"duration_s = {duration_s!r}")
@@ -403,6 +403,9 @@ def plan_burn(
     # (SCI-0012; review N1): if rounding the cutoff overshoots the depletion time, use
     # the latest representable cutoff that does not.
     represented = cutoff_s - ignition_t_s
+    # Terminates: fl(ignition + burn) exceeds ignition + depletion by at most about one
+    # ulp of the cutoff, and each iteration lowers the cutoff by one ulp (observed: at
+    # most one iteration over 20 080 edge/random cases, review N1 re-verification).
     while represented > depletion_s:
         cutoff_s = math.nextafter(cutoff_s, -math.inf)
         represented = cutoff_s - ignition_t_s
@@ -418,8 +421,9 @@ def plan_burn(
             f"{ignition_t_s!r} (resolution limit {EVENT_TIME_RESOLUTION_S} s)",
         )
     burn = represented
-    if cause is BurnEndCause.COMPLETED:
-        used = min(mdot * burn, propellant_kg)
+    # Consumption follows the executed interval for both outcomes (review N5): a
+    # conservative depletion cutoff keeps its tiny residual instead of discarding it.
+    used = min(mdot * burn, propellant_kg)
     # A burn with thrust must consume propellant; mdot*duration can underflow (N1).
     if not used > 0.0:
         raise BurnRejectedError(
