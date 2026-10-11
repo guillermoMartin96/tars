@@ -1,0 +1,22 @@
+F2 invalid ignition/duration idle PASS
+F2 invalid ignition/duration pending PASS
+F2 invalid ignition/duration active PASS
+np.float32 past ignition_in_past
+burn_scalar all four plan inputs PASS
+huge integer > repr limit ValueError: Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit
+invalid policy with past ignition ignition_in_past
+F3 original reject burn_unschedulable
+F3 original burn_to_depletion burn_unschedulable
+F4 r/v immutable backing PASS
+F1 rollback/retry nan PASS
+F1 rollback/retry raise PASS
+F1 rollback/retry direction PASS
+F1 rollback/retry thrust PASS
+edge 1.0 1.2e-16 reject represented 2.220446049250313e-16 mass discrepancy 1.634221271269265e-17 cause completed
+edge 1.0 1.2e-16 burn_to_depletion represented 2.220446049250313e-16 mass discrepancy 1.634221271269265e-17 cause propellant_depleted
+edge 1000000000.0 0.1 reject represented 0.10000002384185791 mass discrepancy 3.818219629359021e-09 cause completed
+edge 1000000000.0 0.1 burn_to_depletion represented 0.10000002384185791 mass discrepancy 3.818219629359021e-09 cause propellant_depleted
+edge 1000000000.0 0.09999999 reject represented 0.10000002384185791 mass discrepancy 5.41969701409184e-09 cause completed
+edge 1000000000.0 0.09999999 burn_to_depletion represented 0.10000002384185791 mass discrepancy 5.41969701409184e-09 cause propellant_depleted
+original multi-event errors 6.0782596733588434e-09 -7.496225862269057e-13 1.7053025658242404e-13
+original active future consumption 3.5232502486865087 3.52325024868656

@@ -116,12 +116,73 @@ At `03f6e4b`:
 
 Mutation re-check: the reviewer's four mutations (zero transition state, double sensed Δv, constant mass, no interior splits) and one mutant per fix are each killed.
 
+## Addendum: reviewer re-verification of fixes (`da43487`)
+**Reviewer:** the same provider, OpenAI Codex `gpt-6.1-sol`, session `01a1284e-43c0-74e1-b2fd-a36cbbf49f5d`.  
+**Raw:** `raw/M2-T2-codex-reverify.md`; prompt and scripts are alongside.  
+**Verdict:** FAIL.
+
+| Finding | Re-verification |
+|---|---|
+| REV-T2-01 | RESOLVED. The reviewer also tested exceptions from force, direction law and `thrust_acceleration`. |
+| REV-T2-02 | PARTIAL: integers beyond the repr limit (N2) |
+| REV-T2-03 | PARTIAL: depletion boundary and justification of the 1 µs rule (N1) |
+| REV-T2-04 | RESOLVED |
+| REV-T2-05 | RESOLVED; retrograde and multi-burn coverage gap (N3) |
+
+### N1 — Representability tolerance permits burning beyond depletion
+**Severity:** Medium  
+**Reviewer claim:**
+- Sufficiency was checked before interval rounding. At ignition 1e9 s with an exact-depletion command, the represented interval exceeds depletion by 2.4e-8 s.
+- With a 1e-10 kg dry mass, the total mass goes negative mid-burn.
+- Separately, the absolute 1 µs bound is not a sufficiently justified universal rule. Escalate a DR covering timing fidelity, depletion semantics and error budgets.
+
+**Implementer disposition:**
+- Executed-past-depletion defect: `ACCEPTED`.
+- Representability rule: `ESCALATED_FOR_INVESTIGATION` (**DR-0017**).
+
+**Implementer reasoning:**
+- Executing past depletion violates SCI-0012 (propellant never negative); this is fixable within approved semantics.
+- The choice of acceptance rule (absolute time, Δv budget, relative bound, or an exact time base) is a fidelity decision with tradeoffs, so it goes to the Tech Lead with options. The provisional 1 µs rule stays until then.
+
+**Resolution/evidence:** Fixed in `9789603`.
+- If rounding the cutoff overshoots depletion, `plan_burn` steps it back to the latest representable time not after depletion.
+- Tests:
+  - `test_executed_interval_never_exceeds_the_depletion_time`: ignition 0, 1, 605.5, 1e6 and 1e9 s under both policies;
+  - `test_boundary_burn_at_large_time_executes_without_negative_mass`: the reviewer's case with a 1e-10 kg dry mass and zero force at t ≈ 1e9 s. Propellant stays ≥ 0 at every tick and ends at the plan's remainder (~1.5e-8 kg).
+- A mutant removing the step-down fails 8 tests.
+- The T1 depletion test now asserts the bounding contract (cutoff ≤ ignition + t_dep).
+
+### N2 — Formatting schema-rejection details can itself raise
+**Severity:** Medium  
+**Reviewer claim:** `schedule_burn("prograde", 10**10000, 1)` raises Python's integer-string-limit `ValueError` instead of a structured rejection.  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Fixed in `9789603`.
+- Rejection details use `_describe()`: bounded and exception-safe, with huge ints described by bit length.
+- Test `test_integers_beyond_the_repr_limit_are_schema_invalid` covers ignition and duration in `schedule_burn`, and propellant in `plan_burn`. The unsafe-repr mutant fails 2 tests.
+- **Also fixed (seen in the reviewer's evidence):** an invalid `policy` combined with a past ignition returned `ignition_in_past`. Policy is now validated with the schema checks first (`test_invalid_policy_is_schema_invalid_before_chronology`).
+
+### N3 — Transition-state tests miss retrograde and multiple-burn evidence
+**Severity:** Low  
+**Reviewer claim:** a mutant zeroing only retrograde transition r and v survives all 178 targeted tests.  
+**Implementer disposition:** `ACCEPTED`  
+**Resolution/evidence:** Tests added in `9789603`:
+- `test_back_to_back_prograde_then_retrograde_transitions_match_free_space`: four transitions including the shared 604 s instant, against a 40-digit closed form;
+- `test_orbital_transition_states_converge_in_both_directions`: ignition and cutoff r and v, order 4 ± 0.5.
+
+The reviewer's retrograde-only zero-state mutant now fails 2 tests.
+
+**Re-test at `9789603`:**
+- 401 tests pass; ruff check and format clean;
+- M1 Proof PASS; GMAT compare PASS;
+- determinism and cross-platform bit-identical to `7a4e1877…`;
+- VAL-0012 `results.json` unchanged.
+
 ## Proof gate
 - [x] All Critical findings resolved (none raised)
-- [x] All High findings resolved (none raised); all Medium/Low findings fixed in `03f6e4b`
-- [x] Every substantive finding has an explicit disposition
-- [x] Accepted fixes re-tested by the implementer
-- [ ] Reviewer re-verification (requested)
-- [ ] Tech Lead confirmation of the new `EVENT_TIME_RESOLUTION_S = 1 µs` scheduling rule
+- [x] All High findings resolved (none raised)
+- [x] Every substantive finding has an explicit disposition, including N1–N3
+- [x] Accepted fixes re-tested by the implementer (`9789603`)
+- [ ] Reviewer re-verification of the N1–N3 fixes (requested)
+- [ ] DR-0017 decision on the representability rule (escalated)
 
-**Review gate result:** BLOCKED, pending reviewer re-verification.
+**Review gate result:** BLOCKED, pending the N1–N3 re-verification and DR-0017. T2 functionality is otherwise complete; only the representability acceptance rule is provisional.
