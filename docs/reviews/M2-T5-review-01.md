@@ -128,5 +128,24 @@ Also corrected, as noted by the reviewer:
 - The DOP853 reference used to integrate up to each predicted cutoff even when the scenario stopped earlier. That was harmless for the end states, but it pushed the new tick extrema past the observation stop in DR-0018 variants (50.6 m).
 - The reference now integrates only to the last requested time. The new check exposed the defect, and the check is kept.
 
-## Re-verification 3
-See below.
+## Re-verification 3 — final
+**Reviewer:** Codex, session `01a12c9d-d05d-7973-83ed-f9fbfb734ee2`, at `21dac47`. **Raw:** `raw/M2-T5-codex-reverify3.md` and `raw/M2-T5-codex-reverify3-scratch/` (`audit.md`).
+
+**Verdict: PASS** (unconditional). No new substantive findings.
+- F16, F17 and F18 are resolved; each new regression test fails when its fix is reverted.
+- The complete field inventory was rechecked. All 85 mutating full-Proof probes are rejected, plus 167 additional plan-field and schema-version mutations. No remaining false pass was demonstrated.
+- The 0.013 m extrema limit is 2.07× the independently measured maximum (0.00629 m over 28 runs). Reverting the horizon clipping fails three early-stop gates.
+- All gates passed: 829 tests, lint, a 206-check M2 Proof, M1 Proof, determinism, golden, GMAT M1.
+- Thresholds remain provisional and justified. M1 gates and golden handling, DR-0017 separation, FU-1 and the same-tick behavior are preserved. No T6–T8 scope.
+
+## Disposition summary
+| Round | Revision | Verdict | Findings |
+|---|---|---|---|
+| Review | `a3b65f6` | FAIL | F1–F2 High; F3–F4 Medium |
+| Re-verification 1 | `f5f3866` | FAIL | F5–F15 (F7 High; one Low) |
+| Re-verification 2 | `344f95a` | FAIL | F16–F17 Medium; F18 Low |
+| Re-verification 3 | `21dac47` | **PASS** | none |
+
+All 18 findings are `ACCEPTED` and resolved. None was rejected or escalated. **No open Critical or High findings.**
+
+**Status: CLOSED. Gate: PASS.**

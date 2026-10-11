@@ -1,6 +1,6 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T1–T4 COMPLETE (final independent PASS each); T5 IN PROGRESS (authorized 2026-10-11). T3 semantics confirmed (DR-0014 amendment); DR-0018 approved (option A). Draft PR #3, not merged.
+**Status:** T1–T5 COMPLETE (final independent PASS each); awaiting authorization for T6 (2026-10-11). T3 semantics confirmed (DR-0014 amendment); DR-0018 approved (option A). `proof/thresholds/m2.json` provisional until T7. Draft PR #3, not merged.
 - See `proof/records/M2-propulsion.md`.
 - Merge to `main` needs separate authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  

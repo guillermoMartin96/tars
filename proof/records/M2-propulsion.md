@@ -1,8 +1,8 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T4 complete)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T5 complete)
 
 **Milestone result:** not yet claimed. M2 Proof (P1–P12, `docs/milestones/M2-propulsion.md` §10) is evaluated at T8.
 - This record collects completed task evidence only (REV-013 lesson).
-- Thresholds: none approved for M2 yet. DR-0015 is conditional; GMAT gate recalibration is tracked as FU-1.
+- Thresholds: none approved for M2 yet. `proof/thresholds/m2.json` is **provisional** (T5); approval follows the T7 threshold DR. DR-0015 is conditional; GMAT gate recalibration is tracked as FU-1.
 
 ## T1 — Standalone propulsion model: COMPLETE
 - **Code:** `src/tars/sim/propulsion.py`, `STANDARD_GRAVITY`.
@@ -80,7 +80,62 @@
   - no explicit end event for burns still active at the stop (DR-0018 option A, approved: by design);
   - the envelope tick of an ignition at its own submission tick is the next tick (documented);
   - FU-1 remains open for T7.
-- **Not started:** T5 and later (needs authorization). The draft PR (#3) is not merged.
+- T5 was authorized on 2026-10-11 (below).
+
+## T5 — Validators O1–O8, m2_proof.py, provisional m2.json, reference missions: COMPLETE (2026-10-11)
+- **Final revision:** `21dac47`. CI is green on ubuntu-latest x86_64 and macos-latest arm64 (run 38171632918). CI covers lint, 829 tests, cross-process determinism (M1 and every M2 scenario), cross-platform M1 golden agreement, GMAT M1 comparison, M1 Proof and the full M2 Proof.
+- **Decision:** DR-0018 approved, option A (`fc3483a`).
+- **Delivered:**
+  - `src/tars/validation/m2.py`:
+    - oracles O1–O8;
+    - `audit_run()`, which checks every simulator output of a run against an independent expectation or an exact rule;
+    - predictions from scenario inputs only, including the exact DR-0017 D1a cutoff.
+  - `src/tars/validation/m2_missions.py`: the missions with hand-declared receipts and diagnostics.
+  - `toolbox/validators/m2_proof.py`:
+    - audits every run it creates: missions, derived variants, four DR-0018 stop variants, and the O6 and O8 auxiliary runs;
+    - requires every emitted metric to be gated unless it is declared report-only.
+  - `proof/thresholds/m2.json` (**provisional**; basis per group).
+  - Scenarios `m2_retrograde_burn`, `m2_burn_to_depletion` and `m2_invalid_commands`, plus derived empty-tank and no-propulsion variants. Together they exercise all 10 rejection codes.
+  - `tests/test_m2_validation.py`: 124 tests, including log mutations and physics mutants.
+- **Evidence:** `proof/records/evidence/M2-T5/m2_proof_report.json` and stdout, at `21dac47` on the reference host: **206 / 206 checks PASS**, thresholds provisional. Measurements, methods and units are in **VAL-0013**.
+  - **O1/O2:** propellant used ≤ 9.2e-17 of the initial mass. Sensed Δv vs the rocket equation ≤ 5.6e-14 relative; zero excess over the analytic RK4 (Simpson) truncation bound.
+  - **O3:** free-space velocity 1.8e-14 relative; position order 3.80 and 3.88; timing exact.
+  - **O4:** vs independent DOP853 at 53 700 s: 0.290 / 0.313 / 0.289 / 0.297 / 0.298 m.
+  - **O5:** coast ≤ 0.314 m.
+  - **O6:** |p − 2| ≤ 0.0041; slice ratio 2.6e-6.
+  - **O7:** signs exact; plane rotation ≤ 1.5e-16 rad.
+  - **O8:** orders 4.28–4.33 and 4.14–4.21.
+  - **Node crossings:** ≤ 4.0e-5 s.
+  - **Altitude extrema:** ≤ 6.3e-3 m.
+- **P-requirement evidence, provisional thresholds:**
+  - **P1:** slice ignition and cutoff exact.
+  - **P2:** O1, O2.
+  - **P3:** O7; prograde raises and retrograde lowers SMA and energy; apsides are reported.
+  - **P4:** O3–O6, O8.
+  - **P6:** same-platform determinism. Cross-platform M2 bounds are T7.
+  - **P7:** declared receipts; the control runs are bit-identical; depletion is exact (D1a).
+  - **P9:** schema version and re-validation.
+  - **P10:** M1 is unchanged.
+  - P5 (GMAT, T6), the threshold approval (T7) and P11/P12 (T8) remain.
+- **Same-tick reporting** (approved T3 behavior, unchanged): a burn submitted at tick 60 for ignition at 600 s is reported at tick 61. It is tested and documented in the contract.
+- **DR-0018 (A) verified:**
+  - no fabricated `BurnEnded`;
+  - the final sample shows the active or pending burn;
+  - physics up to the stop is byte-identical to a longer run;
+  - a cutoff or ignition exactly at the stop is emitted.
+- **Numerical finding:** the sensed-Δv error at high mass flow is RK4 (Simpson) truncation, predicted by the analytic bound to 2–3 %. The O2 gate applies the unchanged round-off allowance to the error beyond that computed bound. Flagged for T7.
+- **M1 regression:**
+  - the golden sha256 `7a4e1877…` is exact on the reference host;
+  - CI hosts are within the approved bounds;
+  - M1 Proof, GMAT M1 and `m1.json` are unchanged.
+- **DR-0017 separation:** each burn's timing Δv bound is reported and recomputed as a timing quantity only. Trajectory error comes only from O4, O5 and O8.
+- **Review:** `docs/reviews/M2-T5-review-01.md`. Codex FAIL → FAIL → FAIL → **PASS**. 18 findings (F1–F18), all accepted, resolved and mutation-tested. **Final independent verdict: PASS** (session `01a12c9d-d05d-7973-83ed-f9fbfb734ee2`).
+- **Limitations at the prototype bar:**
+  - Thresholds are provisional, measured on one reference host and two CI hosts; T7 has not run.
+  - O9/GMAT M2 is T6.
+  - FU-1 is open: GMAT gates must respect the 11–15 µm DOP853 floor.
+  - The validators need the dev group (SciPy).
+- **Not started:** T6 and later (needs authorization). The draft PR (#3) is not merged.
 
 ## REV-012 — resolved
 VAL-0010, DR-0016; CI-reproduced by `tests/test_rev012_evidence.py`.
