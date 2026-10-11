@@ -119,6 +119,7 @@ def test_public_api_cannot_set_physical_state():
         "snapshot",
         "step",
         "schedule_burn",
+        "submit",
         "propulsion_snapshot",
         "engine_transitions",
     }

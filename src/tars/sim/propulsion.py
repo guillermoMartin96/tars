@@ -257,6 +257,7 @@ class BurnRejection(StrEnum):
     OVERLAPS_SCHEDULED_BURN = "overlaps_scheduled_burn"
     ENGINE_BUSY = "engine_busy"
     NO_PROPULSION_CONFIGURED = "no_propulsion_configured"
+    DUPLICATE_COMMAND_ID = "duplicate_command_id"
 
 
 class BurnRejectedError(ValueError):
@@ -566,6 +567,8 @@ class PropulsionSnapshot:
         engine_state: Current engine state.
         active_plan: The burn in progress, if any.
         pending_plans: Accepted burns not yet ignited, in execution order.
+        active_burn_id: Simulator-assigned ID of the burn in progress (T3).
+        pending_burn_ids: IDs of the pending burns, in execution order (T3).
     """
 
     tick: int
@@ -576,6 +579,8 @@ class PropulsionSnapshot:
     engine_state: EngineState
     active_plan: BurnPlan | None
     pending_plans: tuple[BurnPlan, ...]
+    active_burn_id: str | None = None
+    pending_burn_ids: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -597,6 +602,10 @@ class EngineTransition:
     # Cutoff transitions: COMPLETED (normal cutoff) or PROPELLANT_DEPLETED (DR-0017
     # safeguard 6). Ignitions: None.
     end_cause: BurnEndCause | None = None
+    # Correlation (T3): simulator-assigned burn ID, and the command ID if the burn came
+    # from submit() (None for engine-level schedule_burn calls).
+    burn_id: str | None = None
+    command_id: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "r", _frozen3(self.r))

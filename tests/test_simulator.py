@@ -39,6 +39,7 @@ def test_no_public_api_mutates_physical_state():
         "snapshot",
         "step",
         "schedule_burn",
+        "submit",
         "propulsion_snapshot",
         "engine_transitions",
     }
