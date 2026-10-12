@@ -236,3 +236,13 @@ All seven are **`ACCEPTED`**.
 - Re-verifications 3–7 found, in each round, new instances of one open-ended class: a validator-internal helper patched to return a non-finite value, which downstream arithmetic turns into a finite pass.
 - The terminal gates now reject any non-finite metric. What remains requires editing the validator's own code.
 - The implementer does not decide the review's scope: DR-0019 asks the Tech Lead to define the threat model before the final round. **Round 8 has not been launched.**
+
+**DR-0019 approved, option B (Tech Lead, 2026-10-11).**
+- **In scope:** wrong simulator output or physics; tampered GMAT references or threshold files; workflow failures; invalid independent-reference outputs; missing observations or thresholds; any non-finite metric at the validation or Proof boundaries.
+- **Out of scope:** replacing or modifying the validator's own helper implementations.
+- **Constraint:** bad data must never pass by travelling through an (unmodified) internal helper.
+- Findings F16, F18–F20, F22, F23 and F26 were reported under the earlier, open scope. All are fixed regardless and remain tested.
+
+## Re-verification 8 (final, under DR-0019 B)
+See below.
+

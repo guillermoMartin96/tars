@@ -1,6 +1,6 @@
 # Decision Request: Threat model for the independent false-pass review of M2 validators
 
-**Status:** OPEN  
+**Status:** APPROVED — option B (Tech Lead, 2026-10-11)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-11  
 **Related milestone/issue:** M2 T6 (O9); review record `docs/reviews/M2-T6-review-01.md`; T5 review `M2-T5-review-01.md`
@@ -108,6 +108,22 @@ Stating the threat model makes the PASS meaningful and bounded. It also preserve
 `A` / `B` / `C` / `discuss`, with any changes to the in-scope list.
 
 ## Resolution
-**Decision:** <pending>  
-**Reasoning/notes:**  
+**Decision:** APPROVED — option B (Tech Lead, 2026-10-11).
+
+**Recorded review scope:**
+- **In scope:**
+  - incorrect simulator output or physics;
+  - tampered or corrupted GMAT references or threshold files;
+  - failures in the generate/run/compare workflows;
+  - invalid outputs from independent references;
+  - missing observations or thresholds;
+  - any non-finite metric (NaN, +∞, −∞) reaching the validation or Proof boundaries.
+- **Out of scope:** adversarially replacing or modifying the validator's own internal helper implementations. This is treated as equivalent to editing validator source, a risk covered by code review, unit and mutation tests, and the automated validator checks (AST guard, terminal finiteness gates).
+- **Constraint (Tech Lead):** the boundary must **not** let bad simulator, GMAT, independent-reference, threshold or workflow data pass merely because it travels through an internal helper. The exclusion applies only to attacks that require modifying or replacing validator implementation code. Bad *data* flowing through unmodified helpers stays fully in scope.
+
+**Reasoning/notes:** this states the guarantee of a passing M2 Proof precisely, keeps every existing defense, and bounds the review. No gate, threshold or measured value changes.
+
 **Follow-up:**
+- One final Codex re-verification of T6 under this scope; an unconditional PASS is required.
+- The scope is recorded in the T6 review record and VAL-0014.
+- It can be widened later, for example for T8's external review.

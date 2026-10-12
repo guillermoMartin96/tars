@@ -470,4 +470,8 @@ All 10 approved rejection codes are exercised.
   - Exact threshold-file structure and finite, nonnegative limits in both loaders (F15, F17).
   - A distinct name for the orbit-event contract check.
   - No gate, limit or measured value changed: the 212 Proof metric values are bit-identical before and after.
+- **Scope of the false-pass review (DR-0019 B, approved 2026-10-11).**
+  - **Covered:** wrong simulator output or physics; tampered references or thresholds; workflow failures; invalid reference outputs; missing observations or thresholds; non-finite metrics.
+  - **Not covered at runtime:** replacing the validator's own helper code, which code review, mutation tests and the AST guard cover instead.
+  - Bad data passing through unmodified helpers stays in scope.
 

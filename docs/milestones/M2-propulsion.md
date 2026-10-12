@@ -1,6 +1,6 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T1–T5 COMPLETE (final independent PASS each); T6 implemented, final review pending DR-0019 (2026-10-11). T3 semantics confirmed (DR-0014 amendment); DR-0018 approved (option A). `proof/thresholds/m2.json` provisional until T7. Draft PR #3, not merged.
+**Status:** T1–T5 COMPLETE (final independent PASS each); T6 implemented; final review under DR-0019 B (approved 2026-10-11). T3 semantics confirmed (DR-0014 amendment); DR-0018 approved (option A). `proof/thresholds/m2.json` provisional until T7. Draft PR #3, not merged.
 - See `proof/records/M2-propulsion.md`.
 - Merge to `main` needs separate authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
@@ -243,7 +243,7 @@ Later Decision Requests:
 - **DR-0016** GMAT aligned stepping: resolved.
 - **DR-0017** burn timing fidelity and the depletion boundary: resolved.
 - **[DR-0018](../decisions/requests/DR-0018-burns-in-progress-at-simulation-end.md)** burns in progress or pending when a scenario stops: **APPROVED, option A** (2026-10-11). A stop is an observation boundary; no fabricated `BurnEnded`.
-- **[DR-0019](../decisions/requests/DR-0019-false-pass-review-threat-model.md)** threat model for the independent false-pass review: **OPEN** (recommended B). It blocks only the final T6 review round.
+- **[DR-0019](../decisions/requests/DR-0019-false-pass-review-threat-model.md)** threat model for the independent false-pass review: **APPROVED, option B** (2026-10-11). Bad data is always in scope; replacing validator internals is not.
 
 ## 12a. Tracked follow-ups
 | ID | Follow-up | Constraint |
