@@ -1,0 +1,105 @@
+13:- O1 mass law: propellant used = F T / (Isp g0), T the commanded or depletion time.
+14:- O2 rocket equation: sensed delta-v = Isp g0 ln(m0 / mf).
+23:DR-0017's timing-induced delta-v bound is a separate, per-burn quantity reported by
+24:the simulator; nothing here treats it as a bound on trajectory error.
+77:    ``intended_s`` is the commanded duration, or the analytic depletion time P / mdot
+122:        return self.thrust_n / (self.isp_s * STANDARD_GRAVITY)
+155:        depletion = propellant / mdot
+167:        used = min(mdot * executed, propellant)
+189:                delta_v_mps=c * math.log(m0 / mf),
+213:    max(x, nan) returns x, and max(x, -inf) returns x)."""
+216:    return max(values)
+221:    max(err - inf, 0.0) would turn any error into a pass (review M2-T6 F23)."""
+224:    return max(err - allowance, 0.0)
+235:def simpson_bound(
+238:    """Analytic RK4 truncation bound on the sensed delta-v integral [m/s].
+242:    cutoff, DR-0013 3A). Its error is h^5/2880 |f|, with f = 24 F mdot^4 / m^5
+247:    end = burn.cutoff_t_s if until is None else min(until, burn.cutoff_t_s)
+251:    first = math.ceil(burn.ignition_t_s / dt)
+252:    grid = [k * dt for k in range(first, math.floor(end / dt) + 1)]
+257:        total += (b - a) ** 5 / 2880.0 * 24.0 * veh.thrust_n * mdot**4 / m_end**5
+267:    An event exactly on a tick boundary k*dt is executed by the step reaching it
+272:    k = math.ceil(event_t / dt)
+631:        want = veh.thrust_n / p.total_mass_kg
+632:        thrust_rel = worst(thrust_rel, abs(float(np.linalg.norm(a)) - want) / want)
+636:            u = sign * np.array(st.v) / np.linalg.norm(st.v)
+637:            dir_err = worst(dir_err, float(np.linalg.norm(a / np.linalg.norm(a) - u)))
+660:        sensed += veh.exhaust_velocity_mps * math.log(s.total_mass_kg / last.total_mass_kg)
+667:        "propellant_accounting_rel_error": abs(veh.propellant_kg - last.propellant_kg - used) / m0,
+669:            abs(last.delta_v_sensed_mps - sensed) / sensed
+680:# --------------------------------------------------------------- O1 / O2
+691:    ratio to that analytic bound is reported and must be <= 1.
+697:    o1 = {"propellant_used_rel_error_max": 0.0, "depletion_residual_over_bound_max": 0.0}
+710:            abs(e.propellant_used_kg - b.propellant_used_kg) / m0_total,
+713:            bound = veh.mass_flow_kgps * 2.0 * _ulp(b.cutoff_t_s)
+714:            o1["depletion_residual_over_bound_max"] = worst(
+715:                o1["depletion_residual_over_bound_max"], e.propellant_kg / bound
+721:            o2["sensed_delta_v_rel_error_max"], err / b.delta_v_mps
+723:        # Gated: the error beyond the analytic Simpson truncation bound (round-off).
+726:            excess_over(err, simpson_bound(veh, b, scenario.dt_s)) / b.delta_v_mps,
+730:            abs(e.rocket_equation_delta_v_mps - b.delta_v_mps) / b.delta_v_mps,
+755:        mdot = Decimal(veh.thrust_n) / c
+758:        ln = (m0 / m).ln()
+759:        return c * ln, c * (tt - (m / mdot) * ln)
+807:            - Decimal(veh.thrust_n) / (Decimal(veh.isp_s) * Decimal(STANDARD_GRAVITY)) * t
+811:        "velocity_rel_error": math.hypot(*map(float, v_err)) / float(dv),
+833:            r10["propellant_error_kg"] / veh.initial_mass_kg,
+834:            r5["propellant_error_kg"] / veh.initial_mass_kg,
+836:        order = math.log2(r10["position_error_m"] / r5["position_error_m"])
+855:    mdot = 0.0 if thrust == 0.0 else thrust / (veh.isp_s * STANDARD_GRAVITY)  # type: ignore[union-attr]
+860:        a = -mu * r / math.sqrt(float(r @ r)) ** 3
+862:            a = a + (sign * thrust / (dry + m_p) / math.sqrt(float(vel @ vel))) * vel
+885:    Segment boundaries are the predicted ignition and cutoff times (scenario inputs),
+896:    horizon = max(marks)
+897:    bounds = sorted(
+916:    for a, b in pairwise(bounds):
+933:        ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
+939:            out.alt_min = -worst(-out.alt_min, -float(alts.min()))
+940:            out.alt_max = worst(out.alt_max, float(alts.max()))
+965:    speed = math.sqrt(c.mu / radius)
+1029:        u = SIGN[st.direction] * ref[p.t][3:6] / np.linalg.norm(ref[p.t][3:6])
+1030:        direction = worst(direction, float(np.linalg.norm(a / norm - u)))
+1047:        / float(np.linalg.norm(r0)),
+1049:        / float(np.linalg.norm(v0)),
+1155:    mid = ignition + duration / 2.0
+1157:    stop = math.ceil((mid + duration) / grid) * grid
+1167:            "duration_s": duration / scale,
+1168:            "ignition_t_s": mid - duration / scale / 2.0,
+1188:    mid = float(cmd["ignition_t_s"]) + duration / 2.0
+1196:    dv = veh.exhaust_velocity_mps * math.log(m0 / (m0 - veh.mass_flow_kgps * duration))
+1197:    v_imp = v_m + sign * dv * v_m / np.linalg.norm(v_m)
+1198:    a_imp = -mu / (2.0 * specific_energy(r_m, v_imp, mu))
+1218:        math.log2(a["sma_finite_minus_impulsive_m"] / b["sma_finite_minus_impulsive_m"])
+1225:            r0["sma_change_finite_m"] / r0["sma_change_impulsive_m"] - 1.0
+1261:        cosang = float(h0 @ h1) / float(np.linalg.norm(h0) * np.linalg.norm(h1))
+1264:            float(np.linalg.norm(np.cross(h0, h1)) / (np.linalg.norm(h0) * np.linalg.norm(h1)))
+1273:        out[f"{tag}_apoapsis_alt_km"] = (el1.a * (1 + el1.e) - re) / 1e3
+1274:        out[f"{tag}_periapsis_alt_km"] = (el1.a * (1 - el1.e) - re) / 1e3
+1307:    orders = [math.log2(a / b) for a, b in pairwise(errs)]
+1314:# --------------------------------------------------------------- control and boundary
+1335:# --------------------------------------------------------------- DR-0018 boundary
+1355:def boundary_variant(
+1370:def boundary_violations(
+1378:    - The stop is an observation boundary only: every physical event up to the stop is
+1456:def _timing_bound(veh: Vehicle, b: PredictedBurn) -> float:
+1457:    """DR-0017 definition: F |D - d| / m_end, m_end after the longer interval."""
+1461:    m_end = veh.dry_mass_kg + max(
+1462:        b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0
+1464:    return veh.thrust_n * dt / m_end
+1508:            abs(acc.planned_propellant_used_kg - b.propellant_used_kg) / veh.initial_mass_kg,
+1510:        bound = _timing_bound(veh, b)
+1513:            v.append(f"{acc.burn_id}: timing bound {reported!r} missing or over budget")
+1514:        elif bound == 0.0:
+1516:                v.append(f"{acc.burn_id}: timing bound {reported!r}, intervals equal")
+1517:        elif not bound <= reported <= bound * (1.0 + 1e-9):
+1518:            v.append(f"{acc.burn_id}: timing bound {reported!r} != F|D-d|/m_end {bound!r}")
+1550:            abs(s.propellant_kg - b.propellant_before_kg) / m0,
+1554:        u = SIGN[s.direction] * np.array(s.v) / np.linalg.norm(s.v)
+1566:            abs(e.propellant_kg - b.propellant_after_kg) / m0,
+1622:                dv += c * math.log(b.mass_before_kg / (veh.dry_mass_kg + prop))
+1623:                allowance += simpson_bound(veh, b, dt, until=t)
+1627:                allowance += simpson_bound(veh, b, dt)
+1633:            out["sample_propellant_rel_error_max"], abs(p.propellant_kg - prop) / m0
+1637:            out["sample_delta_v_rel_error_max"], err / total_dv
+1641:            excess_over(err, allowance) / total_dv,
+1915:    if not (done.min_altitude_m <= min(alts) and done.max_altitude_m >= max(alts)):

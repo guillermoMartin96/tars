@@ -218,4 +218,21 @@ All seven are **`ACCEPTED`**.
 **Behavior is preserved.** All 212 previous checks are identical; the Proof now has 213 checks (`report_only_metrics_finite` added). Each mechanism is mutation-tested.
 
 ## Re-verification 7
-See below.
+**Reviewer:** Codex, session `01a12d76-2ae3-7092-9f1c-f2cbce1e39b3`, at `d7d77ae`. **Raw:** `raw/M2-T6-codex-reverify7.md`, `raw/M2-T6-codex-reverify7-scratch/`.
+
+**Verdict: FAIL** (F26).
+- F23, F24 (for the reported forms) and F25 are resolved.
+- 773 metric bits across the 212 previous checks are identical.
+
+**All three are `ACCEPTED` and fixed.** Each mechanism is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F26 | Med | An infinite depletion bound (patched `_ulp`) turned a failing residual ratio into 0 | The ratio is computed only against a finite, positive bound; otherwise it is +inf | `test_depletion_ratio_needs_a_finite_positive_bound` (normal, ±inf, 0), `test_infinite_depletion_bound_fails_the_integrated_mission` |
+| F27 | Low | An aliased reducer (`from numpy import fmax as reducer`) bypassed the AST guard | The guard flags importing a reducer at all, and binding one to a name (`reducer = np.fmax`, `reducer = max`) | `test_the_guard_detects_common_unsafe_forms` (13 forms) |
+| F28 | Low | Standalone O9 accepted non-finite T5 report-only audit metrics, and the terminal Proof check's wiring was untested | Standalone evaluation rejects any non-finite audit metric. **Self-found while testing this:** a non-finite metric made `m2_proof.py` crash while writing its report (the event schema requires finite numbers). It now writes the check as a failure with the values in its notes, so the report is always written | `test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics`, `test_report_only_finiteness_is_a_terminal_proof_check` (`main` exits 1 with the check failed) |
+
+**Pattern escalated (DR-0019).**
+- Re-verifications 3–7 found, in each round, new instances of one open-ended class: a validator-internal helper patched to return a non-finite value, which downstream arithmetic turns into a finite pass.
+- The terminal gates now reject any non-finite metric. What remains requires editing the validator's own code.
+- The implementer does not decide the review's scope: DR-0019 asks the Tech Lead to define the threat model before the final round. **Round 8 has not been launched.**

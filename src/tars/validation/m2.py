@@ -711,8 +711,10 @@ def mass_and_rocket_metrics(
         )
         if b.end_cause == "propellant_depleted":
             bound = veh.mass_flow_kgps * 2.0 * _ulp(b.cutoff_t_s)
+            # F26: a ratio to a non-finite or non-positive bound is not evidence.
+            ratio = e.propellant_kg / bound if math.isfinite(bound) and bound > 0.0 else math.inf
             o1["depletion_residual_over_bound_max"] = worst(
-                o1["depletion_residual_over_bound_max"], e.propellant_kg / bound
+                o1["depletion_residual_over_bound_max"], ratio
             )
             if e.propellant_kg < 0.0:
                 v.append(f"{b.burn_id}: negative residual")

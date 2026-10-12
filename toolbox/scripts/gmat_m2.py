@@ -95,6 +95,11 @@ def _evaluate(name: str, base: Path | None = None) -> tuple[list[str], Check | N
     t5 = load_scoped_thresholds(missions=frozenset(BY_NAME))
     for group, metrics in audit.metrics.items():
         limits = t5.for_validator(group, name)
+        # Every audit metric, report-only included, must be finite (F28).
+        non_finite = [k for k, x in metrics.items() if not math.isfinite(x)]
+        if non_finite:
+            rejected.append(f"simulator audit {group}: non-finite metrics {non_finite}")
+            continue
         missing = m2.ungated_metrics(metrics, limits)
         if missing:
             rejected.append(f"simulator audit {group}: metrics without a threshold {missing}")

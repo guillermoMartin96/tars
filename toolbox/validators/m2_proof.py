@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any
 
 import tars
+from tars.events.schema import ValidationResult
 from tars.sim.runner import RunResult, run_scenario
 from tars.sim.scenario import ScenarioV2
 from tars.validation import gmat_m2, m2
@@ -77,6 +78,26 @@ def _burn_table(scenario: ScenarioV2, run: RunResult) -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+def _result(check: Check) -> dict[str, Any]:
+    """A check as a ValidationResult. The event schema requires finite metrics, so a
+    non-finite one is moved into the notes and the result is a failure; the report is
+    always written (T6 review F28)."""
+    bad = {k: repr(v) for k, v in check.metrics.items() if not math.isfinite(v)}
+    if not bad:
+        return check.to_event().model_dump(mode="json")
+    notes = "; ".join([f"non-finite metrics {bad}", *check.failures, check.notes])
+    return ValidationResult(
+        tick=0,
+        t=0.0,
+        validator=check.validator,
+        passed=False,
+        metrics={k: v for k, v in check.metrics.items() if k not in bad},
+        thresholds=check.thresholds,
+        threshold_status=check.threshold_status,
+        notes=notes,
+    ).model_dump(mode="json")
 
 
 def _ungated(metrics: dict[str, float], limits: dict[str, float]) -> list[str]:
@@ -323,7 +344,7 @@ def main(argv: list[str] | None = None) -> int:
         "quick": args.quick,
         "missions": missions,
         "dr0018_boundary": boundary_info,
-        "results": [c.to_event().model_dump(mode="json") for c in checks],
+        "results": [_result(c) for c in checks],
         "passed": all(c.passed for c in checks),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -1179,6 +1179,23 @@ def _reducer_calls(source: str, filename: str) -> set[tuple[str, str, str]]:
                 found.add((filename, stack[-1] if stack else "<module>", ast.unparse(node)))
             self.generic_visit(node)
 
+        def visit_ImportFrom(self, node):
+            # `from numpy import fmax as reducer`: importing a reducer at all (F27).
+            for alias in node.names:
+                if alias.name in _REDUCERS:
+                    found.add(
+                        (filename, stack[-1] if stack else "<module>", f"import {alias.name}")
+                    )
+            self.generic_visit(node)
+
+        def visit_Assign(self, node):
+            # `reducer = np.fmax` / `reducer = max`: binding a reducer to a name (F27).
+            value = node.value
+            name = value.id if isinstance(value, ast.Name) else getattr(value, "attr", None)
+            if name in _REDUCERS:
+                found.add((filename, stack[-1] if stack else "<module>", f"bind {name}"))
+            self.generic_visit(node)
+
     Visitor().visit(ast.parse(source))
     return found
 
@@ -1205,6 +1222,9 @@ def test_every_max_min_call_in_the_validators_is_reviewed():
         "e = np.fmax.reduce([dst.get(k, -math.inf), x])",
         "e = np.fmin.reduce(errors)",
         "e = np.maximum(a, b)",
+        "from numpy import fmax as reducer",
+        "reducer = np.fmax",
+        "reducer = max",
     ],
 )
 def test_the_guard_detects_common_unsafe_forms(snippet):
@@ -1406,3 +1426,104 @@ def test_report_only_metrics_must_be_finite():
         {**dict.fromkeys(LIMITS["all"], 0.0), "gmat_rows": math.nan},
     )
     assert gates.non_finite_report_only == ["o9: gmat_rows=nan"]
+
+
+# ------------------------------------------------------------------ re-verification 7 fixes
+
+
+def _with_residual(run, kg=1e-10):
+    """A bookkeeping-consistent extra residual after the depletion burn."""
+    end = next(e for e in run.events if e.type == "BurnEnded")
+
+    def more_mass(e, **extra):
+        return e.model_copy(
+            update={
+                "propellant_kg": e.propellant_kg + kg,
+                "total_mass_kg": e.total_mass_kg + kg,
+                **extra,
+            }
+        )
+
+    out = []
+    for e in run.events:
+        if e is end:
+            e = more_mass(e, propellant_used_kg=e.propellant_used_kg - kg)
+        elif e.type == "PropellantDepleted":
+            e = e.model_copy(update={"residual_propellant_kg": e.residual_propellant_kg + kg})
+        elif e.type == "PropulsionSampled" and e.tick >= end.tick:
+            e = more_mass(e)
+        out.append(e)
+    run.events[:] = out
+
+
+@pytest.mark.parametrize("ulp", [None, math.inf, -math.inf, 0.0])
+def test_depletion_ratio_needs_a_finite_positive_bound(monkeypatch, ulp):
+    """F26: with the normal bound the extra residual fails; an infinite, negative or
+    zero bound cannot turn it into a pass."""
+    if ulp is not None:
+        monkeypatch.setattr(m2, "_ulp", lambda x: ulp)
+    mission = BY_NAME["m2_burn_to_depletion"]
+    scenario = mission.build()
+    run = run_scenario(scenario)
+    _with_residual(run)
+    o1, _, _ = m2.mass_and_rocket_metrics(
+        scenario, run.events, m2.predict_burns(scenario, mission.expected)
+    )
+    assert o1["depletion_residual_over_bound_max"] > 1.0
+
+
+@pytest.mark.slow
+def test_infinite_depletion_bound_fails_the_integrated_mission(monkeypatch):
+    """F26 integrated."""
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    module = _proof_module()
+    monkeypatch.setattr(m2, "_ulp", lambda x: math.inf)
+    original = module.run_scenario
+
+    def with_residual(scenario, *a, **k):
+        run = original(scenario, *a, **k)
+        if scenario.name == "m2_burn_to_depletion":
+            _with_residual(run)
+        return run
+
+    monkeypatch.setattr(module, "run_scenario", with_residual)
+    gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+    checks, _ = module.mission_checks(BY_NAME["m2_burn_to_depletion"], gates, quick=True)
+    failed = {c.validator for c in checks if not c.passed}
+    assert "o1_mass_law[m2_burn_to_depletion]" in failed
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+def test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics(monkeypatch, bad):
+    """F28: report-only T5 audit metrics must be finite in standalone O9 too."""
+    cli = _cli()
+    original = m2.audit_run
+
+    def poisoned(scenario, expected, run):
+        audit = original(scenario, expected, run)
+        audit.metrics["o2_rocket_equation"]["sensed_delta_v_rel_error_max"] = bad
+        return audit
+
+    monkeypatch.setattr(m2, "audit_run", poisoned)
+    rejected, check = cli._evaluate("m2_prograde_burn")
+    assert check is None and any("non-finite metrics" in r for r in rejected)
+
+
+@pytest.mark.slow
+def test_report_only_finiteness_is_a_terminal_proof_check(monkeypatch, tmp_path):
+    """F28: the terminal report_only_metrics_finite check is wired into m2_proof.main."""
+    module = _proof_module()
+    original = m2.audit_run
+
+    def poisoned(scenario, expected, run):
+        audit = original(scenario, expected, run)
+        if "o2_rocket_equation" in audit.metrics:
+            audit.metrics["o2_rocket_equation"]["sensed_delta_v_rel_error_max"] = math.nan
+        return audit
+
+    monkeypatch.setattr(m2, "audit_run", poisoned)
+    out = tmp_path / "m2.json"
+    assert module.main(["--quick", "--out", str(out)]) == 1
+    results = {r["validator"]: r for r in json.loads(out.read_text())["results"]}
+    assert not results["report_only_metrics_finite"]["passed"]
