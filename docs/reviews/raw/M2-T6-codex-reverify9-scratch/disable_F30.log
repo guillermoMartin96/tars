@@ -1,0 +1,89 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+____________ test_gmat_coast_alignment_checks_kepler_velocity[nan] _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e00a810>, bad = nan
+
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_gmat_coast_alignment_checks_kepler_velocity(monkeypatch, bad):
+        """F30: an invalid Kepler velocity in the coast alignment fails, even though only
+        the position is compared."""
+        from tars.astro import kepler
+    
+        original = kepler.propagate
+    
+        def poisoned(r, v, dt, mu):
+            rr, vv = original(r, v, dt, mu)
+            return rr, np.array([vv[0], vv[1], bad])
+    
+        scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        monkeypatch.setattr(kepler, "propagate", poisoned)
+        metrics = gmat_m2.alignment_metrics(
+            labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+        )
+>       assert metrics["coast_vs_kepler_position_error_max_m"] == math.inf
+E       assert 4.0105683859652e-06 == inf
+E        +  where inf = math.inf
+
+tests/test_gmat_m2.py:1663: AssertionError
+____________ test_gmat_coast_alignment_checks_kepler_velocity[inf] _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e0c28a0>, bad = inf
+
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_gmat_coast_alignment_checks_kepler_velocity(monkeypatch, bad):
+        """F30: an invalid Kepler velocity in the coast alignment fails, even though only
+        the position is compared."""
+        from tars.astro import kepler
+    
+        original = kepler.propagate
+    
+        def poisoned(r, v, dt, mu):
+            rr, vv = original(r, v, dt, mu)
+            return rr, np.array([vv[0], vv[1], bad])
+    
+        scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        monkeypatch.setattr(kepler, "propagate", poisoned)
+        metrics = gmat_m2.alignment_metrics(
+            labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+        )
+>       assert metrics["coast_vs_kepler_position_error_max_m"] == math.inf
+E       assert 4.0105683859652e-06 == inf
+E        +  where inf = math.inf
+
+tests/test_gmat_m2.py:1663: AssertionError
+____________ test_gmat_coast_alignment_checks_kepler_velocity[-inf] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10df64ce0>
+bad = -inf
+
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_gmat_coast_alignment_checks_kepler_velocity(monkeypatch, bad):
+        """F30: an invalid Kepler velocity in the coast alignment fails, even though only
+        the position is compared."""
+        from tars.astro import kepler
+    
+        original = kepler.propagate
+    
+        def poisoned(r, v, dt, mu):
+            rr, vv = original(r, v, dt, mu)
+            return rr, np.array([vv[0], vv[1], bad])
+    
+        scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        monkeypatch.setattr(kepler, "propagate", poisoned)
+        metrics = gmat_m2.alignment_metrics(
+            labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+        )
+>       assert metrics["coast_vs_kepler_position_error_max_m"] == math.inf
+E       assert 4.0105683859652e-06 == inf
+E        +  where inf = math.inf
+
+tests/test_gmat_m2.py:1663: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_gmat_coast_alignment_checks_kepler_velocity[nan]
+FAILED tests/test_gmat_m2.py::test_gmat_coast_alignment_checks_kepler_velocity[inf]
+FAILED tests/test_gmat_m2.py::test_gmat_coast_alignment_checks_kepler_velocity[-inf]
+3 failed, 156 deselected in 0.30s

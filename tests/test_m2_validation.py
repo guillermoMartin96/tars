@@ -754,8 +754,9 @@ def test_returned_result_is_reconciled_with_events(runs, field):
 
 def test_cli_summary_is_reconciled_with_events(runs):
     """F8: a CLI summary without the commands fails."""
-    _, _, run = _slice(runs)
+    _, scenario, run = _slice(runs)
     good = {
+        "unsubmitted_command_ids": [],
         "commands": [
             {"command_id": "slice-prograde-001", "status": "accepted", "reason": None,
              "burn_id": "burn#000001", "submit_tick": 0}
@@ -766,8 +767,14 @@ def test_cli_summary_is_reconciled_with_events(runs):
         "active_burn_id_at_stop": None,
         "pending_burn_ids_at_stop": [],
     }  # fmt: skip
-    assert m2.cli_summary_violations(run.events, good) == []
-    assert m2.cli_summary_violations(run.events, {**good, "commands": []})
+    assert m2.cli_summary_violations(run.events, good, scenario) == []
+    assert m2.cli_summary_violations(run.events, {**good, "commands": []}, scenario)
+    # F37 (T6 review): unsubmitted IDs reconciled with the timeline.
+    for wrong in (["slice-prograde-001"], ["invented"], [None]):
+        bad = {**good, "unsubmitted_command_ids": wrong}
+        assert m2.cli_summary_violations(run.events, bad, scenario)
+    missing = {k: v for k, v in good.items() if k != "unsubmitted_command_ids"}
+    assert m2.cli_summary_violations(run.events, missing, scenario)
 
 
 @pytest.mark.parametrize(

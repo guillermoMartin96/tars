@@ -899,19 +899,58 @@ def _check_reference_states(
     states = np.atleast_2d(states)
     if not np.all(np.isfinite(states)):
         raise RuntimeError(f"DOP853 produced a non-finite state on {where}")
+    times = np.atleast_1d(np.asarray(times, dtype=float))
+    if not np.all(np.isfinite(times)):  # F34: a NaN time would make the law check NaN
+        raise RuntimeError(f"DOP853 produced a non-finite time on {where}")
     tol = 1e-12 * (veh.initial_mass_kg if veh is not None else 1.0)
-    for t, m_p in zip(np.atleast_1d(times), states[6], strict=True):
-        if m_p < 0.0 or abs(m_p - mass_law_propellant(float(t), veh, predicted)) > tol:
+    for t, m_p in zip(times, states[6], strict=True):
+        err = abs(m_p - mass_law_propellant(float(t), veh, predicted))
+        if not (m_p >= 0.0 and err <= tol):  # NaN-safe: any NaN fails
             raise RuntimeError(f"DOP853 reference propellant {m_p!r} invalid at t={t!r} ({where})")
 
 
+# Reference self-consistency tolerances (not Proof gates). Measured residuals: 9e-16
+# (Kepler invariants) and 2.6e-10 (dense velocity vs its position derivative). The
+# limits sit far above round-off and far below any physical corruption.
+KEPLER_INVARIANT_REL_TOL = 1e-12
+DENSE_VELOCITY_REL_TOL = 1e-8
+DENSE_TERMINAL_REL_TOL = 1e-12
+
+
 def kepler_state(r0, v0, dt: float, mu: float) -> tuple[np.ndarray, np.ndarray]:
-    """Kepler propagation whose output is validated: a non-finite position or velocity
-    becomes +inf in every component, so any comparison with it fails (review F30)."""
+    """Kepler propagation whose output is validated (reviews M2-T6 F30, F36): it must be
+    finite and conserve two-body energy and angular momentum (vector) relative to the
+    input state. Otherwise every component becomes +inf, so any comparison fails. A
+    finite but physically wrong position or velocity cannot pass silently."""
     r, v = kepler.propagate(r0, v0, dt, mu)
+    r0, v0 = np.asarray(r0, float), np.asarray(v0, float)
+    bad = (np.full(3, math.inf), np.full(3, math.inf))
     if not (np.all(np.isfinite(r)) and np.all(np.isfinite(v))):
-        return np.full(3, math.inf), np.full(3, math.inf)
+        return bad
+    e0, e1 = specific_energy(r0, v0, mu), specific_energy(r, v, mu)
+    h0, h1 = np.cross(r0, v0), np.cross(r, v)
+    e_err = abs(e1 - e0) / abs(e0)
+    h_err = float(np.linalg.norm(h1 - h0)) / float(np.linalg.norm(h0))
+    if not (e_err <= KEPLER_INVARIANT_REL_TOL and h_err <= KEPLER_INVARIANT_REL_TOL):
+        return bad
     return r, v
+
+
+def _check_dense_consistency(sol, ticks, dense, terminal, b: float, where: str) -> None:
+    """Dense velocities agree with a central difference of the dense position, and the
+    dense state at the segment end equals the terminal state (review M2-T6 F35)."""
+    step = 1e-3
+    fd = (sol.sol(ticks + step)[:3] - sol.sol(ticks - step)[:3]) / (2.0 * step)
+    speed = np.linalg.norm(dense[3:6], axis=0)
+    err = np.linalg.norm(dense[3:6] - fd, axis=0)
+    if not np.all(err <= DENSE_VELOCITY_REL_TOL * speed):  # NaN-safe
+        raise RuntimeError(f"DOP853 dense velocity inconsistent with its position on {where}")
+    if ticks[-1] == b:
+        end = dense[:, -1]
+        if not np.all(
+            np.abs(end - terminal) <= DENSE_TERMINAL_REL_TOL * np.maximum(np.abs(terminal), 1.0)
+        ):
+            raise RuntimeError(f"DOP853 dense output disagrees with the terminal state on {where}")
 
 
 def dop853_reference(
@@ -969,6 +1008,12 @@ def dop853_reference(
         if not sol.success:
             raise RuntimeError(f"DOP853 failed on [{a}, {b}]: {sol.message}")
         y = sol.y[:, -1].copy()
+        # F34: solver times are finite, strictly increasing and span exactly [a, b].
+        st = np.asarray(sol.t, dtype=float)
+        if not (
+            np.all(np.isfinite(st)) and np.all(np.diff(st) > 0.0) and st[0] == a and st[-1] == b
+        ):
+            raise RuntimeError(f"DOP853 solver times invalid on [{a}, {b}]")
         _check_reference_states(sol.t, sol.y, veh, predicted, f"[{a}, {b}]")
         ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
         ticks = ticks[(ticks > a) & (ticks <= b)]
@@ -976,6 +1021,9 @@ def dop853_reference(
             dense = sol.sol(ticks)
             # F18/F29: the complete dense-output state is validated, not only altitude.
             _check_reference_states(ticks, dense, veh, predicted, f"dense output [{a}, {b}]")
+            # F35: the dense velocity is the derivative of the dense position, and the
+            # dense state at the segment end is the integrator's terminal state.
+            _check_dense_consistency(sol, ticks, dense, y, b, f"[{a}, {b}]")
             alts = np.linalg.norm(dense[:3], axis=0) - radius
             out.alt_min = -worst(-out.alt_min, -float(alts.min()))
             out.alt_max = worst(out.alt_max, float(alts.max()))
@@ -1848,9 +1896,17 @@ def _plan_violations(
     return [] if got == want else [f"{where}: plan {got} != expected {want}"]
 
 
-def cli_summary_violations(events: Sequence[Any], summary: dict[str, Any]) -> list[str]:
-    """The CLI's propulsion summary agrees with the event log (review F8)."""
+def cli_summary_violations(
+    events: Sequence[Any], summary: dict[str, Any], scenario: ScenarioV2
+) -> list[str]:
+    """The CLI's propulsion summary agrees with the event log and, for the never
+    submitted entries, with the scenario timeline (reviews M2-T5 F8, M2-T6 F37)."""
     v: list[str] = []
+    n = expected_submissions(scenario, events)
+    rest = [e.command.get("command_id") for e in scenario.commands[n:]]
+    rest = [c if isinstance(c, str) else None for c in rest]
+    if "unsubmitted_command_ids" not in summary or summary["unsubmitted_command_ids"] != rest:
+        v.append(f"CLI summary unsubmitted_command_ids != {rest}")
     receipts = _of(events, *COMMAND_EVENTS)
     want = [
         {
@@ -1927,9 +1983,9 @@ def orbit_checks(
             crossing = None
             for _ in range(80):
                 mid = 0.5 * (lo + hi)
-                rr, vv = kepler.propagate(r0, v0, mid, mu)
+                rr, vv = kepler_state(r0, v0, mid, mu)
                 z = float(rr[2])
-                # F22: any invalid oracle output fails, never steers the bisection.
+                # F22/F36: any invalid oracle output fails, never steers the bisection.
                 if not (np.all(np.isfinite(rr)) and np.all(np.isfinite(vv))):
                     crossing = math.inf
                     break

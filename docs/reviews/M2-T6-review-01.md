@@ -262,6 +262,26 @@ All seven are **`ACCEPTED`**.
 
 **Behavior is preserved:** the 212 previous checks are identical, 213 checks pass, and 989 tests pass. The M1 threshold file is byte-identical to `main`, so its pin authenticates exactly the approved file.
 
-## Re-verification 9 (final, under DR-0019 B)
+## Re-verification 9 (under DR-0019 B)
+**Reviewer:** Codex, session `01a12df8-d7f5-70b3-a265-e51e434ea892`, at `1270b09`. **Raw:** `raw/M2-T6-codex-reverify9.md`, `raw/M2-T6-codex-reverify9-scratch/`.
+
+**Verdict: FAIL.**
+- F29–F33 are resolved; disabling their mechanisms causes 12, 3, 2, 1 and 2 regression failures.
+- The 212 prior check records are bit-identical.
+
+**All four are `ACCEPTED`** (all in scope: corrupted reference or summary data, validator code unmodified). F35 and F36 share a pattern: a reference output component checked only for finiteness, then unused. It is closed generally.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F34 | Med | A NaN solver time made the reference mass-law comparison NaN, which passed | Solver times must be finite, strictly increasing and exactly `[a, b]`; the mass-law comparison is NaN-safe | `test_nan_solver_time_cannot_hide_off_law_propellant`, `test_reference_mass_law_check_is_nan_safe` (uses a predicted burn, so a NaN time gives a NaN expectation) |
+| F35 | Med | Finite but wrong dense velocities passed (unused after the finiteness check) | Dense velocity must equal the central difference of the dense position (relative 1e-8; measured 2.6e-10), and the dense state at the segment end must equal the terminal state | `test_dense_output_must_be_self_consistent` (zero velocity; shifted positions) |
+| F36 | Med | A finite but wrong Kepler coast velocity passed GMAT alignment | **Every Kepler output** (O5, O6, GMAT alignment, both node bisections) goes through `kepler_state`, which requires two-body energy and the angular-momentum vector to be conserved (relative 1e-12; measured 9e-16). GMAT coast **velocity** is now also gated against Kepler: new metric `coast_vs_kepler_velocity_error_max_mps`, provisional limit 1e-7 m/s (the approved M1 GMAT-vs-Kepler velocity limit; measured 1.8–4.6e-9) | `test_kepler_outputs_must_conserve_two_body_invariants`, `test_gmat_coast_velocity_is_gated`, the targeted per-metric corruption (meta-test updated) |
+| F37 | Med | The CLI summary's `unsubmitted_command_ids` was never reconciled | Must be present and equal the timeline entries after the submission boundary, in order | `test_cli_summary_is_reconciled_with_events` (accepted IDs, invented IDs, null, missing) |
+
+**First use of the approval anchor.**
+- The new O9 limit changed `proof/thresholds/m2.json`, so its pinned digest in `approved_digests.py` was updated in the same commit, the procedure the anchor requires.
+- Existing O9 metric values are unchanged; the three O9 checks gain the new metric, all passing.
+
+## Re-verification 10 (under DR-0019 B)
 See below.
 

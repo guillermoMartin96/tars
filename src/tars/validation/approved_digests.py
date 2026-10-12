@@ -16,7 +16,7 @@ APPROVED_THRESHOLD_SHA256 = {
     "m1": "446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d",
     # proof/thresholds/m2.json: PROVISIONAL (T5/T6); the pin authenticates the reviewed
     # content, it does not approve the values (T7 threshold DR).
-    "m2": "7e4883b60df00f48f3713609068ce4387be2c1b3f6d33cf2f7924a004771652b",
+    "m2": "5c096963d8c5099a16f19bdb2dfb8860a0b6d4ef289838fd7f48972bedf8dcb3",
 }
 
 # toolbox/references/gmat/m2/APPROVED_DIGESTS.json: reference digests and the

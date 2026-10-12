@@ -1,0 +1,412 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+____________ test_dense_output_state_is_validated_completely[nan-3] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109882750>
+component = 3, bad = nan
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[nan-4] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c6f94f0>
+component = 4, bad = nan
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[nan-5] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c77a900>
+component = 5, bad = nan
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[nan-6] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b49b530>
+component = 6, bad = nan
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[inf-3] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1098816a0>
+component = 3, bad = inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[inf-4] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c77a6f0>
+component = 4, bad = inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[inf-5] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c77ab70>
+component = 5, bad = inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+____________ test_dense_output_state_is_validated_completely[inf-6] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c7f2a80>
+component = 6, bad = inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+___________ test_dense_output_state_is_validated_completely[-inf-3] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c7f0bf0>
+component = 3, bad = -inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+___________ test_dense_output_state_is_validated_completely[-inf-4] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c7f0080>
+component = 4, bad = -inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+___________ test_dense_output_state_is_validated_completely[-inf-5] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c7f0aa0>
+component = 5, bad = -inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+___________ test_dense_output_state_is_validated_completely[-inf-6] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c7f2960>
+component = 6, bad = -inf
+
+    @pytest.mark.parametrize("component", [3, 4, 5, 6])
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+        """F29: velocity and propellant components of the dense output are checked too."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[component, :] = bad
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1641: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[nan-3]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[nan-4]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[nan-5]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[nan-6]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[inf-3]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[inf-4]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[inf-5]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[inf-6]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[-inf-3]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[-inf-4]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[-inf-5]
+FAILED tests/test_gmat_m2.py::test_dense_output_state_is_validated_completely[-inf-6]
+12 failed, 147 deselected in 1.12s

@@ -362,19 +362,21 @@ def alignment_metrics(
             continue
         used = labelled[arc.start_s].mass_kg - labelled[arc.end_s].mass_kg
         duration = worst(duration, abs(used / mass_flow_kgps - arc.length_s))
-    kep = 0.0
+    kep = kep_v = 0.0
     for arc in arcs:
         if arc.direction is not None or arc.start_s not in labelled:
             continue
         s0 = labelled[arc.start_s]
         for t in times:
             if arc.start_s < t <= arc.end_s:
-                r, _ = kepler_state(s0.r, s0.v, t - arc.start_s, mu)  # F30: v checked too
+                r, v = kepler_state(s0.r, s0.v, t - arc.start_s, mu)  # F30/F36 validated
                 kep = worst(kep, float(np.linalg.norm(labelled[t].r - r)))
+                kep_v = worst(kep_v, float(np.linalg.norm(labelled[t].v - v)))
     return {
         "step_spacing_error_max_s": spacing,
         "burn_duration_from_mass_error_max_s": duration,
         "coast_vs_kepler_position_error_max_m": kep,
+        "coast_vs_kepler_velocity_error_max_mps": kep_v,
     }
 
 
@@ -395,7 +397,6 @@ def _expected_mass(t: float, veh, predicted: Sequence[PredictedBurn]) -> float:
 def _node_crossings(states: dict[float, tuple[np.ndarray, np.ndarray]], mu: float) -> list[float]:
     """Ascending-node crossings between consecutive states, refined by bisection on
     exact Kepler propagation (coast arcs; burns never contain a crossing here)."""
-    from tars.astro import kepler
 
     out = []
     times = sorted(states)
@@ -406,7 +407,7 @@ def _node_crossings(states: dict[float, tuple[np.ndarray, np.ndarray]], mu: floa
             crossing = None
             for _ in range(80):
                 mid = 0.5 * (lo + hi)
-                rr, vv = kepler.propagate(ra, va, mid, mu)
+                rr, vv = kepler_state(ra, va, mid, mu)
                 z = float(rr[2])
                 # F22: any invalid oracle output fails, never steers the bisection.
                 if not (np.all(np.isfinite(rr)) and np.all(np.isfinite(vv))):

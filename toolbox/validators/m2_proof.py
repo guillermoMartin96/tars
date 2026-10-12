@@ -158,7 +158,9 @@ def mission_checks(
     audit = m2.audit_run(scenario, mission.expected, run)
     checks = _audit_checks(gates, tag, tag, audit)
     checks.append(
-        _exact(f"cli_summary[{tag}]", m2.cli_summary_violations(events, _cli_summary(run)))
+        _exact(
+            f"cli_summary[{tag}]", m2.cli_summary_violations(events, _cli_summary(run), scenario)
+        )
     )
 
     first = m2.events_sha256(events)

@@ -581,6 +581,7 @@ ROW_CASES = {
     "step_spacing_error_max_s": ("a1mjd", 300, 1.0 / 86400.0),
     "burn_duration_from_mass_error_max_s": ("mass_kg", 88, -1e-6),  # burn-end row, 677.3 s
     "coast_vs_kepler_position_error_max_m": ("r", 300, 1e-3),
+    "coast_vs_kepler_velocity_error_max_mps": ("v", 300, 1e-6),
     "gmat_vs_dop853_position_error_max_m": ("r", 500, 1e-3),
     "gmat_vs_dop853_velocity_error_max_mps": ("v", 500, 1e-6),
     "gmat_vs_dop853_final_position_error_m": ("r", -1, 1e-3),
@@ -1158,6 +1159,8 @@ _ALLOWED = {
     ): "predicted values",
     ("m2.py", "_timing_bound", "max(b.executed_s, b.intended_s)"): "predicted values",
     ("m2.py", "orbit_checks", "min(alts)"): "schema-valid event values (round-trip check)",
+    ("m2.py", "_check_dense_consistency", "np.maximum(np.abs(terminal), 1.0)"):
+        "elementwise tolerance floor on values already validated finite",
     ("m2.py", "orbit_checks", "max(alts)"): "schema-valid event values (round-trip check)",
     ("gmat_m2.py", "plan_arcs", "min(b.cutoff_t_s, horizon_s)"): "predicted times",
     ("gmat_m2.py", "plan_arcs", "min(BURN_STEP_S, b - a)"): "predicted times",
@@ -1333,7 +1336,10 @@ def test_poisoned_node_oracle_fails_the_integrated_mission(monkeypatch):
 
     def poisoned(r, v, dt, mu):
         rr, vv = original(r, v, dt, mu)
-        caller = inspect.stack()[1].function
+        stack = inspect.stack()
+        caller = stack[1].function
+        if caller == "kepler_state":  # validated wrapper (F36): look one frame up
+            caller = stack[2].function
         if caller in ("orbit_checks", "_node_crossings"):
             counts[caller] = counts.get(caller, 0) + 1
             if counts[caller] % 80 == 0:  # the last of the 80 bisection steps
@@ -1679,3 +1685,104 @@ def test_reference_propellant_must_follow_the_mass_law(monkeypatch, value):
     scenario = BY_NAME["m2_prograde_burn"].build()
     with pytest.raises(RuntimeError, match="propellant"):
         m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])
+
+
+# ------------------------------------------------------------------ re-verification 9 fixes
+
+
+def test_nan_solver_time_cannot_hide_off_law_propellant(monkeypatch):
+    """F34: a NaN solver time with off-law propellant is rejected."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        sol.t = sol.t.copy()
+        sol.t[-1] = math.nan
+        sol.y[6, -1] = 299.0
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    predicted = m2.predict_burns(scenario, BY_NAME["m2_prograde_burn"].expected)
+    with pytest.raises(RuntimeError, match=r"time|propellant"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), predicted, [720.0])
+
+
+def test_reference_mass_law_check_is_nan_safe():
+    """F34: the mass-law comparison rejects NaN times directly, too. With a predicted
+    burn, a NaN time makes the expectation NaN, so `err > tol` would be False."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    veh = m2.vehicle(scenario)
+    predicted = m2.predict_burns(scenario, mission.expected)
+    assert math.isnan(m2.mass_law_propellant(math.nan, veh, predicted))  # the hazard
+    states = np.zeros((7, 1))
+    states[6, 0] = 299.0
+    with pytest.raises(RuntimeError):
+        m2._check_reference_states([math.nan], states, veh, predicted, "probe")
+
+
+@pytest.mark.parametrize("corruption", ["zero_velocity", "terminal_mismatch"])
+def test_dense_output_must_be_self_consistent(monkeypatch, corruption):
+    """F35: finite but wrong dense velocities, or a dense state that disagrees with the
+    terminal state, are rejected."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        dense = sol.sol
+
+        class Bad:
+            def __call__(self, t):
+                out = dense(t)
+                if corruption == "zero_velocity":
+                    out[3:6, :] = 0.0
+                else:
+                    out[0, :] += 1.0  # positions shifted 1 m everywhere
+                return out
+
+        sol.sol = Bad()
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="dense"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])
+
+
+def test_kepler_outputs_must_conserve_two_body_invariants(monkeypatch):
+    """F36: a finite but physically wrong Kepler output (zero velocity) is rejected by
+    the invariant check, and GMAT coast alignment compares velocity too."""
+    from tars.astro import kepler
+
+    scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    r0, v0 = labelled[0.0].r, labelled[0.0].v
+    r, v = m2.kepler_state(r0, v0, 60.0, scenario.constants.mu)
+    assert np.all(np.isfinite(r)) and np.all(np.isfinite(v))
+    original = kepler.propagate
+    monkeypatch.setattr(kepler, "propagate", lambda *a: (original(*a)[0], np.zeros(3)))
+    r, v = m2.kepler_state(r0, v0, 60.0, scenario.constants.mu)
+    assert np.all(r == math.inf) and np.all(v == math.inf)
+    metrics = gmat_m2.alignment_metrics(
+        labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+    )
+    assert metrics["coast_vs_kepler_velocity_error_max_mps"] == math.inf
+
+
+def test_gmat_coast_velocity_is_gated():
+    """F36: a GMAT coast row with a 1e-6 m/s velocity error fails the coast velocity gate."""
+    scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+    rows = [dataclasses.replace(r, v=r.v + 1e-6) if i == 300 else r for i, r in enumerate(rows)]
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    metrics = gmat_m2.alignment_metrics(
+        labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+    )
+    assert (
+        metrics["coast_vs_kepler_velocity_error_max_mps"]
+        > LIMITS["all"]["coast_vs_kepler_velocity_error_max_mps"]
+    )
