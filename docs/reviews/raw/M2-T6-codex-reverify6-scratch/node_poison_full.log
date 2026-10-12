@@ -1,0 +1,6 @@
+node standalone nan hits {'orbit_checks': 9, '_node_crossings': 9} rejected ['simulator audit orbit_events: node_crossing_time_error_max_s=inf is not finite'] passed None
+node integrated nan hits {'orbit_checks': 36, '_node_crossings': 18} checks 42 failed ['orbit_events[m2_prograde_burn]', 'o9_gmat[m2_prograde_burn]', 'orbit_events[m2_prograde_burn/o8_aux]'] missing []
+node standalone inf hits {'orbit_checks': 9, '_node_crossings': 9} rejected ['simulator audit orbit_events: node_crossing_time_error_max_s=inf is not finite'] passed None
+node integrated inf hits {'orbit_checks': 36, '_node_crossings': 18} checks 42 failed ['orbit_events[m2_prograde_burn]', 'o9_gmat[m2_prograde_burn]', 'orbit_events[m2_prograde_burn/o8_aux]'] missing []
+node standalone -inf hits {'orbit_checks': 9, '_node_crossings': 9} rejected ['simulator audit orbit_events: node_crossing_time_error_max_s=inf is not finite'] passed None
+node integrated -inf hits {'orbit_checks': 36, '_node_crossings': 18} checks 42 failed ['orbit_events[m2_prograde_burn]', 'o9_gmat[m2_prograde_burn]', 'orbit_events[m2_prograde_burn/o8_aux]'] missing []

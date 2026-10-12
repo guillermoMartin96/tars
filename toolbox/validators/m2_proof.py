@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -88,12 +89,19 @@ class Gates:
     def __init__(self, thresholds: Any) -> None:
         self.thresholds = thresholds
         self.missing: list[str] = []
+        self.non_finite_report_only: list[str] = []
 
     def check(
         self, group: str, name: str, mission: str, metrics: dict[str, float], notes: str = ""
     ) -> Check:
         limits = self.thresholds.for_validator(group, mission)
         self.missing += [f"{name}: {k}" for k in _ungated(metrics, limits)]
+        # Report-only metrics are not gated, but must still be finite (T6 review notes).
+        self.non_finite_report_only += [
+            f"{name}: {k}={x!r}"
+            for k, x in metrics.items()
+            if k not in limits and not math.isfinite(x)
+        ]
         return Check(name, metrics, limits, self.thresholds.status, notes)
 
 
@@ -304,6 +312,7 @@ def main(argv: list[str] | None = None) -> int:
     # Every emitted metric is gated unless declared report-only (review F15): a
     # missing threshold group or metric fails instead of silently passing.
     checks.append(_exact("thresholds_cover_all_metrics", [f"ungated {m}" for m in gates.missing]))
+    checks.append(_exact("report_only_metrics_finite", gates.non_finite_report_only))
 
     report = {
         "milestone": "M2",

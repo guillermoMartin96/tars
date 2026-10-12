@@ -1,0 +1,15 @@
+disabled Check test FAILS as required
+disabled Check O9 test FAILS as required
+disabled worst test FAILS as required
+disabled merge test FAILS as required
+disabled node nan test FAILS as required
+disabled node inf test FAILS as required
+disabled node -inf test FAILS as required
+disabled node integrated UNEXPECTED PASS
+guard mutation dst[k] = max(dst.get(k, -math.inf), x) test FAILS as required
+guard mutation out['k'] = max(x, out['k']) test FAILS as required
+guard mutation e = max(abs(p) for p in orders) test FAILS as required
+guard mutation e = np.nanmax(errors) test FAILS as required
+guard mutation e = errors.max() test FAILS as required
+disabled independently orbit_checks test FAILS as required
+disabled independently _node_crossings test FAILS as required

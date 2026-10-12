@@ -216,6 +216,14 @@ def worst(*values: float) -> float:
     return max(values)
 
 
+def excess_over(err: float, allowance: float) -> float:
+    """Error beyond an analytic allowance, clamped at 0. Both inputs must be finite:
+    max(err - inf, 0.0) would turn any error into a pass (review M2-T6 F23)."""
+    if not (math.isfinite(err) and math.isfinite(allowance)):
+        return math.inf
+    return max(err - allowance, 0.0)
+
+
 def worst_of(values, default: float = 0.0) -> float:
     """``worst`` over an iterable (NaN anywhere gives +inf; empty gives ``default``)."""
     out: float | None = None
@@ -715,7 +723,7 @@ def mass_and_rocket_metrics(
         # Gated: the error beyond the analytic Simpson truncation bound (round-off).
         o2["sensed_delta_v_excess_over_simpson_rel_max"] = worst(
             o2["sensed_delta_v_excess_over_simpson_rel_max"],
-            max(err - simpson_bound(veh, b, scenario.dt_s), 0.0) / b.delta_v_mps,
+            excess_over(err, simpson_bound(veh, b, scenario.dt_s)) / b.delta_v_mps,
         )
         o2["reported_rocket_equation_rel_error_max"] = worst(
             o2["reported_rocket_equation_rel_error_max"],
@@ -1630,7 +1638,7 @@ def propulsion_sample_checks(
         )
         out["sample_delta_v_excess_over_simpson_rel_max"] = worst(
             out["sample_delta_v_excess_over_simpson_rel_max"],
-            max(err - allowance, 0.0) / total_dv,
+            excess_over(err, allowance) / total_dv,
         )
     return out, v
 
@@ -1878,8 +1886,10 @@ def orbit_checks(
             crossing = None
             for _ in range(80):
                 mid = 0.5 * (lo + hi)
-                z = float(kepler.propagate(r0, v0, mid, mu)[0][2])
-                if not math.isfinite(z):  # F22: invalid oracle output fails, never steers
+                rr, vv = kepler.propagate(r0, v0, mid, mu)
+                z = float(rr[2])
+                # F22: any invalid oracle output fails, never steers the bisection.
+                if not (np.all(np.isfinite(rr)) and np.all(np.isfinite(vv))):
                     crossing = math.inf
                     break
                 if z < 0.0:

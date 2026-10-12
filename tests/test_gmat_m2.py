@@ -1125,7 +1125,10 @@ _GUARDED = (
     "toolbox/scripts/gmat_m2.py",
     "src/tars/validation/thresholds.py",
 )
-_REDUCERS = {"max", "min", "nanmax", "nanmin", "amax", "amin", "fmax", "fmin"}
+_REDUCERS = {
+    "max", "min", "nanmax", "nanmin", "amax", "amin", "fmax", "fmin", "maximum", "minimum",
+}  # fmt: skip
+_UFUNC_METHODS = {"reduce", "accumulate", "reduceat", "outer", "at"}
 # Every max/min-style call in the validators, reviewed (review M2-T6 F21). Anything else
 # fails this test: metric accumulators must use worst/worst_of, which never drop
 # non-finite values.
@@ -1133,8 +1136,8 @@ _ALLOWED = {
     ("m2.py", "predict_burns", "min(mdot * executed, propellant)"): "scenario inputs",
     ("m2.py", "worst", "max(values)"): "after its own finiteness check",
     ("m2.py", "simpson_bound", "min(until, burn.cutoff_t_s)"): "predicted times",
-    ("m2.py", "mass_and_rocket_metrics", "max(err - simpson_bound(veh, b, scenario.dt_s), 0.0)"):
-        "result passes through worst(); max(nan, 0.0) is nan",
+    ("m2.py", "excess_over", "max(err - allowance, 0.0)"):
+        "both arguments verified finite first (F23: max(err - inf, 0.0) would hide errors)",
     ("m2.py", "dop853_reference", "max(marks)"): "scenario and sample times",
     ("m2.py", "dop853_reference", "alts.min()"): "after the dense-output finiteness check",
     ("m2.py", "dop853_reference", "alts.max()"): "after the dense-output finiteness check",
@@ -1144,8 +1147,6 @@ _ALLOWED = {
         "max(b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0)",
     ): "predicted values",
     ("m2.py", "_timing_bound", "max(b.executed_s, b.intended_s)"): "predicted values",
-    ("m2.py", "propulsion_sample_checks", "max(err - allowance, 0.0)"):
-        "result passes through worst(); max(nan, 0.0) is nan",
     ("m2.py", "orbit_checks", "min(alts)"): "schema-valid event values (round-trip check)",
     ("m2.py", "orbit_checks", "max(alts)"): "schema-valid event values (round-trip check)",
     ("gmat_m2.py", "plan_arcs", "min(b.cutoff_t_s, horizon_s)"): "predicted times",
@@ -1170,6 +1171,10 @@ def _reducer_calls(source: str, filename: str) -> set[tuple[str, str, str]]:
         def visit_Call(self, node):
             fn = node.func
             name = fn.id if isinstance(fn, ast.Name) else getattr(fn, "attr", None)
+            # np.maximum.reduce(...) and friends: the reducer is the ufunc (F24).
+            if name in _UFUNC_METHODS and isinstance(fn, ast.Attribute):
+                inner = fn.value
+                name = getattr(inner, "attr", getattr(inner, "id", None))
             if name in _REDUCERS:
                 found.add((filename, stack[-1] if stack else "<module>", ast.unparse(node)))
             self.generic_visit(node)
@@ -1195,11 +1200,16 @@ def test_every_max_min_call_in_the_validators_is_reviewed():
         "e = max(abs(p) for p in orders)",
         "e = np.nanmax(errors)",
         "e = errors.max()",
+        "e = np.maximum.reduce(errors)",
+        "e = np.minimum.reduce(errors)",
+        "e = np.fmax.reduce([dst.get(k, -math.inf), x])",
+        "e = np.fmin.reduce(errors)",
+        "e = np.maximum(a, b)",
     ],
 )
 def test_the_guard_detects_common_unsafe_forms(snippet):
     """F21: the guard flags the original F19 expression and other common forms."""
-    source = f"def merged(dst, k, x, out, orders, errors, np, math):\n    {snippet}\n"
+    source = f"def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    {snippet}\n"
     assert _reducer_calls(source, "m2_proof.py")
 
 
@@ -1240,7 +1250,9 @@ def test_o9_rejects_a_negative_infinity_metric(monkeypatch):
 
     monkeypatch.setattr(gmat_m2, "o9_metrics", poisoned)
     rejected, check = cli._evaluate("m2_prograde_burn")
-    assert rejected == [] and check is not None and not check.passed
+    # Rejected outright (non-finite metric) or failed by Check: never a pass.
+    assert any("not finite" in r for r in rejected) or (check is not None and not check.passed)
+    assert check is None or not check.passed
 
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
@@ -1277,23 +1289,120 @@ def test_node_bisection_rejects_non_finite_oracle_output(monkeypatch, bad):
 
 @pytest.mark.slow
 def test_poisoned_node_oracle_fails_the_integrated_mission(monkeypatch):
-    """F22 integrated: a NaN Kepler value in node bisection fails the mission checks."""
+    """F22/F25 integrated: poison only the final bisection step of each crossing, in
+    both validators (counted per caller). Without the finiteness checks the result
+    moves by ~60/2^80 s and passes; with them both node metrics are +inf."""
+    import inspect
+
     from tars.astro import kepler
     from tars.validation.thresholds import load_scoped_thresholds
 
     module = _proof_module()
     original = kepler.propagate
-    calls = {"n": 0}
+    counts: dict[str, int] = {}
 
     def poisoned(r, v, dt, mu):
-        calls["n"] += 1
         rr, vv = original(r, v, dt, mu)
-        if calls["n"] % 80 == 0:
-            rr = np.array([rr[0], rr[1], math.nan])
+        caller = inspect.stack()[1].function
+        if caller in ("orbit_checks", "_node_crossings"):
+            counts[caller] = counts.get(caller, 0) + 1
+            if counts[caller] % 80 == 0:  # the last of the 80 bisection steps
+                rr = np.array([rr[0], rr[1], math.nan])
         return rr, vv
 
     monkeypatch.setattr(kepler, "propagate", poisoned)
     gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
     checks, _ = module.mission_checks(BY_NAME["m2_prograde_burn"], gates, quick=True)
+    by_name = {c.validator: c for c in checks}
+    assert (
+        by_name["orbit_events[m2_prograde_burn]"].metrics["node_crossing_time_error_max_s"]
+        == math.inf
+    )
+    assert (
+        by_name["o9_gmat[m2_prograde_burn]"].metrics["ours_vs_gmat_node_crossing_error_max_s"]
+        == math.inf
+    )
+
+
+# ------------------------------------------------------------------ re-verification 6 fixes
+
+
+def test_excess_over_rejects_non_finite_inputs():
+    """F23: max(err - inf, 0.0) == 0.0 would hide any error."""
+    assert max(1.0 - math.inf, 0.0) == 0.0  # the hazard
+    for err, allowance in ((1.0, math.inf), (1.0, math.nan), (math.nan, 0.0), (math.inf, 1.0)):
+        assert m2.excess_over(err, allowance) == math.inf
+    assert m2.excess_over(1.0, 0.25) == 0.75
+    assert m2.excess_over(0.1, 0.25) == 0.0
+
+
+def _inflate_sensed_delta_v(run):
+    """+1e-6 m/s on the burn's sensed delta-v, everywhere it is reported."""
+    end = next(e for e in run.events if e.type == "BurnEnded")
+    bump = 1e-6
+    run.events[:] = [
+        e.model_copy(update={"sensed_delta_v_mps": e.sensed_delta_v_mps + bump})
+        if e is end
+        else e.model_copy(update={"delta_v_sensed_mps": e.delta_v_sensed_mps + bump})
+        if e.type == "PropulsionSampled" and e.tick >= end.tick
+        else e
+        for e in run.events
+    ]
+
+
+@pytest.mark.parametrize("bound", ["normal", "infinite"])
+def test_infinite_simpson_allowance_cannot_hide_an_error(monkeypatch, bound):
+    """F23 standalone: the 1e-6 m/s error fails with the normal allowance and with an
+    infinite one."""
+    if bound == "infinite":
+        monkeypatch.setattr(m2, "simpson_bound", lambda *a, **k: math.inf)
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    run = run_scenario(scenario)
+    _inflate_sensed_delta_v(run)
+    predicted = m2.predict_burns(scenario, mission.expected)
+    _, o2, _ = m2.mass_and_rocket_metrics(scenario, run.events, predicted)
+    samples, _ = m2.propulsion_sample_checks(scenario, run.events, predicted)
+    limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["o2_rocket_equation"]["all"]
+    assert (
+        o2["sensed_delta_v_excess_over_simpson_rel_max"]
+        > limit["sensed_delta_v_excess_over_simpson_rel_max"]
+    )
+    assert samples["sample_delta_v_excess_over_simpson_rel_max"] > 1e-12
+
+
+@pytest.mark.slow
+def test_infinite_simpson_allowance_fails_the_integrated_mission(monkeypatch):
+    """F23 integrated: the full mission path rejects it too."""
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    module = _proof_module()
+    monkeypatch.setattr(m2, "simpson_bound", lambda *a, **k: math.inf)
+    original = module.run_scenario
+
+    def inflated(scenario, *a, **k):
+        run = original(scenario, *a, **k)
+        if scenario.name == "m2_prograde_burn":
+            _inflate_sensed_delta_v(run)
+        return run
+
+    monkeypatch.setattr(module, "run_scenario", inflated)
+    gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+    checks, _ = module.mission_checks(BY_NAME["m2_prograde_burn"], gates, quick=True)
     failed = {c.validator for c in checks if not c.passed}
-    assert "orbit_events[m2_prograde_burn]" in failed or "o9_gmat[m2_prograde_burn]" in failed
+    assert "o2_rocket_equation[m2_prograde_burn]" in failed
+
+
+def test_report_only_metrics_must_be_finite():
+    """Non-finite report-only metrics are flagged, although they are not gated."""
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    module = _proof_module()
+    gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+    gates.check(
+        "o9_gmat",
+        "o9",
+        "m2_prograde_burn",
+        {**dict.fromkeys(LIMITS["all"], 0.0), "gmat_rows": math.nan},
+    )
+    assert gates.non_finite_report_only == ["o9: gmat_rows=nan"]

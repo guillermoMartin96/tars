@@ -24,6 +24,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import math
 import platform
 import re
 import shutil
@@ -111,6 +112,9 @@ def _evaluate(name: str, base: Path | None = None) -> tuple[list[str], Check | N
     missing = gmat_m2.missing_gates(result.metrics, limits)
     if missing:
         return [f"O9 metrics without a threshold: {missing}"], None
+    non_finite = [k for k, x in result.metrics.items() if not math.isfinite(x)]
+    if non_finite:  # report-only metrics too (gated ones also fail in Check)
+        return [f"O9 metrics not finite: {non_finite}"], None
     check = Check(
         f"o9_gmat[{name}]",
         result.metrics,

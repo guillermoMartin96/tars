@@ -1,0 +1,7 @@
+actual guard PASSES mutation: e = np.maximum.reduce(errors)
+actual guard PASSES mutation: e = np.minimum.reduce(errors)
+actual guard PASSES mutation: e = np.fmax.reduce(errors)
+actual guard PASSES mutation: e = np.fmin.reduce(errors)
+actual guard PASSES mutation: e = np.maximum(a,b)
+actual guard PASSES unsafe fmax.reduce merge
+unsafe merge hides NaN: {'o4_reference': {'sample_position_error_max_m': 0.1}}

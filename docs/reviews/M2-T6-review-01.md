@@ -199,4 +199,23 @@ All seven are **`ACCEPTED`**.
 **Behavior is preserved:** the regenerated M2 Proof report is identical (212 checks, every metric and result). Each mechanism is mutation-tested: disabling it fails its tests, and a new unreviewed `max(...)` call fails the AST guard.
 
 ## Re-verification 6
+**Reviewer:** Codex, session `01a12d5e-ecac-78e0-9681-71ba431dddda`, at `e9e06aa`. **Raw:** `raw/M2-T6-codex-reverify6.md`, `raw/M2-T6-codex-reverify6-scratch/`.
+
+**Verdict: FAIL** (F23; F24 and F25 weaken regression protection).
+- F20 is resolved. F21 and F22 are resolved for the forms they covered.
+- 773 metric bits across 212 checks are identical; all mutation families are rejected.
+
+**All three are `ACCEPTED`**, together with two review notes.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F23 | Med | An infinite Simpson allowance turned a failing error into 0: `max(err - inf, 0.0)` | `excess_over(err, allowance)` returns +inf unless both inputs are finite. Both O2 and per-sample sites use it, and the allowlist entry and justification are corrected | `test_excess_over_rejects_non_finite_inputs`, `test_infinite_simpson_allowance_cannot_hide_an_error` (normal and infinite allowance, +1e-6 m/s), `test_infinite_simpson_allowance_fails_the_integrated_mission` |
+| F24 | Low | The AST guard missed NumPy ufunc reductions (`np.fmax.reduce`, …) | `.reduce`, `.accumulate`, `.reduceat`, `.outer` and `.at` resolve to their ufunc; `maximum` and `minimum` are covered | `test_the_guard_detects_common_unsafe_forms` (10 forms, including `np.fmax.reduce([dst.get(k, -math.inf), x])`) |
+| F25 | Low | The integrated node test survived disabling its fix (misaligned global call counting) | Poisons only the last bisection step of each crossing, counted **per calling validator**, and asserts both node metrics are +inf. Disabling either check fails it | `test_poisoned_node_oracle_fails_the_integrated_mission` |
+| note | — | Report-only metrics could be non-finite | New exact check `report_only_metrics_finite` in `m2_proof.py`; standalone O9 rejects any non-finite metric | `test_report_only_metrics_must_be_finite` |
+| note | — | Bisection validated only the consumed z | The whole propagated r and v must be finite | (node tests) |
+
+**Behavior is preserved.** All 212 previous checks are identical; the Proof now has 213 checks (`report_only_metrics_finite` added). Each mechanism is mutation-tested.
+
+## Re-verification 7
 See below.

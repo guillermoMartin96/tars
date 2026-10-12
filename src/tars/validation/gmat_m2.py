@@ -400,8 +400,10 @@ def _node_crossings(states: dict[float, tuple[np.ndarray, np.ndarray]], mu: floa
             crossing = None
             for _ in range(80):
                 mid = 0.5 * (lo + hi)
-                z = float(kepler.propagate(ra, va, mid, mu)[0][2])
-                if not math.isfinite(z):  # F22: invalid oracle output fails, never steers
+                rr, vv = kepler.propagate(ra, va, mid, mu)
+                z = float(rr[2])
+                # F22: any invalid oracle output fails, never steers the bisection.
+                if not (np.all(np.isfinite(rr)) and np.all(np.isfinite(vv))):
                     crossing = math.inf
                     break
                 if z < 0.0:
