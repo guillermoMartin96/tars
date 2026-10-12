@@ -1,0 +1,131 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________________ test_f50_acceptance_flip_is_rejected _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1106eb7a0>
+
+    def test_f50_acceptance_flip_is_rejected(monkeypatch):
+        """F50 regression: identical simulator data is rejected with clean references
+        (max altitude 1e-5 m beyond its limit) and still rejected under the coordinated
+        Kepler + DOP853 corruption, now by the reference snapshot."""
+        cli = _gmat_cli()
+        name = "m2_prograde_burn"
+        mission = BY_NAME[name]
+        scenario = mission.build()
+        limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+            "max_altitude_error_m"
+        ]
+        reasons, check = cli._evaluate(name)
+>       assert reasons == [] and check is not None and check.passed  # clean baseline passes
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert (['o5_coast_ke...in bound inf'] == []
+E         
+E         Left contains 2 more items, first extra item: 'o5_coast_kepler: coast_position_error_max_m: invalid margin bound inf'
+E         Use -v to get more diff)
+
+tests/test_reference_snapshot.py:418: AssertionError
+_________________ test_f51_wrong_time_kepler_in_o6_is_rejected _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x11083e840>
+
+    def test_f51_wrong_time_kepler_in_o6_is_rejected(monkeypatch):
+        """F51 regression: Kepler returns at 10x the requested flight time in O6, forward
+        and in the round trip (invariants and round trip still hold), are rejected by the
+        snapshot within the M2 Proof's session."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        variants = m2.impulsive_variants(scenario)
+        runs = [run_scenario(v) for v in variants]
+        with snap.session("m2_proof") as s:
+            for v, r in zip(variants, runs, strict=True):
+                m2.impulsive_row(scenario, v, r)
+        assert s.finish(complete=False) == []  # clean: every O6 value reproduces
+    
+        original = kepler.propagate
+    
+        def wrong_time(r, v, dt, mu):
+            f = sys._getframe(1)
+            while f:
+                if f.f_code.co_name == "impulsive_row":
+                    return original(r, v, dt * 10, mu)
+                f = f.f_back
+            return original(r, v, dt, mu)
+    
+        monkeypatch.setattr(kepler, "propagate", wrong_time)
+        with snap.session("m2_proof") as s:
+            for v, r in zip(variants, runs, strict=True):
+                m2.impulsive_row(scenario, v, r)
+        problems = s.finish(complete=False)
+>       assert any("o6.midpoint" in p and "tolerance" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_f51_wrong_time_kepler_in_o6_is_rejected.<locals>.<genexpr> at 0x1183a3d30>)
+
+tests/test_reference_snapshot.py:472: AssertionError
+_________ test_coordinated_radial_shift_of_both_references_is_rejected _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1186304d0>
+
+    def test_coordinated_radial_shift_of_both_references_is_rejected(monkeypatch):
+        """Condition 5: Kepler anchor ticks AND DOP853 dense positions raised together by
+        1 cm at every interior coast tick. The two references still agree (F49), the
+        derivative stencil never samples a tick, and the extrema move: every runtime check
+        passes, and the snapshot rejects it inside the Proof's session."""
+        import scipy.integrate
+    
+        mission = BY_NAME["m2_invalid_commands_no_propulsion"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        dt, dr = scenario.dt_s, 0.01
+        lines, start = inspect.getsourcelines(m2._anchor_segment)
+        target = start + next(i for i, ln in enumerate(lines) if "rows = [kepler_state" in ln)
+        original_kepler, original_ivp = m2.kepler_state, scipy.integrate.solve_ivp
+    
+        def raise_r(r):
+            return r * (1.0 + dr / np.linalg.norm(r))
+    
+        def shifted_kepler(r, v, dt_, mu):
+            rr, vv = original_kepler(r, v, dt_, mu)
+            f = sys._getframe(1)
+            in_anchor = f.f_code.co_name == "_anchor_segment" and f.f_lineno == target
+            if in_anchor and 0.0 < dt_ < f.f_locals["b"] - f.f_locals["a"]:
+                return raise_r(rr), vv
+            return rr, vv
+    
+        def shifted_ivp(fun, t_span, y0, **kw):
+            sol = original_ivp(fun, t_span, y0, **kw)
+            dense, (a, b) = sol.sol, t_span
+    
+            class Shifted:
+                def __call__(self, t):
+                    out = dense(t)
+                    tt = np.atleast_1d(t)
+                    for j, tj in enumerate(tt):
+                        if a < tj < b and abs(tj / dt - round(tj / dt)) < 1e-12:
+                            out[:3, j] = raise_r(out[:3, j])
+                    return out
+    
+            sol.sol = Shifted()
+            return sol
+    
+        with snap.session("m2_proof") as s:
+            clean = m2.audit_run(scenario, mission.expected, run)
+        assert s.finish(complete=False) == []
+        monkeypatch.setattr(m2, "kepler_state", shifted_kepler)
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", shifted_ivp)
+        outside = m2.dop853_reference(
+            scenario, *m2.expected_initial_state(scenario), [], [scenario.stop.duration_s]
+        )  # no session: every runtime check passes on the shifted references
+        assert outside.alt_max == pytest.approx(clean.reference.alt_max + dr, abs=1e-6)
+        with snap.session("m2_proof") as s:
+            m2.audit_run(scenario, mission.expected, run)
+        problems = s.finish(complete=False)
+>       assert any("dop853.segment" in p and "anchor_ticks_m" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_coordinated_radial_shift_of_both_references_is_rejected.<locals>.<genexpr> at 0x1230a9be0>)
+
+tests/test_reference_snapshot.py:529: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_f50_acceptance_flip_is_rejected
+FAILED tests/test_reference_snapshot.py::test_f51_wrong_time_kepler_in_o6_is_rejected
+FAILED tests/test_reference_snapshot.py::test_coordinated_radial_shift_of_both_references_is_rejected
+3 failed, 36 deselected in 26.54s
