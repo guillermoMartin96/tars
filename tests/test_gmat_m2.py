@@ -1317,13 +1317,14 @@ def test_node_bisection_rejects_non_finite_oracle_output(monkeypatch, bad):
     events = run_scenario(scenario).events
     _, predicted, arcs, rows = _labelled(name)
     labelled, _ = gmat_m2.label_rows(rows, arcs)
+    # Build the reference before poisoning: its anchors also use Kepler (F47).
+    ref = m2.dop853_reference(
+        scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+    )
     monkeypatch.setattr(kepler, "propagate", poisoned)
     states = {t: (labelled[t].r, labelled[t].v) for t in sorted(labelled)}
     assert math.inf in gmat_m2._node_crossings(states, scenario.constants.mu)
     calls["n"] = 0
-    ref = m2.dop853_reference(
-        scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
-    )
     metrics, _ = m2.orbit_checks(scenario, events, ref, predicted)
     assert metrics["node_crossing_time_error_max_s"] == math.inf
 

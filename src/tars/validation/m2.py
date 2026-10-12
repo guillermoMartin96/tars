@@ -1081,11 +1081,16 @@ def dop853_reference(
     # Integrate only up to the last requested time: a burn predicted to end after an
     # observation stop must not extend the reference (or its extrema) past it.
     horizon = max(marks)
+    # Segments never exceed the telemetry interval, the length the per-segment anchor
+    # tolerances were measured for (review M2-T6 F47): split at every grid time.
+    grid = scenario.telemetry.sample_interval_s
+    grid_times = [k * grid for k in range(1, math.floor(horizon / grid) + 1)]
     bounds = sorted(
         t
         for t in {
             0.0,
             *marks,
+            *grid_times,
             *(b.ignition_t_s for b in predicted),
             *(b.cutoff_t_s for b in predicted),
         }
