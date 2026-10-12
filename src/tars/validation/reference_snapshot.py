@@ -70,6 +70,7 @@ TOLERANCES: dict[tuple[str, str], float] = {
     ("gmat", "s"): 1e-11,  # measured 0; 10 ulp(6000 s)
     ("sim", "m"): 1e-5,  # measured 5.37e-7 (inherits the simulator's platform variation)
     ("sim", "mps"): 1e-8,  # measured 6.59e-10
+    ("sim", "s"): 1e-11,  # O5/O6 flight times (baseline 2): measured 0; 10 ulp(6000 s)
 }
 
 MAX_LISTED = 20  # problems listed per kind; the count is always reported

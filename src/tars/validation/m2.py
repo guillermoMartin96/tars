@@ -277,7 +277,9 @@ def simpson_bound(
     total = 0.0
     if end > burn.ignition_t_s:
         total = _simpson_total(veh, burn, dt, end)
-    return float(snap.pin("simpson_bound", "ref", bound_mps=[total])["bound_mps"][0])
+    # The window is pinned with the bound so the baseline can be recomputed (F53).
+    p = snap.pin("simpson_bound", "ref", bound_mps=[total], window_s=[burn.ignition_t_s, end])
+    return float(p["bound_mps"][0])
 
 
 def _simpson_total(veh: Vehicle, burn: PredictedBurn, dt: float, end: float) -> float:
@@ -857,6 +859,9 @@ def free_space_run(veh: Vehicle, direction: str, duration_s: float, dt: float) -
         v_mps=[float(x) for x in v_exp],
         r_m=[float(x) for x in x_exp],
         propellant_kg=[float(m_exp)],
+        start_r_m=x0,
+        start_v_mps=v0,
+        duration_s=[burn_t],
     )
     return {
         "timing_violations": timing,
@@ -1439,6 +1444,9 @@ def coast_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, floa
         p = snap.pin(
             "o5.kepler",
             "sim",
+            seed_r_m=r0,
+            seed_v_mps=v0,
+            flight_s=[t - t0 for t, _, _ in arc],
             r_m=np.array([k[0] for k in kep]).reshape(-1, 3),
             v_mps=np.array([k[1] for k in kep]).reshape(-1, 3),
         )
@@ -1514,7 +1522,16 @@ def impulsive_row(base: ScenarioV2, variant: ScenarioV2, run: RunResult) -> dict
         a_imp = -mu / (2.0 * specific_energy(r_m, v_imp, mu))
         # DR-0021: seeded by the simulator's ignition state, so verified within the
         # sim-seeded tolerance (F51), not substituted; margin_problems covers the gates.
-        snap.pin("o6.midpoint", "sim", r_m=r_m, v_mps=v_m, sma_impulsive_m=[a_imp])
+        snap.pin(
+            "o6.midpoint",
+            "sim",
+            seed_r_m=s.r,
+            seed_v_mps=s.v,
+            flight_s=[mid - s.event_t_s],
+            r_m=r_m,
+            v_mps=v_m,
+            sma_impulsive_m=[a_imp],
+        )
     return {
         "burn_duration_s": float(vcmd["duration_s"]),
         "sma_finite_minus_impulsive_m": a_fin - a_imp,
@@ -1576,11 +1593,12 @@ def o6_snapshot_shifts(rows: Sequence[dict[str, float]], delta: float) -> dict[s
 
 
 def o5_snapshot_shifts() -> dict[str, float]:
-    """O5 compares simulator samples with Kepler states: a Kepler deviation of at most
-    the sim-seeded tolerance moves each gated metric by at most that tolerance."""
+    """O5 compares simulator samples with Kepler states by Euclidean norm. The snapshot
+    tolerance bounds each COMPONENT, so a within-tolerance Kepler vector can move by
+    up to sqrt(3) x the tolerance, and each gated metric with it (review M2-T6 F52)."""
     return {
-        "coast_position_error_max_m": snap.TOLERANCES[("sim", "m")],
-        "coast_velocity_error_max_mps": snap.TOLERANCES[("sim", "mps")],
+        "coast_position_error_max_m": math.sqrt(3.0) * snap.TOLERANCES[("sim", "m")],
+        "coast_velocity_error_max_mps": math.sqrt(3.0) * snap.TOLERANCES[("sim", "mps")],
     }
 
 
@@ -1816,7 +1834,14 @@ def _timing_bound(veh: Vehicle, b: PredictedBurn) -> float:
             b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0
         )
         bound = veh.thrust_n * dt / m_end
-    return float(snap.pin("timing_bound", "ref", bound_mps=[bound])["bound_mps"][0])
+    p = snap.pin(
+        "timing_bound",
+        "ref",
+        bound_mps=[bound],
+        durations_s=[b.executed_s, b.intended_s],
+        propellant_before_kg=[b.propellant_before_kg],
+    )
+    return float(p["bound_mps"][0])
 
 
 def check_receipt_details(

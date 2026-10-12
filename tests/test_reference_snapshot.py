@@ -309,8 +309,6 @@ def test_approved_artifact_is_pinned_and_verified():
     assert prov["tree_clean"] is True
     for key in ("numpy", "scipy", "python_full", "uv_lock_sha256"):
         assert prov["environment"][key]
-    tool = _load(TOOL, "reference_snapshot_tool")
-    assert tool.verify_baseline(data) == []  # GMAT evidence and physical invariants
 
 
 def test_tolerances_are_finite_positive_and_small():
@@ -527,3 +525,134 @@ def test_coordinated_radial_shift_of_both_references_is_rejected(monkeypatch):
         m2.audit_run(scenario, mission.expected, run)
     problems = s.finish(complete=False)
     assert any("dop853.segment" in p and "anchor_ticks_m" in p for p in problems)
+
+
+# ------------------------------------------------------------------ re-verification 15
+
+
+def test_o5_margin_uses_the_vector_norm_bound():
+    """F52: per-component tolerances let a Kepler vector move by sqrt(3) x tol, so a
+    passing O5 metric closer than that to its limit is flagged."""
+    tol = snap.TOLERANCES[("sim", "m")]
+    shifts = m2.o5_snapshot_shifts()
+    assert shifts["coast_position_error_max_m"] == pytest.approx(math.sqrt(3.0) * tol)
+    limits = {"coast_position_error_max_m": 0.6, "coast_velocity_error_max_mps": 7e-4}
+    metrics = {"coast_position_error_max_m": 0.6 - 1.5 * tol, "coast_velocity_error_max_mps": 0.0}
+    assert snap.margin_problems("o5", metrics, limits, shifts)  # 1.5 tol < sqrt(3) tol
+
+
+@pytest.fixture(scope="module")
+def baseline():
+    return snap.load_approved()
+
+
+def _verify(data):
+    return _load(TOOL, "reference_snapshot_tool_v").verify_baseline(data)
+
+
+def _copy(data):
+    return json.loads(json.dumps(data))
+
+
+def _set(rec, name, values):
+    part = rec["parts"][name]
+    arr = np.asarray(values, dtype=float).reshape(part["shape"])
+    part["values"] = [float(x) for x in arr.ravel()]
+
+
+def _first(data, label, scope=None):
+    for key, rec in data["records"].items():
+        if f"/{label}#" in key and (scope is None or key.startswith(scope + "/")):
+            return key, rec
+    raise KeyError(label)
+
+
+def test_baseline_verification_rejects_invalid_o6_values(baseline):
+    """F53, second probe: zero O6 midpoints with an absurd impulsive SMA."""
+    data = _copy(baseline)
+    for key, rec in data["records"].items():
+        if "/o6.midpoint#" in key:
+            _set(rec, "r_m", [0.0, 0.0, 0.0])
+            _set(rec, "v_mps", [0.0, 0.0, 0.0])
+            _set(rec, "sma_impulsive_m", [-1e30])
+    problems = _verify(data)
+    assert sum("O6 midpoint" in p for p in problems) == 10
+
+
+def test_baseline_verification_rejects_wrong_time_o6_recording(baseline):
+    """F53, first probe: a recording made under F51's 10x flight-time corruption has
+    self-consistent O6 values (state and SMA agree) at the wrong time."""
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    data = _copy(baseline)
+    key, rec = _first(data, "o6.midpoint")
+    mu = BY_NAME["m2_prograde_burn"].build().constants.mu
+    seed_r, seed_v = tool._arr(rec, "seed_r_m"), tool._arr(rec, "seed_v_mps")
+    flight = tool._arr(rec, "flight_s")
+    r, v = tool.kepler_uv(seed_r, seed_v, flight * 10, mu)
+    dv = tool._arr(data["records"][key.replace("o6.midpoint", "o6.delta_v")], "dv_mps")[0]
+    v_imp = v[0] + dv * v[0] / np.linalg.norm(v[0])
+    a = -mu / (2.0 * (v_imp @ v_imp / 2.0 - mu / np.linalg.norm(r[0])))
+    _set(rec, "r_m", r[0])
+    _set(rec, "v_mps", v[0])
+    _set(rec, "sma_impulsive_m", [a])
+    problems = _verify(data)
+    assert any(key in p and "independent propagation" in p for p in problems)
+    assert not any("impulsive SMA inconsistent" in p for p in problems)  # self-consistent
+
+
+def test_baseline_verification_rejects_an_f50_recording(baseline):
+    """A recording made under F50's coordinated corruption: anchor ticks at 1.001 x
+    the flight time, extrema recomputed from them so they stay consistent."""
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    data = _copy(baseline)
+    scope = "m2_prograde_burn/audit"
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    mu, dt = scenario.constants.mu, scenario.dt_s
+    b = tool._arr(data["records"][f"{scope}/dop853.bounds#0"], "bounds_s")
+    start = data["records"][f"{scope}/dop853.start#0"]
+    y = np.concatenate([tool._arr(start, "r_m"), tool._arr(start, "v_mps")])
+    seg = data["records"][f"{scope}/dop853.segment#0"]
+    ticks = np.arange(1, int(b[1] / dt) + 1) * dt
+    r, _ = tool.kepler_uv(y[:3], y[3:6], (ticks - b[0]) * 1.001, mu)
+    _set(seg, "anchor_ticks_m", r)
+    problems = _verify(data)
+    assert any("segment#0" in p and "independent propagation" in p for p in problems)
+
+
+@pytest.mark.parametrize(
+    "label,part,factor",
+    [
+        ("predicted_burns", "delta_v_mps", 1.0 + 1e-9),
+        ("simpson_bound", "bound_mps", 2.0),
+        ("initial_state", "r_m", 1.0 + 1e-12 * 10),
+        ("o5.kepler", "r_m", 1.0 + 1e-9),
+        ("o6.delta_v", "dv_mps", 1.0 + 1e-9),
+        ("orbit.node_crossings", "crossings_s", 1.0 + 1e-7),
+        ("o9.alignment_kepler", "r_m", 1.0 + 1e-9),
+        ("o9.gmat_node_crossings", "crossings_s", 1.0 + 1e-7),
+        ("o9.expected_mass", "mass_kg", 1.0 + 1e-9),
+        ("dop853.segment", "end_r_m", 1.0 + 1e-12 * 100),
+        ("dop853.extrema", "altitude_m", 1.0 + 1e-12),
+    ],
+)
+def test_baseline_verification_rejects_each_corrupted_value(baseline, label, part, factor):
+    data = _copy(baseline)
+    for key, rec in data["records"].items():
+        if f"/{label}#" in key and rec["parts"][part]["values"]:
+            vals = rec["parts"][part]["values"]
+            rec["parts"][part]["values"] = [x * factor if x else 1e-3 for x in vals]
+            break
+    else:
+        pytest.fail(f"no {label} record with values")
+    assert _verify(data), label
+
+
+def test_baseline_verification_requires_coverage(baseline):
+    data = _copy(baseline)
+    key, rec = _first(data, "o5.kepler")
+    data["records"][key.replace("o5.kepler", "o5.unverified")] = rec
+    assert any("not independently verified" in p for p in _verify(data))
+
+
+def test_the_approved_baseline_passes_independent_verification(baseline):
+    assert _verify(baseline) == []
