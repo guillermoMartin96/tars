@@ -1,0 +1,36 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_finite_invalid_stencil_states_are_rejected[propellant] __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e249580>
+rows = 'propellant'
+
+    @pytest.mark.parametrize("rows", ["velocity", "propellant"])
+    def test_finite_invalid_stencil_states_are_rejected(monkeypatch, rows):
+        """F44: finite but wrong velocity (continuity check) or propellant (mass law) at the
+        stencil points are rejected, each by its own check."""
+        sel = slice(3, 6) if rows == "velocity" else slice(6, 7)
+    
+        def mutate(sol):
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    tt = np.atleast_1d(t)
+                    off = np.abs(tt - 10.0 * np.round(tt / 10.0))
+                    stencil = np.abs(off - 1e-3) < 1e-9  # exactly +-1 ms: not the midpoints
+                    out[sel, stencil] = 1e9
+                    return out
+    
+            sol.sol = Bad()
+    
+        run = _dense_probe(monkeypatch, mutate)
+>       with pytest.raises(RuntimeError, match=r"stencil|propellant"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1910: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_finite_invalid_stencil_states_are_rejected[propellant]
+1 failed in 0.65s

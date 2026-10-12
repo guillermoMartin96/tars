@@ -480,4 +480,11 @@ All 10 approved rejection codes are exercised.
   - A reference-output corruption is blocking when it could affect a check, a reported value, an acceptance decision or a required physical invariant.
   - F42 and F43 are accepted residual risk: corruptions of unused or invariant-preserving reference internals.
   - Currently unused intermediates (listed in the review record) must be validated before anything relies on them.
+- **Reference anchoring (review M2-T6 F47, F48).**
+  - The altitude extrema now use tick radii from independent anchors: exact Kepler from each coast segment's start, and an in-validator fixed-step RK4 during burns. They no longer use the DOP853 dense output.
+  - Every DOP853 segment end must agree with its anchor:
+    - coasts: ≤ 1e-7 m and 1e-10 m/s (measured 2.9e-9 m and 2.9e-12 m/s);
+    - burns: ≤ 1e-6 m, 1e-9 m/s and 1e-9 kg (measured 3.8e-8 m, 1.1e-10 m/s and 1.5e-10 kg).
+  - Every tolerance comparison requires finite operands.
+  - The extrema metrics moved by at most 2e-8 m.
 

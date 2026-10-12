@@ -950,10 +950,7 @@ def _check_solver_nodes(sol, where: str) -> None:
     residual 0). Run for every segment, with or without telemetry ticks (F45)."""
     nodes = sol.sol(sol.t)
     scale = np.maximum(np.abs(sol.y), 1.0)
-    if not (
-        np.all(np.isfinite(nodes))
-        and np.all(np.abs(nodes - sol.y) <= DENSE_TERMINAL_REL_TOL * scale)
-    ):
+    if not within(np.abs(nodes - sol.y), DENSE_TERMINAL_REL_TOL * scale):  # finite-safe
         raise RuntimeError(f"DOP853 dense output disagrees with its solver nodes on {where}")
 
 
@@ -976,7 +973,7 @@ def _check_dense_consistency(
         _check_reference_states(t_s, st, veh, predicted, f"stencil {where}")
         speed = np.linalg.norm(dense[3:6], axis=0)
         dv = np.linalg.norm(st[3:6] - dense[3:6], axis=0)
-        if not np.all(dv <= DENSE_STENCIL_VELOCITY_REL_TOL * speed):
+        if not within(dv, DENSE_STENCIL_VELOCITY_REL_TOL * speed):
             raise RuntimeError(f"DOP853 stencil velocity inconsistent on {where}")
     # Central difference about the stencil midpoint (second order even where the
     # stencil is clipped to the segment), compared with the velocity there.
@@ -986,14 +983,81 @@ def _check_dense_consistency(
     fd = (plus[:3] - minus[:3]) / (hi - lo)
     speed = np.linalg.norm(mid[3:6], axis=0)
     err = np.linalg.norm(mid[3:6] - fd, axis=0)
-    if not np.all(err <= DENSE_VELOCITY_REL_TOL * speed):  # NaN-safe
+    if not within(err, DENSE_VELOCITY_REL_TOL * speed):  # finite-safe (F48)
         raise RuntimeError(f"DOP853 dense velocity inconsistent with its position on {where}")
     if ticks[-1] == b:
         end = dense[:, -1]
-        if not np.all(
-            np.abs(end - terminal) <= DENSE_TERMINAL_REL_TOL * np.maximum(np.abs(terminal), 1.0)
+        if not within(
+            np.abs(end - terminal), DENSE_TERMINAL_REL_TOL * np.maximum(np.abs(terminal), 1.0)
         ):
             raise RuntimeError(f"DOP853 dense output disagrees with the terminal state on {where}")
+
+
+# Independent anchors for every DOP853 segment (review M2-T6 F47). Measured residuals:
+# coast segment end vs Kepler <= 2.9e-9 m and 2.9e-12 m/s; burn segment end vs the
+# fixed-step RK4 below (h = 0.01 s) <= 3.8e-8 m, 1.1e-10 m/s and 1.5e-10 kg (RK4
+# round-off over up to 12 500 steps). The per-segment limits keep the cumulative drift
+# over ~900 coast segments (~1e-4 m) and a few burns far below every Proof limit.
+ANCHOR_POS_TOL_M = 1e-7
+ANCHOR_VEL_TOL_MPS = 1e-10
+ANCHOR_BURN_POS_TOL_M = 1e-6
+ANCHOR_BURN_VEL_TOL_MPS = 1e-9
+ANCHOR_BURN_MASS_TOL_KG = 1e-9
+ANCHOR_BURN_STEP_S = 0.01
+
+
+def within(err, bound) -> bool:
+    """err <= bound elementwise with both finite: inf <= tol * inf, or NaN, never
+    passes a tolerance check (review M2-T6 F48)."""
+    err, bound = np.asarray(err, dtype=float), np.asarray(bound, dtype=float)
+    return bool(np.all(np.isfinite(err) & np.isfinite(bound) & (err <= bound)))
+
+
+def _rk4_path(f, y: np.ndarray, times: Sequence[float]) -> list[np.ndarray]:
+    """Fixed-step RK4 written here, independent of SciPy: states at each time in
+    ``times`` (first is the start), with steps <= ANCHOR_BURN_STEP_S."""
+    out = [y.copy()]
+    for a, b in pairwise(times):
+        n = max(1, math.ceil((b - a) / ANCHOR_BURN_STEP_S))
+        h, t = (b - a) / n, a
+        for _ in range(n):
+            k1 = f(t, y)
+            k2 = f(t + h / 2, y + h / 2 * k1)
+            k3 = f(t + h / 2, y + h / 2 * k2)
+            k4 = f(t + h, y + h * k3)
+            y = y + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+            t = a + (b - a) * (_ + 1) / n
+        out.append(y.copy())
+    return out
+
+
+def _anchor_segment(mu, veh, sign, y_a, y_b, a, b, ticks, where) -> np.ndarray:
+    """Check the DOP853 segment end against an independent propagation from the
+    segment start and return the anchor's positions at ``ticks`` (review F47)."""
+    ticks = np.asarray(ticks, dtype=float)
+    if sign == 0.0:
+        r_b, v_b = kepler_state(y_a[:3], y_a[3:6], b - a, mu)
+        ok = within(np.linalg.norm(y_b[:3] - r_b), ANCHOR_POS_TOL_M) and within(
+            np.linalg.norm(y_b[3:6] - v_b), ANCHOR_VEL_TOL_MPS
+        )
+        if not ok:
+            raise RuntimeError(f"DOP853 coast segment end disagrees with Kepler on {where}")
+        rows = [kepler_state(y_a[:3], y_a[3:6], float(t) - a, mu)[0] for t in ticks]
+    else:
+        path = _rk4_path(_independent_rhs(mu, veh, sign), y_a.copy(), [a, *ticks.tolist(), b])
+        end = path[-1]
+        ok = (
+            within(np.linalg.norm(y_b[:3] - end[:3]), ANCHOR_BURN_POS_TOL_M)
+            and within(np.linalg.norm(y_b[3:6] - end[3:6]), ANCHOR_BURN_VEL_TOL_MPS)
+            and within(abs(y_b[6] - end[6]), ANCHOR_BURN_MASS_TOL_KG)
+        )
+        if not ok:
+            raise RuntimeError(f"DOP853 burn segment end disagrees with the RK4 anchor on {where}")
+        rows = [st[:3] for st in path[1:-1]]
+    tick_r = np.array(rows, dtype=float).reshape(-1, 3)
+    if not np.all(np.isfinite(tick_r)):
+        raise RuntimeError(f"anchor positions non-finite on {where}")
+    return tick_r
 
 
 def dop853_reference(
@@ -1039,6 +1103,7 @@ def dop853_reference(
     for a, b in pairwise(bounds):
         burn = next((p for p in predicted if p.ignition_t_s <= a and b <= p.cutoff_t_s), None)
         sign = 0.0 if burn is None else SIGN[burn.direction]
+        y_start = y.copy()
         sol = solve_ivp(
             _independent_rhs(mu, veh, sign),
             (a, b),
@@ -1058,6 +1123,8 @@ def dop853_reference(
         ):
             raise RuntimeError(f"DOP853 solver times invalid on [{a}, {b}]")
         _check_reference_states(sol.t, sol.y, veh, predicted, f"[{a}, {b}]")
+        if not np.array_equal(sol.y[:, 0], y_start):  # the segment starts where asked
+            raise RuntimeError(f"DOP853 first node differs from the segment start on [{a}, {b}]")
         _check_solver_nodes(sol, f"[{a}, {b}]")  # every segment (F45)
         ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
         ticks = ticks[(ticks > a) & (ticks <= b)]
@@ -1068,7 +1135,12 @@ def dop853_reference(
             # F35: the dense velocity is the derivative of the dense position, and the
             # dense state at the segment end is the integrator's terminal state.
             _check_dense_consistency(sol, ticks, dense, y, b, f"[{a}, {b}]", veh, predicted)
-            alts = np.linalg.norm(dense[:3], axis=0) - radius
+        # F47: every segment end is anchored independently of SciPy, and the tick
+        # radii used for the altitude extrema come from the anchor, not from the dense
+        # output: exact Kepler on coasts, the RK4 above during burns.
+        tick_r = _anchor_segment(mu, veh, sign, y_start, y, a, b, ticks, f"[{a}, {b}]")
+        if tick_r.size:
+            alts = np.linalg.norm(tick_r, axis=1) - radius
             out.alt_min = -worst(-out.alt_min, -float(alts.min()))
             out.alt_max = worst(out.alt_max, float(alts.max()))
         if b in marks:

@@ -1161,6 +1161,8 @@ _ALLOWED = {
     ("m2.py", "orbit_checks", "min(alts)"): "schema-valid event values (round-trip check)",
     ("m2.py", "_check_dense_consistency", "np.maximum(np.abs(terminal), 1.0)"):
         "elementwise tolerance floor on values already validated finite",
+    ("m2.py", "_rk4_path", "max(1, math.ceil((b - a) / ANCHOR_BURN_STEP_S))"):
+        "integer step count from predicted segment times",
     ("m2.py", "_check_solver_nodes", "np.maximum(np.abs(sol.y), 1.0)"):
         "elementwise tolerance floor on solver nodes already validated finite",
     ("m2.py", "_check_dense_consistency", "np.maximum(ticks - step, a)"):
@@ -1955,3 +1957,185 @@ def test_time_shifted_staged_report_is_rejected(tmp_path):
     _rehash(dst, name)
     rejected, check = _cli()._evaluate(name, base=dst)
     assert check is None and any("configured epoch" in r for r in rejected)
+
+
+# ------------------------------------------------------------------ re-verification 12 fixes
+
+
+def _segment_probe(monkeypatch, mutate_sol):
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        mutate_sol(sol)
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+
+
+def _translate_interior(sol, dx=0.005):
+    """+dx m in x on interior solver nodes and on interior dense output (endpoints kept)."""
+    if sol.y.shape[1] > 2:
+        sol.y[0, 1:-1] += dx
+    dense, a, b = sol.sol, sol.t[0], sol.t[-1]
+
+    class Shifted:
+        def __call__(self, t):
+            out = dense(t)
+            tt = np.atleast_1d(t)
+            out[0, (tt > a) & (tt < b)] += dx
+            return out
+
+    sol.sol = Shifted()
+
+
+def _radial_at_interior_ticks(dr=0.1, dt=10.0):
+    """Raise the radius by dr at exact interior telemetry ticks of the dense output only.
+    Solver nodes, stencil points and segment ends are untouched, so every dense
+    self-consistency check still passes: only a consumer of these radii is affected."""
+
+    def mutate(sol):
+        dense, a, b = sol.sol, sol.t[0], sol.t[-1]
+
+        class Raised:
+            def __call__(self, t):
+                out = dense(t)
+                tt = np.atleast_1d(t)
+                on_tick = (np.abs(tt / dt - np.round(tt / dt)) < 1e-12) & (tt > a) & (tt < b)
+                r = out[:3, on_tick]
+                out[:3, on_tick] = r * (1.0 + dr / np.linalg.norm(r, axis=0))
+                return out
+
+        sol.sol = Raised()
+
+    return mutate
+
+
+def test_dense_radii_corruption_cannot_change_the_extrema(monkeypatch):
+    """F47: the extrema come from the independent anchors (Kepler on coasts, RK4 in
+    burns), so corrupting the dense radii at the ticks changes no consumed radius."""
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    marks = [k * 60.0 for k in range(1, 100)]
+    clean = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
+    _segment_probe(monkeypatch, _radial_at_interior_ticks())
+    dirty = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
+    assert (dirty.alt_min, dirty.alt_max) == (clean.alt_min, clean.alt_max)
+
+
+def _shift_after_start(dx=0.005, only=None):
+    """Shift x by dx for every node and dense state after the segment start: internally
+    consistent (nodes, dense, derivative, terminal), so only an independent anchor of
+    the segment end can detect it."""
+
+    def mutate(sol):
+        a, b = sol.t[0], sol.t[-1]
+        if only is not None and not only(a, b):
+            return
+        sol.y[0, 1:] += dx
+        dense = sol.sol
+
+        class Shifted:
+            def __call__(self, t):
+                out = dense(t)
+                out[0, np.atleast_1d(t) > a] += dx
+                return out
+
+        sol.sol = Shifted()
+
+    return mutate
+
+
+def test_segment_end_corruption_is_rejected_by_the_anchor(monkeypatch):
+    """F47: a consistently shifted coast segment is rejected by the Kepler anchor."""
+    _segment_probe(monkeypatch, _shift_after_start())
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="Kepler"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [60.0, 120.0])
+
+
+def test_burn_segment_end_is_anchored_to_the_independent_rk4(monkeypatch):
+    """F47: a consistently shifted burn segment is rejected by the in-validator RK4."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    predicted = m2.predict_burns(scenario, mission.expected)
+    _segment_probe(
+        monkeypatch, _shift_after_start(only=lambda a, b: a >= 600.0 and b <= 677.3 + 1e-9)
+    )
+    with pytest.raises(RuntimeError, match="RK4"):
+        m2.dop853_reference(
+            scenario, *m2.expected_initial_state(scenario), predicted, [600.0, 677.3]
+        )
+
+
+def test_segment_must_start_at_the_requested_state(monkeypatch):
+    def move_start(sol):
+        """Node 0 and the dense output at t = a moved together (reconciliation passes)."""
+        a = sol.t[0]
+        sol.y[0, 0] += 0.005
+        dense = sol.sol
+
+        class Moved:
+            def __call__(self, t):
+                out = dense(t)
+                out[0, np.atleast_1d(t) == a] += 0.005
+                return out
+
+        sol.sol = Moved()
+
+    _segment_probe(monkeypatch, move_start)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="first node"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [60.0])
+
+
+def test_overstated_altitude_stays_rejected_under_reference_corruption(monkeypatch):
+    """F47 (acceptance reversal): a simulator maximum altitude overstated by 0.1 m is
+    rejected with the clean reference, and still rejected when the reference's dense
+    radii are raised by the same 0.1 m at every interior tick."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    run = run_scenario(scenario)
+    done = run.events[-1]
+    run.events[-1] = done.model_copy(update={"max_altitude_m": done.max_altitude_m + 0.1})
+    predicted = m2.predict_burns(scenario, mission.expected)
+    limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+        "max_altitude_error_m"
+    ]
+
+    def max_alt_error():
+        _, ref = m2.reference_metrics(scenario, run.events, predicted)
+        metrics, _ = m2.orbit_checks(scenario, run.events, ref, predicted)
+        return metrics["max_altitude_error_m"]
+
+    assert max_alt_error() > limit
+    _segment_probe(monkeypatch, _radial_at_interior_ticks(0.1, scenario.dt_s))
+    assert max_alt_error() > limit
+
+
+def test_overflowing_finite_velocities_are_rejected(monkeypatch):
+    """F48: finite 1e200 velocities overflow the norms; the finite-safe comparison
+    rejects them instead of accepting inf <= tol * inf."""
+    assert not m2.within(math.inf, math.inf)
+    assert not m2.within(np.array([1.0, math.nan]), 2.0)
+    assert m2.within(np.array([1.0, 1.5]), 2.0)
+
+    def huge(sol):
+        if sol.y.shape[1] > 2:
+            sol.y[3:6, 1:-1] = 1e200
+        dense, a, b = sol.sol, sol.t[0], sol.t[-1]
+
+        class Huge:
+            def __call__(self, t):
+                out = dense(t)
+                tt = np.atleast_1d(t)
+                out[3:6, (tt > a) & (tt < b)] = 1e200
+                return out
+
+        sol.sol = Huge()
+
+    _segment_probe(monkeypatch, huge)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [60.0, 120.0])

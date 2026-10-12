@@ -344,6 +344,26 @@ DR-0020 was approved as option A, with conditions. Under it, a reference-output 
 - No check, threshold or test was removed or weakened.
 - All existing checks stay enforced: finite values, physical consistency (two-body invariants, Kepler round trip, solver-node reconciliation, dense self-consistency), the mass law, GMAT and DOP853.
 
-## Re-verification 12 (final, under DR-0019 B and DR-0020 A)
+## Re-verification 12 (under DR-0019 B and DR-0020 A)
+**Reviewer:** Codex, session `01a12e64-2402-7002-871c-524bd30c03c9`, at `d36c4c4`. **Raw:** `raw/M2-T6-codex-reverify12.md`, `raw/M2-T6-codex-reverify12-scratch/`.
+
+**Verdict: FAIL** (F47, F48; both blocking under DR-0020 A).
+- F42 and F43 are accurately recorded as accepted residual risk; the reviewer confirms the relevance analysis for those mechanisms.
+- F44–F46 are resolved. The fresh 213-check report is identical.
+
+**Both are `ACCEPTED`.** Each mechanism is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F47 | Med | A consistent interior corruption of DOP853 nodes and dense output (a translation, or r and v scaled together) changed the **consumed** radii of the altitude extrema. It reversed an acceptance: a 0.1 m overstated maximum altitude passed | **The extrema no longer consume DOP853 dense output.** Every segment end is **anchored independently of SciPy**: on coasts to validated Kepler from the segment start (≤ 1e-7 m and 1e-10 m/s; measured 2.9e-9 m and 2.9e-12 m/s); during burns to a fixed-step RK4 written in the validator (h = 0.01 s; ≤ 1e-6 m, 1e-9 m/s and 1e-9 kg; measured 3.8e-8 m, 1.1e-10 m/s and 1.5e-10 kg). The tick radii come from those anchors. Each segment must also start exactly at the requested state. The dense checks remain (DR-0020 condition 3) | `test_dense_radii_corruption_cannot_change_the_extrema`, `test_overstated_altitude_stays_rejected_under_reference_corruption` (the reversal case), `test_segment_end_corruption_is_rejected_by_the_anchor`, `test_burn_segment_end_is_anchored_to_the_independent_rk4`, `test_segment_must_start_at_the_requested_state` |
+| F48 | Med | Finite 1e200 velocities overflowed the norms, and `inf <= tol·inf` passed the derivative check | `within(err, bound)` requires err and bound finite and err ≤ bound. It is used for every reference tolerance comparison (nodes, dense derivative, stencil, terminal, anchors) | `test_overflowing_finite_velocities_are_rejected` |
+
+**Report change (documented).** Only the altitude-extrema metrics change, because they now come from the anchors instead of the DOP853 interpolant: `min_altitude_error_m` and `max_altitude_error_m` in the orbit_events checks, by at most 2.0e-8 m. Every check still passes, and every other metric is identical.
+
+**Test design.** The first F47 probes were caught by other checks (the derivative stencil, node reconciliation), so the anchors were not pinned. The probes now corrupt only what each anchor alone can see: radii at exact interior ticks, a consistent shift after the segment start, and a moved start node.
+
+**Runtime.** The full M2 Proof now takes about 114 s, because of per-tick Kepler anchoring with round trips.
+
+## Re-verification 13 (final, under DR-0019 B and DR-0020 A)
 See below.
 
