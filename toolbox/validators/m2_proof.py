@@ -36,6 +36,7 @@ from tars.events.schema import ValidationResult
 from tars.sim.runner import RunResult, run_scenario
 from tars.sim.scenario import ScenarioV2
 from tars.validation import gmat_m2, m2
+from tars.validation import reference_snapshot as snap
 from tars.validation.cross_platform import platform_info
 from tars.validation.m2_missions import ACCEPT, MISSIONS, Mission
 from tars.validation.thresholds import Check, load_scoped_thresholds, load_thresholds
@@ -111,6 +112,7 @@ class Gates:
         self.thresholds = thresholds
         self.missing: list[str] = []
         self.non_finite_report_only: list[str] = []
+        self.margins: list[str] = []  # DR-0021 condition 4 (sim-seeded references)
 
     def check(
         self, group: str, name: str, mission: str, metrics: dict[str, float], notes: str = ""
@@ -123,7 +125,10 @@ class Gates:
             for k, x in metrics.items()
             if k not in limits and not math.isfinite(x)
         ]
-        return Check(name, metrics, limits, self.thresholds.status, notes)
+        check = Check(name, metrics, limits, self.thresholds.status, notes)
+        if group == "o5_coast_kepler":
+            self.margins += snap.margin_problems(name, metrics, limits, m2.o5_snapshot_shifts())
+        return check
 
 
 def _audit_checks(gates: Gates, tag: str, mission: str, audit: m2.Audit) -> list[Check]:
@@ -232,10 +237,15 @@ def mission_checks(
             vrun = run_scenario(variant)
             rows.append(m2.impulsive_row(scenario, variant, vrun))
             aux.append((variant.name, m2.audit_run(variant, (ACCEPT,), vrun)))
-        checks.append(
-            gates.check(
-                "o6_impulsive_limit", f"o6_impulsive_limit[{tag}]", tag, m2.impulsive_metrics(rows)
-            )
+        o6 = gates.check(
+            "o6_impulsive_limit", f"o6_impulsive_limit[{tag}]", tag, m2.impulsive_metrics(rows)
+        )
+        checks.append(o6)
+        gates.margins += snap.margin_problems(
+            o6.validator,
+            o6.metrics,
+            o6.thresholds,
+            m2.o6_snapshot_shifts(rows, snap.TOLERANCES[("sim", "m")]),
         )
         checks += _audit_checks(gates, f"{tag}/o6_aux", tag, _merge_audits(aux))
         info["impulsive_family"] = rows
@@ -302,7 +312,9 @@ def boundary_checks(gates: Gates) -> tuple[list[Check], dict[str, Any]]:
     return checks, info
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, recorder: snap.Session | None = None) -> int:
+    """``recorder`` is passed only by toolbox/scripts/reference_snapshot.py (candidate
+    baselines); the Proof itself always verifies against the approved snapshot."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=Path("runs") / "proof" / "m2.json")
     parser.add_argument("--quick", action="store_true", help="skip O6 and O8 (not for Proof)")
@@ -312,24 +324,30 @@ def main(argv: list[str] | None = None) -> int:
     gates = Gates(thresholds)
     checks: list[Check] = []
     missions: dict[str, Any] = {}
-    for mission in MISSIONS:
-        mission_checks_, info = mission_checks(mission, gates, args.quick)
-        checks += mission_checks_
-        missions[mission.name] = info
-    boundary, boundary_info = boundary_checks(gates)
-    checks += boundary
+    # DR-0021: every reference value is verified against the approved snapshot.
+    with snap.session("m2_proof", recorder) as refs:
+        for mission in MISSIONS:
+            mission_checks_, info = mission_checks(mission, gates, args.quick)
+            checks += mission_checks_
+            missions[mission.name] = info
+        boundary, boundary_info = boundary_checks(gates)
+        checks += boundary
 
-    veh = m2.vehicle(MISSIONS[0].build())
-    assert veh is not None
-    checks.append(
-        gates.check(
-            "o3_free_space",
-            "o3_free_space",
-            "all",
-            m2.free_space_metrics(veh, O3_DURATION_S),
-            "production Simulator, zero force, velocity tracking along v0",
+        veh = m2.vehicle(MISSIONS[0].build())
+        assert veh is not None
+        checks.append(
+            gates.check(
+                "o3_free_space",
+                "o3_free_space",
+                "all",
+                m2.free_space_metrics(veh, O3_DURATION_S),
+                "production Simulator, zero force, velocity tracking along v0",
+            )
         )
-    )
+    # Complete coverage: every approved value of the Proof must be reproduced (a quick
+    # run skips O6/O8 and is not a Proof report).
+    checks.append(_exact("reference_snapshot", refs.finish(complete=not args.quick)))
+    checks.append(_exact("reference_snapshot_margins", gates.margins))
     unused = [] if args.quick else thresholds.unused()
     checks.append(_exact("thresholds_all_consumed", [f"unused {u}" for u in unused]))
     # Every emitted metric is gated unless declared report-only (review F15): a
@@ -346,6 +364,7 @@ def main(argv: list[str] | None = None) -> int:
         "quick": args.quick,
         "missions": missions,
         "dr0018_boundary": boundary_info,
+        "reference_snapshot": {"mode": refs.mode, **refs.report()},
         "results": [_result(c) for c in checks],
         "passed": all(c.passed for c in checks),
     }

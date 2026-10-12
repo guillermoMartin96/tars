@@ -36,6 +36,7 @@ from pathlib import Path
 from tars.sim.constants import STANDARD_GRAVITY
 from tars.sim.runner import run_scenario
 from tars.validation import gmat_m2, m2
+from tars.validation import reference_snapshot as snap
 from tars.validation.m2_missions import MISSIONS
 from tars.validation.thresholds import REPO_ROOT, Check, load_scoped_thresholds, load_thresholds
 
@@ -84,8 +85,22 @@ def _script_tolerances() -> tuple[float, float]:
     )
 
 
-def _evaluate(name: str, base: Path | None = None) -> tuple[list[str], Check | None]:
-    """Full O9 evaluation: simulator audit, reference verification, gate coverage."""
+def _evaluate(
+    name: str, base: Path | None = None, recorder: snap.Session | None = None
+) -> tuple[list[str], Check | None]:
+    """Full O9 evaluation: simulator audit, reference verification, gate coverage.
+
+    Every reference value is verified against the approved reference snapshot
+    (DR-0021); ``recorder`` is passed only by toolbox/scripts/reference_snapshot.py."""
+    with snap.session(f"gmat_m2:{name}", recorder) as refs:
+        rejected, check = _evaluate_references(name, base)
+    problems = refs.finish(complete=True)
+    if problems:
+        return [*rejected, *(f"reference snapshot: {p}" for p in problems)], None
+    return rejected, check
+
+
+def _evaluate_references(name: str, base: Path | None) -> tuple[list[str], Check | None]:
     mission = BY_NAME[name]
     scenario = mission.build()
     run = run_scenario(scenario)
@@ -106,6 +121,8 @@ def _evaluate(name: str, base: Path | None = None) -> tuple[list[str], Check | N
             continue
         failed = Check(group, metrics, limits, t5.status).failures
         rejected += [f"simulator audit {group}: {f}" for f in failed]
+        if group == "o5_coast_kepler":  # DR-0021 condition 4
+            rejected += snap.margin_problems(group, metrics, limits, m2.o5_snapshot_shifts())
     result = gmat_m2.compare_committed(
         name, scenario, mission.expected, run.events, *_script_tolerances(), base=base
     )

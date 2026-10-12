@@ -28,6 +28,7 @@ SciPy is a dev-only dependency (DR-0015): it is imported inside ``dop853_referen
 
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 import math
 from collections.abc import Sequence
@@ -47,6 +48,7 @@ from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
 from tars.sim.runner import RunResult
 from tars.sim.scenario import ScenarioV2
 from tars.sim.simulator import Simulator
+from tars.validation import reference_snapshot as snap
 from tars.validation.m2_missions import Expected
 
 SIGN = {"prograde": 1.0, "retrograde": -1.0}
@@ -192,7 +194,34 @@ def predict_burns(scenario: ScenarioV2, expected: Sequence[Expected]) -> list[Pr
         propellant = after
     if any(b.ignition_t_s < a.cutoff_t_s for a, b in pairwise(burns)):
         raise ValueError("declared accepted burns overlap")
-    return burns
+    return _pin_burns(burns)
+
+
+_BURN_TIMES = ("ignition_t_s", "commanded_duration_s", "intended_s", "cutoff_t_s", "executed_s")
+_BURN_MASSES = (
+    "propellant_before_kg", "propellant_used_kg", "propellant_after_kg",
+    "mass_before_kg", "mass_after_kg",
+)  # fmt: skip
+
+
+def _pin_burns(burns: list[PredictedBurn]) -> list[PredictedBurn]:
+    """The predicted burns, pinned to the approved reference snapshot (DR-0021)."""
+    p = snap.pin(
+        "predicted_burns",
+        "ref",
+        times_s=np.array([[getattr(b, f) for f in _BURN_TIMES] for b in burns]).reshape(-1, 5),
+        masses_kg=np.array([[getattr(b, f) for f in _BURN_MASSES] for b in burns]).reshape(-1, 5),
+        delta_v_mps=np.array([b.delta_v_mps for b in burns]),
+    )
+    return [
+        dataclasses.replace(
+            b,
+            **{f: float(p["times_s"][i, j]) for j, f in enumerate(_BURN_TIMES)},
+            **{f: float(p["masses_kg"][i, j]) for j, f in enumerate(_BURN_MASSES)},
+            delta_v_mps=float(p["delta_v_mps"][i]),
+        )
+        for i, b in enumerate(burns)
+    ]
 
 
 def _of(events: Sequence[Any], *types: str) -> list[Any]:
@@ -245,8 +274,13 @@ def simpson_bound(
     ``until`` truncates the burn at a sample time.
     """
     end = burn.cutoff_t_s if until is None else min(until, burn.cutoff_t_s)
-    if end <= burn.ignition_t_s:
-        return 0.0
+    total = 0.0
+    if end > burn.ignition_t_s:
+        total = _simpson_total(veh, burn, dt, end)
+    return float(snap.pin("simpson_bound", "ref", bound_mps=[total])["bound_mps"][0])
+
+
+def _simpson_total(veh: Vehicle, burn: PredictedBurn, dt: float, end: float) -> float:
     mdot = veh.mass_flow_kgps
     first = math.ceil(burn.ignition_t_s / dt)
     grid = [k * dt for k in range(first, math.floor(end / dt) + 1)]
@@ -758,7 +792,10 @@ def _closed_form(veh: Vehicle, t: float) -> tuple[Decimal, Decimal]:
         m0, tt = Decimal(veh.initial_mass_kg), Decimal(t)
         m = m0 - mdot * tt
         ln = (m0 / m).ln()
-        return c * ln, c * (tt - (m / mdot) * ln)
+        dv, disp = c * ln, c * (tt - (m / mdot) * ln)
+    # Decimal arithmetic is platform independent: pinned exactly, used as computed.
+    snap.pin("o3.closed_form", "ref", exact=True, dv_mps=[float(dv)], disp_m=[float(disp)])
+    return dv, disp
 
 
 def free_space_run(veh: Vehicle, direction: str, duration_s: float, dt: float) -> dict[str, float]:
@@ -804,10 +841,23 @@ def free_space_run(veh: Vehicle, direction: str, duration_s: float, dt: float) -
             Decimal(cutoff.r[k]) - Decimal(x0[k]) - Decimal(v0[k]) * t - sign * disp * Decimal(u[k])
             for k in range(3)
         ]
-        m_err = Decimal(cutoff.propellant_kg) - (
+        m_exp = (
             Decimal(veh.propellant_kg)
             - Decimal(veh.thrust_n) / (Decimal(veh.isp_s) * Decimal(STANDARD_GRAVITY)) * t
         )
+        m_err = Decimal(cutoff.propellant_kg) - m_exp
+        v_exp = [Decimal(v0[k]) + sign * dv * Decimal(u[k]) for k in range(3)]
+        x_exp = [
+            Decimal(x0[k]) + Decimal(v0[k]) * t + sign * disp * Decimal(u[k]) for k in range(3)
+        ]
+    snap.pin(
+        "o3.expected_cutoff",
+        "ref",
+        exact=True,
+        v_mps=[float(x) for x in v_exp],
+        r_m=[float(x) for x in x_exp],
+        propellant_kg=[float(m_exp)],
+    )
     return {
         "timing_violations": timing,
         "velocity_rel_error": math.hypot(*map(float, v_err)) / float(dv),
@@ -824,8 +874,9 @@ def free_space_metrics(veh: Vehicle, duration_s: float) -> dict[str, float]:
         "timing_violations": 0.0,
     }
     for direction in ("prograde", "retrograde"):
-        r10 = free_space_run(veh, direction, duration_s, 10.0)
-        r5 = free_space_run(veh, direction, duration_s, 5.0)
+        with snap.scope("o3_free_space", direction):
+            r10 = free_space_run(veh, direction, duration_s, 10.0)
+            r5 = free_space_run(veh, direction, duration_s, 5.0)
         out["timing_violations"] += r10["timing_violations"] + r5["timing_violations"]
         out["velocity_rel_error_max"] = worst(
             out["velocity_rel_error_max"], r10["velocity_rel_error"], r5["velocity_rel_error"]
@@ -1034,9 +1085,10 @@ def _rk4_path(f, y: np.ndarray, times: Sequence[float]) -> list[np.ndarray]:
     return out
 
 
-def _anchor_segment(mu, veh, sign, y_a, y_b, a, b, ticks, where) -> np.ndarray:
+def _anchor_segment(mu, veh, sign, y_a, y_b, a, b, ticks, where) -> tuple[np.ndarray, np.ndarray]:
     """Check the DOP853 segment end against an independent propagation from the
-    segment start and return the anchor's positions at ``ticks`` (review F47)."""
+    segment start; return the anchor's positions at ``ticks`` and its end state
+    (review F47)."""
     ticks = np.asarray(ticks, dtype=float)
     if sign == 0.0:
         r_b, v_b = kepler_state(y_a[:3], y_a[3:6], b - a, mu)
@@ -1046,6 +1098,7 @@ def _anchor_segment(mu, veh, sign, y_a, y_b, a, b, ticks, where) -> np.ndarray:
         if not ok:
             raise RuntimeError(f"DOP853 coast segment end disagrees with Kepler on {where}")
         rows = [kepler_state(y_a[:3], y_a[3:6], float(t) - a, mu)[0] for t in ticks]
+        anchor_end = np.concatenate([r_b, v_b])
     else:
         path = _rk4_path(_independent_rhs(mu, veh, sign), y_a.copy(), [a, *ticks.tolist(), b])
         end = path[-1]
@@ -1057,10 +1110,11 @@ def _anchor_segment(mu, veh, sign, y_a, y_b, a, b, ticks, where) -> np.ndarray:
         if not ok:
             raise RuntimeError(f"DOP853 burn segment end disagrees with the RK4 anchor on {where}")
         rows = [st[:3] for st in path[1:-1]]
+        anchor_end = end[:7].copy()
     tick_r = np.array(rows, dtype=float).reshape(-1, 3)
     if not np.all(np.isfinite(tick_r)):
         raise RuntimeError(f"anchor positions non-finite on {where}")
-    return tick_r
+    return tick_r, anchor_end
 
 
 def dop853_reference(
@@ -1102,6 +1156,11 @@ def dop853_reference(
     y = np.concatenate(
         [np.asarray(r0, float), np.asarray(v0, float), [0.0 if veh is None else veh.propellant_kg]]
     )
+    # DR-0021: every evaluation time and consumed output is pinned to the approved
+    # reference snapshot; inside a Proof session the approved values are used.
+    snap.pin("dop853.bounds", "ref", exact=True, bounds_s=bounds)
+    p = snap.pin("dop853.start", "ref", r_m=y[:3], v_mps=y[3:6], propellant_kg=y[6:])
+    y = np.concatenate([p["r_m"], p["v_mps"], p["propellant_kg"]])
     out = Reference()
     if 0.0 in marks:
         out[0.0] = y.copy()
@@ -1136,6 +1195,14 @@ def dop853_reference(
         _check_solver_nodes(sol, f"[{a}, {b}]")  # every segment (F45)
         ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
         ticks = ticks[(ticks > a) & (ticks <= b)]
+        # The tick grid is pinned exactly as its index range: ticks are k * dt for
+        # every k in it, bit for bit (DR-0021 evaluation times).
+        k0 = math.floor(a / dt) + 1
+        idx = np.round(ticks / dt).astype(np.int64)
+        k_first, k_last = (int(idx[0]), int(idx[-1])) if ticks.size else (k0, k0 - 1)
+        if not np.array_equal(ticks, np.arange(k_first, k_last + 1) * dt):
+            raise RuntimeError(f"tick grid is not k * dt on [{a}, {b}]")
+        snap.pin("dop853.ticks", "ref", exact=True, index_1=[k_first, k_last], dt_s=[dt])
         if ticks.size:
             dense = sol.sol(ticks)
             # F18/F29: the complete dense-output state is validated, not only altitude.
@@ -1146,7 +1213,7 @@ def dop853_reference(
         # F47: every segment end is anchored independently of SciPy, and the tick
         # radii used for the altitude extrema come from the anchor, not from the dense
         # output: exact Kepler on coasts, the RK4 above during burns.
-        tick_r = _anchor_segment(mu, veh, sign, y_start, y, a, b, ticks, f"[{a}, {b}]")
+        tick_r, anchor_end = _anchor_segment(mu, veh, sign, y_start, y, a, b, ticks, f"[{a}, {b}]")
         if tick_r.size:
             # F49: every consumed anchor tick agrees with the validated dense output, so
             # the two independent references (Kepler/RK4 and DOP853) must both be
@@ -1154,11 +1221,30 @@ def dop853_reference(
             tol = ANCHOR_POS_TOL_M if sign == 0.0 else ANCHOR_BURN_POS_TOL_M
             if not within(np.linalg.norm(tick_r - dense[:3].T, axis=1), tol):
                 raise RuntimeError(f"anchor tick positions disagree with DOP853 on [{a}, {b}]")
+        # DR-0021: the segment end (the next segment's start and any mark), the dense
+        # and anchor tick positions and the anchor end are pinned; the approved values
+        # are used from here on (the extrema and every later segment).
+        p = snap.pin(
+            "dop853.segment",
+            "ref",
+            end_r_m=y[:3],
+            end_v_mps=y[3:6],
+            end_propellant_kg=y[6:],
+            anchor_ticks_m=tick_r,
+            anchor_end_r_m=anchor_end[:3],
+            anchor_end_v_mps=anchor_end[3:6],
+            anchor_end_propellant_kg=anchor_end[6:],  # empty on coasts (Kepler)
+        )
+        y = np.concatenate([p["end_r_m"], p["end_v_mps"], p["end_propellant_kg"]])
+        tick_r = p["anchor_ticks_m"]
+        if tick_r.size:
             alts = np.linalg.norm(tick_r, axis=1) - radius
             out.alt_min = -worst(-out.alt_min, -float(alts.min()))
             out.alt_max = worst(out.alt_max, float(alts.max()))
         if b in marks:
             out[b] = y.copy()
+    ext = snap.pin("dop853.extrema", "ref", altitude_m=[out.alt_min, out.alt_max])["altitude_m"]
+    out.alt_min, out.alt_max = float(ext[0]), float(ext[1])
     return out
 
 
@@ -1184,7 +1270,8 @@ def expected_initial_state(scenario: ScenarioV2) -> tuple[np.ndarray, np.ndarray
     speed = math.sqrt(c.mu / radius)
     r = radius * np.array([cw * cu - sw * su * ci, sw * cu + cw * su * ci, su * si])
     v = speed * np.array([-cw * su - sw * cu * ci, -sw * su + cw * cu * ci, cu * si])
-    return r, v
+    p = snap.pin("initial_state", "ref", r_m=r, v_mps=v)
+    return p["r_m"], p["v_mps"]
 
 
 def horizon_s(scenario: ScenarioV2, events: Sequence[Any]) -> float:
@@ -1345,14 +1432,22 @@ def coast_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, floa
     pos = vel = post_pos = 0.0
     for i, (t0, r0, v0) in enumerate(arcs):
         t_end = next((t for t in ignitions if t >= t0), math.inf)
-        for t, r, v in samples:
-            if t0 <= t <= t_end:
-                rk, vk = kepler_state(r0, v0, t - t0, mu)
-                dp = float(np.linalg.norm(r - rk))
-                pos = worst(pos, dp)
-                vel = worst(vel, float(np.linalg.norm(v - vk)))
-                if i > 0:
-                    post_pos = worst(post_pos, dp)
+        arc = [(t, r, v) for t, r, v in samples if t0 <= t <= t_end]
+        kep = [kepler_state(r0, v0, t - t0, mu) for t, _, _ in arc]
+        # DR-0021: seeded by simulator output, so verified against the snapshot within
+        # the sim-seeded tolerance, not substituted (margin_problems covers the gates).
+        p = snap.pin(
+            "o5.kepler",
+            "sim",
+            r_m=np.array([k[0] for k in kep]).reshape(-1, 3),
+            v_mps=np.array([k[1] for k in kep]).reshape(-1, 3),
+        )
+        for (_, r, v), rk, vk in zip(arc, p["r_m"], p["v_mps"], strict=True):
+            dp = float(np.linalg.norm(r - rk))
+            pos = worst(pos, dp)
+            vel = worst(vel, float(np.linalg.norm(v - vk)))
+            if i > 0:
+                post_pos = worst(post_pos, dp)
     return {
         "coast_position_error_max_m": pos,
         "coast_velocity_error_max_mps": vel,
@@ -1410,11 +1505,16 @@ def impulsive_row(base: ScenarioV2, variant: ScenarioV2, run: RunResult) -> dict
     e = _of(run.events, "BurnEnded")[0]
     a0 = rv_to_elements(np.array(s.r), np.array(s.v), mu).a
     a_fin = rv_to_elements(np.array(e.r), np.array(e.v), mu).a
-    r_m, v_m = kepler_state(np.array(s.r), np.array(s.v), mid - s.event_t_s, mu)
     m0 = veh.initial_mass_kg
-    dv = veh.exhaust_velocity_mps * math.log(m0 / (m0 - veh.mass_flow_kgps * duration))
-    v_imp = v_m + sign * dv * v_m / np.linalg.norm(v_m)
-    a_imp = -mu / (2.0 * specific_energy(r_m, v_imp, mu))
+    with snap.scope(variant.name, "o6"):
+        dv = veh.exhaust_velocity_mps * math.log(m0 / (m0 - veh.mass_flow_kgps * duration))
+        dv = float(snap.pin("o6.delta_v", "ref", dv_mps=[dv])["dv_mps"][0])
+        r_m, v_m = kepler_state(np.array(s.r), np.array(s.v), mid - s.event_t_s, mu)
+        v_imp = v_m + sign * dv * v_m / np.linalg.norm(v_m)
+        a_imp = -mu / (2.0 * specific_energy(r_m, v_imp, mu))
+        # DR-0021: seeded by the simulator's ignition state, so verified within the
+        # sim-seeded tolerance (F51), not substituted; margin_problems covers the gates.
+        snap.pin("o6.midpoint", "sim", r_m=r_m, v_mps=v_m, sma_impulsive_m=[a_imp])
     return {
         "burn_duration_s": float(vcmd["duration_s"]),
         "sma_finite_minus_impulsive_m": a_fin - a_imp,
@@ -1448,6 +1548,40 @@ def impulsive_metrics(rows: Sequence[dict[str, float]]) -> dict[str, float]:
     for i, p in enumerate(orders):
         out[f"order_pair_{i}"] = p
     return out
+
+
+def o6_snapshot_shifts(rows: Sequence[dict[str, float]], delta: float) -> dict[str, float]:
+    """Worst change of the gated O6 metrics if every impulsive SMA moves by at most
+    ``delta`` (the sim-seeded snapshot tolerance, DR-0021 condition 4). Each metric is
+    monotone in each SMA, so the corners of the interval give the bound."""
+
+    def d(row: dict[str, float], e: float) -> float:
+        return row["sma_finite_minus_impulsive_m"] - e
+
+    order = 0.0
+    for a, b in pairwise(rows):
+        p = math.log2(d(a, 0.0) / d(b, 0.0))
+        for ea in (-delta, delta):
+            for eb in (-delta, delta):
+                da, db = d(a, ea), d(b, eb)
+                q = math.log2(da / db) if da * db > 0.0 and d(a, 0.0) * da > 0.0 else math.inf
+                order = worst(order, abs(q - p))
+    r0 = rows[0]
+    fin, imp = r0["sma_change_finite_m"], r0["sma_change_impulsive_m"]
+    ratio = 0.0
+    for e in (-delta, delta):
+        moved = imp + e
+        ratio = worst(ratio, abs(fin / moved - fin / imp) if moved * imp > 0.0 else math.inf)
+    return {"order_deviation_from_2_max": order, "slice_sma_change_ratio_deviation": ratio}
+
+
+def o5_snapshot_shifts() -> dict[str, float]:
+    """O5 compares simulator samples with Kepler states: a Kepler deviation of at most
+    the sim-seeded tolerance moves each gated metric by at most that tolerance."""
+    return {
+        "coast_position_error_max_m": snap.TOLERANCES[("sim", "m")],
+        "coast_velocity_error_max_mps": snap.TOLERANCES[("sim", "mps")],
+    }
 
 
 # --------------------------------------------------------------- O7 direction
@@ -1602,7 +1736,8 @@ def boundary_violations(
     events = run.events
     v = check_event_order(variant, events)
     v += check_traceability(variant, events, expected, run)
-    predicted = predict_burns(variant, expected)
+    with snap.scope(variant.name, "dr0018"):
+        predicted = predict_burns(variant, expected)
     v += check_outcomes(variant, events, predicted)
     v += check_final_consistency(events, run)
     stop_tick = events[-1].tick
@@ -1675,12 +1810,13 @@ def check_start_identity(scenario: ScenarioV2, events: Sequence[Any]) -> list[st
 def _timing_bound(veh: Vehicle, b: PredictedBurn) -> float:
     """DR-0017 definition: F |D - d| / m_end, m_end after the longer interval."""
     dt = abs(b.executed_s - b.intended_s)
-    if dt == 0.0:
-        return 0.0
-    m_end = veh.dry_mass_kg + max(
-        b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0
-    )
-    return veh.thrust_n * dt / m_end
+    bound = 0.0
+    if dt != 0.0:
+        m_end = veh.dry_mass_kg + max(
+            b.propellant_before_kg - veh.mass_flow_kgps * max(b.executed_s, b.intended_s), 0.0
+        )
+        bound = veh.thrust_n * dt / m_end
+    return float(snap.pin("timing_bound", "ref", bound_mps=[bound])["bound_mps"][0])
 
 
 def check_receipt_details(
@@ -2137,6 +2273,17 @@ def orbit_checks(
                 else:
                     hi = mid
             ref_crossings.append(a + hi if crossing is None else crossing)
+    # DR-0021: the timed crossings are pinned (the bisection's Kepler states only steer
+    # it); powered intervals are counted, not timed.
+    timed = [i for i, c in enumerate(ref_crossings) if not math.isnan(c)]
+    p = snap.pin(
+        "orbit.node_crossings",
+        "ref",
+        crossings_s=[ref_crossings[i] for i in timed],
+        powered_1=[float(len(ref_crossings) - len(timed))],
+    )
+    for i, c in zip(timed, p["crossings_s"], strict=True):
+        ref_crossings[i] = float(c)
     if len(ref_crossings) != len(orbits):
         v.append(f"{len(orbits)} OrbitCompleted, reference has {len(ref_crossings)} node crossings")
     err = worst_of(
@@ -2183,6 +2330,11 @@ def audit_run(scenario: ScenarioV2, expected: Sequence[Expected], run: RunResult
     Used for reference missions, derived variants and the O6/O8 auxiliary runs alike,
     so no simulator output escapes because of the run it came from (review F6, F7).
     """
+    with snap.scope(scenario.name, "audit"):
+        return _audit_run(scenario, expected, run)
+
+
+def _audit_run(scenario: ScenarioV2, expected: Sequence[Expected], run: RunResult) -> Audit:
     events = run.events
     predicted = predict_burns(scenario, expected)
     acc, identities = accounting_metrics(scenario, events)

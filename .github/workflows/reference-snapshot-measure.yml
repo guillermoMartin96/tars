@@ -1,0 +1,39 @@
+# Cross-platform measurement of the M2 reference snapshot values (DR-0021 condition 4,
+# VAL-0015). Runs only on a pushed `refsnap-measure-*` tag or by hand; it records
+# measurement files as artifacts and never writes or approves the reference snapshot.
+name: reference-snapshot-measure
+
+on:
+  push:
+    tags: ["refsnap-measure-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --locked
+
+      - name: Record the reference values (measurement, not a baseline candidate)
+        run: uv run python toolbox/scripts/reference_snapshot.py generate --measurement --out runs/refsnap/${{ matrix.os }}.json.gz
+
+      - name: Upload measurement
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: refsnap-${{ matrix.os }}
+          path: runs/refsnap/

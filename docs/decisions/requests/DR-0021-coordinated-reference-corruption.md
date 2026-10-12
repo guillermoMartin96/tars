@@ -1,6 +1,6 @@
 # Decision Request: Coordinated corruption of independent references (follows DR-0019 B, DR-0020 A)
 
-**Status:** OPEN  
+**Status:** APPROVED — option A, with conditions (Tech Lead, 2026-10-12)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-11  
 **Related milestone/issue:** M2 T6; DR-0019 (approved B); DR-0020 (approved A); review record `docs/reviews/M2-T6-review-01.md`, re-verifications 12–14
@@ -89,3 +89,17 @@ If A's maintenance cost is not wanted at this stage, **B** is acceptable, provid
 
 ## Requested response
 `A` / `B` / `C` / `discuss`.
+
+## Resolution
+**Decision:** APPROVED — option A (approved reference snapshot), with conditions (Tech Lead, 2026-10-12).
+
+**Conditions (recorded in substance):**
+1. **Complete coverage.** Snapshot every reference-derived value that influences an M2 Proof check, a reported result or an acceptance decision, including intermediate tick positions, evaluation times, altitude extrema, Kepler outputs, DOP853 outputs and O6 values. Document the coverage inventory and identify every exclusion explicitly.
+2. **Independent baseline approval.** Generate the initial snapshot from a clean, reviewed implementation at a pinned commit and dependency environment. Verify it against the existing GMAT evidence and the physical invariants before approval. Agreement with the snapshot is not proof of physical correctness.
+3. **Immutable approved baseline.** Pin the snapshot by SHA-256. Never regenerate it or update its digest automatically in tests, CI or Proof runs. Any change includes the new artifact, an explicit justification, a comparison with the previous baseline and an independent Codex review, in the same reviewed change.
+4. **Measured reproducibility tolerance.** Measure the numerical variation across the supported macOS and Ubuntu environments. Use the smallest justified tolerance, document the method, and ensure it cannot conceal a change that would alter an acceptance decision. Do not borrow the GMAT comparison tolerance.
+5. **No circular validation.** Verification compares runtime outputs with the previously approved artifact, never with a baseline regenerated from the same outputs during the test. Negative tests must show that coordinated corruption of Kepler and DOP853 is detected.
+6. **Regression tests for F50 and F51.** Both adversarial cases become permanent regression tests: the F50 acceptance flip and the F51 wrong-time evaluation must be rejected.
+7. **Preserve existing gates.** Do not weaken or remove existing checks. *(The approval text as received ends here; it appears truncated, and the Tech Lead has been asked whether more followed.)*
+
+**Implementation record:** VAL-0015 (`docs/science/validation.md`) and the review record `docs/reviews/M2-T6-review-01.md`, "DR-0021 implementation".

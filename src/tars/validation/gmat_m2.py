@@ -35,6 +35,7 @@ import numpy as np
 
 from tars.sim.constants import STANDARD_GRAVITY
 from tars.sim.scenario import ScenarioV2
+from tars.validation import reference_snapshot as snap
 from tars.validation.gmat import _gmat_epoch
 from tars.validation.m2 import (
     PredictedBurn,
@@ -332,6 +333,7 @@ def epoch_anchor_problems(labelled: dict[float, Row], scenario: ScenarioV2) -> l
     epoch = _dt.datetime.fromisoformat(scenario.epoch)
     jd = (epoch - _dt.datetime(2000, 1, 1, 12)).total_seconds() / 86400.0 + 2451545.0
     want = jd - GMAT_MJD_OFFSET - TT_MINUS_A1_S / 86400.0  # A.1 MJD (scenario epoch is TT)
+    want = float(snap.pin("o9.epoch_anchor", "ref", exact=True, a1_mjd_1=[want])["a1_mjd_1"][0])
     err = abs(labelled[0.0].a1mjd - want) * 86400.0
     if not err <= EPOCH_ANCHOR_TOL_S:
         return [f"first GMAT epoch is {err:.3g} s from the configured epoch"]
@@ -391,11 +393,18 @@ def alignment_metrics(
         if arc.direction is not None or arc.start_s not in labelled:
             continue
         s0 = labelled[arc.start_s]
-        for t in times:
-            if arc.start_s < t <= arc.end_s:
-                r, v = kepler_state(s0.r, s0.v, t - arc.start_s, mu)  # F30/F36 validated
-                kep = worst(kep, float(np.linalg.norm(labelled[t].r - r)))
-                kep_v = worst(kep_v, float(np.linalg.norm(labelled[t].v - v)))
+        in_arc = [t for t in times if arc.start_s < t <= arc.end_s]
+        states = [kepler_state(s0.r, s0.v, t - arc.start_s, mu) for t in in_arc]  # F30/F36
+        # DR-0021: seeded by the committed GMAT rows; pinned, approved values consumed.
+        p = snap.pin(
+            "o9.alignment_kepler",
+            "gmat",
+            r_m=np.array([x[0] for x in states]).reshape(-1, 3),
+            v_mps=np.array([x[1] for x in states]).reshape(-1, 3),
+        )
+        for t, r, v in zip(in_arc, p["r_m"], p["v_mps"], strict=True):
+            kep = worst(kep, float(np.linalg.norm(labelled[t].r - r)))
+            kep_v = worst(kep_v, float(np.linalg.norm(labelled[t].v - v)))
     return {
         "step_spacing_error_max_s": spacing,
         "burn_duration_from_mass_error_max_s": duration,
@@ -442,7 +451,9 @@ def _node_crossings(states: dict[float, tuple[np.ndarray, np.ndarray]], mu: floa
                 else:
                     hi = mid
             out.append(a + hi if crossing is None else crossing)
-    return out
+    # DR-0021: seeded by the committed GMAT rows; pinned, approved values consumed.
+    pinned = snap.pin("o9.gmat_node_crossings", "gmat", crossings_s=out)["crossings_s"]
+    return [float(c) for c in pinned]
 
 
 def o9_metrics(
@@ -464,11 +475,15 @@ def o9_metrics(
     times = sorted(labelled)
     invalid = [t for t in times if not np.all(np.isfinite(reference[t]))]
     g_pos = g_vel = g_mass = math.inf if invalid else 0.0  # F16: invalid reference fails
-    for t in times:
+    # DR-0021: the analytic mass at every row is pinned; approved values consumed.
+    expected_mass = snap.pin(
+        "o9.expected_mass", "ref", mass_kg=[_expected_mass(t, veh, predicted) for t in times]
+    )["mass_kg"]
+    for t, m_exp in zip(times, expected_mass, strict=True):
         row, y = labelled[t], reference[t]
         g_pos = worst(g_pos, float(np.linalg.norm(row.r - y[:3])))
         g_vel = worst(g_vel, float(np.linalg.norm(row.v - y[3:6])))
-        g_mass = worst(g_mass, abs(row.mass_kg - _expected_mass(t, veh, predicted)))
+        g_mass = worst(g_mass, abs(row.mass_kg - float(m_exp)))
     end = times[-1]
     states = [e for e in events if e.type == "StateSampled"]
     s_pos = s_vel = 0.0
@@ -867,6 +882,15 @@ def compare_committed(
     match the manifest digest pinned in reviewed source. A staged reference inside
     ``run`` (``base`` given) is checked against everything else; its new digest must
     be pinned in a reviewed change before ``compare`` accepts it."""
+    with snap.scope(name, "o9"):
+        return _compare_committed(
+            name, scenario, expected, events, position_tol_m, velocity_tol_mps, base
+        )
+
+
+def _compare_committed(
+    name, scenario, expected, events, position_tol_m, velocity_tol_mps, base
+) -> O9Result:
     import json
 
     from tars.validation.m2 import dop853_reference, horizon_s, predict_burns
@@ -886,10 +910,18 @@ def compare_committed(
     if base is None:
         v += manifest_anchor_problems()
     arcs = plan_arcs(scenario, predicted, horizon)
+    snap.pin(
+        "o9.arcs",
+        "ref",
+        exact=True,
+        bounds_s=np.array([[a.start_s, a.end_s] for a in arcs]).reshape(-1, 2),
+        step_s=[a.step_s for a in arcs],
+    )
     labelled, label_v = label_rows(parse_stream(files["report"].read_text()), arcs)
     v += label_v
     if label_v or not labelled:
         return O9Result({}, v, {})
+    snap.pin("o9.label_times", "ref", exact=True, times_s=sorted(labelled))
     v += coverage_problems(scenario, predicted, events, labelled, horizon)
     v += epoch_anchor_problems(labelled, scenario)
     veh = vehicle(scenario)
