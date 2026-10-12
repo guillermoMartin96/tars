@@ -244,7 +244,7 @@ Later Decision Requests:
 - **DR-0017** burn timing fidelity and the depletion boundary: resolved.
 - **[DR-0018](../decisions/requests/DR-0018-burns-in-progress-at-simulation-end.md)** burns in progress or pending when a scenario stops: **APPROVED, option A** (2026-10-11). A stop is an observation boundary; no fabricated `BurnEnded`.
 - **[DR-0019](../decisions/requests/DR-0019-false-pass-review-threat-model.md)** threat model for the independent false-pass review: **APPROVED, option B** (2026-10-11). Bad data is always in scope; replacing validator internals is not.
-- **[DR-0020](../decisions/requests/DR-0020-verdict-relevance-of-reference-output-findings.md)** verdict relevance for reference-output findings (clarifies DR-0019 B): **OPEN** (recommended A). It blocks the final T6 review round.
+- **[DR-0020](../decisions/requests/DR-0020-verdict-relevance-of-reference-output-findings.md)** verdict relevance for reference-output findings (clarifies DR-0019 B): **APPROVED, option A with conditions** (2026-10-11). F42 and F43 are accepted residual risk; digest updates must carry an explicit justification.
 
 ## 12a. Tracked follow-ups
 | ID | Follow-up | Constraint |

@@ -476,4 +476,8 @@ All 10 approved rejection codes are exercised.
   - **Covered:** wrong simulator output or physics; tampered references or thresholds; workflow failures; invalid reference outputs; missing observations or thresholds; non-finite metrics.
   - **Not covered at runtime:** replacing the validator's own helper code, which code review, mutation tests and the AST guard cover instead.
   - Bad data passing through unmodified helpers stays in scope.
+- **DR-0020 (approved A with conditions, 2026-10-11).**
+  - A reference-output corruption is blocking when it could affect a check, a reported value, an acceptance decision or a required physical invariant.
+  - F42 and F43 are accepted residual risk: corruptions of unused or invariant-preserving reference internals.
+  - Currently unused intermediates (listed in the review record) must be validated before anything relies on them.
 

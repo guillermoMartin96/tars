@@ -1,6 +1,6 @@
 # Decision Request: Verdict relevance for findings about independent-reference outputs (clarifies DR-0019 B)
 
-**Status:** OPEN  
+**Status:** APPROVED — option A, with conditions (Tech Lead, 2026-10-11)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-11  
 **Related milestone/issue:** M2 T6; DR-0019 (approved B); review record `docs/reviews/M2-T6-review-01.md`, re-verifications 8–11
@@ -87,6 +87,33 @@ Then one final Codex round under DR-0019 B with this criterion stated, requiring
 `A` / `B` / `C` / `discuss`.
 
 ## Resolution
-**Decision:** <pending>  
-**Reasoning/notes:**  
+**Decision:** APPROVED — option A, with conditions (Tech Lead, 2026-10-11).
+
+**Conditions (recorded verbatim in substance):**
+1. **Scope of reference validation.**
+   - A reference-output finding is **blocking** when the corruption could affect any of:
+     - a validation check;
+     - a reported value;
+     - an acceptance decision;
+     - an explicitly required physical invariant.
+   - Unused intermediate values do not need independent validation merely to detect arbitrary mutations.
+2. **F42 and F43** are recorded with:
+   - their mutation mechanisms;
+   - why they cannot affect the current validation contract;
+   - the rationale for accepting their residual risk.
+
+   They are not discarded and not marked fixed (review record, "Residual risk accepted under DR-0020").
+3. **Preserve independent validation.**
+   - All existing checks stay enforced: finite values, physical consistency, the mass law, GMAT, Kepler and DOP853.
+   - No approved threshold or existing test is weakened to obtain a PASS.
+4. **Future applicability.** If a currently unused intermediate value becomes part of a reported result, an acceptance criterion or a mission decision, it must be validated appropriately before anything relies on it.
+5. **Threshold integrity.**
+   - The SHA-256 protections from F33 stay.
+   - Any modification of an approved threshold file or of the reference manifest must update its digest in `tars.validation.approved_digests` **in the same reviewed commit, with an explicit justification**. This includes T7 changes to `m2.json`.
+6. **Final review.** Record this decision and submit the final T6 review under DR-0019 B with this criterion.
+
 **Follow-up:**
+- The review record lists F42 and F43 as accepted residual risk.
+- `approved_digests.py` states the justification requirement.
+- The unused intermediates are named in the review record so that condition 4 can be applied.
+- The final Codex round has been submitted.

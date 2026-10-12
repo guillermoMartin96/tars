@@ -325,3 +325,25 @@ All seven are **`ACCEPTED`**.
 
 **Report preserved:** the M2 Proof report is identical (213 checks). Each F44–F46 mechanism fails its test when disabled. **Round 12 has not been launched; it waits for DR-0020.**
 
+## Residual risk accepted under DR-0020 (Tech Lead, 2026-10-11)
+DR-0020 was approved as option A, with conditions. Under it, a reference-output finding is blocking only if the corruption could affect a validation check, a reported value, an acceptance decision or an explicitly required physical invariant. F42 and F43 are **not fixed**; their residual risk is **accepted** and recorded here.
+
+| Finding | Mutation mechanism | Why it cannot affect the current validation contract | Residual risk accepted |
+|---|---|---|---|
+| **F42** | Every Kepler return in the O6 midpoint propagation, forward and in the −Δt round trip, has r and v negated. The round trip then cancels, and the two-body invariants are preserved | O6 consumes only the semi-major axis after the midpoint impulse. Negating r and v preserves \|v\| and \|r\|, so the energy and the SMA are unchanged, and every O6 metric is identical. Every other Kepler consumer compares Kepler's output with another independent state, so a negated output would fail there: O5 against simulator samples, GMAT coast alignment against GMAT rows, and the node bisection's crossing times against the simulator's | A Kepler phase error consistent across forward and backward calls, in a quantity no check consumes. Detecting it needs a second independent propagator, and the same question applies to that one |
+| **F43** | Interior DOP853 solver nodes and the dense output are negated together, consistently, keeping the segment endpoints and the propellant. Node reconciliation and the derivative check stay self-consistent | The interior solver nodes are unused. The dense output feeds only the altitude extrema, which depend on \|r\| and are unchanged. Every consumed state (segment ends, all marks, all comparisons) is the exact, unchanged integrator state | Internally inconsistent values inside one reference's internal representation, consumed by no check. Detecting it needs a second independent integrator, with the same regress |
+
+**Unused intermediate values, named for DR-0020 condition 4.** They must be validated before any of them is relied on:
+- DOP853 interior solver nodes (`sol.y[:, 1:-1]`);
+- dense-output velocity and propellant at telemetry ticks (beyond the existing consistency checks);
+- dense-output positions except through \|r\|;
+- Kepler output beyond the quantities each consumer compares;
+- the GMAT epoch column (used only for spacing and the epoch anchor).
+
+**Preserved (DR-0020 condition 3).**
+- No check, threshold or test was removed or weakened.
+- All existing checks stay enforced: finite values, physical consistency (two-body invariants, Kepler round trip, solver-node reconciliation, dense self-consistency), the mass law, GMAT and DOP853.
+
+## Re-verification 12 (final, under DR-0019 B and DR-0020 A)
+See below.
+

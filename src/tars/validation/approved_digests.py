@@ -7,8 +7,11 @@ history) is rejected; changing one legitimately (the T7 threshold DR, a regenera
 GMAT reference) needs a reviewed commit that updates the digest here. Bypassing the
 pin requires editing validator source, which DR-0019 B places under code review.
 
-Update procedure: change the file, review it, then set its new digest below in the
-same reviewed change (``shasum -a 256 <file>``).
+Update procedure (DR-0020 condition 5): change the file, review it, then set its new
+digest below in the SAME reviewed commit, with an explicit justification in that commit
+message and in the relevant record (threshold DR, VAL record or review record). This
+applies to every approved threshold file and to the reference manifest, including the
+T7 changes to m2.json (``shasum -a 256 <file>``).
 """
 
 APPROVED_THRESHOLD_SHA256 = {
