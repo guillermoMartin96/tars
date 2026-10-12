@@ -4,6 +4,7 @@ Usage:
     uv run python toolbox/scripts/reference_snapshot.py generate --out PATH [--measurement]
     uv run python toolbox/scripts/reference_snapshot.py verify-baseline PATH
     uv run python toolbox/scripts/reference_snapshot.py compare OLD NEW
+    uv run python toolbox/scripts/reference_snapshot.py measure-deviation CANDIDATE --out JSON
 
 ``generate`` records every reference value of the M2 Proof and of the GMAT M2
 evaluation into a CANDIDATE file. It never writes the approved artifact and never
@@ -20,7 +21,12 @@ cross-platform measurement, not a candidate (VAL-0015).
 physical invariants, from the snapshot's own values (DR-0021 condition 2).
 
 ``compare`` reports the largest |a - b| per value class and any keys present in only
-one file: the cross-platform measurement and the baseline-change comparison.
+one file (the baseline-change comparison).
+
+``measure-deviation`` runs the Proof and the GMAT evaluation in VERIFY mode against a
+candidate with unlimited tolerances, so every within-run value is substituted exactly
+as in a real verification, and reports the largest |runtime - approved| per value class:
+the quantity the reproducibility tolerances bound (VAL-0015, DR-0021 condition 4).
 """
 
 from __future__ import annotations
@@ -29,6 +35,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import math
 import subprocess
 import sys
 from collections import defaultdict
@@ -371,6 +378,50 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 1 if structural else 0
 
 
+def cmd_measure_deviation(args: argparse.Namespace) -> int:
+    candidate = Path(args.candidate).resolve()
+    proof = _load_module("m2_proof", "toolbox/validators/m2_proof.py")
+    cli = _load_module("gmat_m2_cli", "toolbox/scripts/gmat_m2.py")
+    saved = dict(snap.TOLERANCES)
+    snap.TOLERANCES.update({k: math.inf for k in snap.TOLERANCES})
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    results: dict[str, Any] = {}
+    structural: list[str] = []
+    try:
+        with snap.session("m2_proof", path=candidate, authenticate=False) as s:
+            proof.main(["--out", str(out.with_suffix(".proof.json"))])
+        results["m2_proof"] = s.report()
+        structural += s.finish(complete=True)
+        for name in cli.gmat_m2.GMAT_MISSIONS:
+            ep = f"gmat_m2:{name}"
+            with snap.session(ep, path=candidate, authenticate=False) as s:
+                cli._evaluate(name)
+            results[ep] = s.report()
+            structural += s.finish(complete=True)
+    finally:
+        snap.TOLERANCES.clear()
+        snap.TOLERANCES.update(saved)
+    overall: dict[str, float] = {}
+    for rep in results.values():
+        for cls, v in rep["max_deviation_by_class"].items():
+            overall[cls] = max(overall.get(cls, 0.0), v)
+    summary = {
+        "candidate_sha256": hashlib.sha256(candidate.read_bytes()).hexdigest(),
+        "environment": _environment(),
+        "max_deviation_by_class": dict(sorted(overall.items())),
+        "by_entrypoint": results,
+        "structural_problems": structural,
+    }
+    out.write_text(json.dumps(summary, indent=2) + "\n")
+    print(
+        json.dumps(
+            {k: summary[k] for k in ("max_deviation_by_class", "structural_problems")}, indent=2
+        )
+    )
+    return 1 if structural else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest="command", required=True)
@@ -385,6 +436,10 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("first")
     c.add_argument("second")
     c.set_defaults(func=cmd_compare)
+    d = sub.add_parser("measure-deviation")
+    d.add_argument("candidate")
+    d.add_argument("--out", required=True)
+    d.set_defaults(func=cmd_measure_deviation)
     args = parser.parse_args(argv)
     return args.func(args)
 

@@ -31,6 +31,9 @@ jobs:
       - name: Record the reference values (measurement, not a baseline candidate)
         run: uv run python toolbox/scripts/reference_snapshot.py generate --measurement --out runs/refsnap/${{ matrix.os }}.json.gz
 
+      - name: Verify-mode deviation from the committed snapshot (unlimited tolerance)
+        run: uv run python toolbox/scripts/reference_snapshot.py measure-deviation toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz --out runs/refsnap/${{ matrix.os }}-deviation.json
+
       - name: Upload measurement
         if: always()
         uses: actions/upload-artifact@v4

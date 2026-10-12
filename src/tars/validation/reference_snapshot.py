@@ -269,10 +269,15 @@ def active() -> Session | None:
 
 @contextlib.contextmanager
 def session(
-    entrypoint: str, recorder: Session | None = None, path: Path | None = None
+    entrypoint: str,
+    recorder: Session | None = None,
+    path: Path | None = None,
+    authenticate: bool = True,
 ) -> Iterator[Session]:
-    """Verify against the approved artifact, or record into ``recorder`` (only the
-    reference_snapshot script passes one). Nested calls reuse the outer session."""
+    """Verify against the approved artifact, or record into ``recorder``. Nested calls
+    reuse the outer session. Only toolbox/scripts/reference_snapshot.py passes a
+    recorder or ``authenticate=False`` (a candidate's deviation measurement); the Proof
+    and the GMAT evaluation always verify the pinned artifact."""
     outer = _SESSION.get()
     if outer is not None:
         yield outer
@@ -283,7 +288,7 @@ def session(
         s = Session("verify", entrypoint)
         try:
             p = snapshot_path() if path is None else path
-            data = load_approved(p)
+            data = load_approved(p, authenticate)
             s.approved = data["records"]
             s.sha256 = hashlib.sha256(p.read_bytes()).hexdigest()
         except (SnapshotError, OSError, ValueError) as exc:
