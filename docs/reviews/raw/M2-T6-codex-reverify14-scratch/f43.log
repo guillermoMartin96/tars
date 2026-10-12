@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap15/review_scratch/correlated_probe.py", line 52, in <module>
+    rejected, check = cli._evaluate("m2_prograde_burn")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap15/toolbox/scripts/gmat_m2.py", line 92, in _evaluate
+    audit = m2.audit_run(scenario, mission.expected, run)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap15/src/tars/validation/m2.py", line 2192, in audit_run
+    o4, ref = reference_metrics(scenario, events, predicted)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap15/src/tars/validation/m2.py", line 1228, in reference_metrics
+    ref = dop853_reference(scenario, r0, v0, predicted, marks)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap15/src/tars/validation/m2.py", line 1156, in dop853_reference
+    raise RuntimeError(f"anchor tick positions disagree with DOP853 on [{a}, {b}]")
+RuntimeError: anchor tick positions disagree with DOP853 on [0.0, 60.0]

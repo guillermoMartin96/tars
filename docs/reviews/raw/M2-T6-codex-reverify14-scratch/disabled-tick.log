@@ -1,0 +1,124 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+____________ test_dense_radii_corruption_cannot_change_the_extrema _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b10ae10>
+
+    def test_dense_radii_corruption_cannot_change_the_extrema(monkeypatch):
+        """F47/F49: the extrema come from the independent anchors (Kepler on coasts, RK4 in
+        burns), and corrupting the dense radii at the ticks makes the two references
+        disagree, which rejects the reference instead of moving an extremum."""
+        scenario = BY_NAME["m2_prograde_burn"].build()
+        marks = [k * 60.0 for k in range(1, 100)]
+        _segment_probe(monkeypatch, _radial_at_interior_ticks())
+>       with pytest.raises(RuntimeError, match="disagree with DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2024: Failed
+______ test_overstated_altitude_stays_rejected_under_reference_corruption ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d28d130>
+
+    def test_overstated_altitude_stays_rejected_under_reference_corruption(monkeypatch):
+        """F47 (acceptance reversal): a simulator maximum altitude overstated by 0.1 m is
+        rejected with the clean reference, and the reference whose dense radii are raised
+        by the same 0.1 m at every interior tick is itself rejected (F49)."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        done = run.events[-1]
+        run.events[-1] = done.model_copy(update={"max_altitude_m": done.max_altitude_m + 0.1})
+        predicted = m2.predict_burns(scenario, mission.expected)
+        limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+            "max_altitude_error_m"
+        ]
+    
+        def max_alt_error():
+            _, ref = m2.reference_metrics(scenario, run.events, predicted)
+            metrics, _ = m2.orbit_checks(scenario, run.events, ref, predicted)
+            return metrics["max_altitude_error_m"]
+    
+        assert max_alt_error() > limit
+        _segment_probe(monkeypatch, _radial_at_interior_ticks(0.1, scenario.dt_s))
+>       with pytest.raises(RuntimeError, match="disagree with DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2115: Failed
+___________________ test_kepler_tick_corruption_is_rejected ____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e669130>
+
+    def test_kepler_tick_corruption_is_rejected(monkeypatch):
+        """F49: wrong-phase Kepler tick states keep energy, angular momentum and the round
+        trip, but disagree with the validated DOP853 dense output."""
+        scenario = BY_NAME["m2_prograde_burn"].build()
+        calls = _kepler_tick_phase(monkeypatch)
+>       with pytest.raises(RuntimeError, match="disagree with DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2176: Failed
+____________ test_kepler_tick_corruption_cannot_reverse_acceptance _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10eb20710>
+
+    def test_kepler_tick_corruption_cannot_reverse_acceptance(monkeypatch):
+        """F49 (acceptance reversal): a simulator maximum altitude just over the limit is
+        rejected with the clean reference; with wrong-phase Kepler ticks the reference is
+        rejected instead of producing a passing error."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        predicted = m2.predict_burns(scenario, mission.expected)
+        limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+            "max_altitude_error_m"
+        ]
+    
+        def max_alt_error():
+            _, ref = m2.reference_metrics(scenario, run.events, predicted)
+            metrics, _ = m2.orbit_checks(scenario, run.events, ref, predicted)
+            return metrics["max_altitude_error_m"]
+    
+        _, ref = m2.reference_metrics(scenario, run.events, predicted)
+        done = run.events[-1]
+        run.events[-1] = done.model_copy(update={"max_altitude_m": ref.alt_max + limit + 1e-5})
+        assert max_alt_error() > limit
+        _kepler_tick_phase(monkeypatch)
+>       with pytest.raises(RuntimeError, match="disagree with DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2203: Failed
+__________________ test_rk4_burn_tick_corruption_is_rejected ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10eb2f770>
+
+    def test_rk4_burn_tick_corruption_is_rejected(monkeypatch):
+        """F49: interior RK4 tick states (consumed by the extrema) are reconciled with the
+        dense output too; the RK4 segment end is left exact so only that check can fire."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        predicted = m2.predict_burns(scenario, mission.expected)
+        original = m2._rk4_path
+    
+        def poisoned(f, y, times):
+            out = original(f, y, times)
+            for st in out[1:-1]:
+                st[:3] *= 1.0 + 0.005 / np.linalg.norm(st[:3])
+            return out
+    
+        monkeypatch.setattr(m2, "_rk4_path", poisoned)
+>       with pytest.raises(RuntimeError, match="disagree with DOP853"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2222: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_dense_radii_corruption_cannot_change_the_extrema
+FAILED tests/test_gmat_m2.py::test_overstated_altitude_stays_rejected_under_reference_corruption
+FAILED tests/test_gmat_m2.py::test_kepler_tick_corruption_is_rejected - Faile...
+FAILED tests/test_gmat_m2.py::test_kepler_tick_corruption_cannot_reverse_acceptance
+FAILED tests/test_gmat_m2.py::test_rk4_burn_tick_corruption_is_rejected - Fai...
+5 failed, 179 deselected in 25.78s

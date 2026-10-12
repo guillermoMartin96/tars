@@ -336,9 +336,11 @@ DR-0020 was approved as option A, with conditions. Under it, a reference-output 
 **Unused intermediate values, named for DR-0020 condition 4.** They must be validated before any of them is relied on:
 - DOP853 interior solver nodes (`sol.y[:, 1:-1]`);
 - dense-output velocity and propellant at telemetry ticks (beyond the existing consistency checks);
-- dense-output positions except through \|r\|;
+- dense-output positions except through \|r\| (superseded by F49: the full position vector at every tick is now consumed by the anchor reconciliation);
 - Kepler output beyond the quantities each consumer compares;
 - the GMAT epoch column (used only for spacing and the epoch anchor).
+
+**Amendment after F49 (round 14 note).** F43's rationale above describes the contract before F49. Since F49, the DOP853 dense positions at the ticks are consumed as full vectors by the anchor reconciliation, and F43's exact mutation (interior nodes and dense output negated) is now **rejected**: the reviewer re-ran it in round 14. F43 stays recorded as accepted residual risk for its mechanism; it is not marked fixed by this note.
 
 **Preserved (DR-0020 condition 3).**
 - No check, threshold or test was removed or weakened.
@@ -392,6 +394,19 @@ DR-0020 was approved as option A, with conditions. Under it, a reference-output 
 
 **Limit of the method (not a new acceptance).** A corruption applied consistently to **both** independent references at the same ticks would still pass. That is the regress described in DR-0020 for F42 and F43, now requiring two separate implementations to agree on the same wrong value.
 
-## Re-verification 14 (final, under DR-0019 B and DR-0020 A)
-See below.
+## Re-verification 14 (under DR-0019 B and DR-0020 A)
+**Reviewer:** Codex, session `01a12ec0-bdd9-7fd3-a011-f7658ec2be53`, at `683a224`. **Raw:** `raw/M2-T6-codex-reverify14.md`, `raw/M2-T6-codex-reverify14-scratch/`.
+
+**Verdict: FAIL** (F50, F51).
+- F44–F49 are resolved. Both F49 probes are rejected, and disabling the tick reconciliation fails five targeted tests. The revised F47 assertions are confirmed stricter.
+- F42 is re-probed and remains accepted residual risk. F43's exact mutation is now rejected (by F49).
+- All eight required commands pass (1,019 tests). The fresh 213-check report matches `1017c55`, except for CPU metadata.
+
+| # | Sev. | Finding | Disposition |
+|---|---|---|---|
+| F50 | Med | Kepler tick states (1.001 × flight time) and DOP853 dense positions corrupted **consistently with each other** at 17,876 ticks pass the F49 reconciliation and reverse an acceptance: 0.01301 m rejected with clean references, 0.012976 m accepted | **`ESCALATED_FOR_INVESTIGATION`** (DR-0021). This is the two-reference regress that DR-0020 named for its option B. Fixing this instance (tick continuity against the stencil) adds another reference for the next consistent corruption to target |
+| F51 | Med | O6 midpoint Kepler returns at 10 × the flight time, forward and in the round trip, keep the invariants and the round trip but change the reported and gated O6 values; every check still passes | **`ESCALATED_FOR_INVESTIGATION`** (DR-0021). Fixable by a DOP853 cross-check of the midpoint (in scope under every DR-0021 option); not started, because option A would cover it differently |
+| note | — | Stale docs: the F43 rationale and unused-value inventory after F49; the VAL-0014 epoch-column description omitted the F46 anchor | **`ACCEPTED`, fixed.** An amendment note under "Residual risk accepted under DR-0020" (F43 stays accepted residual risk, not marked fixed); the inventory line marked superseded; VAL-0014 now describes the epoch anchor |
+
+**T6 is blocked on DR-0021.** No further review round runs until it is decided.
 
