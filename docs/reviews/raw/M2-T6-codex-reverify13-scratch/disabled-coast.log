@@ -1,0 +1,24 @@
+.F....                                                                   [100%]
+=================================== FAILURES ===================================
+____________ test_segment_end_corruption_is_rejected_by_the_anchor _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10eb55d30>
+
+    def test_segment_end_corruption_is_rejected_by_the_anchor(monkeypatch):
+        """F47: a consistently shifted coast segment is rejected by the Kepler anchor."""
+        _segment_probe(monkeypatch, _shift_after_start())
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="Kepler"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2055: Failed
+=============================== warnings summary ===============================
+tests/test_gmat_m2.py::test_overflowing_finite_velocities_are_rejected
+  /private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap14/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2803: RuntimeWarning: overflow encountered in multiply
+    s = (x.conj() * x).real
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_segment_end_corruption_is_rejected_by_the_anchor
+1 failed, 5 passed, 175 deselected, 1 warning in 10.48s

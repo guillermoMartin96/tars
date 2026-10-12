@@ -364,6 +364,34 @@ DR-0020 was approved as option A, with conditions. Under it, a reference-output 
 
 **Runtime.** The full M2 Proof now takes about 114 s, because of per-tick Kepler anchoring with round trips.
 
-## Re-verification 13 (final, under DR-0019 B and DR-0020 A)
+## Re-verification 13 (under DR-0019 B and DR-0020 A)
+**Reviewer:** Codex, session `01a12e99-e8c0-7fa1-b240-85492b7ff544`, at `1017c55`. **Raw:** `raw/M2-T6-codex-reverify13.md`, `raw/M2-T6-codex-reverify13-scratch/`.
+
+**Verdict: FAIL** (F49, blocking under DR-0020 A).
+- F42 and F43 remain accepted residual risk; the reviewer reconfirms the relevance analysis.
+- F44–F48 are resolved. Disabling each F47/F48 mechanism fails its targeted tests.
+- All eight required commands pass (1,016 tests). The fresh 213-check report is identical to `1017c55`'s.
+
+**`ACCEPTED`.** The F47 fix made the anchor's tick positions a **consumed** value (the altitude extrema), and DR-0020 condition 4 requires validating such a value before relying on it. Only the segment-end anchor call was reconciled.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F49 | Med | Kepler tick states returned at 1.001 × the requested time of flight keep the energy, the angular momentum and the round trip. They changed `max_altitude_error_m` and reversed an acceptance (0.01301 m > 0.013 m clean; ≈ 0.012976 m corrupted) | **Every consumed anchor tick is reconciled with the validated DOP853 dense output** at the same tick, with the anchor limits: ≤ 1e-7 m on coasts and ≤ 1e-6 m during burns (measured maxima 2.8e-8 m over 15,362 coast segments and 2.4e-8 m over 299 burn segments). An extremum therefore moves only if two independent references (Kepler or the in-validator RK4, and SciPy DOP853) are corrupted consistently at the same ticks | `test_kepler_tick_corruption_is_rejected`, `test_kepler_tick_corruption_cannot_reverse_acceptance`, `test_rk4_burn_tick_corruption_is_rejected` |
+
+**Changed tests (stricter, not weaker).** `test_dense_radii_corruption_cannot_change_the_extrema` and `test_overstated_altitude_stays_rejected_under_reference_corruption` corrupt the dense radii at the ticks. They previously asserted that the extrema were unchanged; that corruption is now **rejected**, and the tests assert the rejection. The clean-reference half of the reversal test is unchanged.
+
+**Mutation.** With the F49 check disabled, all five tests above fail.
+
+**Report.** Unchanged: the check only accepts or rejects the reference and moves no metric.
+
+**Consumed reference quantities (inventory, updated for F49).**
+- DOP853 segment-end states: the marks and every comparison. Anchored to Kepler or RK4.
+- Anchor tick positions: the altitude extrema, through \|r\|. Reconciled with the DOP853 dense output (F49).
+- DOP853 dense positions at the ticks: consumed only as F49's cross-check. Self-consistent (nodes, derivative, terminal).
+- Kepler output in O5, O6 and the GMAT coast alignment: each compares with another independent state, except the O6 SMA (F42, accepted).
+
+**Limit of the method (not a new acceptance).** A corruption applied consistently to **both** independent references at the same ticks would still pass. That is the regress described in DR-0020 for F42 and F43, now requiring two separate implementations to agree on the same wrong value.
+
+## Re-verification 14 (final, under DR-0019 B and DR-0020 A)
 See below.
 

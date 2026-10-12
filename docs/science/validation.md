@@ -487,4 +487,5 @@ All 10 approved rejection codes are exercised.
     - burns: ≤ 1e-6 m, 1e-9 m/s and 1e-9 kg (measured 3.8e-8 m, 1.1e-10 m/s and 1.5e-10 kg).
   - Every tolerance comparison requires finite operands.
   - The extrema metrics moved by at most 2e-8 m.
+  - Every consumed anchor tick must also agree with the validated DOP853 dense output at that tick, with the same limits (review F49; measured ≤ 2.8e-8 m). An extremum moves only if both independent references are corrupted consistently.
 

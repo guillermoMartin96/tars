@@ -1,0 +1,26 @@
+/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap14/.venv/lib/python3.12/site-packages/pydantic/main.py:542: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `list[float]` - serialized value may not be as expected [field_name='r', input_value=(1000000000.0, 1000000000.0, 1000000000.0), input_type=tuple])
+  return self.__pydantic_serializer__.to_json(
+state-position accepted False reasons ['simulator audit event_order: event 3 StateSampled: does not round-trip through the schema', 'simulator audit identities: returned samples differ from StateSampled events']
+/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap14/.venv/lib/python3.12/site-packages/pydantic/main.py:542: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `list[float]` - serialized value may not be as expected [field_name='v', input_value=(nan, 0.0, 0.0), input_type=tuple])
+  return self.__pydantic_serializer__.to_json(
+state-nan accepted False reasons ['simulator audit event_order: event 3 StateSampled: invalid against the schema (ValidationError)', 'simulator audit identities: returned samples differ from StateSampled events']
+thrust-direction accepted False reasons ['simulator audit identities: tick 0: thrust acceleration while not burning']
+mass accepted False reasons ['simulator audit identities: tick 0: total mass != dry + propellant']
+propellant-inf accepted False reasons ['simulator audit event_order: event 4 PropulsionSampled: invalid against the schema (ValidationError)', 'simulator audit identities: tick 0: total mass != dry + propellant']
+delta-v accepted False reasons ['simulator audit identities: ticks 0->6: propellant or delta-v changed while idle', 'simulator audit accounting: sample_delta_v_excess_over_simpson_rel_max=3.41579e+07 > 1e-12']
+engine-state accepted False reasons ["simulator audit identities: tick 0: schedule ('burning', None, ['burn#000001']), expected ('scheduled', None, ['burn#000001'])", 'simulator audit o4_reference: thrust_direction_vs_reference_max=3.14159 > 4e-10']
+cutoff-state accepted False reasons ['simulator audit o4_reference: cutoff_position_error_max_m=1.72554e+09 > 0.002', 'simulator audit o5_coast_kepler: coast_position_error_max_m=1.84695e+09 > 0.6']
+ignition-time accepted False reasons ['simulator audit event_order: BurnStarted burn#000001 at t=650.0: tick 60, expected 65', 'simulator audit traceability: burn#000001: ignited at 650.0, commanded 600.0']
+crossing-time accepted False reasons ['simulator audit identities: returned crossing_times differ from OrbitCompleted events', 'simulator audit orbit_events_contract: orbit 1: crossing_t outside its step']
+completion-extrema accepted False reasons ['simulator audit orbit_events: min_altitude_error_m=1.00025e+09 > 0.013']
+start-mu accepted False reasons ["simulator audit identities: SimulationStarted.earth_constants {'name': 'WGS84', 'mu': 1.0, 'equatorial_radius': 6378137.0} != {'name': 'WGS84', 'mu': 398600441800000.0, 'equatorial_radius': 6378137.0}"]
+missing-StateSampled accepted False
+missing-PropulsionSampled accepted False
+missing-BurnStarted accepted False
+missing-BurnEnded accepted False
+missing-OrbitCompleted accepted False
+result-status accepted False
+result-crossing_times accepted False
+result-failure_cause accepted False

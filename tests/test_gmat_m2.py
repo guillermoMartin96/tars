@@ -2015,14 +2015,14 @@ def _radial_at_interior_ticks(dr=0.1, dt=10.0):
 
 
 def test_dense_radii_corruption_cannot_change_the_extrema(monkeypatch):
-    """F47: the extrema come from the independent anchors (Kepler on coasts, RK4 in
-    burns), so corrupting the dense radii at the ticks changes no consumed radius."""
+    """F47/F49: the extrema come from the independent anchors (Kepler on coasts, RK4 in
+    burns), and corrupting the dense radii at the ticks makes the two references
+    disagree, which rejects the reference instead of moving an extremum."""
     scenario = BY_NAME["m2_prograde_burn"].build()
     marks = [k * 60.0 for k in range(1, 100)]
-    clean = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
     _segment_probe(monkeypatch, _radial_at_interior_ticks())
-    dirty = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
-    assert (dirty.alt_min, dirty.alt_max) == (clean.alt_min, clean.alt_max)
+    with pytest.raises(RuntimeError, match="disagree with DOP853"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
 
 
 def _shift_after_start(dx=0.005, only=None):
@@ -2093,8 +2093,8 @@ def test_segment_must_start_at_the_requested_state(monkeypatch):
 
 def test_overstated_altitude_stays_rejected_under_reference_corruption(monkeypatch):
     """F47 (acceptance reversal): a simulator maximum altitude overstated by 0.1 m is
-    rejected with the clean reference, and still rejected when the reference's dense
-    radii are raised by the same 0.1 m at every interior tick."""
+    rejected with the clean reference, and the reference whose dense radii are raised
+    by the same 0.1 m at every interior tick is itself rejected (F49)."""
     mission = BY_NAME["m2_prograde_burn"]
     scenario = mission.build()
     run = run_scenario(scenario)
@@ -2112,7 +2112,8 @@ def test_overstated_altitude_stays_rejected_under_reference_corruption(monkeypat
 
     assert max_alt_error() > limit
     _segment_probe(monkeypatch, _radial_at_interior_ticks(0.1, scenario.dt_s))
-    assert max_alt_error() > limit
+    with pytest.raises(RuntimeError, match="disagree with DOP853"):
+        max_alt_error()
 
 
 def test_overflowing_finite_velocities_are_rejected(monkeypatch):
@@ -2140,3 +2141,85 @@ def test_overflowing_finite_velocities_are_rejected(monkeypatch):
     scenario = BY_NAME["m2_prograde_burn"].build()
     with pytest.raises(RuntimeError):
         m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [60.0, 120.0])
+
+
+# ------------------------------------------------------------------ re-verification 13 fixes
+
+
+def _kepler_tick_phase(monkeypatch, factor=1.001):
+    """Kepler states for the anchor's tick rows only, at factor x the requested time of
+    flight (review F49 probe); the segment-end Kepler anchor call is untouched."""
+    import inspect
+    import sys
+
+    lines, start = inspect.getsourcelines(m2._anchor_segment)
+    target = start + next(i for i, ln in enumerate(lines) if "rows = [kepler_state" in ln)
+    original = m2.kepler_state
+    calls = []
+
+    def poisoned(r, v, dt, mu):
+        f = sys._getframe(1)
+        if f.f_code.co_name == "_anchor_segment" and f.f_lineno == target:
+            calls.append(dt)
+            return original(r, v, dt * factor, mu)
+        return original(r, v, dt, mu)
+
+    monkeypatch.setattr(m2, "kepler_state", poisoned)
+    return calls
+
+
+def test_kepler_tick_corruption_is_rejected(monkeypatch):
+    """F49: wrong-phase Kepler tick states keep energy, angular momentum and the round
+    trip, but disagree with the validated DOP853 dense output."""
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    calls = _kepler_tick_phase(monkeypatch)
+    with pytest.raises(RuntimeError, match="disagree with DOP853"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [60.0])
+    assert calls  # the probe reached the tick rows
+
+
+def test_kepler_tick_corruption_cannot_reverse_acceptance(monkeypatch):
+    """F49 (acceptance reversal): a simulator maximum altitude just over the limit is
+    rejected with the clean reference; with wrong-phase Kepler ticks the reference is
+    rejected instead of producing a passing error."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    run = run_scenario(scenario)
+    predicted = m2.predict_burns(scenario, mission.expected)
+    limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+        "max_altitude_error_m"
+    ]
+
+    def max_alt_error():
+        _, ref = m2.reference_metrics(scenario, run.events, predicted)
+        metrics, _ = m2.orbit_checks(scenario, run.events, ref, predicted)
+        return metrics["max_altitude_error_m"]
+
+    _, ref = m2.reference_metrics(scenario, run.events, predicted)
+    done = run.events[-1]
+    run.events[-1] = done.model_copy(update={"max_altitude_m": ref.alt_max + limit + 1e-5})
+    assert max_alt_error() > limit
+    _kepler_tick_phase(monkeypatch)
+    with pytest.raises(RuntimeError, match="disagree with DOP853"):
+        max_alt_error()
+
+
+def test_rk4_burn_tick_corruption_is_rejected(monkeypatch):
+    """F49: interior RK4 tick states (consumed by the extrema) are reconciled with the
+    dense output too; the RK4 segment end is left exact so only that check can fire."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    predicted = m2.predict_burns(scenario, mission.expected)
+    original = m2._rk4_path
+
+    def poisoned(f, y, times):
+        out = original(f, y, times)
+        for st in out[1:-1]:
+            st[:3] *= 1.0 + 0.005 / np.linalg.norm(st[:3])
+        return out
+
+    monkeypatch.setattr(m2, "_rk4_path", poisoned)
+    with pytest.raises(RuntimeError, match="disagree with DOP853"):
+        m2.dop853_reference(
+            scenario, *m2.expected_initial_state(scenario), predicted, [600.0, 677.3]
+        )

@@ -1,0 +1,157 @@
+F...F.                                                                   [100%]
+=================================== FAILURES ===================================
+____________ test_dense_radii_corruption_cannot_change_the_extrema _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x109295e80>
+
+    def test_dense_radii_corruption_cannot_change_the_extrema(monkeypatch):
+        """F47: the extrema come from the independent anchors (Kepler on coasts, RK4 in
+        burns), so corrupting the dense radii at the ticks changes no consumed radius."""
+        scenario = BY_NAME["m2_prograde_burn"].build()
+        marks = [k * 60.0 for k in range(1, 100)]
+        clean = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
+        _segment_probe(monkeypatch, _radial_at_interior_ticks())
+        dirty = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], marks)
+>       assert (dirty.alt_min, dirty.alt_max) == (clean.alt_min, clean.alt_max)
+E       assert (249999.99999...00.1000000257) == (249999.99999...0.00000002515)
+E         
+E         At index 0 diff: 249999.99999998976 != 249999.99999998603
+E         Use -v to get more diff
+
+tests/test_gmat_m2.py:2025: AssertionError
+______ test_overstated_altitude_stays_rejected_under_reference_corruption ______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c1c5580>
+
+    def test_overstated_altitude_stays_rejected_under_reference_corruption(monkeypatch):
+        """F47 (acceptance reversal): a simulator maximum altitude overstated by 0.1 m is
+        rejected with the clean reference, and still rejected when the reference's dense
+        radii are raised by the same 0.1 m at every interior tick."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        done = run.events[-1]
+        run.events[-1] = done.model_copy(update={"max_altitude_m": done.max_altitude_m + 0.1})
+        predicted = m2.predict_burns(scenario, mission.expected)
+        limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+            "max_altitude_error_m"
+        ]
+    
+        def max_alt_error():
+            _, ref = m2.reference_metrics(scenario, run.events, predicted)
+            metrics, _ = m2.orbit_checks(scenario, run.events, ref, predicted)
+            return metrics["max_altitude_error_m"]
+    
+>       assert max_alt_error() > limit
+               ^^^^^^^^^^^^^^^
+
+tests/test_gmat_m2.py:2113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gmat_m2.py:2109: in max_alt_error
+    _, ref = m2.reference_metrics(scenario, run.events, predicted)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/validation/m2.py:1219: in reference_metrics
+    ref = dop853_reference(scenario, r0, v0, predicted, marks)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/validation/m2.py:1146: in dop853_reference
+    tick_r = _anchor_segment(mu, veh, sign, y_start, y, a, b, ticks, f"[{a}, {b}]")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/disable_plugin.py:15: in anchor
+    return altered(*args,**kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+<string>:27: in _anchor_segment
+    ???
+.venv/lib/python3.12/site-packages/scipy/integrate/_ivp/common.py:254: in __call__
+    ys = np.hstack(ys)
+         ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tup = [], dtype = None, casting = 'same_kind'
+
+    @array_function_dispatch(_vhstack_dispatcher)
+    def hstack(tup, *, dtype=None, casting="same_kind"):
+        """
+        Stack arrays in sequence horizontally (column wise).
+    
+        This is equivalent to concatenation along the second axis, except for 1-D
+        arrays where it concatenates along the first axis. Rebuilds arrays divided
+        by `hsplit`.
+    
+        This function makes most sense for arrays with up to 3 dimensions. For
+        instance, for pixel-data with a height (first axis), width (second axis),
+        and r/g/b channels (third axis). The functions `concatenate`, `stack` and
+        `block` provide more general stacking and concatenation operations.
+    
+        Parameters
+        ----------
+        tup : sequence of ndarrays
+            The arrays must have the same shape along all but the second axis,
+            except 1-D arrays which can be any length. In the case of a single
+            array_like input, it will be treated as a sequence of arrays; i.e.,
+            each element along the zeroth axis is treated as a separate array.
+    
+        dtype : str or dtype
+            If provided, the destination array will have this dtype. Cannot be
+            provided together with `out`.
+    
+            .. versionadded:: 1.24
+    
+        casting : {'no', 'equiv', 'safe', 'same_kind', 'unsafe'}, optional
+            Controls what kind of data casting may occur. Defaults to 'same_kind'.
+    
+            .. versionadded:: 1.24
+    
+        Returns
+        -------
+        stacked : ndarray
+            The array formed by stacking the given arrays.
+    
+        See Also
+        --------
+        concatenate : Join a sequence of arrays along an existing axis.
+        stack : Join a sequence of arrays along a new axis.
+        block : Assemble an nd-array from nested lists of blocks.
+        vstack : Stack arrays in sequence vertically (row wise).
+        dstack : Stack arrays in sequence depth wise (along third axis).
+        column_stack : Stack 1-D arrays as columns into a 2-D array.
+        hsplit : Split an array into multiple sub-arrays
+                 horizontally (column-wise).
+        unstack : Split an array into a tuple of sub-arrays along an axis.
+    
+        Examples
+        --------
+        >>> import numpy as np
+        >>> a = np.array((1,2,3))
+        >>> b = np.array((4,5,6))
+        >>> np.hstack((a,b))
+        array([1, 2, 3, 4, 5, 6])
+        >>> a = np.array([[1],[2],[3]])
+        >>> b = np.array([[4],[5],[6]])
+        >>> np.hstack((a,b))
+        array([[1, 4],
+               [2, 5],
+               [3, 6]])
+    
+        """
+        arrs = atleast_1d(*tup)
+        if not isinstance(arrs, tuple):
+            arrs = (arrs,)
+        # As a special case, dimension 0 of 1-dimensional arrays is "horizontal"
+        if arrs and arrs[0].ndim == 1:
+            return _nx.concatenate(arrs, 0, dtype=dtype, casting=casting)
+        else:
+>           return _nx.concatenate(arrs, 1, dtype=dtype, casting=casting)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           ValueError: need at least one array to concatenate
+
+.venv/lib/python3.12/site-packages/numpy/_core/shape_base.py:365: ValueError
+=============================== warnings summary ===============================
+tests/test_gmat_m2.py::test_overflowing_finite_velocities_are_rejected
+  /private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap14/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2803: RuntimeWarning: overflow encountered in multiply
+    s = (x.conj() * x).real
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_dense_radii_corruption_cannot_change_the_extrema
+FAILED tests/test_gmat_m2.py::test_overstated_altitude_stays_rejected_under_reference_corruption
+2 failed, 4 passed, 175 deselected, 1 warning in 3.31s
