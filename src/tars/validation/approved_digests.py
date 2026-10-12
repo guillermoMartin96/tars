@@ -33,5 +33,5 @@ APPROVED_GMAT_M2_MANIFEST_SHA256 = (
 # needs the artifact, a justification, a comparison with the previous baseline and an
 # independent review in the same commit (DR-0021 condition 3).
 APPROVED_REFERENCE_SNAPSHOT_SHA256 = (
-    "031c7e7bcebb6ae11ba872c9648971da8478c1f981292d3a7fe8acfe7b59e99e"
+    "1355cb3a6643de36b485644e749c31941b402988216f51c9cfb2152b63f8bcc9"
 )
