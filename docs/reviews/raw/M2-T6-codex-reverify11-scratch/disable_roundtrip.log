@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_kepler_output_on_the_wrong_side_of_the_orbit_is_rejected _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105d20710>
+
+    def test_kepler_output_on_the_wrong_side_of_the_orbit_is_rejected(monkeypatch):
+        """F38: negating r and v conserves energy and angular momentum but not the phase;
+        the round trip catches it, so O6 cannot consume it."""
+        from tars.astro import kepler
+    
+        original = kepler.propagate
+    
+        def flipped(r, v, dt, mu):
+            rr, vv = original(r, v, dt, mu)
+            return (-rr, -vv) if dt > 0 else (rr, vv)
+    
+        scenario, _, arcs, rows = _labelled("m2_prograde_burn")
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        monkeypatch.setattr(kepler, "propagate", flipped)
+        r, v = m2.kepler_state(labelled[0.0].r, labelled[0.0].v, 300.0, scenario.constants.mu)
+>       assert np.all(r == math.inf) and np.all(v == math.inf)
+E       assert (np.False_)
+E        +  where np.False_ = <function all at 0x104eb8470>(array([-6224022.86330912, -1415581.95746714, -1786019.93535007]) == inf)
+E        +    where <function all at 0x104eb8470> = np.all
+E        +    and   inf = math.inf
+
+tests/test_gmat_m2.py:1811: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_kepler_output_on_the_wrong_side_of_the_orbit_is_rejected
+1 failed, 169 deselected in 0.14s

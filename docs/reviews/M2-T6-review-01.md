@@ -309,5 +309,19 @@ All seven are **`ACCEPTED`**.
 - **Results.** 1 005 tests pass; the M2 Proof report is identical to `b3a76eb` (213 checks).
 
 ## Re-verification 11 (under DR-0019 B)
-See below.
+**Reviewer:** Codex, session `01a12e30-3e5c-7023-98e3-4a5e4be213df`, at `1a11ff7`. **Raw:** `raw/M2-T6-codex-reverify11.md`, `raw/M2-T6-codex-reverify11-scratch/`.
+
+**Verdict: FAIL.**
+- F41 is resolved; F38–F40 are partly resolved (remainders F42–F45).
+- The fresh 213-check report is identical. All other corruption sweeps are rejected.
+
+| # | Sev. | Finding | Disposition |
+|---|---|---|---|
+| F42 | Med | Kepler output negated in both directions (the round trip cancels) | **`ESCALATED_FOR_INVESTIGATION`** to the Tech Lead as **DR-0020**. The corruption cannot change any verdict (O6 consumes only the SMA, which is invariant), and detecting it needs a second independent propagator (a regress) |
+| F43 | Med | Interior solver nodes and dense output negated consistently | **`ESCALATED_FOR_INVESTIGATION`** (DR-0020). Interior nodes are unused, the altitude extrema consume only \|r\|, and every consumed state is exact; detecting it needs a second integrator |
+| F44 | Med | Finite but wrong velocity or propellant at the stencil points | **`ACCEPTED`, fixed.** Stencil points are kept inside the segment, and their states must be finite and on the mass law. Their velocity must be continuous with the tick's (relative 1e-5). The central difference is taken about the stencil midpoint, which is also validated. Tests: `test_finite_invalid_stencil_states_are_rejected` (velocity-only and propellant-only probes, each pinning its own check) |
+| F45 | Med | Solver-node reconciliation skipped on segments without telemetry ticks | **`ACCEPTED`, fixed.** `_check_solver_nodes` runs for every segment. Test: `test_solver_nodes_are_reconciled_on_tickless_segments` |
+| F46 | Med | A staged GMAT report shifted by one day passed (epoch never anchored) | **`ACCEPTED`, fixed.** The first row's A.1 MJD must equal the configured TT epoch converted to A.1 (TT − A.1 = 32.184 − 0.0343817 s) within 1 µs; the committed references match exactly. Tests: `test_time_shifted_staged_report_is_rejected`, `test_epoch_anchor_matches_the_committed_references` |
+
+**Report preserved:** the M2 Proof report is identical (213 checks). Each F44–F46 mechanism fails its test when disabled. **Round 12 has not been launched; it waits for DR-0020.**
 

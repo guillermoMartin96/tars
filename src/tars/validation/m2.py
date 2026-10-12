@@ -944,11 +944,10 @@ def kepler_state(r0, v0, dt: float, mu: float) -> tuple[np.ndarray, np.ndarray]:
     return r, v
 
 
-def _check_dense_consistency(sol, ticks, dense, terminal, b: float, where: str) -> None:
-    """Dense velocities agree with a central difference of the dense position, and the
-    dense state at the segment end equals the terminal state (review M2-T6 F35)."""
-    # F40/F39: the interpolant reproduces every solver node, so interior nodes and the
-    # dense trajectory cannot be corrupted independently (measured residual 0).
+def _check_solver_nodes(sol, where: str) -> None:
+    """The interpolant reproduces every solver node, so interior nodes and the dense
+    trajectory cannot be corrupted independently (reviews M2-T6 F39, F40; measured
+    residual 0). Run for every segment, with or without telemetry ticks (F45)."""
     nodes = sol.sol(sol.t)
     scale = np.maximum(np.abs(sol.y), 1.0)
     if not (
@@ -956,13 +955,37 @@ def _check_dense_consistency(sol, ticks, dense, terminal, b: float, where: str) 
         and np.all(np.abs(nodes - sol.y) <= DENSE_TERMINAL_REL_TOL * scale)
     ):
         raise RuntimeError(f"DOP853 dense output disagrees with its solver nodes on {where}")
+
+
+DENSE_STENCIL_VELOCITY_REL_TOL = 1e-5  # velocity changes ~1.2e-6 relative over 1 ms
+
+
+def _check_dense_consistency(
+    sol, ticks, dense, terminal, b: float, where: str, veh=None, predicted=()
+) -> None:
+    """Dense velocities agree with a central difference of the dense position, the
+    stencil states are valid reference states, and the dense state at the segment end
+    equals the terminal state (reviews M2-T6 F35, F39, F44)."""
     step = 1e-3
-    plus, minus = sol.sol(ticks + step), sol.sol(ticks - step)
-    if not (np.all(np.isfinite(plus)) and np.all(np.isfinite(minus))):  # F39: whole stencil
-        raise RuntimeError(f"DOP853 dense output non-finite near the ticks on {where}")
-    fd = (plus[:3] - minus[:3]) / (2.0 * step)
-    speed = np.linalg.norm(dense[3:6], axis=0)
-    err = np.linalg.norm(dense[3:6] - fd, axis=0)
+    a = float(sol.t[0])
+    # Stencil points inside the segment's domain (no extrapolation past its ends).
+    lo, hi = np.maximum(ticks - step, a), np.minimum(ticks + step, b)
+    plus, minus = sol.sol(hi), sol.sol(lo)
+    for t_s, st in ((hi, plus), (lo, minus)):
+        # Finite, mass law (F44), and velocity continuous with the tick's velocity.
+        _check_reference_states(t_s, st, veh, predicted, f"stencil {where}")
+        speed = np.linalg.norm(dense[3:6], axis=0)
+        dv = np.linalg.norm(st[3:6] - dense[3:6], axis=0)
+        if not np.all(dv <= DENSE_STENCIL_VELOCITY_REL_TOL * speed):
+            raise RuntimeError(f"DOP853 stencil velocity inconsistent on {where}")
+    # Central difference about the stencil midpoint (second order even where the
+    # stencil is clipped to the segment), compared with the velocity there.
+    mid_t = 0.5 * (hi + lo)
+    mid = sol.sol(mid_t)
+    _check_reference_states(mid_t, mid, veh, predicted, f"stencil midpoint {where}")
+    fd = (plus[:3] - minus[:3]) / (hi - lo)
+    speed = np.linalg.norm(mid[3:6], axis=0)
+    err = np.linalg.norm(mid[3:6] - fd, axis=0)
     if not np.all(err <= DENSE_VELOCITY_REL_TOL * speed):  # NaN-safe
         raise RuntimeError(f"DOP853 dense velocity inconsistent with its position on {where}")
     if ticks[-1] == b:
@@ -1035,6 +1058,7 @@ def dop853_reference(
         ):
             raise RuntimeError(f"DOP853 solver times invalid on [{a}, {b}]")
         _check_reference_states(sol.t, sol.y, veh, predicted, f"[{a}, {b}]")
+        _check_solver_nodes(sol, f"[{a}, {b}]")  # every segment (F45)
         ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
         ticks = ticks[(ticks > a) & (ticks <= b)]
         if ticks.size:
@@ -1043,7 +1067,7 @@ def dop853_reference(
             _check_reference_states(ticks, dense, veh, predicted, f"dense output [{a}, {b}]")
             # F35: the dense velocity is the derivative of the dense position, and the
             # dense state at the segment end is the integrator's terminal state.
-            _check_dense_consistency(sol, ticks, dense, y, b, f"[{a}, {b}]")
+            _check_dense_consistency(sol, ticks, dense, y, b, f"[{a}, {b}]", veh, predicted)
             alts = np.linalg.norm(dense[:3], axis=0) - radius
             out.alt_min = -worst(-out.alt_min, -float(alts.min()))
             out.alt_max = worst(out.alt_max, float(alts.max()))

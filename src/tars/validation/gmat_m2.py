@@ -46,6 +46,11 @@ from tars.validation.m2 import (
 )
 
 BURN_STEP_S = 1.0  # DR-0016: burns at 1 s steps (a divisor of the microsecond grid)
+# GMAT time scales: TT = TAI + 32.184 s; A.1 = TAI + 0.0343817 s (GMAT Mathematical
+# Specification; VAL-0010 used the same offset). GMAT ModJulian = JD - 2430000.
+TT_MINUS_A1_S = 32.184 - 0.0343817
+GMAT_MJD_OFFSET = 2430000.0
+EPOCH_ANCHOR_TOL_S = 1e-6  # ~3 ulp of an A.1 MJD near 31 041 (3.1e-7 s)
 STREAM_COLUMNS = (
     "ARC",
     "Sat.A1ModJulian",
@@ -312,6 +317,25 @@ def split_script(script: str) -> tuple[list[str], np.ndarray, np.ndarray]:
 
 
 # --------------------------------------------------------------- labelling and checks
+
+
+def epoch_anchor_problems(labelled: dict[float, Row], scenario: ScenarioV2) -> list[str]:
+    """The first row's GMAT epoch is the scenario's configured epoch (review M2-T6 F46).
+
+    Rows are labelled from the step schedule (DR-0016), and spacing is verified row to
+    row; this anchors the absolute epoch, so a report shifted in time is rejected.
+    """
+    import datetime as _dt
+
+    if 0.0 not in labelled:
+        return ["no row at t = 0"]
+    epoch = _dt.datetime.fromisoformat(scenario.epoch)
+    jd = (epoch - _dt.datetime(2000, 1, 1, 12)).total_seconds() / 86400.0 + 2451545.0
+    want = jd - GMAT_MJD_OFFSET - TT_MINUS_A1_S / 86400.0  # A.1 MJD (scenario epoch is TT)
+    err = abs(labelled[0.0].a1mjd - want) * 86400.0
+    if not err <= EPOCH_ANCHOR_TOL_S:
+        return [f"first GMAT epoch is {err:.3g} s from the configured epoch"]
+    return []
 
 
 def label_rows(rows: Sequence[Row], arcs: Sequence[Arc]) -> tuple[dict[float, Row], list[str]]:
@@ -867,6 +891,7 @@ def compare_committed(
     if label_v or not labelled:
         return O9Result({}, v, {})
     v += coverage_problems(scenario, predicted, events, labelled, horizon)
+    v += epoch_anchor_problems(labelled, scenario)
     veh = vehicle(scenario)
     assert veh is not None
     alignment = alignment_metrics(

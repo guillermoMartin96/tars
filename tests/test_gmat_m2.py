@@ -1161,8 +1161,12 @@ _ALLOWED = {
     ("m2.py", "orbit_checks", "min(alts)"): "schema-valid event values (round-trip check)",
     ("m2.py", "_check_dense_consistency", "np.maximum(np.abs(terminal), 1.0)"):
         "elementwise tolerance floor on values already validated finite",
-    ("m2.py", "_check_dense_consistency", "np.maximum(np.abs(sol.y), 1.0)"):
+    ("m2.py", "_check_solver_nodes", "np.maximum(np.abs(sol.y), 1.0)"):
         "elementwise tolerance floor on solver nodes already validated finite",
+    ("m2.py", "_check_dense_consistency", "np.maximum(ticks - step, a)"):
+        "clips stencil times to the segment domain (scenario times)",
+    ("m2.py", "_check_dense_consistency", "np.minimum(ticks + step, b)"):
+        "clips stencil times to the segment domain (scenario times)",
     ("m2.py", "orbit_checks", "max(alts)"): "schema-valid event values (round-trip check)",
     ("gmat_m2.py", "plan_arcs", "min(b.cutoff_t_s, horizon_s)"): "predicted times",
     ("gmat_m2.py", "plan_arcs", "min(BURN_STEP_S, b - a)"): "predicted times",
@@ -1863,7 +1867,7 @@ def test_non_finite_stencil_evaluations_are_rejected(monkeypatch):
         sol.sol = Bad()
 
     run = _dense_probe(monkeypatch, mutate)
-    with pytest.raises(RuntimeError, match="near the ticks"):
+    with pytest.raises(RuntimeError, match="stencil"):
         run()
 
 
@@ -1877,3 +1881,77 @@ def test_interior_solver_node_corruption_is_rejected(monkeypatch):
     run = _dense_probe(monkeypatch, mutate)
     with pytest.raises(RuntimeError, match="solver nodes"):
         run()
+
+
+# ------------------------------------------------------------------ re-verification 11 fixes
+
+
+@pytest.mark.parametrize("rows", ["velocity", "propellant"])
+def test_finite_invalid_stencil_states_are_rejected(monkeypatch, rows):
+    """F44: finite but wrong velocity (continuity check) or propellant (mass law) at the
+    stencil points are rejected, each by its own check."""
+    sel = slice(3, 6) if rows == "velocity" else slice(6, 7)
+
+    def mutate(sol):
+        dense = sol.sol
+
+        class Bad:
+            def __call__(self, t):
+                out = dense(t)
+                tt = np.atleast_1d(t)
+                off = np.abs(tt - 10.0 * np.round(tt / 10.0))
+                stencil = np.abs(off - 1e-3) < 1e-9  # exactly +-1 ms: not the midpoints
+                out[sel, stencil] = 1e9
+                return out
+
+        sol.sol = Bad()
+
+    run = _dense_probe(monkeypatch, mutate)
+    with pytest.raises(RuntimeError, match=r"stencil|propellant"):
+        run()
+
+
+def test_solver_nodes_are_reconciled_on_tickless_segments(monkeypatch):
+    """F45: a segment containing no telemetry tick still reconciles its solver nodes."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+    seen = {"tickless": 0}
+
+    def poisoned(fun, t_span, *a, **k):
+        sol = original(fun, t_span, *a, **k)
+        lo, hi = t_span
+        if math.floor(hi / 10.0) * 10.0 <= lo and sol.y.shape[1] > 2:  # no tick in (lo, hi]
+            seen["tickless"] += 1
+            sol.y[:6, 1:-1] = -sol.y[:6, 1:-1]
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="solver nodes"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0, 609.5])
+    assert seen["tickless"] >= 1
+
+
+def test_epoch_anchor_matches_the_committed_references():
+    for name in gmat_m2.GMAT_MISSIONS:
+        scenario, _, arcs, rows = _labelled(name)
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        assert gmat_m2.epoch_anchor_problems(labelled, scenario) == []
+
+
+def test_time_shifted_staged_report_is_rejected(tmp_path):
+    """F46: every epoch shifted by one day, digests recomputed consistently, is rejected
+    by the staged evaluation that run uses before publishing."""
+    name = "m2_prograde_burn"
+    dst = _copy_refs(tmp_path)
+    report = dst / f"{name}_report.txt"
+    lines = []
+    for line in report.read_text().splitlines():
+        f = line.split()
+        f[1] = repr(float(f[1]) + 1.0)
+        lines.append(" ".join(f))
+    report.write_text("\n".join(lines) + "\n")
+    _rehash(dst, name)
+    rejected, check = _cli()._evaluate(name, base=dst)
+    assert check is None and any("configured epoch" in r for r in rejected)

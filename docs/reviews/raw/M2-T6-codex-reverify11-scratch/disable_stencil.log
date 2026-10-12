@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_non_finite_stencil_evaluations_are_rejected _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x110e50ce0>
+
+    def test_non_finite_stencil_evaluations_are_rejected(monkeypatch):
+        """F39: velocity and propellant at the derivative stencil points are checked too."""
+    
+        def mutate(sol):
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    frac = np.abs(np.atleast_1d(t) / 10.0 - np.round(np.atleast_1d(t) / 10.0))
+                    stencil = (frac > 0) & (frac < 1e-3)
+                    out[3:, stencil] = math.nan
+                    return out
+    
+            sol.sol = Bad()
+    
+        run = _dense_probe(monkeypatch, mutate)
+>       with pytest.raises(RuntimeError, match="near the ticks"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1866: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_non_finite_stencil_evaluations_are_rejected
+1 failed, 169 deselected in 0.73s
