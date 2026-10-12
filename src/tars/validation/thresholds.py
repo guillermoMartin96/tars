@@ -57,8 +57,27 @@ def _require_finite_limits(limits: object, depth: int, where: str = "limits") ->
         raise ValueError(f"threshold {where} must be finite and nonnegative: {limits!r}")
 
 
-def load_thresholds(path: Path = M1_THRESHOLDS) -> Thresholds:
-    data = json.loads(path.read_text())
+def _authenticate(raw: bytes, key: str) -> None:
+    """The threshold file is the reviewed one (review M2-T6 F33): finite but inflated
+    limits would otherwise disable gates while passing every structural check."""
+    import hashlib
+
+    from tars.validation.approved_digests import APPROVED_THRESHOLD_SHA256
+
+    digest = hashlib.sha256(raw).hexdigest()
+    if digest != APPROVED_THRESHOLD_SHA256[key]:
+        raise ValueError(
+            f"{key} thresholds are not the approved file (sha256 {digest}); a reviewed "
+            "change must update tars.validation.approved_digests"
+        )
+
+
+def load_thresholds(path: Path = M1_THRESHOLDS, authenticate: bool = True) -> Thresholds:
+    """Load M1 thresholds. ``authenticate=False`` only for tests of malformed files."""
+    raw = path.read_bytes()
+    if authenticate:
+        _authenticate(raw, "m1")
+    data = json.loads(raw)
     unknown = sorted(set(data["limits"]) - KNOWN_VALIDATORS)
     if unknown:
         raise ValueError(f"threshold groups match no validator: {unknown}")
@@ -108,9 +127,13 @@ class ScopedThresholds:
 
 
 def load_scoped_thresholds(
-    path: Path = M2_THRESHOLDS, missions: frozenset[str] = frozenset()
+    path: Path = M2_THRESHOLDS, missions: frozenset[str] = frozenset(), authenticate: bool = True
 ) -> ScopedThresholds:
-    data = json.loads(path.read_text())
+    """Load M2 thresholds. ``authenticate=False`` only for tests of malformed files."""
+    raw = path.read_bytes()
+    if authenticate:
+        _authenticate(raw, "m2")
+    data = json.loads(raw)
     unknown = sorted(set(data["limits"]) - M2_KNOWN_VALIDATORS)
     if unknown:
         raise ValueError(f"threshold groups match no validator: {unknown}")

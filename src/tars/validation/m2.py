@@ -875,6 +875,45 @@ class Reference(dict):
     alt_max: float = -math.inf
 
 
+def mass_law_propellant(t: float, veh: Vehicle | None, predicted: Sequence[PredictedBurn]) -> float:
+    """Analytic propellant at t from the scenario inputs (mass law, burns in order)."""
+    if veh is None:
+        return 0.0
+    prop = veh.propellant_kg
+    for b in predicted:
+        if t <= b.ignition_t_s:
+            break
+        if t >= b.cutoff_t_s:
+            prop = b.propellant_after_kg
+            continue
+        return b.propellant_before_kg - veh.mass_flow_kgps * (t - b.ignition_t_s)
+    return prop
+
+
+def _check_reference_states(
+    times, states, veh: Vehicle | None, predicted: Sequence[PredictedBurn], where: str
+) -> None:
+    """Every reference state component is finite, and the reference propellant is
+    non-negative and on the analytic mass law to the O1 round-off class (reviews
+    M2-T6 F16, F29, F31). An invalid reference never reaches a comparison."""
+    states = np.atleast_2d(states)
+    if not np.all(np.isfinite(states)):
+        raise RuntimeError(f"DOP853 produced a non-finite state on {where}")
+    tol = 1e-12 * (veh.initial_mass_kg if veh is not None else 1.0)
+    for t, m_p in zip(np.atleast_1d(times), states[6], strict=True):
+        if m_p < 0.0 or abs(m_p - mass_law_propellant(float(t), veh, predicted)) > tol:
+            raise RuntimeError(f"DOP853 reference propellant {m_p!r} invalid at t={t!r} ({where})")
+
+
+def kepler_state(r0, v0, dt: float, mu: float) -> tuple[np.ndarray, np.ndarray]:
+    """Kepler propagation whose output is validated: a non-finite position or velocity
+    becomes +inf in every component, so any comparison with it fails (review F30)."""
+    r, v = kepler.propagate(r0, v0, dt, mu)
+    if not (np.all(np.isfinite(r)) and np.all(np.isfinite(v))):
+        return np.full(3, math.inf), np.full(3, math.inf)
+    return r, v
+
+
 def dop853_reference(
     scenario: ScenarioV2,
     r0: Sequence[float],
@@ -930,14 +969,14 @@ def dop853_reference(
         if not sol.success:
             raise RuntimeError(f"DOP853 failed on [{a}, {b}]: {sol.message}")
         y = sol.y[:, -1].copy()
-        if not np.all(np.isfinite(sol.y)):  # F16: never hand on an invalid reference
-            raise RuntimeError(f"DOP853 produced a non-finite state on [{a}, {b}]")
+        _check_reference_states(sol.t, sol.y, veh, predicted, f"[{a}, {b}]")
         ticks = np.arange(math.floor(a / dt) + 1, math.floor(b / dt) + 1) * dt
         ticks = ticks[(ticks > a) & (ticks <= b)]
         if ticks.size:
-            alts = np.linalg.norm(sol.sol(ticks)[:3], axis=0) - radius
-            if not np.all(np.isfinite(alts)):  # F18: dense output validated too
-                raise RuntimeError(f"DOP853 dense output non-finite on [{a}, {b}]")
+            dense = sol.sol(ticks)
+            # F18/F29: the complete dense-output state is validated, not only altitude.
+            _check_reference_states(ticks, dense, veh, predicted, f"dense output [{a}, {b}]")
+            alts = np.linalg.norm(dense[:3], axis=0) - radius
             out.alt_min = -worst(-out.alt_min, -float(alts.min()))
             out.alt_max = worst(out.alt_max, float(alts.max()))
         if b in marks:
@@ -1130,7 +1169,7 @@ def coast_metrics(scenario: ScenarioV2, events: Sequence[Any]) -> dict[str, floa
         t_end = next((t for t in ignitions if t >= t0), math.inf)
         for t, r, v in samples:
             if t0 <= t <= t_end:
-                rk, vk = kepler.propagate(r0, v0, t - t0, mu)
+                rk, vk = kepler_state(r0, v0, t - t0, mu)
                 dp = float(np.linalg.norm(r - rk))
                 pos = worst(pos, dp)
                 vel = worst(vel, float(np.linalg.norm(v - vk)))
@@ -1193,7 +1232,7 @@ def impulsive_row(base: ScenarioV2, variant: ScenarioV2, run: RunResult) -> dict
     e = _of(run.events, "BurnEnded")[0]
     a0 = rv_to_elements(np.array(s.r), np.array(s.v), mu).a
     a_fin = rv_to_elements(np.array(e.r), np.array(e.v), mu).a
-    r_m, v_m = kepler.propagate(np.array(s.r), np.array(s.v), mid - s.event_t_s, mu)
+    r_m, v_m = kepler_state(np.array(s.r), np.array(s.v), mid - s.event_t_s, mu)
     m0 = veh.initial_mass_kg
     dv = veh.exhaust_velocity_mps * math.log(m0 / (m0 - veh.mass_flow_kgps * duration))
     v_imp = v_m + sign * dv * v_m / np.linalg.norm(v_m)

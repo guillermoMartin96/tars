@@ -243,6 +243,25 @@ All seven are **`ACCEPTED`**.
 - **Constraint:** bad data must never pass by travelling through an (unmodified) internal helper.
 - Findings F16, F18–F20, F22, F23 and F26 were reported under the earlier, open scope. All are fixed regardless and remain tested.
 
-## Re-verification 8 (final, under DR-0019 B)
+## Re-verification 8 (under DR-0019 B)
+**Reviewer:** Codex, session `01a12dd5-9a4c-76e3-b509-c4b309ec186e`, at `6a03e1b`. **Raw:** `raw/M2-T6-codex-reverify8.md`, `raw/M2-T6-codex-reverify8-scratch/`.
+
+**Verdict: FAIL.**
+- F26–F28 are resolved, and the report is identical (212 checks, 773 metric bits).
+- The reviewer stated, for each finding, why it is in scope under DR-0019 B. Each corrupts **data** (reference outputs, the manifest, the threshold file) while leaving validator code unmodified.
+
+**All five are `ACCEPTED`.** Each mechanism is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F33 | **High** | Finite threshold inflation (1e100) let the thrust mutant (47.7 m error) pass; nothing authenticated the values | **Approval anchors** in reviewed source (`tars.validation.approved_digests`). Both loaders authenticate the file content by sha256 by default (`m1.json` approved, `m2.json` provisional), wherever it is read from. A legitimate change (for example the T7 threshold DR) must update the pin in the same reviewed commit. Only tests of malformed files opt out (`authenticate=False`) | `test_threshold_files_are_authenticated` (M1, M2, redirected reads), `test_inflated_thresholds_cannot_pass_wrong_physics`, `test_pinned_digests_match_the_committed_files` |
+| F29 | Med | DOP853 dense output: only the altitude was validated | The **complete** dense-output state (r, v, m) is validated at the source, including the propellant mass law | `test_dense_output_state_is_validated_completely` (4 components × NaN/±inf) |
+| F30 | Med | GMAT coast alignment discarded Kepler's velocity unchecked | Every Kepler consumer (O5, O6, GMAT alignment) uses `kepler_state`: a non-finite r or v becomes +inf in every component. Bisection already checks both | `test_gmat_coast_alignment_checks_kepler_velocity` |
+| F31 | Med | Negative DOP853 propellant passed (the component was unused) | Every reference state (terminal and dense) must have propellant ≥ 0 and on the analytic mass law within the O1 round-off class (1e-12 of the initial mass; measured 5.7e-14 kg) | `test_reference_propellant_must_follow_the_mass_law` (−1 kg, off-law) |
+| F32 | Med | A wholesale re-chained manifest history passed: the chain cannot authenticate itself | The manifest digest is pinned in reviewed source and checked whenever the committed references are evaluated, wherever `reference_dir` points. `run` validates a staged reference without the pin, then prints the digest that must be pinned in a reviewed change. The earlier documented limit (F14) is **closed** | `test_wholesale_history_rewrite_is_rejected_by_the_anchor`; the interrupted-publication test now expects a complete new generation to be rejected until it is pinned |
+
+**Behavior is preserved:** the 212 previous checks are identical, 213 checks pass, and 989 tests pass. The M1 threshold file is byte-identical to `main`, so its pin authenticates exactly the approved file.
+
+## Re-verification 9 (final, under DR-0019 B)
 See below.
 

@@ -461,7 +461,9 @@ All 10 approved rejection codes are exercised.
   - an entry in the approved-digest manifest.
 
   These controls detect silent or accidental substitution, including of metadata.
-  - **Manifest history.** It is a validated hash chain covering all four generations. Edits, insertions, reordering or deletions inside it are rejected; a consistent wholesale rewrite is visible only in version control (review M2-T6 F14; an earlier wording overstated this).
+  - **Manifest history.** It is a validated hash chain covering all four generations, and the manifest digest is pinned in reviewed source. Edits, insertions, reordering, deletions and wholesale rewrites are all rejected (reviews M2-T6 F14, F32).
+  - **Thresholds.** The threshold files are authenticated by pinned digests (F33).
+  - **References.** Every independent-reference state (DOP853 terminal and dense output, Kepler) is validated in full, including the reference propellant against the mass law (F29–F31).
   - **Origin.** None of these controls proves GMAT origin against deliberate fabrication.
 - **Reproduction.** The reproduction test authenticates the executable (approved sha256) and its success marker, and requires byte-identical reports. That is authenticated, independent reproducibility evidence. It does not by itself prove the historical origin of stored bytes (review M2-T6 F10).
 - **Classification:** no discrepancy. **Status:** provisional Proof evidence (T6); thresholds remain provisional until the T7 three-platform measurement and threshold DR.

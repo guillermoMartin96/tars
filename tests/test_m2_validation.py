@@ -497,7 +497,9 @@ def test_m2_threshold_loader_rejects_unknown_entries(tmp_path, edit, message):
     path = tmp_path / "m2.json"
     path.write_text(json.dumps(data))
     with pytest.raises(ValueError, match=message):
-        load_scoped_thresholds(path, missions=frozenset(m.name for m in MISSIONS))
+        load_scoped_thresholds(
+            path, missions=frozenset(m.name for m in MISSIONS), authenticate=False
+        )
 
 
 def test_unconsumed_threshold_entries_are_reported():

@@ -154,8 +154,9 @@ uv run python toolbox/scripts/gmat_m2.py compare             # O9; also inside m
   - Each record must name a GMAT mission and carry a plausible UTC timestamp, a non-null revision, a non-empty reason and a report digest.
   - Records are in time order. Each holds the sha256 of the previous record, so the history is a hash chain; the first record holds null.
   - Editing, inserting, reordering or deleting records breaks the chain or the ordering and is rejected.
-  - **Limit:** deleting records *and* consistently re-chaining the remainder passes the checks. Only review of the manifest's version-control history reveals that (executable as `test_wholesale_history_rewrite_is_the_documented_limit`).
+  - **Approval anchor** (review M2-T6 F32). The manifest's sha256 is pinned in reviewed source (`src/tars/validation/approved_digests.py`), so even a consistent wholesale rewrite of the chain is rejected. After `run` stores a new generation, it prints the new digest. `compare` rejects the reference until a reviewed change pins that digest.
 - **Thresholds.** Every non-null limit must be finite and nonnegative. An overflowing JSON number such as `1e999`, which parses as infinity, is rejected at load (review M2-T6 F15).
+- **Threshold files are authenticated** against digests pinned in `approved_digests.py` (review M2-T6 F33). A changed threshold file, including finite inflation, is rejected unless a reviewed change updates the pin.
 - **What provenance can and cannot prove.** The checks above make silent or accidental substitution detectable. They cannot prove GMAT origin against deliberate fabrication.
 - **The reproduction test** verifies that the installed executable *is* the approved GMAT (sha256), that it reports success, and that it reproduces the committed reports byte for byte. That is authenticated, independent reproducibility evidence. Together with review of `APPROVED_DIGESTS.json` changes, it is the basis for trusting the references; by itself it cannot prove the historical origin of stored bytes.
 - `generate` refuses symlinked or protected destinations.

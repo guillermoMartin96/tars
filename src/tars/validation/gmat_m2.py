@@ -36,7 +36,14 @@ import numpy as np
 from tars.sim.constants import STANDARD_GRAVITY
 from tars.sim.scenario import ScenarioV2
 from tars.validation.gmat import _gmat_epoch
-from tars.validation.m2 import PredictedBurn, expected_initial_state, vehicle, worst, worst_of
+from tars.validation.m2 import (
+    PredictedBurn,
+    expected_initial_state,
+    kepler_state,
+    vehicle,
+    worst,
+    worst_of,
+)
 
 BURN_STEP_S = 1.0  # DR-0016: burns at 1 s steps (a divisor of the microsecond grid)
 STREAM_COLUMNS = (
@@ -343,7 +350,6 @@ def alignment_metrics(
     - Coast arcs vs exact Kepler propagation of GMAT's arc-start state: the rows are at
       their labelled times.
     """
-    from tars.astro import kepler
 
     times = sorted(labelled)
     spacing = 0.0
@@ -363,7 +369,7 @@ def alignment_metrics(
         s0 = labelled[arc.start_s]
         for t in times:
             if arc.start_s < t <= arc.end_s:
-                r, _ = kepler.propagate(s0.r, s0.v, t - arc.start_s, mu)
+                r, _ = kepler_state(s0.r, s0.v, t - arc.start_s, mu)  # F30: v checked too
                 kep = worst(kep, float(np.linalg.norm(labelled[t].r - r)))
     return {
         "step_spacing_error_max_s": spacing,
@@ -802,6 +808,25 @@ def coverage_problems(
     return v
 
 
+def manifest_anchor_problems(base=None) -> list[str]:
+    """The manifest is the reviewed one (review M2-T6 F32): its own hash chain cannot
+    authenticate a wholesale rewrite, so its digest is pinned in reviewed source."""
+    import hashlib
+
+    from tars.validation.approved_digests import APPROVED_GMAT_M2_MANIFEST_SHA256
+
+    path = approved_manifest_path(base)
+    if not path.exists():
+        return ["approved manifest missing"]
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != APPROVED_GMAT_M2_MANIFEST_SHA256:
+        return [
+            f"manifest is not the approved one (sha256 {digest}); a reviewed change must "
+            "update tars.validation.approved_digests"
+        ]
+    return []
+
+
 def compare_committed(
     name: str,
     scenario: ScenarioV2,
@@ -811,7 +836,12 @@ def compare_committed(
     velocity_tol_mps: float,
     base=None,
 ) -> O9Result:
-    """Verify and compare one committed (or staged, ``base``) GMAT reference."""
+    """Verify and compare one committed (or staged, ``base``) GMAT reference.
+
+    The committed references (``base`` None, wherever reference_dir points) must also
+    match the manifest digest pinned in reviewed source. A staged reference inside
+    ``run`` (``base`` given) is checked against everything else; its new digest must
+    be pinned in a reviewed change before ``compare`` accepts it."""
     import json
 
     from tars.validation.m2 import dop853_reference, horizon_s, predict_burns
@@ -828,6 +858,8 @@ def compare_committed(
         name, metadata, files, scenario, regenerated, position_tol_m, velocity_tol_mps,
         load_approved(base),
     )  # fmt: skip
+    if base is None:
+        v += manifest_anchor_problems()
     arcs = plan_arcs(scenario, predicted, horizon)
     labelled, label_v = label_rows(parse_stream(files["report"].read_text()), arcs)
     v += label_v

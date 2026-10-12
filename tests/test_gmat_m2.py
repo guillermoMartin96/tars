@@ -683,7 +683,9 @@ def test_metadata_and_history_are_bound_to_the_manifest(tmp_path, monkeypatch, c
     violations = _compare(name).violations
     assert violations
     if change == "history":
-        assert all("history" in v for v in violations)  # only the history check fires
+        # The history check fires; the manifest anchor (F32) rejects the edit too.
+        assert any("history" in v for v in violations)
+        assert all("history" in v or "manifest" in v for v in violations)
     if change == "host":
         assert violations == ["reference digests are not in the approved manifest"]
 
@@ -743,7 +745,9 @@ def test_interrupted_publication_never_leaves_an_accepted_mix(tmp_path, monkeypa
     now = {p.name: p.read_bytes() for p in live.iterdir() if not p.name.startswith(".")}
     violations = _compare(name).violations
     if not interrupted:
-        assert violations == []  # complete new generation
+        # A complete new generation is accepted only after a reviewed change pins its
+        # manifest digest (F32): until then the anchor alone rejects it.
+        assert len(violations) == 1 and "manifest is not the approved one" in violations[0]
     elif now == old:
         assert violations == []  # nothing changed
     else:
@@ -865,15 +869,17 @@ def test_every_history_record_is_validated(tmp_path, monkeypatch, edit):
     assert _with_history(tmp_path, monkeypatch, edit)
 
 
-def test_wholesale_history_rewrite_is_the_documented_limit(tmp_path, monkeypatch):
-    """F14 limit, made executable: deleting superseded records AND re-chaining the rest
-    consistently passes; only version-control review of the manifest reveals it."""
+def test_wholesale_history_rewrite_is_rejected_by_the_anchor(tmp_path, monkeypatch):
+    """F32: deleting records AND consistently re-chaining the rest (formerly the
+    documented limit, F14) is rejected by the manifest digest pinned in reviewed
+    source."""
 
     def rewrite(history):
         del history[:3]
         _rechain(history)
 
-    assert _with_history(tmp_path, monkeypatch, rewrite) == []
+    violations = _with_history(tmp_path, monkeypatch, rewrite)
+    assert violations and all("manifest is not the approved one" in v for v in violations)
 
 
 @pytest.mark.parametrize("bad", ["1e999", "-1.0", "NaN", '"0.6"'])
@@ -889,14 +895,14 @@ def test_threshold_loaders_reject_non_finite_or_negative_limits(tmp_path, bad):
     path = tmp_path / "m2.json"
     path.write_text(text)
     with pytest.raises(ValueError, match="threshold"):
-        load_scoped_thresholds(path, missions=frozenset(BY_NAME))
+        load_scoped_thresholds(path, missions=frozenset(BY_NAME), authenticate=False)
     m1 = M1_THRESHOLDS.read_text().replace(
         '"position_error_max_m": 0.6', f'"position_error_max_m": {bad}', 1
     )
     path1 = tmp_path / "m1.json"
     path1.write_text(m1)
     with pytest.raises(ValueError, match="threshold"):
-        load_thresholds(path1)
+        load_thresholds(path1, authenticate=False)
 
 
 def test_committed_thresholds_load():
@@ -993,13 +999,15 @@ def test_threshold_loaders_reject_object_limits(tmp_path):
     )
     (tmp_path / "m2.json").write_text(m2_text)
     with pytest.raises(ValueError, match="not a number"):
-        load_scoped_thresholds(tmp_path / "m2.json", missions=frozenset(BY_NAME))
+        load_scoped_thresholds(
+            tmp_path / "m2.json", missions=frozenset(BY_NAME), authenticate=False
+        )
     m1_text = M1_THRESHOLDS.read_text().replace(
         '"position_error_max_m": 0.6', '"position_error_max_m": {}', 1
     )
     (tmp_path / "m1.json").write_text(m1_text)
     with pytest.raises(ValueError, match="not a number"):
-        load_thresholds(tmp_path / "m1.json")
+        load_thresholds(tmp_path / "m1.json", authenticate=False)
 
 
 def test_nan_in_an_unreduced_reference_component_fails_o9(monkeypatch):
@@ -1026,12 +1034,14 @@ def test_threshold_loaders_reject_a_wrong_structure(tmp_path):
     data["limits"]["o9_gmat"]["all"] = 5
     (tmp_path / "m2.json").write_text(json.dumps(data))
     with pytest.raises(ValueError, match="must be an object"):
-        load_scoped_thresholds(tmp_path / "m2.json", missions=frozenset(BY_NAME))
+        load_scoped_thresholds(
+            tmp_path / "m2.json", missions=frozenset(BY_NAME), authenticate=False
+        )
     data1 = json.loads(M1_THRESHOLDS.read_text())
     data1["limits"]["kepler_reference"] = 5
     (tmp_path / "m1.json").write_text(json.dumps(data1))
     with pytest.raises(ValueError, match="must be an object"):
-        load_thresholds(tmp_path / "m1.json")
+        load_thresholds(tmp_path / "m1.json", authenticate=False)
 
 
 # ------------------------------------------------------------------ re-verification 4 fixes
@@ -1527,3 +1537,145 @@ def test_report_only_finiteness_is_a_terminal_proof_check(monkeypatch, tmp_path)
     assert module.main(["--quick", "--out", str(out)]) == 1
     results = {r["validator"]: r for r in json.loads(out.read_text())["results"]}
     assert not results["report_only_metrics_finite"]["passed"]
+
+
+def test_threshold_files_are_authenticated(tmp_path, monkeypatch):
+    """F33: finite but inflated limits (1e100) are rejected by the pinned digest, by
+    default, wherever the file is read from."""
+    from tars.validation import thresholds as thresholds_module
+    from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+
+    inflated = tmp_path / "m2.json"
+    inflated.write_text(
+        M2_THRESHOLDS.read_text().replace(
+            '"final_position_error_m": 0.6', '"final_position_error_m": 1e100'
+        )
+    )
+    with pytest.raises(ValueError, match="not the approved file"):
+        load_scoped_thresholds(inflated, missions=frozenset(BY_NAME))
+    m1 = tmp_path / "m1.json"
+    m1.write_text(
+        M1_THRESHOLDS.read_text().replace(
+            '"position_error_max_m": 0.6', '"position_error_max_m": 1e100', 1
+        )
+    )
+    with pytest.raises(ValueError, match="not the approved file"):
+        load_thresholds(m1)
+    # Redirecting the default path does not help: the content is authenticated.
+    content = inflated.read_bytes()
+    monkeypatch.setattr(thresholds_module.Path, "read_bytes", lambda self: content)
+    with pytest.raises(ValueError, match="not the approved file"):
+        load_scoped_thresholds(missions=frozenset(BY_NAME))
+
+
+@pytest.mark.slow
+def test_inflated_thresholds_cannot_pass_wrong_physics(monkeypatch, tmp_path):
+    """F33 integrated: the thrust x (1 + 1e-5) mutant fails O9; with an inflated
+    threshold file the evaluation is rejected instead of passing."""
+    from tars.validation import thresholds as thresholds_module
+
+    original = simulator_module.thrust_acceleration
+    monkeypatch.setattr(
+        simulator_module, "thrust_acceleration", lambda *a: original(*a) * (1 + 1e-5)
+    )
+    cli = _cli()
+    _, check = cli._evaluate("m2_prograde_burn")
+    assert check is None or not check.passed
+    data = json.loads(M2_THRESHOLDS.read_text())
+    for group in data["limits"].values():
+        for scope in group.values():
+            for k in scope:
+                scope[k] = 1e100
+    inflated = tmp_path / "m2.json"
+    inflated.write_text(json.dumps(data))
+    monkeypatch.setattr(thresholds_module, "M2_THRESHOLDS", inflated)
+    monkeypatch.setattr(
+        cli,
+        "load_scoped_thresholds",
+        lambda **kw: thresholds_module.load_scoped_thresholds(inflated, **kw),
+    )
+    with pytest.raises(ValueError, match="not the approved file"):
+        cli._evaluate("m2_prograde_burn")
+
+
+def test_pinned_digests_match_the_committed_files():
+    import hashlib
+
+    from tars.validation.approved_digests import (
+        APPROVED_GMAT_M2_MANIFEST_SHA256,
+        APPROVED_THRESHOLD_SHA256,
+    )
+    from tars.validation.thresholds import M1_THRESHOLDS
+
+    def digest(path):
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+
+    assert digest(M1_THRESHOLDS) == APPROVED_THRESHOLD_SHA256["m1"]
+    assert digest(M2_THRESHOLDS) == APPROVED_THRESHOLD_SHA256["m2"]
+    assert digest(gmat_m2.approved_manifest_path()) == APPROVED_GMAT_M2_MANIFEST_SHA256
+
+
+@pytest.mark.parametrize("component", [3, 4, 5, 6])
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+def test_dense_output_state_is_validated_completely(monkeypatch, component, bad):
+    """F29: velocity and propellant components of the dense output are checked too."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        dense = sol.sol
+
+        class Bad:
+            def __call__(self, t):
+                out = dense(t)
+                out[component, :] = bad
+                return out
+
+        sol.sol = Bad()
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="DOP853"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])
+
+
+@pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+def test_gmat_coast_alignment_checks_kepler_velocity(monkeypatch, bad):
+    """F30: an invalid Kepler velocity in the coast alignment fails, even though only
+    the position is compared."""
+    from tars.astro import kepler
+
+    original = kepler.propagate
+
+    def poisoned(r, v, dt, mu):
+        rr, vv = original(r, v, dt, mu)
+        return rr, np.array([vv[0], vv[1], bad])
+
+    scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    monkeypatch.setattr(kepler, "propagate", poisoned)
+    metrics = gmat_m2.alignment_metrics(
+        labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+    )
+    assert metrics["coast_vs_kepler_position_error_max_m"] == math.inf
+
+
+@pytest.mark.parametrize("value", [-1.0, 299.0])
+def test_reference_propellant_must_follow_the_mass_law(monkeypatch, value):
+    """F31: a negative or off-law reference propellant is rejected at the source."""
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        sol.y[6, -1] = value
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    with pytest.raises(RuntimeError, match="propellant"):
+        m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])

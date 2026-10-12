@@ -251,6 +251,12 @@ def cmd_run(args: argparse.Namespace) -> int:
             _publish(name, staged, staged_manifest, manifest)
             rows = int(check.metrics["gmat_rows"])
             print(f"{name}: GMAT reference validated and stored ({rows} rows)")
+            digest = hashlib.sha256(gmat_m2.approved_manifest_path().read_bytes()).hexdigest()
+            print(
+                "compare will reject it until a reviewed change sets "
+                f"APPROVED_GMAT_M2_MANIFEST_SHA256 = {digest!r} in "
+                "src/tars/validation/approved_digests.py (review M2-T6 F32)"
+            )
     return status
 
 
