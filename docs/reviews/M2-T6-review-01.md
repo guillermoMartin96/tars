@@ -410,3 +410,38 @@ DR-0020 was approved as option A, with conditions. Under it, a reference-output 
 
 **T6 is blocked on DR-0021.** No further review round runs until it is decided.
 
+
+## DR-0021 implementation (approved option A with conditions, 2026-10-12)
+F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an approved reference snapshot. Their disposition is now **`ACCEPTED`, fixed by the snapshot**. Record: VAL-0015; artifact `toolbox/references/snapshot/m2/` (baseline 1).
+
+| Condition | Implementation | Evidence |
+|---|---|---|
+| 1. Complete coverage | Every reference oracle output passes through `reference_snapshot.pin`: initial state, predicted burns, Simpson and DR-0017 bounds, DOP853 bounds, ticks, start, segment ends, anchor ticks and ends, extrema, node crossings, O5 and O6 Kepler, O3 closed forms, O9 arcs, labels, epoch, expected mass, alignment Kepler and GMAT node crossings. Inventory and seven explicit exclusions with reasons in VAL-0015 | 48,279 records, 920,849 values; coverage is complete per entrypoint (every approved value must be reproduced) |
+| 2. Independent baseline | Generated at `ad1c33b` from a clean tree (environment, `uv.lock` and Proof report digests recorded); the recording run passed the Proof and the GMAT evaluations; `verify-baseline` checks the snapshot's own values against the committed GMAT rows and the physical invariants | DOP853 vs GMAT ≤ 4.66e-6 m, 5.39e-9 m/s (gates 3e-5 m, 3.5e-8 m/s); `test_approved_artifact_is_pinned_and_verified` |
+| 3. Immutable baseline | sha256 `031c7e7b…e99e` pinned in `approved_digests.py`; `generate` refuses the approved path and writes candidates only; CI only measures; documented change procedure in the snapshot README | `test_generate_refuses_to_write_the_approved_artifact`, `test_only_the_tool_writes_snapshots_and_ci_only_measures`, `test_tampered_artifact_is_rejected` |
+| 4. Measured tolerance | Verify-mode deviations measured on 9 environments; 10× the maximum, rounded up to 1-2-5; ref/gmat values consumed from the snapshot (a within-tolerance deviation moves no metric); sim-seeded gates must keep a margin larger than the worst within-tolerance shift (`reference_snapshot_margins`) | VAL-0015 table; O6 margin 0.0405 against 0.05 |
+| 5. No circularity | Verification reads the committed, authenticated artifact; nothing regenerates it in a test or a run | coordinated Kepler + DOP853 tests below |
+| 6. F50, F51 regressions | `test_f50_acceptance_flip_is_rejected` (clean: rejected on the limit; coordinated corruption: rejected by the snapshot); `test_f51_wrong_time_kepler_in_o6_is_rejected`; `test_joint_corruption_defeats_the_runtime_checks_without_the_snapshot`; `test_coordinated_radial_shift_of_both_references_is_rejected` | each fails when the tolerance comparison is disabled |
+| 7. Existing gates | No check, threshold or test removed or weakened; the two new exact checks are additions | M2 report: the 213 previous checks are byte-identical, plus `reference_snapshot` and `reference_snapshot_margins` (215) |
+
+**Mutation results.** Disabling each mechanism fails its targeted tests:
+
+| Mechanism disabled | Failing tests |
+|---|---|
+| Tolerance comparison | 9, including F50, F51 and the coordinated shift |
+| Substitution | 1 |
+| Coverage | 2 |
+| Authentication | 1 |
+| Margin check | 1 |
+| Unexpected-key check | 1 |
+| Kind check | 3 |
+
+**Design notes.**
+- The tick grid is pinned exactly as an index range plus dt. The runtime grid must be k·dt bit for bit.
+- DOP853 dense tick output is excluded; it is pinned transitively through F49.
+- Record-mode cross-platform drift (6.8 µm) is not the tolerance basis. Verify mode restarts each segment from its approved state, and that is the behaviour measured.
+
+**Open point for T7.** If T7 tightens `order_deviation_from_2_max` below about 0.041, the impulsive SMA needs its own measured class: the sim-seeded length tolerance is set by O5.
+
+## Re-verification 15 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
+See below.

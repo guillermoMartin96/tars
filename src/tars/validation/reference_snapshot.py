@@ -52,10 +52,24 @@ SEEDS = ("ref", "sim", "gmat")
 # Part names end with their unit; the unit selects the tolerance.
 UNIT_SUFFIXES = ("_mps", "_kg", "_m", "_s", "_1")
 
-# Reproducibility tolerances, |runtime - approved| per value, by (seed, unit). Measured
-# across the supported environments (VAL-0015); see that record for the method.
+# Reproducibility tolerances, |runtime - approved| per value, by (seed, unit) (VAL-0015).
+# Measured in verify mode against baseline 1 on nine environments: the reference host
+# (macOS x86_64, i9-9880H: 0 everywhere), four GitHub ubuntu-latest hosts (EPYC 7763,
+# Xeon Platinum, EPYC 9V74 x2) and four macos-latest hosts (Apple M1). Rule: 10 x the
+# largest measured deviation, rounded up to 1-2-5; a continuous class measured exactly
+# 0 everywhere gets 10 ulp of its largest value; counts are exact. Unused classes are 0
+# (exact), so a new value in one fails closed until it is measured.
 TOLERANCES: dict[tuple[str, str], float] = {
-    (seed, unit): 0.0 for seed in SEEDS for unit in ("m", "mps", "kg", "s", "1")
+    **{(seed, unit): 0.0 for seed in SEEDS for unit in ("m", "mps", "kg", "s", "1")},
+    ("ref", "m"): 5e-8,  # measured 2.79e-9 (Kepler/RK4 anchors, segment ends)
+    ("ref", "mps"): 5e-11,  # measured 4.09e-12
+    ("ref", "kg"): 2e-12,  # measured 1.14e-13
+    ("ref", "s"): 1e-11,  # measured 0; 10 ulp(6000 s) = 9.1e-12
+    ("gmat", "m"): 5e-6,  # measured 2.02e-7 (AVX-512 hosts; Kepler over long GMAT arcs)
+    ("gmat", "mps"): 5e-9,  # measured 2.52e-10
+    ("gmat", "s"): 1e-11,  # measured 0; 10 ulp(6000 s)
+    ("sim", "m"): 1e-5,  # measured 5.37e-7 (inherits the simulator's platform variation)
+    ("sim", "mps"): 1e-8,  # measured 6.59e-10
 }
 
 MAX_LISTED = 20  # problems listed per kind; the count is always reported

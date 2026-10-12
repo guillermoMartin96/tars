@@ -314,8 +314,19 @@ def test_approved_artifact_is_pinned_and_verified():
 
 
 def test_tolerances_are_finite_positive_and_small():
-    for (seed, unit), tol in snap.TOLERANCES.items():
-        assert math.isfinite(tol) and tol > 0.0, (seed, unit)
+    """Every class used by a non-exact approved value has a finite positive tolerance
+    (VAL-0015); counts and unused classes are exact."""
+    for tol in snap.TOLERANCES.values():
+        assert math.isfinite(tol) and tol >= 0.0
+    used = {
+        (rec["seed"], snap.unit_of(name))
+        for rec in snap.load_approved()["records"].values()
+        if not rec["exact"]
+        for name in rec["parts"]
+    }
+    for cls in used - {("ref", "1")}:
+        assert snap.TOLERANCES[cls] > 0.0, cls
+    assert snap.TOLERANCES[("ref", "1")] == 0.0  # the powered-crossing count
     # Far below the GMAT noise floor (11-15 um) for every reference-seeded length.
     assert snap.TOLERANCES[("ref", "m")] < 1.5e-5 / 100
 
@@ -384,7 +395,7 @@ def test_joint_corruption_defeats_the_runtime_checks_without_the_snapshot(monkey
     scenario = mission.build()
     predicted = m2.predict_burns(scenario, mission.expected)
     burns = [(b.ignition_t_s, b.cutoff_t_s) for b in predicted]
-    marks = [k * 60.0 for k in range(1, 30)]
+    marks = [scenario.stop.duration_s]  # the whole mission, as in the F50 probe
     clean = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), predicted, marks)
     hits = _joint_corruption(monkeypatch, scenario, burns)
     dirty = m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), predicted, marks)
@@ -461,26 +472,58 @@ def test_f51_wrong_time_kepler_in_o6_is_rejected(monkeypatch):
     assert any("o6.midpoint" in p and "tolerance" in p for p in problems)
 
 
-def test_consistent_alternate_dynamics_in_both_references_is_rejected(monkeypatch):
-    """Coordinated corruption of Kepler AND DOP853 with one consistent wrong physics
-    (time runs 1e-6 faster in both, so anchors, round trips and invariants agree):
-    every runtime self-check passes, the snapshot rejects it (condition 5)."""
+def test_coordinated_radial_shift_of_both_references_is_rejected(monkeypatch):
+    """Condition 5: Kepler anchor ticks AND DOP853 dense positions raised together by
+    1 cm at every interior coast tick. The two references still agree (F49), the
+    derivative stencil never samples a tick, and the extrema move: every runtime check
+    passes, and the snapshot rejects it inside the Proof's session."""
     import scipy.integrate
 
     mission = BY_NAME["m2_invalid_commands_no_propulsion"]
     scenario = mission.build()
     run = run_scenario(scenario)
-    k = 1.0 + 1e-6
-    original_prop, original_ivp = kepler.propagate, scipy.integrate.solve_ivp
+    dt, dr = scenario.dt_s, 0.01
+    lines, start = inspect.getsourcelines(m2._anchor_segment)
+    target = start + next(i for i, ln in enumerate(lines) if "rows = [kepler_state" in ln)
+    original_kepler, original_ivp = m2.kepler_state, scipy.integrate.solve_ivp
 
-    monkeypatch.setattr(kepler, "propagate", lambda r, v, dt, mu: original_prop(r, v, dt * k, mu))
+    def raise_r(r):
+        return r * (1.0 + dr / np.linalg.norm(r))
 
-    def faster(fun, t_span, y0, **kw):
-        return original_ivp(lambda t, y: k * fun(t, y), t_span, y0, **kw)
+    def shifted_kepler(r, v, dt_, mu):
+        rr, vv = original_kepler(r, v, dt_, mu)
+        f = sys._getframe(1)
+        in_anchor = f.f_code.co_name == "_anchor_segment" and f.f_lineno == target
+        if in_anchor and 0.0 < dt_ < f.f_locals["b"] - f.f_locals["a"]:
+            return raise_r(rr), vv
+        return rr, vv
 
-    monkeypatch.setattr(scipy.integrate, "solve_ivp", faster)
+    def shifted_ivp(fun, t_span, y0, **kw):
+        sol = original_ivp(fun, t_span, y0, **kw)
+        dense, (a, b) = sol.sol, t_span
+
+        class Shifted:
+            def __call__(self, t):
+                out = dense(t)
+                tt = np.atleast_1d(t)
+                for j, tj in enumerate(tt):
+                    if a < tj < b and abs(tj / dt - round(tj / dt)) < 1e-12:
+                        out[:3, j] = raise_r(out[:3, j])
+                return out
+
+        sol.sol = Shifted()
+        return sol
+
     with snap.session("m2_proof") as s:
-        audit = m2.audit_run(scenario, mission.expected, run)
-    assert audit.reference  # the corrupted references pass every runtime check
+        clean = m2.audit_run(scenario, mission.expected, run)
+    assert s.finish(complete=False) == []
+    monkeypatch.setattr(m2, "kepler_state", shifted_kepler)
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", shifted_ivp)
+    outside = m2.dop853_reference(
+        scenario, *m2.expected_initial_state(scenario), [], [scenario.stop.duration_s]
+    )  # no session: every runtime check passes on the shifted references
+    assert outside.alt_max == pytest.approx(clean.reference.alt_max + dr, abs=1e-6)
+    with snap.session("m2_proof") as s:
+        m2.audit_run(scenario, mission.expected, run)
     problems = s.finish(complete=False)
-    assert any("dop853" in p and "tolerance" in p for p in problems)
+    assert any("dop853.segment" in p and "anchor_ticks_m" in p for p in problems)

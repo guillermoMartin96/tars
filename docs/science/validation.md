@@ -489,3 +489,86 @@ All 10 approved rejection codes are exercised.
   - The extrema metrics moved by at most 2e-8 m.
   - Every consumed anchor tick must also agree with the validated DOP853 dense output at that tick, with the same limits (review F49; measured ≤ 2.8e-8 m). An extremum moves only if both independent references are corrupted consistently.
 
+
+## VAL-0015 — DR-0021: approved reference snapshot, coverage and reproducibility tolerances (M2; T6)
+- **Date / revision:** 2026-10-12. Baseline 1 generated at `ad1c33b` (clean tree), installed and pinned at `c753372`; tolerances set after the measurement below.
+- **Purpose:** DR-0021 option A. Every reference-derived value of the M2 Proof is verified against an approved, digest-pinned snapshot, so coordinated corruption of several independent references (review F50, F51) is detected.
+- **Mechanism (`tars.validation.reference_snapshot`).**
+  - Each reference oracle passes its outputs through `pin(label, seed, **parts)`. Keys are scope (scenario, consumer), label and call counter; part names carry their unit.
+  - Verify sessions are opened by the M2 Proof (`m2_proof`) and by each GMAT M2 evaluation (`gmat_m2:<mission>`, used by `compare` and `run`). The artifact is authenticated by its pinned sha256 before use.
+  - A value that is missing, unexpected, non-finite, changed in kind or shape, or outside its tolerance is a problem, and the exact check `reference_snapshot` fails, or the GMAT evaluation is rejected. Coverage is complete: every approved value of the entrypoint must be reproduced.
+  - **Consumption.**
+    - Seeds `ref` (scenario inputs only) and `gmat` (committed GMAT rows): once a value agrees, the check consumes the *approved* value. A within-tolerance deviation therefore changes no metric and cannot alter an acceptance decision.
+    - Seed `sim` (Kepler states seeded by simulator output: O5, O6): verified but not substituted. The exact check `reference_snapshot_margins` requires every gated metric built on them to pass by more than the worst shift a within-tolerance deviation could cause (O5: the tolerance itself; O6: corner bounds in `m2.o6_snapshot_shifts`).
+  - `exact` values (evaluation-time grids, the decimal O3 closed form, the GMAT epoch anchor) must match bit for bit.
+- **Coverage inventory (pinned).**
+
+| Label | Seed | Values | Consumed by |
+|---|---|---|---|
+| `initial_state` | ref | r, v from the elements | O4 initial state, DOP853 seed, GMAT script |
+| `predicted_burns` | ref | ignition, commanded, intended, cutoff, executed times; propellant before/used/after; mass before/after; Δv | O1, O2, accounting and receipts, lifecycle, segment bounds, GMAT arcs |
+| `simpson_bound`, `timing_bound` | ref | RK4 truncation bound; DR-0017 timing bound | O2 and sample excess metrics; receipt check |
+| `dop853.bounds`, `dop853.ticks` | ref, exact | segment bounds; tick index range and dt (the grid is checked to be k·dt bit for bit) | every evaluation time |
+| `dop853.start`, `dop853.segment` | ref | start state; each segment end (r, v, propellant); anchor (Kepler or RK4) positions at every tick; anchor end state | marks for O4, O8 and O9; node bisection seeds; altitude extrema |
+| `dop853.extrema` | ref | min and max reference altitude | orbit_events extrema metrics |
+| `orbit.node_crossings` | ref | timed crossings; powered-interval count | node crossing error, crossing count |
+| `o5.kepler` | sim | Kepler r, v at every coast sample | O5 |
+| `o6.delta_v`, `o6.midpoint` | ref, sim | impulsive Δv; midpoint r, v and impulsive SMA | O6 |
+| `o3.closed_form`, `o3.expected_cutoff` | ref, exact | decimal Δv and displacement; expected cutoff v, r, propellant | O3 |
+| `o9.arcs`, `o9.label_times`, `o9.epoch_anchor` | ref, exact | arc schedule; row labels; configured A.1 epoch | O9 alignment, labelling, epoch anchor |
+| `o9.expected_mass` | ref | analytic mass at every GMAT row | `gmat_mass_vs_analytic_error_max_kg` |
+| `o9.alignment_kepler`, `o9.gmat_node_crossings` | gmat | Kepler states from GMAT arc starts; GMAT node crossings | O9 alignment; ours-vs-GMAT node error |
+
+  Baseline 1: 48,279 records, 920,849 values (7.4 MB, gzip JSON).
+- **Excluded (explicitly), with reason.**
+  1. *DOP853 dense output at the ticks.* The positions are consumed only by the F49 check, which requires them to agree with the pinned anchor tick positions (≤ 1e-7 m on coasts, 1e-6 m in burns), so they are pinned transitively. Velocity and propellant feed only self-consistency checks. Storing them would add 534k values.
+  2. *DOP853 interior solver nodes, stencil and midpoint samples.* Their number follows the adaptive step selection, which can differ by platform. They feed only the self-consistency checks (node reconciliation, derivative stencil, mass law), which remain.
+  3. *Internal states of `kepler_state`* (round trip, invariants): validation of an output that is itself pinned.
+  4. *Per-iteration bisection states*: only their sign steers the bisection; the resulting crossing times are pinned.
+  5. *Bookkeeping identities on simulator output* (total = dry + propellant, F/m with the reported mass, the rocket equation on reported masses, unit vectors): the expected side is a function of the same run's reported values and scenario constants, not a reference oracle output.
+  6. *Simulator output* (never truth) and *GMAT rows* (pinned by the GMAT manifest digest).
+  7. *M1 references*: M1 is approved and closed; DR-0021 concerns M2.
+- **Tolerance measurement (condition 4).**
+  - **Method.** `reference_snapshot.py measure-deviation` runs the Proof and the three GMAT evaluations in *verify* mode against baseline 1 with unlimited tolerances, so substitution happens exactly as in a real run. It reports the largest |runtime − approved| per class.
+  - This is the right quantity. Without substitution, record-mode drift accumulates along the DOP853 chain: up to 6.8 µm between platforms, consistent with the 11–15 µm cross-platform floor of VAL-0010. With substitution, each segment starts from its approved state.
+  - **Environments (9):**
+    - the reference host (macOS x86_64, i9-9880H): every class 0;
+    - GitHub `ubuntu-latest` on four hosts: EPYC 7763, Xeon Platinum, and EPYC 9V74 twice;
+    - GitHub `macos-latest` on four hosts (Apple M1).
+
+    Workflow `reference-snapshot-measure`, tags `refsnap-measure-2` to `-5`. Same `uv.lock`: NumPy 2.5.3, SciPy 1.18.1.
+  - **Rule.** 10 × the largest measured deviation, rounded up to 1-2-5. A continuous class measured 0 everywhere gets 10 ulp of its largest value. Counts are exact. Unused classes are exact, so they fail closed.
+  - The factor 10 covers runner hardware not sampled: the AVX-512 hosts alone raised the GMAT-seeded Kepler class 36×. The tolerance size only trades false alarms against sensitivity, because the acceptance guarantee comes from substitution and from the margin check, not from the size of the tolerance. The GMAT comparison tolerance is not used.
+
+| Class | Measured max | Tolerance |
+|---|---|---|
+| ref m | 2.79e-9 | 5e-8 |
+| ref m/s | 4.09e-12 | 5e-11 |
+| ref kg | 1.14e-13 | 2e-12 |
+| ref s | 0 | 1e-11 (10 ulp of 6000 s) |
+| ref count | 0 | 0 (exact) |
+| gmat m | 2.02e-7 (AVX-512 hosts) | 5e-6 |
+| gmat m/s | 2.52e-10 | 5e-9 |
+| gmat s | 0 | 1e-11 |
+| sim m | 5.37e-7 | 1e-5 |
+| sim m/s | 6.59e-10 | 1e-8 |
+| exact values | bit-identical on every host | 0 |
+
+- **Margins for the sim-seeded gates (baseline report).**
+  - **O5:** 0.314 m against a 0.6 m limit (shift bound 1e-5 m); 3.6e-4 m/s against 7e-4 m/s (shift bound 1e-8 m/s).
+  - **O6 order deviation:** 0.0041 + 0.0366 = 0.0405 against 0.05 (prograde); 0.0039 + 0.0366 = 0.0405 (retrograde).
+  - **O6 slice ratio:** 2.6e-6 + 2.0e-10 against 1e-5.
+  - The O6 order bound is conservative, because the sim length tolerance is set by O5's long Kepler arcs. If T7 tightens that O6 limit below about 0.041, the impulsive SMA needs its own measured class.
+- **Detection (regression tests, `tests/test_reference_snapshot.py`).**
+  - **F50:** Kepler anchor ticks and DOP853 dense positions are corrupted consistently at 1.001 × the flight time. Every runtime check passes and the extremum moves; `_evaluate` rejects it through the snapshot, while the same simulator data is rejected on its limit with clean references.
+  - **F51:** O6 Kepler at 10 × the flight time, forward and in the round trip, is rejected.
+  - **Coordinated shift:** both references raised by 1 cm at every interior tick pass every runtime check and are rejected.
+  - **Tampering:** a tampered, missing or malformed artifact; out-of-tolerance, non-finite, unexpected, missing or changed-kind values; incomplete coverage.
+- **Baseline approval evidence (condition 2).**
+  - The recording run passed the M2 Proof (213 checks and the 2 snapshot checks) and the three GMAT evaluations.
+  - `verify-baseline` passed, computed from the snapshot's own values:
+    - DOP853 against the committed GMAT rows: at most 4.66e-6 m and 5.39e-9 m/s (prograde), 3.64e-6 m (retrograde) and 6.24e-7 m (invalid commands), against the O9 gates of 3e-5 m and 3.5e-8 m/s;
+    - GMAT-seeded Kepler against GMAT: at most 4.01e-6 m, against 1e-4 m;
+    - coast energy and angular momentum conserved to 1e-11, propellant constant on coasts and non-increasing in burns, segment ends on their anchors, and extrema equal to the pinned ticks' extrema.
+  - Agreement with the snapshot is not evidence of physical correctness: that rests on these checks.
+- **Status:** M2 thresholds remain provisional (T7). The tolerances are reproducibility limits, not Proof thresholds.
