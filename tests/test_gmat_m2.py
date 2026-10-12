@@ -1161,6 +1161,8 @@ _ALLOWED = {
     ("m2.py", "orbit_checks", "min(alts)"): "schema-valid event values (round-trip check)",
     ("m2.py", "_check_dense_consistency", "np.maximum(np.abs(terminal), 1.0)"):
         "elementwise tolerance floor on values already validated finite",
+    ("m2.py", "_check_dense_consistency", "np.maximum(np.abs(sol.y), 1.0)"):
+        "elementwise tolerance floor on solver nodes already validated finite",
     ("m2.py", "orbit_checks", "max(alts)"): "schema-valid event values (round-trip check)",
     ("gmat_m2.py", "plan_arcs", "min(b.cutoff_t_s, horizon_s)"): "predicted times",
     ("gmat_m2.py", "plan_arcs", "min(BURN_STEP_S, b - a)"): "predicted times",
@@ -1786,3 +1788,92 @@ def test_gmat_coast_velocity_is_gated():
         metrics["coast_vs_kepler_velocity_error_max_mps"]
         > LIMITS["all"]["coast_vs_kepler_velocity_error_max_mps"]
     )
+
+
+# ------------------------------------------------------------------ re-verification 10 fixes
+
+
+def test_kepler_output_on_the_wrong_side_of_the_orbit_is_rejected(monkeypatch):
+    """F38: negating r and v conserves energy and angular momentum but not the phase;
+    the round trip catches it, so O6 cannot consume it."""
+    from tars.astro import kepler
+
+    original = kepler.propagate
+
+    def flipped(r, v, dt, mu):
+        rr, vv = original(r, v, dt, mu)
+        return (-rr, -vv) if dt > 0 else (rr, vv)
+
+    scenario, _, arcs, rows = _labelled("m2_prograde_burn")
+    labelled, _ = gmat_m2.label_rows(rows, arcs)
+    monkeypatch.setattr(kepler, "propagate", flipped)
+    r, v = m2.kepler_state(labelled[0.0].r, labelled[0.0].v, 300.0, scenario.constants.mu)
+    assert np.all(r == math.inf) and np.all(v == math.inf)
+
+
+def _dense_probe(monkeypatch, mutate_sol):
+    import scipy.integrate
+
+    original = scipy.integrate.solve_ivp
+
+    def poisoned(*a, **k):
+        sol = original(*a, **k)
+        mutate_sol(sol)
+        return sol
+
+    monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+    scenario = BY_NAME["m2_prograde_burn"].build()
+    return lambda: m2.dop853_reference(scenario, *m2.expected_initial_state(scenario), [], [600.0])
+
+
+def test_interior_dense_corruption_is_rejected(monkeypatch):
+    """F39: interior dense states negated (endpoints kept) disagree with solver nodes."""
+
+    def mutate(sol):
+        dense, a, b = sol.sol, sol.t[0], sol.t[-1]
+
+        class Bad:
+            def __call__(self, t):
+                out = dense(t)
+                interior = (np.atleast_1d(t) > a) & (np.atleast_1d(t) < b)
+                out[:6, interior] = -out[:6, interior]
+                return out
+
+        sol.sol = Bad()
+
+    run = _dense_probe(monkeypatch, mutate)
+    with pytest.raises(RuntimeError, match="solver nodes"):
+        run()
+
+
+def test_non_finite_stencil_evaluations_are_rejected(monkeypatch):
+    """F39: velocity and propellant at the derivative stencil points are checked too."""
+
+    def mutate(sol):
+        dense = sol.sol
+
+        class Bad:
+            def __call__(self, t):
+                out = dense(t)
+                frac = np.abs(np.atleast_1d(t) / 10.0 - np.round(np.atleast_1d(t) / 10.0))
+                stencil = (frac > 0) & (frac < 1e-3)
+                out[3:, stencil] = math.nan
+                return out
+
+        sol.sol = Bad()
+
+    run = _dense_probe(monkeypatch, mutate)
+    with pytest.raises(RuntimeError, match="near the ticks"):
+        run()
+
+
+def test_interior_solver_node_corruption_is_rejected(monkeypatch):
+    """F40: negated interior solver nodes disagree with the dense interpolant."""
+
+    def mutate(sol):
+        if sol.y.shape[1] > 2:
+            sol.y[:6, 1:-1] = -sol.y[:6, 1:-1]
+
+    run = _dense_probe(monkeypatch, mutate)
+    with pytest.raises(RuntimeError, match="solver nodes"):
+        run()

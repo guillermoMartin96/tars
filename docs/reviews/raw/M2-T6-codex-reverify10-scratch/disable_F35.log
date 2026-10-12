@@ -1,0 +1,78 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_dense_output_must_be_self_consistent[zero_velocity] ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108fd3020>
+corruption = 'zero_velocity'
+
+    @pytest.mark.parametrize("corruption", ["zero_velocity", "terminal_mismatch"])
+    def test_dense_output_must_be_self_consistent(monkeypatch, corruption):
+        """F35: finite but wrong dense velocities, or a dense state that disagrees with the
+        terminal state, are rejected."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    if corruption == "zero_velocity":
+                        out[3:6, :] = 0.0
+                    else:
+                        out[0, :] += 1.0  # positions shifted 1 m everywhere
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="dense"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1753: Failed
+_________ test_dense_output_must_be_self_consistent[terminal_mismatch] _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10be9ffb0>
+corruption = 'terminal_mismatch'
+
+    @pytest.mark.parametrize("corruption", ["zero_velocity", "terminal_mismatch"])
+    def test_dense_output_must_be_self_consistent(monkeypatch, corruption):
+        """F35: finite but wrong dense velocities, or a dense state that disagrees with the
+        terminal state, are rejected."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            dense = sol.sol
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    if corruption == "zero_velocity":
+                        out[3:6, :] = 0.0
+                    else:
+                        out[0, :] += 1.0  # positions shifted 1 m everywhere
+                    return out
+    
+            sol.sol = Bad()
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="dense"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1753: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_dense_output_must_be_self_consistent[zero_velocity]
+FAILED tests/test_gmat_m2.py::test_dense_output_must_be_self_consistent[terminal_mismatch]
+2 failed, 289 deselected in 0.75s

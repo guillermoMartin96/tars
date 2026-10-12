@@ -1,0 +1,29 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_kepler_outputs_must_conserve_two_body_invariants _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x103f8a0c0>
+
+    def test_kepler_outputs_must_conserve_two_body_invariants(monkeypatch):
+        """F36: a finite but physically wrong Kepler output (zero velocity) is rejected by
+        the invariant check, and GMAT coast alignment compares velocity too."""
+        from tars.astro import kepler
+    
+        scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        r0, v0 = labelled[0.0].r, labelled[0.0].v
+        r, v = m2.kepler_state(r0, v0, 60.0, scenario.constants.mu)
+        assert np.all(np.isfinite(r)) and np.all(np.isfinite(v))
+        original = kepler.propagate
+        monkeypatch.setattr(kepler, "propagate", lambda *a: (original(*a)[0], np.zeros(3)))
+        r, v = m2.kepler_state(r0, v0, 60.0, scenario.constants.mu)
+>       assert np.all(r == math.inf) and np.all(v == math.inf)
+E       assert (np.False_)
+E        +  where np.False_ = <function all at 0x10402bf70>(array([6611812.15853978,  288776.98807753,  364345.88252287]) == inf)
+E        +    where <function all at 0x10402bf70> = np.all
+E        +    and   inf = math.inf
+
+tests/test_gmat_m2.py:1770: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_kepler_outputs_must_conserve_two_body_invariants
+1 failed, 290 deselected in 0.19s

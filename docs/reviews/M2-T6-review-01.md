@@ -283,5 +283,31 @@ All seven are **`ACCEPTED`**.
 - Existing O9 metric values are unchanged; the three O9 checks gain the new metric, all passing.
 
 ## Re-verification 10 (under DR-0019 B)
+**Reviewer:** Codex, session `01a12e18-6e2c-7ff0-8082-288130e96c22`, at `b3a76eb`. **Raw:** `raw/M2-T6-codex-reverify10.md`, `raw/M2-T6-codex-reverify10-scratch/`.
+
+**Verdict: FAIL.**
+- F34–F37 are resolved (disabling them gives 2, 2, 1, 1 and 1 failures).
+- The fresh 213-check report matches exactly. The three new coast-velocity metrics are 4.6e-9, 1.8e-9 and 4.5e-9 m/s against 1e-7 m/s.
+
+**All four are `ACCEPTED`.**
+- **Implementer note on F38–F40.** Each corruption left the checked quantity unchanged:
+  - the O6 SMA is invariant to negating both r and v;
+  - the altitude extrema depend only on |r|;
+  - interior solver nodes were never consumed.
+
+  None could have changed a verdict. They are closed anyway with general consistency checks rather than argued away.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F38 | Med | A Kepler output on the wrong side of the orbit passed: invariants do not fix the phase | `kepler_state` also requires a **round trip**: propagating the result by −Δt must recover the input state (relative 1e-10; measured 8.1e-14) | `test_kepler_output_on_the_wrong_side_of_the_orbit_is_rejected` |
+| F39 | Med | Interior dense states could be corrupted with the endpoints kept; derivative-stencil components were unchecked | The dense interpolant must reproduce **every solver node** (relative 1e-12; measured 0), and every component of every stencil evaluation must be finite | `test_interior_dense_corruption_is_rejected`, `test_non_finite_stencil_evaluations_are_rejected` |
+| F40 | Med | Negated interior solver nodes passed (unused) | Covered by the node reconciliation above | `test_interior_solver_node_corruption_is_rejected` |
+| F41 | Med | A no-propulsion CLI summary could claim fuel and an active engine | Every final propulsion field must be present. Without propulsion they must be exactly empty (null, null, null, null, []) | `test_no_propulsion_cli_summary_must_be_empty` (5 fields: wrong and missing) |
+
+- **Mutation tests.** Each mechanism fails its tests when disabled. A first mutation of the node check was itself wrong (it made the check always raise); it was redone by removing the `raise`.
+- **Documentation.** The VAL-0014 metric count is corrected (16 gated O9 metrics since F36).
+- **Results.** 1 005 tests pass; the M2 Proof report is identical to `b3a76eb` (213 checks).
+
+## Re-verification 11 (under DR-0019 B)
 See below.
 

@@ -913,6 +913,7 @@ def _check_reference_states(
 # (Kepler invariants) and 2.6e-10 (dense velocity vs its position derivative). The
 # limits sit far above round-off and far below any physical corruption.
 KEPLER_INVARIANT_REL_TOL = 1e-12
+KEPLER_ROUNDTRIP_REL_TOL = 1e-10  # measured 8.1e-14
 DENSE_VELOCITY_REL_TOL = 1e-8
 DENSE_TERMINAL_REL_TOL = 1e-12
 
@@ -933,14 +934,33 @@ def kepler_state(r0, v0, dt: float, mu: float) -> tuple[np.ndarray, np.ndarray]:
     h_err = float(np.linalg.norm(h1 - h0)) / float(np.linalg.norm(h0))
     if not (e_err <= KEPLER_INVARIANT_REL_TOL and h_err <= KEPLER_INVARIANT_REL_TOL):
         return bad
+    # F38: invariants do not fix the orbital phase; propagating back by -dt must
+    # recover the input state, which pins the time of flight.
+    rb, vb = kepler.propagate(r, v, -dt, mu)
+    r_err = float(np.linalg.norm(rb - r0)) / float(np.linalg.norm(r0))
+    v_err = float(np.linalg.norm(vb - v0)) / float(np.linalg.norm(v0))
+    if not (r_err <= KEPLER_ROUNDTRIP_REL_TOL and v_err <= KEPLER_ROUNDTRIP_REL_TOL):
+        return bad
     return r, v
 
 
 def _check_dense_consistency(sol, ticks, dense, terminal, b: float, where: str) -> None:
     """Dense velocities agree with a central difference of the dense position, and the
     dense state at the segment end equals the terminal state (review M2-T6 F35)."""
+    # F40/F39: the interpolant reproduces every solver node, so interior nodes and the
+    # dense trajectory cannot be corrupted independently (measured residual 0).
+    nodes = sol.sol(sol.t)
+    scale = np.maximum(np.abs(sol.y), 1.0)
+    if not (
+        np.all(np.isfinite(nodes))
+        and np.all(np.abs(nodes - sol.y) <= DENSE_TERMINAL_REL_TOL * scale)
+    ):
+        raise RuntimeError(f"DOP853 dense output disagrees with its solver nodes on {where}")
     step = 1e-3
-    fd = (sol.sol(ticks + step)[:3] - sol.sol(ticks - step)[:3]) / (2.0 * step)
+    plus, minus = sol.sol(ticks + step), sol.sol(ticks - step)
+    if not (np.all(np.isfinite(plus)) and np.all(np.isfinite(minus))):  # F39: whole stencil
+        raise RuntimeError(f"DOP853 dense output non-finite near the ticks on {where}")
+    fd = (plus[:3] - minus[:3]) / (2.0 * step)
     speed = np.linalg.norm(dense[3:6], axis=0)
     err = np.linalg.norm(dense[3:6] - fd, axis=0)
     if not np.all(err <= DENSE_VELOCITY_REL_TOL * speed):  # NaN-safe
@@ -1921,6 +1941,19 @@ def cli_summary_violations(
     if summary.get("commands") != want:
         v.append("CLI summary commands differ from the receipt events")
     props = _of(events, "PropulsionSampled")
+    fields = (
+        "final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+        "active_burn_id_at_stop", "pending_burn_ids_at_stop",
+    )  # fmt: skip
+    if any(f not in summary for f in fields):
+        v.append("CLI summary lacks a final propulsion field")
+        return v
+    if not props:
+        # No propulsion (F41): every final propulsion field is explicitly empty.
+        got = tuple(summary[f] for f in fields)
+        if got != (None, None, None, None, []):
+            v.append(f"CLI summary claims propulsion state {got} without propulsion")
+        return v
     if props:
         last = props[-1]
         got = (

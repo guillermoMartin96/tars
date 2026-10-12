@@ -444,7 +444,7 @@ All 10 approved rejection codes are exercised.
 - **Negative and mutation tests** (`tests/test_gmat_m2.py`).
   - **Rejected references:** a tampered report, g0 = 9.81, a C1 change, K3 ≠ 0, a changed Accuracy, wrong metadata constants, a missing row, an unaligned step, and a 1 mm GMAT state or 1 mg GMAT mass error (caught by the independent references).
   - **Simulator mutants that fail O9:** thrust × (1 + 1e-5), g0 = 9.81, frozen pointing, swapped retrograde direction, cutoff timing × (1 + 1e-9).
-  - **Each O9 check disabled in turn makes a test fail.** As first written, this claim was false for the coast-vs-Kepler gate (review M2-T6 F7). It is now verified by a harness over all 15 gated metrics and the F1/F3/F5/F6 checks, each with its own targeted test.
+  - **Each O9 check disabled in turn makes a test fail.** As first written, this claim was false for the coast-vs-Kepler gate (review M2-T6 F7). It is now verified by a harness over all gated O9 metrics (15 at the time; 16 since review F36 added the coast velocity gate) and the F1/F3/F5/F6 checks, each with its own targeted test.
 - **Cross-platform (CI, `805d789`).** The committed GMAT reports are identical everywhere; only our simulator and the DOP853 reference vary by platform.
 
   | Platform | GMAT vs DOP853 (max, prograde / retrograde / invalid cmds) | Ours vs GMAT at 53 700 s, prograde |

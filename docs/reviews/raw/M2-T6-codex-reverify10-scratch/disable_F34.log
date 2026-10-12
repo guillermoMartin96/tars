@@ -1,0 +1,50 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____________ test_nan_solver_time_cannot_hide_off_law_propellant ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f244f20>
+
+    def test_nan_solver_time_cannot_hide_off_law_propellant(monkeypatch):
+        """F34: a NaN solver time with off-law propellant is rejected."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            sol.t = sol.t.copy()
+            sol.t[-1] = math.nan
+            sol.y[6, -1] = 299.0
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+        predicted = m2.predict_burns(scenario, BY_NAME["m2_prograde_burn"].expected)
+>       with pytest.raises(RuntimeError, match=r"time|propellant"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'time|propellant'
+E         Actual message: 'DOP853 dense output disagrees with the terminal state on [0.0, 600.0]'
+
+tests/test_gmat_m2.py:1709: AssertionError
+__________________ test_reference_mass_law_check_is_nan_safe ___________________
+
+    def test_reference_mass_law_check_is_nan_safe():
+        """F34: the mass-law comparison rejects NaN times directly, too. With a predicted
+        burn, a NaN time makes the expectation NaN, so `err > tol` would be False."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        veh = m2.vehicle(scenario)
+        predicted = m2.predict_burns(scenario, mission.expected)
+        assert math.isnan(m2.mass_law_propellant(math.nan, veh, predicted))  # the hazard
+        states = np.zeros((7, 1))
+        states[6, 0] = 299.0
+>       with pytest.raises(RuntimeError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1723: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_nan_solver_time_cannot_hide_off_law_propellant
+FAILED tests/test_gmat_m2.py::test_reference_mass_law_check_is_nan_safe - Fai...
+2 failed, 164 deselected in 0.74s

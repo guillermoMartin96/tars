@@ -1078,3 +1078,34 @@ def test_audit_check_names_are_unique(runs):
     mission, scenario, run = runs["m2_prograde_burn"]
     audit = m2.audit_run(scenario, mission.expected, run)
     assert not set(audit.violations) & set(audit.metrics)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+     "active_burn_id_at_stop", "pending_burn_ids_at_stop"],
+)  # fmt: skip
+def test_no_propulsion_cli_summary_must_be_empty(runs, field):
+    """F41 (T6 review): without propulsion every final propulsion field is empty."""
+    _, scenario, run = runs["m2_invalid_commands_no_propulsion"]
+    good = {
+        "commands": [
+            {"command_id": r.command_id, "status": str(r.status),
+             "reason": r.reason and str(r.reason), "burn_id": r.burn_id, "submit_tick": r.tick}
+            for r in run.receipts
+        ],
+        "unsubmitted_command_ids": [],
+        "final_propellant_kg": None,
+        "final_total_mass_kg": None,
+        "final_engine_state": None,
+        "active_burn_id_at_stop": None,
+        "pending_burn_ids_at_stop": [],
+    }  # fmt: skip
+    assert m2.cli_summary_violations(run.events, good, scenario) == []
+    wrong = {
+        "final_propellant_kg": 1e9, "final_total_mass_kg": 1e9, "final_engine_state": "burning",
+        "active_burn_id_at_stop": "burn#000001", "pending_burn_ids_at_stop": ["burn#000002"],
+    }[field]  # fmt: skip
+    assert m2.cli_summary_violations(run.events, {**good, field: wrong}, scenario)
+    missing = {k: v for k, v in good.items() if k != field}
+    assert m2.cli_summary_violations(run.events, missing, scenario)
