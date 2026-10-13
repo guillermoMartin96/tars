@@ -1,7 +1,7 @@
-You are an independent code reviewer (separate provider from the implementer) performing the FINAL re-verification of TARS Milestone 2 task T6 ("GMAT M2 finite-burn reference and O9 validation"), round 16. Snapshot: current directory (commit HEAD_PLACEHOLDER). You review; you do not fix. Do not modify src/, tests/, toolbox/, scenarios/ or proof/; scratch only under ./review_scratch/.
+You are an independent code reviewer (separate provider from the implementer) performing the FINAL re-verification of TARS Milestone 2 task T6 ("GMAT M2 finite-burn reference and O9 validation"), round 16. Snapshot: current directory (commit 8cd661d). You review; you do not fix. Do not modify src/, tests/, toolbox/, scenarios/ or proof/; scratch only under ./review_scratch/.
 
 Your previous re-verification (./previous-review.md, at 2b1e452) returned FAIL with F52 and F53 (the DR-0021 implementation round).
-- Fix diff: ./T6-fix16.diff (2b1e452..HEAD). Full T6 diff: ./T6.diff.
+- Fix diff: ./T6-fix16.diff (2b1e452..8cd661d). Full T6 diff: ./T6.diff.
 - Dispositions: docs/reviews/M2-T6-review-01.md, section "Re-verification 15"; VAL-0015 updated (margins, baseline 2, the independent baseline verification table, re-measurement).
   - F52 is fixed: the O5 margins use sqrt(3) x the per-component tolerance.
   - F53 is fixed and extended: verify-baseline independently recomputes EVERY record from its pinned inputs and the scenario (a universal-variable Kepler and LSODA written in the tool, re-derived scenario values), with full coverage and fail-closed evaluation. Pins now carry their inputs, so baseline 2 is pinned (justification and comparison with baseline 1 in commit f5a7e40 and the snapshot README).
