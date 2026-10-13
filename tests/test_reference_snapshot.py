@@ -662,7 +662,7 @@ def test_baseline_verification_fails_closed_on_unreadable_records(baseline):
     """A record the verifier cannot even evaluate (a missing part) is a problem, never
     a crash and never a silent pass."""
     data = _copy(baseline)
-    key, rec = _first(data, "dop853.segment", "m2_prograde_burn/audit")
+    _key, rec = _first(data, "dop853.segment", "m2_prograde_burn/audit")
     del rec["parts"]["anchor_ticks_m"]
     problems = _verify(data)
     assert any("verification raised" in p and "m2_prograde_burn/audit" in p for p in problems)
