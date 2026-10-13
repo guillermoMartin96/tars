@@ -180,7 +180,7 @@
   - **Acceptance protection:** ref and gmat values are consumed from the snapshot. Sim-seeded gates keep margins above the worst shift a within-tolerance deviation could cause.
   - **DR-0022 B safeguards:** the digest is re-verified at the end of every run, and verification mode is asserted.
 - **Negative and mutation tests:**
-  - `tests/test_gmat_m2.py` (~190): artifact, threshold, row and workflow mutants; provenance; anchors; the F47–F51 coordinated-corruption regressions.
+  - `tests/test_gmat_m2.py` (184): artifact, threshold, row and workflow mutants; provenance; anchors; the F47–F51 coordinated-corruption regressions.
   - `tests/test_reference_snapshot.py` (82): ledger mechanics, authentication, immutability, margins, the F50/F51/F52 regressions, baseline-approval corruptions (F53–F56), fail-closed sessions (F57) and the DR-0022 safeguards.
   - Every mechanism was mutation-tested: disabling it fails its targeted tests (review record).
 - **Review:** `docs/reviews/M2-T6-review-01.md`. 18 Codex rounds, 59 findings:
