@@ -1163,6 +1163,7 @@ def dop853_reference(
     )
     # DR-0021: every evaluation time and consumed output is pinned to the approved
     # reference snapshot; inside a Proof session the approved values are used.
+    snap.pin("dop853.marks", "ref", exact=True, marks_s=sorted(set(marks)))
     snap.pin("dop853.bounds", "ref", exact=True, bounds_s=bounds)
     p = snap.pin("dop853.start", "ref", r_m=y[:3], v_mps=y[3:6], propellant_kg=y[6:])
     y = np.concatenate([p["r_m"], p["v_mps"], p["propellant_kg"]])

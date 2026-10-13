@@ -546,8 +546,28 @@ def baseline():
     return snap.load_approved()
 
 
+@pytest.fixture(scope="module")
+def fresh():
+    """A fresh recording of the current code: the expected inventory and inputs."""
+    records, failures = _load(TOOL, "reference_snapshot_tool_r").record_all()
+    assert failures == []
+    return records
+
+
+_FRESH: dict = {}
+
+
+@pytest.fixture(autouse=True)
+def _use_fresh(request):
+    if "baseline" in request.fixturenames:
+        _FRESH["records"] = request.getfixturevalue("fresh")
+    yield
+    _FRESH.clear()
+
+
 def _verify(data):
-    return _load(TOOL, "reference_snapshot_tool_v").verify_baseline(data)
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    return tool.verify_baseline(data, expected=_FRESH.get("records"))
 
 
 def _copy(data):
@@ -670,3 +690,134 @@ def test_baseline_verification_fails_closed_on_unreadable_records(baseline):
     _key, rec = _first(data, "o9.alignment_kepler", "m2_prograde_burn/o9")
     del rec["parts"]["r_m"]
     assert any("verification raised" in p for p in _verify(data))
+
+
+# ------------------------------------------------------------------ re-verification 16
+
+
+def test_session_without_its_ledger_fails_closed():
+    """F57: a verify session whose authenticated ledger is lost after loading verifies
+    nothing, so it must fail instead of passing unchecked values."""
+    mission = BY_NAME["m2_prograde_burn"]
+    scenario = mission.build()
+    variant = m2.impulsive_variants(scenario)[0]
+    run = run_scenario(variant)
+    with snap.session("m2_proof") as s:
+        assert s.approved is not None
+        s.approved = None  # corrupted after authentication
+        m2.impulsive_row(scenario, variant, run)
+    problems = s.finish(complete=True)
+    assert any("no authenticated reference ledger" in p for p in problems)
+    assert s.report()["records_verified"] == 0
+
+
+@pytest.mark.parametrize(
+    "mutate,expect",
+    [
+        (
+            lambda d: [
+                r["parts"]["step_s"].update(values=[12345.0] * len(r["parts"]["step_s"]["values"]))
+                for k, r in d["records"].items()
+                if "/o9.arcs#" in k
+            ],
+            "arcs",
+        ),
+        (
+            lambda d: [
+                r["parts"]["powered_1"].update(values=[999.0])
+                for k, r in d["records"].items()
+                if "/orbit.node_crossings#" in k
+            ],
+            "powered",
+        ),
+        (
+            lambda d: d["records"].update(
+                {
+                    k.replace("#3", "#999999"): d["records"].pop(k)
+                    for k in [k for k in list(d["records"]) if k.endswith("/o5.kepler#3")][:1]
+                }
+            ),
+            "inventory",
+        ),
+        (
+            lambda d: next(r for k, r in d["records"].items() if "/o5.kepler#" in k).update(
+                entrypoints=["bogus"]
+            ),
+            "inventory",
+        ),
+        (
+            lambda d: [
+                d["records"].pop(k) for k in [k for k in d["records"] if "/o5.kepler#" in k]
+            ],
+            "inventory",
+        ),
+        (
+            lambda d: d["records"].update(
+                {
+                    "m2_prograde_burn/o9/o9.unverified#0": dict(
+                        next(r for k, r in d["records"].items() if "/o9.epoch_anchor#" in k)
+                    )
+                }
+            ),
+            "inventory",
+        ),
+    ],
+    ids=["arc-steps", "powered-count", "counter", "entrypoint", "removed-o5", "unknown-label"],
+)
+def test_baseline_verification_requires_the_complete_inventory(baseline, mutate, expect):
+    """F54: missing, renamed, re-tagged or unknown records, and unverified parts, are
+    rejected against the fresh recording's inventory."""
+    data = _copy(baseline)
+    mutate(data)
+    problems = _verify(data)
+    assert problems, expect
+
+
+@pytest.mark.parametrize("how", ["duplicate", "empty", "removed"])
+def test_baseline_verification_enumerates_node_crossings(baseline, how):
+    """F55: the crossing sequence (count, order, powered intervals) is enumerated
+    independently, so duplicated, emptied or removed crossing lists are rejected."""
+    data = _copy(baseline)
+    keys = [k for k in data["records"] if "node_crossings#" in k]
+    for k in keys:
+        part = data["records"][k]["parts"]["crossings_s"]
+        if how == "duplicate" and part["values"]:
+            part["values"] = [part["values"][0]] * len(part["values"])
+        elif how == "empty":
+            part["values"], part["shape"] = [], [0]
+        elif how == "removed":
+            del data["records"][k]
+    problems = _verify(data)
+    assert problems
+
+
+def test_baseline_verification_rejects_wrong_o5_inputs(baseline):
+    """F56: O5 flight times x10 with positions and velocities recomputed to match are
+    self-consistent, but not the required observation schedule."""
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    data = _copy(baseline)
+    key, rec = _first(data, "o5.kepler")
+    mu = BY_NAME["m2_prograde_burn"].build().constants.mu
+    fl = tool._arr(rec, "flight_s") * 10
+    r, v = tool.kepler_uv(tool._arr(rec, "seed_r_m"), tool._arr(rec, "seed_v_mps"), fl, mu)
+    _set(rec, "flight_s", fl)
+    _set(rec, "r_m", r)
+    _set(rec, "v_mps", v)
+    problems = _verify(data)
+    assert any(key in p and "input differs from the fresh recording" in p for p in problems)
+
+
+def test_baseline_verification_rejects_a_wrong_o3_case(baseline):
+    """F56: O3 expectations recomputed self-consistently for 100 s instead of 77.3 s."""
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    data = _copy(baseline)
+    veh = m2.vehicle(BY_NAME["m2_prograde_burn"].build())
+    dv, disp = tool._free_space_closed_form(veh, 100.0)
+    for key, rec in data["records"].items():
+        if "/o3.closed_form#" in key:
+            _set(rec, "dv_mps", [dv])
+            _set(rec, "disp_m", [disp])
+        if "/o3.expected_cutoff#" in key:
+            _set(rec, "duration_s", [100.0])
+    problems = _verify(data)
+    assert any("duration" in p or "input differs" in p for p in problems)

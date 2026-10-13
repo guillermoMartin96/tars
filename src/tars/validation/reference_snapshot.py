@@ -171,6 +171,7 @@ class Session:
     counters: dict[str, int] = field(default_factory=dict)
     recorded: dict[str, dict[str, Any]] = field(default_factory=dict)
     consumed: set[str] = field(default_factory=set)
+    compared: set[str] = field(default_factory=set)  # consumed AND compared (F57)
     problems: list[str] = field(default_factory=list)
     counts: dict[str, int] = field(default_factory=dict)
     max_deviation: dict[str, float] = field(default_factory=dict)
@@ -207,7 +208,10 @@ class Session:
             }
             return runtime
         self.consumed.add(key)
-        if self.approved is None:  # load failure already reported
+        if not isinstance(self.approved, dict):
+            # Fail closed (review F57): a verify session without its authenticated
+            # ledger -- never loaded, or lost after loading -- verifies nothing.
+            self._problem("no authenticated reference ledger", key)
             return runtime
         rec = self.approved.get(key)
         if rec is None:
@@ -241,6 +245,7 @@ class Session:
                 ok = False
             self.verified_values += int(arr.size)
             approved[name] = want
+        self.compared.add(key)
         if not ok:
             return runtime
         # Approved values are consumed for ref/gmat seeds; sim-seeded ones depend on
@@ -250,7 +255,14 @@ class Session:
     def finish(self, complete: bool = True) -> list[str]:
         """All problems; with ``complete``, every approved value of this entrypoint
         must have been reproduced (a skipped or missing computation fails)."""
-        if complete and self.approved is not None:
+        if self.mode == "verify":
+            if not isinstance(self.approved, dict):
+                self._problem("no authenticated reference ledger", "session finished without it")
+            unchecked = self.consumed - self.compared
+            if unchecked and isinstance(self.approved, dict):
+                for k in sorted(unchecked):
+                    self._problem("reference value not compared", k)
+        if complete and isinstance(self.approved, dict):
             missing = sorted(
                 k
                 for k, rec in self.approved.items()
@@ -267,7 +279,8 @@ class Session:
         return {
             "entrypoint": self.entrypoint,
             "artifact_sha256": self.sha256,
-            "records_verified": len(self.consumed),
+            "records_consumed": len(self.consumed),
+            "records_verified": len(self.compared),
             "values_verified": self.verified_values,
             "max_deviation_by_class": dict(sorted(self.max_deviation.items())),
         }
