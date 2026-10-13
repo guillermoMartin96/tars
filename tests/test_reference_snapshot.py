@@ -916,3 +916,85 @@ def test_tolerances_follow_the_documented_rule():
     for cls, top in maxima.items():
         need = max(10.0 * snap.MEASURED[cls], 10.0 * float(np.spacing(top)))
         assert snap.TOLERANCES[cls] == pytest.approx(_round_125(need), rel=1e-12), cls
+
+
+# ------------------------------------------------------------------ DR-0022 B safeguards
+
+
+def test_ledger_changed_during_the_run_is_detected():
+    """Safeguard 1: the in-memory ledger is re-hashed at the end of the run, so an
+    accidental change to it (a bug writing into the loaded records) fails."""
+    with snap.session("m2_proof") as s:
+        rec = next(iter(s.approved.values()))
+        part = next(iter(rec["parts"].values()))
+        if part["values"]:
+            part["values"][0] += 1.0
+        else:
+            rec["seed"] = "sim" if rec["seed"] != "sim" else "ref"
+    problems = s.finish(complete=False)
+    assert any("ledger changed during the run" in p for p in problems)
+
+
+def test_artifact_replaced_during_the_run_is_detected(tmp_path, monkeypatch):
+    """Safeguard 1: the artifact file is re-hashed at the end of the run against the
+    hash loaded and the pinned digest."""
+    path = tmp_path / "snap.json.gz"
+    path.write_bytes(snap.snapshot_path().read_bytes())
+    with snap.session("m2_proof", path=path) as s:
+        data = snap.read_json(path)
+        data["provenance"] = {"replaced": True}
+        snap.write_json(path, data)
+    problems = s.finish(complete=False)
+    assert any("artifact changed during the run" in p for p in problems)
+    assert any("not the approved one at finish" in p for p in problems)
+
+
+def test_a_clean_session_passes_the_integrity_checks():
+    with snap.session("m2_proof") as s:
+        pass
+    assert not any("digest" in p for p in s.finish(complete=False))
+
+
+def test_run_mode_problems():
+    """Safeguard 2: without an explicit recorder, an entrypoint must have run a
+    verification session that compared values."""
+    rec = snap.Session("record", "m2_proof")
+    assert snap.run_mode_problems(rec, recorder=rec) == []
+    assert any("did not run" in p for p in snap.run_mode_problems(None, None))
+    assert any("'record' mode" in p for p in snap.run_mode_problems(rec, None))
+    idle = snap.Session("verify", "m2_proof")
+    assert any("compared no value" in p for p in snap.run_mode_problems(idle, None))
+
+
+@pytest.fixture
+def record_mode_sessions(monkeypatch):
+    """Every session opened by an entrypoint silently records instead of verifying
+    (the incorrect execution state the safeguard must catch)."""
+    import contextlib
+
+    @contextlib.contextmanager
+    def wrong(entrypoint, recorder=None, path=None, authenticate=True):
+        s = snap.Session("record", entrypoint)
+        token = snap._SESSION.set(s)
+        try:
+            yield s
+        finally:
+            snap._SESSION.reset(token)
+
+    monkeypatch.setattr(snap, "session", wrong)
+
+
+def test_gmat_comparison_in_the_wrong_mode_fails(record_mode_sessions):
+    reasons, check = _gmat_cli()._evaluate("m2_prograde_burn")
+    assert check is None
+    assert any("'record' mode, not verification" in r for r in reasons)
+
+
+def test_m2_proof_in_the_wrong_mode_fails(record_mode_sessions, tmp_path):
+    proof = _load(REPO_ROOT / "toolbox" / "validators" / "m2_proof.py", "m2_proof_mode")
+    out = tmp_path / "m2.json"
+    assert proof.main(["--quick", "--out", str(out)]) == 1
+    result = next(
+        r for r in json.loads(out.read_text())["results"] if r["validator"] == "reference_snapshot"
+    )
+    assert not result["passed"] and "'record' mode, not verification" in result["notes"]

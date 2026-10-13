@@ -188,6 +188,10 @@ class Session:
     counts: dict[str, int] = field(default_factory=dict)
     max_deviation: dict[str, float] = field(default_factory=dict)
     verified_values: int = 0
+    # DR-0022 B safeguards (accidental corruption, not deliberate in-memory edits):
+    path: Path | None = None
+    authenticated: bool = False
+    ledger_sha256: str | None = None
 
     def _problem(self, kind: str, text: str) -> None:
         n = self.counts.get(kind, 0)
@@ -268,6 +272,7 @@ class Session:
         """All problems; with ``complete``, every approved value of this entrypoint
         must have been reproduced (a skipped or missing computation fails)."""
         if self.mode == "verify":
+            self._integrity_problems()
             if not isinstance(self.approved, dict):
                 self._problem("no authenticated reference ledger", "session finished without it")
             unchecked = self.consumed - self.compared
@@ -286,6 +291,32 @@ class Session:
             f"{kind}: {n} in total" for kind, n in sorted(self.counts.items()) if n > MAX_LISTED
         ]
         return self.problems + summary
+
+    def _integrity_problems(self) -> None:
+        """DR-0022 B: at the end of the run, the in-memory ledger still hashes to what
+        was loaded, and the artifact file still hashes to what was loaded and to the
+        pinned digest. Detects accidental corruption during the run (a bug that edits
+        the ledger, a file replaced mid-run); deliberate edits of validator state are
+        outside the threat model (DR-0019 B, DR-0022)."""
+        loaded = isinstance(self.approved, dict) and self.ledger_sha256 is not None
+        if loaded and ledger_digest(self.approved) != self.ledger_sha256:
+            self._problem("reference snapshot digest", "the ledger changed during the run")
+        if self.path is not None and self.sha256 is not None:
+            try:
+                now = hashlib.sha256(self.path.read_bytes()).hexdigest()
+            except OSError as exc:
+                self._problem("reference snapshot digest", f"artifact unreadable at finish: {exc}")
+                return
+            if now != self.sha256:
+                self._problem("reference snapshot digest", "the artifact changed during the run")
+            if self.authenticated:
+                from tars.validation.approved_digests import APPROVED_REFERENCE_SNAPSHOT_SHA256
+
+                if now != APPROVED_REFERENCE_SNAPSHOT_SHA256:
+                    self._problem(
+                        "reference snapshot digest",
+                        "the artifact is not the approved one at finish",
+                    )
 
     def report(self) -> dict[str, Any]:
         return {
@@ -331,6 +362,8 @@ def session(
             data = load_approved(p, authenticate)
             s.approved = data["records"]
             s.sha256 = hashlib.sha256(p.read_bytes()).hexdigest()
+            s.path, s.authenticated = p, authenticate
+            s.ledger_sha256 = ledger_digest(s.approved)
         except (SnapshotError, OSError, ValueError) as exc:
             s.problems.append(f"approved reference snapshot unusable: {exc}")
     token = _SESSION.set(s)
@@ -338,6 +371,28 @@ def session(
         yield s
     finally:
         _SESSION.reset(token)
+
+
+def ledger_digest(records: dict[str, Any]) -> str:
+    """sha256 of the canonical JSON of an in-memory ledger (DR-0022 B)."""
+    text = json.dumps(records, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(text.encode()).hexdigest()
+
+
+def run_mode_problems(s: Session | None, recorder: Session | None) -> list[str]:
+    """DR-0022 B: an entrypoint (the M2 Proof, a GMAT comparison) that was not given a
+    recorder must actually have run a verification session that compared values;
+    anything else is an explicit failure, never a pass."""
+    if recorder is not None:
+        return []  # an explicit recording by toolbox/scripts/reference_snapshot.py
+    if s is None:
+        return ["reference snapshot verification did not run"]
+    out = []
+    if s.mode != "verify":
+        out.append(f"reference snapshot session ran in {s.mode!r} mode, not verification")
+    if not s.compared:
+        out.append("reference snapshot verification compared no value")
+    return out
 
 
 @contextlib.contextmanager

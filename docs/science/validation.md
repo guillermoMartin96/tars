@@ -598,4 +598,9 @@ All 10 approved rejection codes are exercised.
 
     Disabling each verifier check fails its tests.
   - Agreement with the snapshot is not evidence of physical correctness: that rests on these checks.
+- **Run safeguards (DR-0022 B).**
+  - At the end of every verification run, the in-memory ledger is re-hashed against its load-time hash. The artifact file is re-hashed against the bytes loaded and against the pinned digest.
+  - The M2 Proof and every GMAT comparison must have run a verification session, in verify mode, that compared values.
+  - Any failure fails closed.
+  - These catch accidental corruption and wrong execution state, not deliberate in-memory tampering, which is outside the threat model (DR-0019 B, DR-0022; review F58).
 - **Status:** M2 thresholds remain provisional (T7). The tolerances are reproducibility limits, not Proof thresholds.

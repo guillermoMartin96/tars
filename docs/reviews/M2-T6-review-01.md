@@ -502,7 +502,52 @@ F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an appro
 
 | # | Sev. | Finding | Disposition |
 |---|---|---|---|
-| F58 | High | Editing the authenticated ledger's contents in memory, or switching the session's mode to `record`, after authentication lets the F50 reversal and the F51 O6 change pass the Proof | **`ESCALATED_FOR_INVESTIGATION`** (DR-0022). This mutates the validator's own runtime state, the same class as F57 taken further. Any in-memory guard is itself mutable, so there is no fixed point. Whether DR-0019 B's exclusion covers validator runtime state is a scope decision for the Tech Lead |
+| F58 | High | Editing the authenticated ledger's contents in memory, or switching the session's mode to `record`, after authentication lets the F50 reversal and the F51 O6 change pass the Proof | Escalated to DR-0022, then **`REJECTED_WITH_REASONING`** under DR-0022 B (see below). This mutates the validator's own runtime state, the same class as F57 taken further. Any in-memory guard is itself mutable, so there is no fixed point. Whether DR-0019 B's exclusion covers validator runtime state is a scope decision for the Tech Lead |
 | F59 | Med | The 10-ulp floor for zero-measured time classes used 6,000 s; the pinned times reach 53,700 s (10 ulp = 7.3e-11 s), so the 1e-11 s tolerances falsely rejected deviations within the documented allowance | **`ACCEPTED`, fixed.** One uniform rule for every class: the smallest 1-2-5 value ≥ max(10 × measured, 10 ulp of the class's largest snapshot value). Time classes are 1e-10 s; `ref kg` is 5e-12 kg (10 ulp of 1,300 kg = 2.3e-12). The measured maxima are recorded in `reference_snapshot.MEASURED`. Test: `test_tolerances_follow_the_documented_rule` recomputes the rule from the artifact |
 
 **T6 is blocked on DR-0022.** No further review round runs until it is decided.
+
+## DR-0022 implementation (approved option B with conditions, 2026-10-13)
+
+### F58: `REJECTED_WITH_REASONING`, not fixed
+F58's mechanism has two forms. Both act after the artifact is authenticated and both need write access to the validator's own memory while it runs:
+- (a) edit the in-memory ledger's values, so a corrupted reference agrees with the edited ledger;
+- (b) set the session's `mode` to `record` and `approved` to `None`, which skips verification.
+
+DR-0019 B, as clarified by DR-0022 condition 1, places deliberate modification of the validator's executable code, control flow or in-memory state outside the T6 threat model. Such an actor can equally rewrite the loaded thresholds, a `Check`'s result or the report before it is written. Any in-memory guard is itself in-memory state open to the same edit, so there is no fixed point inside the process. Code review and trusted execution address this class.
+
+Option B's safeguards do not change that. They are not claimed to detect deliberate edits, and F58 is not recorded as fixed by them.
+
+### Safeguards (DR-0022 B), and what they detect
+
+**1. Snapshot digest at the end of every verification run** (`Session._integrity_problems`, called by `finish`):
+- the in-memory ledger is re-hashed (canonical JSON, about 0.8 s) and compared with the hash taken when it was loaded;
+- the artifact file is re-read and re-hashed, and compared both with the bytes loaded and with the pinned `APPROVED_REFERENCE_SNAPSHOT_SHA256`.
+
+A mismatch is a `reference snapshot digest` problem, and the `reference_snapshot` check fails.
+
+**2. Execution mode** (`run_mode_problems`, used by `m2_proof.py` and by `gmat_m2.py`'s `_evaluate`, which `compare` and `run` use). Without an explicit recorder (only the snapshot tool passes one), the entrypoint fails if:
+- no session ran;
+- the session was not in verify mode;
+- the session compared no value.
+
+The failure goes into the Proof's `reference_snapshot` check and into the GMAT rejection reasons. The Proof still has 215 checks.
+
+| Detects (accidental corruption and wrong execution state) | Does not detect |
+|---|---|
+| a bug that writes into the loaded ledger during the run | a deliberate edit that also updates the stored load-time hash, or patches the check |
+| the artifact file replaced or modified during the run | edits to `APPROVED_REFERENCE_SNAPSHOT_SHA256` or to validator code (code review) |
+| a Proof or GMAT comparison that ran in record mode, without a session, or verified nothing (for example a wiring regression) | a deliberate mode switch combined with an edit of the mode check, or any other in-process tampering (outside the threat model, F58) |
+
+**Tests (each fails when its safeguard is disabled):**
+- `test_ledger_changed_during_the_run_is_detected`;
+- `test_artifact_replaced_during_the_run_is_detected` (the file re-hash and the pin at finish);
+- `test_a_clean_session_passes_the_integrity_checks`;
+- `test_run_mode_problems` (missing session, record mode, nothing compared);
+- `test_gmat_comparison_in_the_wrong_mode_fails`;
+- `test_m2_proof_in_the_wrong_mode_fails`.
+
+**Preserved (condition 6).** No threshold, reference value, tolerance or acceptance semantics changed. The M2 report still has 215 checks.
+
+## Re-verification 18 (final, complete T6 checkpoint; under DR-0019 B, DR-0020 A, DR-0021 A and DR-0022 B)
+See below.

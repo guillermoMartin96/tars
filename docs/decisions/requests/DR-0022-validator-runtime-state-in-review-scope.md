@@ -1,6 +1,6 @@
 # Decision Request: Is runtime mutation of validator-internal state in the review scope? (clarifies DR-0019 B)
 
-**Status:** OPEN  
+**Status:** APPROVED — option B, with conditions (Tech Lead, 2026-10-13)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-13  
 **Related milestone/issue:** M2 T6; DR-0019 (approved B), DR-0020 (approved A), DR-0021 (approved A); review record `docs/reviews/M2-T6-review-01.md`, re-verifications 16 and 17
@@ -87,3 +87,20 @@ Harden every in-memory structure against adversarial edits: ledger, mode, thresh
 
 ## Requested response
 `A` / `B` / `C` / `discuss`.
+
+## Resolution
+**Decision:** APPROVED — option B, with conditions (Tech Lead, 2026-10-13).
+
+**Conditions (recorded in substance):**
+1. **DR-0019 B is preserved.** Deliberate modification of the validator's executable code, control flow or in-memory state during execution stays outside the threat model. Code review and trusted execution address it, not the T6 verification contract.
+2. **Both safeguards are implemented.** The reference snapshot digest is recomputed and verified at the end of each verification run. Both the M2 Proof and the GMAT comparison must be shown to have executed in verification mode.
+3. **Fail closed.** A digest mismatch, a missing verification step or the wrong execution mode is an explicit verification failure, never a silent pass or a substituted success.
+4. **Focused regression tests** show each safeguard detecting the accidental corruption or incorrect execution state it targets.
+5. **No scope expansion.** No process isolation, runtime attestation, self-verifying logic or further adversarial in-memory requirements without a separate architectural decision.
+6. **Acceptance criteria preserved.** Physics thresholds, reference values, tolerances and acceptance semantics are unchanged. The F59 tolerance fix stays subject to the existing verification requirements.
+7. **F58** is recorded as rejected under the approved boundary, with a concrete explanation, not as fixed by option B. The record documents what the safeguards detect and what they do not.
+8. **Independent review round 18** covers the complete T6 checkpoint and must return an unconditional PASS. Findings must show a concrete effect on an approved check, a reported value, an acceptance decision or a physical invariant (DR-0020).
+9. **Stop conditions.** On REQUEST_CHANGES, FAIL or a conditional verdict: record the findings and stop for the Tech Lead's review. No further repair or review cycle without authorization.
+10. **Completion.** Only after an unconditional PASS and green Ubuntu and macOS CI: close T6, update draft PR #3 to T1–T6 and report. Do not merge the PR or start T7.
+
+**Implementation:** `tars.validation.reference_snapshot`: `Session._integrity_problems`, `ledger_digest` and `run_mode_problems`, used by `m2_proof.py` and `gmat_m2.py`. Recorded in VAL-0015 and in the review record, section "DR-0022 implementation".

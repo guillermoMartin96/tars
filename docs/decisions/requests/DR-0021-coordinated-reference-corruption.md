@@ -100,6 +100,8 @@ If A's maintenance cost is not wanted at this stage, **B** is acceptable, provid
 4. **Measured reproducibility tolerance.** Measure the numerical variation across the supported macOS and Ubuntu environments. Use the smallest justified tolerance, document the method, and ensure it cannot conceal a change that would alter an acceptance decision. Do not borrow the GMAT comparison tolerance.
 5. **No circular validation.** Verification compares runtime outputs with the previously approved artifact, never with a baseline regenerated from the same outputs during the test. Negative tests must show that coordinated corruption of Kepler and DOP853 is detected.
 6. **Regression tests for F50 and F51.** Both adversarial cases become permanent regression tests: the F50 acceptance flip and the F51 wrong-time evaluation must be rejected.
-7. **Preserve existing gates.** Do not weaken or remove existing checks. *(The approval text as received ends here; it appears truncated, and the Tech Lead has been asked whether more followed.)*
+7. **Preserve existing gates.** Do not weaken or remove existing checks.
+
+**Clarification (Tech Lead, 2026-10-13):** the approval ended at condition 7. These seven conditions are the complete approval; there are no others.
 
 **Implementation record:** VAL-0015 (`docs/science/validation.md`) and the review record `docs/reviews/M2-T6-review-01.md`, "DR-0021 implementation".

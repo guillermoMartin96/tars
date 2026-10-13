@@ -346,7 +346,12 @@ def main(argv: list[str] | None = None, recorder: snap.Session | None = None) ->
         )
     # Complete coverage: every approved value of the Proof must be reproduced (a quick
     # run skips O6/O8 and is not a Proof report).
-    checks.append(_exact("reference_snapshot", refs.finish(complete=not args.quick)))
+    checks.append(
+        _exact(
+            "reference_snapshot",
+            refs.finish(complete=not args.quick) + snap.run_mode_problems(refs, recorder),
+        )
+    )
     checks.append(_exact("reference_snapshot_margins", gates.margins))
     unused = [] if args.quick else thresholds.unused()
     checks.append(_exact("thresholds_all_consumed", [f"unused {u}" for u in unused]))

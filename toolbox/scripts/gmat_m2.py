@@ -94,7 +94,7 @@ def _evaluate(
     (DR-0021); ``recorder`` is passed only by toolbox/scripts/reference_snapshot.py."""
     with snap.session(f"gmat_m2:{name}", recorder) as refs:
         rejected, check = _evaluate_references(name, base)
-    problems = refs.finish(complete=True)
+    problems = refs.finish(complete=True) + snap.run_mode_problems(refs, recorder)
     if problems:
         return [*rejected, *(f"reference snapshot: {p}" for p in problems)], None
     return rejected, check
