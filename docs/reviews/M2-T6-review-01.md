@@ -443,5 +443,33 @@ F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an appro
 
 **Open point for T7.** If T7 tightens `order_deviation_from_2_max` below about 0.041, the impulsive SMA needs its own measured class: the sim-seeded length tolerance is set by O5.
 
-## Re-verification 15 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
+## Re-verification 15 (under DR-0019 B, DR-0020 A and DR-0021 A)
+**Reviewer:** Codex, session `01a13192-dbc6-7f42-97ea-d016f726c136`, at `2b1e452`. **Raw:** `raw/M2-T6-codex-reverify15.md`, `raw/M2-T6-codex-reverify15-scratch/`.
+
+**Verdict: FAIL** (F52, F53).
+- F50 and F51 are resolved in runtime verification, and their regressions fail when the comparison is disabled.
+- DR-0021 conditions 1, 3, 5, 6 and 7 are verified; 2 and 4 had the gaps below.
+- The 215-check report keeps the 213 earlier records unchanged. All nine commands pass (1,058 tests).
+
+**Both are `ACCEPTED`.** Each mechanism is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F52 | Med | The O5 margin used the per-component tolerance as the bound on a Euclidean norm. A Kepler state 1.6 ns late moved the vector by 12.4 µm with every component under 10 µm, and reversed O5 (0.60000100 m to 0.59998859 m) with no snapshot or margin problem | `o5_snapshot_shifts` uses √3 × the tolerance for both position and velocity. O6 is unaffected: its bound is on the scalar impulsive SMA | `test_o5_margin_uses_the_vector_norm_bound` |
+| F53 | Med | `verify-baseline` did not independently check O6. A recording under F51's corruption, and zeroed O6 values with an SMA of −1e30 m, were both approved | `verify-baseline` now recomputes **every** record from its pinned inputs and the scenario, independently of the runtime references (VAL-0015 table), with a full-coverage requirement, fail-closed evaluation, and DOP853 against GMAT. The O5, O6, Simpson, DR-0017 and O3 pins now carry their inputs, so **baseline 2** is pinned (`f5a7e40`): key set identical, every common value bit-identical, five labels gained input parts | `test_baseline_verification_rejects_invalid_o6_values`, `..._wrong_time_o6_recording`, `..._an_f50_recording`, `..._each_corrupted_value` (11 kinds), `..._requires_coverage`, `..._fails_closed_on_unreadable_records`, `test_the_approved_baseline_passes_independent_verification` |
+
+**Beyond the finding.** I extended F53's fix past O6 because the same gap covered every propagated value: a baseline recorded under F50's corruption would also have been approved. It is now rejected.
+
+**Mutation results.** Disabling a verifier check fails its targeted tests:
+
+| Check disabled | Failing tests |
+|---|---|
+| O6 Kepler | 2 |
+| Segment | 1 |
+| Coverage | 1 |
+| Each fail-closed wrapper | 1 |
+
+**Re-measurement.** Eight more hosts were measured against baseline 2. The maxima by class are identical, and the new flight-time parts are exact, so `sim s` is 1e-11 s by the zero-measured rule.
+
+## Re-verification 16 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
 See below.

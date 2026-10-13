@@ -358,9 +358,6 @@ def verify_baseline(data: dict[str, Any]) -> list[str]:
     - DOP853 against the committed GMAT rows within the O9 gates; coast energy and
       angular momentum conserved; extrema equal to the pinned anchor ticks'.
     """
-    from tars.astro.elements import circular_orbit_state
-    from tars.validation import gmat_m2, m2
-    from tars.validation.thresholds import load_scoped_thresholds
 
     problems: list[str] = []
     records = data["records"]
@@ -380,419 +377,15 @@ def verify_baseline(data: dict[str, Any]) -> list[str]:
     for items in by_scope.values():
         items.sort(key=lambda x: (x[0], x[1]))
 
-    def scenario_of(scope: str):
-        return scen.get(scope.split("/")[0])
-
     covered: set[str] = set()
 
     for scope, items in sorted(by_scope.items()):
-        found = scenario_of(scope)
-        if scope.startswith("o3_free_space/"):
-            veh = m2.vehicle(scen["m2_prograde_burn"][0])
-            sign = 1.0 if scope.endswith("/prograde") else -1.0
-            from tars.sim.constants import STANDARD_GRAVITY
-
-            c = veh.isp_s * STANDARD_GRAVITY
-            mdot = veh.thrust_n / c
-            closed = {n: rec for label, n, key, rec in items if label == "o3.closed_form"}
-            for label, n, key, rec in items:
-                covered.add(key)
-                if label == "o3.closed_form":
-                    continue
-                cf = closed.get(n)
-                if cf is None:
-                    bad(key, "no closed form for this expected cutoff")
-                    continue
-                t = float(_arr(rec, "duration_s")[0])
-                dv, disp = _free_space_closed_form(veh, t)
-                x0, v0 = _arr(rec, "start_r_m"), _arr(rec, "start_v_mps")
-                u = v0 / np.linalg.norm(v0)
-                want_v, want_r = v0 + sign * dv * u, x0 + v0 * t + sign * disp * u
-                err = max(
-                    _rel(_arr(rec, "v_mps"), want_v),
-                    float(np.max(np.abs(_arr(rec, "r_m") - want_r)))
-                    / max(float(np.linalg.norm(want_r)), 1.0),
-                    _rel(_arr(rec, "propellant_kg"), [veh.propellant_kg - mdot * t]),
-                    _rel(_arr(cf, "dv_mps"), [dv]),
-                    _rel(_arr(cf, "disp_m"), [disp]),
-                )
-                note("closed form rel", err)
-                if not err <= INDEP_REL:
-                    bad(key, f"O3 closed form differs from the independent one ({err:.3g})")
-            continue
-        if found is None:
-            bad(scope, "no scenario for this scope")
-            continue
-        scenario, expected = found
-        mu = scenario.constants.mu
-        radius = scenario.constants.equatorial_radius
-        veh = m2.vehicle(scenario)
-        burns = _independent_burns(scenario, expected)
-        grid, dt = scenario.telemetry.sample_interval_s, scenario.dt_s
-
-        for label, _n, key, rec in items:
-            if label == "initial_state":
-                covered.add(key)
-                o = scenario.initial_orbit
-                r, v = circular_orbit_state(
-                    radius + o.altitude_m, math.radians(o.inclination_deg),
-                    math.radians(o.raan_deg), math.radians(o.arg_latitude_deg), mu,
-                )  # fmt: skip
-                err = max(_rel(_arr(rec, "r_m"), r), _rel(_arr(rec, "v_mps"), v))
-                note("initial state rel", err)
-                if not err <= INDEP_REL:
-                    bad(key, f"initial state differs from elements_to_rv ({err:.3g})")
-            elif label == "predicted_burns":
-                covered.add(key)
-                want_t = [
-                    [b["ign"], b["dur"], b["intended"], b["cut"], b["executed"]] for b in burns
-                ]
-                want_m = [[b["before"], b["used"], b["after"], b["m0"], b["mf"]] for b in burns]
-                t, m_, dv = _arr(rec, "times_s"), _arr(rec, "masses_kg"), _arr(rec, "delta_v_mps")
-                if t.shape != (len(burns), 5) or not np.array_equal(
-                    t, np.array(want_t).reshape(-1, 5)
-                ):
-                    bad(key, "predicted burn times differ from the independent derivation")
-                if _rel(m_, np.array(want_m).reshape(-1, 5)) > INDEP_REL:
-                    bad(key, "predicted burn masses differ from the independent derivation")
-                if _rel(dv, [b["dv"] for b in burns]) > INDEP_REL:
-                    bad(key, "predicted burn delta-v differs from the rocket equation")
-            elif label == "simpson_bound":
-                covered.add(key)
-                a, e = _arr(rec, "window_s")
-                b = next((x for x in burns if x["ign"] == a), None)
-                total = 0.0
-                if b is not None and e > a:
-                    mdot = veh.mass_flow_kgps
-                    pts = sorted(
-                        {
-                            a,
-                            e,
-                            *(
-                                k * dt
-                                for k in range(math.ceil(a / dt), math.floor(e / dt) + 1)
-                                if a < k * dt < e
-                            ),
-                        }
-                    )
-                    for p, q in pairwise(pts):
-                        m_end = b["m0"] - mdot * (q - a)
-                        total += (q - p) ** 5 / 2880.0 * 24.0 * veh.thrust_n * mdot**4 / m_end**5
-                elif b is None:
-                    bad(key, "Simpson window does not start at a predicted ignition")
-                err = (
-                    _rel(_arr(rec, "bound_mps"), [total])
-                    if total
-                    else float(_arr(rec, "bound_mps")[0] != 0.0)
-                )
-                note("simpson rel", err)
-                if not err <= INDEP_REL:
-                    bad(key, f"Simpson bound differs from the independent one ({err:.3g})")
-            elif label == "timing_bound":
-                covered.add(key)
-                ex, it = _arr(rec, "durations_s")
-                pb = float(_arr(rec, "propellant_before_kg")[0])
-                if not any(
-                    x["executed"] == ex and x["intended"] == it and x["before"] == pb for x in burns
-                ):
-                    bad(key, "DR-0017 bound inputs are not a predicted burn")
-                d = abs(ex - it)
-                want = 0.0
-                if d:
-                    m_end = veh.dry_mass_kg + max(pb - veh.mass_flow_kgps * max(ex, it), 0.0)
-                    want = veh.thrust_n * d / m_end
-                if _rel(_arr(rec, "bound_mps"), [want]) > INDEP_REL and want != float(
-                    _arr(rec, "bound_mps")[0]
-                ):
-                    bad(key, "DR-0017 timing bound differs from the independent one")
-            elif label == "o5.kepler":
-                covered.add(key)
-                fl = _arr(rec, "flight_s")
-                r, v = kepler_uv(_arr(rec, "seed_r_m"), _arr(rec, "seed_v_mps"), fl, mu)
-                ep = float(np.max(np.linalg.norm(r - _arr(rec, "r_m"), axis=1))) if fl.size else 0.0
-                ev = (
-                    float(np.max(np.linalg.norm(v - _arr(rec, "v_mps"), axis=1)))
-                    if fl.size
-                    else 0.0
-                )
-                note("o5 kepler m", ep), note("o5 kepler m/s", ev)
-                if not (ep <= INDEP_POS_M and ev <= INDEP_VEL_MPS):
-                    bad(
-                        key,
-                        f"O5 Kepler differs from the independent one ({ep:.3g} m, {ev:.3g} m/s)",
-                    )
-            elif label == "o6.delta_v":
-                covered.add(key)
-                base, _ = scen[scope.split("/")[0].rsplit("_o6_", 1)[0]]
-                bveh = m2.vehicle(base)
-                dur = float(base.commands[0].command["duration_s"])
-                m0 = bveh.initial_mass_kg
-                want = bveh.exhaust_velocity_mps * math.log(m0 / (m0 - bveh.mass_flow_kgps * dur))
-                if _rel(_arr(rec, "dv_mps"), [want]) > INDEP_REL:
-                    bad(key, "O6 delta-v differs from the rocket equation")
-                o6_dv = float(_arr(rec, "dv_mps")[0])
-            elif label == "o6.midpoint":
-                covered.add(key)
-                base, _ = scen[scope.split("/")[0].rsplit("_o6_", 1)[0]]
-                cmd = base.commands[0].command
-                sign = 1.0 if cmd["direction"] == "prograde" else -1.0
-                fl = _arr(rec, "flight_s")
-                want_flight = float(cmd["ignition_t_s"]) + float(cmd["duration_s"]) / 2.0
-                r, v = kepler_uv(_arr(rec, "seed_r_m"), _arr(rec, "seed_v_mps"), fl, mu)
-                ep = float(np.linalg.norm(r[0] - _arr(rec, "r_m")))
-                ev = float(np.linalg.norm(v[0] - _arr(rec, "v_mps")))
-                note("o6 kepler m", ep), note("o6 kepler m/s", ev)
-                if not (ep <= INDEP_POS_M and ev <= INDEP_VEL_MPS):
-                    bad(
-                        key,
-                        f"O6 midpoint differs from the independent propagation ({ep:.3g} m)",
-                    )
-                # The flight ends at the commanded burn midpoint (ignition from the variant).
-                vign = float(scenario.commands[0].command["ignition_t_s"])
-                if not abs(vign + float(fl[0]) - want_flight) <= 1e-9:
-                    bad(key, "O6 flight does not end at the commanded burn midpoint")
-                vm, rm = _arr(rec, "v_mps"), _arr(rec, "r_m")
-                v_imp = vm + sign * o6_dv * vm / np.linalg.norm(vm)
-                a_imp = -mu / (2.0 * (float(v_imp @ v_imp) / 2.0 - mu / float(np.linalg.norm(rm))))
-                err = _rel(_arr(rec, "sma_impulsive_m"), [a_imp])
-                note("o6 sma rel", err)
-                if not err <= INDEP_REL:
-                    bad(key, f"O6 impulsive SMA inconsistent with its state ({err:.3g})")
-
-        # DOP853 chains in this scope.
-        starts = [it for it in items if it[0] == "dop853.start"]
-        bounds = [it for it in items if it[0] == "dop853.bounds"]
-        segs = [it for it in items if it[0] == "dop853.segment"]
-        ticks = [it for it in items if it[0] == "dop853.ticks"]
-        extrema = [it for it in items if it[0] == "dop853.extrema"]
-        for it in starts + bounds + segs + ticks + extrema:
-            covered.add(it[2])
-        if not (len(starts) == len(bounds) == len(extrema)) or len(segs) != len(ticks):
-            bad(scope, "inconsistent DOP853 record counts")
-            continue
-        init = next((it[3] for it in items if it[0] == "initial_state"), None)
-        cursor = 0
-        chain_states: list[dict[float, np.ndarray]] = []
-        for (_, _, skey, s_rec), (_, _, bkey, b_rec), (_, _, ekey, e_rec) in zip(
-            starts, bounds, extrema, strict=True
-        ):
-            b = _arr(b_rec, "bounds_s")
-            horizon = float(b[-1])
-            want_cuts = {0.0, *(g * grid for g in range(1, math.floor(horizon / grid) + 1))}
-            want_cuts |= {x["ign"] for x in burns if x["ign"] <= horizon}
-            want_cuts |= {x["cut"] for x in burns if x["cut"] <= horizon}
-            if not (np.all(np.diff(b) > 0) and b[0] == 0.0 and want_cuts <= set(b.tolist())):
-                bad(bkey, "segment bounds miss a grid, ignition or cutoff time")
-            y = np.concatenate(
-                [_arr(s_rec, "r_m"), _arr(s_rec, "v_mps"), _arr(s_rec, "propellant_kg")]
-            )
-            if init is not None and not (
-                np.array_equal(y[:3], _arr(init, "r_m"))
-                and np.array_equal(y[3:6], _arr(init, "v_mps"))
-            ):
-                bad(skey, "DOP853 start is not the pinned initial state")
-            if y[6] != (0.0 if veh is None else veh.propellant_kg):
-                bad(skey, "DOP853 start propellant is not the tank load")
-            alt = [float(np.linalg.norm(y[:3])) - radius]
-            states = {0.0: y.copy()}
-            n = len(b) - 1
-            for j in range(n):
-                _, _, gkey, g = segs[cursor + j]
-                _, _, tkey, t_rec = ticks[cursor + j]
-                a_, b_ = float(b[j]), float(b[j + 1])
-                k0, k1 = (int(x) for x in _arr(t_rec, "index_1"))
-                lo_k = math.floor(a_ / dt) + 1
-                cand = [q for q in range(lo_k, math.floor(b_ / dt) + 1) if a_ < q * dt <= b_]
-                want_k = (cand[0], cand[-1]) if cand else (lo_k, lo_k - 1)
-                if _arr(t_rec, "dt_s")[0] != dt or (k0, k1) != want_k:
-                    bad(tkey, "tick index range is not the dt grid of its segment")
-                tt = np.arange(k0, k1 + 1) * dt
-                end = np.concatenate(
-                    [_arr(g, "end_r_m"), _arr(g, "end_v_mps"), _arr(g, "end_propellant_kg")]
-                )
-                at = _arr(g, "anchor_ticks_m")
-                burn = next((x for x in burns if x["ign"] <= a_ and b_ <= x["cut"]), None)
-                if burn is None:
-                    times = np.concatenate([tt, [b_]]) - a_
-                    r, v = kepler_uv(y[:3], y[3:6], times, mu)
-                    e_pos, e_vel = INDEP_POS_M, INDEP_VEL_MPS
-                    kind = "coast"
-                    if end[6] != y[6]:
-                        bad(gkey, "propellant changed on a coast")
-                    e0 = float(y[3:6] @ y[3:6]) / 2 - mu / float(np.linalg.norm(y[:3]))
-                    e1 = float(end[3:6] @ end[3:6]) / 2 - mu / float(np.linalg.norm(end[:3]))
-                    if not abs(e1 - e0) <= 1e-11 * abs(e0):
-                        bad(gkey, "coast does not conserve energy")
-                else:
-                    path = _burn_path(y, np.concatenate([[a_], tt, [b_]]), mu, veh, burn["sign"])
-                    r, v = path[1:, :3], path[1:, 3:6]
-                    e_pos, e_vel = INDEP_BURN_POS_M, INDEP_BURN_VEL_MPS
-                    kind = "burn"
-                    want_p = burn["before"] - veh.mass_flow_kgps * (b_ - burn["ign"])
-                    if not abs(end[6] - want_p) <= INDEP_MASS_KG:
-                        bad(gkey, "burn propellant off the mass law")
-                ep = float(np.linalg.norm(end[:3] - r[-1]))
-                ev = float(np.linalg.norm(end[3:6] - v[-1]))
-                et = float(np.max(np.linalg.norm(at - r[:-1], axis=1))) if at.size else 0.0
-                if at.shape != (len(tt), 3):
-                    bad(gkey, "anchor tick count is not the tick grid")
-                    et = math.inf
-                ea = float(np.linalg.norm(_arr(g, "anchor_end_r_m") - r[-1]))
-                note(f"{kind} segment end m", ep), note(f"{kind} segment end m/s", ev)
-                note(f"{kind} anchor ticks m", et), note(f"{kind} anchor end m", ea)
-                if not (ep <= e_pos and ev <= e_vel and et <= e_pos and ea <= e_pos):
-                    bad(
-                        gkey,
-                        f"{kind} segment differs from the independent propagation "
-                        f"({ep:.3g}, {et:.3g}, {ea:.3g} m; {ev:.3g} m/s)",
-                    )
-                if at.size:
-                    alt += list(np.linalg.norm(at, axis=1) - radius)
-                y = end
-                states[b_] = end.copy()
-            cursor += n
-            ext = _arr(e_rec, "altitude_m")
-            if (float(ext[0]), float(ext[1])) != (min(alt), max(alt)):
-                bad(ekey, "extrema are not the pinned ticks' extrema")
-            chain_states.append(states)
-        if cursor != len(segs):
-            bad(scope, "DOP853 segments without a reference")
-
-        # Node crossings: on z = 0 of the independent propagation from the reference.
-        for label, _n, key, rec in items:
-            if label != "orbit.node_crossings":
-                continue
-            covered.add(key)
-            states = chain_states[0] if chain_states else {}
-            ts = sorted(states)
-            for c in _arr(rec, "crossings_s"):
-                a_ = max((t for t in ts if t < c), default=None)
-                if a_ is None:
-                    bad(key, f"crossing {c} before the reference")
-                    continue
-                r, v = kepler_uv(states[a_][:3], states[a_][3:6], [c - a_], mu)
-                note("node z m", abs(float(r[0, 2])))
-                if not (abs(float(r[0, 2])) <= NODE_Z_M and v[0, 2] > 0.0):
-                    bad(key, f"crossing {c} is not an ascending node (z = {r[0, 2]:.3g} m)")
-
-    # O9: GMAT-seeded values and the committed GMAT evidence.
-    limits = load_scoped_thresholds(missions=frozenset(scen))
-    for name in gmat_m2.GMAT_MISSIONS:
-        scenario, expected = scen[name]
-        mu = scenario.constants.mu
-        burns = _independent_burns(scenario, expected)
-        predicted = m2.predict_burns(scenario, expected)
-        horizon = scenario.stop.duration_s
-        files = gmat_m2.reference_files(name)
-        arcs = gmat_m2.plan_arcs(scenario, predicted, horizon)
-        labelled, label_v = gmat_m2.label_rows(
-            gmat_m2.parse_stream(files["report"].read_text()), arcs
-        )
-        if label_v:
-            bad(name, f"committed GMAT rows do not label: {label_v[:3]}")
-            continue
-        times = sorted(labelled)
-        scope = f"{name}/o9"
-        recs = {
-            (_split(k)[1], _split(k)[2]): (k, r)
-            for k, r in records.items()
-            if k.startswith(scope + "/")
-        }
-        lim = limits.for_validator("o9_gmat", name)
-        for (label, _n), (key, rec) in sorted(recs.items()):
-            covered.add(key)
-            if label == "o9.arcs":
-                bnd = _arr(rec, "bounds_s")
-                ok = (
-                    bnd.size
-                    and bnd[0, 0] == 0.0
-                    and bnd[-1, 1] == horizon
-                    and np.all(bnd[1:, 0] == bnd[:-1, 1])
-                )
-                cuts = {x["ign"] for x in burns} | {x["cut"] for x in burns}
-                ok = ok and {c for c in cuts if c < horizon} <= set(bnd.ravel().tolist())
-                if not ok:
-                    bad(key, "GMAT arcs are not a contiguous schedule over the burns")
-            elif label == "o9.label_times":
-                if _arr(rec, "times_s").tolist() != times:
-                    bad(key, "label times are not the committed GMAT rows' schedule")
-            elif label == "o9.epoch_anchor":
-                import datetime as _dt
-
-                ep = _dt.datetime.fromisoformat(scenario.epoch)
-                jd = (ep - _dt.datetime(2000, 1, 1, 12)).total_seconds() / 86400.0 + 2451545.0
-                want = jd - 2430000.0 - (32.184 - 0.0343817) / 86400.0
-                if abs(float(_arr(rec, "a1_mjd_1")[0]) - want) * 86400.0 > 1e-6:
-                    bad(key, "epoch anchor differs from the configured TT epoch in A.1")
-            elif label == "o9.expected_mass":
-                veh = m2.vehicle(scenario)
-                want = []
-                for t in times:
-                    p = veh.propellant_kg
-                    for x in burns:
-                        if t <= x["ign"]:
-                            break
-                        if t >= x["cut"]:
-                            p = x["after"]
-                            continue
-                        p = x["before"] - veh.mass_flow_kgps * (t - x["ign"])
-                        break
-                    want.append(veh.dry_mass_kg + p)
-                err = float(np.max(np.abs(_arr(rec, "mass_kg") - want)))
-                if not err <= INDEP_MASS_KG:
-                    bad(key, f"expected mass differs from the mass law ({err:.3g} kg)")
-            elif label == "o9.alignment_kepler":
-                pass  # below, in arc order
-            elif label == "o9.gmat_node_crossings":
-                for c in _arr(rec, "crossings_s"):
-                    a_ = max(t for t in times if t < c)
-                    r, v = kepler_uv(labelled[a_].r, labelled[a_].v, [c - a_], mu)
-                    note("gmat node z m", abs(float(r[0, 2])))
-                    if not (abs(float(r[0, 2])) <= NODE_Z_M and v[0, 2] > 0.0):
-                        bad(key, f"GMAT crossing {c} is not an ascending node")
-        coast_arcs = [a for a in arcs if a.direction is None and a.start_s in labelled]
-        kep = [recs[k] for k in sorted(k for k in recs if k[0] == "o9.alignment_kepler")]
-        if len(kep) != len(coast_arcs):
-            bad(name, f"{len(kep)} alignment records for {len(coast_arcs)} coast arcs")
-        for arc, (key, rec) in zip(coast_arcs, kep, strict=False):
-            in_arc = [t for t in times if arc.start_s < t <= arc.end_s]
-            s0 = labelled[arc.start_s]
-            r, v = kepler_uv(s0.r, s0.v, np.array(in_arc) - arc.start_s, mu)
-            ep = float(np.max(np.linalg.norm(r - _arr(rec, "r_m"), axis=1))) if in_arc else 0.0
-            ev = float(np.max(np.linalg.norm(v - _arr(rec, "v_mps"), axis=1))) if in_arc else 0.0
-            note("gmat kepler m", ep), note("gmat kepler m/s", ev)
-            if not (ep <= INDEP_POS_M and ev <= INDEP_VEL_MPS):
-                bad(key, f"alignment Kepler differs from the independent propagation ({ep:.3g} m)")
-        # The snapshot's DOP853 states against the committed GMAT rows (O9 gates).
-        segs = sorted(
-            (
-                (_split(k)[2], r)
-                for k, r in records.items()
-                if k.startswith(scope + "/dop853.segment#")
-            ),
-        )
-        bkey = f"{scope}/dop853.bounds#0"
-        if bkey not in records:
-            bad(name, "no O9 DOP853 reference")
-            continue
-        b = _arr(records[bkey], "bounds_s")
-        pos = vel = 0.0
-        compared = 0
-        for t, (_, seg) in zip(b[1:], segs, strict=True):
-            row = labelled.get(float(t))
-            if row is None:
-                continue
-            pos = max(pos, float(np.linalg.norm(row.r - _arr(seg, "end_r_m"))))
-            vel = max(vel, float(np.linalg.norm(row.v - _arr(seg, "end_v_mps"))))
-            compared += 1
-        note("dop853 vs gmat m", pos), note("dop853 vs gmat m/s", vel)
-        if compared != len(times) - 1:
-            bad(name, f"{compared} GMAT rows compared of {len(times) - 1}")
-        if not (
-            pos <= lim["gmat_vs_dop853_position_error_max_m"]
-            and vel <= lim["gmat_vs_dop853_velocity_error_max_mps"]
-        ):
-            bad(name, f"snapshot DOP853 vs GMAT {pos:.3g} m, {vel:.3g} m/s")
+        try:
+            _verify_scope(scope, items, scen, covered, note, bad)
+        except Exception as exc:  # corrupted values must fail, never crash (F53)
+            bad(scope, f"verification raised {exc!r}")
+            covered.update(key for _, _, key, _ in items)
+    _verify_gmat(records, scen, covered, note, bad)
 
     uncovered = sorted(set(records) - covered)
     if uncovered:
@@ -802,6 +395,420 @@ def verify_baseline(data: dict[str, Any]) -> list[str]:
     for k, v in sorted(stats.items()):
         print(f"  independent agreement, max {k}: {v:.3g}")
     return problems
+
+
+def _verify_scope(scope, items, scen, covered, note, bad) -> None:
+    from tars.astro.elements import circular_orbit_state
+    from tars.validation import m2
+
+    def scenario_of(scope: str):
+        return scen.get(scope.split("/")[0])
+
+    found = scenario_of(scope)
+    if scope.startswith("o3_free_space/"):
+        veh = m2.vehicle(scen["m2_prograde_burn"][0])
+        sign = 1.0 if scope.endswith("/prograde") else -1.0
+        from tars.sim.constants import STANDARD_GRAVITY
+
+        c = veh.isp_s * STANDARD_GRAVITY
+        mdot = veh.thrust_n / c
+        closed = {n: rec for label, n, key, rec in items if label == "o3.closed_form"}
+        for label, n, key, rec in items:
+            covered.add(key)
+            if label == "o3.closed_form":
+                continue
+            cf = closed.get(n)
+            if cf is None:
+                bad(key, "no closed form for this expected cutoff")
+                continue
+            t = float(_arr(rec, "duration_s")[0])
+            dv, disp = _free_space_closed_form(veh, t)
+            x0, v0 = _arr(rec, "start_r_m"), _arr(rec, "start_v_mps")
+            u = v0 / np.linalg.norm(v0)
+            want_v, want_r = v0 + sign * dv * u, x0 + v0 * t + sign * disp * u
+            err = max(
+                _rel(_arr(rec, "v_mps"), want_v),
+                float(np.max(np.abs(_arr(rec, "r_m") - want_r)))
+                / max(float(np.linalg.norm(want_r)), 1.0),
+                _rel(_arr(rec, "propellant_kg"), [veh.propellant_kg - mdot * t]),
+                _rel(_arr(cf, "dv_mps"), [dv]),
+                _rel(_arr(cf, "disp_m"), [disp]),
+            )
+            note("closed form rel", err)
+            if not err <= INDEP_REL:
+                bad(key, f"O3 closed form differs from the independent one ({err:.3g})")
+        return
+    if found is None:
+        bad(scope, "no scenario for this scope")
+        return
+    scenario, expected = found
+    mu = scenario.constants.mu
+    radius = scenario.constants.equatorial_radius
+    veh = m2.vehicle(scenario)
+    burns = _independent_burns(scenario, expected)
+    grid, dt = scenario.telemetry.sample_interval_s, scenario.dt_s
+
+    for label, _n, key, rec in items:
+        if label == "initial_state":
+            covered.add(key)
+            o = scenario.initial_orbit
+            r, v = circular_orbit_state(
+                radius + o.altitude_m, math.radians(o.inclination_deg),
+                math.radians(o.raan_deg), math.radians(o.arg_latitude_deg), mu,
+            )  # fmt: skip
+            err = max(_rel(_arr(rec, "r_m"), r), _rel(_arr(rec, "v_mps"), v))
+            note("initial state rel", err)
+            if not err <= INDEP_REL:
+                bad(key, f"initial state differs from elements_to_rv ({err:.3g})")
+        elif label == "predicted_burns":
+            covered.add(key)
+            want_t = [[b["ign"], b["dur"], b["intended"], b["cut"], b["executed"]] for b in burns]
+            want_m = [[b["before"], b["used"], b["after"], b["m0"], b["mf"]] for b in burns]
+            t, m_, dv = _arr(rec, "times_s"), _arr(rec, "masses_kg"), _arr(rec, "delta_v_mps")
+            if t.shape != (len(burns), 5) or not np.array_equal(t, np.array(want_t).reshape(-1, 5)):
+                bad(key, "predicted burn times differ from the independent derivation")
+            if _rel(m_, np.array(want_m).reshape(-1, 5)) > INDEP_REL:
+                bad(key, "predicted burn masses differ from the independent derivation")
+            if _rel(dv, [b["dv"] for b in burns]) > INDEP_REL:
+                bad(key, "predicted burn delta-v differs from the rocket equation")
+        elif label == "simpson_bound":
+            covered.add(key)
+            a, e = _arr(rec, "window_s")
+            b = next((x for x in burns if x["ign"] == a), None)
+            total = 0.0
+            if b is not None and e > a:
+                mdot = veh.mass_flow_kgps
+                pts = sorted(
+                    {
+                        a,
+                        e,
+                        *(
+                            k * dt
+                            for k in range(math.ceil(a / dt), math.floor(e / dt) + 1)
+                            if a < k * dt < e
+                        ),
+                    }
+                )
+                for p, q in pairwise(pts):
+                    m_end = b["m0"] - mdot * (q - a)
+                    total += (q - p) ** 5 / 2880.0 * 24.0 * veh.thrust_n * mdot**4 / m_end**5
+            elif b is None:
+                bad(key, "Simpson window does not start at a predicted ignition")
+            err = (
+                _rel(_arr(rec, "bound_mps"), [total])
+                if total
+                else float(_arr(rec, "bound_mps")[0] != 0.0)
+            )
+            note("simpson rel", err)
+            if not err <= INDEP_REL:
+                bad(key, f"Simpson bound differs from the independent one ({err:.3g})")
+        elif label == "timing_bound":
+            covered.add(key)
+            ex, it = _arr(rec, "durations_s")
+            pb = float(_arr(rec, "propellant_before_kg")[0])
+            if not any(
+                x["executed"] == ex and x["intended"] == it and x["before"] == pb for x in burns
+            ):
+                bad(key, "DR-0017 bound inputs are not a predicted burn")
+            d = abs(ex - it)
+            want = 0.0
+            if d:
+                m_end = veh.dry_mass_kg + max(pb - veh.mass_flow_kgps * max(ex, it), 0.0)
+                want = veh.thrust_n * d / m_end
+            if _rel(_arr(rec, "bound_mps"), [want]) > INDEP_REL and want != float(
+                _arr(rec, "bound_mps")[0]
+            ):
+                bad(key, "DR-0017 timing bound differs from the independent one")
+        elif label == "o5.kepler":
+            covered.add(key)
+            fl = _arr(rec, "flight_s")
+            r, v = kepler_uv(_arr(rec, "seed_r_m"), _arr(rec, "seed_v_mps"), fl, mu)
+            ep = float(np.max(np.linalg.norm(r - _arr(rec, "r_m"), axis=1))) if fl.size else 0.0
+            ev = float(np.max(np.linalg.norm(v - _arr(rec, "v_mps"), axis=1))) if fl.size else 0.0
+            note("o5 kepler m", ep), note("o5 kepler m/s", ev)
+            if not (ep <= INDEP_POS_M and ev <= INDEP_VEL_MPS):
+                bad(
+                    key,
+                    f"O5 Kepler differs from the independent one ({ep:.3g} m, {ev:.3g} m/s)",
+                )
+        elif label == "o6.delta_v":
+            covered.add(key)
+            base, _ = scen[scope.split("/")[0].rsplit("_o6_", 1)[0]]
+            bveh = m2.vehicle(base)
+            dur = float(base.commands[0].command["duration_s"])
+            m0 = bveh.initial_mass_kg
+            want = bveh.exhaust_velocity_mps * math.log(m0 / (m0 - bveh.mass_flow_kgps * dur))
+            if _rel(_arr(rec, "dv_mps"), [want]) > INDEP_REL:
+                bad(key, "O6 delta-v differs from the rocket equation")
+            o6_dv = float(_arr(rec, "dv_mps")[0])
+        elif label == "o6.midpoint":
+            covered.add(key)
+            base, _ = scen[scope.split("/")[0].rsplit("_o6_", 1)[0]]
+            cmd = base.commands[0].command
+            sign = 1.0 if cmd["direction"] == "prograde" else -1.0
+            fl = _arr(rec, "flight_s")
+            want_flight = float(cmd["ignition_t_s"]) + float(cmd["duration_s"]) / 2.0
+            r, v = kepler_uv(_arr(rec, "seed_r_m"), _arr(rec, "seed_v_mps"), fl, mu)
+            ep = float(np.linalg.norm(r[0] - _arr(rec, "r_m")))
+            ev = float(np.linalg.norm(v[0] - _arr(rec, "v_mps")))
+            note("o6 kepler m", ep), note("o6 kepler m/s", ev)
+            if not (ep <= INDEP_POS_M and ev <= INDEP_VEL_MPS):
+                bad(
+                    key,
+                    f"O6 midpoint differs from the independent propagation ({ep:.3g} m)",
+                )
+            # The flight ends at the commanded burn midpoint (ignition from the variant).
+            vign = float(scenario.commands[0].command["ignition_t_s"])
+            if not abs(vign + float(fl[0]) - want_flight) <= 1e-9:
+                bad(key, "O6 flight does not end at the commanded burn midpoint")
+            vm, rm = _arr(rec, "v_mps"), _arr(rec, "r_m")
+            v_imp = vm + sign * o6_dv * vm / np.linalg.norm(vm)
+            a_imp = -mu / (2.0 * (float(v_imp @ v_imp) / 2.0 - mu / float(np.linalg.norm(rm))))
+            err = _rel(_arr(rec, "sma_impulsive_m"), [a_imp])
+            note("o6 sma rel", err)
+            if not err <= INDEP_REL:
+                bad(key, f"O6 impulsive SMA inconsistent with its state ({err:.3g})")
+
+    # DOP853 chains in this scope.
+    starts = [it for it in items if it[0] == "dop853.start"]
+    bounds = [it for it in items if it[0] == "dop853.bounds"]
+    segs = [it for it in items if it[0] == "dop853.segment"]
+    ticks = [it for it in items if it[0] == "dop853.ticks"]
+    extrema = [it for it in items if it[0] == "dop853.extrema"]
+    for it in starts + bounds + segs + ticks + extrema:
+        covered.add(it[2])
+    if not (len(starts) == len(bounds) == len(extrema)) or len(segs) != len(ticks):
+        bad(scope, "inconsistent DOP853 record counts")
+        return
+    init = next((it[3] for it in items if it[0] == "initial_state"), None)
+    cursor = 0
+    chain_states: list[dict[float, np.ndarray]] = []
+    for (_, _, skey, s_rec), (_, _, bkey, b_rec), (_, _, ekey, e_rec) in zip(
+        starts, bounds, extrema, strict=True
+    ):
+        b = _arr(b_rec, "bounds_s")
+        horizon = float(b[-1])
+        want_cuts = {0.0, *(g * grid for g in range(1, math.floor(horizon / grid) + 1))}
+        want_cuts |= {x["ign"] for x in burns if x["ign"] <= horizon}
+        want_cuts |= {x["cut"] for x in burns if x["cut"] <= horizon}
+        if not (np.all(np.diff(b) > 0) and b[0] == 0.0 and want_cuts <= set(b.tolist())):
+            bad(bkey, "segment bounds miss a grid, ignition or cutoff time")
+        y = np.concatenate([_arr(s_rec, "r_m"), _arr(s_rec, "v_mps"), _arr(s_rec, "propellant_kg")])
+        if init is not None and not (
+            np.array_equal(y[:3], _arr(init, "r_m")) and np.array_equal(y[3:6], _arr(init, "v_mps"))
+        ):
+            bad(skey, "DOP853 start is not the pinned initial state")
+        if y[6] != (0.0 if veh is None else veh.propellant_kg):
+            bad(skey, "DOP853 start propellant is not the tank load")
+        alt = [float(np.linalg.norm(y[:3])) - radius]
+        states = {0.0: y.copy()}
+        n = len(b) - 1
+        for j in range(n):
+            _, _, gkey, g = segs[cursor + j]
+            _, _, tkey, t_rec = ticks[cursor + j]
+            a_, b_ = float(b[j]), float(b[j + 1])
+            k0, k1 = (int(x) for x in _arr(t_rec, "index_1"))
+            lo_k = math.floor(a_ / dt) + 1
+            cand = [q for q in range(lo_k, math.floor(b_ / dt) + 1) if a_ < q * dt <= b_]
+            want_k = (cand[0], cand[-1]) if cand else (lo_k, lo_k - 1)
+            if _arr(t_rec, "dt_s")[0] != dt or (k0, k1) != want_k:
+                bad(tkey, "tick index range is not the dt grid of its segment")
+            tt = np.arange(k0, k1 + 1) * dt
+            end = np.concatenate(
+                [_arr(g, "end_r_m"), _arr(g, "end_v_mps"), _arr(g, "end_propellant_kg")]
+            )
+            at = _arr(g, "anchor_ticks_m")
+            burn = next((x for x in burns if x["ign"] <= a_ and b_ <= x["cut"]), None)
+            if burn is None:
+                times = np.concatenate([tt, [b_]]) - a_
+                r, v = kepler_uv(y[:3], y[3:6], times, mu)
+                e_pos, e_vel = INDEP_POS_M, INDEP_VEL_MPS
+                kind = "coast"
+                if end[6] != y[6]:
+                    bad(gkey, "propellant changed on a coast")
+                e0 = float(y[3:6] @ y[3:6]) / 2 - mu / float(np.linalg.norm(y[:3]))
+                e1 = float(end[3:6] @ end[3:6]) / 2 - mu / float(np.linalg.norm(end[:3]))
+                if not abs(e1 - e0) <= 1e-11 * abs(e0):
+                    bad(gkey, "coast does not conserve energy")
+            else:
+                path = _burn_path(y, np.concatenate([[a_], tt, [b_]]), mu, veh, burn["sign"])
+                r, v = path[1:, :3], path[1:, 3:6]
+                e_pos, e_vel = INDEP_BURN_POS_M, INDEP_BURN_VEL_MPS
+                kind = "burn"
+                want_p = burn["before"] - veh.mass_flow_kgps * (b_ - burn["ign"])
+                if not abs(end[6] - want_p) <= INDEP_MASS_KG:
+                    bad(gkey, "burn propellant off the mass law")
+            ep = float(np.linalg.norm(end[:3] - r[-1]))
+            ev = float(np.linalg.norm(end[3:6] - v[-1]))
+            et = float(np.max(np.linalg.norm(at - r[:-1], axis=1))) if at.size else 0.0
+            if at.shape != (len(tt), 3):
+                bad(gkey, "anchor tick count is not the tick grid")
+                et = math.inf
+            ea = float(np.linalg.norm(_arr(g, "anchor_end_r_m") - r[-1]))
+            note(f"{kind} segment end m", ep), note(f"{kind} segment end m/s", ev)
+            note(f"{kind} anchor ticks m", et), note(f"{kind} anchor end m", ea)
+            if not (ep <= e_pos and ev <= e_vel and et <= e_pos and ea <= e_pos):
+                bad(
+                    gkey,
+                    f"{kind} segment differs from the independent propagation "
+                    f"({ep:.3g}, {et:.3g}, {ea:.3g} m; {ev:.3g} m/s)",
+                )
+            if at.size:
+                alt += list(np.linalg.norm(at, axis=1) - radius)
+            y = end
+            states[b_] = end.copy()
+        cursor += n
+        ext = _arr(e_rec, "altitude_m")
+        if (float(ext[0]), float(ext[1])) != (min(alt), max(alt)):
+            bad(ekey, "extrema are not the pinned ticks' extrema")
+        chain_states.append(states)
+    if cursor != len(segs):
+        bad(scope, "DOP853 segments without a reference")
+
+    # Node crossings: on z = 0 of the independent propagation from the reference.
+    for label, _n, key, rec in items:
+        if label != "orbit.node_crossings":
+            continue
+        covered.add(key)
+        states = chain_states[0] if chain_states else {}
+        ts = sorted(states)
+        for c in _arr(rec, "crossings_s"):
+            a_ = max((t for t in ts if t < c), default=None)
+            if a_ is None:
+                bad(key, f"crossing {c} before the reference")
+                continue
+            r, v = kepler_uv(states[a_][:3], states[a_][3:6], [c - a_], mu)
+            note("node z m", abs(float(r[0, 2])))
+            if not (abs(float(r[0, 2])) <= NODE_Z_M and v[0, 2] > 0.0):
+                bad(key, f"crossing {c} is not an ascending node (z = {r[0, 2]:.3g} m)")
+
+
+def _verify_gmat(records, scen, covered, note, bad) -> None:
+    """O9: GMAT-seeded values and the committed GMAT evidence."""
+    from tars.validation import gmat_m2
+    from tars.validation.thresholds import load_scoped_thresholds
+
+    limits = load_scoped_thresholds(missions=frozenset(scen))
+    for name in gmat_m2.GMAT_MISSIONS:
+        try:
+            _verify_gmat_mission(name, records, scen, covered, note, bad, limits)
+        except Exception as exc:  # fail closed (F53)
+            bad(name, f"verification raised {exc!r}")
+            covered.update(k for k in records if k.startswith(f"{name}/o9/o9."))
+
+
+def _verify_gmat_mission(name, records, scen, covered, note, bad, limits) -> None:
+    from tars.validation import gmat_m2, m2
+
+    scenario, expected = scen[name]
+    mu = scenario.constants.mu
+    burns = _independent_burns(scenario, expected)
+    predicted = m2.predict_burns(scenario, expected)
+    horizon = scenario.stop.duration_s
+    files = gmat_m2.reference_files(name)
+    arcs = gmat_m2.plan_arcs(scenario, predicted, horizon)
+    labelled, label_v = gmat_m2.label_rows(gmat_m2.parse_stream(files["report"].read_text()), arcs)
+    if label_v:
+        bad(name, f"committed GMAT rows do not label: {label_v[:3]}")
+        return
+    times = sorted(labelled)
+    scope = f"{name}/o9"
+    recs = {
+        (_split(k)[1], _split(k)[2]): (k, r)
+        for k, r in records.items()
+        if k.startswith(scope + "/")
+    }
+    lim = limits.for_validator("o9_gmat", name)
+    for (label, _n), (key, rec) in sorted(recs.items()):
+        covered.add(key)
+        if label == "o9.arcs":
+            bnd = _arr(rec, "bounds_s")
+            ok = (
+                bnd.size
+                and bnd[0, 0] == 0.0
+                and bnd[-1, 1] == horizon
+                and np.all(bnd[1:, 0] == bnd[:-1, 1])
+            )
+            cuts = {x["ign"] for x in burns} | {x["cut"] for x in burns}
+            ok = ok and {c for c in cuts if c < horizon} <= set(bnd.ravel().tolist())
+            if not ok:
+                bad(key, "GMAT arcs are not a contiguous schedule over the burns")
+        elif label == "o9.label_times":
+            if _arr(rec, "times_s").tolist() != times:
+                bad(key, "label times are not the committed GMAT rows' schedule")
+        elif label == "o9.epoch_anchor":
+            import datetime as _dt
+
+            ep = _dt.datetime.fromisoformat(scenario.epoch)
+            jd = (ep - _dt.datetime(2000, 1, 1, 12)).total_seconds() / 86400.0 + 2451545.0
+            want = jd - 2430000.0 - (32.184 - 0.0343817) / 86400.0
+            if abs(float(_arr(rec, "a1_mjd_1")[0]) - want) * 86400.0 > 1e-6:
+                bad(key, "epoch anchor differs from the configured TT epoch in A.1")
+        elif label == "o9.expected_mass":
+            veh = m2.vehicle(scenario)
+            want = []
+            for t in times:
+                p = veh.propellant_kg
+                for x in burns:
+                    if t <= x["ign"]:
+                        break
+                    if t >= x["cut"]:
+                        p = x["after"]
+                        continue
+                    p = x["before"] - veh.mass_flow_kgps * (t - x["ign"])
+                    break
+                want.append(veh.dry_mass_kg + p)
+            err = float(np.max(np.abs(_arr(rec, "mass_kg") - want)))
+            if not err <= INDEP_MASS_KG:
+                bad(key, f"expected mass differs from the mass law ({err:.3g} kg)")
+        elif label == "o9.alignment_kepler":
+            pass  # below, in arc order
+        elif label == "o9.gmat_node_crossings":
+            for c in _arr(rec, "crossings_s"):
+                a_ = max(t for t in times if t < c)
+                r, v = kepler_uv(labelled[a_].r, labelled[a_].v, [c - a_], mu)
+                note("gmat node z m", abs(float(r[0, 2])))
+                if not (abs(float(r[0, 2])) <= NODE_Z_M and v[0, 2] > 0.0):
+                    bad(key, f"GMAT crossing {c} is not an ascending node")
+    coast_arcs = [a for a in arcs if a.direction is None and a.start_s in labelled]
+    kep = [recs[k] for k in sorted(k for k in recs if k[0] == "o9.alignment_kepler")]
+    if len(kep) != len(coast_arcs):
+        bad(name, f"{len(kep)} alignment records for {len(coast_arcs)} coast arcs")
+    for arc, (key, rec) in zip(coast_arcs, kep, strict=False):
+        in_arc = [t for t in times if arc.start_s < t <= arc.end_s]
+        s0 = labelled[arc.start_s]
+        r, v = kepler_uv(s0.r, s0.v, np.array(in_arc) - arc.start_s, mu)
+        ep = float(np.max(np.linalg.norm(r - _arr(rec, "r_m"), axis=1))) if in_arc else 0.0
+        ev = float(np.max(np.linalg.norm(v - _arr(rec, "v_mps"), axis=1))) if in_arc else 0.0
+        note("gmat kepler m", ep), note("gmat kepler m/s", ev)
+        if not (ep <= INDEP_POS_M and ev <= INDEP_VEL_MPS):
+            bad(key, f"alignment Kepler differs from the independent propagation ({ep:.3g} m)")
+    # The snapshot's DOP853 states against the committed GMAT rows (O9 gates).
+    segs = sorted(
+        ((_split(k)[2], r) for k, r in records.items() if k.startswith(scope + "/dop853.segment#")),
+    )
+    bkey = f"{scope}/dop853.bounds#0"
+    if bkey not in records:
+        bad(name, "no O9 DOP853 reference")
+        return
+    b = _arr(records[bkey], "bounds_s")
+    pos = vel = 0.0
+    compared = 0
+    for t, (_, seg) in zip(b[1:], segs, strict=True):
+        row = labelled.get(float(t))
+        if row is None:
+            continue
+        pos = max(pos, float(np.linalg.norm(row.r - _arr(seg, "end_r_m"))))
+        vel = max(vel, float(np.linalg.norm(row.v - _arr(seg, "end_v_mps"))))
+        compared += 1
+    note("dop853 vs gmat m", pos), note("dop853 vs gmat m/s", vel)
+    if compared != len(times) - 1:
+        bad(name, f"{compared} GMAT rows compared of {len(times) - 1}")
+    if not (
+        pos <= lim["gmat_vs_dop853_position_error_max_m"]
+        and vel <= lim["gmat_vs_dop853_velocity_error_max_mps"]
+    ):
+        bad(name, f"snapshot DOP853 vs GMAT {pos:.3g} m, {vel:.3g} m/s")
 
 
 def cmd_verify_baseline(args: argparse.Namespace) -> int:

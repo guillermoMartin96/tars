@@ -656,3 +656,17 @@ def test_baseline_verification_requires_coverage(baseline):
 
 def test_the_approved_baseline_passes_independent_verification(baseline):
     assert _verify(baseline) == []
+
+
+def test_baseline_verification_fails_closed_on_unreadable_records(baseline):
+    """A record the verifier cannot even evaluate (a missing part) is a problem, never
+    a crash and never a silent pass."""
+    data = _copy(baseline)
+    key, rec = _first(data, "dop853.segment", "m2_prograde_burn/audit")
+    del rec["parts"]["anchor_ticks_m"]
+    problems = _verify(data)
+    assert any("verification raised" in p and "m2_prograde_burn/audit" in p for p in problems)
+    data = _copy(baseline)
+    _key, rec = _first(data, "o9.alignment_kepler", "m2_prograde_burn/o9")
+    del rec["parts"]["r_m"]
+    assert any("verification raised" in p for p in _verify(data))

@@ -8,3 +8,4 @@ together with the environment.
   against the identical measurement recording. Every class is 0.
 - `ci2-*`, `m<run id>-*`: GitHub Actions workflow `reference-snapshot-measure`, tags
   `refsnap-measure-2` to `-5`. Runs 38291386470, 38292229310, 38292231479 and 38292235152.
+- `b2-<run id>-*`: the same against baseline 2 (tags `refsnap-measure-6` to `-9`), runs 38320405875, 38320407537, 38320409961 and 38320411392.
