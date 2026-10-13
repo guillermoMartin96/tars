@@ -1,0 +1,51 @@
+mutated 10 O6 midpoints to zero r/v and SMA=-1e30
+verify-baseline exit 1   independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 2.13e-09
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 4.66e-06
+  independent agreement, max dop853 vs gmat m/s: 5.39e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max gmat node z m: 2.05e-08
+  independent agreement, max initial state rel: 0
+  independent agreement, max node z m: 2.17e-08
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 6.63e+06
+  independent agreement, max o6 kepler m/s: 7.75e+03
+  independent agreement, max simpson rel: 0
+m2_prograde_burn_o6_k0/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_prograde_burn_o6_k0/o6: verification raised ZeroDivisionError('float division by zero')
+m2_prograde_burn_o6_k1/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_prograde_burn_o6_k1/o6: verification raised ZeroDivisionError('float division by zero')
+m2_prograde_burn_o6_k2/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_prograde_burn_o6_k2/o6: verification raised ZeroDivisionError('float division by zero')
+m2_prograde_burn_o6_k3/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_prograde_burn_o6_k3/o6: verification raised ZeroDivisionError('float division by zero')
+m2_prograde_burn_o6_k4/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_prograde_burn_o6_k4/o6: verification raised ZeroDivisionError('float division by zero')
+m2_retrograde_burn_o6_k0/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_retrograde_burn_o6_k0/o6: verification raised ZeroDivisionError('float division by zero')
+m2_retrograde_burn_o6_k1/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_retrograde_burn_o6_k1/o6: verification raised ZeroDivisionError('float division by zero')
+m2_retrograde_burn_o6_k2/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_retrograde_burn_o6_k2/o6: verification raised ZeroDivisionError('float division by zero')
+m2_retrograde_burn_o6_k3/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_retrograde_burn_o6_k3/o6: verification raised ZeroDivisionError('float division by zero')
+m2_retrograde_burn_o6_k4/o6/o6.midpoint#0: O6 midpoint differs from the independent propagation (6.63e+06 m)
+m2_retrograde_burn_o6_k4/o6: verification raised ZeroDivisionError('float division by zero')
+ /private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap17/toolbox/scripts/reference_snapshot.py:565: RuntimeWarning: invalid value encountered in divide
+  v_imp = vm + sign * o6_dv * vm / np.linalg.norm(vm)
+
+runtime verification ['approved reference snapshot unusable: reference snapshot is not the approved one (sha256 8fd5730667cac0a8d8e080b4bd51ee4cae40e720884e179442adee5711dc0db9); a reviewed change must update tars.validation.approved_digests']
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap17/review_scratch/baseline_corruption15.py", line 26, in <module>
+    assert result.returncode == 0
+           ^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

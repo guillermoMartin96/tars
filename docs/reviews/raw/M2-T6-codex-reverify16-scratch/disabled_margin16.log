@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_o5_margin_uses_the_vector_norm_bound ___________________
+
+    def test_o5_margin_uses_the_vector_norm_bound():
+        """F52: per-component tolerances let a Kepler vector move by sqrt(3) x tol, so a
+        passing O5 metric closer than that to its limit is flagged."""
+        tol = snap.TOLERANCES[("sim", "m")]
+        shifts = m2.o5_snapshot_shifts()
+>       assert shifts["coast_position_error_max_m"] == pytest.approx(math.sqrt(3.0) * tol)
+E       assert 1e-05 == 1.73205080756...e-05 ± 1.7e-11
+E         
+E         comparison failed
+E         Obtained: 1e-05
+E         Expected: 1.7320508075688774e-05 ± 1.7e-11
+
+tests/test_reference_snapshot.py:538: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_o5_margin_uses_the_vector_norm_bound
+1 failed, 56 deselected in 0.09s

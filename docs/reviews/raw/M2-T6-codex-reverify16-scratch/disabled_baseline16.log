@@ -1,0 +1,150 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_baseline_verification_rejects_invalid_o6_values _____________
+
+baseline = {'artifact': 'M2 approved reference snapshot (DR-0021 option A)', 'kind': 'baseline candidate', 'provenance': {'entryp..., 424944.09479826404, 6599124.328922474, 384789.98647103074, 485484.1382621217, ...]}, ...}, 'seed': 'ref'}, ...}, ...}
+
+    def test_baseline_verification_rejects_invalid_o6_values(baseline):
+        """F53, second probe: zero O6 midpoints with an absurd impulsive SMA."""
+        data = _copy(baseline)
+        for key, rec in data["records"].items():
+            if "/o6.midpoint#" in key:
+                _set(rec, "r_m", [0.0, 0.0, 0.0])
+                _set(rec, "v_mps", [0.0, 0.0, 0.0])
+                _set(rec, "sma_impulsive_m", [-1e30])
+        problems = _verify(data)
+>       assert sum("O6 midpoint" in p for p in problems) == 10
+E       assert 0 == 10
+E        +  where 0 = sum(<generator object test_baseline_verification_rejects_invalid_o6_values.<locals>.<genexpr> at 0x122c02cf0>)
+
+tests/test_reference_snapshot.py:579: AssertionError
+----------------------------- Captured stdout call -----------------------------
+  independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 2.13e-09
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 4.66e-06
+  independent agreement, max dop853 vs gmat m/s: 5.39e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max gmat node z m: 2.05e-08
+  independent agreement, max initial state rel: 0
+  independent agreement, max node z m: 2.17e-08
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 6.63e+06
+  independent agreement, max o6 kepler m/s: 7.75e+03
+  independent agreement, max simpson rel: 0
+__________ test_baseline_verification_rejects_wrong_time_o6_recording __________
+
+baseline = {'artifact': 'M2 approved reference snapshot (DR-0021 option A)', 'kind': 'baseline candidate', 'provenance': {'entryp..., 424944.09479826404, 6599124.328922474, 384789.98647103074, 485484.1382621217, ...]}, ...}, 'seed': 'ref'}, ...}, ...}
+
+    def test_baseline_verification_rejects_wrong_time_o6_recording(baseline):
+        """F53, first probe: a recording made under F51's 10x flight-time corruption has
+        self-consistent O6 values (state and SMA agree) at the wrong time."""
+        tool = _load(TOOL, "reference_snapshot_tool_v")
+        data = _copy(baseline)
+        key, rec = _first(data, "o6.midpoint")
+        mu = BY_NAME["m2_prograde_burn"].build().constants.mu
+        seed_r, seed_v = tool._arr(rec, "seed_r_m"), tool._arr(rec, "seed_v_mps")
+        flight = tool._arr(rec, "flight_s")
+        r, v = tool.kepler_uv(seed_r, seed_v, flight * 10, mu)
+        dv = tool._arr(data["records"][key.replace("o6.midpoint", "o6.delta_v")], "dv_mps")[0]
+        v_imp = v[0] + dv * v[0] / np.linalg.norm(v[0])
+        a = -mu / (2.0 * (v_imp @ v_imp / 2.0 - mu / np.linalg.norm(r[0])))
+        _set(rec, "r_m", r[0])
+        _set(rec, "v_mps", v[0])
+        _set(rec, "sma_impulsive_m", [a])
+        problems = _verify(data)
+>       assert any(key in p and "independent propagation" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_baseline_verification_rejects_wrong_time_o6_recording.<locals>.<genexpr> at 0x12d76b440>)
+
+tests/test_reference_snapshot.py:599: AssertionError
+----------------------------- Captured stdout call -----------------------------
+  independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 2.13e-09
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 4.66e-06
+  independent agreement, max dop853 vs gmat m/s: 5.39e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max gmat node z m: 2.05e-08
+  independent agreement, max initial state rel: 0
+  independent agreement, max node z m: 2.17e-08
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 2.68e+06
+  independent agreement, max o6 kepler m/s: 3.13e+03
+  independent agreement, max o6 sma rel: 0
+  independent agreement, max simpson rel: 0
+_____________ test_baseline_verification_rejects_an_f50_recording ______________
+
+baseline = {'artifact': 'M2 approved reference snapshot (DR-0021 option A)', 'kind': 'baseline candidate', 'provenance': {'entryp..., 424944.09479826404, 6599124.328922474, 384789.98647103074, 485484.1382621217, ...]}, ...}, 'seed': 'ref'}, ...}, ...}
+
+    def test_baseline_verification_rejects_an_f50_recording(baseline):
+        """A recording made under F50's coordinated corruption: anchor ticks at 1.001 x
+        the flight time, extrema recomputed from them so they stay consistent."""
+        tool = _load(TOOL, "reference_snapshot_tool_v")
+        data = _copy(baseline)
+        scope = "m2_prograde_burn/audit"
+        scenario = BY_NAME["m2_prograde_burn"].build()
+        mu, dt = scenario.constants.mu, scenario.dt_s
+        b = tool._arr(data["records"][f"{scope}/dop853.bounds#0"], "bounds_s")
+        start = data["records"][f"{scope}/dop853.start#0"]
+        y = np.concatenate([tool._arr(start, "r_m"), tool._arr(start, "v_mps")])
+        seg = data["records"][f"{scope}/dop853.segment#0"]
+        ticks = np.arange(1, int(b[1] / dt) + 1) * dt
+        r, _ = tool.kepler_uv(y[:3], y[3:6], (ticks - b[0]) * 1.001, mu)
+        _set(seg, "anchor_ticks_m", r)
+        problems = _verify(data)
+>       assert any("segment#0" in p and "independent propagation" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_baseline_verification_rejects_an_f50_recording.<locals>.<genexpr> at 0x122467850>)
+
+tests/test_reference_snapshot.py:619: AssertionError
+----------------------------- Captured stdout call -----------------------------
+  independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 465
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 4.66e-06
+  independent agreement, max dop853 vs gmat m/s: 5.39e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max gmat node z m: 2.05e-08
+  independent agreement, max initial state rel: 0
+  independent agreement, max node z m: 2.17e-08
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 1.14e-09
+  independent agreement, max o6 kepler m/s: 1.36e-12
+  independent agreement, max o6 sma rel: 0
+  independent agreement, max simpson rel: 0
+=============================== warnings summary ===============================
+tests/test_reference_snapshot.py::test_baseline_verification_rejects_invalid_o6_values
+  /private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap17/toolbox/scripts/reference_snapshot.py:565: RuntimeWarning: invalid value encountered in divide
+    v_imp = vm + sign * o6_dv * vm / np.linalg.norm(vm)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_baseline_verification_rejects_invalid_o6_values
+FAILED tests/test_reference_snapshot.py::test_baseline_verification_rejects_wrong_time_o6_recording
+FAILED tests/test_reference_snapshot.py::test_baseline_verification_rejects_an_f50_recording
+3 failed, 54 deselected, 1 warning in 27.10s

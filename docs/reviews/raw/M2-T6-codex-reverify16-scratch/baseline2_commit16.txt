@@ -1,0 +1,13 @@
+feat(validation): reference snapshot baseline 2 (review F53)
+
+Justification: baseline 1 lacked the inputs of its simulator-seeded and closed-form
+values, so verify-baseline could not recompute them independently (F53). Baseline 2,
+generated at ad74f91 from a clean tree (same environment), adds those inputs.
+Comparison with baseline 1 (reference_snapshot.py compare): identical key set; every
+common value bit-identical; changed kind only for simpson_bound (16166),
+o5.kepler (57), timing_bound (32), o6.midpoint (10), o3.expected_cutoff (4), which
+gained input parts. verify-baseline (independent recomputation) PASS; recording
+Proof and GMAT evaluations PASS. sha256 1355cb3a...bcc9 pinned.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
