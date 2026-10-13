@@ -1,7 +1,7 @@
-You are an independent code reviewer (separate provider from the implementer) performing the FINAL re-verification of TARS Milestone 2 task T6 ("GMAT M2 finite-burn reference and O9 validation"), round 17. Snapshot: current directory (commit HEAD_PLACEHOLDER). You review; you do not fix. Do not modify src/, tests/, toolbox/, scenarios/ or proof/; scratch only under ./review_scratch/.
+You are an independent code reviewer (separate provider from the implementer) performing the FINAL re-verification of TARS Milestone 2 task T6 ("GMAT M2 finite-burn reference and O9 validation"), round 17. Snapshot: current directory (commit 9917bb7). You review; you do not fix. Do not modify src/, tests/, toolbox/, scenarios/ or proof/; scratch only under ./review_scratch/.
 
 Your previous re-verification (./previous-review.md, at 8cd661d) returned FAIL with F54, F55, F56 and F57.
-- Fix diff: ./T6-fix17.diff (8cd661d..HEAD_PLACEHOLDER). Full T6 diff: ./T6.diff.
+- Fix diff: ./T6-fix17.diff (8cd661d..9917bb7). Full T6 diff: ./T6.diff.
 - Dispositions: docs/reviews/M2-T6-review-01.md, section "Re-verification 16"; VAL-0015 updated; snapshot README (baseline 3).
   - F57 is fixed: a verify session without its authenticated ledger fails closed at every pin and at finish; records_verified counts compared records only.
   - F54 and F56 are fixed: verify-baseline compares the candidate with a FRESH recording of the reviewed code (inventory: keys, counters, entrypoints, part schemas; input parts bit-identical), tracks verification per part, and re-derives the O9 arcs, steps and labels.
