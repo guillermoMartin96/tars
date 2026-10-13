@@ -889,3 +889,30 @@ def test_inputs_are_compared_within_their_reproducibility_tolerance(baseline, sc
     problems = tool.verify_baseline(_copy(baseline), expected=expected)
     hit = any(key in p and "input differs" in p for p in problems)
     assert hit is (not ok)
+
+
+def _round_125(x: float) -> float:
+    """The smallest value of the 1-2-5 sequence >= x."""
+    e = math.floor(math.log10(x))
+    for k in (e, e + 1):
+        for m in (1.0, 2.0, 5.0):
+            if m * 10.0**k >= x * (1 - 1e-12):
+                return m * 10.0**k
+    raise AssertionError(x)
+
+
+def test_tolerances_follow_the_documented_rule():
+    """F59: each tolerance is the smallest 1-2-5 value >= max(10 x measured, 10 ulp of
+    the class's largest value in the approved snapshot), recomputed here."""
+    maxima: dict = {}
+    for rec in snap.load_approved()["records"].values():
+        if rec["exact"]:
+            continue
+        for name, part in rec["parts"].items():
+            cls = (rec["seed"], snap.unit_of(name))
+            if part["values"] and cls != ("ref", "1"):
+                maxima[cls] = max(maxima.get(cls, 0.0), max(abs(x) for x in part["values"]))
+    assert set(maxima) == set(snap.MEASURED)
+    for cls, top in maxima.items():
+        need = max(10.0 * snap.MEASURED[cls], 10.0 * float(np.spacing(top)))
+        assert snap.TOLERANCES[cls] == pytest.approx(_round_125(need), rel=1e-12), cls

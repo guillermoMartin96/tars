@@ -1,0 +1,67 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____________________ test_f50_acceptance_flip_is_rejected _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x111c2d160>
+
+    def test_f50_acceptance_flip_is_rejected(monkeypatch):
+        """F50 regression: identical simulator data is rejected with clean references
+        (max altitude 1e-5 m beyond its limit) and still rejected under the coordinated
+        Kepler + DOP853 corruption, now by the reference snapshot."""
+        cli = _gmat_cli()
+        name = "m2_prograde_burn"
+        mission = BY_NAME[name]
+        scenario = mission.build()
+        limit = json.loads(M2_THRESHOLDS.read_text())["limits"]["orbit_events"]["all"][
+            "max_altitude_error_m"
+        ]
+        reasons, check = cli._evaluate(name)
+>       assert reasons == [] and check is not None and check.passed  # clean baseline passes
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert (['o5_coast_ke...in bound inf'] == []
+E         
+E         Left contains 2 more items, first extra item: 'o5_coast_kepler: coast_position_error_max_m: invalid margin bound inf'
+E         Use -v to get more diff)
+
+tests/test_reference_snapshot.py:416: AssertionError
+_________________ test_f51_wrong_time_kepler_in_o6_is_rejected _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x111c973e0>
+
+    def test_f51_wrong_time_kepler_in_o6_is_rejected(monkeypatch):
+        """F51 regression: Kepler returns at 10x the requested flight time in O6, forward
+        and in the round trip (invariants and round trip still hold), are rejected by the
+        snapshot within the M2 Proof's session."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        variants = m2.impulsive_variants(scenario)
+        runs = [run_scenario(v) for v in variants]
+        with snap.session("m2_proof") as s:
+            for v, r in zip(variants, runs, strict=True):
+                m2.impulsive_row(scenario, v, r)
+        assert s.finish(complete=False) == []  # clean: every O6 value reproduces
+    
+        original = kepler.propagate
+    
+        def wrong_time(r, v, dt, mu):
+            f = sys._getframe(1)
+            while f:
+                if f.f_code.co_name == "impulsive_row":
+                    return original(r, v, dt * 10, mu)
+                f = f.f_back
+            return original(r, v, dt, mu)
+    
+        monkeypatch.setattr(kepler, "propagate", wrong_time)
+        with snap.session("m2_proof") as s:
+            for v, r in zip(variants, runs, strict=True):
+                m2.impulsive_row(scenario, v, r)
+        problems = s.finish(complete=False)
+>       assert any("o6.midpoint" in p and "tolerance" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_f51_wrong_time_kepler_in_o6_is_rejected.<locals>.<genexpr> at 0x111bb3ac0>)
+
+tests/test_reference_snapshot.py:470: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_f50_acceptance_flip_is_rejected
+FAILED tests/test_reference_snapshot.py::test_f51_wrong_time_kepler_in_o6_is_rejected
+2 failed, 71 deselected in 13.56s

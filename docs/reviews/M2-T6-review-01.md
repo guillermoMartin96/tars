@@ -492,5 +492,17 @@ F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an appro
 
 **CI correction after `9917bb7`.** The bit-exact input comparison failed on CI hosts, whose simulator-seeded inputs differ within the measured tolerance. Two snapshot tests failed on both platforms. Inputs are now compared within their class's reproducibility tolerance (exact for exact records). The F56 probes stay rejected: flight times and the O3 duration are exact classes. Test: `test_inputs_are_compared_within_their_reproducibility_tolerance` (0.5× tolerance accepted, 2× rejected).
 
-## Re-verification 17 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
-See below.
+## Re-verification 17 (under DR-0019 B, DR-0020 A and DR-0021 A)
+**Reviewer:** Codex, session `01a136d4-fd41-7d51-87de-00d94e7a4bda`, at `9917bb7`. **Raw:** `raw/M2-T6-codex-reverify17.md`, `raw/M2-T6-codex-reverify17-scratch/`.
+
+**Verdict: FAIL** (F58, F59).
+- F54–F57 are resolved for their reported mechanisms. All eight probes reject, and the regressions fail when their mechanisms are disabled.
+- All nine commands pass (1,092 tests). The 215-check report against baseline 3 keeps the 213 earlier records unchanged.
+- The inventory, per-part recomputation, provenance, 24 measurements, substitution, O5 margins and O6 corners are verified.
+
+| # | Sev. | Finding | Disposition |
+|---|---|---|---|
+| F58 | High | Editing the authenticated ledger's contents in memory, or switching the session's mode to `record`, after authentication lets the F50 reversal and the F51 O6 change pass the Proof | **`ESCALATED_FOR_INVESTIGATION`** (DR-0022). This mutates the validator's own runtime state, the same class as F57 taken further. Any in-memory guard is itself mutable, so there is no fixed point. Whether DR-0019 B's exclusion covers validator runtime state is a scope decision for the Tech Lead |
+| F59 | Med | The 10-ulp floor for zero-measured time classes used 6,000 s; the pinned times reach 53,700 s (10 ulp = 7.3e-11 s), so the 1e-11 s tolerances falsely rejected deviations within the documented allowance | **`ACCEPTED`, fixed.** One uniform rule for every class: the smallest 1-2-5 value ≥ max(10 × measured, 10 ulp of the class's largest snapshot value). Time classes are 1e-10 s; `ref kg` is 5e-12 kg (10 ulp of 1,300 kg = 2.3e-12). The measured maxima are recorded in `reference_snapshot.MEASURED`. Test: `test_tolerances_follow_the_documented_rule` recomputes the rule from the artifact |
+
+**T6 is blocked on DR-0022.** No further review round runs until it is decided.

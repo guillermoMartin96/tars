@@ -541,22 +541,22 @@ All 10 approved rejection codes are exercised.
     - GitHub `macos-latest` on eight hosts (Apple M1).
 
     Workflow `reference-snapshot-measure`: tags `refsnap-measure-2` to `-5` against baseline 1, `-6` to `-9` against baseline 2, and `-10` to `-13` against baseline 3 (7 more hosts). The maxima are identical by class in every set; the flight-time and mark parts are exact everywhere. Same `uv.lock`: NumPy 2.5.3, SciPy 1.18.1.
-  - **Rule.** 10 × the largest measured deviation, rounded up to 1-2-5. A continuous class measured 0 everywhere gets 10 ulp of its largest value. Counts are exact. Unused classes are exact, so they fail closed.
+  - **Rule (review F59).** The smallest 1-2-5 value ≥ max(10 × the largest measured deviation, 10 ulp of the class's largest value in the approved snapshot). Counts are exact. Unused classes are exact, so they fail closed. The measured maxima are recorded in `reference_snapshot.MEASURED`; a test recomputes the rule from the artifact.
   - The factor 10 covers runner hardware not sampled: the AVX-512 hosts alone raised the GMAT-seeded Kepler class 36×. The tolerance size only trades false alarms against sensitivity, because the acceptance guarantee comes from substitution and from the margin check, not from the size of the tolerance. The GMAT comparison tolerance is not used.
 
 | Class | Measured max | Tolerance |
 |---|---|---|
 | ref m | 2.79e-9 | 5e-8 |
 | ref m/s | 4.09e-12 | 5e-11 |
-| ref kg | 1.14e-13 | 2e-12 |
-| ref s | 0 | 1e-11 (10 ulp of 6000 s) |
+| ref kg | 1.14e-13 | 5e-12 (10 ulp of 1,300 kg) |
+| ref s | 0 | 1e-10 (10 ulp of 53,100 s) |
 | ref count | 0 | 0 (exact) |
 | gmat m | 2.02e-7 (AVX-512 hosts) | 5e-6 |
 | gmat m/s | 2.52e-10 | 5e-9 |
-| gmat s | 0 | 1e-11 |
+| gmat s | 0 | 1e-10 |
 | sim m | 5.37e-7 | 1e-5 |
 | sim m/s | 6.59e-10 | 1e-8 |
-| sim s (O5/O6 flight times) | 0 | 1e-11 |
+| sim s (O5/O6 flight times) | 0 | 1e-10 (10 ulp of 53,700 s) |
 | exact values | bit-identical on every host | 0 |
 
 - **Margins for the sim-seeded gates (baseline report).**

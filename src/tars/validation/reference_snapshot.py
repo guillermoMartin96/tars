@@ -53,24 +53,36 @@ SEEDS = ("ref", "sim", "gmat")
 UNIT_SUFFIXES = ("_mps", "_kg", "_m", "_s", "_1")
 
 # Reproducibility tolerances, |runtime - approved| per value, by (seed, unit) (VAL-0015).
-# Measured in verify mode against baseline 1 on nine environments: the reference host
-# (macOS x86_64, i9-9880H: 0 everywhere), four GitHub ubuntu-latest hosts (EPYC 7763,
-# Xeon Platinum, EPYC 9V74 x2) and four macos-latest hosts (Apple M1). Rule: 10 x the
-# largest measured deviation, rounded up to 1-2-5; a continuous class measured exactly
-# 0 everywhere gets 10 ulp of its largest value; counts are exact. Unused classes are 0
-# (exact), so a new value in one fails closed until it is measured.
+# MEASURED: the largest verify-mode deviation over 24 measurements (the reference host,
+# GitHub ubuntu-latest and macos-latest hosts; proof/records/evidence/M2-T6/
+# reference-snapshot-measurements). Rule (review M2-T6 F59): the smallest 1-2-5 value
+# >= max(10 x measured, 10 ulp of the class's largest value in the approved snapshot).
+# Counts are exact. Unused classes are 0 (exact): a new value in one fails closed until
+# it is measured.
+MEASURED: dict[tuple[str, str], float] = {
+    ("ref", "m"): 2.7939677238464355e-09,
+    ("ref", "mps"): 4.092726157978177e-12,
+    ("ref", "kg"): 1.1368683772161603e-13,
+    ("ref", "s"): 0.0,
+    ("gmat", "m"): 2.016313374042511e-07,  # AVX-512 hosts (Kepler over long GMAT arcs)
+    ("gmat", "mps"): 2.523847797419876e-10,
+    ("gmat", "s"): 0.0,
+    ("sim", "m"): 5.366746336221695e-07,  # inherits the simulator's platform variation
+    ("sim", "mps"): 6.589289114344865e-10,
+    ("sim", "s"): 0.0,
+}
 TOLERANCES: dict[tuple[str, str], float] = {
     **{(seed, unit): 0.0 for seed in SEEDS for unit in ("m", "mps", "kg", "s", "1")},
-    ("ref", "m"): 5e-8,  # measured 2.79e-9 (Kepler/RK4 anchors, segment ends)
-    ("ref", "mps"): 5e-11,  # measured 4.09e-12
-    ("ref", "kg"): 2e-12,  # measured 1.14e-13
-    ("ref", "s"): 1e-11,  # measured 0; 10 ulp(6000 s) = 9.1e-12
-    ("gmat", "m"): 5e-6,  # measured 2.02e-7 (AVX-512 hosts; Kepler over long GMAT arcs)
-    ("gmat", "mps"): 5e-9,  # measured 2.52e-10
-    ("gmat", "s"): 1e-11,  # measured 0; 10 ulp(6000 s)
-    ("sim", "m"): 1e-5,  # measured 5.37e-7 (inherits the simulator's platform variation)
-    ("sim", "mps"): 1e-8,  # measured 6.59e-10
-    ("sim", "s"): 1e-11,  # O5/O6 flight times (baseline 2): measured 0; 10 ulp(6000 s)
+    ("ref", "m"): 5e-8,  # 10 x measured 2.8e-8
+    ("ref", "mps"): 5e-11,  # 10 x measured 4.1e-11
+    ("ref", "kg"): 5e-12,  # 10 ulp(1300 kg) = 2.3e-12
+    ("ref", "s"): 1e-10,  # 10 ulp(53 100 s) = 7.3e-11
+    ("gmat", "m"): 5e-6,  # 10 x measured 2.0e-6
+    ("gmat", "mps"): 5e-9,  # 10 x measured 2.5e-9
+    ("gmat", "s"): 1e-10,  # 10 ulp(53 100 s)
+    ("sim", "m"): 1e-5,  # 10 x measured 5.4e-6
+    ("sim", "mps"): 1e-8,  # 10 x measured 6.6e-9
+    ("sim", "s"): 1e-10,  # 10 ulp(53 700 s)
 }
 
 MAX_LISTED = 20  # problems listed per kind; the count is always reported
