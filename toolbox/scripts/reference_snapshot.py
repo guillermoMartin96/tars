@@ -402,7 +402,8 @@ def record_all() -> tuple[dict[str, dict[str, Any]], list[str]]:
 def _inventory_problems(records, expected, cov: _Coverage) -> list[str]:
     """The candidate holds exactly the expected records -- keys (counters included),
     seeds, exactness, entrypoints, part names and shapes -- and its input parts are
-    bit-identical to the fresh recording's (F54, F56)."""
+    match the fresh recording's within their class's reproducibility tolerance (exact
+    for exact records) (F54, F56)."""
     out: list[str] = []
     missing, extra = sorted(set(expected) - set(records)), sorted(set(records) - set(expected))
     if missing:
@@ -443,7 +444,8 @@ def verify_baseline(
     """Independent verification of a snapshot (DR-0021 condition 2; F53-F56).
 
     1. Inventory: exactly the records, counters, entrypoints and part schemas of a
-       fresh recording of the reviewed code; input parts bit-identical to it.
+       fresh recording of the reviewed code; input parts within their class's
+       reproducibility tolerance of it (exact for exact records).
     2. Every output part recomputed independently of the runtime references:
        scenario values re-derived (initial state, predicted burns, Simpson and DR-0017
        bounds, O3 closed forms, O6 delta-v, segment bounds from the marks, tick

@@ -486,11 +486,11 @@ F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an appro
 | F57 | High | Corrupting `Session.approved` to `None` after authentication silently skipped all comparisons and the coverage check. It restored the F50 reversal and the F51 O6 change while the Proof passed | A verify session without its authenticated ledger (never loaded, or lost after loading) reports `no authenticated reference ledger` on every pin and at finish. Records that were consumed but not compared are problems. `records_verified` counts only compared records | `test_session_without_its_ledger_fails_closed` |
 | F54 | Med | `verify-baseline` checked coverage of the supplied records only. It approved changed arc steps, a powered count of 999, a renamed counter, a bogus entrypoint, removed O5 records and an unknown label | `verify-baseline` compares the candidate with a **fresh recording** of the reviewed code: records, counters, entrypoints, part names and shapes must match exactly. Verification is tracked **per part**, so every part must pass an explicit check. Arcs and steps are re-derived independently | `test_baseline_verification_requires_the_complete_inventory` (6 cases) |
 | F55 | Med | Node verification checked only the supplied roots. It approved duplicated, emptied and removed crossing lists | Crossings and powered intervals are **enumerated independently** over the reference marks: count, order and times, by bisection on the independent Kepler. The marks are now pinned (`dop853.marks`, exact) → **baseline 3** | `test_baseline_verification_enumerates_node_crossings` (3 cases) |
-| F56 | Med | O5 flight times ×10 (states recomputed to match) and an O3 case at 100 s passed | **Input parts** (O5 and O6 seeds and flight times, Simpson windows, DR-0017 inputs, O3 start and duration, marks) must be bit-identical to the fresh recording, where they come from the simulator and the scenario, never from a reference. O3's duration must equal the Proof's | `test_baseline_verification_rejects_wrong_o5_inputs`, `..._a_wrong_o3_case` |
+| F56 | Med | O5 flight times ×10 (states recomputed to match) and an O3 case at 100 s passed | **Input parts** (O5 and O6 seeds and flight times, Simpson windows, DR-0017 inputs, O3 start and duration, marks) must match the fresh recording (bit-identical as first implemented; within their class's reproducibility tolerance since `97b6f30`, see below), where they come from the simulator and the scenario, never from a reference. O3's duration must equal the Proof's | `test_baseline_verification_rejects_wrong_o5_inputs`, `..._a_wrong_o3_case` |
 
 **Baseline 3** (`9d49b60`, generated at `58be803` from a clean tree) adds the 31 marks records; every common value is bit-identical to baseline 2. `verify-baseline` passed at generation and standalone, against a separate fresh recording. The independent crossing enumeration reproduces every pinned crossing exactly.
 
-**CI correction after `9917bb7`.** The bit-exact input comparison failed on CI hosts, whose simulator-seeded inputs differ within the measured tolerance. Two snapshot tests failed on both platforms. Inputs are now compared within their class's reproducibility tolerance (exact for exact records). The F56 probes stay rejected: flight times and the O3 duration are exact classes. Test: `test_inputs_are_compared_within_their_reproducibility_tolerance` (0.5× tolerance accepted, 2× rejected).
+**CI correction after `9917bb7`.** The bit-exact input comparison failed on CI hosts, whose simulator-seeded inputs differ within the measured tolerance. Two snapshot tests failed on both platforms. Inputs are now compared within their class's reproducibility tolerance (exact for exact records). The F56 probes stay rejected. The O3 duration and the marks are exact records. O5 and O6 flight times use the continuous `sim s` tolerance (1e-10 s; bit-identical in every measurement), far below the ×10 probe's change. *(Wording corrected after review round 18's note.)* Test: `test_inputs_are_compared_within_their_reproducibility_tolerance` (0.5× tolerance accepted, 2× rejected).
 
 ## Re-verification 17 (under DR-0019 B, DR-0020 A and DR-0021 A)
 **Reviewer:** Codex, session `01a136d4-fd41-7d51-87de-00d94e7a4bda`, at `9917bb7`. **Raw:** `raw/M2-T6-codex-reverify17.md`, `raw/M2-T6-codex-reverify17-scratch/`.
@@ -550,4 +550,19 @@ The failure goes into the Proof's `reference_snapshot` check and into the GMAT r
 **Preserved (condition 6).** No threshold, reference value, tolerance or acceptance semantics changed. The M2 report still has 215 checks.
 
 ## Re-verification 18 (final, complete T6 checkpoint; under DR-0019 B, DR-0020 A, DR-0021 A and DR-0022 B)
-See below.
+**Reviewer:** Codex, session `01a13786-1001-7861-8f77-87cd0ff53796`, at `e7c0148`. **Raw:** `raw/M2-T6-codex-reverify18.md`, `raw/M2-T6-codex-reverify18-scratch/`.
+
+**Verdict: PASS (unconditional; no blocking findings).**
+- F42 and F43 remain accepted residual risk.
+- F44–F57 remain resolved; the in-scope probes were re-run and reject their corruptions.
+- F58 is accurately recorded as rejected with reasoning, not as fixed.
+- F59 is resolved.
+- Both DR-0022 safeguards fail closed, and their tests fail when the safeguards are disabled.
+- All nine command groups pass (1,101 tests). The fresh M2 Proof has 215 passing checks against baseline 3: the 213 earlier records are unchanged, and 48,310 records and 982,324 values are verified.
+- The artifact, threshold, simulator-output, reference-output and workflow sweeps found no remaining blocking false pass.
+
+| # | Kind | Remark | Disposition |
+|---|---|---|---|
+| — | Note | Two verifier docstrings and this record still said "bit-identical" and "exact" for O5/O6 flight times, which use the continuous `sim s` tolerance (1e-10 s; bit-identical in every measurement). No acceptance effect | **`ACCEPTED`.** Wording corrected (documentation only) after the PASS commit |
+
+**T6 review closed: PASS.** CI green on Ubuntu and macOS (run 38482342000, every job confirmed complete).

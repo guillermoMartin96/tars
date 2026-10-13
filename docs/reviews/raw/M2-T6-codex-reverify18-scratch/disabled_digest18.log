@@ -1,0 +1,44 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________ test_ledger_changed_during_the_run_is_detected ________________
+
+    def test_ledger_changed_during_the_run_is_detected():
+        """Safeguard 1: the in-memory ledger is re-hashed at the end of the run, so an
+        accidental change to it (a bug writing into the loaded records) fails."""
+        with snap.session("m2_proof") as s:
+            rec = next(iter(s.approved.values()))
+            part = next(iter(rec["parts"].values()))
+            if part["values"]:
+                part["values"][0] += 1.0
+            else:
+                rec["seed"] = "sim" if rec["seed"] != "sim" else "ref"
+        problems = s.finish(complete=False)
+>       assert any("ledger changed during the run" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_ledger_changed_during_the_run_is_detected.<locals>.<genexpr> at 0x110903c60>)
+
+tests/test_reference_snapshot.py:935: AssertionError
+______________ test_artifact_replaced_during_the_run_is_detected _______________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-10/test_artifact_replaced_during_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x110a5af30>
+
+    def test_artifact_replaced_during_the_run_is_detected(tmp_path, monkeypatch):
+        """Safeguard 1: the artifact file is re-hashed at the end of the run against the
+        hash loaded and the pinned digest."""
+        path = tmp_path / "snap.json.gz"
+        path.write_bytes(snap.snapshot_path().read_bytes())
+        with snap.session("m2_proof", path=path) as s:
+            data = snap.read_json(path)
+            data["provenance"] = {"replaced": True}
+            snap.write_json(path, data)
+        problems = s.finish(complete=False)
+>       assert any("artifact changed during the run" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_artifact_replaced_during_the_run_is_detected.<locals>.<genexpr> at 0x1191a9f20>)
+
+tests/test_reference_snapshot.py:948: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_ledger_changed_during_the_run_is_detected
+FAILED tests/test_reference_snapshot.py::test_artifact_replaced_during_the_run_is_detected
+2 failed, 80 deselected in 10.04s

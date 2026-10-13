@@ -1,4 +1,4 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T5 complete)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T6 complete)
 
 **Milestone result:** not yet claimed. M2 Proof (P1–P12, `docs/milestones/M2-propulsion.md` §10) is evaluated at T8.
 - This record collects completed task evidence only (REV-013 lesson).
@@ -135,7 +135,72 @@
   - O9/GMAT M2 is T6.
   - FU-1 is open: GMAT gates must respect the 11–15 µm DOP853 floor.
   - The validators need the dev group (SciPy).
-- **Not started:** T6 and later (needs authorization). The draft PR (#3) is not merged.
+- **Next:** T6 (authorized 2026-10-11; see below).
+
+## T6 — GMAT M2 finite-burn reference and O9: COMPLETE (2026-10-13)
+- **Final revision reviewed:** `e7c0148`. A post-review documentation-only wording correction (round 18's note) follows.
+- **CI:** green on ubuntu-latest and macos-latest, every job confirmed complete (run 38482342000). CI covers lint, 1,101 tests, cross-process determinism (M1 and every M2 scenario), cross-platform M1 golden agreement, GMAT M1 and M2 comparisons, the M1 Proof and the full M2 Proof, verified against the reference snapshot.
+- **Decisions:**
+  - DR-0019 approved, option B (review threat model).
+  - DR-0020 approved, option A (verdict relevance; F42 and F43 accepted residual risk).
+  - DR-0021 approved, option A (approved reference snapshot; seven conditions, confirmed complete).
+  - DR-0022 approved, option B (validator runtime state out of scope; two accidental-corruption safeguards).
+- **GMAT configuration and reproduction.**
+  - GMAT R2026a: NASA-signed `GmatConsole`, build "Mar 26 2026 19:40:08", sha256 `1162803d…52e2` (pinned in `gmat_m2.APPROVED_GMAT`).
+  - Aligned stepping (DR-0016): coasts at 60 s, burns at 1 s, one-step realignment arcs. Point-mass Earth. Ideal constant-thrust engine with velocity-tracking VNB pointing. Standard gravity overridden to the TARS value (VAL-0009).
+  - Rows are labelled from the step schedule; the first epoch is anchored to the configured TT epoch in A.1.
+  - Missions: `m2_prograde_burn`, `m2_retrograde_burn`, `m2_invalid_commands`. Depletion is excluded from GMAT (VAL-0009 finding 4).
+  - **Reproduce:**
+    - `uv run python toolbox/scripts/gmat_m2.py generate --out <dir>` previews the scripts;
+    - `... gmat_m2.py run` stages, evaluates and publishes, then prints the digest to pin;
+    - `... gmat_m2.py compare` checks the committed references (no GMAT needed).
+  - Raw scripts, reports, console logs and metadata are in `toolbox/references/gmat/m2/`. The reports are byte-identical to `1de827e`. The manifest has a hash-chained history and its sha256 is pinned in `approved_digests.py`.
+- **O9 results against provisional limits** (reference host; `evidence/M2-T6/m2_proof_report.json` and stdout; VAL-0014):
+
+| Metric (worst of 3 missions) | Value | Limit |
+|---|---|---|
+| GMAT vs independent DOP853, position / velocity | 4.66e-6 m / 5.39e-9 m/s | 3e-5 m / 3.5e-8 m/s |
+| GMAT coast vs Kepler, position / velocity | 4.01e-6 m / 4.63e-9 m/s | 1e-4 m / 1e-7 m/s |
+| GMAT mass vs analytic | 2.25e-11 kg | 1.3e-9 kg |
+| Step spacing; burn duration from mass | 2.34e-7 s; 1.41e-10 s | 1e-6 s; 1e-9 s |
+| Simulator vs GMAT, samples and final | 0.313 m / 3.64e-4 m/s | 0.6 m / 7e-4 m/s |
+| Simulator vs GMAT, burn boundaries (slices; invalid-commands) | 7.8e-4 m; 8.0e-3 m | 2e-3 m; 1.6e-2 m |
+| Simulator vs GMAT, mass; node crossings | 2.25e-11 kg; 3.99e-5 s | 1.3e-9 kg; 8e-5 s |
+
+  GMAT agrees with the independent DOP853 reference to the 11–15 µm floor class. The simulator-versus-GMAT differences match the simulator-versus-DOP853 differences of O4, so they are TARS's RK4 error (dt = 10 s), not a modelling disagreement. No O9 gate is below the 15 µm floor (FU-1 respected).
+- **M2 Proof:** **215 / 215 checks PASS** against reference snapshot baseline 3. The 213 checks from before DR-0021 are byte-identical in name, metrics, thresholds and result, plus the exact checks `reference_snapshot` and `reference_snapshot_margins`. All 48,310 records and 982,324 values are compared.
+- **Reference snapshot (DR-0021, VAL-0015).**
+  - Every reference-derived value is pinned and verified: DOP853, the Kepler and RK4 anchors, O5, O6, node crossings, O3, O9 and the scenario predictions. Seven exclusions are documented.
+  - **Baseline 3** (`a2cddf4b…448b`) was generated from a clean tree. It was approved by `verify-baseline`, which checks:
+    - the inventory against a fresh recording;
+    - every part recomputed independently (universal-variable Kepler, LSODA, re-derived scenario values);
+    - node crossings enumerated independently;
+    - DOP853 against GMAT.
+  - **Tolerances:** the smallest 1-2-5 value ≥ max(10 × measured, 10 ulp). Measured over 24 cross-platform runs.
+  - **Acceptance protection:** ref and gmat values are consumed from the snapshot. Sim-seeded gates keep margins above the worst shift a within-tolerance deviation could cause.
+  - **DR-0022 B safeguards:** the digest is re-verified at the end of every run, and verification mode is asserted.
+- **Negative and mutation tests:**
+  - `tests/test_gmat_m2.py` (~190): artifact, threshold, row and workflow mutants; provenance; anchors; the F47–F51 coordinated-corruption regressions.
+  - `tests/test_reference_snapshot.py` (82): ledger mechanics, authentication, immutability, margins, the F50/F51/F52 regressions, baseline-approval corruptions (F53–F56), fail-closed sessions (F57) and the DR-0022 safeguards.
+  - Every mechanism was mutation-tested: disabling it fails its targeted tests (review record).
+- **Review:** `docs/reviews/M2-T6-review-01.md`. 18 Codex rounds, 59 findings:
+  - F42 and F43: accepted residual risk (DR-0020);
+  - F50 and F51: fixed by DR-0021;
+  - F58: rejected with reasoning (DR-0022);
+  - every other finding: accepted and fixed.
+
+  **Final independent verdict: unconditional PASS** (round 18, session `01a13786-1001-7861-8f77-87cd0ff53796`).
+- **Impact on O1–O8 and M1:**
+  - O1–O8 checks and values are unchanged, except the documented T6 refinements: the altitude extrema are now taken from the independent anchors (≤ 2e-8 m change, review round 12), and all 213 prior checks are identical since then.
+  - M1 Proof, GMAT M1, `m1.json` and the golden sha256 `7a4e1877…` are exact on the reference host and within approved bounds on CI.
+- **DR-0017 / DR-0018:** the timing Δv bound stays separate from trajectory error, and the stop semantics are preserved and verified.
+- **Limitations at the prototype bar:**
+  - The M2 thresholds remain provisional until T7.
+  - GMAT runs on the reference host only; CI compares the committed artifacts.
+  - The validators need the dev group (SciPy).
+  - The O6 margin bound is 0.0405 against 0.05 (a T7 consideration).
+  - The Proof takes about 135 s.
+- **Not started:** T7 (needs authorization). Draft PR #3 is not merged.
 
 ## REV-012 — resolved
 VAL-0010, DR-0016; CI-reproduced by `tests/test_rev012_evidence.py`.
