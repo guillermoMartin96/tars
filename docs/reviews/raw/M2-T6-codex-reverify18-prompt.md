@@ -1,7 +1,7 @@
-You are an independent code reviewer (separate provider from the implementer) performing the FINAL review of the COMPLETE TARS Milestone 2 task T6 checkpoint ("GMAT M2 finite-burn reference and O9 validation", including the DR-0021 reference snapshot), round 18. Snapshot: current directory (commit HEAD_PLACEHOLDER). You review; you do not fix. Do not modify src/, tests/, toolbox/, scenarios/ or proof/; scratch only under ./review_scratch/.
+You are an independent code reviewer (separate provider from the implementer) performing the FINAL review of the COMPLETE TARS Milestone 2 task T6 checkpoint ("GMAT M2 finite-burn reference and O9 validation", including the DR-0021 reference snapshot), round 18. Snapshot: current directory (commit e7c0148). You review; you do not fix. Do not modify src/, tests/, toolbox/, scenarios/ or proof/; scratch only under ./review_scratch/.
 
 Your previous re-verification (./previous-review.md, at 9917bb7) returned FAIL with F58 and F59.
-- Diff since then: ./T6-fix18.diff (9917bb7..HEAD_PLACEHOLDER). Full T6 diff: ./T6.diff (a0169e7..HEAD_PLACEHOLDER).
+- Diff since then: ./T6-fix18.diff (9917bb7..e7c0148). Full T6 diff: ./T6.diff (a0169e7..e7c0148).
 - F59 is fixed: one tolerance rule for every class, the smallest 1-2-5 value >= max(10 x measured, 10 ulp of the class maximum), with the measured maxima recorded in reference_snapshot.MEASURED and a test that recomputes the rule.
 - F58 was escalated to DR-0022, which the Tech Lead approved as option B (docs/decisions/requests/DR-0022-validator-runtime-state-in-review-scope.md, "Resolution"):
   - Deliberate modification of the validator's code, control flow or in-memory state during execution is OUTSIDE the threat model.
