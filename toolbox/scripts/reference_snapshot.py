@@ -349,8 +349,9 @@ def _rel(a, b) -> float:
 
 # Parts that are INPUTS of a pinned value: they come from the simulator or the scenario
 # schedule, never from a reference. verify-baseline takes their expected values from a
-# fresh recording of the reviewed code (bit-identical on the generating host) and
-# recomputes every OUTPUT part independently from them (review M2-T6 F54, F56).
+# fresh recording of the reviewed code (bit-identical on the generating host, within
+# the measured reproducibility tolerance elsewhere) and recomputes every OUTPUT part
+# independently from them (review M2-T6 F54, F56).
 INPUT_PARTS = {
     "dop853.marks": ("marks_s",),
     "simpson_bound": ("window_s",),
@@ -423,7 +424,13 @@ def _inventory_problems(records, expected, cov: _Coverage) -> list[str]:
             continue
         label = _split(key)[1]
         for part in INPUT_PARTS.get(label, ()):
-            if got["parts"][part]["values"] == want["parts"][part]["values"]:
+            # Inputs agree within the measured reproducibility tolerance of their
+            # class (exact for exact records): the fresh recording may run on another
+            # platform, whose simulator-seeded inputs differ within it (VAL-0015).
+            tol = 0.0 if got["exact"] else snap.TOLERANCES[(got["seed"], snap.unit_of(part))]
+            g = np.asarray(got["parts"][part]["values"], dtype=float)
+            w = np.asarray(want["parts"][part]["values"], dtype=float)
+            if g.shape == w.shape and bool(np.all(np.isfinite(g) & (np.abs(g - w) <= tol))):
                 cov.add(key, part)
             else:
                 out.append(f"{key}.{part}: input differs from the fresh recording")

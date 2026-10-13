@@ -490,5 +490,7 @@ F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an appro
 
 **Baseline 3** (`9d49b60`, generated at `58be803` from a clean tree) adds the 31 marks records; every common value is bit-identical to baseline 2. `verify-baseline` passed at generation and standalone, against a separate fresh recording. The independent crossing enumeration reproduces every pinned crossing exactly.
 
+**CI correction after `9917bb7`.** The bit-exact input comparison failed on CI hosts, whose simulator-seeded inputs differ within the measured tolerance. Two snapshot tests failed on both platforms. Inputs are now compared within their class's reproducibility tolerance (exact for exact records). The F56 probes stay rejected: flight times and the O3 duration are exact classes. Test: `test_inputs_are_compared_within_their_reproducibility_tolerance` (0.5× tolerance accepted, 2× rejected).
+
 ## Re-verification 17 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
 See below.

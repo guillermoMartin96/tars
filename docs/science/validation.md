@@ -573,7 +573,7 @@ All 10 approved rejection codes are exercised.
   - The recording run passed the M2 Proof (213 checks and the 2 snapshot checks) and the three GMAT evaluations. That alone is not enough: a corruption present while recording can pass the recording Proof (F53).
   - `verify-baseline` checks the candidate as follows (F54–F56):
     - **Inventory.** It compares the candidate with a **fresh recording** of the reviewed code. Records, counters, entrypoints, part names and shapes must match exactly.
-    - **Inputs.** The input parts (marks, O5 and O6 seeds and flight times, Simpson windows, DR-0017 inputs, O3 start and duration) come from the simulator and the scenario, never from a reference. They must be bit-identical to the fresh recording's.
+    - **Inputs.** The input parts (marks, O5 and O6 seeds and flight times, Simpson windows, DR-0017 inputs, O3 start and duration) come from the simulator and the scenario, never from a reference. They must agree with the fresh recording's within their class's reproducibility tolerance: bit-identical on the generating host, and exact for exact records (flight times and marks are exact everywhere).
     - **Outputs.** Every output part is recomputed from its inputs and the scenario, with implementations independent of the runtime references.
     - **Coverage.** It is tracked per part. An unverified part, or a record that cannot be evaluated, is a failure.
 

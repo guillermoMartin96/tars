@@ -21,7 +21,7 @@ values (F53).
 Approval evidence: `verify-baseline` passed both while generating and standalone, against
 a separate fresh recording of the reviewed code. It checks:
 - the inventory: records, counters, entrypoints and part schemas;
-- the inputs, bit-identical to the fresh recording;
+- the inputs, matching the fresh recording within their reproducibility tolerance (bit-identical on the generating host);
 - every output part, recomputed independently of the runtime references by a
   universal-variable Kepler, LSODA and re-derived scenario values;
 - node crossings, enumerated independently;

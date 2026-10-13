@@ -875,3 +875,17 @@ def test_crossing_count_is_checked_on_its_own(baseline):
     tool = _load(TOOL, "reference_snapshot_tool_v")
     problems = tool.verify_baseline(data, expected=exp)
     assert any(key in p and "enumerated independently" in p for p in problems)
+
+
+@pytest.mark.parametrize("scale,ok", [(0.5, True), (2.0, False)])
+def test_inputs_are_compared_within_their_reproducibility_tolerance(baseline, scale, ok):
+    """On another platform the fresh recording's sim-seeded inputs differ within the
+    measured tolerance (CI hosts): accepted inside it, rejected beyond it."""
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    expected = _copy({"records": _FRESH["records"]})["records"]
+    key = next(k for k in expected if "/o5.kepler#" in k)
+    part = expected[key]["parts"]["seed_r_m"]
+    part["values"] = [x + scale * snap.TOLERANCES[("sim", "m")] for x in part["values"]]
+    problems = tool.verify_baseline(_copy(baseline), expected=expected)
+    hit = any(key in p and "input differs" in p for p in problems)
+    assert hit is (not ok)
