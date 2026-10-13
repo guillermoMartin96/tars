@@ -493,7 +493,8 @@ All 10 approved rejection codes are exercised.
 ## VAL-0015 — DR-0021: approved reference snapshot, coverage and reproducibility tolerances (M2; T6)
 - **Date / revision:** 2026-10-12.
   - Baseline 1: generated at `ad1c33b` (clean tree), pinned at `c753372`.
-  - **Baseline 2 (current):** generated at `ad74f91` (clean tree), pinned at `f5a7e40`. It adds the inputs of the sim-seeded and closed-form values (review F53).
+  - Baseline 2: generated at `ad74f91`, pinned at `f5a7e40`. It adds the inputs of the sim-seeded and closed-form values (review F53).
+  - **Baseline 3 (current):** generated at `58be803` (clean tree), pinned at `9d49b60`. It adds the reference marks, so that node crossings can be enumerated independently (review F55).
   - Tolerances were set after the measurement below.
 - **Purpose:** DR-0021 option A. Every reference-derived value of the M2 Proof is verified against an approved, digest-pinned snapshot, so coordinated corruption of several independent references (review F50, F51) is detected.
 - **Mechanism (`tars.validation.reference_snapshot`).**
@@ -511,7 +512,7 @@ All 10 approved rejection codes are exercised.
 | `initial_state` | ref | r, v from the elements | O4 initial state, DOP853 seed, GMAT script |
 | `predicted_burns` | ref | ignition, commanded, intended, cutoff, executed times; propellant before/used/after; mass before/after; Δv | O1, O2, accounting and receipts, lifecycle, segment bounds, GMAT arcs |
 | `simpson_bound`, `timing_bound` | ref | RK4 truncation bound with its window; DR-0017 timing bound with its durations and propellant | O2 and sample excess metrics; receipt check |
-| `dop853.bounds`, `dop853.ticks` | ref, exact | segment bounds; tick index range and dt (the grid is checked to be k·dt bit for bit) | every evaluation time |
+| `dop853.marks`, `dop853.bounds`, `dop853.ticks` | ref, exact | the reference's mark times; segment bounds; tick index range and dt (the grid is checked to be k·dt bit for bit) | every evaluation time |
 | `dop853.start`, `dop853.segment` | ref | start state; each segment end (r, v, propellant); anchor (Kepler or RK4) positions at every tick; anchor end state | marks for O4, O8 and O9; node bisection seeds; altitude extrema |
 | `dop853.extrema` | ref | min and max reference altitude | orbit_events extrema metrics |
 | `orbit.node_crossings` | ref | timed crossings; powered-interval count | node crossing error, crossing count |
@@ -522,7 +523,7 @@ All 10 approved rejection codes are exercised.
 | `o9.expected_mass` | ref | analytic mass at every GMAT row | `gmat_mass_vs_analytic_error_max_kg` |
 | `o9.alignment_kepler`, `o9.gmat_node_crossings` | gmat | Kepler states from GMAT arc starts; GMAT node crossings | O9 alignment; ours-vs-GMAT node error |
 
-  Baseline 2: 48,279 records, 966,417 values (gzip JSON). The key set is identical to baseline 1, and every common value is bit-identical.
+  Baseline 3: 48,310 records, 982,324 values (gzip JSON). Every value common to baselines 1, 2 and 3 is bit-identical.
 - **Excluded (explicitly), with reason.**
   1. *DOP853 dense output at the ticks.* The positions are consumed only by the F49 check, which requires them to agree with the pinned anchor tick positions (≤ 1e-7 m on coasts, 1e-6 m in burns), so they are pinned transitively. Velocity and propellant feed only self-consistency checks. Storing them would add 534k values.
   2. *DOP853 interior solver nodes, stencil and midpoint samples.* Their number follows the adaptive step selection, which can differ by platform. They feed only the self-consistency checks (node reconciliation, derivative stencil, mass law), which remain.
@@ -534,12 +535,12 @@ All 10 approved rejection codes are exercised.
 - **Tolerance measurement (condition 4).**
   - **Method.** `reference_snapshot.py measure-deviation` runs the Proof and the three GMAT evaluations in *verify* mode against baseline 1 with unlimited tolerances, so substitution happens exactly as in a real run. It reports the largest |runtime − approved| per class.
   - This is the right quantity. Without substitution, record-mode drift accumulates along the DOP853 chain: up to 6.8 µm between platforms, consistent with the 11–15 µm cross-platform floor of VAL-0010. With substitution, each segment starts from its approved state.
-  - **Environments (17 measurements):**
+  - **Environments (24 measurements):**
     - the reference host (macOS x86_64, i9-9880H): every class 0;
     - GitHub `ubuntu-latest` on eight hosts: EPYC 7763 twice, Xeon Platinum twice, EPYC 9V74 twice, EPYC 9V45, and one more EPYC 9V74;
     - GitHub `macos-latest` on eight hosts (Apple M1).
 
-    Workflow `reference-snapshot-measure`: tags `refsnap-measure-2` to `-5` against baseline 1, and `-6` to `-9` against baseline 2. The baseline-2 maxima are identical by class, and the new flight-time parts are exact everywhere. Same `uv.lock`: NumPy 2.5.3, SciPy 1.18.1.
+    Workflow `reference-snapshot-measure`: tags `refsnap-measure-2` to `-5` against baseline 1, `-6` to `-9` against baseline 2, and `-10` to `-13` against baseline 3 (7 more hosts). The maxima are identical by class in every set; the flight-time and mark parts are exact everywhere. Same `uv.lock`: NumPy 2.5.3, SciPy 1.18.1.
   - **Rule.** 10 × the largest measured deviation, rounded up to 1-2-5. A continuous class measured 0 everywhere gets 10 ulp of its largest value. Counts are exact. Unused classes are exact, so they fail closed.
   - The factor 10 covers runner hardware not sampled: the AVX-512 hosts alone raised the GMAT-seeded Kepler class 36×. The tolerance size only trades false alarms against sensitivity, because the acceptance guarantee comes from substitution and from the margin check, not from the size of the tolerance. The GMAT comparison tolerance is not used.
 
@@ -570,16 +571,20 @@ All 10 approved rejection codes are exercised.
   - **Tampering:** a tampered, missing or malformed artifact; out-of-tolerance, non-finite, unexpected, missing or changed-kind values; incomplete coverage.
 - **Baseline approval evidence (condition 2; review F53).**
   - The recording run passed the M2 Proof (213 checks and the 2 snapshot checks) and the three GMAT evaluations. That alone is not enough: a corruption present while recording can pass the recording Proof (F53).
-  - `verify-baseline` therefore recomputes **every** record from its pinned inputs and the scenario, with implementations independent of the runtime references. Any uncovered record, or any record that cannot be evaluated, is a failure.
+  - `verify-baseline` checks the candidate as follows (F54–F56):
+    - **Inventory.** It compares the candidate with a **fresh recording** of the reviewed code. Records, counters, entrypoints, part names and shapes must match exactly.
+    - **Inputs.** The input parts (marks, O5 and O6 seeds and flight times, Simpson windows, DR-0017 inputs, O3 start and duration) come from the simulator and the scenario, never from a reference. They must be bit-identical to the fresh recording's.
+    - **Outputs.** Every output part is recomputed from its inputs and the scenario, with implementations independent of the runtime references.
+    - **Coverage.** It is tracked per part. An unverified part, or a record that cannot be evaluated, is a failure.
 
 | Values | Independent recomputation | Limit | Measured agreement |
 |---|---|---|---|
 | Coast segment ends, anchor ticks and ends | universal-variable Kepler (Curtis Alg. 3.3–3.4, written in the tool) | 1e-6 m, 2e-9 m/s | 2.8e-9 m, 3.3e-12 m/s |
 | O5 and O6 Kepler states; GMAT alignment states | the same, from the pinned seed (GMAT arc-start row) | 1e-6 m, 2e-9 m/s | 2.9e-7 m, 4.1e-10 m/s (longest arcs) |
 | Burn segments | ODEPACK LSODA (`odeint`) with its own equations of motion; propellant on the mass law | 1e-5 m, 1e-8 m/s, 1e-9 kg | 6.5e-7 m, 1.1e-9 m/s |
-| Node crossings (reference, GMAT) | z of the independent propagation at the crossing, ascending | 1e-5 m | 2.2e-8 m |
+| Node crossings (reference, GMAT) | independently **enumerated** over the marks (GMAT rows): count, order, powered intervals, times by bisection on the independent Kepler | 1e-6 s | exact |
 | Initial state | `tars.astro.elements` (not the validator's formula) | 1e-12 relative | exact |
-| Predicted burns, Simpson and DR-0017 bounds, O6 Δv and SMA, O9 expected mass, epoch, schedule, tick grids and bounds | re-derived from the scenario | exact or 1e-12 relative | exact |
+| Predicted burns, Simpson and DR-0017 bounds, O6 Δv and SMA, O9 expected mass, epoch, arcs with steps, row labels, tick grids, and segment bounds from the marks | re-derived from the scenario | exact or 1e-12 relative | exact |
 | O3 closed form | 40-digit decimal in a separate form | 1e-12 relative | ≤ 1e-15 |
 
   - DOP853 against the committed GMAT rows: at most 4.66e-6 m and 5.39e-9 m/s (O9 gates 3e-5 m, 3.5e-8 m/s). Coast energy is conserved to 1e-11, and the extrema equal the pinned ticks' extrema.

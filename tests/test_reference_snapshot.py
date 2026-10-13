@@ -821,3 +821,57 @@ def test_baseline_verification_rejects_a_wrong_o3_case(baseline):
             _set(rec, "duration_s", [100.0])
     problems = _verify(data)
     assert any("duration" in p or "input differs" in p for p in problems)
+
+
+def test_ledger_loss_is_reported_at_pin_and_at_finish_independently():
+    """F57, each fail-closed point on its own: a pin without the ledger is a problem
+    immediately, and a session that finishes without it is one even with no pins."""
+    with snap.session("m2_proof") as s:
+        s.approved = None
+        snap.pin("x", "ref", a_m=[1.0])
+        assert any("no authenticated reference ledger" in p for p in s.problems)
+    with snap.session("m2_proof") as s:
+        s.approved = None
+    assert any("session finished without it" in p for p in s.finish(complete=False))
+
+
+def test_inventory_rejects_an_extra_record_that_would_verify(baseline):
+    """F54: a duplicated, otherwise valid record (it passes its value check) is
+    rejected by the inventory alone."""
+    data = _copy(baseline)
+    key = next(k for k in data["records"] if "/o9.epoch_anchor#" in k)
+    data["records"][key.replace("#0", "#1")] = json.loads(json.dumps(data["records"][key]))
+    problems = _verify(data)
+    assert any("unexpected records" in p for p in problems)
+    assert not any("epoch anchor differs" in p for p in problems)
+
+
+def test_coverage_rejects_a_part_no_check_verifies(baseline):
+    """F54 backstop: a part present in the candidate AND the inventory that no check
+    knows is reported as unverified."""
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    data, expected = _copy(baseline), _copy({"records": _FRESH["records"]})["records"]
+    key = next(k for k in data["records"] if "/o9.epoch_anchor#" in k)
+    for recs in (data["records"], expected):
+        recs[key]["parts"]["spare_1"] = {"shape": [1], "values": [0.0]}
+    problems = tool.verify_baseline(data, expected=expected)
+    assert any("not independently verified" in p and "spare_1" in p for p in problems)
+
+
+def test_crossing_count_is_checked_on_its_own(baseline):
+    """F55: dropping the last crossing keeps the remaining times correct and ordered;
+    only the independent count rejects it."""
+    data = _copy(baseline)
+    key = next(
+        k
+        for k, r in data["records"].items()
+        if "/orbit.node_crossings#" in k and len(r["parts"]["crossings_s"]["values"]) > 1
+    )
+    part = data["records"][key]["parts"]["crossings_s"]
+    part["values"], part["shape"] = part["values"][:-1], [len(part["values"]) - 1]
+    exp = _copy({"records": _FRESH["records"]})["records"]
+    exp[key]["parts"]["crossings_s"]["shape"] = part["shape"]
+    exp[key]["parts"]["crossings_s"]["values"] = part["values"]
+    tool = _load(TOOL, "reference_snapshot_tool_v")
+    problems = tool.verify_baseline(data, expected=exp)
+    assert any(key in p and "enumerated independently" in p for p in problems)

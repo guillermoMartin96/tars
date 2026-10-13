@@ -471,5 +471,24 @@ F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an appro
 
 **Re-measurement.** Eight more hosts were measured against baseline 2. The maxima by class are identical, and the new flight-time parts are exact, so `sim s` is 1e-11 s by the zero-measured rule.
 
-## Re-verification 16 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
+## Re-verification 16 (under DR-0019 B, DR-0020 A and DR-0021 A)
+**Reviewer:** Codex, session `01a13291-c7ac-7140-ab84-7c3e8a4e80d5`, at `8cd661d`. **Raw:** `raw/M2-T6-codex-reverify16.md`, `raw/M2-T6-codex-reverify16-scratch/`.
+
+**Verdict: FAIL** (F54–F57).
+- F52 is resolved, and so are F53's reported O6 mechanisms. F50 and F51 are resolved with intact sessions.
+- All nine commands pass (1,076 tests). The 215-check report keeps the 213 earlier records unchanged.
+- Baseline 2's provenance, justification and comparison are verified (920,849 common values bit-identical).
+
+**All four are `ACCEPTED`.** Each mechanism is mutation-tested.
+
+| # | Sev. | Finding | Fix | Tests |
+|---|---|---|---|---|
+| F57 | High | Corrupting `Session.approved` to `None` after authentication silently skipped all comparisons and the coverage check. It restored the F50 reversal and the F51 O6 change while the Proof passed | A verify session without its authenticated ledger (never loaded, or lost after loading) reports `no authenticated reference ledger` on every pin and at finish. Records that were consumed but not compared are problems. `records_verified` counts only compared records | `test_session_without_its_ledger_fails_closed` |
+| F54 | Med | `verify-baseline` checked coverage of the supplied records only. It approved changed arc steps, a powered count of 999, a renamed counter, a bogus entrypoint, removed O5 records and an unknown label | `verify-baseline` compares the candidate with a **fresh recording** of the reviewed code: records, counters, entrypoints, part names and shapes must match exactly. Verification is tracked **per part**, so every part must pass an explicit check. Arcs and steps are re-derived independently | `test_baseline_verification_requires_the_complete_inventory` (6 cases) |
+| F55 | Med | Node verification checked only the supplied roots. It approved duplicated, emptied and removed crossing lists | Crossings and powered intervals are **enumerated independently** over the reference marks: count, order and times, by bisection on the independent Kepler. The marks are now pinned (`dop853.marks`, exact) → **baseline 3** | `test_baseline_verification_enumerates_node_crossings` (3 cases) |
+| F56 | Med | O5 flight times ×10 (states recomputed to match) and an O3 case at 100 s passed | **Input parts** (O5 and O6 seeds and flight times, Simpson windows, DR-0017 inputs, O3 start and duration, marks) must be bit-identical to the fresh recording, where they come from the simulator and the scenario, never from a reference. O3's duration must equal the Proof's | `test_baseline_verification_rejects_wrong_o5_inputs`, `..._a_wrong_o3_case` |
+
+**Baseline 3** (`9d49b60`, generated at `58be803` from a clean tree) adds the 31 marks records; every common value is bit-identical to baseline 2. `verify-baseline` passed at generation and standalone, against a separate fresh recording. The independent crossing enumeration reproduces every pinned crossing exactly.
+
+## Re-verification 17 (final, under DR-0019 B, DR-0020 A and DR-0021 A)
 See below.

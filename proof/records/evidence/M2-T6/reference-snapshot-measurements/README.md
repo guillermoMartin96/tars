@@ -9,3 +9,4 @@ together with the environment.
 - `ci2-*`, `m<run id>-*`: GitHub Actions workflow `reference-snapshot-measure`, tags
   `refsnap-measure-2` to `-5`. Runs 38291386470, 38292229310, 38292231479 and 38292235152.
 - `b2-<run id>-*`: the same against baseline 2 (tags `refsnap-measure-6` to `-9`), runs 38320405875, 38320407537, 38320409961 and 38320411392.
+- `b3-<run id>-*`: the same against baseline 3 (tags `refsnap-measure-10` to `-13`), runs 38450053216, 38450056198, 38450061306 and 38450063228. The macOS job of 38450061306 was cancelled before any step ran (no runner was assigned), so 7 files.
