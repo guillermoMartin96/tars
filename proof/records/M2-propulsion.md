@@ -206,7 +206,7 @@
 - **Measured:** 11 bundles on the DR-0008 matrix at `2870392`: the macOS x86_64 reference host, Linux x86_64 ×5 on four CPU types, and macOS arm64 ×5. Clean trees, identical input digests. VAL-0016; evidence in `proof/records/evidence/M2-T7/`.
 - **Results:**
   - M2 Proof 215/215 on all 11.
-  - Cross-process determinism byte-identical everywhere.
+  - Determinism byte-identical everywhere: cross-process for the four M2 scenario files and M1, and in process for all six missions.
   - Simulator cross-platform drift ≤ 7.2e-6 m (final state).
   - Reference drift is removed from the verdict by the snapshot: zero spread on every O9 reference metric.
   - Every margin is ≥ 1.5× (O8 policy) and ≥ 1.9× for truncation-type gates.

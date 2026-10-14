@@ -34,12 +34,12 @@ This DR proposes the final matrix and resolves FU-1. It also covers the O6 margi
 | Contribution | Size | Enters the verdict? |
 |---|---|---|
 | Simulator truncation (RK4, dt = 10 s) | 0.29–0.31 m at 53,700 s; ≤ 8e-3 m at burn boundaries | **Yes: this is what the gates measure** |
-| Reference error (GMAT vs independent DOP853) | ≤ 4.7e-6 m | Yes, as measurement uncertainty |
-| Reference platform drift (raw DOP853) | ≤ 8.1e-6 m | **No.** The snapshot removes it; verify-mode deviation ≤ 2.8e-9 m (DR-0021) |
-| Simulator platform drift | ≤ 7.2e-6 m (final state); ≤ 1.1e-5 m (any metric) | Yes, as spread |
+| Reference disagreement: committed GMAT rows vs the approved DOP853 baseline | 4.66e-6 m (Euclidean), platform-independent | It is the residual the O9 reference gates measure. It shows two independent methods are consistent; it does **not** bound either reference's absolute error (review T7-F1) |
+| Reference platform drift (raw DOP853, no substitution) | ≤ 8.62e-6 m Euclidean (8.10e-6 m largest component) | **No.** The snapshot removes it; verify-mode deviation ≤ 2.8e-9 m (DR-0021) |
+| Simulator platform drift | ≤ 7.2e-6 m (final state); ≤ 1.1e-5 m in any metric (O4, O5) | Yes, as spread |
 | Round-off class | ≤ 7.5e-14 relative | Yes |
 
-The measurement uncertainty (≈ 1e-5 m) is more than four orders of magnitude below the simulator error and below every margin. Every margin is at least 1.5× (O8, a policy limit), and every truncation-type margin is at least 1.9×.
+Platform variation of any compared quantity (≤ 1.1e-5 m) and the reference disagreement (4.66e-6 m) are more than four orders of magnitude below the simulator error and below every margin. These describe reproducibility and inter-reference consistency. They do not independently bound the references' absolute error. Every margin is at least 1.5× (O8, a policy limit), and every truncation-type margin is at least 1.9×.
 
 ## Proposed final matrix
 **Recommendation:** approve every current value unchanged, with the status changed from provisional to approved. Each rationale says why no change is proposed and what tightening or relaxing would do.
@@ -75,7 +75,7 @@ The measurement uncertainty (≈ 1e-5 m) is more than four orders of magnitude b
 | Orbit events: min / max altitude error (m) | 0.013 | 6.3e-3 / 4.3e-3 | ≤ 2.4e-7 | TR | **0.013** | 2.1× / 3.0× | About 2× measured |
 | O9 ours vs GMAT: sample / final position (m) | 0.6 | 0.313 | 7.2e-6 | TR | **0.6** | 1.9× | Equal to O4; the difference is our RK4 error, since ours-vs-GMAT equals ours-vs-DOP853 |
 | O9 ours vs GMAT: sample / final velocity (m/s) | 7e-4 | 3.6e-4 | 8.4e-9 | TR | **7e-4** | 1.9× | As above |
-| O9 ours vs GMAT: burn boundaries, position / velocity | 2e-3 m / 3e-6 m/s (invalid-commands 1.6e-2 / 2e-5) | 7.8e-4 / 1.24e-6 (8.0e-3 / 1.0e-5) | ≤ 9.4e-12 | TR | **unchanged** | ≥ 2.0× | Equal to the O4 boundary limits |
+| O9 ours vs GMAT: burn boundaries, position / velocity | 2e-3 m / 3e-6 m/s (invalid-commands 1.6e-2 / 2e-5) | 7.8e-4 / 1.24e-6 (8.0e-3 / 1.0e-5) | position 5.2e-10 m (invalid-commands 6.4e-9 m); velocity ≤ 9.4e-12 m/s | TR | **unchanged** | ≥ 2.0× | Equal to the O4 boundary limits |
 | O9 ours vs GMAT: node crossing (s) | 8e-5 | 4.0e-5 | 7.9e-10 | TR | **8e-5** | 2.0× | As for orbit events |
 | O9 ours vs GMAT: mass (kg) | 1.3e-9 | 2.3e-11 | 0 | RO | **1.3e-9** | 58× | O1 round-off class (1e-12 × 1,300 kg) |
 
@@ -102,34 +102,38 @@ The measurement uncertainty (≈ 1e-5 m) is more than four orders of magnitude b
 
 ## FU-1 — the GMAT gates and the DOP853 platform floor
 **Finding.** FU-1 required "no gate tighter than [the 11–15 µm DOP853 cross-platform floor] unless the reference is made platform-robust". T7 shows:
-- The raw DOP853 reference still drifts by **8.1e-6 m** between platforms (record mode). That is the floor, re-measured.
+- The raw DOP853 reference still drifts by **8.62e-6 m** (Euclidean; 8.10e-6 m largest component) between platforms in record mode. That is the floor, re-measured.
 - Since DR-0021, **the Proof never consumes the raw reference.** It consumes the approved snapshot values, once the runtime agrees within 5e-8 m. As a result, every O9 GMAT-vs-reference metric has **exactly zero cross-platform spread** on all 11 bundles. For the verdict, the reference is platform-robust.
-- The measured 4.66e-6 m is a real, platform-independent difference between two independent references, GMAT's integrator and DOP853. It is not noise.
+- The measured 4.66e-6 m is the disagreement between the committed GMAT rows and the **approved DOP853 baseline**. It is platform-independent because both sides are pinned. The snapshot freezes the baseline's numerical error together with its values, so zero spread shows reproducibility, not reference accuracy. Agreement between two numerical references does not bound either one's absolute error (review T7-F1).
 
 **Options.**
-- **(a) Keep 3e-5 m / 3.5e-8 m/s (recommended).** That is about 2× the worst plausible value if the snapshot were ever re-baselined on another host: 4.66 µm plus 8.1 µm of reference drift ≈ 12.8 µm, doubled ≈ 2.6e-5 m, rounded to 3e-5. The O9 gate then does not depend on which host generated the baseline, and still catches any GMAT or reference change above about 25 µm, roughly 0.01 % of the 0.31 m simulator error.
+- **(a) Keep 3e-5 m / 3.5e-8 m/s (recommended).**
+  - It is about 2× the worst plausible residual if the snapshot were ever re-baselined on another host: 4.66 µm plus 8.62 µm of Euclidean reference drift ≈ 13.3 µm, doubled ≈ 2.66e-5 m, rounded to 3e-5 (review T7-F2). The gate then does not depend on which host generated the baseline.
+  - **Detection.** By the reverse triangle inequality, it is guaranteed to catch any GMAT or reference change whose norm exceeds 30 + 4.66 ≈ **34.7 µm**. A change in a favourable direction is caught from about 25.3 µm (review T7-F3). Both are about 0.01 % of the 0.31 m simulator error.
 - **(b) Tighten to 1e-5 m / 1.2e-8 m/s** (about 2× measured, permitted because the reference is now platform-robust).
-  - It detects GMAT or reference changes above about 5 µm.
-  - It couples the gate to the snapshot host: a future baseline generated on a non-reference host could fail at about 12.8 µm without any physical change.
+  - It is guaranteed to catch changes above **14.7 µm**, and catches a change in a favourable direction from about 5.3 µm (review T7-F3).
+  - It couples the gate to the snapshot host: a future baseline generated on a non-reference host could fail at about 13.3 µm without any physical change.
 - **(c) Relax.** Not recommended: there is no measured need, and it would hide GMAT configuration errors.
 
 **Recommendation: (a)**, and close FU-1 as resolved. The floor is accounted for, the gate stays above it, and the snapshot makes the verdict platform-independent.
 
 ## O6 — the 0.0405 snapshot margin bound
 **Finding.**
-- The 0.0405 figure is not a measured error. It is DR-0021's worst-case bound: the most the O6 metric could move if each impulsive SMA shifted by the whole simulator-seeded length tolerance (1e-5 m).
+- The 0.0405 figure is not a measured error. It is the largest **measured deviation plus DR-0021's worst-case shift**, the most the O6 metric could move if each impulsive SMA shifted by the whole simulator-seeded length tolerance (1e-5 m). Per mission, worst over the 11 bundles (macOS arm64) (review T7-F4):
+  - prograde: 0.004102 + 0.035602 = **0.039703**;
+  - retrograde: 0.003851 + 0.036642 = **0.040493**, the maximum combined bound.
 - O6 is very sensitive to that shift. It is an order computed from finite-minus-impulsive SMA differences that shrink to 0.5 mm at the finest level, so a shift δ moves the order by about δ(1/d₃ + 1/d₄)/ln 2.
 - The 1e-5 m class tolerance is sized for O5's long Kepler arcs (5.4e-7 m measured).
 - The impulsive SMA's own cross-platform variation is **1.86e-9 m**, about 5,000× smaller.
 
 **Effect on the decision.**
-- With the limit at 0.05 (proposed unchanged), the margin check passes: 0.0041 + 0.0366 = 0.0405 < 0.05.
+- With the limit at 0.05 (proposed unchanged), the margin check passes for both missions; the largest combined bound is 0.040493 < 0.05.
 - The bound only matters if the O6 limit is tightened below about 0.041.
 - The measured O6 cross-platform spread is 3.8e-7.
 
 **Options.**
 - **(a) No change (recommended for this DR).** The 0.05 limit is the DR-0015 candidate and passes with its margin bound.
-- **(b) A dedicated O6 impulsive-SMA reproducibility class, approved separately.** Apply the DR-0021 rule (the 1-2-5 step at or above max(10 × 1.86e-9, 10 ulp of 6.8e6 m)), giving **2e-8 m**. The O6 margin bound becomes 0.0041 + 0.00007 ≈ 0.0042.
+- **(b) A dedicated O6 impulsive-SMA reproducibility class, approved separately.** Apply the DR-0021 rule (the 1-2-5 step at or above max(10 × 1.86e-9, 10 ulp of 6.8e6 m)), giving **2e-8 m**. The combined bound becomes 0.004102 + 0.000071 = 0.004172 (prograde) and 0.003851 + 0.000073 = 0.003923 (retrograde).
   - It needs a snapshot schema change (a distinct unit or class for the SMA part), so it means **a new baseline (baseline 4)** with independent verification and its own approval under DR-0021 condition 3.
   - It is justified on measurement grounds, but it is not needed unless the O6 limit is tightened.
 

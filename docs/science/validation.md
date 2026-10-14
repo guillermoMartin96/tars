@@ -561,7 +561,7 @@ All 10 approved rejection codes are exercised.
 
 - **Margins for the sim-seeded gates (baseline report).**
   - **O5:** 0.314 m against a 0.6 m limit (shift bound √3 × 1e-5 = 1.7e-5 m); 3.6e-4 m/s against 7e-4 m/s (shift bound 1.7e-8 m/s).
-  - **O6 order deviation:** 0.0041 + 0.0366 = 0.0405 against 0.05 (prograde); 0.0039 + 0.0366 = 0.0405 (retrograde).
+  - **O6 order deviation**, per mission: prograde 0.0041 + 0.0356 = 0.0397, retrograde 0.0039 + 0.0366 = 0.0405, against 0.05. Corrected in T7 (review T7-F4); the T7 worst over 11 bundles is 0.039703 and 0.040493.
   - **O6 slice ratio:** 2.6e-6 + 2.0e-10 against 1e-5.
   - The O6 order bound is conservative, because the sim length tolerance is set by O5's long Kepler arcs. If T7 tightens that O6 limit below about 0.041, the impulsive SMA needs its own measured class.
 - **Detection (regression tests, `tests/test_reference_snapshot.py`).**
@@ -610,7 +610,7 @@ All 10 approved rejection codes are exercised.
 - **Method.** `toolbox/scripts/m2_t7_measure.py collect` runs on each platform and records:
   - the environment, with digests of every input and output and the exact commands;
   - the full M2 Proof, verified against the reference snapshot;
-  - cross-process determinism of all six M2 scenario files and M1;
+  - cross-process determinism of the four M2 scenario files and of M1 (the Proof also replays all six missions in process);
   - every mission's final state;
   - M1 cross-platform agreement;
   - reference variation, measured two ways: verify mode (`measure-deviation`) and record mode (raw values, no substitution).
@@ -624,18 +624,22 @@ All 10 approved rejection codes are exercised.
   All use Python 3.12, NumPy 2.5.3 and SciPy 1.18.1 from the same `uv.lock`.
 - **Results:**
   - **Proof:** the M2 Proof passes 215/215 on all 11.
-  - **Determinism:** cross-process determinism is byte-identical for every M2 scenario and for M1 on all 11.
+  - **Determinism:** byte-identical on all 11: cross-process for the four M2 scenario files and M1, and in process for all six missions, including the two generated variants (review T7-F6).
   - **M1:** cross-platform |Δr| is at most 2.9e-6 m (unchanged, within the approved 1e-4 m).
   - **Simulator, cross-platform:** M2 final states drift by at most 7.2e-6 m and 8.4e-9 m/s (prograde slice). Coast-only missions drift 2.9e-6 m, so the burn amplifies the drift about 2.5×. Event logs are not bit-identical across platforms, as DR-0006 expects.
-  - **Gated metrics:** the largest cross-platform spread of any check is 1.1e-5 m (O4, O5 and simulator-vs-GMAT at 53,700 s). The O8 order spread is 1e-3. Every O9 GMAT-vs-reference metric, every round-off metric and every scenario-only metric has zero spread.
-  - **Reference variation, record mode** (raw DOP853, no substitution): up to 8.1e-6 m and 9.9e-9 m/s, which is the FU-1 floor re-measured. Kepler from GMAT rows: 2.0e-7 m. Node crossings: 8.5e-10 s.
+  - **Gated metrics** (review T7-F5):
+    - largest cross-platform spread of any check: 1.1e-5 m (O4 and O5 at 53,700 s); simulator vs GMAT 7.2e-6 m;
+    - O8 order spread: 1e-3;
+    - every O9 GMAT-vs-reference metric and every scenario-only metric: zero spread;
+    - round-off-class metrics: at most 3.3e-16.
+  - **Reference variation, record mode** (raw DOP853, no substitution): up to 8.62e-6 m and 1.01e-8 m/s as vector norms (largest components 8.10e-6 m and 9.9e-9 m/s), which is the FU-1 floor re-measured. Kepler from GMAT rows: 2.1e-7 m. Node crossings: 8.5e-10 s.
   - **Reference variation, verify mode** (with substitution, as the Proof runs): reference values 2.8e-9 m and 4.1e-12 m/s; GMAT-seeded 2.0e-7 m; simulator-seeded 5.4e-7 m. All within the DR-0021 tolerances.
   - **O6 impulsive SMA:** cross-platform variation 1.9e-9 m.
 - **Error attribution:**
   - **Simulator integration error** (RK4, dt = 10 s): 0.29–0.31 m at 53,700 s; ≤ 8e-3 m at burn boundaries; O8 orders 4.14–4.33.
-  - **Reference uncertainty:** GMAT and the independent DOP853 agree to 4.7e-6 m. The reference's platform drift (8.1e-6 m) is removed from the verdict by the snapshot (≤ 5e-8 m in verify mode).
+  - **Reference disagreement:** the committed GMAT rows and the approved DOP853 baseline differ by 4.66e-6 m. That shows two independent methods are consistent; it does not bound either one's absolute error (review T7-F1). The reference's platform drift (8.62e-6 m) is removed from the verdict by the snapshot (≤ 5e-8 m in verify mode).
   - **Simulator platform drift:** ≤ 1.1e-5 m in any metric.
   - **Round-off-class metrics:** ≤ 7.5e-14 relative.
 
-  The measurement uncertainty (≈ 1e-5 m) is more than four orders of magnitude below the simulator error (0.31 m) and below every margin.
+  Platform variation of compared quantities (≤ 1.1e-5 m) and the reference disagreement (4.66e-6 m) are more than four orders of magnitude below the simulator error (0.31 m) and below every margin. They describe reproducibility and consistency, not the references' absolute accuracy.
 - **Status:** a measurement, not approval. The threshold matrix and the recommendations are in DR-0023. No threshold, reference value or tolerance was changed.

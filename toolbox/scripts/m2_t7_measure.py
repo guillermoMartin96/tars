@@ -241,8 +241,9 @@ def final_drift(bundles: list[dict[str, Any]], ref: dict[str, Any]) -> dict[str,
 
 
 def record_drift(bundles: list[dict[str, Any]], ref: dict[str, Any]) -> dict[str, Any]:
-    """Raw reference values (no substitution) against the reference host: by class and
-    by label; the O6 impulsive SMA is reported on its own (O6 investigation)."""
+    """Raw reference values (no substitution) against the reference host: the largest
+    absolute COMPONENT difference by class and by label, and, for 3-vectors, the largest
+    Euclidean difference (review T7-F2). The O6 impulsive SMA appears by label."""
     sys.path.insert(0, str(REPO_ROOT / "src"))
     from tars.validation import reference_snapshot as snap
 
@@ -254,14 +255,21 @@ def record_drift(bundles: list[dict[str, Any]], ref: dict[str, Any]) -> dict[str
         rec = snap.read_json(b["dir"] / "record.json.gz")["records"]
         by_class: dict[str, float] = defaultdict(float)
         by_label: dict[str, float] = defaultdict(float)
+        # Euclidean drift of 3-vectors (positions, velocities), next to the coordinate
+        # maxima, so vector-norm gates are compared with vector norms (review T7-F2).
+        norm_class: dict[str, float] = defaultdict(float)
+        norm_label: dict[str, float] = defaultdict(float)
         for key, r in rec.items():
             g = base.get(key)
             if g is None:
                 continue
             label = key.rpartition("#")[0].rpartition("/")[2]
             for name, part in r["parts"].items():
-                a = np.asarray(part["values"], float)
-                c = np.asarray(g["parts"][name]["values"], float)
+                # Values are stored flattened: restore the stored shape, so (n, 3)
+                # arrays are compared row by row.
+                a = np.asarray(part["values"], float).reshape(part["shape"])
+                gp = g["parts"][name]
+                c = np.asarray(gp["values"], float).reshape(gp["shape"])
                 if a.shape != c.shape or not a.size:
                     continue
                 d = float(np.max(np.abs(a - c)))
@@ -269,8 +277,17 @@ def record_drift(bundles: list[dict[str, Any]], ref: dict[str, Any]) -> dict[str
                     by_class[f"{r['seed']}:{snap.unit_of(name)}"], d
                 )
                 by_label[f"{label}.{name}"] = max(by_label[f"{label}.{name}"], d)
-        out[b["label"]] = {"by_class": dict(sorted(by_class.items())),
-                           "by_label": dict(sorted(by_label.items()))}  # fmt: skip
+                if a.shape[-1] == 3 and snap.unit_of(name) in ("m", "mps"):
+                    n = float(np.max(np.linalg.norm((a - c).reshape(-1, 3), axis=1)))
+                    cls = f"{r['seed']}:{snap.unit_of(name)}"
+                    norm_class[cls] = max(norm_class[cls], n)
+                    norm_label[f"{label}.{name}"] = max(norm_label[f"{label}.{name}"], n)
+        out[b["label"]] = {
+            "max_abs_component_by_class": dict(sorted(by_class.items())),
+            "max_abs_component_by_label": dict(sorted(by_label.items())),
+            "max_vector_norm_by_class": dict(sorted(norm_class.items())),
+            "max_vector_norm_by_label": dict(sorted(norm_label.items())),
+        }
     return out
 
 
