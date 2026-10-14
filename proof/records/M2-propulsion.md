@@ -215,6 +215,7 @@
   - FU-1: keep the O9 GMAT gates and close FU-1.
   - O6: no change (a dedicated SMA class only with a future tightening).
   - Add an M2 cross-platform final-state gate at the M1 bounds (proposed, not implemented).
+- **Independent review:** `docs/reviews/M2-T7-review-01.md`. Round 1 was REQUEST_CHANGES (T7-F1 to F6, all accepted and corrected, no proposed value changed); round 2 was an **unconditional PASS** (session `01a1380d-c632-74f0-aa96-0fe350a30cbe`). CI is green (run 38496630761).
 - **Not changed:** thresholds, reference values, snapshot tolerances and checks. `m2.json` stays provisional until DR-0023 is approved. T8 is not started, and PR #3 is not merged.
 
 ## REV-012 — resolved

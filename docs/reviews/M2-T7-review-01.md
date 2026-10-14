@@ -29,4 +29,14 @@ The findings concern the stated rationale and some reported figures.
 `analysis.json` was regenerated with the corrected analyzer, from the same 11 bundles.
 
 ## Round 2
-See below.
+**Reviewer:** Codex, session `01a1380d-c632-74f0-aa96-0fe350a30cbe`, at `8fe709f`. **Raw:** `raw/M2-T7-codex-review02.md`.
+
+**Verdict: PASS (unconditional; no new findings).**
+- T7-F1 to T7-F6 are resolved. The corrected figures match the evidence: Euclidean reference drift 8.619305 µm, the detection bounds, the spreads and the determinism coverage.
+- The analyzer's restored shapes and vector norms are correct.
+- Independently recomputed: the worst cases, spreads, margins, final-state drift, reference variation and O6 bounds (maximum combined bound 0.040492872 < 0.05). The regenerated `analysis.json` matches the committed file.
+- Digests and provenance match the DR-0008 matrix with no substitution. Reference reproducibility is distinguished from accuracy. The FU-1, O6 and unchanged-threshold proposals are supported.
+- Nothing in scope changed: `m2.json` stays provisional and no T8 work appears.
+- 1,101 tests, Ruff, the M2 Proof (215/215), the M1 Proof and the GMAT comparison all pass.
+
+**T7 review closed: PASS.** CI is green on Ubuntu and macOS (run 38496630761). **T7 now stops at the DR-0023 threshold decision gate.**
