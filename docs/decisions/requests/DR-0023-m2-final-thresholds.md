@@ -1,6 +1,6 @@
 # Decision Request: M2 final acceptance thresholds (T7 threshold DR; DR-0015, FU-1)
 
-**Status:** OPEN — awaiting the Tech Lead's decision  
+**Status:** APPROVED — items 1–4 as recommended, with conditions (Tech Lead, 2026-10-14)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-13  
 **Related milestone/issue:** M2 T7. DR-0015 (threshold method), DR-0008 (M1 precedent), FU-1, DR-0021 (reference snapshot). Evidence: VAL-0016, `proof/records/evidence/M2-T7/`.
@@ -174,3 +174,43 @@ Implementing it means a new validator, committed golden M2 final states from the
 
 ## Requested response
 Items 1–4: approve, amend or `discuss`.
+
+## Resolution
+**Decision:** APPROVED, with conditions (Tech Lead, 2026-10-14).
+
+1. **Threshold finalization: approved.** Every existing M2 value is finalized unchanged. `m2.json` and its approved digest are updated in the same reviewed commit. No numerical threshold, reference value, tolerance, scenario or existing acceptance check is altered.
+2. **FU-1: approved for closure.** The O9 GMAT-vs-DOP853 thresholds stay at 3e-5 m and 3.5e-8 m/s. The record documents:
+   - the pinned-snapshot rationale;
+   - host dependence;
+   - the noise-floor measurements;
+   - the actual detection guarantees.
+
+   It does not claim that these thresholds establish absolute physical accuracy.
+3. **O6: no change.** The O6 tolerance and limit stay as they are. The dedicated SMA tolerance class is recorded as a future improvement that needs separate approval and a reviewed snapshot baseline.
+4. **Cross-platform final-state gate: approved for implementation**, with position difference ≤ 1e-4 m and velocity difference ≤ 1e-7 m/s.
+
+**Implementation requirements (recorded in substance):**
+- The gate compares identical canonical mission inputs at the same pinned revision.
+- It requires macOS x86_64, Linux x86_64 and macOS arm64.
+- Position and velocity differences are Euclidean.
+- It validates provenance, input digests, platform identity, completeness and revision consistency.
+- It fails closed when evidence is missing, corrupted, inconsistent or stale.
+- Tests cover threshold boundaries, deliberate perturbations, missing platforms, mismatched inputs and malformed evidence.
+- The validator is a required CI acceptance gate.
+- Evidence is retained or archived beyond the 90-day CI artifact expiry.
+- All existing M1 and M2 acceptance criteria are preserved.
+
+**Verification requirements:**
+- The full test suite, Ruff, the M1 Proof, the M2 Proof and the GMAT comparisons pass.
+- The new validator passes against all three required platforms.
+- The M1 golden hash is unchanged.
+- No previously passing acceptance check is weakened, bypassed or removed.
+- Codex returns an unconditional PASS.
+- CI jobs complete successfully on every required platform.
+
+On REQUEST_CHANGES, the findings are corrected within the approved scope. A finding whose resolution would change an approved threshold, reference baseline, tolerance, acceptance contract or scope goes back to the Tech Lead.
+
+**Boundaries:** draft PR #3 stays open and unmerged. T8 is not started, and M2 is not declared complete.
+
+**Applied:** see "Implementation" below and VAL-0017.
+

@@ -1,7 +1,8 @@
 # CI (DR-0007, DR-0009): lint, tests, determinism, cross-platform agreement, every M1
 # Proof check, the comparison against the committed GMAT reference, and the M2 Proof
-# checks O1-O8 (T5; thresholds provisional until T7). GMAT itself is never installed or
-# run in CI.
+# (O1-O9, approved thresholds, DR-0023). GMAT itself is never installed or run in CI.
+# The m2-cross-platform job is the DR-0023 three-platform final-state gate: it compares
+# the evidence that the three required platforms (DR-0008 matrix) produced in THIS run.
 name: ci
 
 on:
@@ -16,8 +17,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Two platforms measure the cross-platform agreement required by DR-0006.
-        os: [ubuntu-latest, macos-latest]
+        # The DR-0008 platform matrix (DR-0023 decision 4): Linux x86_64, macOS arm64,
+        # macOS x86_64 (a GitHub Intel runner; the reference host itself enters through
+        # the committed golden record, proof/references/m2_final_states.json).
+        os: [ubuntu-latest, macos-latest, macos-15-intel]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -28,6 +31,17 @@ jobs:
 
       - name: Install locked environment
         run: uv sync --locked
+
+      # First, from the clean checkout: the record must show a clean tree (DR-0023).
+      - name: M2 cross-platform evidence (every canonical mission, this platform)
+        run: uv run python toolbox/validators/m2_cross_platform.py collect --out runs/xp/${{ matrix.os }}.json
+
+      - name: Upload M2 cross-platform evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: m2-xp-${{ matrix.os }}
+          path: runs/xp/${{ matrix.os }}.json
+          if-no-files-found: error
 
       - name: Lint
         run: |
@@ -59,7 +73,7 @@ jobs:
       - name: M2 GMAT reference comparison (committed artifacts only; GMAT not installed)
         run: uv run python toolbox/scripts/gmat_m2.py compare
 
-      - name: M2 Proof (O1-O9 and contract checks; thresholds provisional)
+      - name: M2 Proof (O1-O9, contract checks, golden cross-platform; approved thresholds)
         run: uv run python toolbox/validators/m2_proof.py --out runs/proof/m2_${{ matrix.os }}.json
 
       - name: Upload Proof report
@@ -68,3 +82,44 @@ jobs:
         with:
           name: proof-${{ matrix.os }}
           path: runs/proof/
+
+  m2-cross-platform:
+    # Runs even when a platform's check job failed, so missing evidence is reported as a
+    # gate failure; it never passes without all three platforms' evidence from this run.
+    needs: check
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --locked
+
+      - name: Download every platform's evidence from this run
+        uses: actions/download-artifact@v4
+        with:
+          pattern: m2-xp-*
+          path: runs/xp-in
+          merge-multiple: true
+
+      # The three files are named explicitly: a missing one is unreadable evidence and
+      # fails the gate (fail closed).
+      - name: M2 three-platform final-state gate (DR-0023 decision 4)
+        run: >-
+          uv run python toolbox/validators/m2_cross_platform.py gate
+          runs/xp-in/macos-15-intel.json runs/xp-in/ubuntu-latest.json runs/xp-in/macos-latest.json
+          --revision "${{ github.sha }}" --run-id "${{ github.run_id }}"
+          --report runs/proof/m2_cross_platform.json
+
+      - name: Upload gate report and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m2-cross-platform-gate
+          path: |
+            runs/proof/
+            runs/xp-in/

@@ -468,12 +468,16 @@ def test_rk4_converges_at_fourth_order_through_the_burn():
 # ------------------------------------------------------------------ thresholds
 
 
-def test_m2_thresholds_are_provisional_and_scoped():
+def test_m2_thresholds_are_approved_and_scoped():
     names = frozenset(m.name for m in MISSIONS)
     thresholds = load_scoped_thresholds(missions=names)
-    assert thresholds.status == "provisional"
+    assert thresholds.status == "approved"
     data = json.loads(M2_THRESHOLDS.read_text())
-    assert data["approved_by"] is None and "NOT APPROVED" in data["basis"]
+    assert data["approved_by"] == "Guillermo (Tech Lead)" and "DR-0023" in data["basis"]
+    # DR-0023 decision 4: the approved M1 bounds, scope "all".
+    assert data["limits"]["cross_platform"] == {
+        "all": {"final_position_difference_m": 1e-4, "final_velocity_difference_mps": 1e-7}
+    }
     merged = thresholds.for_validator("o4_reference", "m2_invalid_commands")
     assert merged["cutoff_position_error_max_m"] == 0.016
     assert merged["final_position_error_m"] == 0.6  # from "all"
@@ -526,7 +530,7 @@ def test_m2_proof_cli_quick_passes(tmp_path):
     out = tmp_path / "m2.json"
     assert module.main(["--quick", "--out", str(out)]) == 0
     report = json.loads(out.read_text())
-    assert report["passed"] and report["threshold_status"] == "provisional" and report["quick"]
+    assert report["passed"] and report["threshold_status"] == "approved" and report["quick"]
     assert {r["validator"].split("[")[0] for r in report["results"]} >= {
         "event_order", "traceability", "outcomes", "accounting", "determinism",
         "rejections_change_nothing", "o1_mass_law", "o2_rocket_equation", "o3_free_space",

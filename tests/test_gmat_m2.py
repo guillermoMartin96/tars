@@ -910,7 +910,7 @@ def test_committed_thresholds_load():
     from tars.validation.thresholds import load_scoped_thresholds, load_thresholds
 
     assert load_thresholds().status == "approved"
-    assert load_scoped_thresholds(missions=frozenset(BY_NAME)).status == "provisional"
+    assert load_scoped_thresholds(missions=frozenset(BY_NAME)).status == "approved"
 
 
 # ------------------------------------------------------------------ re-verification 3 fixes

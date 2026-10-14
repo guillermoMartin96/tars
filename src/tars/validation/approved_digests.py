@@ -17,9 +17,9 @@ T7 changes to m2.json (``shasum -a 256 <file>``).
 APPROVED_THRESHOLD_SHA256 = {
     # proof/thresholds/m1.json: approved by the Tech Lead 2026-10-05 (DR-0008, DR-0009).
     "m1": "446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d",
-    # proof/thresholds/m2.json: PROVISIONAL (T5/T6); the pin authenticates the reviewed
-    # content, it does not approve the values (T7 threshold DR).
-    "m2": "5c096963d8c5099a16f19bdb2dfb8860a0b6d4ef289838fd7f48972bedf8dcb3",
+    # proof/thresholds/m2.json: approved by the Tech Lead 2026-10-14 (DR-0023): T5/T6
+    # values finalized unchanged, plus the cross_platform group (decision 4).
+    "m2": "9d4eab47133a4f9eb1125cf7242ada0c720fbe9e4b8dd12b0f698cc79e5f0ce9",
 }
 
 # toolbox/references/gmat/m2/APPROVED_DIGESTS.json: reference digests and the
@@ -35,3 +35,8 @@ APPROVED_GMAT_M2_MANIFEST_SHA256 = (
 APPROVED_REFERENCE_SNAPSHOT_SHA256 = (
     "a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b"
 )
+
+# proof/references/m2_final_states.json: the reference-host golden M2 final states
+# (DR-0023 decision 4; macOS x86_64 reference host, DR-0008). A new golden needs the
+# record, a justification and a comparison with the previous one in a reviewed commit.
+APPROVED_M2_GOLDEN_SHA256 = "0" * 64  # set when the golden record is committed

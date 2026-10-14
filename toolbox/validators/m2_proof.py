@@ -13,8 +13,11 @@ Two kinds of check:
   identities, rejected commands change nothing (control run), in-process determinism,
   DR-0018 observation boundary. Their requirement comes from approved contracts, so
   they report threshold_status "approved", as M1's mission/determinism checks do.
-- **Numerical oracles** O1-O8 against proof/thresholds/m2.json, which is
-  PROVISIONAL until the T7 threshold DR. O9 (GMAT) is T6.
+- **Numerical oracles** O1-O9 against proof/thresholds/m2.json (approved, DR-0023).
+- **Cross-platform agreement** (DR-0023 decision 4): every mission's final state against
+  the committed reference-host golden record (proof/references/m2_final_states.json),
+  as M1 does. The three-platform gate at one revision is
+  toolbox/validators/m2_cross_platform.py (CI job ``m2-cross-platform``).
 
 ``--quick`` skips O6 and O8 (the multi-run studies). It is for local iteration only;
 the Proof report must be produced without it.
@@ -36,6 +39,7 @@ from tars.events.schema import ValidationResult
 from tars.sim.runner import RunResult, run_scenario
 from tars.sim.scenario import ScenarioV2
 from tars.validation import gmat_m2, m2
+from tars.validation import m2_cross_platform as xp
 from tars.validation import reference_snapshot as snap
 from tars.validation.cross_platform import platform_info
 from tars.validation.m2_missions import ACCEPT, MISSIONS, Mission
@@ -113,6 +117,8 @@ class Gates:
         self.missing: list[str] = []
         self.non_finite_report_only: list[str] = []
         self.margins: list[str] = []  # DR-0021 condition 4 (sim-seeded references)
+        # DR-0023 decision 4: the reference-host golden, validated once (fail closed).
+        self.golden: dict[str, Any] | None = None
 
     def check(
         self, group: str, name: str, mission: str, metrics: dict[str, float], notes: str = ""
@@ -174,6 +180,24 @@ def mission_checks(
         _exact(
             f"determinism[{tag}]",
             [] if first == second else [f"in-process replay differs: {first} vs {second}"],
+        )
+    )
+    # Cross-platform agreement with the reference-host golden (DR-0023 decision 4).
+    if gates.golden is None:
+        xp_metrics = {xp.POSITION: math.inf, xp.VELOCITY: math.inf}
+        xp_violations = [f"{tag}: no valid golden record"]
+    else:
+        xp_metrics, xp_violations = xp.compare_with_golden(
+            tag, scenario.config_hash(), run, gates.golden
+        )
+    checks.append(_exact(f"cross_platform_golden[{tag}]", xp_violations))
+    checks.append(
+        gates.check(
+            "cross_platform",
+            f"cross_platform[{tag}]",
+            tag,
+            xp_metrics,
+            f"this platform: {platform_info()}",
         )
     )
     if mission.control_of:
@@ -323,6 +347,13 @@ def main(argv: list[str] | None = None, recorder: snap.Session | None = None) ->
     thresholds = load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS))
     gates = Gates(thresholds)
     checks: list[Check] = []
+    try:
+        golden = xp.load_golden()
+        golden_problems = xp.golden_problems(golden, xp.canonical_inputs())
+    except (OSError, ValueError) as exc:
+        golden, golden_problems = None, [f"golden record unusable: {exc}"]
+    gates.golden = None if golden_problems else golden
+    checks.append(_exact("cross_platform_golden", golden_problems))
     missions: dict[str, Any] = {}
     # DR-0021: every reference value is verified against the approved snapshot.
     with snap.session("m2_proof", recorder) as refs:
