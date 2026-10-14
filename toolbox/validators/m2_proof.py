@@ -117,8 +117,14 @@ class Gates:
         self.missing: list[str] = []
         self.non_finite_report_only: list[str] = []
         self.margins: list[str] = []  # DR-0021 condition 4 (sim-seeded references)
-        # DR-0023 decision 4: the reference-host golden, validated once (fail closed).
-        self.golden: dict[str, Any] | None = None
+        # DR-0023 decision 4: the reference-host golden, validated once; unusable is a
+        # violation and every mission's comparison fails (fail closed).
+        try:
+            golden = xp.load_golden()
+            self.golden_problems = xp.golden_problems(golden, xp.canonical_inputs())
+        except (OSError, ValueError) as exc:
+            golden, self.golden_problems = None, [f"golden record unusable: {exc}"]
+        self.golden: dict[str, Any] | None = None if self.golden_problems else golden
 
     def check(
         self, group: str, name: str, mission: str, metrics: dict[str, float], notes: str = ""
@@ -347,13 +353,7 @@ def main(argv: list[str] | None = None, recorder: snap.Session | None = None) ->
     thresholds = load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS))
     gates = Gates(thresholds)
     checks: list[Check] = []
-    try:
-        golden = xp.load_golden()
-        golden_problems = xp.golden_problems(golden, xp.canonical_inputs())
-    except (OSError, ValueError) as exc:
-        golden, golden_problems = None, [f"golden record unusable: {exc}"]
-    gates.golden = None if golden_problems else golden
-    checks.append(_exact("cross_platform_golden", golden_problems))
+    checks.append(_exact("cross_platform_golden", gates.golden_problems))
     missions: dict[str, Any] = {}
     # DR-0021: every reference value is verified against the approved snapshot.
     with snap.session("m2_proof", recorder) as refs:

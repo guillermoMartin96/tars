@@ -447,3 +447,61 @@ def test_archived_three_platform_evidence_passes_at_its_revision():
     assert result.metrics == pytest.approx(manifest["metrics"], rel=0, abs=0)
     # The golden is the archived reference-host record, byte for byte.
     assert (ARCHIVE / manifest["golden"]).read_bytes() == xp.GOLDEN_M2.read_bytes()
+
+
+# ------------------------------------------------------------------ M2 Proof integration
+
+
+def _proof():
+    spec = importlib.util.spec_from_file_location(
+        "m2_proof_xp", REPO_ROOT / "toolbox" / "validators" / "m2_proof.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _proof_checks(monkeypatch, load):
+    monkeypatch.setattr(xp, "load_golden", load)
+    proof = _proof()
+    names = frozenset(m.name for m in MISSIONS)
+    gates = proof.Gates(load_scoped_thresholds(missions=names))
+    mission = next(m for m in MISSIONS if m.name == "m2_invalid_commands_no_propulsion")
+    checks, _ = proof.mission_checks(mission, gates, quick=True)
+    return gates, {c.validator: c for c in checks}
+
+
+def test_proof_compares_every_mission_with_the_golden(monkeypatch):
+    gates, checks = _proof_checks(monkeypatch, xp.load_golden)
+    assert gates.golden_problems == []
+    tag = "m2_invalid_commands_no_propulsion"
+    assert checks[f"cross_platform_golden[{tag}]"].passed
+    assert checks[f"cross_platform[{tag}]"].passed
+    assert checks[f"cross_platform[{tag}]"].thresholds == LIMITS
+
+
+@pytest.mark.parametrize("failure", ["missing", "digest", "stale", "perturbed"])
+def test_proof_fails_closed_on_an_unusable_or_disagreeing_golden(monkeypatch, failure):
+    good = xp.load_golden()
+    tag = "m2_invalid_commands_no_propulsion"
+
+    def load(path=xp.GOLDEN_M2):
+        if failure == "missing":
+            raise FileNotFoundError(path)
+        if failure == "digest":
+            raise ValueError("not the approved golden record")
+        data = copy.deepcopy(good)
+        if failure == "stale":
+            data["inputs"][tag] = "0" * 64
+        else:
+            data["missions"][tag]["r"][2] += 1.5e-4
+        return sign(data)
+
+    gates, checks = _proof_checks(monkeypatch, load)
+    assert not checks[f"cross_platform[{tag}]"].passed
+    if failure == "perturbed":
+        assert gates.golden_problems == []  # valid record, disagreeing final state
+        assert checks[f"cross_platform[{tag}]"].metrics[xp.POSITION] == pytest.approx(1.5e-4)
+    else:
+        assert gates.golden_problems and gates.golden is None
+        assert not checks[f"cross_platform_golden[{tag}]"].passed
