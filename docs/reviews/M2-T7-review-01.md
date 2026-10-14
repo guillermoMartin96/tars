@@ -64,3 +64,19 @@ On platform coverage, the reviewer found that the GitHub Intel runner satisfies 
 | T7-F7 | High | The gate never cross-checked the declared OS against independent OS provenance. A Linux record relabelled `Darwin`/`macos-x86_64`, with its checksum recomputed, filled the macOS x86_64 slot. The gate passed with no macOS x86_64 evidence. This is bad workflow data, inside the DR-0019 B scope, and it changes an acceptance decision | **ACCEPTED, fixed.** `record_problems` now requires two independent OS signals to agree with the declared platform: (1) `ci.runner_os` (GitHub `Linux`/`macOS`) must map to `platform.system`, and a missing or unknown value fails; (2) `environment.os` (`platform.platform()`) must start with `Linux-`/`macOS-` for the declared system and name the declared machine as a token, so CI-less records are covered too. New regressions cover the reviewer's exact reproduction (archived Linux record relabelled, with and without CI provenance, library and CLI), contradictory or missing runner OS and environment OS (eight cases), and consistent provenance in all four archived records. Mutation check: disabling either new check makes five regressions fail. No threshold, contract or scope change |
 
 **Also fixed (found in CI, not by the reviewer):** `test_proof_fails_closed_on_an_unusable_or_disagreeing_golden[perturbed]` expected exactly 1.5e-4 m. On Linux the run differs from the macOS x86_64 golden by its genuine platform drift, so the value was 1.5068e-4 m. The assertion now allows 1e-5 m (measured drift ≤ 7.3e-6 m). The gate itself was right; only the test was too strict.
+
+## Round 4 — re-verification of T7-F7
+**Reviewer:** Codex, session `01a13c65-4bc4-78f3-8576-450dfc0f1205`, at `f44d181` (git clone). **Raw:** `raw/M2-T7-codex-review04.md`.
+
+**Verdict: PASS (unconditional; no substantive findings). T7-F7 is resolved.**
+
+Verified:
+- **The fix:** the reviewer's original reproduction and three variants all fail closed, in the library and in the CLI. The variants were: CI provenance removed; the runner OS forged to match the fake label; the environment OS forged.
+- **No genuine record is rejected:** all four archived records and a fresh collection on the host are accepted.
+- **Mutation:** disabling either new OS check makes five regressions fail.
+- **The relaxed test still proves its point:** an agreeing golden fails the disagreement regression, and a 1.5e-4 m perturbation fails the unchanged gate.
+- **Full verification:** 1,185 tests pass and Ruff is clean. The M2 Proof passes 228/228, and the 215 earlier checks keep identical metrics and thresholds. Thresholds, references, tolerances, pins, scenarios, workflows and existing checks are unchanged.
+
+**Note (no severity), the residual risk:** a record whose every OS signal is rewritten consistently and whose checksum is recomputed is still accepted. The record format is documented as unauthenticated, under DR-0019 B and DR-0022 B condition 1. CI records are produced and consumed within one workflow run, and the golden is pinned by a reviewed digest.
+
+**Round 3/4 closed: PASS.**
