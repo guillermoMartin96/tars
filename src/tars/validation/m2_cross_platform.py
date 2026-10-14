@@ -59,8 +59,12 @@ REQUIRED_PLATFORMS: dict[str, tuple[str, str]] = {
 }
 GOLDEN_PLATFORM = "macos-x86_64"  # the DR-0008 reference host
 
-# GitHub runner architecture names, cross-checked against platform.machine().
+# GitHub runner architecture and OS names, cross-checked against platform.machine()
+# and platform.system(); platform.platform() prefixes, cross-checked likewise
+# (review T7-F7: a relabelled Linux record must not fill the macOS x86_64 slot).
 _RUNNER_ARCH = {"X64": "x86_64", "ARM64": "arm64"}
+_RUNNER_OS = {"Linux": "Linux", "macOS": "Darwin"}
+_OS_PREFIX = {"Linux": "Linux-", "Darwin": "macOS-"}
 
 _TOP_KEYS = frozenset(
     {"schema", "revision", "tree_clean", "platform", "environment", "ci", "inputs", "missions",
@@ -254,10 +258,15 @@ def record_problems(
             if ci.get("github_sha") != rev:
                 problems.append(f"{label}: CI commit {ci.get('github_sha')} != revision")
             machine = plat.get("machine") if isinstance(plat, dict) else None
+            system = plat.get("system") if isinstance(plat, dict) else None
             if _RUNNER_ARCH.get(str(ci.get("runner_arch"))) != machine:
                 problems.append(
                     f"{label}: runner architecture {ci.get('runner_arch')} does not "
                     f"match machine {machine}"
+                )
+            if _RUNNER_OS.get(str(ci.get("runner_os"))) != system:
+                problems.append(
+                    f"{label}: runner OS {ci.get('runner_os')} does not match system {system}"
                 )
     if run_id is not None and (not isinstance(ci, dict) or ci.get("github_run_id") != run_id):
         problems.append(f"{label}: not produced by CI run {run_id}")
@@ -265,6 +274,21 @@ def record_problems(
     env = record["environment"]
     if not isinstance(env, dict) or not _is_sha256(env.get("uv_lock_sha256")):
         problems.append(f"{label}: environment provenance missing")
+    elif isinstance(plat, dict):
+        # platform.platform(), e.g. "Linux-6.17.0-azure-x86_64-with-glibc2.39" or
+        # "macOS-15.7.9-x86_64-i386-64bit": must name the declared OS and machine.
+        os_name = env.get("os")
+        prefix = _OS_PREFIX.get(str(plat.get("system")))
+        if (
+            not isinstance(os_name, str)
+            or prefix is None
+            or not os_name.startswith(prefix)
+            or str(plat.get("machine")) not in os_name.split("-")
+        ):
+            problems.append(
+                f"{label}: environment OS {os_name!r} contradicts platform "
+                f"{plat.get('system')} {plat.get('machine')}"
+            )
 
     inputs = record["inputs"]
     if inputs != expected_inputs:

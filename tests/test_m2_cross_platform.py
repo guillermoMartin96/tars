@@ -27,6 +27,13 @@ PLATFORMS = {
     "linux-x86_64": ("Linux", "x86_64", "AMD EPYC 7763 64-Core Processor", "X64"),
     "macos-arm64": ("Darwin", "arm64", "Apple M1 (Virtual)", "ARM64"),
 }
+# platform.platform() and GitHub's RUNNER_OS, as the real records carry them.
+OS_NAME = {
+    "macos-x86_64": "macOS-26.2-x86_64-i386-64bit",
+    "linux-x86_64": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "macos-arm64": "macOS-26.6.2-arm64-arm-64bit",
+}
+RUNNER_OS = {"Darwin": "macOS", "Linux": "Linux"}
 LIMITS = load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS)).for_validator(
     "cross_platform"
 )
@@ -42,8 +49,14 @@ def record(pid: str, r=R0, v=V0, run_id: str | None = "42") -> dict:
     system, machine, cpu, arch = PLATFORMS[pid]
     ci = None
     if arch is not None:
-        ci = {"github_run_id": run_id, "github_run_attempt": "1", "github_sha": REV,
-              "github_job": "check", "runner_os": system, "runner_arch": arch}  # fmt: skip
+        ci = {
+            "github_run_id": run_id,
+            "github_run_attempt": "1",
+            "github_sha": REV,
+            "github_job": "check",
+            "runner_os": RUNNER_OS[system],
+            "runner_arch": arch,
+        }
     return sign(
         {
             "schema": xp.SCHEMA,
@@ -56,7 +69,7 @@ def record(pid: str, r=R0, v=V0, run_id: str | None = "42") -> dict:
                 "cpu": cpu,
                 "translated": False,
             },
-            "environment": {"python": "3.12.8", "uv_lock_sha256": LOCK},
+            "environment": {"os": OS_NAME[pid], "python": "3.12.8", "uv_lock_sha256": LOCK},
             "ci": ci,
             "inputs": dict(INPUTS),
             "missions": {
@@ -177,6 +190,7 @@ def test_additional_record_of_a_required_platform_is_compared():
     extra = record("macos-x86_64", r=[R0[0] + 3e-5, R0[1], R0[2]], run_id="42")
     extra["platform"]["cpu"] = "Intel(R) Xeon(R) W-3245 (GitHub macos-15-intel)"
     extra["ci"] = {**record("linux-x86_64")["ci"], "runner_os": "macOS"}
+    extra["environment"]["os"] = "macOS-15.7.9-x86_64-i386-64bit"
     ok, result = verdict([*three(), ("macos-intel-ci", sign(extra))])
     assert ok and result.metrics[xp.POSITION] == pytest.approx(3e-5, rel=1e-4)
 
@@ -397,8 +411,20 @@ def test_golden_with_another_digest_is_rejected(tmp_path):
 @pytest.mark.parametrize(
     ("edit", "message"),
     [
-        (lambda g: g["platform"].update(id="linux-x86_64", system="Linux"), "reference host"),
-        (lambda g: g.update(ci={"github_sha": g["revision"], "runner_arch": "X64"}), "CI record"),
+        # Internally consistent records, so only the golden-specific rule can reject them.
+        (
+            lambda g: (
+                g["platform"].update(id="linux-x86_64", system="Linux"),
+                g["environment"].update(os=OS_NAME["linux-x86_64"]),
+            ),
+            "reference host",
+        ),
+        (
+            lambda g: g.update(
+                ci={"github_sha": g["revision"], "runner_arch": "X64", "runner_os": "macOS"}
+            ),
+            "CI record",
+        ),
         (lambda g: g["inputs"].update(m2_prograde_burn="0" * 64), "stale or mismatched"),
     ],
 )
@@ -501,7 +527,91 @@ def test_proof_fails_closed_on_an_unusable_or_disagreeing_golden(monkeypatch, fa
     assert not checks[f"cross_platform[{tag}]"].passed
     if failure == "perturbed":
         assert gates.golden_problems == []  # valid record, disagreeing final state
-        assert checks[f"cross_platform[{tag}]"].metrics[xp.POSITION] == pytest.approx(1.5e-4)
+        # The perturbation plus this platform's own drift from the reference host
+        # (<= 7.3e-6 m measured, VAL-0017): exact only on macOS x86_64.
+        assert checks[f"cross_platform[{tag}]"].metrics[xp.POSITION] == pytest.approx(
+            1.5e-4, abs=1e-5
+        )
     else:
         assert gates.golden_problems and gates.golden is None
         assert not checks[f"cross_platform_golden[{tag}]"].passed
+
+
+# ------------------------------------------------------------------ review T7-F7
+
+
+def _relabel_as_macos_x86_64(rec: dict) -> dict:
+    """Codex T7-F7: a Linux record relabelled as macOS x86_64, checksum recomputed."""
+    bad = copy.deepcopy(rec)
+    bad["platform"].update(id="macos-x86_64", system="Darwin")
+    return sign(bad)
+
+
+def test_relabelled_linux_record_cannot_fill_the_macos_x86_64_slot():
+    linux = json.loads((ARCHIVE / "ubuntu-latest.json").read_text())
+    arm = json.loads((ARCHIVE / "macos-latest.json").read_text())
+    rev = linux["revision"]
+    records = [("fake", _relabel_as_macos_x86_64(linux)), ("linux", linux), ("arm", arm)]
+    result = xp.gate(records, revision=rev, expected_inputs=INPUTS)
+    assert any("runner OS Linux does not match system Darwin" in v for v in result.violations)
+    assert any("environment OS 'Linux-" in v for v in result.violations)
+    assert math.isinf(result.metrics[xp.POSITION])
+    # Without CI provenance, the environment OS still contradicts the label.
+    stripped = _relabel_as_macos_x86_64(linux)
+    stripped["ci"] = None
+    result = xp.gate(
+        [("fake", sign(stripped)), ("linux", linux), ("arm", arm)],
+        revision=rev,
+        expected_inputs=INPUTS,
+    )
+    assert [v for v in result.violations if v.startswith("fake:")] == [
+        "fake: environment OS 'Linux-6.17.0-1022-azure-x86_64-with-glibc2.39' contradicts "
+        "platform Darwin x86_64"
+    ]
+
+
+def test_relabelled_linux_record_fails_the_cli(tmp_path):
+    linux = json.loads((ARCHIVE / "ubuntu-latest.json").read_text())
+    paths = []
+    for name, rec in (
+        ("fake", _relabel_as_macos_x86_64(linux)),
+        ("linux", linux),
+        ("arm", json.loads((ARCHIVE / "macos-latest.json").read_text())),
+    ):
+        path = tmp_path / f"{name}.json"
+        path.write_text(json.dumps(rec))
+        paths.append(str(path))
+    assert _cli().main(["gate", *paths, "--revision", linux["revision"]]) == 1
+
+
+@pytest.mark.parametrize(
+    ("pid", "edit", "message"),
+    [
+        ("linux-x86_64", lambda r: r["ci"].update(runner_os="macOS"), "runner OS macOS"),
+        ("macos-arm64", lambda r: r["ci"].update(runner_os="Linux"), "runner OS Linux"),
+        ("macos-arm64", lambda r: r["ci"].pop("runner_os"), "runner OS None"),
+        ("macos-arm64", lambda r: r["ci"].update(runner_os="Windows"), "runner OS Windows"),
+        ("macos-x86_64", lambda r: r["environment"].pop("os"), "environment OS None"),
+        ("macos-x86_64", lambda r: r["environment"].update(os="Linux-6.8-x86_64"),
+         "environment OS"),
+        ("macos-arm64", lambda r: r["environment"].update(os="macOS-26.2-x86_64-i386-64bit"),
+         "contradicts platform Darwin arm64"),
+        ("macos-x86_64", lambda r: r["environment"].update(os="macOS-26.6.2-arm64-arm-64bit"),
+         "contradicts platform Darwin x86_64"),
+    ],
+)  # fmt: skip
+def test_os_provenance_must_match_the_declared_platform(pid, edit, message):
+    bad = record(pid)
+    edit(bad)
+    ok, result = verdict(three(**{pid.replace("-", "_"): sign(bad)}))
+    assert not ok and any(message in v for v in result.violations), result.violations
+
+
+def test_archived_records_carry_consistent_os_provenance():
+    for name in ("reference-host.json", "ubuntu-latest.json", "macos-latest.json",
+                 "macos-15-intel.json"):  # fmt: skip
+        rec = json.loads((ARCHIVE / name).read_text())
+        problems = xp.record_problems(
+            rec, label=name, expected_inputs=INPUTS, revision=rec["revision"]
+        )
+        assert problems == []

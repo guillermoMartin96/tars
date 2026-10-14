@@ -40,3 +40,27 @@ The findings concern the stated rationale and some reported figures.
 - 1,101 tests, Ruff, the M2 Proof (215/215), the M1 Proof and the GMAT comparison all pass.
 
 **T7 review closed: PASS.** CI is green on Ubuntu and macOS (run 38496630761). **T7 now stops at the DR-0023 threshold decision gate.**
+
+## Round 3 — DR-0023 application and the cross-platform final-state gate
+**Reviewer:** Codex, session `01a13c44-15f2-7d11-a381-f5b3d8bf52b0`, at `fbdbe77` (a git clone, with metadata). **Raw:** `raw/M2-T7-codex-review03.md`. **Prompt:** `raw/M2-T7-codex-review03-prompt.md`.
+
+**Verdict: REQUEST_CHANGES (one High finding).**
+
+Verified as correct:
+- every pre-existing `m2.json` limit is unchanged, and the pin matches;
+- the FU-1 and O6 text meets the DR-0023 conditions;
+- all 215 earlier M2 checks are present with identical metrics and thresholds, plus 13 additions;
+- the M1 golden, the snapshot and GMAT pins, and the CI steps are unchanged;
+- the VAL-0017 figures recompute exactly, including 7.232054622489096e-6 m and 8.428690417483863e-9 m/s;
+- the archive digests and the golden's byte identity hold;
+- the Euclidean norm and inclusive boundaries are correct;
+- 1,174 tests pass;
+- mutating missing-platform detection, Rosetta rejection, input matching or the Euclidean norm makes tests fail.
+
+On platform coverage, the reviewer found that the GitHub Intel runner satisfies the OS/architecture matrix and that the pinned golden preserves the reference-host baseline. Requiring the local host to run every revision would be a Tech Lead decision.
+
+| # | Sev. | Finding | Disposition |
+|---|---|---|---|
+| T7-F7 | High | The gate never cross-checked the declared OS against independent OS provenance. A Linux record relabelled `Darwin`/`macos-x86_64`, with its checksum recomputed, filled the macOS x86_64 slot. The gate passed with no macOS x86_64 evidence. This is bad workflow data, inside the DR-0019 B scope, and it changes an acceptance decision | **ACCEPTED, fixed.** `record_problems` now requires two independent OS signals to agree with the declared platform: (1) `ci.runner_os` (GitHub `Linux`/`macOS`) must map to `platform.system`, and a missing or unknown value fails; (2) `environment.os` (`platform.platform()`) must start with `Linux-`/`macOS-` for the declared system and name the declared machine as a token, so CI-less records are covered too. New regressions cover the reviewer's exact reproduction (archived Linux record relabelled, with and without CI provenance, library and CLI), contradictory or missing runner OS and environment OS (eight cases), and consistent provenance in all four archived records. Mutation check: disabling either new check makes five regressions fail. No threshold, contract or scope change |
+
+**Also fixed (found in CI, not by the reviewer):** `test_proof_fails_closed_on_an_unusable_or_disagreeing_golden[perturbed]` expected exactly 1.5e-4 m. On Linux the run differs from the macOS x86_64 golden by its genuine platform drift, so the value was 1.5068e-4 m. The assertion now allows 1e-5 m (measured drift ≤ 7.3e-6 m). The gate itself was right; only the test was too strict.
