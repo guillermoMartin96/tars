@@ -1,0 +1,244 @@
+{
+  "label": "macos-latest-38492704906",
+  "environment": {
+    "system": "Darwin",
+    "machine": "arm64",
+    "cpu": "Apple M1 (Virtual)",
+    "python": "3.12.10",
+    "numpy": "2.5.3",
+    "os": "macOS-26.6.2-arm64-arm-64bit",
+    "python_full": "3.12.10",
+    "python_compiler": "Clang 13.0.0 (clang-1300.0.29.30)",
+    "python_build": "v3.12.10:0cc81280367 Apr  8 2025 08:46:59",
+    "scipy": "1.18.1",
+    "numpy_simd_baseline": [
+      "NEON",
+      "NEON_FP16",
+      "NEON_VFPV4",
+      "ASIMD"
+    ],
+    "numpy_simd_found": [
+      "ASIMDHP",
+      "ASIMDDP"
+    ],
+    "numpy_blas": "accelerate",
+    "uv_lock_sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+    "git_revision": "28703922502d077c4042f82deafb7d6b28f2362f",
+    "git_tree_clean": true
+  },
+  "inputs_sha256": {
+    "scenarios/m2_burn_to_depletion.json": "c6d2340bb47d01fbe4e750e68a9dfd721e3ae1e18b8722de296482b25ca9b14d",
+    "scenarios/m2_invalid_commands.json": "68135aa85506ecbf24e47bf7040bb3d0f35314ddb4500fda29cb9468106711d6",
+    "scenarios/m2_prograde_burn.json": "67088ec0b50d7588452a62c0c2de154e6bc0cfa4d5fa4f26f8982dcbe1704120",
+    "scenarios/m2_retrograde_burn.json": "7af5ae65dfbedbdc2f904ea5b90e0348d67113b27c514e4904e78a1b151c33db",
+    "scenarios/m1_leo_250km.json": "51f109c9895b1d5fbc662e241a2f7af0f10954bb23004f5fdf01a0b4754228bf",
+    "proof/thresholds/m1.json": "446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d",
+    "proof/thresholds/m2.json": "5c096963d8c5099a16f19bdb2dfb8860a0b6d4ef289838fd7f48972bedf8dcb3",
+    "toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz": "a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b",
+    "toolbox/references/gmat/m2/APPROVED_DIGESTS.json": "f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585",
+    "uv.lock": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+  },
+  "determinism": {
+    "m2_burn_to_depletion": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "cadae50df7df2c10d0ef7fac32dd57bbc064e798d0ae174400ae2e07443a8aee",
+        "cadae50df7df2c10d0ef7fac32dd57bbc064e798d0ae174400ae2e07443a8aee"
+      ]
+    },
+    "m2_invalid_commands": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "5866b87e77f4ad8b2b52bbbbed1a04b0ed93874414a1bd31e4d253bc5a8cee54",
+        "5866b87e77f4ad8b2b52bbbbed1a04b0ed93874414a1bd31e4d253bc5a8cee54"
+      ]
+    },
+    "m2_prograde_burn": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "3d5adebb4fd9702f11e632df449be52f0949019c8f2141b24fecf5df52155557",
+        "3d5adebb4fd9702f11e632df449be52f0949019c8f2141b24fecf5df52155557"
+      ]
+    },
+    "m2_retrograde_burn": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "14eb08a5d6aefe3d21d2126bcebfb2cd5f950610140e86df501f49c20e6e3640",
+        "14eb08a5d6aefe3d21d2126bcebfb2cd5f950610140e86df501f49c20e6e3640"
+      ]
+    },
+    "m1_leo_250km": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "a9f35f0d1ad568744f16a3806687aebdeeed8e5b8795a7b11a230b7e1b2dee05",
+        "a9f35f0d1ad568744f16a3806687aebdeeed8e5b8795a7b11a230b7e1b2dee05"
+      ]
+    }
+  },
+  "mission_finals": {
+    "m2_prograde_burn": {
+      "events_sha256": "3d5adebb4fd9702f11e632df449be52f0949019c8f2141b24fecf5df52155557",
+      "t": 53700.0,
+      "r": [
+        5009922.076521974,
+        -2738091.068464679,
+        -3454611.1634764443
+      ],
+      "v": [
+        5063.692568037905,
+        3629.354949178288,
+        4579.106322668888
+      ],
+      "status": "success"
+    },
+    "m2_retrograde_burn": {
+      "events_sha256": "14eb08a5d6aefe3d21d2126bcebfb2cd5f950610140e86df501f49c20e6e3640",
+      "t": 53700.0,
+      "r": [
+        5067949.182850969,
+        2653335.7589866905,
+        3347676.576216486
+      ],
+      "v": [
+        -4976.937167320563,
+        3670.339047306525,
+        4630.815385435133
+      ],
+      "status": "success"
+    },
+    "m2_burn_to_depletion": {
+      "events_sha256": "cadae50df7df2c10d0ef7fac32dd57bbc064e798d0ae174400ae2e07443a8aee",
+      "t": 53700.0,
+      "r": [
+        601014.5039222817,
+        -4207076.69999265,
+        -5308009.766653181
+      ],
+      "v": [
+        7580.203466602244,
+        475.9674172326986,
+        600.5214260258798
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands": {
+      "events_sha256": "5866b87e77f4ad8b2b52bbbbed1a04b0ed93874414a1bd31e4d253bc5a8cee54",
+      "t": 53700.0,
+      "r": [
+        6613493.036832927,
+        -39084.88278418955,
+        -49312.849358634616
+      ],
+      "v": [
+        63.71316740866796,
+        4827.160474174581,
+        6090.360782385034
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands_empty_tank": {
+      "events_sha256": "e0dd1471781ddafbc24392136135be53294c7d79872f005d8c6a766d8b269f79",
+      "t": 53700.0,
+      "r": [
+        6628097.3461093595,
+        -14240.788545295407,
+        -17967.40351404315
+      ],
+      "v": [
+        26.823829122198532,
+        4816.876251953302,
+        6077.385323203761
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "events_sha256": "663ccf7b47134373b24f739290e8a00d68f23f9ad8ef8a57ab64b024e37481ff",
+      "t": 53700.0,
+      "r": [
+        6628097.3461093595,
+        -14240.788545295407,
+        -17967.40351404315
+      ],
+      "v": [
+        26.823829122198532,
+        4816.876251953302,
+        6077.385323203761
+      ],
+      "status": "success"
+    }
+  },
+  "m1_cross_platform": {
+    "schema_version": 1,
+    "tick": 0,
+    "t": 0.0,
+    "type": "ValidationResult",
+    "validator": "cross_platform",
+    "passed": true,
+    "metrics": {
+      "final_position_difference_m": 8.761673469736646e-07,
+      "final_velocity_difference_mps": 1.0361015095108408e-09,
+      "bit_identical_to_golden": 0.0,
+      "script_initial_position_difference_m": 0.0,
+      "script_initial_velocity_difference_mps": 1.2862197421537486e-12
+    },
+    "thresholds": {
+      "final_position_difference_m": 0.0001,
+      "final_velocity_difference_mps": 1e-07
+    },
+    "threshold_status": "approved",
+    "notes": "this platform: {'system': 'Darwin', 'machine': 'arm64', 'cpu': 'Apple M1 (Virtual)', 'python': '3.12.10', 'numpy': '2.5.3'}; golden platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz', 'python': '3.12.15', 'numpy': '2.5.3'}"
+  },
+  "commands": [
+    {
+      "command": "python toolbox/validators/m2_proof.py --out runs/t7/macos-latest-38492704906/m2_proof.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/runner/work/tars/tars/scenarios/m2_burn_to_depletion.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/runner/work/tars/tars/scenarios/m2_invalid_commands.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/runner/work/tars/tars/scenarios/m2_prograde_burn.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/runner/work/tars/tars/scenarios/m2_retrograde_burn.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/cross_platform.py",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/scripts/reference_snapshot.py measure-deviation toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz --out runs/t7/macos-latest-38492704906/deviation.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/scripts/reference_snapshot.py generate --measurement --out runs/t7/macos-latest-38492704906/record.json.gz",
+      "exit_code": 0
+    }
+  ],
+  "outputs_sha256": {
+    "deviation.json": "3944834d518d2e377b0037ce3d3fb809bd7a47aa7550ae6658cdb94e93c90685",
+    "deviation.proof.json": "5a8a9178f449e66c690ea1931e5690e49cb79294ddd3156fc68ee1e7643daf92",
+    "deviation_stdout.txt": "394bb8329c7a4eb2382863f25fcc2b7a22c0b11cbb683d24e4cb34a38934099a",
+    "m2_proof.json": "d87fb4876bbe72a8b64183470ca039c267c93e7d8d183182d7682d6b43e63a79",
+    "m2_proof_stdout.txt": "06e6b4a8517d7aad712c56d6687abaac7bcc73d1794593024bf7c0f5da2260bd",
+    "record.json.gz": "f129f75f7990efc62d2d28e5136e73ef08e1d636cf3c53b78618a80f24d1cd9e",
+    "record.proof.json": "3de8a6345a5c9223af34a50183eb47ffc08d5cd5e16243efbbac23470993201e",
+    "record_stdout.txt": "1195470b17def4b44e2a309988e0436b0cb7130e672ee7106ada8462f18a1d48"
+  }
+}

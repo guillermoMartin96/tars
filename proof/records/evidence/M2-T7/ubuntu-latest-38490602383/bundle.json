@@ -1,0 +1,242 @@
+{
+  "label": "ubuntu-latest-38490602383",
+  "environment": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "python": "3.12.3",
+    "numpy": "2.5.3",
+    "os": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+    "python_full": "3.12.3",
+    "python_compiler": "GCC 13.3.0",
+    "python_build": "main Aug 31 2026 10:18:26",
+    "scipy": "1.18.1",
+    "numpy_simd_baseline": [
+      "X86_V2"
+    ],
+    "numpy_simd_found": [
+      "X86_V3",
+      "X86_V4",
+      "AVX512_ICL"
+    ],
+    "numpy_blas": "scipy-openblas",
+    "uv_lock_sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+    "git_revision": "28703922502d077c4042f82deafb7d6b28f2362f",
+    "git_tree_clean": true
+  },
+  "inputs_sha256": {
+    "scenarios/m2_burn_to_depletion.json": "c6d2340bb47d01fbe4e750e68a9dfd721e3ae1e18b8722de296482b25ca9b14d",
+    "scenarios/m2_invalid_commands.json": "68135aa85506ecbf24e47bf7040bb3d0f35314ddb4500fda29cb9468106711d6",
+    "scenarios/m2_prograde_burn.json": "67088ec0b50d7588452a62c0c2de154e6bc0cfa4d5fa4f26f8982dcbe1704120",
+    "scenarios/m2_retrograde_burn.json": "7af5ae65dfbedbdc2f904ea5b90e0348d67113b27c514e4904e78a1b151c33db",
+    "scenarios/m1_leo_250km.json": "51f109c9895b1d5fbc662e241a2f7af0f10954bb23004f5fdf01a0b4754228bf",
+    "proof/thresholds/m1.json": "446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d",
+    "proof/thresholds/m2.json": "5c096963d8c5099a16f19bdb2dfb8860a0b6d4ef289838fd7f48972bedf8dcb3",
+    "toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz": "a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b",
+    "toolbox/references/gmat/m2/APPROVED_DIGESTS.json": "f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585",
+    "uv.lock": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+  },
+  "determinism": {
+    "m2_burn_to_depletion": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "7e6091f19411c287d7fd0ecfe886b5d53d15333cfcdd2e2c402c8480d57aa02f",
+        "7e6091f19411c287d7fd0ecfe886b5d53d15333cfcdd2e2c402c8480d57aa02f"
+      ]
+    },
+    "m2_invalid_commands": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "45101a0c6e55d5459dc0fd26ab97b0dfd09aec1db001740e4e435d81a51dca4a",
+        "45101a0c6e55d5459dc0fd26ab97b0dfd09aec1db001740e4e435d81a51dca4a"
+      ]
+    },
+    "m2_prograde_burn": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "38aaa065e867d22dd3b18216243c84580f6b0e762ec8e81fd95db411d09b4958",
+        "38aaa065e867d22dd3b18216243c84580f6b0e762ec8e81fd95db411d09b4958"
+      ]
+    },
+    "m2_retrograde_burn": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "8087464571ad94197094ae193771aeca9ba7ff51c8be3762eca3b68141c6fe46",
+        "8087464571ad94197094ae193771aeca9ba7ff51c8be3762eca3b68141c6fe46"
+      ]
+    },
+    "m1_leo_250km": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "4049b5a3daeb3470bf51fd30d8e380e52a5d6cf924da65e96b69221163c277b1",
+        "4049b5a3daeb3470bf51fd30d8e380e52a5d6cf924da65e96b69221163c277b1"
+      ]
+    }
+  },
+  "mission_finals": {
+    "m2_prograde_burn": {
+      "events_sha256": "38aaa065e867d22dd3b18216243c84580f6b0e762ec8e81fd95db411d09b4958",
+      "t": 53700.0,
+      "r": [
+        5009922.076520296,
+        -2738091.0684659663,
+        -3454611.163478111
+      ],
+      "v": [
+        5063.692568040207,
+        3629.3549491769536,
+        4579.106322667252
+      ],
+      "status": "success"
+    },
+    "m2_retrograde_burn": {
+      "events_sha256": "8087464571ad94197094ae193771aeca9ba7ff51c8be3762eca3b68141c6fe46",
+      "t": 53700.0,
+      "r": [
+        5067949.182849413,
+        2653335.7589878147,
+        3347676.5762178963
+      ],
+      "v": [
+        -4976.937167322671,
+        3670.339047305427,
+        4630.81538543376
+      ],
+      "status": "success"
+    },
+    "m2_burn_to_depletion": {
+      "events_sha256": "7e6091f19411c287d7fd0ecfe886b5d53d15333cfcdd2e2c402c8480d57aa02f",
+      "t": 53700.0,
+      "r": [
+        601014.503923024,
+        -4207076.69999259,
+        -5308009.766653141
+      ],
+      "v": [
+        7580.203466602143,
+        475.9674172332227,
+        600.5214260265357
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands": {
+      "events_sha256": "45101a0c6e55d5459dc0fd26ab97b0dfd09aec1db001740e4e435d81a51dca4a",
+      "t": 53700.0,
+      "r": [
+        6613493.0368329575,
+        -39084.88278387968,
+        -49312.84935823398
+      ],
+      "v": [
+        63.713167408130374,
+        4827.1604741745805,
+        6090.360782385014
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands_empty_tank": {
+      "events_sha256": "150f0f535af636f5032e0cd1086e7048912dcba6f20209efad474857569ece2b",
+      "t": 53700.0,
+      "r": [
+        6628097.34610925,
+        -14240.788542974115,
+        -17967.403511086974
+      ],
+      "v": [
+        26.82382911778238,
+        4816.876251953385,
+        6077.385323203834
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "events_sha256": "e989dd6c0a74507e25fe982b87e940767b6e9f8c18bead86a7126a490c723a38",
+      "t": 53700.0,
+      "r": [
+        6628097.34610925,
+        -14240.788542974115,
+        -17967.403511086974
+      ],
+      "v": [
+        26.82382911778238,
+        4816.876251953385,
+        6077.385323203834
+      ],
+      "status": "success"
+    }
+  },
+  "m1_cross_platform": {
+    "schema_version": 1,
+    "tick": 0,
+    "t": 0.0,
+    "type": "ValidationResult",
+    "validator": "cross_platform",
+    "passed": true,
+    "metrics": {
+      "final_position_difference_m": 2.8896842560448454e-06,
+      "final_velocity_difference_mps": 3.386632705866204e-09,
+      "bit_identical_to_golden": 0.0,
+      "script_initial_position_difference_m": 0.0,
+      "script_initial_velocity_difference_mps": 1.2862197421537486e-12
+    },
+    "thresholds": {
+      "final_position_difference_m": 0.0001,
+      "final_velocity_difference_mps": 1e-07
+    },
+    "threshold_status": "approved",
+    "notes": "this platform: {'system': 'Linux', 'machine': 'x86_64', 'cpu': 'AMD EPYC 9V74 80-Core Processor', 'python': '3.12.3', 'numpy': '2.5.3'}; golden platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz', 'python': '3.12.15', 'numpy': '2.5.3'}"
+  },
+  "commands": [
+    {
+      "command": "python toolbox/validators/m2_proof.py --out runs/t7/ubuntu-latest-38490602383/m2_proof.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /home/runner/work/tars/tars/scenarios/m2_burn_to_depletion.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /home/runner/work/tars/tars/scenarios/m2_invalid_commands.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /home/runner/work/tars/tars/scenarios/m2_prograde_burn.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /home/runner/work/tars/tars/scenarios/m2_retrograde_burn.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/cross_platform.py",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/scripts/reference_snapshot.py measure-deviation toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz --out runs/t7/ubuntu-latest-38490602383/deviation.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/scripts/reference_snapshot.py generate --measurement --out runs/t7/ubuntu-latest-38490602383/record.json.gz",
+      "exit_code": 0
+    }
+  ],
+  "outputs_sha256": {
+    "deviation.json": "9780fa629b2a07443de1c343ac585c0f4b44cc9ba7fe36ec372efede2386e79a",
+    "deviation.proof.json": "d49336cc664b77d239a90fb642d5dda84a8a12e11de57a5b3f6a29ab4764a670",
+    "deviation_stdout.txt": "6c2f292c70bd31151198d2d414e162405e7bcb9e79898e252298f3880069319e",
+    "m2_proof.json": "886204b9248e1bb2f22893ad4100ee104541a786a3524ee6e5aa716f86e8dab7",
+    "m2_proof_stdout.txt": "b70e8b9eb4ffd31832512434350e0f09c12ad8ff9afe748287eee69813f78c86",
+    "record.json.gz": "04b7349eb93ce47382507cdceb73b66f355ff71da52cff23fcbcb05836886d1a",
+    "record.proof.json": "dc287193de519aff70ba4217127a7a26c6fc760034ec2f1e1e64c1c7c49fdb67",
+    "record_stdout.txt": "577fbfb5934cf9fa498c4b7d588a69580bf0a5b86fa57cea1e92bf9fd64ef7b4"
+  }
+}

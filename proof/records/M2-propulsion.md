@@ -1,4 +1,4 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T6 complete)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T6 complete; T7 at the threshold decision)
 
 **Milestone result:** not yet claimed. M2 Proof (P1–P12, `docs/milestones/M2-propulsion.md` §10) is evaluated at T8.
 - This record collects completed task evidence only (REV-013 lesson).
@@ -200,7 +200,22 @@
   - The validators need the dev group (SciPy).
   - The O6 margin bound is 0.0405 against 0.05 (a T7 consideration).
   - The Proof takes about 135 s.
-- **Not started:** T7 (needs authorization). Draft PR #3 is not merged.
+- **Next:** T7 (authorized 2026-10-13; see below).
+
+## T7 — Three-platform measurement and threshold decision: MEASUREMENT COMPLETE, DECISION PENDING (2026-10-13)
+- **Measured:** 11 bundles on the DR-0008 matrix at `2870392`: the macOS x86_64 reference host, Linux x86_64 ×5 on four CPU types, and macOS arm64 ×5. Clean trees, identical input digests. VAL-0016; evidence in `proof/records/evidence/M2-T7/`.
+- **Results:**
+  - M2 Proof 215/215 on all 11.
+  - Cross-process determinism byte-identical everywhere.
+  - Simulator cross-platform drift ≤ 7.2e-6 m (final state).
+  - Reference drift is removed from the verdict by the snapshot: zero spread on every O9 reference metric.
+  - Every margin is ≥ 1.5× (O8 policy) and ≥ 1.9× for truncation-type gates.
+- **Decision request:** DR-0023.
+  - Approve every provisional value unchanged.
+  - FU-1: keep the O9 GMAT gates and close FU-1.
+  - O6: no change (a dedicated SMA class only with a future tightening).
+  - Add an M2 cross-platform final-state gate at the M1 bounds (proposed, not implemented).
+- **Not changed:** thresholds, reference values, snapshot tolerances and checks. `m2.json` stays provisional until DR-0023 is approved. T8 is not started, and PR #3 is not merged.
 
 ## REV-012 — resolved
 VAL-0010, DR-0016; CI-reproduced by `tests/test_rev012_evidence.py`.

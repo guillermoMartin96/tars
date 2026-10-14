@@ -604,3 +604,38 @@ All 10 approved rejection codes are exercised.
   - Any failure fails closed.
   - These catch accidental corruption and wrong execution state, not deliberate in-memory tampering, which is outside the threat model (DR-0019 B, DR-0022; review F58).
 - **Status:** M2 thresholds remain provisional (T7). The tolerances are reproducibility limits, not Proof thresholds.
+
+## VAL-0016 — T7: three-platform measurement for the M2 threshold decision (DR-0015 method; DR-0008 precedent)
+- **Date / revision:** 2026-10-13, `2870392`. Every bundle comes from a clean tree with identical input digests (scenarios, `m1.json`, `m2.json`, reference snapshot baseline 3, GMAT manifest, `uv.lock`).
+- **Method.** `toolbox/scripts/m2_t7_measure.py collect` runs on each platform and records:
+  - the environment, with digests of every input and output and the exact commands;
+  - the full M2 Proof, verified against the reference snapshot;
+  - cross-process determinism of all six M2 scenario files and M1;
+  - every mission's final state;
+  - M1 cross-platform agreement;
+  - reference variation, measured two ways: verify mode (`measure-deviation`) and record mode (raw values, no substitution).
+
+  `analyze` aggregates the bundles. Evidence: `proof/records/evidence/M2-T7/`.
+- **Platforms (the DR-0008 matrix), 11 bundles:**
+  - macOS x86_64 reference host (i9-9880H; NumPy SIMD X86_V3; Accelerate);
+  - Linux x86_64, GitHub `ubuntu-latest`, five runs on four CPU types: EPYC 7763 (X86_V3, no AVX-512), Xeon Platinum 8573, EPYC 9V74 twice and EPYC 9V45 (AVX-512);
+  - macOS arm64, GitHub `macos-latest`, five runs on Apple M1.
+
+  All use Python 3.12, NumPy 2.5.3 and SciPy 1.18.1 from the same `uv.lock`.
+- **Results:**
+  - **Proof:** the M2 Proof passes 215/215 on all 11.
+  - **Determinism:** cross-process determinism is byte-identical for every M2 scenario and for M1 on all 11.
+  - **M1:** cross-platform |Δr| is at most 2.9e-6 m (unchanged, within the approved 1e-4 m).
+  - **Simulator, cross-platform:** M2 final states drift by at most 7.2e-6 m and 8.4e-9 m/s (prograde slice). Coast-only missions drift 2.9e-6 m, so the burn amplifies the drift about 2.5×. Event logs are not bit-identical across platforms, as DR-0006 expects.
+  - **Gated metrics:** the largest cross-platform spread of any check is 1.1e-5 m (O4, O5 and simulator-vs-GMAT at 53,700 s). The O8 order spread is 1e-3. Every O9 GMAT-vs-reference metric, every round-off metric and every scenario-only metric has zero spread.
+  - **Reference variation, record mode** (raw DOP853, no substitution): up to 8.1e-6 m and 9.9e-9 m/s, which is the FU-1 floor re-measured. Kepler from GMAT rows: 2.0e-7 m. Node crossings: 8.5e-10 s.
+  - **Reference variation, verify mode** (with substitution, as the Proof runs): reference values 2.8e-9 m and 4.1e-12 m/s; GMAT-seeded 2.0e-7 m; simulator-seeded 5.4e-7 m. All within the DR-0021 tolerances.
+  - **O6 impulsive SMA:** cross-platform variation 1.9e-9 m.
+- **Error attribution:**
+  - **Simulator integration error** (RK4, dt = 10 s): 0.29–0.31 m at 53,700 s; ≤ 8e-3 m at burn boundaries; O8 orders 4.14–4.33.
+  - **Reference uncertainty:** GMAT and the independent DOP853 agree to 4.7e-6 m. The reference's platform drift (8.1e-6 m) is removed from the verdict by the snapshot (≤ 5e-8 m in verify mode).
+  - **Simulator platform drift:** ≤ 1.1e-5 m in any metric.
+  - **Round-off-class metrics:** ≤ 7.5e-14 relative.
+
+  The measurement uncertainty (≈ 1e-5 m) is more than four orders of magnitude below the simulator error (0.31 m) and below every margin.
+- **Status:** a measurement, not approval. The threshold matrix and the recommendations are in DR-0023. No threshold, reference value or tolerance was changed.
