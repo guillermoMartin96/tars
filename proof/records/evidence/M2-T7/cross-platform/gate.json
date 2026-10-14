@@ -1,0 +1,327 @@
+{
+  "gate": "m2_cross_platform",
+  "revision": "27e5b8bf4e1d159388b16570a65c37e1a7db9518",
+  "run_id": null,
+  "evidence": [
+    "reference-host.json",
+    "ubuntu-latest.json",
+    "macos-latest.json",
+    "macos-15-intel.json"
+  ],
+  "platforms": [
+    "macos-x86_64: Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+    "linux-x86_64: AMD EPYC 9V74 80-Core Processor",
+    "macos-arm64: Apple M1 (Virtual)",
+    "macos-x86_64: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz"
+  ],
+  "checks": [
+    {
+      "validator": "m2_cross_platform",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": "7.232054622489096e-06",
+        "final_velocity_difference_mps": "8.428690417483863e-09"
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "failures": []
+    },
+    {
+      "validator": "m2_cross_platform_evidence",
+      "passed": true,
+      "metrics": {
+        "violations": "0.0"
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "failures": []
+    }
+  ],
+  "per_mission": {
+    "m2_burn_to_depletion": {
+      "final_position_difference_m": 3.527632366712157e-06,
+      "final_velocity_difference_mps": 3.974066415782729e-09
+    },
+    "m2_invalid_commands": {
+      "final_position_difference_m": 4.749088037631342e-06,
+      "final_velocity_difference_mps": 5.491281368457221e-09
+    },
+    "m2_invalid_commands_empty_tank": {
+      "final_position_difference_m": 3.7602478010319506e-06,
+      "final_velocity_difference_mps": 4.417525721178428e-09
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "final_position_difference_m": 3.7602478010319506e-06,
+      "final_velocity_difference_mps": 4.417525721178428e-09
+    },
+    "m2_prograde_burn": {
+      "final_position_difference_m": 7.232054622489096e-06,
+      "final_velocity_difference_mps": 8.428690417483863e-09
+    },
+    "m2_retrograde_burn": {
+      "final_position_difference_m": 5.553571822632368e-06,
+      "final_velocity_difference_mps": 6.443552709832039e-09
+    }
+  },
+  "pairs": [
+    {
+      "mission": "m2_burn_to_depletion",
+      "a": "reference-host.json",
+      "b": "ubuntu-latest.json",
+      "final_position_difference_m": 2.782382927724128e-06,
+      "final_velocity_difference_mps": 3.129290093624392e-09
+    },
+    {
+      "mission": "m2_burn_to_depletion",
+      "a": "reference-host.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 3.527632366712157e-06,
+      "final_velocity_difference_mps": 3.974066415782729e-09
+    },
+    {
+      "mission": "m2_burn_to_depletion",
+      "a": "reference-host.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0
+    },
+    {
+      "mission": "m2_burn_to_depletion",
+      "a": "ubuntu-latest.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 7.459203528535997e-07,
+      "final_velocity_difference_mps": 8.455886446689968e-10
+    },
+    {
+      "mission": "m2_burn_to_depletion",
+      "a": "ubuntu-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 2.782382927724128e-06,
+      "final_velocity_difference_mps": 3.129290093624392e-09
+    },
+    {
+      "mission": "m2_burn_to_depletion",
+      "a": "macos-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 3.527632366712157e-06,
+      "final_velocity_difference_mps": 3.974066415782729e-09
+    },
+    {
+      "mission": "m2_invalid_commands",
+      "a": "reference-host.json",
+      "b": "ubuntu-latest.json",
+      "final_position_difference_m": 4.2432928710961795e-06,
+      "final_velocity_difference_mps": 4.954092565614058e-09
+    },
+    {
+      "mission": "m2_invalid_commands",
+      "a": "reference-host.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 4.749088037631342e-06,
+      "final_velocity_difference_mps": 5.491281368457221e-09
+    },
+    {
+      "mission": "m2_invalid_commands",
+      "a": "reference-host.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0
+    },
+    {
+      "mission": "m2_invalid_commands",
+      "a": "ubuntu-latest.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 5.074172656337617e-07,
+      "final_velocity_difference_mps": 5.37955429509381e-10
+    },
+    {
+      "mission": "m2_invalid_commands",
+      "a": "ubuntu-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 4.2432928710961795e-06,
+      "final_velocity_difference_mps": 4.954092565614058e-09
+    },
+    {
+      "mission": "m2_invalid_commands",
+      "a": "macos-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 4.749088037631342e-06,
+      "final_velocity_difference_mps": 5.491281368457221e-09
+    },
+    {
+      "mission": "m2_invalid_commands_empty_tank",
+      "a": "reference-host.json",
+      "b": "ubuntu-latest.json",
+      "final_position_difference_m": 2.889252295764607e-06,
+      "final_velocity_difference_mps": 3.3858987642035502e-09
+    },
+    {
+      "mission": "m2_invalid_commands_empty_tank",
+      "a": "reference-host.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 8.742316171971867e-07,
+      "final_velocity_difference_mps": 1.0345108697724913e-09
+    },
+    {
+      "mission": "m2_invalid_commands_empty_tank",
+      "a": "reference-host.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0
+    },
+    {
+      "mission": "m2_invalid_commands_empty_tank",
+      "a": "ubuntu-latest.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 3.7602478010319506e-06,
+      "final_velocity_difference_mps": 4.417525721178428e-09
+    },
+    {
+      "mission": "m2_invalid_commands_empty_tank",
+      "a": "ubuntu-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 2.889252295764607e-06,
+      "final_velocity_difference_mps": 3.3858987642035502e-09
+    },
+    {
+      "mission": "m2_invalid_commands_empty_tank",
+      "a": "macos-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 8.742316171971867e-07,
+      "final_velocity_difference_mps": 1.0345108697724913e-09
+    },
+    {
+      "mission": "m2_invalid_commands_no_propulsion",
+      "a": "reference-host.json",
+      "b": "ubuntu-latest.json",
+      "final_position_difference_m": 2.889252295764607e-06,
+      "final_velocity_difference_mps": 3.3858987642035502e-09
+    },
+    {
+      "mission": "m2_invalid_commands_no_propulsion",
+      "a": "reference-host.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 8.742316171971867e-07,
+      "final_velocity_difference_mps": 1.0345108697724913e-09
+    },
+    {
+      "mission": "m2_invalid_commands_no_propulsion",
+      "a": "reference-host.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0
+    },
+    {
+      "mission": "m2_invalid_commands_no_propulsion",
+      "a": "ubuntu-latest.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 3.7602478010319506e-06,
+      "final_velocity_difference_mps": 4.417525721178428e-09
+    },
+    {
+      "mission": "m2_invalid_commands_no_propulsion",
+      "a": "ubuntu-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 2.889252295764607e-06,
+      "final_velocity_difference_mps": 3.3858987642035502e-09
+    },
+    {
+      "mission": "m2_invalid_commands_no_propulsion",
+      "a": "macos-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 8.742316171971867e-07,
+      "final_velocity_difference_mps": 1.0345108697724913e-09
+    },
+    {
+      "mission": "m2_prograde_burn",
+      "a": "reference-host.json",
+      "b": "ubuntu-latest.json",
+      "final_position_difference_m": 4.540998059892469e-06,
+      "final_velocity_difference_mps": 5.30592201462594e-09
+    },
+    {
+      "mission": "m2_prograde_burn",
+      "a": "reference-host.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 7.232054622489096e-06,
+      "final_velocity_difference_mps": 8.428690417483863e-09
+    },
+    {
+      "mission": "m2_prograde_burn",
+      "a": "reference-host.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0
+    },
+    {
+      "mission": "m2_prograde_burn",
+      "a": "ubuntu-latest.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 2.692704382052872e-06,
+      "final_velocity_difference_mps": 3.123482223881972e-09
+    },
+    {
+      "mission": "m2_prograde_burn",
+      "a": "ubuntu-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 4.540998059892469e-06,
+      "final_velocity_difference_mps": 5.30592201462594e-09
+    },
+    {
+      "mission": "m2_prograde_burn",
+      "a": "macos-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 7.232054622489096e-06,
+      "final_velocity_difference_mps": 8.428690417483863e-09
+    },
+    {
+      "mission": "m2_retrograde_burn",
+      "a": "reference-host.json",
+      "b": "ubuntu-latest.json",
+      "final_position_difference_m": 5.553571822632368e-06,
+      "final_velocity_difference_mps": 6.443552709832039e-09
+    },
+    {
+      "mission": "m2_retrograde_burn",
+      "a": "reference-host.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 3.171394496095607e-06,
+      "final_velocity_difference_mps": 3.698968286982034e-09
+    },
+    {
+      "mission": "m2_retrograde_burn",
+      "a": "reference-host.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0
+    },
+    {
+      "mission": "m2_retrograde_burn",
+      "a": "ubuntu-latest.json",
+      "b": "macos-latest.json",
+      "final_position_difference_m": 2.382220517951888e-06,
+      "final_velocity_difference_mps": 2.7446020469638435e-09
+    },
+    {
+      "mission": "m2_retrograde_burn",
+      "a": "ubuntu-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 5.553571822632368e-06,
+      "final_velocity_difference_mps": 6.443552709832039e-09
+    },
+    {
+      "mission": "m2_retrograde_burn",
+      "a": "macos-latest.json",
+      "b": "macos-15-intel.json",
+      "final_position_difference_m": 3.171394496095607e-06,
+      "final_velocity_difference_mps": 3.698968286982034e-09
+    }
+  ],
+  "violations": [],
+  "passed": true
+}

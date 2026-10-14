@@ -1,0 +1,135 @@
+{
+  "schema": "tars.m2.final-state-evidence/1",
+  "revision": "27e5b8bf4e1d159388b16570a65c37e1a7db9518",
+  "tree_clean": true,
+  "platform": {
+    "id": "macos-arm64",
+    "system": "Darwin",
+    "machine": "arm64",
+    "cpu": "Apple M1 (Virtual)",
+    "translated": false
+  },
+  "environment": {
+    "os": "macOS-26.6.2-arm64-arm-64bit",
+    "python": "3.12.10",
+    "python_compiler": "Clang 13.0.0 (clang-1300.0.29.30)",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "uv_lock_sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+  },
+  "ci": {
+    "github_run_id": "38629384726",
+    "github_run_attempt": "1",
+    "github_sha": "27e5b8bf4e1d159388b16570a65c37e1a7db9518",
+    "github_job": "check",
+    "runner_os": "macOS",
+    "runner_arch": "ARM64"
+  },
+  "inputs": {
+    "m2_prograde_burn": "f7816ee7b0c2a139e386aea2c0ecde90dc1b53ecda8be003213c751601673c19",
+    "m2_retrograde_burn": "fb88efdc5da06edc8ebc120fff1dd83e7ff0514c092249a029be19516de68d84",
+    "m2_burn_to_depletion": "6d83fbd3252f998eb435c9bcbf73f8148732c32ca1f69b85240a1cec76422b95",
+    "m2_invalid_commands": "ed70e91e6899ce9ea41b1735d6d482ff9fbab1ffcac45cd78632aed585b093dd",
+    "m2_invalid_commands_empty_tank": "a5d95aa2f11d922f1105d2c052de4e39d423cf3f0c02be2883e423267bcc5761",
+    "m2_invalid_commands_no_propulsion": "04c401c763ecd5656af2993881542701d67ea85cfdc6be28a5508cdc67c7b1b2"
+  },
+  "missions": {
+    "m2_prograde_burn": {
+      "status": "success",
+      "final_tick": 5370,
+      "final_t": 53700.0,
+      "r": [
+        5009922.076521974,
+        -2738091.068464679,
+        -3454611.1634764443
+      ],
+      "v": [
+        5063.692568037905,
+        3629.354949178288,
+        4579.106322668888
+      ],
+      "events_sha256": "3d5adebb4fd9702f11e632df449be52f0949019c8f2141b24fecf5df52155557"
+    },
+    "m2_retrograde_burn": {
+      "status": "success",
+      "final_tick": 5370,
+      "final_t": 53700.0,
+      "r": [
+        5067949.182850969,
+        2653335.7589866905,
+        3347676.576216486
+      ],
+      "v": [
+        -4976.937167320563,
+        3670.339047306525,
+        4630.815385435133
+      ],
+      "events_sha256": "14eb08a5d6aefe3d21d2126bcebfb2cd5f950610140e86df501f49c20e6e3640"
+    },
+    "m2_burn_to_depletion": {
+      "status": "success",
+      "final_tick": 5370,
+      "final_t": 53700.0,
+      "r": [
+        601014.5039222817,
+        -4207076.69999265,
+        -5308009.766653181
+      ],
+      "v": [
+        7580.203466602244,
+        475.9674172326986,
+        600.5214260258798
+      ],
+      "events_sha256": "cadae50df7df2c10d0ef7fac32dd57bbc064e798d0ae174400ae2e07443a8aee"
+    },
+    "m2_invalid_commands": {
+      "status": "success",
+      "final_tick": 5370,
+      "final_t": 53700.0,
+      "r": [
+        6613493.036832927,
+        -39084.88278418955,
+        -49312.849358634616
+      ],
+      "v": [
+        63.71316740866796,
+        4827.160474174581,
+        6090.360782385034
+      ],
+      "events_sha256": "5866b87e77f4ad8b2b52bbbbed1a04b0ed93874414a1bd31e4d253bc5a8cee54"
+    },
+    "m2_invalid_commands_empty_tank": {
+      "status": "success",
+      "final_tick": 5370,
+      "final_t": 53700.0,
+      "r": [
+        6628097.3461093595,
+        -14240.788545295407,
+        -17967.40351404315
+      ],
+      "v": [
+        26.823829122198532,
+        4816.876251953302,
+        6077.385323203761
+      ],
+      "events_sha256": "e0dd1471781ddafbc24392136135be53294c7d79872f005d8c6a766d8b269f79"
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "status": "success",
+      "final_tick": 5370,
+      "final_t": 53700.0,
+      "r": [
+        6628097.3461093595,
+        -14240.788545295407,
+        -17967.40351404315
+      ],
+      "v": [
+        26.823829122198532,
+        4816.876251953302,
+        6077.385323203761
+      ],
+      "events_sha256": "663ccf7b47134373b24f739290e8a00d68f23f9ad8ef8a57ab64b024e37481ff"
+    }
+  },
+  "sha256": "1ec4c9b4256f2ed654f11476469b69e3d3c051c49eaf85ae1208a97dd6fae91b"
+}

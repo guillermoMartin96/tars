@@ -1,0 +1,54 @@
+{
+  "description": "DR-0023 decision 4: three-platform M2 final-state evidence, retained in git beyond the 90-day CI artifact expiry. reference-host.json is the local DR-0008 reference host (and, byte for byte, the golden proof/references/m2_final_states.json); the others are CI push run 38629384726 at the same revision.",
+  "revision": "27e5b8bf4e1d159388b16570a65c37e1a7db9518",
+  "ci_run_id": "38629384726",
+  "command": "uv run python toolbox/validators/m2_cross_platform.py gate reference-host.json ubuntu-latest.json macos-latest.json macos-15-intel.json --revision 27e5b8bf4e1d159388b16570a65c37e1a7db9518",
+  "records": [
+    "reference-host.json",
+    "ubuntu-latest.json",
+    "macos-latest.json",
+    "macos-15-intel.json"
+  ],
+  "golden": "reference-host.json",
+  "sha256": {
+    "reference-host.json": "dc3baf7abb209a11ca463b9ca5001ce886c62b92b191ac76249d32924aa951dc",
+    "ubuntu-latest.json": "8b789d3923dbc315be59149b28333da7997420878cafe371c409ed39d627630e",
+    "macos-latest.json": "87ee362b0bbd4084db881099b62480500316151420641ea325a3cfd02e287047",
+    "macos-15-intel.json": "4b9d988a99ed9abbc9156f0a0c263afc17982cf9cf0a46b8a24ee01481af3563"
+  },
+  "metrics": {
+    "final_position_difference_m": 7.232054622489096e-06,
+    "final_velocity_difference_mps": 8.428690417483863e-09
+  },
+  "per_mission": {
+    "m2_burn_to_depletion": {
+      "final_position_difference_m": 3.527632366712157e-06,
+      "final_velocity_difference_mps": 3.974066415782729e-09
+    },
+    "m2_invalid_commands": {
+      "final_position_difference_m": 4.749088037631342e-06,
+      "final_velocity_difference_mps": 5.491281368457221e-09
+    },
+    "m2_invalid_commands_empty_tank": {
+      "final_position_difference_m": 3.7602478010319506e-06,
+      "final_velocity_difference_mps": 4.417525721178428e-09
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "final_position_difference_m": 3.7602478010319506e-06,
+      "final_velocity_difference_mps": 4.417525721178428e-09
+    },
+    "m2_prograde_burn": {
+      "final_position_difference_m": 7.232054622489096e-06,
+      "final_velocity_difference_mps": 8.428690417483863e-09
+    },
+    "m2_retrograde_burn": {
+      "final_position_difference_m": 5.553571822632368e-06,
+      "final_velocity_difference_mps": 6.443552709832039e-09
+    }
+  },
+  "limits": {
+    "final_position_difference_m": 0.0001,
+    "final_velocity_difference_mps": 1e-07
+  },
+  "passed": true
+}

@@ -214,3 +214,20 @@ On REQUEST_CHANGES, the findings are corrected within the approved scope. A find
 
 **Applied:** see "Implementation" below and VAL-0017.
 
+## Implementation
+- **Item 1:** `proof/thresholds/m2.json` has status `approved`; approved by the Tech Lead on 2026-10-14. Every pre-existing limit is numerically unchanged, as `git diff 77995b9 -- proof/thresholds/m2.json` shows. The M2 Proof's 215 earlier checks report identical thresholds and identical metric values. The digest is updated in `approved_digests` in the same commit (`27e5b8b`).
+- **Item 2:** FU-1 is closed. `limit_basis.o9_gmat` documents:
+  - the pinned-snapshot rationale and zero cross-platform spread;
+  - host dependence;
+  - the 8.62e-6 m noise floor;
+  - the 4.66e-6 m inter-reference disagreement, explicitly *not* an absolute-accuracy bound;
+  - the detection guarantees: 34.7 µm guaranteed, about 25.3 µm favourable.
+- **Item 3:** no O6 change. `limit_basis.o6_impulsive_limit` records the margin bounds and the 2e-8 m SMA class as a future improvement that needs separate approval and a reviewed snapshot baseline.
+- **Item 4:**
+  - New group `cross_platform` (1e-4 m, 1e-7 m/s).
+  - Logic in `tars.validation.m2_cross_platform`; CLI `toolbox/validators/m2_cross_platform.py`; tests `tests/test_m2_cross_platform.py`.
+  - Golden record `proof/references/m2_final_states.json`, pinned.
+  - New M2 Proof checks: `cross_platform_golden` and `cross_platform[...]`.
+  - CI: the `macos-15-intel` runner joins the matrix, and the job `m2-cross-platform` runs the three-platform gate.
+  - Archived evidence: `proof/records/evidence/M2-T7/cross-platform/`. Measurements are in VAL-0017.
+

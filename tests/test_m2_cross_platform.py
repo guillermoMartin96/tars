@@ -434,7 +434,11 @@ def test_run_compared_with_golden():
 def test_archived_three_platform_evidence_passes_at_its_revision():
     """The committed evidence (retained beyond the CI artifact expiry) still passes the
     gate at its recorded revision and matches the current canonical inputs."""
+    import hashlib
+
     manifest = json.loads((ARCHIVE / "MANIFEST.json").read_text())
+    for name, digest in manifest["sha256"].items():
+        assert hashlib.sha256((ARCHIVE / name).read_bytes()).hexdigest() == digest
     records = [(p, json.loads((ARCHIVE / p).read_text())) for p in manifest["records"]]
     assert {r["platform"]["id"] for _, r in records} == set(xp.REQUIRED_PLATFORMS)
     result = xp.gate(records, revision=manifest["revision"], expected_inputs=INPUTS)

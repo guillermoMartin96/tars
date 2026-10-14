@@ -643,3 +643,40 @@ All 10 approved rejection codes are exercised.
 
   Platform variation of compared quantities (≤ 1.1e-5 m) and the reference disagreement (4.66e-6 m) are more than four orders of magnitude below the simulator error (0.31 m) and below every margin. They describe reproducibility and consistency, not the references' absolute accuracy.
 - **Status:** a measurement, not approval. The threshold matrix and the recommendations are in DR-0023. No threshold, reference value or tolerance was changed.
+
+## VAL-0017 — DR-0023 decision 4: M2 cross-platform final-state gate (three platforms, one revision)
+- **Date / revision:** 2026-10-14. Evidence revision `27e5b8b`, the implementation commit, from a clean tree on every platform.
+- **Method.** `toolbox/validators/m2_cross_platform.py collect` runs every canonical M2 mission (the six in `tars.validation.m2_missions`) and writes one evidence record. Each record carries:
+  - the revision and whether the tree was clean;
+  - the platform identity: OS, architecture, CPU, and Rosetta translation, which is rejected;
+  - the environment, including the `uv.lock` digest;
+  - CI provenance: run id, commit and runner architecture, cross-checked against the machine;
+  - the canonical input digest (scenario config hash) of every mission;
+  - every final state, status, tick, time and event-log digest;
+  - a record digest.
+
+  `gate` validates every record and requires all three DR-0008 platforms. It compares every pair of records for every mission as Euclidean |Δr| and |Δv|; status, final tick and final time must agree exactly. It fails closed: a missing, unreadable, corrupted, inconsistent or stale record gives +inf and a violation.
+- **Platforms:**
+  - macOS x86_64 reference host (i9-9880H, local);
+  - GitHub push run 38629384726: `ubuntu-latest` (AMD EPYC 9V74), `macos-latest` (Apple M1) and `macos-15-intel` (i7-8700B).
+- **Results (four records, six missions, all pairs):** at most **7.23e-6 m and 8.43e-9 m/s** (prograde slice), against limits of 1e-4 m and 1e-7 m/s. Margins are 13.8× and 11.9×.
+
+  | Mission | Worst \|Δr\| (m) | Worst \|Δv\| (m/s) |
+  |---|---|---|
+  | prograde | 7.23e-6 | 8.43e-9 |
+  | retrograde | 5.55e-6 | 6.44e-9 |
+  | burn to depletion | 3.53e-6 | 3.97e-9 |
+  | invalid commands | 4.75e-6 | 5.49e-9 |
+  | invalid commands, empty tank | 3.76e-6 | 4.42e-9 |
+  | invalid commands, no propulsion | 3.76e-6 | 4.42e-9 |
+
+  - By platform pair, the arm64-vs-x86_64 pairs are the largest (7.23e-6 m), then Linux vs macOS x86_64 (5.55e-6 m), then Linux vs arm64 (3.76e-6 m).
+  - The reference host and the GitHub Intel runner are **bit-identical** (Δ = 0) on every mission.
+  - The reference-host record is also bit-identical to the T7 reference-host bundle at `2870392`: the same final states and the same event-log digests.
+  - These match VAL-0016: 7.2e-6 m and 8.4e-9 m/s over 11 bundles.
+- **Golden record.** `proof/references/m2_final_states.json` is the reference-host record. It is sha256-pinned in `approved_digests.APPROVED_M2_GOLDEN_SHA256` and identical, byte for byte, to the archived `reference-host.json`. The M2 Proof validates it and compares every mission on the running platform with it (13 checks; 228 in total).
+- **Retention.** The records, the gate report and a manifest with their digests are committed in `proof/records/evidence/M2-T7/cross-platform/`. They no longer depend on the 90-day CI artifact expiry. `tests/test_m2_cross_platform.py` re-runs the gate on them, at their revision and against the current canonical inputs, so a scenario change makes the archive visibly stale.
+- **CI.** Every `check` job collects its record from the clean checkout before anything else. The `m2-cross-platform` job gates the three records of the same workflow run, using `--revision ${{ github.sha }}` and `--run-id ${{ github.run_id }}`.
+- **What it does not detect.** The record digest detects corruption and accidental edits. It does not authenticate a deliberately forged record (DR-0019 B; DR-0022 B condition 1). CI records are produced and consumed within one run, and the golden is pinned by a reviewed digest.
+- **Status:** gate implemented under DR-0023 decision 4. No existing threshold, reference, tolerance or check was changed.
+

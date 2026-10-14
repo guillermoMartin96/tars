@@ -39,4 +39,4 @@ APPROVED_REFERENCE_SNAPSHOT_SHA256 = (
 # proof/references/m2_final_states.json: the reference-host golden M2 final states
 # (DR-0023 decision 4; macOS x86_64 reference host, DR-0008). A new golden needs the
 # record, a justification and a comparison with the previous one in a reviewed commit.
-APPROVED_M2_GOLDEN_SHA256 = "0" * 64  # set when the golden record is committed
+APPROVED_M2_GOLDEN_SHA256 = "dc3baf7abb209a11ca463b9ca5001ce886c62b92b191ac76249d32924aa951dc"
