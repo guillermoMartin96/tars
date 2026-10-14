@@ -1,6 +1,6 @@
 You are an independent reviewer from a separate provider; you did not write this code. You are reviewing TARS Milestone 2 task T7, round 3: the application of the approved DR-0023 and the implementation of the M2 cross-platform final-state gate.
 
-The snapshot is the current directory: a git clone at commit 0f95de3, with git metadata. You review; you do not fix. Do not modify `src/`, `tests/`, `toolbox/`, `scenarios/` or `proof/`. Put scratch files only under `./review_scratch/`, which is git-ignored by `.git/info/exclude`.
+The snapshot is the current directory: a git clone of the branch at HEAD (see `git log`), with git metadata. You review; you do not fix. Do not modify `src/`, `tests/`, `toolbox/`, `scenarios/` or `proof/`. Put scratch files only under `./review_scratch/`, which is git-ignored by `.git/info/exclude`.
 
 ## Context
 - The T7 measurement and DR-0023 passed your round 2, unconditionally, at 8fe709f.
@@ -21,9 +21,11 @@ The snapshot is the current directory: a git clone at commit 0f95de3, with git m
 - **Threat model** (DR-0019 B, DR-0022 B): bad simulator, reference, threshold and workflow *data* are in scope. Deliberate modification of validator code or in-memory state is out of scope. A finding is blocking only if it has a concrete effect on a check, a reported value, an acceptance decision or a physical invariant (DR-0020).
 
 ## Changes to review
-`./R3.diff` covers 77995b9..0f95de3. Of the commits:
+`./R3.diff` covers 77995b9..HEAD. Of the commits:
 - 27e5b8b is the implementation.
 - 0f95de3 adds the golden record, its pin and the archived evidence.
+- 777d1f3 makes the M2 Proof's `Gates` load and validate the golden itself, and adds fail-closed Proof tests.
+- The last commit adds this prompt.
 
 The files are:
 - `proof/thresholds/m2.json` and `src/tars/validation/approved_digests.py`;
