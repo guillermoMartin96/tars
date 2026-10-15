@@ -350,3 +350,7 @@ Recorded in full in ADR-0008, "Tech Lead decisions".
 - **Change from this document's proposal:** the fifth layer is Ground/Operations, not Verification Infrastructure. The §3 diagram and §3.2 table above are kept as originally proposed. Where verification sits is open decision ADR-0008 AT-1; the proposal is that it becomes a cross-cutting concern.
 - **Still open:** ADR-0008 AT-1…AT-7.
 
+## 13. Addendum (2026-10-15, M3 planning checkpoint)
+- **Planning constraint PC-1** (Tech Lead): revisit the language/runtime decision before implementing software intended to cross from simulator/ground tooling into flight-runtime or embedded execution. Recorded in ADR-0008.
+- **AT-1** was investigated as a hypothesis (verification is cross-cutting; Ground/Operations remains the fifth runtime layer). The analysis is in ADR-0008. It is not a decision.
+- **AT-2…AT-7, U2 and U3 remain open.** M3 (J2 + drag) is Python only and does not depend on them. Its design (DR-0026 on `milestone-3-planning`) stays within TL-6…TL-9.

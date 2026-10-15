@@ -59,6 +59,57 @@ Items of the original proposal **not** decided by the Tech Lead remain **PROPOSE
 | AT-6 | **Scope of "preparation"** (TL-8) | Some preparation would change validated M2 behavior: fixed capacities for the burn queue and command history, a proven loop bound or closed form in `plan_burn` | **PROPOSED:** documentation and design only under TL-8. Any change to simulator behavior, contracts or evidence needs its own approval and a Proof re-run |
 | AT-7 | **Milestone for reconsideration** (RES-0001 U3) | No roadmap document exists | Open: Tech Lead |
 
+### Planning constraint (Tech Lead, 2026-10-15; recorded at the M3 planning checkpoint)
+| # | Constraint | Status |
+|---|---|---|
+| PC-1 | "Revisit the language/runtime decision before implementing software intended to cross the boundary from simulator/ground tooling into flight-runtime or embedded execution." | **ACCEPTED** (Tech Lead instruction, 2026-10-15). It complements "Reconsider when" below: PC-1 is a gate before such work starts, independent of milestone numbering |
+
+### Status of AT-1…AT-7 at the M3 planning checkpoint (2026-10-15)
+All remain **OPEN**. M3 (J2 + drag, Python only) needs none of them answered. DR-0026 §7 (on `milestone-3-planning`) keeps M3 design within TL-6…TL-9: pure force functions over plain fixed-size data, and a canonical physics identity. No FFI, ABI, adapter or migration.
+| # | Status | Change since 27ad862 |
+|---|---|---|
+| AT-1 | OPEN, investigated as a **hypothesis** (below) | Analysis added; no decision |
+| AT-2 | OPEN (BLOCKED ON OWNER; with the crew/permissions milestone) | None |
+| AT-3 | OPEN, PROPOSED handling unchanged | None |
+| AT-4 | OPEN (BLOCKED ON OWNER) | None |
+| AT-5 | OPEN (BLOCKED ON OWNER; requirements-based DR) | None |
+| AT-6 | OPEN, PROPOSED handling unchanged | None |
+| AT-7 | OPEN (BLOCKED ON OWNER); see PC-1, which now bounds it from the other side | PC-1 recorded |
+
+### AT-1 investigation: "Verification is a cross-cutting concern rather than one of the five runtime layers; Ground/Operations remains the fifth runtime layer" (HYPOTHESIS; not an approved decision)
+**Definitions used.**
+- A *runtime layer* is a partition of the operating system of systems. It has runtime inputs and outputs, a place on the command/telemetry path, and an owner.
+- *Verification* means development-time and acceptance-time evidence: oracles, references, the snapshot, Proof runs, SIL/HIL harnesses, independent review. It is distinct from *runtime assurance*: onboard re-validation of commands, limit monitoring and fault management.
+
+**Evidence for the hypothesis (repository, 2026-10-15).**
+1. **Verification already spans every existing component without being on the runtime path.**
+   - `tars.validation` and `toolbox/` validate `tars.sim` (dynamics, propulsion), `tars.events` (contracts) and the runner.
+   - The static guard `tars.validation.architecture` forbids the physics core from importing `tars.validation`. The dependency points only from verification to what it verifies, which is the defining property of a cross-cutting concern rather than a layer.
+2. **Each of the five accepted layers needs its own verification:**
+   - Flight Core: unit oracles, Proof, SIL/HIL;
+   - Mission Laboratory: references, the snapshot, cross-platform gates;
+   - AI Navigator: evaluation harnesses, safety-gate tests;
+   - Hardware Abstraction: HIL and interface conformance;
+   - Ground/Operations: procedure and command-path validation.
+
+   Placing verification as a peer layer would leave it with no runtime inputs or outputs of its own.
+3. **The runtime-assurance functions that look like "verification" already have homes in accepted decisions:**
+   - command re-validation and fault handling belong to the Flight Core (TL-5; proposal item 1);
+   - authorization belongs where AT-2 places it.
+
+   Moving them into a verification layer would contradict TL-5's independence requirement.
+
+**Evidence against, or risks.**
+- **Diffused ownership.** A concern owned by "everyone" can be owned by no one. The mitigation is an explicit verification owner and plan per layer, plus a project-level Proof owner, as `proof/` already provides.
+- **HIL/SIL rigs are physical or ground infrastructure.** They might be argued into Ground/Operations, but they serve development and acceptance, not operations.
+- **Some standards organize verification as a separate discipline with its own lifecycle artifacts.** This is compatible with a cross-cutting concern; it does not require a runtime layer. Not checked against any specific standard, because AT-4 is open.
+
+**What would confirm or refute it.**
+- **Confirm:** when the authorization layer (AT-2) and the Navigator exist, every verification element is either (a) development or acceptance tooling with no runtime path, or (b) runtime assurance already owned by Flight Core or authorization.
+- **Refute:** an element that must run in operations on the command/telemetry path and belongs to no accepted layer.
+
+**Engineer's assessment (PROPOSED):** the hypothesis is consistent with the repository's current structure and with TL-3/TL-5. Recommend recording it as the working assumption for documentation, and confirming it at AT-2 time. **Not approved; AT-1 remains open.**
+
 ## Decision (as proposed, 2026-10-14)
 1. **Adopt the target partition** (RES-0001 §3): Flight Core, Mission Laboratory, AI Navigator, Hardware Abstraction, Verification Infrastructure. Use the advisory/authority rules of §3.3:
    - the AI produces proposals only;
