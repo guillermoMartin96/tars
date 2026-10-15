@@ -10,7 +10,7 @@
 | Baseline commit | **`main` = `d92ab894907d06b2b13aefff6c005caa0026a68f`** ("Merge pull request #3 …"; parents `63bec8d`, `f05bc1e`) | `git rev-parse origin/main`, `git log` |
 | Merge content | The tree of `d92ab89` is identical to the reviewed final candidate `f05bc1e` | `git diff f05bc1e d92ab89`: empty |
 | CI on the baseline | Run 38799635788 (push, `d92ab89`): `check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`, all success. Three-platform gate 7.23e-6 m / 8.43e-9 m/s | `gh run view` |
-| M2 Proof | 228/228 in the M2 evidence (`proof/records/evidence/M2/`, run at `017d7f6`). The tree is unchanged in code since then, and the pre-merge re-run at `f05bc1e` gave 228/228. A fresh re-run at `d92ab89` is recorded in §1.1 | Evidence files; fresh re-run |
+| M2 Proof | 228/228 in the M2 evidence (`proof/records/evidence/M2/`, run at `017d7f6`). **Re-run at `d92ab89`: 228/228, identical check by check (§1.1)** | Evidence files; fresh re-run |
 | M1 golden | `events_sha256` `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` | `proof/references/m1_final_state.json`; re-run in §1.1 |
 | Pinned digests | m1.json `446e75ee…`, m2.json `9d4eab47…`, GMAT M2 manifest `f8d6bd78…`, snapshot `a2cddf4b…`, M2 golden `dc3baf7a…` | sha256 of the blobs at `d92ab89` equals `src/tars/validation/approved_digests.py` |
 | **M3 implementation started?** | **No.** Checked as follows: | |
@@ -22,7 +22,14 @@
 **Note on the prompt's branch name:** the instruction mentions `research/flight-architecture`. The branch that exists is `research/flight-software-architecture` (head `27ad862` before this checkpoint). It is treated as the same branch. This is a naming difference, not a conflict.
 
 ### 1.1 Fresh baseline re-run at `d92ab89` (detached worktree, clean)
-_Filled in below from the run log; see "Baseline re-run result"._
+Run on 2026-10-15 in a detached worktree at `d92ab894907d06b2b13aefff6c005caa0026a68f` with a clean tree. Host: macOS 26.2 x86_64 (i9-9880H), `uv sync --locked`.
+| Check | Result |
+|---|---|
+| `toolbox/validators/cross_platform.py` (M1 golden) | PASS; final position and velocity difference 0.0 m and 0.0 m/s; `bit_identical_to_golden` = 1 |
+| `toolbox/validators/determinism.py` (M1, cross-process) | PASS; both runs `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` |
+| `toolbox/validators/m2_proof.py` | **PASS, 228/228**, thresholds approved. **Identical to `proof/records/evidence/M2/m2_proof_report.json` in every check's validator, metrics, thresholds and verdict** |
+
+The run outputs were kept in the session scratchpad and are not committed: they would duplicate the accepted M2 evidence, which this checkpoint must not alter.
 
 ## 2. Frozen historical evidence (class A): must remain unchanged
 Each entry is identified by its git object id at `d92ab89` (`git rev-parse d92ab89:<path>`; a tree id covers every file below it). "Unchanged" means: same object id, and the same pinned digest where one exists.
