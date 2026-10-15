@@ -8,7 +8,7 @@ The repository has no multi-milestone roadmap document. Milestones are authorize
 |---|---|---|
 | M1 Orbit | (predates this directory) [Proof record](../../proof/records/M1-orbit.md) | PASS, merged |
 | M2 Propulsion & Orbital Maneuvers | [M2-propulsion.md](M2-propulsion.md), [Proof record](../../proof/records/M2-propulsion.md) | PASS; accepted by the Tech Lead 2026-10-15; merge to `main` authorized (PR #3) |
-| M3 | not defined | A planning proposal follows M2's acceptance. Nothing is authorized |
+| M3 | PROPOSED (not authorized) | Planning proposal: [M3-proposal.md](M3-proposal.md). Awaiting the Tech Lead's objective decision (G0). Nothing is authorized |
 
 ## Known forward requirements (recorded, not authorized)
 These are the only forward-looking commitments on record. They are not a roadmap: milestone objectives beyond M2 have not been defined in this repository.
