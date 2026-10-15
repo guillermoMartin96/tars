@@ -1,6 +1,6 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T1–T7 COMPLETE (T7 accepted at `963dbe7`, 2026-10-14). DR-0023 approved and applied: `proof/thresholds/m2.json` is **approved**, FU-1 closed, three-platform final-state gate in CI. **T8** (full Proof, Proof record, README, external review) evaluated at `c304b53`; see `proof/records/M2-propulsion.md`. Draft PR #3, not merged.
+**Status:** T1–T7 COMPLETE (T7 accepted at `963dbe7`, 2026-10-14). DR-0023 approved and applied: `proof/thresholds/m2.json` is **approved**, FU-1 closed, three-platform final-state gate in CI. **T8** (full Proof, Proof record, README, external review) evaluated at `017d7f6`; see `proof/records/M2-propulsion.md`. Draft PR #3, not merged.
 - M2 completion and the merge to `main` need separate Tech Lead authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  

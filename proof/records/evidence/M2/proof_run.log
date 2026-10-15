@@ -1,13 +1,13 @@
-revision: c304b53f96b2119e836aeb3fa79415454169649a
+revision: 017d7f63af3b052c834fe79922b1da484987d2c3
 branch: milestone-2-propulsion-f90f9ba4
-date_utc: 2026-10-15T00:18:11Z
+date_utc: 2026-10-15T01:27:01Z
 working_tree_clean_excluding_evidence: yes
 == uv sync --locked: /Users/guillermomartin/Library/Python/3.9/bin/uv sync --locked
 Resolved 15 packages in 6ms
-Checked 14 packages in 2ms
+Checked 14 packages in 5ms
    exit=0
-== m2 cross-platform record (this platform): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m2_cross_platform.py collect --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m2_final_states_record.json
-wrote /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m2_final_states_record.json: platform macos-x86_64 (Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz), revision c304b53f96b2119e836aeb3fa79415454169649a, clean tree True
+== m2 cross-platform record (this platform): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m2_cross_platform.py collect --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m2_final_states_record.json
+wrote /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m2_final_states_record.json: platform macos-x86_64 (Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz), revision 017d7f63af3b052c834fe79922b1da484987d2c3, clean tree True
    exit=0
 == ruff check: /Users/guillermomartin/Library/Python/3.9/bin/uv run ruff check .
 All checks passed!
@@ -44,14 +44,14 @@ tests/test_simulator.py::test_state_with_overflowing_norm_is_a_non_finite_failur
     sqnorm = x.dot(x)
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-1185 passed, 3 warnings in 1694.93s (0:28:14)
+1185 passed, 3 warnings in 1694.76s (0:28:14)
    exit=0
 == m1 determinism (cross-process): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py
 {"validator": "determinism_cross_process", "passed": true, "sha256": ["7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4", "7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4"]}
    exit=0
-== m1 cross-platform: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m1_cross_platform.json"
+== m1 cross-platform: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m1_cross_platform.json"
    exit=0
-== m1_proof (non-GMAT): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m1_non_gmat.json
+== m1_proof (non-GMAT): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m1_non_gmat.json
 [PASS] mission: failed=0, orbits_short_of_target=0
 [PASS] invariants: energy_rel_drift_max=3.82693e-10, angular_momentum_rel_drift_max=1.91347e-10, eccentricity_vector_drift_max=5.85589e-10, sma_drift_max_m=0.00253654
 [PASS] kepler_reference: position_error_max_m=0.298364, position_error_final_m=0.298364, velocity_error_max_mps=0.000349092, velocity_error_final_mps=0.000349092
@@ -67,9 +67,9 @@ convergence (dt s -> position error m, |dE/E|):
         5 -> 1.4905e-02, 1.194e-11
       2.5 -> 8.2243e-04, 3.974e-13
         1 -> 1.5233e-05, 1.028e-14
-thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m1_non_gmat.json
+thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m1_non_gmat.json
    exit=0
-== gmat m1 compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/gmat_m1_reference.json"
+== gmat m1 compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/gmat_m1_reference.json"
    exit=0
 == m2 determinism m2_burn_to_depletion: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py --scenario scenarios/m2_burn_to_depletion.json
 {"validator": "determinism_cross_process", "passed": true, "sha256": ["6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12", "6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12"]}
@@ -83,7 +83,7 @@ thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380
 == m2 determinism m2_retrograde_burn: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py --scenario scenarios/m2_retrograde_burn.json
 {"validator": "determinism_cross_process", "passed": true, "sha256": ["1c0037c202bb1d8663a5b9d6affe1ecfbc94b400c2db494cf3d3d636db1b5848", "1c0037c202bb1d8663a5b9d6affe1ecfbc94b400c2db494cf3d3d636db1b5848"]}
    exit=0
-== gmat m2 compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m2.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/gmat_m2_reference.json"
+== gmat m2 compare: sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m2.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/gmat_m2_reference.json"
    exit=0
 == reference snapshot verify-baseline (DR-0021): /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/reference_snapshot.py verify-baseline toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz
 [PASS] cross_platform_golden: violations=0
@@ -314,7 +314,7 @@ thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380
 [PASS] thresholds_all_consumed: violations=0
 [PASS] thresholds_cover_all_metrics: violations=0
 [PASS] report_only_metrics_finite: violations=0
-thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmpo0z151rd/m2.json
+thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp1fdlq_57/m2.json
   independent agreement, max burn anchor end m: 6.51e-07
   independent agreement, max burn anchor ticks m: 6.51e-07
   independent agreement, max burn segment end m: 6.47e-07
@@ -338,18 +338,18 @@ thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380
   independent agreement, max simpson rel: 0
 baseline verification: PASS
    exit=0
-== m2_proof (O1-O9, contract, golden cross-platform): sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/m2_proof.py --out "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m2_proof_report.json" > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/m2_proof_stdout.txt"
+== m2_proof (O1-O9, contract, golden cross-platform): sh -c "/Users/guillermomartin/Library/Python/3.9/bin/uv" run python toolbox/validators/m2_proof.py --out "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m2_proof_report.json" > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/m2_proof_stdout.txt"
    exit=0
-== run_mission m2_burn_to_depletion: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_burn_to_depletion
-m2_burn_to_depletion: success, 9 orbits, events sha256 6bd23e707020686d... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_burn_to_depletion
+== run_mission m2_burn_to_depletion: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_burn_to_depletion
+m2_burn_to_depletion: success, 9 orbits, events sha256 6bd23e707020686d... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_burn_to_depletion
    exit=0
-== run_mission m2_invalid_commands: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_invalid_commands
-m2_invalid_commands: success, 9 orbits, events sha256 7e52dd1d276b309c... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_invalid_commands
+== run_mission m2_invalid_commands: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_invalid_commands
+m2_invalid_commands: success, 9 orbits, events sha256 7e52dd1d276b309c... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_invalid_commands
    exit=0
-== run_mission m2_prograde_burn: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_prograde_burn
-m2_prograde_burn: success, 9 orbits, events sha256 42316356a4c2b093... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_prograde_burn
+== run_mission m2_prograde_burn: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_prograde_burn
+m2_prograde_burn: success, 9 orbits, events sha256 42316356a4c2b093... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_prograde_burn
    exit=0
-== run_mission m2_retrograde_burn: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_retrograde_burn
-m2_retrograde_burn: success, 10 orbits, events sha256 1c0037c202bb1d86... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.xHtAqomeFh/mission_m2_retrograde_burn
+== run_mission m2_retrograde_burn: /Users/guillermomartin/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_retrograde_burn
+m2_retrograde_burn: success, 10 orbits, events sha256 1c0037c202bb1d86... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.zVkbzfPRdk/mission_m2_retrograde_burn
    exit=0
 overall: PASS

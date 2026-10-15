@@ -234,10 +234,11 @@
     - The three-platform gate is the CI job `m2-cross-platform` and is not part of the script.
   - README M2 section (`c304b53`).
   - This section.
-- **CI at the proven revision:** push run 38659242411: `check` on ubuntu-latest, macos-latest and macos-15-intel, and `m2-cross-platform`, all success.
-- **Proven revision:** `c304b53` (clean tree), the full run of 2026-10-15T00:18Z on the reference host: macOS x86_64, i9-9880H, Python 3.12.15, NumPy 2.5.3, SciPy 1.18.1, `uv.lock` sha256 `6d784550…`. Later commits change only records and evidence.
+- **Proven revision:** `017d7f6` (clean tree), the full run of 2026-10-15T01:27Z with the review-corrected script, on the reference host: macOS x86_64, i9-9880H, Python 3.12.15, NumPy 2.5.3, SciPy 1.18.1, `uv.lock` sha256 `6d784550…`. Later commits change only records and evidence.
+  - An earlier full run at `c304b53`, made with the script before the review fixes, gave the same result. Its `m2_proof_report.json` is byte-identical to the one at `017d7f6`.
+  - CI at `c304b53` (push run 38659242411): `check` on ubuntu-latest, macos-latest and macos-15-intel, and `m2-cross-platform`, all success.
 - **Evidence:** `proof/records/evidence/M2/`:
-  - `proof_run.log` (every step exit 0, `overall: PASS`);
+  - `proof_run.log` (all 20 steps exit 0, `overall: PASS`);
   - `m2_proof_report.json` and `m2_proof_stdout.txt`;
   - `gmat_m1_reference.json` and `gmat_m2_reference.json`;
   - `m1_non_gmat.json` and `m1_cross_platform.json`;
@@ -264,7 +265,7 @@
 | `m2_cross_platform.py collect` | clean-tree record; Δ = 0 against the golden (the same host) |
 
 ### M2 Proof requirements (M2 plan §10)
-Every gated value is from `m2_proof_report.json` at `c304b53`, worst case over the missions it applies to. Limits are the approved `m2.json` values. The highest utilization of any limit is 0.66 (O8 order deviation, 0.330 of 0.5).
+Every gated value is from `m2_proof_report.json` at `017d7f6`, worst case over the missions it applies to. Limits are the approved `m2.json` values. The highest utilization of any limit is 0.66 (O8 order deviation, 0.330 of 0.5).
 
 | # | Requirement | Result | Evidence |
 |---|---|---|---|
@@ -273,7 +274,7 @@ Every gated value is from `m2_proof_report.json` at `c304b53`, worst case over t
 | P3 | Prograde raises, retrograde lowers SMA/energy/apoapsis; plane unchanged (O7) | ✅ Sign violations 0; plane rotation ≤ 2.7e-16 rad and inclination change ≤ 3.3e-16 rad (1e-12) | `o7_direction` |
 | P4 | Agreement with analytic and independent references (O3–O6, O8) | ✅ O3 velocity 1.8e-14 (1e-12), order deviation 0.195 (0.5). O4 vs DOP853 ≤ 0.313 m / 3.64e-4 m/s (0.6 m / 7e-4 m/s). O5 coast ≤ 0.314 m (0.6). O6 \|p − 2\| ≤ 0.0041 (0.05), slice ratio 2.6e-6 (1e-5). O8 order deviation ≤ 0.330 (0.5) | `o3`…`o8`; VAL-0013 |
 | P5 | GMAT finite burn within limits; configuration exact (O9); REV-012 investigated | ✅ GMAT vs DOP853 4.66e-6 m (3e-5); GMAT coast vs Kepler 4.0e-6 m (1e-4); GMAT mass 2.25e-11 kg (1.3e-9). Simulator vs GMAT 0.313 m (0.6), burn boundaries 8.0e-3 m (1.6e-2), node crossings 3.99e-5 s (8e-5). Reference integrity 0 violations; snapshot verified. REV-012 resolved (VAL-0010, DR-0016) | `o9_gmat`, `o9_reference_integrity`, `gmat_m2_reference.json`; VAL-0014 |
-| P6 | Byte-identical replay on the same platform; cross-platform within approved bounds | ✅ Cross-process byte identity for the four M2 scenario files and M1; in-process determinism for all six missions. Golden cross-platform 0 violations (Δ = 0 on the reference host). Three-platform gate: VAL-0017 (max 7.23e-6 m / 8.43e-9 m/s vs 1e-4 / 1e-7); at the proven revision, CI run 38659242411 job `m2-cross-platform` PASS: 7.23e-6 m / 8.43e-9 m/s, evidence violations 0 (macOS x86_64 i7-8700B, Linux x86_64 EPYC 7763, macOS arm64 M1) | `determinism`, `cross_platform_golden`, `cross_platform`; VAL-0017 |
+| P6 | Byte-identical replay on the same platform; cross-platform within approved bounds | ✅ Cross-process byte identity for the four M2 scenario files and M1; in-process determinism for all six missions. Golden cross-platform 0 violations (Δ = 0 on the reference host). Three-platform gate: VAL-0017 (max 7.23e-6 m / 8.43e-9 m/s vs 1e-4 / 1e-7); at `c304b53`, CI run 38659242411 job `m2-cross-platform` PASS: 7.23e-6 m / 8.43e-9 m/s, evidence violations 0 (macOS x86_64 i7-8700B, Linux x86_64 EPYC 7763, macOS arm64 M1) | `determinism`, `cross_platform_golden`, `cross_platform`; VAL-0017 |
 | P7 | Invalid commands rejected with the correct reason and no state change; depletion exact; propellant never negative | ✅ All 10 rejection codes exercised (invalid-commands and its empty-tank and no-propulsion variants); `rejections_change_nothing` 0 violations (4 control comparisons); depletion D1a exact (O1 residual) | `rejections_change_nothing`, `identities`, `outcomes`; `tests/test_m2_validation.py` |
 | P8 | No setters for r/v/mass/propellant; commands only via `submit()`; core scan clean; no LLM/3D dependencies | ✅ Architecture scan clean (`test_repository_passes_architecture_scan`). `test_no_public_api_mutates_physical_state`, `test_simulator_state_is_read_only_to_direction_laws_and_forces` and `test_force_models_cannot_mutate_simulator_state` pass. Runtime dependencies are only NumPy and Pydantic | pytest; `pyproject.toml` |
 | P9 | Schema-valid events; JSONL round-trips | ✅ Event schema and round-trip tests pass (`tests/test_events.py`, `tests/test_commands.py`); the Proof re-validates every event (`identities`, `event_order`) | pytest; report |
@@ -292,7 +293,7 @@ Every gated value is from `m2_proof_report.json` at `c304b53`, worst case over t
 | Engineering decisions recorded | ✅ DR-0010…0023; ADR-0007 |
 | External review / findings / no open Critical-High | ⏳ P12 |
 | No secrets, debug artifacts or accidental files | ✅ `runs/` is git-ignored; evidence is intentional |
-| Branch pushed; revision identified | ✅ `c304b53` |
+| Branch pushed; revision identified | ✅ `017d7f6` |
 
 ### Discrepancies (carried, all explained)
 | ID | Description | Classification | Status |

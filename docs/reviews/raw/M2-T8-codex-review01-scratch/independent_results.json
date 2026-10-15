@@ -1,0 +1,116 @@
+[
+  {
+    "args": [
+      "toolbox/validators/m1_proof.py",
+      "--out",
+      "review_scratch/m1.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/validators/determinism.py"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/validators/cross_platform.py"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/gmat_m1.py",
+      "compare"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/gmat_m2.py",
+      "compare"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/reference_snapshot.py",
+      "verify-baseline",
+      "toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_burn_to_depletion.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/run_mission.py",
+      "--scenario",
+      "scenarios/m2_burn_to_depletion.json",
+      "--out",
+      "review_scratch/mission_m2_burn_to_depletion"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_invalid_commands.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/run_mission.py",
+      "--scenario",
+      "scenarios/m2_invalid_commands.json",
+      "--out",
+      "review_scratch/mission_m2_invalid_commands"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_prograde_burn.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/run_mission.py",
+      "--scenario",
+      "scenarios/m2_prograde_burn.json",
+      "--out",
+      "review_scratch/mission_m2_prograde_burn"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_retrograde_burn.json"
+    ],
+    "returncode": 0
+  },
+  {
+    "args": [
+      "toolbox/scripts/run_mission.py",
+      "--scenario",
+      "scenarios/m2_retrograde_burn.json",
+      "--out",
+      "review_scratch/mission_m2_retrograde_burn"
+    ],
+    "returncode": 0
+  }
+]
