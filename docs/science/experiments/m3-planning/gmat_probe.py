@@ -14,6 +14,8 @@ Cases (all from the M1 initial state, propagated 53 700 s in one Propagate comma
   drag_sph_2026    degree-0 custom field + Exponential drag, Earth.Flattening = 0
   drag_geod_2026   the same with the default flattening (geodetic altitude)
   drag_sph_2000    drag_sph at epoch 2000-01-01 12:00 TT
+  *_TOE            the same, with the initial state given and the final state reported in GMAT's
+                   true-of-epoch axes (TOEEq) fixed at the scenario epoch
 Each GMAT final state is compared with SciPy DOP853 runs of the Python candidate models in
 perturbation_experiment.py.
 
@@ -55,7 +57,8 @@ def cof(gm: float, radius: float, c20: float) -> str:
     )
 
 
-def script(epoch: str, cof_path: str, degree: int, drag: bool, flattening: float | None, report: str) -> str:
+def script(epoch: str, cof_path: str, degree: int, drag: bool, flattening: float | None, report: str,
+           toe_a1mjd: float | None = None) -> str:
     r, v = [float(x) for x in pe.R0 / 1000.0], [float(x) for x in pe.V0 / 1000.0]
     lines = [
         "GMAT Earth.Mu = 398600.4418;",
@@ -63,11 +66,18 @@ def script(epoch: str, cof_path: str, degree: int, drag: bool, flattening: float
     ]
     if flattening is not None:
         lines.append(f"GMAT Earth.Flattening = {flattening!r};")
+    cs = "EarthMJ2000Eq"
+    if toe_a1mjd is not None:
+        # True-of-epoch axes fixed at the scenario epoch: GMAT's J2 axis at the epoch is then
+        # (up to polar motion and pole drift during the run) this frame's z axis.
+        cs = "TOE"
+        lines += ["Create CoordinateSystem TOE;", "GMAT TOE.Origin = Earth;", "GMAT TOE.Axes = TOEEq;",
+                  f"GMAT TOE.Epoch = {toe_a1mjd!r};"]
     lines += [
         "Create Spacecraft Sat;",
         "GMAT Sat.DateFormat = TTGregorian;",
         f"GMAT Sat.Epoch = '{epoch}';",
-        "GMAT Sat.CoordinateSystem = EarthMJ2000Eq;",
+        f"GMAT Sat.CoordinateSystem = {cs};",
         "GMAT Sat.DisplayStateType = Cartesian;",
         f"GMAT Sat.X = {r[0]!r};", f"GMAT Sat.Y = {r[1]!r};", f"GMAT Sat.Z = {r[2]!r};",
         f"GMAT Sat.VX = {v[0]!r};", f"GMAT Sat.VY = {v[1]!r};", f"GMAT Sat.VZ = {v[2]!r};",
@@ -107,11 +117,9 @@ def script(epoch: str, cof_path: str, degree: int, drag: bool, flattening: float
         "GMAT R.Precision = 16;",
         "GMAT R.WriteHeaders = false;",
         "BeginMissionSequence;",
-        "Report R Sat.ElapsedSecs Sat.EarthMJ2000Eq.X Sat.EarthMJ2000Eq.Y Sat.EarthMJ2000Eq.Z "
-        "Sat.EarthMJ2000Eq.VX Sat.EarthMJ2000Eq.VY Sat.EarthMJ2000Eq.VZ;",
+        f"Report R Sat.ElapsedSecs Sat.{cs}.X Sat.{cs}.Y Sat.{cs}.Z Sat.{cs}.VX Sat.{cs}.VY Sat.{cs}.VZ;",
         f"Propagate Prop(Sat) {{Sat.ElapsedSecs = {T_END}}};",
-        "Report R Sat.ElapsedSecs Sat.EarthMJ2000Eq.X Sat.EarthMJ2000Eq.Y Sat.EarthMJ2000Eq.Z "
-        "Sat.EarthMJ2000Eq.VX Sat.EarthMJ2000Eq.VY Sat.EarthMJ2000Eq.VZ;",
+        f"Report R Sat.ElapsedSecs Sat.{cs}.X Sat.{cs}.Y Sat.{cs}.Z Sat.{cs}.VX Sat.{cs}.VY Sat.{cs}.VZ;",
     ]
     return "\n".join(lines) + "\n"
 
@@ -155,6 +163,8 @@ def main() -> None:
     py["drag_geod_z"] = pe.dop(pe.make_accel(mu, re, drag=b, altitude="geodetic"), pe.R0, pe.V0, T_END).y[:, -1]
 
     e2026, e2000 = "01 Jan 2026 00:00:00.000", "01 Jan 2000 12:00:00.000"
+    # A1 = TT - 32.184 s + 0.0343817 s (GMAT A1 definition); GMAT ModJulian = JD - 2430000.
+    a1_2026 = 31041.5 - (32.184 - 0.0343817) / 86400.0
     jgm3 = str(CONSOLE.parent.parent / "data/gravity/earth/JGM3.cof")
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
@@ -168,6 +178,10 @@ def main() -> None:
             "c20zero_fileGM415": (dict(epoch=e2026, cof_path=str(tmp / "zero_fileGM415.cof"), degree=2, drag=False, flattening=None), "kepler_gm415"),
             "drag_sph_2026": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=0.0), "drag_sph_z"),
             "drag_geod_2026": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=None), "drag_geod_z"),
+            "j2_custom_2026_TOE": (dict(epoch=e2026, cof_path=str(tmp / "j2.cof"), degree=2, drag=False, flattening=None, toe_a1mjd=a1_2026), "j2_z"),
+            "drag_sph_2026_TOE": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=0.0, toe_a1mjd=a1_2026), "drag_sph_z"),
+            "drag_geod_2026_TOE_defaultf": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=None, toe_a1mjd=a1_2026), "drag_geod_z"),
+            "drag_geod_2026_TOE_wgs84f": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=pe.F_WGS84, toe_a1mjd=a1_2026), "drag_geod_z"),
             "drag_sph_2000": (dict(epoch=e2000, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=0.0), "drag_sph_z"),
         }
         for name, (kw, ref) in cases.items():

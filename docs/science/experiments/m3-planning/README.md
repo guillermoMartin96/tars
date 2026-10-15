@@ -74,18 +74,21 @@ The GMAT probe was run twice, and both runs gave identical numbers.
 | Case | Δ position / Δ velocity | Reading |
 |---|---|---|
 | `c20zero_fileGM415`: a `.cof` with C20 = 0 and GM 3.986004415e14, while `Earth.Mu` = 3.986004418e14 | 1.4e-5 m vs a Kepler orbit with GM 4415; 0.627 m vs WGS 84 | **GMAT's gravity field applies the coefficient file's GM, not `Earth.Mu`.** |
-| `j2_custom_2026`: custom `.cof` with the WGS 84 GM and radius and the EGM2008 tide-free C20 | 123.5 m / 1.153 m/s | GMAT evaluates J2 in its Earth-fixed frame (IAU-1976/FK5 pole of date). The 521″ precession tilt alone reproduces 117 m / 1.149 m/s. |
-| `j2_custom_2000`: the same at epoch 2000-01-01 12:00 TT | 25.4 m / 0.031 m/s | The residual is consistent with nutation and polar motion (not separated here). |
+| `j2_custom_2026`: custom `.cof` with the WGS 84 GM and radius and the EGM2008 tide-free C20; state in EarthMJ2000Eq | 123.5 m / 1.153 m/s | GMAT evaluates J2 in its Earth-fixed frame (IAU-1976/FK5 pole of date). The 521″ precession tilt alone reproduces 117 m / 1.149 m/s. |
+| `j2_custom_2000`: the same at epoch 2000-01-01 12:00 TT | 25.4 m / 0.031 m/s | Residual from nutation and polar motion at J2000. |
 | `j2_jgm3_2026`: GMAT's own JGM3.cof vs Python with JGM-3 GM and R | 123.5 m | Same pole effect; the constants matched. |
-| `drag_sph_2026` / `drag_sph_2000`: `Exponential` atmosphere, `Earth.Flattening = 0` | 1.38 / 1.12 m | About 1 m residual against a 363 km drag displacement (≈ 3e-6 relative); **not yet explained** (pole of date, ω_E, band selection and mass handling are candidates). |
-| `drag_geod_2026`: the same with GMAT's default flattening | 4.33 m | Geodetic-height implementations differ in detail (axis of date and algorithm). |
+| **`j2_custom_2026_TOE`**: initial and final states in GMAT **true-of-epoch axes (TOEEq) fixed at the scenario epoch** | **0.19 m / 4.5e-4 m/s** | Expressing the state in the axes whose z is GMAT's pole at the epoch removes the pole offset. The residual is consistent with polar motion and pole motion during the run (not separated). |
+| `drag_sph_2026` / `drag_sph_2000`: `Exponential` atmosphere, `Earth.Flattening = 0`, EarthMJ2000Eq | 1.38 / 1.12 m | The atmosphere rotates about GMAT's pole of date. |
+| **`drag_sph_2026_TOE`**: the same in TOEEq axes | **0.0020 m / 2.4e-6 m/s** | **Exact-configuration match.** The 1.38 m above was the rotation axis. |
+| `drag_geod_2026`: GMAT's default flattening, EarthMJ2000Eq | 4.33 m | Pole of date and GMAT's default flattening. |
+| `drag_geod_2026_TOE_defaultf`: TOEEq, GMAT's default flattening | 1.85 m | **GMAT's default Earth flattening is not the WGS 84 value.** |
+| **`drag_geod_2026_TOE_wgs84f`**: TOEEq, `Earth.Flattening` = 1/298.257223563 | **0.38 m / 4.4e-4 m/s** | Remaining residual: polar motion (GMAT's ellipsoid is ITRF-fixed) and/or a different geodetic-height algorithm (not separated). |
 
 ## Findings that drive the Decision Requests
-1. **The J2 axis is a definition, not a detail.** A J2 about the frame z axis (SCI-0003 frame) and GMAT's J2 about the pole of date differ by 123 m after 10 orbits at a 2026 epoch, and by 25 m at J2000. That is 80–400× the RK4 truncation error. GMAT cannot be an exact-configuration J2 reference unless one of these holds:
-   - TARS models the pole of date;
-   - GMAT can be configured with a body whose pole is fixed (not established);
-   - the comparison uses a derived, documented bound.
-2. **GMAT's gravity GM comes from the `.cof` file.** An exact-configuration GMAT gate needs a generated coefficient file with the project's GM, radius and C20. The informational VAL-0007 J2 runs therefore used the JGM-3 GM (3.986004415e14), not the `Earth.Mu` override in their scripts. That run is informational, and the 0.6 m effect is negligible against its 741 km result, but its metadata does not say so.
+1. **The J2 axis is a definition, not a detail.**
+   - A J2 about the frame z axis (SCI-0003 frame) and GMAT's J2 about the pole of date differ by 123 m after 10 orbits at a 2026 epoch (25 m at J2000). That is 80–400× the RK4 truncation error.
+   - **GMAT can nevertheless be an exact-configuration reference for a fixed-pole model** if states are exchanged in its true-of-epoch axes fixed at the scenario epoch. The residuals are then 0.19 m (J2), 2 mm (spherical-height drag) and 0.38 m (geodetic-height drag). Those residuals are attributed to Earth-orientation terms that the fixed-pole model deliberately omits, and must be bounded in DR-0025 before any gate uses them.
+2. **GMAT's gravity GM comes from the `.cof` file, and its default Earth flattening is not WGS 84.** An exact-configuration GMAT gate needs a generated coefficient file with the project's GM, radius and C20, and an explicit `Earth.Flattening`. The informational VAL-0007 J2 runs therefore used the JGM-3 GM (3.986004415e14), not the `Earth.Mu` override in their scripts. That run is informational, and the 0.6 m effect is negligible against its 741 km result, but its metadata does not say so.
 3. **Drag is far more sensitive to modelling choices than to integration error.**
    - 0.7 m of altitude datum moves the final state by 9 m, and 1% in B moves it by 4.8 km.
    - The altitude definition and atmosphere rotation are tens of km.
