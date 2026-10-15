@@ -1,6 +1,6 @@
 # RES-0001: Flight-software language and architecture assessment (Rust, C, hybrid)
 
-**Status:** Research only. No implementation is authorized. Proposed decision: [ADR-0008](../decisions/0008-flight-software-architecture-proposed.md) (Proposed).  
+**Status:** Research only. No implementation is authorized. Decision record: [ADR-0008](../decisions/0008-flight-software-architecture-proposed.md). Its direction was accepted by the Tech Lead on 2026-10-15 (TL-1…TL-9); the language is deferred; open items are AT-1…AT-7. See §12.  
 **Requested by:** Guillermo (Tech Lead), 2026-10-14, together with the M2 T8 authorization.  
 **Author:** implementing engineer (Level 1).  
 **Repository state assessed:** branch `milestone-2-propulsion-f90f9ba4` at `963dbe7` (T7 accepted).  
@@ -252,7 +252,7 @@ Three layers, from strictest to loosest:
    - `ln` (rocket equation, timing bound) and trigonometry must use the same implementation on both sides (for example both calling the same `libm` port), or be gated by measured tolerances.
 3. **Proof-level equivalence.**
    - The new core runs the canonical M2 missions. Its JSONL events go through the **unchanged** M2 Proof: O1–O9, the contract checks, the reference snapshot and the golden cross-platform gate.
-   - Using the existing cross-platform bound (≤ 1e-4 m, ≤ 1e-7 m/s, DR-0023) as a *cross-implementation* bound would be a **new use of an approved threshold** and needs a Tech Lead decision (§10, U4).
+   - Using the existing cross-platform bound (≤ 1e-4 m, ≤ 1e-7 m/s, DR-0023) as a *cross-implementation* bound would be a **new use of an approved threshold**. **Tech Lead decision (2026-10-15): not permitted without independent justification** (ADR-0008 TL-7).
 
 Supporting practices:
 - golden vectors exported from the reference snapshot;
@@ -308,11 +308,11 @@ The Tech Lead is asked to map this trigger to a milestone number (§10, U3).
 - A4. CPU budgets are dominated by future estimation, not propagation. Not measured.
 
 **Unresolved decisions for the Tech Lead**:
-- **U1.** Confirm that no external C core exists, so that Options A and B mean *new* C code. The request described an existing C core.
-- **U2.** Which assurance standard applies, if any: ECSS-E-ST-40C/Q-ST-80C, DO-178C or NASA-STD-8739.8. This drives the toolchain choice more than language features do.
-- **U3.** Map the reconsideration trigger (§8) to a roadmap milestone. A roadmap document would be needed.
-- **U4.** Whether the DR-0023 platform bound may be reused as a cross-implementation bound, or a new measured bound is required.
-- **U5.** Whether Step 0 items (fixed capacities, a loop-bound proof) should be scheduled in a future milestone. They change approved behavior or contracts.
+- **U1. Resolved (Tech Lead, 2026-10-15):** the repository is Python-based, with no C or Rust implementation. Options A and B would mean new code.
+- **U2. Open** (ADR-0008 AT-4). Which assurance standard applies, if any: ECSS-E-ST-40C/Q-ST-80C, DO-178C or NASA-STD-8739.8. This drives the toolchain choice more than language features do.
+- **U3. Open** (ADR-0008 AT-7). Map the reconsideration trigger (§8) to a roadmap milestone. A roadmap document would be needed.
+- **U4. Resolved (Tech Lead, 2026-10-15):** existing cross-platform limits are **not** reused as cross-language thresholds without independent justification (ADR-0008 TL-7; the method is AT-3).
+- **U5. Partly resolved (Tech Lead, 2026-10-15):** language-independent architectural preparation and documentation are permitted (TL-8). Step 0 items that change validated behavior still need separate approval (ADR-0008 AT-6).
 
 ## 11. Sources
 External sources were consulted on 2026-10-14. Vendor statements are vendor claims.
@@ -334,3 +334,19 @@ Gaps in the sources:
 - The DO-178C, ECSS and RTEMS Rust-support statuses were not verified beyond the vendor and ESA summaries above.
 - The RTIC and Embassy maturity claims come from secondary sources.
 - The tier of `riscv32imac` was taken from the official table (Tier 2); `sparc-unknown-none-elf` is Tier 3.
+
+## 12. Tech Lead decisions (2026-10-15)
+Recorded in full in ADR-0008, "Tech Lead decisions".
+- **Accepted:**
+  - Python remains the reference (TL-1).
+  - Rust is the preferred candidate for future Flight Core investigation, not a rewrite (TL-2).
+  - The five layers are **Flight Core, Mission Laboratory, AI Navigator, Hardware Abstraction and Ground/Operations** (TL-3).
+  - Deterministic authorization stands between AI recommendations and commands (TL-4).
+  - Safety and fault handling are independent of AI (TL-5).
+  - The language is deferred until hardware, real-time, numerical, memory and assurance requirements exist (TL-6).
+  - Platform limits are not reused as cross-language thresholds without justification (TL-7).
+  - Language-independent preparation and documentation only (TL-8).
+  - No C or Rust implementation (TL-9).
+- **Change from this document's proposal:** the fifth layer is Ground/Operations, not Verification Infrastructure. The §3 diagram and §3.2 table above are kept as originally proposed. Where verification sits is open decision ADR-0008 AT-1; the proposal is that it becomes a cross-cutting concern.
+- **Still open:** ADR-0008 AT-1…AT-7.
+
