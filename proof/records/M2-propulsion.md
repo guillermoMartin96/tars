@@ -1,8 +1,30 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (T1–T7 complete; T8 Proof evaluated)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers
 
-**Milestone result:** T8 Proof evaluation **PASS** at `017d7f6`: P1–P12 met (prototype definition of done), independent review unconditional PASS. M2 is **not declared complete**; that and the merge await the Tech Lead's final milestone review.
+**Result:** `PASS` (prototype definition of done). **M2 accepted as complete by the Tech Lead on 2026-10-15.**
+- **Proven revision:** `017d7f6`. The T8 full Proof meets P1–P12, and the independent review is an unconditional PASS.
+- **Acceptance conditions verified by the implementer before the merge** (2026-10-15, at merge candidate `cd8fdd8` plus this records-only commit):
+  1. The PR #3 diff contains only M2 work: T0–T8, their reviews and evidence, and post-merge notes on two M1 records. There are no research-branch files and no secrets or junk files.
+  2. Contracts, thresholds, GMAT references, golden artifacts and validation semantics are unchanged.
+     - No file under `src/`, `tests/`, `scenarios/`, `proof/thresholds/`, `proof/references/`, `toolbox/references/`, `docs/contracts/`, `toolbox/validators/` or `.github/` changed since `963dbe7`.
+     - Every pinned digest matches its file: `m1.json` `446e75ee…`, `m2.json` `9d4eab47…`, GMAT M2 manifest `f8d6bd78…`, snapshot `a2cddf4b…`, M2 golden `dc3baf7a…`.
+     - The M1 thresholds, golden and GMAT reference are identical to `main`.
+  3. M2 Proof 228/228. The evidence names `017d7f6`, and only records changed after it.
+  4. CI is green on the merge candidate.
+  5. T8 review: unconditional PASS, no open findings.
+  6. Clean working tree.
+- **Merge:** PR #3, by merge commit, the repository's established policy (PRs #1 and #2).
+- DR-0015 is now APPROVED (both conditions met).
+- **Residual risks and margins accepted unchanged:**
+  - F42 and F43 (DR-0020);
+  - unauthenticated evidence (DR-0019 B, DR-0022 B);
+  - the macOS x86_64 CI slot is the GitHub Intel runner, with the reference host entering through the golden;
+  - the O8 margin is 1.5×;
+  - the O6 margin bound is 0.0405 against 0.05;
+  - the DR-0017 bound covers timing Δv only;
+  - DR-0018 stop semantics;
+  - FU-2 stays deferred.
 - This record collects completed task evidence only (REV-013 lesson).
-- Thresholds: `proof/thresholds/m2.json` is **approved** (DR-0023, 2026-10-14; values unchanged from T5/T6). DR-0015's conditions are met (REV-012: VAL-0010/DR-0016; measurements: T5–T7, DR-0023). FU-1 is closed (DR-0023).
+- Thresholds: `proof/thresholds/m2.json` is **approved** (DR-0023, 2026-10-14; values unchanged from T5/T6). DR-0015 is APPROVED (2026-10-15): both conditions are met (REV-012: VAL-0010/DR-0016; measurements: T5–T7, DR-0023). FU-1 is closed (DR-0023).
 
 ## T1 — Standalone propulsion model: COMPLETE
 - **Code:** `src/tars/sim/propulsion.py`, `STANDARD_GRAVITY`.
@@ -279,7 +301,7 @@ Every gated value is from `m2_proof_report.json` at `017d7f6`, worst case over t
 | P8 | No setters for r/v/mass/propellant; commands only via `submit()`; core scan clean; no LLM/3D dependencies | ✅ Architecture scan clean (`test_repository_passes_architecture_scan`). `test_no_public_api_mutates_physical_state`, `test_simulator_state_is_read_only_to_direction_laws_and_forces` and `test_force_models_cannot_mutate_simulator_state` pass. Runtime dependencies are only NumPy and Pydantic | pytest; `pyproject.toml` |
 | P9 | Schema-valid events; JSONL round-trips | ✅ Event schema and round-trip tests pass (`tests/test_events.py`, `tests/test_commands.py`); the Proof re-validates every event (`identities`, `event_order`) | pytest; report |
 | P10 | M1 unchanged | ✅ Golden event-log sha256 `7a4e1877…` exact; M1 Proof PASS; GMAT M1 PASS; M1 cross-platform Δ = 0. `m1.json`, `m1_final_state.json` and the M1 GMAT reference files are unchanged against `main` | `m1_non_gmat.json`, `gmat_m1_reference.json`, `m1_cross_platform.json` |
-| P11 | SCI-0008…0012 Active; ADR for propulsion; DRs resolved | ✅ SCI-0008…0012 Active (DR-0011/0012/0014); ADR-0007 Accepted. DR-0010…0014, 0016 and 0017 resolved; DR-0018…0023 approved. DR-0015 is "conditionally approved", and both its conditions are now satisfied (REV-012 reviewed: VAL-0010, DR-0016; measurements on the implementation: T5–T7, DR-0023). Its status line is left for the Tech Lead | `docs/science/assumptions.md`, `docs/decisions/` |
+| P11 | SCI-0008…0012 Active; ADR for propulsion; DRs resolved | ✅ SCI-0008…0012 Active (DR-0011/0012/0014); ADR-0007 Accepted. DR-0010…0014, 0016 and 0017 resolved; DR-0018…0023 approved. DR-0015 was "conditionally approved" at T8 evaluation with both conditions satisfied (REV-012 reviewed: VAL-0010, DR-0016; measurements on the implementation: T5–T7, DR-0023); the Tech Lead approved it on 2026-10-15 | `docs/science/assumptions.md`, `docs/decisions/` |
 | P12 | External review completed; every finding dispositioned; no open Critical/High | ✅ T1–T7 reviews closed: T1 (review gate PASS), T2, T3, T4, T5, T6 (round 18) and T7 (round 4) all PASS, every finding dispositioned. **T8 milestone review** (`docs/reviews/M2-T8-review-01.md`): round 1 REQUEST_CHANGES (T8-F1…F5, all Medium/Low, ACCEPTED and fixed); round 2 **unconditional PASS** (Codex session `01a13d4b-a7ac-7382-aef2-0b1b8f8bbf87`, at `31f2fc1`). No Critical or High finding open | `docs/reviews/M2-*.md` |
 
 ### Standard gate (proof/PROOF.md)

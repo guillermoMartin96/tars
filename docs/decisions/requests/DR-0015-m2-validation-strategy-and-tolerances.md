@@ -1,6 +1,6 @@
 # Decision Request: M2 validation strategy, GMAT finite-burn reference, REV-012, and candidate tolerances
 
-**Status:** CONDITIONALLY APPROVED  
+**Status:** APPROVED (Tech Lead, 2026-10-15; conditionally approved 2026-10-09, both conditions met)  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-09  
 **Related milestone/issue:** Milestone 2 — Propulsion ([plan](../../milestones/M2-propulsion.md))
@@ -118,4 +118,21 @@ Measured values are from VAL-0008/0009 on the reference host, using the research
 
 **Reasoning/notes:** The REV-012 investigation was authorized the same day in an isolated worktree.  
 **Follow-up:** REV-012 findings (VAL-0010); threshold DR after T5/T6 measurements; `proof/thresholds/m2.json` only after that approval.
+
+## Final approval (Tech Lead, 2026-10-15)
+**Decision:** APPROVED. The status changes from CONDITIONALLY APPROVED to APPROVED as part of the M2 milestone acceptance. Both conditions of the 2026-10-09 resolution are met:
+
+1. **REV-012 investigated and its findings reviewed.**
+   - Root cause established in **VAL-0010**: per-command double-MJD epoch re-rounding (M-a) and final-step microsecond rounding (M-b).
+   - The Tech Lead accepted the investigation in **DR-0016** (APPROVED A + R1, 2026-10-10), together with aligned GMAT stepping and mandatory alignment verification.
+   - Reproduced in CI by `tests/test_rev012_evidence.py`.
+2. **Measurements on the implemented code available, then a threshold DR.**
+   - The O1–O8 measurements are VAL-0013 (T5). The GMAT O9 measurements and the reference snapshot are VAL-0014 and VAL-0015 (T6). The three-platform measurement is VAL-0016 (T7).
+   - **DR-0023** (APPROVED 2026-10-14) finalized `proof/thresholds/m2.json` with values unchanged. It closed FU-1 with the O9 GMAT gates retained, and added the three-platform final-state gate (VAL-0017).
+
+**Effect:**
+- The candidate tolerances in this DR are superseded by the approved values in `proof/thresholds/m2.json`, pinned by sha256 in `approved_digests.py`.
+- GMAT is a final gated reference for M2 (O9).
+- The accepted residual risks and margins recorded in DR-0020, DR-0021, DR-0022, DR-0023 and the M2 Proof record are unchanged.
+- No threshold, reference or check was changed by this approval.
 
