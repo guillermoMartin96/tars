@@ -1,0 +1,50 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+__________________ test_interior_dense_corruption_is_rejected __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b2b8500>
+
+    def test_interior_dense_corruption_is_rejected(monkeypatch):
+        """F39: interior dense states negated (endpoints kept) disagree with solver nodes."""
+    
+        def mutate(sol):
+            dense, a, b = sol.sol, sol.t[0], sol.t[-1]
+    
+            class Bad:
+                def __call__(self, t):
+                    out = dense(t)
+                    interior = (np.atleast_1d(t) > a) & (np.atleast_1d(t) < b)
+                    out[:6, interior] = -out[:6, interior]
+                    return out
+    
+            sol.sol = Bad()
+    
+        run = _dense_probe(monkeypatch, mutate)
+>       with pytest.raises(RuntimeError, match="solver nodes"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'solver nodes'
+E         Actual message: 'DOP853 dense velocity inconsistent with its position on [0.0, 600.0]'
+
+tests/test_gmat_m2.py:1845: AssertionError
+_______________ test_interior_solver_node_corruption_is_rejected _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d6d28d0>
+
+    def test_interior_solver_node_corruption_is_rejected(monkeypatch):
+        """F40: negated interior solver nodes disagree with the dense interpolant."""
+    
+        def mutate(sol):
+            if sol.y.shape[1] > 2:
+                sol.y[:6, 1:-1] = -sol.y[:6, 1:-1]
+    
+        run = _dense_probe(monkeypatch, mutate)
+>       with pytest.raises(RuntimeError, match="solver nodes"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1878: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_interior_dense_corruption_is_rejected - As...
+FAILED tests/test_gmat_m2.py::test_interior_solver_node_corruption_is_rejected
+2 failed, 168 deselected in 0.78s

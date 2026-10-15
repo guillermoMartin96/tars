@@ -1,0 +1,26 @@
+........................F............................................... [ 40%]
+........................................................................ [ 80%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+_______________ test_sensed_delta_v_matches_the_rocket_equation ________________
+
+    def test_sensed_delta_v_matches_the_rocket_equation():
+        """O2: integral of F/m over the burn equals c ln(m0/mf). Round-off bound 1e-12
+        relative (measured 1.2e-14, VAL-0008)."""
+        sim, plan, dv0 = _burn_run(10.0)
+        sensed = sim.propulsion_snapshot().delta_v_sensed_mps - dv0
+        m0 = DRY + PROP
+        expected = rocket_equation_delta_v(
+            ENGINE.exhaust_velocity_mps, m0, m0 - plan.propellant_used_kg
+        )
+>       assert sensed == pytest.approx(expected, rel=1e-12, abs=0)
+E       assert 58.55153459543006 == 29.275767297714378 ± 2.9e-11
+E         
+E         comparison failed
+E         Obtained: 58.55153459543006
+E         Expected: 29.275767297714378 ± 2.9e-11
+
+tests/test_simulator_propulsion.py:350: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_sensed_delta_v_matches_the_rocket_equation
+1 failed, 177 passed in 1.58s

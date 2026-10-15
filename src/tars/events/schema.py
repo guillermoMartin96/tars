@@ -5,7 +5,15 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    StringConstraints,
+    TypeAdapter,
+)
 
 SCHEMA_VERSION = 1
 
@@ -75,8 +83,194 @@ class ValidationResult(_EventBase):
     notes: str = ""
 
 
+# ------------------------------------------------------------------ M2 propulsion events
+# Additive types under schema_version 1 (DR-0014 section 5); M1 event types and their bytes
+# are unchanged. M2 events are strict and immutable: vectors are tuples, numbers finite.
+
+Vec3T = tuple[float, float, float]
+RejectionCode = Literal[
+    "schema_invalid",
+    "non_positive_duration",
+    "ignition_in_past",
+    "overlaps_scheduled_burn",
+    "engine_busy",
+    "no_propellant",
+    "insufficient_propellant",
+    "duplicate_command_id",
+    "no_propulsion_configured",
+    "burn_unschedulable",
+]  # DR-0014 section 4 + 2026-10-10 amendment; stable machine-readable vocabulary
+EndCause = Literal["completed", "propellant_depleted"]
+Direction = Literal["prograde", "retrograde"]
+Policy = Literal["reject", "burn_to_depletion"]
+
+
+# Correlation ID formats (T3 contract). Command IDs are issuer-chosen; burn IDs are
+# simulator-assigned. '#' appears only in burn IDs, so the two spaces cannot collide.
+COMMAND_ID_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$"
+BURN_ID_PATTERN = r"^burn#[0-9]{6,}$"
+CommandId = Annotated[str, StringConstraints(pattern=COMMAND_ID_PATTERN)]
+BurnId = Annotated[str, StringConstraints(pattern=BURN_ID_PATTERN)]
+
+
+def _require_int_one(value: object) -> object:
+    """Literal[1] alone matches True and 1.0 by equality (review REV-T3-06)."""
+    if type(value) is not int:
+        raise ValueError("schema_version must be the integer 1")
+    return value
+
+
+StrictVersion1 = Annotated[Literal[1], BeforeValidator(_require_int_one)]
+
+
+def _valid_unicode(value: str) -> str:
+    """A record that validates must also serialize: reject lone surrogates (re-verification N3)."""
+    try:
+        value.encode("utf-8")
+    except UnicodeEncodeError:
+        raise ValueError("string must be valid Unicode") from None
+    return value
+
+
+SafeStr = Annotated[str, AfterValidator(_valid_unicode)]
+
+
+class _StrictEventBase(_EventBase):
+    model_config = ConfigDict(extra="forbid", frozen=True, allow_inf_nan=False, strict=True)
+
+    schema_version: StrictVersion1 = SCHEMA_VERSION
+
+
+class SpacecraftConfigured(_StrictEventBase):
+    """Spacecraft and propulsion configuration in effect (emitted once, after start)."""
+
+    type: Literal["SpacecraftConfigured"] = "SpacecraftConfigured"
+    dry_mass_kg: float
+    propellant_kg: float
+    thrust_n: float
+    isp_s: float
+    standard_gravity_mps2: float
+    exhaust_velocity_mps: float
+    mass_flow_kgps: float
+    timing_delta_v_budget_mps: float
+    direction_laws: tuple[SafeStr, ...]
+
+
+class CommandAccepted(_StrictEventBase):
+    """A BurnCommand was accepted. Commanded intent and the resulting plan."""
+
+    type: Literal["CommandAccepted"] = "CommandAccepted"
+    command_id: CommandId
+    issuer: SafeStr
+    burn_id: BurnId
+    direction: Direction
+    on_insufficient_propellant: Policy
+    commanded_ignition_t_s: float
+    commanded_duration_s: float
+    planned_burn_duration_s: float
+    planned_cutoff_t_s: float
+    planned_propellant_used_kg: float
+    planned_end_cause: EndCause
+    timing_delta_v_error_mps: float | None
+
+
+class CommandRejected(_StrictEventBase):
+    """A command was rejected with an approved reason code; nothing changed.
+
+    Commanded intent is recorded when the command was schema-valid; for a schema-invalid
+    payload the intent fields are null and ``schema_errors`` lists "field: error_type"
+    entries (bounded; input values are never echoed).
+    """
+
+    type: Literal["CommandRejected"] = "CommandRejected"
+    command_id: CommandId | None
+    issuer: SafeStr | None
+    reason: RejectionCode
+    detail: SafeStr
+    direction: Direction | None
+    on_insufficient_propellant: Policy | None
+    commanded_ignition_t_s: float | None
+    commanded_duration_s: float | None
+    schema_errors: tuple[SafeStr, ...]
+
+
+class BurnStarted(_StrictEventBase):
+    """Engine ignition at the exact event time ``event_t_s`` (may lie inside a tick)."""
+
+    type: Literal["BurnStarted"] = "BurnStarted"
+    command_id: CommandId | None
+    burn_id: BurnId
+    direction: Direction
+    commanded_ignition_t_s: float
+    commanded_duration_s: float
+    planned_cutoff_t_s: float
+    planned_end_cause: EndCause
+    event_t_s: float
+    r: Vec3T
+    v: Vec3T
+    thrust_unit_vector: Vec3T
+    propellant_kg: float
+    total_mass_kg: float
+
+
+class BurnEnded(_StrictEventBase):
+    """Engine cutoff at ``event_t_s``: executed outcome next to commanded intent."""
+
+    type: Literal["BurnEnded"] = "BurnEnded"
+    command_id: CommandId | None
+    burn_id: BurnId
+    direction: Direction
+    end_cause: EndCause
+    commanded_duration_s: float
+    ignition_t_s: float
+    event_t_s: float
+    executed_duration_s: float
+    planned_propellant_used_kg: float
+    propellant_used_kg: float
+    sensed_delta_v_mps: float
+    rocket_equation_delta_v_mps: float
+    r: Vec3T
+    v: Vec3T
+    propellant_kg: float
+    total_mass_kg: float
+
+
+class PropellantDepleted(_StrictEventBase):
+    """The tank was emptied by a burn (to within event-time resolution, DR-0017 D1a)."""
+
+    type: Literal["PropellantDepleted"] = "PropellantDepleted"
+    command_id: CommandId | None
+    burn_id: BurnId
+    event_t_s: float
+    residual_propellant_kg: float
+
+
+class PropulsionSampled(_StrictEventBase):
+    """Propulsion telemetry sample (truth state)."""
+
+    type: Literal["PropulsionSampled"] = "PropulsionSampled"
+    propellant_kg: float
+    total_mass_kg: float
+    delta_v_sensed_mps: float
+    engine_state: Literal["idle", "scheduled", "burning"]
+    active_burn_id: BurnId | None
+    pending_burn_ids: tuple[BurnId, ...]
+    thrust_acceleration_mps2: Vec3T  # truth state at t; zero when not burning
+
+
 Event = Annotated[
-    SimulationStarted | StateSampled | OrbitCompleted | SimulationCompleted | ValidationResult,
+    SimulationStarted
+    | StateSampled
+    | OrbitCompleted
+    | SimulationCompleted
+    | ValidationResult
+    | SpacecraftConfigured
+    | CommandAccepted
+    | CommandRejected
+    | BurnStarted
+    | BurnEnded
+    | PropellantDepleted
+    | PropulsionSampled,
     Field(discriminator="type"),
 ]
 _EVENT_ADAPTER: TypeAdapter[Event] = TypeAdapter(Event)

@@ -1,0 +1,38 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_________________ test_session_without_its_ledger_fails_closed _________________
+
+    def test_session_without_its_ledger_fails_closed():
+        """F57: a verify session whose authenticated ledger is lost after loading verifies
+        nothing, so it must fail instead of passing unchecked values."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        variant = m2.impulsive_variants(scenario)[0]
+        run = run_scenario(variant)
+        with snap.session("m2_proof") as s:
+            assert s.approved is not None
+            s.approved = None  # corrupted after authentication
+            m2.impulsive_row(scenario, variant, run)
+        problems = s.finish(complete=True)
+>       assert any("no authenticated reference ledger" in p for p in problems)
+E       assert False
+E        +  where False = any(<generator object test_session_without_its_ledger_fails_closed.<locals>.<genexpr> at 0x110f6fed0>)
+
+tests/test_reference_snapshot.py:710: AssertionError
+_______ test_ledger_loss_is_reported_at_pin_and_at_finish_independently ________
+
+    def test_ledger_loss_is_reported_at_pin_and_at_finish_independently():
+        """F57, each fail-closed point on its own: a pin without the ledger is a problem
+        immediately, and a session that finishes without it is one even with no pins."""
+        with snap.session("m2_proof") as s:
+            s.approved = None
+            snap.pin("x", "ref", a_m=[1.0])
+>           assert any("no authenticated reference ledger" in p for p in s.problems)
+E           assert False
+E            +  where False = any(<generator object test_ledger_loss_is_reported_at_pin_and_at_finish_independently.<locals>.<genexpr> at 0x119bedff0>)
+
+tests/test_reference_snapshot.py:832: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_session_without_its_ledger_fails_closed
+FAILED tests/test_reference_snapshot.py::test_ledger_loss_is_reported_at_pin_and_at_finish_independently
+2 failed, 71 deselected in 3.90s

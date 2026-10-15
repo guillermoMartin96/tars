@@ -1,0 +1,128 @@
+{
+  "scenario": "m2_invalid_commands",
+  "scenario_hash": "ed70e91e6899ce9ea41b1735d6d482ff9fbab1ffcac45cd78632aed585b093dd",
+  "status": "success",
+  "failure_cause": null,
+  "orbits_completed": 9,
+  "crossing_times_s": [
+    5375.9917555852835,
+    10746.225631148574,
+    16116.45950640352,
+    21486.693381350142,
+    26856.92725598844,
+    32227.16113031843,
+    37597.395004340084,
+    42967.6288780534,
+    48337.862751458364
+  ],
+  "final_tick": 5370,
+  "final_t_s": 53700.0,
+  "final_r_m": [
+    6613493.0368328625,
+    -39084.882781229164,
+    -49312.84935492169
+  ],
+  "final_v_mps": [
+    63.71316740317762,
+    4827.160474174665,
+    6090.3607823850925
+  ],
+  "min_altitude_m": 233204.72413896956,
+  "max_altitude_m": 266693.7326443391,
+  "events_sha256": "7e52dd1d276b309c8e50951461b1164435617c75674ef9cfe21e854a451cd56e",
+  "event_count": 1828,
+  "schema_version": 2,
+  "stop_duration_s": 53700.0,
+  "commands": [
+    {
+      "command_id": "inv-schema-001",
+      "status": "rejected",
+      "reason": "schema_invalid",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-schema-002",
+      "status": "rejected",
+      "reason": "schema_invalid",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-burn-A",
+      "status": "accepted",
+      "reason": null,
+      "burn_id": "burn#000001",
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-burn-A",
+      "status": "rejected",
+      "reason": "duplicate_command_id",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-retry-001",
+      "status": "rejected",
+      "reason": "non_positive_duration",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-overlap-001",
+      "status": "rejected",
+      "reason": "overlaps_scheduled_burn",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-greedy-001",
+      "status": "rejected",
+      "reason": "insufficient_propellant",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-unschedulable-001",
+      "status": "rejected",
+      "reason": "burn_unschedulable",
+      "burn_id": null,
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-adjacent-001",
+      "status": "accepted",
+      "reason": null,
+      "burn_id": "burn#000002",
+      "submit_tick": 0
+    },
+    {
+      "command_id": "inv-retry-001",
+      "status": "accepted",
+      "reason": null,
+      "burn_id": "burn#000003",
+      "submit_tick": 6
+    },
+    {
+      "command_id": "inv-past-001",
+      "status": "rejected",
+      "reason": "ignition_in_past",
+      "burn_id": null,
+      "submit_tick": 60
+    },
+    {
+      "command_id": "inv-busy-001",
+      "status": "rejected",
+      "reason": "engine_busy",
+      "burn_id": null,
+      "submit_tick": 122
+    }
+  ],
+  "unsubmitted_command_ids": [],
+  "final_propellant_kg": 290.3911356854004,
+  "final_total_mass_kg": 1290.3911356854005,
+  "final_engine_state": "idle",
+  "active_burn_id_at_stop": null,
+  "pending_burn_ids_at_stop": []
+}

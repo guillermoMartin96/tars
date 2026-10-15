@@ -1,0 +1,21 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_threshold_loaders_reject_a_wrong_structure ________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-153/test_threshold_loaders_reject_0')
+
+    def test_threshold_loaders_reject_a_wrong_structure(tmp_path):
+        """F17: a value where a group or scope object belongs is rejected at load."""
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        data = json.loads(M2_THRESHOLDS.read_text())
+        data["limits"]["o9_gmat"]["all"] = 5
+        (tmp_path / "m2.json").write_text(json.dumps(data))
+>       with pytest.raises(ValueError, match="must be an object"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:1028: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_threshold_loaders_reject_a_wrong_structure
+1 failed in 0.16s

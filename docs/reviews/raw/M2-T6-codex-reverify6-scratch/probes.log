@@ -1,0 +1,33 @@
+dense standalone closed nan RuntimeError DOP853 dense output non-finite on [0.0, 60.0]
+dense integrated closed nan RuntimeError DOP853 dense output non-finite on [0.0, 60.0]
+dense standalone closed inf RuntimeError DOP853 dense output non-finite on [0.0, 60.0]
+dense integrated closed inf RuntimeError DOP853 dense output non-finite on [0.0, 60.0]
+dense standalone closed -inf RuntimeError DOP853 dense output non-finite on [0.0, 60.0]
+dense integrated closed -inf RuntimeError DOP853 dense output non-finite on [0.0, 60.0]
+aux integrated nan checks 28 failed ['o4_reference[m2_burn_to_depletion/o8_aux]', 'o5_coast_kepler[m2_burn_to_depletion/o8_aux]']
+merge nan {'o4_reference': {'sample_position_error_max_m': inf}}
+merge nan {'o4_reference': {'sample_position_error_max_m': inf}}
+individual Check nan False
+aux integrated -inf checks 28 failed ['o4_reference[m2_burn_to_depletion/o8_aux]', 'o5_coast_kepler[m2_burn_to_depletion/o8_aux]']
+merge -inf {'o4_reference': {'sample_position_error_max_m': inf}}
+merge -inf {'o4_reference': {'sample_position_error_max_m': inf}}
+individual Check -inf False
+aux integrated inf checks 28 failed ['o4_reference[m2_burn_to_depletion/o8_aux]', 'o5_coast_kepler[m2_burn_to_depletion/o8_aux]']
+merge inf {'o4_reference': {'sample_position_error_max_m': inf}}
+merge inf {'o4_reference': {'sample_position_error_max_m': inf}}
+individual Check inf False
+O9 metric poison -inf [] False
+O9 metric poison nan [] False
+O9 metric poison inf [] False
+guard err = max(err, x) detected True
+guard out["err"] = max(out["err"], x) detected False
+guard dst[k] = max(dst.get(k, -math.inf), x) detected False
+guard err = max(x, err) detected False
+guard err = max(errors) detected False
+guard err = np.nanmax(errors) detected False
+worst [] ValueError worst_of 0.0
+worst [-inf] inf worst_of inf
+worst [0.1, -inf] inf worst_of inf
+worst [-inf, 0.1] inf worst_of inf
+worst [inf] inf worst_of inf
+worst [nan] inf worst_of inf

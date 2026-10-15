@@ -6,6 +6,7 @@ from tars.sim.scenario import Scenario, load_scenario
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 M1_SCENARIO = REPO_ROOT / "scenarios" / "m1_leo_250km.json"
+M2_SLICE_SCENARIO = REPO_ROOT / "scenarios" / "m2_prograde_burn.json"
 
 
 @pytest.fixture(scope="session")

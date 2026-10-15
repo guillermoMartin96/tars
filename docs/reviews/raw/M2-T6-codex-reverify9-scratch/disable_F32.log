@@ -1,0 +1,24 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_wholesale_history_rewrite_is_rejected_by_the_anchor ___________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-177/test_wholesale_history_rewrite0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106b0ab40>
+
+    def test_wholesale_history_rewrite_is_rejected_by_the_anchor(tmp_path, monkeypatch):
+        """F32: deleting records AND consistently re-chaining the rest (formerly the
+        documented limit, F14) is rejected by the manifest digest pinned in reviewed
+        source."""
+    
+        def rewrite(history):
+            del history[:3]
+            _rechain(history)
+    
+        violations = _with_history(tmp_path, monkeypatch, rewrite)
+>       assert violations and all("manifest is not the approved one" in v for v in violations)
+E       assert ([])
+
+tests/test_gmat_m2.py:882: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_wholesale_history_rewrite_is_rejected_by_the_anchor
+1 failed, 158 deselected in 3.15s

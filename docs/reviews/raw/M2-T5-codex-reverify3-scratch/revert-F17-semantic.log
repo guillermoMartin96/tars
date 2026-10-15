@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_sample_only_altitude_extrema_are_detected ________________
+
+    def test_sample_only_altitude_extrema_are_detected():
+        """F17: extrema must cover every executed tick, not only the telemetry samples."""
+    
+        def sample_extrema(run):
+            alts = [e.altitude_m for e in run.events if e.type == "StateSampled"]
+            _edit(
+                run,
+                lambda e: e.type == "SimulationCompleted",
+                min_altitude_m=min(alts),
+                max_altitude_m=max(alts),
+            )
+    
+        audit, _ = _audit("m2_burn_to_depletion", sample_extrema)
+>       assert any(f.startswith("orbit_events.") for f in _gate_failures(audit, "m2_burn_to_depletion"))
+E       assert False
+E        +  where False = any(<generator object test_sample_only_altitude_extrema_are_detected.<locals>.<genexpr> at 0x10ac83d30>)
+
+tests/test_m2_validation.py:1056: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_sample_only_altitude_extrema_are_detected
+1 failed, 123 deselected in 2.64s

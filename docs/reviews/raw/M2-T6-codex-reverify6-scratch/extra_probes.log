@@ -1,0 +1,7 @@
+guard e = np.maximum.reduce(errors) set()
+guard e = np.minimum.reduce(errors) set()
+guard e = np.fmax.reduce(errors) set()
+guard e = np.fmin.reduce(errors) set()
+guard e = np.maximum(a,b) set()
+finite bad dv +1e-6, bound None metrics {'sensed_delta_v_rel_error_max': 3.4157954762166154e-08, 'sensed_delta_v_excess_over_simpson_rel_max': 3.415793649362657e-08, 'reported_rocket_equation_rel_error_max': 1.1285865499902306e-14} passed False failures ['sensed_delta_v_excess_over_simpson_rel_max=3.41579e-08 > 1e-12']
+finite bad dv +1e-6, bound inf metrics {'sensed_delta_v_rel_error_max': 3.4157954762166154e-08, 'sensed_delta_v_excess_over_simpson_rel_max': 0.0, 'reported_rocket_equation_rel_error_max': 1.1285865499902306e-14} passed True failures []

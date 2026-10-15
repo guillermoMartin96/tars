@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_nan_in_an_unreduced_reference_component_fails_o9 _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x112ca7f50>
+
+    def test_nan_in_an_unreduced_reference_component_fails_o9(monkeypatch):
+        """F16: every reference component must be finite, including the propellant entry
+        that no O9 reduction reads."""
+        original = m2.dop853_reference
+    
+        def poisoned(*a, **k):
+            ref = original(*a, **k)
+            ref[650.0] = ref[650.0].copy()
+            ref[650.0][6] = math.nan
+            return ref
+    
+        monkeypatch.setattr(m2, "dop853_reference", poisoned)
+        result = _compare("m2_prograde_burn")
+>       assert result.metrics["gmat_vs_dop853_position_error_max_m"] == math.inf
+E       assert 4.659190270227383e-06 == inf
+E        +  where inf = math.inf
+
+tests/test_gmat_m2.py:1018: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_nan_in_an_unreduced_reference_component_fails_o9
+1 failed in 3.18s

@@ -1,0 +1,194 @@
+{
+  "schema_version": 2,
+  "name": "m2_invalid_commands",
+  "description": "Milestone 2 reference mission (T5): invalid and conflicting commands. Every rejection code reachable with a configured spacecraft is exercised, next to three accepted burns (one corrected retry, one starting exactly at the previous cutoff). Rejected commands must change nothing: the trajectory must be bit-identical to a run with only the accepted commands. Same illustrative spacecraft as the slice. Coast to 53 700 s.",
+  "epoch": "2026-01-01T00:00:00",
+  "time_scale": "TT",
+  "seed": 0,
+  "earth_constants": "WGS84",
+  "force_models": [
+    "point_mass_gravity"
+  ],
+  "integrator": "rk4",
+  "dt_s": 10.0,
+  "initial_orbit": {
+    "kind": "circular",
+    "altitude_m": 250000.0,
+    "inclination_deg": 51.6,
+    "raan_deg": 0.0,
+    "arg_latitude_deg": 0.0
+  },
+  "spacecraft": {
+    "dry_mass_kg": 1000.0,
+    "propellant_kg": 300.0,
+    "engine": {
+      "thrust_n": 490.0,
+      "isp_s": 312.0
+    }
+  },
+  "commands": [
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-schema-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 900.0,
+        "direction": "radial",
+        "duration_s": 10.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-schema-002",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 900.0,
+        "direction": "prograde",
+        "duration_s": 10.0,
+        "on_insufficient_propellant": "reject",
+        "throttle": 0.5
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-burn-A",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 1200.0,
+        "direction": "prograde",
+        "duration_s": 30.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-burn-A",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 3000.0,
+        "direction": "prograde",
+        "duration_s": 5.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-retry-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 2400.0,
+        "direction": "retrograde",
+        "duration_s": 0.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-overlap-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 1210.0,
+        "direction": "prograde",
+        "duration_s": 10.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-greedy-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 4000.0,
+        "direction": "prograde",
+        "duration_s": 5000.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-unschedulable-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 1000000000.0,
+        "direction": "prograde",
+        "duration_s": 1e-09,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 0.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-adjacent-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 1230.0,
+        "direction": "retrograde",
+        "duration_s": 10.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 60.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-retry-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 2400.0,
+        "direction": "retrograde",
+        "duration_s": 20.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 600.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-past-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 300.0,
+        "direction": "prograde",
+        "duration_s": 10.0,
+        "on_insufficient_propellant": "reject"
+      }
+    },
+    {
+      "submit_t_s": 1220.0,
+      "command": {
+        "schema_version": 1,
+        "type": "BurnCommand",
+        "command_id": "inv-busy-001",
+        "issuer": "scenario_timeline",
+        "ignition_t_s": 1225.0,
+        "direction": "prograde",
+        "duration_s": 10.0,
+        "on_insufficient_propellant": "reject"
+      }
+    }
+  ],
+  "stop": {
+    "duration_s": 53700.0
+  },
+  "telemetry": {
+    "sample_interval_s": 60.0
+  }
+}

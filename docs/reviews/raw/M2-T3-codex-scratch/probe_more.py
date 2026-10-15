@@ -1,0 +1,33 @@
+import sys,json,dataclasses,hashlib
+sys.path.insert(0,'tests')
+from test_commands import _sim,_cmd,_executed_burn,DRY,ENGINE,PROP
+from tars.sim.commands import BurnCommand
+from tars.sim.propulsion import SpacecraftSpec,TankSpec
+from tars.sim.burn_events import *
+from tars.events import *
+from tars.events.schema import BurnStarted
+from pydantic import ValidationError
+s,r,tr=_executed_burn();i,it,itt=tr['ignition'];c,ct,ctt=tr['cutoff']
+sd,rd,trd=_executed_burn({'duration_s':100.,'on_insufficient_propellant':'burn_to_depletion'},propellant=5.)
+cd,cdt,cdtt=trd['cutoff']
+events=[spacecraft_configured_event(SpacecraftSpec(DRY,ENGINE,TankSpec(PROP)),tick=0,t=0.),command_event(r),command_event(s.submit(_cmd(command_id='reject',duration_s=0.))),burn_started_event(i,tick=it,t=itt,dry_mass_kg=DRY),burn_ended_event(i,c,tick=ct,t=ctt,dry_mass_kg=DRY,engine=ENGINE),propellant_depleted_event(cd,tick=cdt,t=cdtt),propulsion_sampled_event(s.propulsion_snapshot()),StateSampled(tick=0,t=0.,r=[1.,2.,3.],v=[1.,2.,3.],altitude_m=1.)]
+text=to_jsonl(events);assert read_jsonl(text)==events
+print('all seven + M1 round-trip:',[e.type for e in events])
+for changes in [{'type':'Unknown'},{'schema_version':2},{'t':float('inf')},{'tick':True}]:
+ d=events[3].model_dump(mode='json');d.update(changes)
+ try:parse_event(json.dumps(d));print('unexpected accepts',changes)
+ except ValidationError:print('correctly rejects',changes)
+for method in ['python','json']:
+ try:
+  d=_cmd(issuer='\ud800');cmd=BurnCommand.model_validate(d) if method=='python' else BurnCommand.model_validate_json(json.dumps(d))
+  print('surrogate',method,'accepted')
+ except ValidationError:print('surrogate',method,'rejected')
+r=_sim().submit(BurnCommand(**_cmd()).model_copy(update={'issuer':[]}))
+r.issuer.append('rewritten');print('mutable receipt issuer:',r.issuer,r.command.issuer)
+class Extended(BurnCommand):
+ annotations:list[str]=[]
+cmd=Extended(**_cmd());r=_sim().submit(cmd);cmd.annotations.append('later');print('validated subclass receipt alias:',r.command.model_dump())
+base=events[3].model_dump();base.update(t=1.,x=10.)
+try:BurnStarted.model_validate(base)
+except ValidationError as e:print('finite replacement in non-finite test still rejects:',[err['type'] for err in e.errors()])
+print('M2 event stream sha256',hashlib.sha256(text.encode()).hexdigest())

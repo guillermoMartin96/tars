@@ -1,0 +1,8 @@
+import subprocess
+from pathlib import Path
+repo='/Users/guillermomartin/.superset/worktrees/tars/actually-splash-f90f9ba4'
+paths=subprocess.check_output(['git','-C',repo,'ls-tree','-r','--name-only','a0169e7'],text=True).splitlines()
+selected=[p for p in paths if p.startswith(('src/tars/sim/','src/tars/astro/','scenarios/','proof/references/','toolbox/references/gmat/')) and not p.startswith('toolbox/references/gmat/m2/') and p!='toolbox/references/gmat/README.md']
+for p in selected:
+ assert Path(p).read_bytes()==subprocess.check_output(['git','-C',repo,'show','a0169e7:'+p]),p
+print('Protected baseline unchanged files',len(selected))

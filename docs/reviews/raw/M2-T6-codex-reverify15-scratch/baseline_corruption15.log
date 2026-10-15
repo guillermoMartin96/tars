@@ -1,0 +1,7 @@
+mutated 10 O6 midpoints to zero r/v and SMA=-1e30
+verify-baseline exit 0 m2_prograde_burn: snapshot DOP853 vs GMAT max 4.66e-06 m / 5.39e-09 m/s over 972 rows; Kepler vs GMAT max 4.01e-06 m / 4.63e-09 m/s
+m2_retrograde_burn: snapshot DOP853 vs GMAT max 3.64e-06 m / 4.25e-09 m/s over 972 rows; Kepler vs GMAT max 1.57e-06 m / 1.82e-09 m/s
+m2_invalid_commands: snapshot DOP853 vs GMAT max 6.24e-07 m / 6.87e-10 m/s over 955 rows; Kepler vs GMAT max 3.84e-06 m / 4.49e-09 m/s
+baseline verification: PASS
+ 
+runtime verification ['approved reference snapshot unusable: reference snapshot is not the approved one (sha256 df548e8eb8919fd3d276d86224942519b25299cffc64c41cb5e79b9ee05aec26); a reviewed change must update tars.validation.approved_digests']

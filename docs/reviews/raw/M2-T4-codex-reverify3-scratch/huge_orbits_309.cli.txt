@@ -1,0 +1,24 @@
+exit=1
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/toolbox/scripts/run_mission.py", line 143, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/toolbox/scripts/run_mission.py", line 101, in main
+    scenario = load_scenario(args.scenario)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/src/tars/sim/scenario.py", line 315, in load_scenario
+    return parse_scenario(Path(path).read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/src/tars/sim/scenario.py", line 310, in parse_scenario
+    return ScenarioV2.model_validate_json(text)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/.venv/lib/python3.12/site-packages/pydantic/main.py", line 782, in model_validate_json
+    return cls.__pydantic_validator__.validate_json(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/src/tars/sim/scenario.py", line 83, in _sampling_on_tick_grid
+    self.timeout_ticks  # noqa: B018 -- validates the orbits-stop guard (review N1)
+    ^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t4-snap4/src/tars/sim/scenario.py", line 112, in timeout_ticks
+    ticks = self.stop.max_duration_periods * orbits * self._nominal_period() / self.dt_s
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~
+OverflowError: int too large to convert to float

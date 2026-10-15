@@ -1,0 +1,163 @@
+..................FF.F.FFFFF............................................ [ 46%]
+........................................................................ [ 92%]
+...........                                                              [100%]
+=================================== FAILURES ===================================
+_______ test_engine_transitions_are_recorded_at_exact_times_inside_ticks _______
+
+    def test_engine_transitions_are_recorded_at_exact_times_inside_ticks():
+        sim = _sim()
+        plan = sim.schedule_burn("prograde", ignition_t_s=605.5, duration_s=77.3)
+        seen = []
+        while sim.t < 700.0:
+            sim.step()
+            seen.extend(sim.engine_transitions)
+>       assert [(e.kind, e.t) for e in seen] == [
+            ("ignition", 605.5),
+            ("cutoff", plan.cutoff_t_s),
+        ]
+E       AssertionError: assert [] == [('ignition',...toff', 682.8)]
+E         
+E         Right contains 2 more items, first extra item: ('ignition', 605.5)
+E         Use -v to get more diff
+
+tests/test_simulator_propulsion.py:246: AssertionError
+_______________________ test_two_events_inside_one_tick ________________________
+
+    def test_two_events_inside_one_tick():
+        sim = _sim()
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        _run_until(sim, 600.0)
+        sim.step()  # tick 600 -> 610 contains ignition and cutoff
+>       assert [(e.kind, e.t) for e in sim.engine_transitions] == [
+            ("ignition", 601.0),
+            ("cutoff", 604.0),
+        ]
+E       AssertionError: assert [] == [('ignition',...toff', 604.0)]
+E         
+E         Right contains 2 more items, first extra item: ('ignition', 601.0)
+E         Use -v to get more diff
+
+tests/test_simulator_propulsion.py:260: AssertionError
+______ test_depletion_ends_with_an_exactly_empty_tank_and_never_negative _______
+
+    def test_depletion_ends_with_an_exactly_empty_tank_and_never_negative():
+        sim = _sim(spacecraft=_spacecraft(propellant=5.0))
+        plan = sim.schedule_burn(
+            "prograde",
+            ignition_t_s=603.7,
+            duration_s=60.0,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        while sim.t < 700.0:
+            sim.step()
+            assert sim.propulsion_snapshot().propellant_kg >= 0.0
+        p = sim.propulsion_snapshot()
+>       assert p.propellant_kg == 0.0
+E       AssertionError: assert 5.0 == 0.0
+E        +  where 5.0 = PropulsionSnapshot(tick=70, t=700.0, propellant_kg=5.0, total_mass_kg=1005.0, delta_v_sensed_mps=0.0, engine_state=<En...LANT_DEPLETED: 'propellant_depleted'>, policy=<InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>),)).propellant_kg
+
+tests/test_simulator_propulsion.py:297: AssertionError
+__________________ test_propellant_used_matches_the_mass_law ___________________
+
+    def test_propellant_used_matches_the_mass_law():
+        """O1: integrated propellant equals mdot * T to round-off (RK4 is exact for a
+        linear law). Bound 1e-12 of the initial mass: measured 3.8e-15 (VAL-0008)."""
+        sim, plan, _ = _burn_run(10.0)
+        used = PROP - sim.propulsion_snapshot().propellant_kg
+>       assert abs(used - plan.propellant_used_kg) <= 1e-12 * (DRY + PROP)
+E       AssertionError: assert 12.379420191975958 <= (1e-12 * (1000.0 + 300.0))
+E        +  where 12.379420191975958 = abs((0.0 - 12.379420191975958))
+E        +    where 12.379420191975958 = BurnPlan(ignition_t_s=605.5, commanded_duration_s=77.3, burn_duration_s=77.3, cutoff_t_s=682.8, propellant_used_kg=12....1477385766618, end_cause=<BurnEndCause.COMPLETED: 'completed'>, policy=<InsufficientPropellantPolicy.REJECT: 'reject'>).propellant_used_kg
+
+tests/test_simulator_propulsion.py:333: AssertionError
+_______________ test_sensed_delta_v_matches_the_rocket_equation ________________
+
+    def test_sensed_delta_v_matches_the_rocket_equation():
+        """O2: integral of F/m over the burn equals c ln(m0/mf). Round-off bound 1e-12
+        relative (measured 1.2e-14, VAL-0008)."""
+        sim, plan, dv0 = _burn_run(10.0)
+>       sensed = sim.propulsion_snapshot().delta_v_sensed_mps - dv0
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: unsupported operand type(s) for -: 'float' and 'NoneType'
+
+tests/test_simulator_propulsion.py:340: TypeError
+_______ test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0] ________
+
+direction = 'prograde', sign = 1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 3.9999927151197316 <= 0.5
+E            +  where 3.9999927151197316 = abs((7.284880268359008e-06 - 4.0))
+E            +    where 7.284880268359008e-06 = <built-in function log2>((np.float64(1631.0827117237973) / np.float64(1631.0744756018685)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:382: AssertionError
+______ test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0] ______
+
+direction = 'retrograde', sign = -1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 4.000007284292758 <= 0.5
+E            +  where 4.000007284292758 = abs((-7.284292758427505e-06 - 4.0))
+E            +    where -7.284292758427505e-06 = <built-in function log2>((np.float64(1631.0618968549045) / np.float64(1631.070132249095)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:382: AssertionError
+________ test_prograde_raises_and_retrograde_lowers_the_orbit_in_plane _________
+
+    def test_prograde_raises_and_retrograde_lowers_the_orbit_in_plane():
+        """O7: SMA sign follows direction; an in-plane burn leaves the orbit normal fixed.
+    
+        The plane is compared through the unit angular-momentum vector, which avoids
+        RAAN wrapping at 0/2 pi; 1e-12 rad is a round-off bound.
+        """
+        a0 = rv_to_elements(R0, V0, WGS84.mu).a
+        n0 = np.cross(R0, V0) / np.linalg.norm(np.cross(R0, V0))
+        for direction, sign in (("prograde", 1.0), ("retrograde", -1.0)):
+            sim, _, _ = _burn_run(10.0, direction=direction)
+            s = sim.snapshot()
+>           assert sign * (rv_to_elements(s.r, s.v, WGS84.mu).a - a0) > 40_000.0  # ~50 km
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: assert (1.0 * (6628136.999966948 - 6628136.999999999)) > 40000.0
+E            +  where 6628136.999966948 = ClassicalElements(a=6628136.999966948, e=2.331583756066609e-10, i=0.9005898940290735, raan=1.4204975530225477e-16, argp=1.9958902331020822, nu=5.10628717512458, u=0.8189921010470758).a
+E            +    where ClassicalElements(a=6628136.999966948, e=2.331583756066609e-10, i=0.9005898940290735, raan=1.4204975530225477e-16, argp=1.9958902331020822, nu=5.10628717512458, u=0.8189921010470758) = rv_to_elements(array([4526737.74228294, 3007333.37278504, 3794310.40901939]), array([-5664.58775859,  3289.74279911,  4150.62242803]), 398600441800000.0)
+E            +      where array([4526737.74228294, 3007333.37278504, 3794310.40901939]) = StateSnapshot(tick=70, t=700.0, r=array([4526737.74228294, 3007333.37278504, 3794310.40901939]), v=array([-5664.58775859,  3289.74279911,  4150.62242803])).r
+E            +      and   array([-5664.58775859,  3289.74279911,  4150.62242803]) = StateSnapshot(tick=70, t=700.0, r=array([4526737.74228294, 3007333.37278504, 3794310.40901939]), v=array([-5664.58775859,  3289.74279911,  4150.62242803])).v
+E            +      and   398600441800000.0 = EarthConstants(name='WGS84', mu=398600441800000.0, equatorial_radius=6378137.0).mu
+
+tests/test_simulator_propulsion.py:396: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_engine_transitions_are_recorded_at_exact_times_inside_ticks
+FAILED tests/test_simulator_propulsion.py::test_two_events_inside_one_tick - ...
+FAILED tests/test_simulator_propulsion.py::test_depletion_ends_with_an_exactly_empty_tank_and_never_negative
+FAILED tests/test_simulator_propulsion.py::test_propellant_used_matches_the_mass_law
+FAILED tests/test_simulator_propulsion.py::test_sensed_delta_v_matches_the_rocket_equation
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0]
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0]
+FAILED tests/test_simulator_propulsion.py::test_prograde_raises_and_retrograde_lowers_the_orbit_in_plane
+8 failed, 147 passed in 1.60s

@@ -1,0 +1,47 @@
+........................................................................ [ 38%]
+........................................................................ [ 76%]
+.........................................F..                             [100%]
+=================================== FAILURES ===================================
+_______ test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass ________
+
+    def test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass():
+        """N4: RK4 stages near depletion can carry -1e-17 kg of propellant round-off; the
+        dynamics must use the physical (non-negative) propellant so the step succeeds."""
+        tank = ENGINE.mass_flow_kgps * 1.0
+        sc = SpacecraftSpec(dry_mass_kg=1e-20, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+        sim = Simulator(np.zeros(3), np.array([1.0, 0.0, 0.0]), _ZeroForce(), RK4(), 0.1, spacecraft=sc)
+        sim.schedule_burn("prograde", ignition_t_s=0.0, duration_s=1.0)
+        while sim.t < 2.0:
+>           sim.step()
+
+tests/test_simulator_propulsion.py:754: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tars/sim/simulator.py:360: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/sim/simulator.py:389: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/sim/integrators.py:40: in step
+    k4 = f(t + dt, y + dt * k3)
+         ^^^^^^^^^^^^^^^^^^^^^^
+src/tars/sim/simulator.py:341: in powered
+    thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/sim/propulsion.py:133: in thrust_acceleration
+    mass = _require_positive("total mass", total_mass_kg)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'total mass', value = -5.2031704279304214e-17
+
+    def _require_positive(name: str, value: object) -> float:
+        value = _require_real(name, value)
+        if not value > 0.0:
+>           raise PropulsionSpecError(f"{name} must be positive, got {value!r}")
+E           tars.sim.propulsion.PropulsionSpecError: total mass must be positive, got -5.2031704279304214e-17
+
+src/tars/sim/propulsion.py:60: PropulsionSpecError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_depletion_with_tiny_dry_mass_never_evaluates_negative_mass
+1 failed, 187 passed in 1.37s

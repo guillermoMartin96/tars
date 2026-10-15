@@ -1,0 +1,204 @@
+docs/reviews/M2-T4-review-01.md:19:## Summary
+docs/reviews/M2-T4-review-01.md:35:## Findings
+docs/reviews/M2-T4-review-01.md:36:All five are **`ACCEPTED`**. Each fix is mutation-tested: the new test fails with the fix reverted.
+docs/reviews/M2-T4-review-01.md:38:### F1: Final propulsion telemetry can omit an accepted pending burn
+docs/reviews/M2-T4-review-01.md:53:### F2: Python payload validation permits hash ambiguity and changes command semantics
+docs/reviews/M2-T4-review-01.md:65:### F3: CLI failure can leave outputs from different runs
+docs/reviews/M2-T4-review-01.md:75:### F4: Duration scenarios cannot round-trip their serialized configuration
+docs/reviews/M2-T4-review-01.md:87:### F5: Finite timing inputs can escape validation as an uncaught overflow
+docs/reviews/M2-T4-review-01.md:97:## Re-verification 1 (`5098f8a`)
+docs/reviews/M2-T4-review-01.md:100:**Verdict: CONDITIONAL PASS.**
+docs/reviews/M2-T4-review-01.md:108:### N1: Orbits-stop timeout arithmetic can still overflow
+docs/reviews/M2-T4-review-01.md:109:**Severity:** Low. **Disposition:** `ACCEPTED`.
+docs/reviews/M2-T4-review-01.md:123:## Re-verification 2 (`354914d`)
+docs/reviews/M2-T4-review-01.md:126:**Verdict: CONDITIONAL PASS.**
+docs/reviews/M2-T4-review-01.md:133:### M1: Extreme duration-scenario altitude still causes runtime overflow
+docs/reviews/M2-T4-review-01.md:134:**Severity:** Low. **Disposition:** `ACCEPTED`.
+docs/reviews/M2-T4-review-01.md:144:## Re-verification 3 (`b820588`)
+docs/reviews/M2-T4-review-01.md:147:**Verdict: CONDITIONAL PASS.**
+docs/reviews/M2-T4-review-01.md:154:All are **`ACCEPTED`**:
+docs/reviews/M2-T4-review-01.md:166:## Re-verification 4 (`ddf3f35`): final
+docs/reviews/M2-T4-review-01.md:169:**Verdict: PASS (unconditional).**
+docs/reviews/M2-T4-review-01.md:179:## Gate
+docs/reviews/M2-T4-review-01.md:180:**PASS.** All findings are dispositioned `ACCEPTED` and resolved, and the final independent verdict is an unconditional PASS. CI is green on ubuntu-latest and macos-latest at `ddf3f35` (run 38158129299).
+docs/reviews/M2-T6-review-01.md:19:## Summary
+docs/reviews/M2-T6-review-01.md:34:## Findings
+docs/reviews/M2-T6-review-01.md:35:All seven are **`ACCEPTED`**.
+docs/reviews/M2-T6-review-01.md:37:### F1: `run` stores numerically rejected references (High)
+docs/reviews/M2-T6-review-01.md:45:### F2: script comparison discards assignment placement (Medium)
+docs/reviews/M2-T6-review-01.md:52:### F3: provenance cannot establish external origin (High)
+docs/reviews/M2-T6-review-01.md:64:### F4: `generate` bypasses the replacement guard (Medium)
+docs/reviews/M2-T6-review-01.md:71:### F5: missing simulator observations produce vacuous passes (Medium)
+docs/reviews/M2-T6-review-01.md:81:### F6: standalone comparison accepts missing thresholds (Medium)
+docs/reviews/M2-T6-review-01.md:87:### F7: the gate-disable claim was incorrect (Low)
+docs/reviews/M2-T6-review-01.md:95:## References regenerated (recorded)
+docs/reviews/M2-T6-review-01.md:99:## Re-verification 1
+docs/reviews/M2-T6-review-01.md:111:**All six are `ACCEPTED`.** Each fix is mutation-tested: disabling it makes its tests fail.
+docs/reviews/M2-T6-review-01.md:128:## Re-verification 2
+docs/reviews/M2-T6-review-01.md:136:**Both findings are `ACCEPTED`.** Each fix is mutation-tested.
+docs/reviews/M2-T6-review-01.md:145:## Re-verification 3
+docs/reviews/M2-T6-review-01.md:153:**Both findings are `ACCEPTED`.** Each mechanism is mutation-tested.
+docs/reviews/M2-T6-review-01.md:164:## Re-verification 4
+docs/reviews/M2-T6-review-01.md:173:**Both findings are `ACCEPTED`.** Instead of closing only the two flagged reductions, every remaining accumulator was swept:
+docs/reviews/M2-T6-review-01.md:183:## Re-verification 5
+docs/reviews/M2-T6-review-01.md:191:**All three are `ACCEPTED`.** This round fixes the non-finite class at its root rather than one site at a time:
+docs/reviews/M2-T6-review-01.md:201:## Re-verification 6
+docs/reviews/M2-T6-review-01.md:208:**All three are `ACCEPTED`**, together with two review notes.
+docs/reviews/M2-T6-review-01.md:220:## Re-verification 7
+docs/reviews/M2-T6-review-01.md:227:**All three are `ACCEPTED` and fixed.** Each mechanism is mutation-tested.
+docs/reviews/M2-T6-review-01.md:236:- Re-verifications 3–7 found, in each round, new instances of one open-ended class: a validator-internal helper patched to return a non-finite value, which downstream arithmetic turns into a finite pass.
+docs/reviews/M2-T6-review-01.md:244:- Findings F16, F18–F20, F22, F23 and F26 were reported under the earlier, open scope. All are fixed regardless and remain tested.
+docs/reviews/M2-T6-review-01.md:246:## Re-verification 8 (under DR-0019 B)
+docs/reviews/M2-T6-review-01.md:253:**All five are `ACCEPTED`.** Each mechanism is mutation-tested.
+docs/reviews/M2-T6-review-01.md:265:## Re-verification 9 (under DR-0019 B)
+docs/reviews/M2-T6-review-01.md:272:**All four are `ACCEPTED`** (all in scope: corrupted reference or summary data, validator code unmodified). F35 and F36 share a pattern: a reference output component checked only for finiteness, then unused. It is closed generally.
+docs/reviews/M2-T6-review-01.md:285:## Re-verification 10 (under DR-0019 B)
+docs/reviews/M2-T6-review-01.md:292:**All four are `ACCEPTED`.**
+docs/reviews/M2-T6-review-01.md:311:## Re-verification 11 (under DR-0019 B)
+docs/reviews/M2-T6-review-01.md:320:| F42 | Med | Kepler output negated in both directions (the round trip cancels) | **`ESCALATED_FOR_INVESTIGATION`** to the Tech Lead as **DR-0020**. The corruption cannot change any verdict (O6 consumes only the SMA, which is invariant), and detecting it needs a second independent propagator (a regress) |
+docs/reviews/M2-T6-review-01.md:321:| F43 | Med | Interior solver nodes and dense output negated consistently | **`ESCALATED_FOR_INVESTIGATION`** (DR-0020). Interior nodes are unused, the altitude extrema consume only \|r\|, and every consumed state is exact; detecting it needs a second integrator |
+docs/reviews/M2-T6-review-01.md:322:| F44 | Med | Finite but wrong velocity or propellant at the stencil points | **`ACCEPTED`, fixed.** Stencil points are kept inside the segment, and their states must be finite and on the mass law. Their velocity must be continuous with the tick's (relative 1e-5). The central difference is taken about the stencil midpoint, which is also validated. Tests: `test_finite_invalid_stencil_states_are_rejected` (velocity-only and propellant-only probes, each pinning its own check) |
+docs/reviews/M2-T6-review-01.md:323:| F45 | Med | Solver-node reconciliation skipped on segments without telemetry ticks | **`ACCEPTED`, fixed.** `_check_solver_nodes` runs for every segment. Test: `test_solver_nodes_are_reconciled_on_tickless_segments` |
+docs/reviews/M2-T6-review-01.md:324:| F46 | Med | A staged GMAT report shifted by one day passed (epoch never anchored) | **`ACCEPTED`, fixed.** The first row's A.1 MJD must equal the configured TT epoch converted to A.1 (TT − A.1 = 32.184 − 0.0343817 s) within 1 µs; the committed references match exactly. Tests: `test_time_shifted_staged_report_is_rejected`, `test_epoch_anchor_matches_the_committed_references` |
+docs/reviews/M2-T6-review-01.md:328:## Residual risk accepted under DR-0020 (Tech Lead, 2026-10-11)
+docs/reviews/M2-T6-review-01.md:349:## Re-verification 12 (under DR-0019 B and DR-0020 A)
+docs/reviews/M2-T6-review-01.md:356:**Both are `ACCEPTED`.** Each mechanism is mutation-tested.
+docs/reviews/M2-T6-review-01.md:369:## Re-verification 13 (under DR-0019 B and DR-0020 A)
+docs/reviews/M2-T6-review-01.md:377:**`ACCEPTED`.** The F47 fix made the anchor's tick positions a **consumed** value (the altitude extrema), and DR-0020 condition 4 requires validating such a value before relying on it. Only the segment-end anchor call was reconciled.
+docs/reviews/M2-T6-review-01.md:397:## Re-verification 14 (under DR-0019 B and DR-0020 A)
+docs/reviews/M2-T6-review-01.md:407:| F50 | Med | Kepler tick states (1.001 × flight time) and DOP853 dense positions corrupted **consistently with each other** at 17,876 ticks pass the F49 reconciliation and reverse an acceptance: 0.01301 m rejected with clean references, 0.012976 m accepted | **`ESCALATED_FOR_INVESTIGATION`** (DR-0021). This is the two-reference regress that DR-0020 named for its option B. Fixing this instance (tick continuity against the stencil) adds another reference for the next consistent corruption to target |
+docs/reviews/M2-T6-review-01.md:408:| F51 | Med | O6 midpoint Kepler returns at 10 × the flight time, forward and in the round trip, keep the invariants and the round trip but change the reported and gated O6 values; every check still passes | **`ESCALATED_FOR_INVESTIGATION`** (DR-0021). Fixable by a DOP853 cross-check of the midpoint (in scope under every DR-0021 option); not started, because option A would cover it differently |
+docs/reviews/M2-T6-review-01.md:409:| note | — | Stale docs: the F43 rationale and unused-value inventory after F49; the VAL-0014 epoch-column description omitted the F46 anchor | **`ACCEPTED`, fixed.** An amendment note under "Residual risk accepted under DR-0020" (F43 stays accepted residual risk, not marked fixed); the inventory line marked superseded; VAL-0014 now describes the epoch anchor |
+docs/reviews/M2-T6-review-01.md:414:## DR-0021 implementation (approved option A with conditions, 2026-10-12)
+docs/reviews/M2-T6-review-01.md:415:F50 and F51 were escalated to DR-0021. The Tech Lead approved option A: an approved reference snapshot. Their disposition is now **`ACCEPTED`, fixed by the snapshot**. Record: VAL-0015; artifact `toolbox/references/snapshot/m2/` (baseline 1).
+docs/reviews/M2-T6-review-01.md:446:## Re-verification 15 (under DR-0019 B, DR-0020 A and DR-0021 A)
+docs/reviews/M2-T6-review-01.md:454:**Both are `ACCEPTED`.** Each mechanism is mutation-tested.
+docs/reviews/M2-T6-review-01.md:474:## Re-verification 16 (under DR-0019 B, DR-0020 A and DR-0021 A)
+docs/reviews/M2-T6-review-01.md:482:**All four are `ACCEPTED`.** Each mechanism is mutation-tested.
+docs/reviews/M2-T6-review-01.md:495:## Re-verification 17 (under DR-0019 B, DR-0020 A and DR-0021 A)
+docs/reviews/M2-T6-review-01.md:505:| F58 | High | Editing the authenticated ledger's contents in memory, or switching the session's mode to `record`, after authentication lets the F50 reversal and the F51 O6 change pass the Proof | Escalated to DR-0022, then **`REJECTED_WITH_REASONING`** under DR-0022 B (see below). This mutates the validator's own runtime state, the same class as F57 taken further. Any in-memory guard is itself mutable, so there is no fixed point. Whether DR-0019 B's exclusion covers validator runtime state is a scope decision for the Tech Lead |
+docs/reviews/M2-T6-review-01.md:506:| F59 | Med | The 10-ulp floor for zero-measured time classes used 6,000 s; the pinned times reach 53,700 s (10 ulp = 7.3e-11 s), so the 1e-11 s tolerances falsely rejected deviations within the documented allowance | **`ACCEPTED`, fixed.** One uniform rule for every class: the smallest 1-2-5 value ≥ max(10 × measured, 10 ulp of the class's largest snapshot value). Time classes are 1e-10 s; `ref kg` is 5e-12 kg (10 ulp of 1,300 kg = 2.3e-12). The measured maxima are recorded in `reference_snapshot.MEASURED`. Test: `test_tolerances_follow_the_documented_rule` recomputes the rule from the artifact |
+docs/reviews/M2-T6-review-01.md:510:## DR-0022 implementation (approved option B with conditions, 2026-10-13)
+docs/reviews/M2-T6-review-01.md:512:### F58: `REJECTED_WITH_REASONING`, not fixed
+docs/reviews/M2-T6-review-01.md:517:DR-0019 B, as clarified by DR-0022 condition 1, places deliberate modification of the validator's executable code, control flow or in-memory state outside the T6 threat model. Such an actor can equally rewrite the loaded thresholds, a `Check`'s result or the report before it is written. Any in-memory guard is itself in-memory state open to the same edit, so there is no fixed point inside the process. Code review and trusted execution address this class.
+docs/reviews/M2-T6-review-01.md:521:### Safeguards (DR-0022 B), and what they detect
+docs/reviews/M2-T6-review-01.md:552:## Re-verification 18 (final, complete T6 checkpoint; under DR-0019 B, DR-0020 A, DR-0021 A and DR-0022 B)
+docs/reviews/M2-T6-review-01.md:555:**Verdict: PASS (unconditional; no blocking findings).**
+docs/reviews/M2-T6-review-01.md:566:| — | Note | Two verifier docstrings and this record still said "bit-identical" and "exact" for O5/O6 flight times, which use the continuous `sim s` tolerance (1e-10 s; bit-identical in every measurement). No acceptance effect | **`ACCEPTED`.** Wording corrected (documentation only) after the PASS commit |
+docs/reviews/M2-T6-review-01.md:568:**T6 review closed: PASS.** CI green on Ubuntu and macOS (run 38482342000, every job confirmed complete).
+docs/reviews/M2-T5-review-01.md:21:## Summary
+docs/reviews/M2-T5-review-01.md:37:## Findings
+docs/reviews/M2-T5-review-01.md:38:All four are **`ACCEPTED`**. Each fix is mutation-tested: with the fix reverted, its new test fails.
+docs/reviews/M2-T5-review-01.md:40:### F1: O4 trusts an unverified initial state
+docs/reviews/M2-T5-review-01.md:48:### F2: Successful termination is not checked against the requested horizon
+docs/reviews/M2-T5-review-01.md:57:### F3: Powered samples and boundary completion states escape validation
+docs/reviews/M2-T5-review-01.md:66:### F4: Missing depletion events are accepted
+docs/reviews/M2-T5-review-01.md:73:## Measurement note
+docs/reviews/M2-T5-review-01.md:76:## Re-verification 1
+docs/reviews/M2-T5-review-01.md:85:**All eleven are `ACCEPTED`.** They were closed together by restructuring rather than by patching: `tars.validation.m2.audit_run()` checks every output of one run. `m2_proof.py` applies it to every run it creates: missions, derived variants, DR-0018 stop variants, and O6/O8 auxiliary runs. Each fix is mutation-tested (disabling it makes its tests fail); some mutants are also caught by overlapping checks.
+docs/reviews/M2-T5-review-01.md:110:## Re-verification 2
+docs/reviews/M2-T5-review-01.md:119:**All three are `ACCEPTED`.** Each fix is mutation-tested.
+docs/reviews/M2-T5-review-01.md:131:## Re-verification 3 — final
+docs/reviews/M2-T5-review-01.md:134:**Verdict: PASS** (unconditional). No new substantive findings.
+docs/reviews/M2-T5-review-01.md:141:## Disposition summary
+docs/reviews/M2-T5-review-01.md:147:| Re-verification 3 | `21dac47` | **PASS** | none |
+docs/reviews/M2-T5-review-01.md:149:All 18 findings are `ACCEPTED` and resolved. None was rejected or escalated. **No open Critical or High findings.**
+docs/reviews/M2-T5-review-01.md:151:**Status: CLOSED. Gate: PASS.**
+docs/reviews/M2-T3-review-01.md:18:## Summary
+docs/reviews/M2-T3-review-01.md:32:## Findings
+docs/reviews/M2-T3-review-01.md:33:All seven are **`ACCEPTED`**. Resolutions are pending the fix commit.
+docs/reviews/M2-T3-review-01.md:35:### REV-T3-01 — Rejection changes the seen-ID registry (F1)
+docs/reviews/M2-T3-review-01.md:41:### REV-T3-02 — Prebuilt commands bypass validation; mutable receipt contents (F2)
+docs/reviews/M2-T3-review-01.md:45:### REV-T3-03 — Event payloads omit approved command intent and thrust telemetry (F3)
+docs/reviews/M2-T3-review-01.md:51:### REV-T3-04 — Invalid Unicode echoed into an unserializable rejection event (F4)
+docs/reviews/M2-T3-review-01.md:55:### REV-T3-05 — Public scheduling bypasses command-ID uniqueness (F5)
+docs/reviews/M2-T3-review-01.md:61:### REV-T3-06 — Strict schemas accept bool/float versions; unconstrained correlation IDs (F6)
+docs/reviews/M2-T3-review-01.md:67:### REV-T3-07 — Some negative tests can pass for unrelated failures (F7)
+docs/reviews/M2-T3-review-01.md:71:## Resolutions (fixed in `defd23f`)
+docs/reviews/M2-T3-review-01.md:86:- M1 Proof PASS; GMAT compare PASS;
+docs/reviews/M2-T3-review-01.md:89:## Addendum: reviewer re-verification (`1b2e8ed`)
+docs/reviews/M2-T3-review-01.md:96:### N1 — Overridden `model_dump()` restores the validation and aliasing bypass
+docs/reviews/M2-T3-review-01.md:98:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T3-review-01.md:103:### N2 — Payload failures could escape `submit()`
+docs/reviews/M2-T3-review-01.md:105:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T3-review-01.md:112:### N3 — M2 event strings could validate but fail serialization
+docs/reviews/M2-T3-review-01.md:114:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T3-review-01.md:119:### N4 — Documented precedence omitted the configuration check
+docs/reviews/M2-T3-review-01.md:121:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T3-review-01.md:126:- M1 Proof PASS;
+docs/reviews/M2-T3-review-01.md:129:## Addendum 2: second reviewer re-verification (`79d9d9b`)
+docs/reviews/M2-T3-review-01.md:141:### N5 — Instance-level serializer bypasses the exact-command boundary
+docs/reviews/M2-T3-review-01.md:147:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T3-review-01.md:161:### N6 — Valid non-dict mappings contradicted the contract
+docs/reviews/M2-T3-review-01.md:163:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T3-review-01.md:168:- M1 Proof PASS; GMAT compare PASS;
+docs/reviews/M2-T3-review-01.md:171:## Addendum 3: final reviewer re-verification (`7f8597e`)
+docs/reviews/M2-T3-review-01.md:174:**Verdict: PASS.**
+docs/reviews/M2-T3-review-01.md:178:- All T3 requirements PASS, and the contract is accurate.
+docs/reviews/M2-T3-review-01.md:181:## Proof gate
+docs/reviews/M2-T3-review-01.md:187:**Review gate result: PASS** (final reviewer verdict for T3: PASS).
+docs/reviews/M2-T2-review-01.md:13:## Summary
+docs/reviews/M2-T2-review-01.md:19:- the 7a4e1877… hash and M1 Proof PASS;
+docs/reviews/M2-T2-review-01.md:31:## Findings
+docs/reviews/M2-T2-review-01.md:33:### REV-T2-01 — Failed steps leave the engine schedule partially advanced (F1)
+docs/reviews/M2-T2-review-01.md:40:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:47:### REV-T2-02 — Scheduling classifies malformed inputs before validating them (F2)
+docs/reviews/M2-T2-review-01.md:54:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:63:### REV-T2-03 — Represented event interval can disagree materially with planned consumption (F3)
+docs/reviews/M2-T2-review-01.md:71:**Implementer disposition:** `ACCEPTED` (with one constant surfaced for Tech Lead confirmation; see resolution)  
+docs/reviews/M2-T2-review-01.md:85:### REV-T2-04 — Retained transition arrays can be made writable and rewritten (F4)
+docs/reviews/M2-T2-review-01.md:89:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:95:### REV-T2-05 — Tests do not validate transition position and velocity (F5)
+docs/reviews/M2-T2-review-01.md:99:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:111:## Re-test (implementer)
+docs/reviews/M2-T2-review-01.md:114:- M1 Proof PASS on all checks; GMAT compare PASS;
+docs/reviews/M2-T2-review-01.md:119:## Addendum: reviewer re-verification of fixes (`da43487`)
+docs/reviews/M2-T2-review-01.md:132:### N1 — Representability tolerance permits burning beyond depletion
+docs/reviews/M2-T2-review-01.md:140:- Executed-past-depletion defect: `ACCEPTED`.
+docs/reviews/M2-T2-review-01.md:141:- Representability rule: `ESCALATED_FOR_INVESTIGATION` (**DR-0017**).
+docs/reviews/M2-T2-review-01.md:155:### N2 — Formatting schema-rejection details can itself raise
+docs/reviews/M2-T2-review-01.md:158:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:164:### N3 — Transition-state tests miss retrograde and multiple-burn evidence
+docs/reviews/M2-T2-review-01.md:167:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:176:- M1 Proof PASS; GMAT compare PASS;
+docs/reviews/M2-T2-review-01.md:180:## Addendum 2: second reviewer re-verification (`7af2fd8`)
+docs/reviews/M2-T2-review-01.md:193:### N4 — Accepted depletion plans can evaluate negative propellant during RK4
+docs/reviews/M2-T2-review-01.md:196:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:201:### N5 — Conservative depletion cutoff discarded unburned propellant
+docs/reviews/M2-T2-review-01.md:207:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:217:### N2 (remainder)
+docs/reviews/M2-T2-review-01.md:220:### DR-0017 text corrections (reviewer)
+docs/reviews/M2-T2-review-01.md:230:- M1 Proof PASS; GMAT compare PASS;
+docs/reviews/M2-T2-review-01.md:234:## Addendum 3: third reviewer re-verification (`0955195`)
+docs/reviews/M2-T2-review-01.md:237:**Verdict: CONDITIONAL PASS.** "T2 implementation is complete apart from DR-0017's open decision and the minor text correction."
+docs/reviews/M2-T2-review-01.md:247:### N6 — DR-0017 retained an unsupported accuracy claim
+docs/reviews/M2-T2-review-01.md:250:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T2-review-01.md:253:## Proof gate
+docs/reviews/M2-T2-review-01.md:258:- [x] DR-0017 decision: APPROVED B + D1a (2026-10-10). Implemented and verified in `docs/reviews/M2-DR0017-review-01.md`; final reviewer verdict for T2 is **PASS** (`d8829a2`).
+docs/reviews/M2-T2-review-01.md:260:**Review gate result: PASS.**
+docs/reviews/M2-T1-review-01.md:14:## Summary
+docs/reviews/M2-T1-review-01.md:24:## Findings
+docs/reviews/M2-T1-review-01.md:26:### REV-T1-01 — Collapsed, non-finite, or reduced-precision burn schedules (A-F1, B-F2, B-F3 part)
+docs/reviews/M2-T1-review-01.md:35:**Implementer disposition:** `ACCEPTED`
+docs/reviews/M2-T1-review-01.md:50:### REV-T1-02 — Finite specifications produce invalid derived quantities (A-F2, B-F3)
+docs/reviews/M2-T1-review-01.md:59:**Implementer disposition:** `ACCEPTED`
+docs/reviews/M2-T1-review-01.md:72:### REV-T1-03 — Exactly sufficient propellant rejected or misclassified (A-F3, B-F1)
+docs/reviews/M2-T1-review-01.md:82:**Implementer disposition:** `ACCEPTED`
+docs/reviews/M2-T1-review-01.md:96:### REV-T1-04 — Rocket-equation oracle unstable at extreme or near-equal mass ratios (A-F4, B-F4)
+docs/reviews/M2-T1-review-01.md:105:**Implementer disposition:** `ACCEPTED`
+docs/reviews/M2-T1-review-01.md:120:### REV-T1-05 — Tests do not distinguish velocity tracking from ignition-held pointing (A-F5, B-F5)
+docs/reviews/M2-T1-review-01.md:131:**Implementer disposition:** `ACCEPTED`
+docs/reviews/M2-T1-review-01.md:145:### REV-T1-06 — Public helpers validate inputs incompletely (B-F6)
+docs/reviews/M2-T1-review-01.md:155:**Implementer disposition:** `ACCEPTED`
+docs/reviews/M2-T1-review-01.md:168:### Implementer observation (not raised by the reviewers) — `invalid_input` is not in the DR-0014 vocabulary
+docs/reviews/M2-T1-review-01.md:172:- Disposition: `ESCALATED_FOR_INVESTIGATION` (decision needed).
+docs/reviews/M2-T1-review-01.md:174:## Re-test (implementer)
+docs/reviews/M2-T1-review-01.md:179:- M1 Proof PASS on all checks against approved thresholds, GMAT compare PASS, cross-process determinism and cross-platform bit-identical to the golden `7a4e1877…`;
+docs/reviews/M2-T1-review-01.md:184:## Addendum: reviewer re-verification of fixes
+docs/reviews/M2-T1-review-01.md:188:**Verdict:** CONDITIONAL PASS.
+docs/reviews/M2-T1-review-01.md:203:### N1 — Positive burn consumption can underflow to zero (raised in re-verification)
+docs/reviews/M2-T1-review-01.md:206:**Implementer disposition:** `ACCEPTED`  
+docs/reviews/M2-T1-review-01.md:208:**Resolution/evidence:** Fixed in `b015c54`. `plan_burn` rejects (`invalid_input`) a plan whose consumption is not > 0. Test `test_positive_burn_with_underflowing_consumption_is_rejected` failed before the fix and passes after. Re-test at `b015c54`: 328 passed; M1 determinism hash `7a4e1877…`; M1 Proof PASS.
+docs/reviews/M2-T1-review-01.md:210:### Rejection vocabulary (escalated; the reviewer concurs)
+docs/reviews/M2-T1-review-01.md:213:## Proof gate
+docs/reviews/M2-T1-review-01.md:220:**Review gate result:** PASS. All findings are resolved and re-verified, and the escalated vocabulary item is decided and implemented.

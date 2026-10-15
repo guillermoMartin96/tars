@@ -1,0 +1,240 @@
+{
+  "label": "reference-host",
+  "environment": {
+    "system": "Darwin",
+    "machine": "x86_64",
+    "cpu": "Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+    "python": "3.12.15",
+    "numpy": "2.5.3",
+    "os": "macOS-26.2-x86_64-i386-64bit",
+    "python_full": "3.12.15",
+    "python_compiler": "Clang 22.1.3 ",
+    "python_build": "main Oct  3 2026 00:54:36",
+    "scipy": "1.18.1",
+    "numpy_simd_baseline": [
+      "X86_V2"
+    ],
+    "numpy_simd_found": [
+      "X86_V3"
+    ],
+    "numpy_blas": "accelerate",
+    "uv_lock_sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+    "git_revision": "28703922502d077c4042f82deafb7d6b28f2362f",
+    "git_tree_clean": true
+  },
+  "inputs_sha256": {
+    "scenarios/m2_burn_to_depletion.json": "c6d2340bb47d01fbe4e750e68a9dfd721e3ae1e18b8722de296482b25ca9b14d",
+    "scenarios/m2_invalid_commands.json": "68135aa85506ecbf24e47bf7040bb3d0f35314ddb4500fda29cb9468106711d6",
+    "scenarios/m2_prograde_burn.json": "67088ec0b50d7588452a62c0c2de154e6bc0cfa4d5fa4f26f8982dcbe1704120",
+    "scenarios/m2_retrograde_burn.json": "7af5ae65dfbedbdc2f904ea5b90e0348d67113b27c514e4904e78a1b151c33db",
+    "scenarios/m1_leo_250km.json": "51f109c9895b1d5fbc662e241a2f7af0f10954bb23004f5fdf01a0b4754228bf",
+    "proof/thresholds/m1.json": "446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d",
+    "proof/thresholds/m2.json": "5c096963d8c5099a16f19bdb2dfb8860a0b6d4ef289838fd7f48972bedf8dcb3",
+    "toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz": "a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b",
+    "toolbox/references/gmat/m2/APPROVED_DIGESTS.json": "f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585",
+    "uv.lock": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+  },
+  "determinism": {
+    "m2_burn_to_depletion": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12",
+        "6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12"
+      ]
+    },
+    "m2_invalid_commands": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "7e52dd1d276b309c8e50951461b1164435617c75674ef9cfe21e854a451cd56e",
+        "7e52dd1d276b309c8e50951461b1164435617c75674ef9cfe21e854a451cd56e"
+      ]
+    },
+    "m2_prograde_burn": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "42316356a4c2b093b5f7c96e49b764357110462078064e663d60c40811dd4ce0",
+        "42316356a4c2b093b5f7c96e49b764357110462078064e663d60c40811dd4ce0"
+      ]
+    },
+    "m2_retrograde_burn": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "1c0037c202bb1d8663a5b9d6affe1ecfbc94b400c2db494cf3d3d636db1b5848",
+        "1c0037c202bb1d8663a5b9d6affe1ecfbc94b400c2db494cf3d3d636db1b5848"
+      ]
+    },
+    "m1_leo_250km": {
+      "validator": "determinism_cross_process",
+      "passed": true,
+      "sha256": [
+        "7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4",
+        "7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4"
+      ]
+    }
+  },
+  "mission_finals": {
+    "m2_prograde_burn": {
+      "events_sha256": "42316356a4c2b093b5f7c96e49b764357110462078064e663d60c40811dd4ce0",
+      "t": 53700.0,
+      "r": [
+        5009922.076517316,
+        -2738091.0684680957,
+        -3454611.163480795
+      ],
+      "v": [
+        5063.692568044208,
+        3629.3549491747854,
+        4579.106322664524
+      ],
+      "status": "success"
+    },
+    "m2_retrograde_burn": {
+      "events_sha256": "1c0037c202bb1d8663a5b9d6affe1ecfbc94b400c2db494cf3d3d636db1b5848",
+      "t": 53700.0,
+      "r": [
+        5067949.1828530235,
+        2653335.7589851934,
+        3347676.5762145896
+      ],
+      "v": [
+        -4976.937167317734,
+        3670.3390473080176,
+        4630.81538543699
+      ],
+      "status": "success"
+    },
+    "m2_burn_to_depletion": {
+      "events_sha256": "6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12",
+      "t": 53700.0,
+      "r": [
+        601014.503925784,
+        -4207076.699992377,
+        -5308009.76665286
+      ],
+      "v": [
+        7580.203466601922,
+        475.96741723515566,
+        600.5214260289866
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands": {
+      "events_sha256": "7e52dd1d276b309c8e50951461b1164435617c75674ef9cfe21e854a451cd56e",
+      "t": 53700.0,
+      "r": [
+        6613493.0368328625,
+        -39084.882781229164,
+        -49312.84935492169
+      ],
+      "v": [
+        63.71316740317762,
+        4827.160474174665,
+        6090.3607823850925
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands_empty_tank": {
+      "events_sha256": "916a561b53cdf22ab3cb301c039d46e025f2e3c2c139a3e18b3ffc2e8bfbca11",
+      "t": 53700.0,
+      "r": [
+        6628097.346109269,
+        -14240.788544749514,
+        -17967.403513366306
+      ],
+      "v": [
+        26.823829121168046,
+        4816.876251953346,
+        6077.385323203841
+      ],
+      "status": "success"
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "events_sha256": "d87dffe82190c3910eba471357d1877164ecde26d031203ea5928ac7fed09d6f",
+      "t": 53700.0,
+      "r": [
+        6628097.346109269,
+        -14240.788544749514,
+        -17967.403513366306
+      ],
+      "v": [
+        26.823829121168046,
+        4816.876251953346,
+        6077.385323203841
+      ],
+      "status": "success"
+    }
+  },
+  "m1_cross_platform": {
+    "schema_version": 1,
+    "tick": 0,
+    "t": 0.0,
+    "type": "ValidationResult",
+    "validator": "cross_platform",
+    "passed": true,
+    "metrics": {
+      "final_position_difference_m": 0.0,
+      "final_velocity_difference_mps": 0.0,
+      "bit_identical_to_golden": 1.0,
+      "script_initial_position_difference_m": 0.0,
+      "script_initial_velocity_difference_mps": 0.0
+    },
+    "thresholds": {
+      "final_position_difference_m": 0.0001,
+      "final_velocity_difference_mps": 1e-07
+    },
+    "threshold_status": "approved",
+    "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz', 'python': '3.12.15', 'numpy': '2.5.3'}; golden platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz', 'python': '3.12.15', 'numpy': '2.5.3'}"
+  },
+  "commands": [
+    {
+      "command": "python toolbox/validators/m2_proof.py --out runs/t7/reference-host/m2_proof.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/guillermomartin/.superset/worktrees/tars/actually-splash-f90f9ba4/scenarios/m2_burn_to_depletion.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/guillermomartin/.superset/worktrees/tars/actually-splash-f90f9ba4/scenarios/m2_invalid_commands.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/guillermomartin/.superset/worktrees/tars/actually-splash-f90f9ba4/scenarios/m2_prograde_burn.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py --scenario /Users/guillermomartin/.superset/worktrees/tars/actually-splash-f90f9ba4/scenarios/m2_retrograde_burn.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/determinism.py",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/validators/cross_platform.py",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/scripts/reference_snapshot.py measure-deviation toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz --out runs/t7/reference-host/deviation.json",
+      "exit_code": 0
+    },
+    {
+      "command": "python toolbox/scripts/reference_snapshot.py generate --measurement --out runs/t7/reference-host/record.json.gz",
+      "exit_code": 0
+    }
+  ],
+  "outputs_sha256": {
+    "deviation.json": "425701bdca63b3e26b55cb172dd5c048e2f46f7fbc9a4151538289bc3f45d0bb",
+    "deviation.proof.json": "9a8e31fed57cae376d4e6a38d850ad85d6c190b781ad17323d037dd5d8fe7a00",
+    "deviation_stdout.txt": "2737d70919444b9a717e9ac89ed22080638d1aef06848f3fc1e4f3fe4a6350ca",
+    "m2_proof.json": "19b839699a202900a5a37c3323dca98a5b5931b33c8dff2f04e8f9c831da82e0",
+    "m2_proof_stdout.txt": "33d7b806edac98997270160035e2339dcacd7dc6b0ec600174f94300cdd800f5",
+    "record.json.gz": "89e704b46ccf74f670b763f096e20bd4456dd4ceab8936d64fa1516b01d313e7",
+    "record.proof.json": "7b7bf196e51786a57fea5587b15f2cea31cbadea8d9809a03233411d6866e2a6",
+    "record_stdout.txt": "ad5c1557c88b6d28d42efecc1256cde97fe8af5cc228fe82a2e390a12218f790"
+  }
+}

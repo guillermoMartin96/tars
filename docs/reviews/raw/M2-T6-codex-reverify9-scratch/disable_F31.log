@@ -1,0 +1,54 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_reference_propellant_must_follow_the_mass_law[-1.0] ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10608a990>
+value = -1.0
+
+    @pytest.mark.parametrize("value", [-1.0, 299.0])
+    def test_reference_propellant_must_follow_the_mass_law(monkeypatch, value):
+        """F31: a negative or off-law reference propellant is rejected at the source."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            sol.y[6, -1] = value
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="propellant"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1680: Failed
+__________ test_reference_propellant_must_follow_the_mass_law[299.0] ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108f849b0>
+value = 299.0
+
+    @pytest.mark.parametrize("value", [-1.0, 299.0])
+    def test_reference_propellant_must_follow_the_mass_law(monkeypatch, value):
+        """F31: a negative or off-law reference propellant is rejected at the source."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def poisoned(*a, **k):
+            sol = original(*a, **k)
+            sol.y[6, -1] = value
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="propellant"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1680: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_reference_propellant_must_follow_the_mass_law[-1.0]
+FAILED tests/test_gmat_m2.py::test_reference_propellant_must_follow_the_mass_law[299.0]
+2 failed, 157 deselected in 0.72s

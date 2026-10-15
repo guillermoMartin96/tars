@@ -1,0 +1,7 @@
+from pathlib import Path
+s=Path('docs/reviews/raw/M2-T3-codex-reverify-scratch/mutants.py.txt').read_text()
+s=s.replace('from pydantic import ValidationError','from pydantic import ValidationError\nfrom tars.sim.commands import PayloadTypeError')
+s=s.replace("   print(name,ascii(errors));' '.join(errors).encode('utf8')", "   print(name,ascii(errors));' '.join(errors).encode('utf8')\n  except Exception as e:\n   assert type(e).__name__ == 'PayloadTypeError'; print(name, 'builtin gate rejects', e.errors)")
+Path('review_scratch/mutants.py.txt').write_text(s)
+s=Path('review_scratch/deep.py.txt').read_text().replace("seen.add(r.reason.value);", "__import__('tars.sim.burn_events',fromlist=['command_event']).command_event(r).model_dump_json(); seen.add(r.reason.value);")
+Path('review_scratch/deep.py.txt').write_text(s)

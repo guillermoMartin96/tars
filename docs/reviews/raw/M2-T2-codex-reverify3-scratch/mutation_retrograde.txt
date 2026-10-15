@@ -1,0 +1,90 @@
+...................................................................F.F.. [ 36%]
+........................................................................ [ 72%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+___ test_back_to_back_prograde_then_retrograde_transitions_match_free_space ____
+
+    def test_back_to_back_prograde_then_retrograde_transitions_match_free_space():
+        """N3: every transition state, across two burns sharing an instant (604 s) and in
+        both directions, against the exact free-space solution in 40-digit arithmetic."""
+        v0 = np.array([3000.0, 4000.0, 0.0])
+        u = v0 / 5000.0
+        sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        sim.schedule_burn("retrograde", ignition_t_s=604.0, duration_s=5.0)
+        events = []
+        while sim.t < 620.0:
+            sim.step()
+            events.extend(sim.engine_transitions)
+        assert [(e.kind, e.t, e.direction) for e in events] == [
+            ("ignition", 601.0, "prograde"),
+            ("cutoff", 604.0, "prograde"),
+            ("ignition", 604.0, "retrograde"),
+            ("cutoff", 609.0, "retrograde"),
+        ]
+        with localcontext() as ctx:
+            ctx.prec = 40
+            c, md = Decimal(ENGINE.exhaust_velocity_mps), Decimal(ENGINE.mass_flow_kgps)
+            speed, pos, mass, t = Decimal(5000), Decimal(0), Decimal(DRY + PROP), Decimal(0)
+            expected = []
+            for start, length, sign in ((601, 3, 1), (604, 5, -1)):
+                pos += speed * (Decimal(start) - t)  # coast
+                expected.append((pos, speed))
+                m_end = mass - md * Decimal(length)
+                ln = (mass / m_end).ln()
+                pos += speed * Decimal(length) + sign * c * (Decimal(length) - (m_end / md) * ln)
+                speed += sign * c * ln
+                mass, t = m_end, Decimal(start + length)
+                expected.append((pos, speed))
+        for event, (s_exact, v_exact) in zip(events, expected, strict=True):
+>           np.testing.assert_allclose(event.r, float(s_exact) * u, rtol=1e-14, atol=1e-9)
+E           AssertionError: 
+E           Not equal to tolerance rtol=1e-14, atol=1e-09
+E           
+E           Mismatched elements: 2 / 3 (66.7%)
+E           Mismatch at indices:
+E            [0]: 0.0 (ACTUAL), 1812001.017817701 (DESIRED)
+E            [1]: 0.0 (ACTUAL), 2416001.357090268 (DESIRED)
+E           Max absolute difference among violations: 2416001.35709027
+E           Max relative difference among violations: 1.
+E            ACTUAL: array([0., 0., 0.])
+E            DESIRED: array([1812001.017818, 2416001.35709 ,       0.      ])
+
+tests/test_simulator_propulsion.py:714: AssertionError
+_ test_orbital_transition_states_converge_in_both_directions[retrograde--1.0] __
+
+direction = 'retrograde', sign = -1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_orbital_transition_states_converge_in_both_directions(direction, sign):
+        """N3: ignition r, v vs exact Kepler and cutoff r, v vs independent DOP853,
+        order 4 +/- 0.5 (DR-0008), for prograde and retrograde."""
+        from tars.astro import kepler
+    
+        r_k, v_k = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+        ref = _independent_reference(605.5, 77.3, sign, 605.5 + 77.3)
+        errs = {k: [] for k in ("ign_r", "ign_v", "cut_r", "cut_v")}
+        for dt in (20.0, 10.0, 5.0):
+            sim = _sim(dt=dt)
+            sim.schedule_burn(direction, ignition_t_s=605.5, duration_s=77.3)
+            ev = {}
+            while sim.t < 700.0:
+                sim.step()
+                ev.update({e.kind: e for e in sim.engine_transitions})
+            errs["ign_r"].append(np.linalg.norm(ev["ignition"].r - r_k))
+            errs["ign_v"].append(np.linalg.norm(ev["ignition"].v - v_k))
+            errs["cut_r"].append(np.linalg.norm(ev["cutoff"].r - ref[:3]))
+            errs["cut_v"].append(np.linalg.norm(ev["cutoff"].v - ref[3:6]))
+        for series in errs.values():
+            for coarse, fine in pairwise(series):
+>               assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E               assert 4.0 <= 0.5
+E                +  where 4.0 = abs((0.0 - 4.0))
+E                +    where 0.0 = <built-in function log2>((np.float64(6628137.0) / np.float64(6628137.0)))
+E                +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:740: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_back_to_back_prograde_then_retrograde_transitions_match_free_space
+FAILED tests/test_simulator_propulsion.py::test_orbital_transition_states_converge_in_both_directions[retrograde--1.0]
+2 failed, 196 passed in 1.58s

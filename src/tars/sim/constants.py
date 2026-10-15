@@ -41,3 +41,8 @@ EARTH_CONSTANTS: dict[str, EarthConstants] = {WGS84.name: WGS84}
 # only: used to compare GMAT's J2 node drift with the first-order analytic rate. The M1
 # force model does NOT include J2 (DR-0002).
 EARTH_J2_APPROX = 1.0826e-3
+
+# Standard acceleration of gravity g_n, exact by definition (3rd CGPM, 1901; NIST CODATA).
+# Converts specific impulse [s] to effective exhaust velocity c = Isp * g0 (SCI-0009). It is
+# a units convention, not local gravity. GMAT's ChemicalThruster default is 9.81 (VAL-0009).
+STANDARD_GRAVITY = 9.80665

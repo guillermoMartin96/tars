@@ -1,0 +1,97 @@
+..........FFF                                                            [100%]
+=================================== FAILURES ===================================
+_ test_the_guard_detects_common_unsafe_forms[from numpy import fmax as reducer] _
+
+snippet = 'from numpy import fmax as reducer'
+
+    @pytest.mark.parametrize(
+        "snippet",
+        [
+            "dst[k] = max(dst.get(k, -math.inf), x)",
+            "out['k'] = max(x, out['k'])",
+            "e = max(abs(p) for p in orders)",
+            "e = np.nanmax(errors)",
+            "e = errors.max()",
+            "e = np.maximum.reduce(errors)",
+            "e = np.minimum.reduce(errors)",
+            "e = np.fmax.reduce([dst.get(k, -math.inf), x])",
+            "e = np.fmin.reduce(errors)",
+            "e = np.maximum(a, b)",
+            "from numpy import fmax as reducer",
+            "reducer = np.fmax",
+            "reducer = max",
+        ],
+    )
+    def test_the_guard_detects_common_unsafe_forms(snippet):
+        """F21: the guard flags the original F19 expression and other common forms."""
+        source = f"def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    {snippet}\n"
+>       assert _reducer_calls(source, "m2_proof.py")
+E       AssertionError: assert set()
+E        +  where set() = _reducer_calls('def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    from numpy import fmax as reducer\n', 'm2_proof.py')
+
+tests/test_gmat_m2.py:1233: AssertionError
+________ test_the_guard_detects_common_unsafe_forms[reducer = np.fmax] _________
+
+snippet = 'reducer = np.fmax'
+
+    @pytest.mark.parametrize(
+        "snippet",
+        [
+            "dst[k] = max(dst.get(k, -math.inf), x)",
+            "out['k'] = max(x, out['k'])",
+            "e = max(abs(p) for p in orders)",
+            "e = np.nanmax(errors)",
+            "e = errors.max()",
+            "e = np.maximum.reduce(errors)",
+            "e = np.minimum.reduce(errors)",
+            "e = np.fmax.reduce([dst.get(k, -math.inf), x])",
+            "e = np.fmin.reduce(errors)",
+            "e = np.maximum(a, b)",
+            "from numpy import fmax as reducer",
+            "reducer = np.fmax",
+            "reducer = max",
+        ],
+    )
+    def test_the_guard_detects_common_unsafe_forms(snippet):
+        """F21: the guard flags the original F19 expression and other common forms."""
+        source = f"def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    {snippet}\n"
+>       assert _reducer_calls(source, "m2_proof.py")
+E       AssertionError: assert set()
+E        +  where set() = _reducer_calls('def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    reducer = np.fmax\n', 'm2_proof.py')
+
+tests/test_gmat_m2.py:1233: AssertionError
+__________ test_the_guard_detects_common_unsafe_forms[reducer = max] ___________
+
+snippet = 'reducer = max'
+
+    @pytest.mark.parametrize(
+        "snippet",
+        [
+            "dst[k] = max(dst.get(k, -math.inf), x)",
+            "out['k'] = max(x, out['k'])",
+            "e = max(abs(p) for p in orders)",
+            "e = np.nanmax(errors)",
+            "e = errors.max()",
+            "e = np.maximum.reduce(errors)",
+            "e = np.minimum.reduce(errors)",
+            "e = np.fmax.reduce([dst.get(k, -math.inf), x])",
+            "e = np.fmin.reduce(errors)",
+            "e = np.maximum(a, b)",
+            "from numpy import fmax as reducer",
+            "reducer = np.fmax",
+            "reducer = max",
+        ],
+    )
+    def test_the_guard_detects_common_unsafe_forms(snippet):
+        """F21: the guard flags the original F19 expression and other common forms."""
+        source = f"def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    {snippet}\n"
+>       assert _reducer_calls(source, "m2_proof.py")
+E       AssertionError: assert set()
+E        +  where set() = _reducer_calls('def merged(dst, k, x, out, orders, errors, np, math, a, b):\n    reducer = max\n', 'm2_proof.py')
+
+tests/test_gmat_m2.py:1233: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_the_guard_detects_common_unsafe_forms[from numpy import fmax as reducer]
+FAILED tests/test_gmat_m2.py::test_the_guard_detects_common_unsafe_forms[reducer = np.fmax]
+FAILED tests/test_gmat_m2.py::test_the_guard_detects_common_unsafe_forms[reducer = max]
+3 failed, 10 passed, 126 deselected in 0.25s

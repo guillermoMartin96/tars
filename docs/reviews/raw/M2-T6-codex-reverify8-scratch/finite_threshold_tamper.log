@@ -1,0 +1,217 @@
+wrong thrust, approved thresholds: ['simulator audit o4_reference: cutoff_position_error_max_m=0.0107637 > 0.002', 'simulator audit o4_reference: cutoff_velocity_error_max_mps=0.000292849 > 3e-06', 'simulator audit o4_reference: final_position_error_m=47.7163 > 0.6', 'simulator audit o4_reference: final_velocity_error_mps=0.0546562 > 0.0007', 'simulator audit o4_reference: sample_position_error_max_m=47.7163 > 0.6', 'simulator audit o4_reference: sample_velocity_error_max_mps=0.0546562 > 0.0007', 'simulator audit o4_reference: thrust_direction_vs_reference_max=1.26122e-09 > 4e-10', 'simulator audit orbit_events: max_altitude_error_m=1.01556 > 0.013', 'simulator audit orbit_events: node_crossing_time_error_max_s=0.00558295 > 8e-05'] None
+wrong thrust, tampered finite thresholds: [] True
+[PASS] event_order[m2_prograde_burn]: violations=0
+[PASS] traceability[m2_prograde_burn]: violations=0
+[PASS] outcomes[m2_prograde_burn]: violations=0
+[PASS] identities[m2_prograde_burn]: violations=0
+[PASS] orbit_events_contract[m2_prograde_burn]: violations=0
+[PASS] o4_reference[m2_prograde_burn]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=1.26122e-09, cutoff_position_error_max_m=0.0107637, cutoff_velocity_error_max_mps=0.000292849, sample_position_error_max_m=47.7163, sample_velocity_error_max_mps=0.0546562, final_position_error_m=47.7163, final_velocity_error_mps=0.0546562
+[PASS] o5_coast_kepler[m2_prograde_burn]: coast_position_error_max_m=0.282814, coast_velocity_error_max_mps=0.000325515, post_burn_coast_position_error_max_m=0.282814
+[PASS] orbit_events[m2_prograde_burn]: node_crossing_time_error_max_s=0.00558295, min_altitude_error_m=0.000467595, max_altitude_error_m=1.01556
+[PASS] accounting[m2_prograde_burn]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.46367e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=287.621, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=8.74514e-17, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=8.74514e-17, sample_delta_v_rel_error_max=2.26931e-14, sample_delta_v_excess_over_simpson_rel_max=7.54226e-15
+[PASS] o1_mass_law[m2_prograde_burn]: propellant_used_rel_error_max=8.6085e-17, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_prograde_burn]: sensed_delta_v_rel_error_max=1.14072e-14, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=1.12859e-14
+[PASS] o7_direction[m2_prograde_burn]: sign_violations=0, plane_rotation_max_rad=9.88495e-17, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=50521.5, burn000001_apoapsis_alt_km=351.026, burn000001_periapsis_alt_km=250.017
+[PASS] cli_summary[m2_prograde_burn]: violations=0
+[PASS] determinism[m2_prograde_burn]: violations=0
+[PASS] o9_reference_integrity[m2_prograde_burn]: violations=0
+[PASS] o9_gmat[m2_prograde_burn]: step_spacing_error_max_s=2.33762e-07, burn_duration_from_mass_error_max_s=1.40901e-10, coast_vs_kepler_position_error_max_m=4.01057e-06, gmat_vs_dop853_position_error_max_m=4.65919e-06, gmat_vs_dop853_velocity_error_max_mps=5.39171e-09, gmat_vs_dop853_final_position_error_m=4.65919e-06, gmat_mass_vs_analytic_error_max_kg=2.251e-11, ours_vs_gmat_sample_position_error_max_m=47.7163, ours_vs_gmat_sample_velocity_error_max_mps=0.0546562, ours_vs_gmat_burn_boundary_position_error_max_m=0.0107637, ours_vs_gmat_burn_boundary_velocity_error_max_mps=0.000292849, ours_vs_gmat_final_position_error_m=47.7163, ours_vs_gmat_final_velocity_error_mps=0.0546562, ours_vs_gmat_mass_error_max_kg=2.251e-11, ours_vs_gmat_node_crossing_error_max_s=0.00558295, gmat_rows=973, mass_samples_compared=902
+[PASS] o8_convergence[m2_prograde_burn]: position_error_dt10_m=47.7163, position_error_dt5_m=47.992, position_error_dt2.5_m=48.0059, order_10_to_5=-0.00831072, order_5_to_2.5=-0.000416667, order_deviation_from_4_max=4.00831
+[PASS] event_order[m2_prograde_burn/o8_aux]: violations=0
+[PASS] traceability[m2_prograde_burn/o8_aux]: violations=0
+[PASS] outcomes[m2_prograde_burn/o8_aux]: violations=0
+[PASS] identities[m2_prograde_burn/o8_aux]: violations=0
+[PASS] orbit_events_contract[m2_prograde_burn/o8_aux]: violations=0
+[PASS] o4_reference[m2_prograde_burn/o8_aux]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=4.29649e-05, ignition_velocity_error_max_mps=6.41142e-08, thrust_direction_vs_reference_max=1.59812e-09, cutoff_position_error_max_m=0.0112847, cutoff_velocity_error_max_mps=0.000292299, sample_position_error_max_m=48.0059, sample_velocity_error_max_mps=0.0549902, final_position_error_m=48.0059, final_velocity_error_mps=0.0549902
+[PASS] o5_coast_kepler[m2_prograde_burn/o8_aux]: coast_position_error_max_m=0.0142861, coast_velocity_error_max_mps=1.64166e-05, post_burn_coast_position_error_max_m=0.0142861
+[PASS] orbit_events[m2_prograde_burn/o8_aux]: node_crossing_time_error_max_s=0.00561506, min_altitude_error_m=2.89446e-05, max_altitude_error_m=1.01985
+[PASS] accounting[m2_prograde_burn/o8_aux]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=2.94549e-16, thrust_direction_error_max=1.92296e-16, final_propellant_kg=287.621, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=2.18629e-16, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=2.18629e-16, sample_delta_v_rel_error_max=1.78389e-14, sample_delta_v_excess_over_simpson_rel_max=1.77673e-14
+[PASS] o1_mass_law[m2_prograde_burn/o8_aux]: propellant_used_rel_error_max=2.19995e-16, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_prograde_burn/o8_aux]: sensed_delta_v_rel_error_max=6.67444e-15, sensed_delta_v_excess_over_simpson_rel_max=6.59861e-15, reported_rocket_equation_rel_error_max=2.57269e-14
+[PASS] o7_direction[m2_prograde_burn/o8_aux]: sign_violations=0, plane_rotation_max_rad=3.46553e-16, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=50521.5, burn000001_apoapsis_alt_km=351.026, burn000001_periapsis_alt_km=250.017
+[PASS] o6_impulsive_limit[m2_prograde_burn]: order_deviation_from_2_max=2.33138, slice_sma_change_ratio_deviation=7.50899e-06, slice_finite_minus_impulsive_sma_m=0.379363, order_pair_0=-0.331383, order_pair_1=-0.0722186, order_pair_2=-0.0175813, order_pair_3=-0.00435413
+[PASS] event_order[m2_prograde_burn/o6_aux]: violations=0
+[PASS] traceability[m2_prograde_burn/o6_aux]: violations=0
+[PASS] outcomes[m2_prograde_burn/o6_aux]: violations=0
+[PASS] identities[m2_prograde_burn/o6_aux]: violations=0
+[PASS] orbit_events_contract[m2_prograde_burn/o6_aux]: violations=0
+[PASS] o4_reference[m2_prograde_burn/o6_aux]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000725978, ignition_velocity_error_max_mps=1.11544e-06, thrust_direction_vs_reference_max=1.26122e-09, cutoff_position_error_max_m=0.0107637, cutoff_velocity_error_max_mps=0.000293357, sample_position_error_max_m=0.0232474, sample_velocity_error_max_mps=0.000293279, final_position_error_m=0.0232474, final_velocity_error_mps=0.000292092
+[PASS] o5_coast_kepler[m2_prograde_burn/o6_aux]: coast_position_error_max_m=0.000690237, coast_velocity_error_max_mps=1.02791e-06, post_burn_coast_position_error_max_m=9.29934e-05
+[PASS] orbit_events[m2_prograde_burn/o6_aux]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.000513098, max_altitude_error_m=0.0017939
+[PASS] accounting[m2_prograde_burn/o6_aux]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.46367e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=287.621, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=8.74514e-17, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=8.74514e-17, sample_delta_v_rel_error_max=2.0008e-11, sample_delta_v_excess_over_simpson_rel_max=7.54226e-15
+[PASS] o1_mass_law[m2_prograde_burn/o6_aux]: propellant_used_rel_error_max=8.6085e-17, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_prograde_burn/o6_aux]: sensed_delta_v_rel_error_max=2.0008e-11, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=1.12859e-14
+[PASS] o7_direction[m2_prograde_burn/o6_aux]: sign_violations=0, plane_rotation_max_rad=1.05536e-16, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=50521.7, burn000001_apoapsis_alt_km=351.043, burn000001_periapsis_alt_km=250.017
+[PASS] event_order[m2_retrograde_burn]: violations=0
+[PASS] traceability[m2_retrograde_burn]: violations=0
+[PASS] outcomes[m2_retrograde_burn]: violations=0
+[PASS] identities[m2_retrograde_burn]: violations=0
+[PASS] orbit_events_contract[m2_retrograde_burn]: violations=0
+[PASS] o4_reference[m2_retrograde_burn]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=1.53618e-09, cutoff_position_error_max_m=0.0118348, cutoff_velocity_error_max_mps=0.000291602, sample_position_error_max_m=46.5027, sample_velocity_error_max_mps=0.0543369, final_position_error_m=46.2652, final_velocity_error_mps=0.0543056
+[PASS] o5_coast_kepler[m2_retrograde_burn]: coast_position_error_max_m=0.313823, coast_velocity_error_max_mps=0.000363837, post_burn_coast_position_error_max_m=0.313823
+[PASS] orbit_events[m2_retrograde_burn]: node_crossing_time_error_max_s=0.00600181, min_altitude_error_m=0.985711, max_altitude_error_m=2.04891e-08
+[PASS] accounting[m2_retrograde_burn]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.46912e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=287.621, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=8.74514e-17, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=8.74514e-17, sample_delta_v_rel_error_max=2.26931e-14, sample_delta_v_excess_over_simpson_rel_max=7.54226e-15
+[PASS] o1_mass_law[m2_retrograde_burn]: propellant_used_rel_error_max=8.6085e-17, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_retrograde_burn]: sensed_delta_v_rel_error_max=1.14072e-14, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=1.12859e-14
+[PASS] o7_direction[m2_retrograde_burn]: sign_violations=0, plane_rotation_max_rad=1.11886e-16, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=-49577.1, burn000001_apoapsis_alt_km=249.983, burn000001_periapsis_alt_km=150.863
+[PASS] cli_summary[m2_retrograde_burn]: violations=0
+[PASS] determinism[m2_retrograde_burn]: violations=0
+[PASS] o9_reference_integrity[m2_retrograde_burn]: violations=0
+[PASS] o9_gmat[m2_retrograde_burn]: step_spacing_error_max_s=2.33762e-07, burn_duration_from_mass_error_max_s=1.40901e-10, coast_vs_kepler_position_error_max_m=1.56978e-06, gmat_vs_dop853_position_error_max_m=3.64125e-06, gmat_vs_dop853_velocity_error_max_mps=4.25273e-09, gmat_vs_dop853_final_position_error_m=3.3613e-06, gmat_mass_vs_analytic_error_max_kg=2.251e-11, ours_vs_gmat_sample_position_error_max_m=46.5027, ours_vs_gmat_sample_velocity_error_max_mps=0.0543369, ours_vs_gmat_burn_boundary_position_error_max_m=0.0118348, ours_vs_gmat_burn_boundary_velocity_error_max_mps=0.000291602, ours_vs_gmat_final_position_error_m=46.2652, ours_vs_gmat_final_velocity_error_mps=0.0543056, ours_vs_gmat_mass_error_max_kg=2.251e-11, ours_vs_gmat_node_crossing_error_max_s=0.00600181, gmat_rows=973, mass_samples_compared=902
+[PASS] o8_convergence[m2_retrograde_burn]: position_error_dt10_m=46.2652, position_error_dt5_m=45.9681, position_error_dt2.5_m=45.9533, order_10_to_5=0.00929631, order_5_to_2.5=0.000461968, order_deviation_from_4_max=3.99954
+[PASS] event_order[m2_retrograde_burn/o8_aux]: violations=0
+[PASS] traceability[m2_retrograde_burn/o8_aux]: violations=0
+[PASS] outcomes[m2_retrograde_burn/o8_aux]: violations=0
+[PASS] identities[m2_retrograde_burn/o8_aux]: violations=0
+[PASS] orbit_events_contract[m2_retrograde_burn/o8_aux]: violations=0
+[PASS] o4_reference[m2_retrograde_burn/o8_aux]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=4.29649e-05, ignition_velocity_error_max_mps=6.41142e-08, thrust_direction_vs_reference_max=1.62244e-09, cutoff_position_error_max_m=0.0113205, cutoff_velocity_error_max_mps=0.000292258, sample_position_error_max_m=46.2118, sample_velocity_error_max_mps=0.0539981, final_position_error_m=45.9681, final_velocity_error_mps=0.0539595
+[PASS] o5_coast_kepler[m2_retrograde_burn/o8_aux]: coast_position_error_max_m=0.0157355, coast_velocity_error_max_mps=1.8185e-05, post_burn_coast_position_error_max_m=0.0157355
+[PASS] orbit_events[m2_retrograde_burn/o8_aux]: node_crossing_time_error_max_s=0.00596391, min_altitude_error_m=0.982386, max_altitude_error_m=2.04891e-08
+[PASS] accounting[m2_retrograde_burn/o8_aux]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=2.94549e-16, thrust_direction_error_max=1.92296e-16, final_propellant_kg=287.621, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=2.18629e-16, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=2.18629e-16, sample_delta_v_rel_error_max=1.78389e-14, sample_delta_v_excess_over_simpson_rel_max=1.77673e-14
+[PASS] o1_mass_law[m2_retrograde_burn/o8_aux]: propellant_used_rel_error_max=2.19995e-16, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_retrograde_burn/o8_aux]: sensed_delta_v_rel_error_max=6.67444e-15, sensed_delta_v_excess_over_simpson_rel_max=6.59861e-15, reported_rocket_equation_rel_error_max=2.57269e-14
+[PASS] o7_direction[m2_retrograde_burn/o8_aux]: sign_violations=0, plane_rotation_max_rad=1.5011e-16, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=-49577.1, burn000001_apoapsis_alt_km=249.983, burn000001_periapsis_alt_km=150.863
+[PASS] o6_impulsive_limit[m2_retrograde_burn]: order_deviation_from_2_max=1.99565, slice_sma_change_ratio_deviation=1.24658e-05, slice_finite_minus_impulsive_sma_m=-0.618009, order_pair_0=0.241296, order_pair_1=0.0672067, order_pair_2=0.0172298, order_pair_3=0.00434711
+[PASS] event_order[m2_retrograde_burn/o6_aux]: violations=0
+[PASS] traceability[m2_retrograde_burn/o6_aux]: violations=0
+[PASS] outcomes[m2_retrograde_burn/o6_aux]: violations=0
+[PASS] identities[m2_retrograde_burn/o6_aux]: violations=0
+[PASS] orbit_events_contract[m2_retrograde_burn/o6_aux]: violations=0
+[PASS] o4_reference[m2_retrograde_burn/o6_aux]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000725978, ignition_velocity_error_max_mps=1.11544e-06, thrust_direction_vs_reference_max=1.53618e-09, cutoff_position_error_max_m=0.0118348, cutoff_velocity_error_max_mps=0.000292157, sample_position_error_max_m=0.0243272, sample_velocity_error_max_mps=0.000292055, final_position_error_m=0.0243272, final_velocity_error_mps=0.000290812
+[PASS] o5_coast_kepler[m2_retrograde_burn/o6_aux]: coast_position_error_max_m=0.000690237, coast_velocity_error_max_mps=1.02791e-06, post_burn_coast_position_error_max_m=9.0241e-05
+[PASS] orbit_events[m2_retrograde_burn/o6_aux]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.003091, max_altitude_error_m=2.04891e-08
+[PASS] accounting[m2_retrograde_burn/o6_aux]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.4725e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=287.621, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=8.74514e-17, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=8.74514e-17, sample_delta_v_rel_error_max=2.0008e-11, sample_delta_v_excess_over_simpson_rel_max=7.54226e-15
+[PASS] o1_mass_law[m2_retrograde_burn/o6_aux]: propellant_used_rel_error_max=8.6085e-17, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_retrograde_burn/o6_aux]: sensed_delta_v_rel_error_max=2.0008e-11, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=1.12859e-14
+[PASS] o7_direction[m2_retrograde_burn/o6_aux]: sign_violations=0, plane_rotation_max_rad=1.24293e-16, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=-49576.9, burn000001_apoapsis_alt_km=250, burn000001_periapsis_alt_km=150.863
+[PASS] event_order[m2_burn_to_depletion]: violations=0
+[PASS] traceability[m2_burn_to_depletion]: violations=0
+[PASS] outcomes[m2_burn_to_depletion]: violations=0
+[PASS] identities[m2_burn_to_depletion]: violations=0
+[PASS] orbit_events_contract[m2_burn_to_depletion]: violations=0
+[PASS] o4_reference[m2_burn_to_depletion]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=5.07228e-09, cutoff_position_error_max_m=0.0370666, cutoff_velocity_error_max_mps=0.000603844, sample_position_error_max_m=98.3684, sample_velocity_error_max_mps=0.110353, final_position_error_m=98.3684, final_velocity_error_mps=0.110353
+[PASS] o5_coast_kepler[m2_burn_to_depletion]: coast_position_error_max_m=0.27481, coast_velocity_error_max_mps=0.000304347, post_burn_coast_position_error_max_m=0.27481
+[PASS] orbit_events[m2_burn_to_depletion]: node_crossing_time_error_max_s=0.0118774, min_altitude_error_m=0.000467595, max_altitude_error_m=2.14962
+[PASS] accounting[m2_burn_to_depletion]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.15372e-16, thrust_direction_error_max=1.57009e-16, final_propellant_kg=1.11022e-14, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=4.35382e-19, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=2.61229e-18, sample_delta_v_rel_error_max=4.94885e-14, sample_delta_v_excess_over_simpson_rel_max=5.00844e-15
+[PASS] o1_mass_law[m2_burn_to_depletion]: propellant_used_rel_error_max=0, depletion_residual_over_bound_max=0.304894
+[PASS] o2_rocket_equation[m2_burn_to_depletion]: sensed_delta_v_rel_error_max=4.94885e-14, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=9.38171e-16
+[PASS] o7_direction[m2_burn_to_depletion]: sign_violations=0, plane_rotation_max_rad=2.87687e-19, inclination_change_max_rad=0, burn000001_sma_change_m=105634, burn000001_apoapsis_alt_km=461.177, burn000001_periapsis_alt_km=250.092
+[PASS] cli_summary[m2_burn_to_depletion]: violations=0
+[PASS] determinism[m2_burn_to_depletion]: violations=0
+[PASS] rejections_change_nothing[m2_burn_to_depletion]: violations=0
+[PASS] o8_convergence[m2_burn_to_depletion]: position_error_dt10_m=98.3684, position_error_dt5_m=98.6425, position_error_dt2.5_m=98.6566, order_10_to_5=-0.00401549, order_5_to_2.5=-0.000205173, order_deviation_from_4_max=4.00402
+[PASS] event_order[m2_burn_to_depletion/o8_aux]: violations=0
+[PASS] traceability[m2_burn_to_depletion/o8_aux]: violations=0
+[PASS] outcomes[m2_burn_to_depletion/o8_aux]: violations=0
+[PASS] identities[m2_burn_to_depletion/o8_aux]: violations=0
+[PASS] orbit_events_contract[m2_burn_to_depletion/o8_aux]: violations=0
+[PASS] o4_reference[m2_burn_to_depletion/o8_aux]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=4.29649e-05, ignition_velocity_error_max_mps=6.41142e-08, thrust_direction_vs_reference_max=5.43667e-09, cutoff_position_error_max_m=0.0376181, cutoff_velocity_error_max_mps=0.000603283, sample_position_error_max_m=98.6566, sample_velocity_error_max_mps=0.110672, final_position_error_m=98.6566, final_velocity_error_mps=0.110672
+[PASS] o5_coast_kepler[m2_burn_to_depletion/o8_aux]: coast_position_error_max_m=0.0140486, coast_velocity_error_max_mps=1.54845e-05, post_burn_coast_position_error_max_m=0.0140486
+[PASS] orbit_events[m2_burn_to_depletion/o8_aux]: node_crossing_time_error_max_s=0.0119086, min_altitude_error_m=2.89446e-05, max_altitude_error_m=2.15399
+[PASS] accounting[m2_burn_to_depletion/o8_aux]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=2.29021e-16, thrust_direction_error_max=5.55112e-17, final_propellant_kg=6.10623e-15, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=5.87765e-18, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=1.04492e-17, sample_delta_v_rel_error_max=7.15356e-15, sample_delta_v_excess_over_simpson_rel_max=7.04057e-15
+[PASS] o1_mass_law[m2_burn_to_depletion/o8_aux]: propellant_used_rel_error_max=6.96611e-18, depletion_residual_over_bound_max=0.167692
+[PASS] o2_rocket_equation[m2_burn_to_depletion/o8_aux]: sensed_delta_v_rel_error_max=2.11089e-15, sensed_delta_v_excess_over_simpson_rel_max=1.2019e-15, reported_rocket_equation_rel_error_max=9.38171e-16
+[PASS] o7_direction[m2_burn_to_depletion/o8_aux]: sign_violations=0, plane_rotation_max_rad=2.46585e-16, inclination_change_max_rad=0, burn000001_sma_change_m=105634, burn000001_apoapsis_alt_km=461.177, burn000001_periapsis_alt_km=250.092
+[PASS] event_order[m2_invalid_commands]: violations=0
+[PASS] traceability[m2_invalid_commands]: violations=0
+[PASS] outcomes[m2_invalid_commands]: violations=0
+[PASS] identities[m2_invalid_commands]: violations=0
+[PASS] orbit_events_contract[m2_invalid_commands]: violations=0
+[PASS] o4_reference[m2_invalid_commands]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.103304, ignition_velocity_error_max_mps=0.000164887, thrust_direction_vs_reference_max=2.07501e-08, cutoff_position_error_max_m=0.106682, cutoff_velocity_error_max_mps=0.000204143, sample_position_error_max_m=0.586883, sample_velocity_error_max_mps=0.000492866, final_position_error_m=0.19024, final_velocity_error_mps=0.000173433
+[PASS] o5_coast_kepler[m2_invalid_commands]: coast_position_error_max_m=0.278772, coast_velocity_error_max_mps=0.000327391, post_burn_coast_position_error_max_m=0.278772
+[PASS] orbit_events[m2_invalid_commands]: node_crossing_time_error_max_s=5.45517e-05, min_altitude_error_m=0.170137, max_altitude_error_m=0.163232
+[PASS] accounting[m2_invalid_commands]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.46912e-16, thrust_direction_error_max=1.15278e-16, final_propellant_kg=290.391, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=8.74514e-17, thrust_unit_vector_error_max=3.10317e-17, sample_propellant_rel_error_max=8.74514e-17, sample_delta_v_rel_error_max=1.7451e-14, sample_delta_v_excess_over_simpson_rel_max=7.88616e-15
+[PASS] o1_mass_law[m2_invalid_commands]: propellant_used_rel_error_max=4.16761e-17, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_invalid_commands]: sensed_delta_v_rel_error_max=5.56057e-14, sensed_delta_v_excess_over_simpson_rel_max=3.60182e-14, reported_rocket_equation_rel_error_max=6.70948e-14
+[PASS] o7_direction[m2_invalid_commands]: sign_violations=0, plane_rotation_max_rad=1.00795e-16, inclination_change_max_rad=2.22045e-16, burn000001_sma_change_m=19436.5, burn000001_apoapsis_alt_km=288.872, burn000001_periapsis_alt_km=250.001, burn000002_sma_change_m=-6510.7, burn000002_apoapsis_alt_km=275.853, burn000002_periapsis_alt_km=249.998, burn000003_sma_change_m=-12976.7, burn000003_apoapsis_alt_km=266.694, burn000003_periapsis_alt_km=233.204
+[PASS] cli_summary[m2_invalid_commands]: violations=0
+[PASS] determinism[m2_invalid_commands]: violations=0
+[PASS] rejections_change_nothing[m2_invalid_commands]: violations=0
+[PASS] o9_reference_integrity[m2_invalid_commands]: violations=0
+[PASS] o9_gmat[m2_invalid_commands]: step_spacing_error_max_s=2.33762e-07, burn_duration_from_mass_error_max_s=5.46443e-11, coast_vs_kepler_position_error_max_m=3.84041e-06, gmat_vs_dop853_position_error_max_m=6.24279e-07, gmat_vs_dop853_velocity_error_max_mps=6.86936e-10, gmat_vs_dop853_final_position_error_m=2.9052e-07, gmat_mass_vs_analytic_error_max_kg=1.75078e-11, ours_vs_gmat_sample_position_error_max_m=0.586883, ours_vs_gmat_sample_velocity_error_max_mps=0.000492866, ours_vs_gmat_burn_boundary_position_error_max_m=0.106682, ours_vs_gmat_burn_boundary_velocity_error_max_mps=0.000204143, ours_vs_gmat_final_position_error_m=0.190242, ours_vs_gmat_final_velocity_error_mps=0.000173434, ours_vs_gmat_mass_error_max_kg=1.72804e-11, ours_vs_gmat_node_crossing_error_max_s=5.45517e-05, gmat_rows=956, mass_samples_compared=902
+[PASS] o8_convergence[m2_invalid_commands]: position_error_dt10_m=0.19024, position_error_dt5_m=0.429964, position_error_dt2.5_m=0.443197, order_10_to_5=-1.17639, order_5_to_2.5=-0.0437308, order_deviation_from_4_max=5.17639
+[PASS] event_order[m2_invalid_commands/o8_aux]: violations=0
+[PASS] traceability[m2_invalid_commands/o8_aux]: violations=0
+[PASS] outcomes[m2_invalid_commands/o8_aux]: violations=0
+[PASS] identities[m2_invalid_commands/o8_aux]: violations=0
+[PASS] orbit_events_contract[m2_invalid_commands/o8_aux]: violations=0
+[PASS] o4_reference[m2_invalid_commands/o8_aux]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.107973, ignition_velocity_error_max_mps=0.000174555, thrust_direction_vs_reference_max=2.20622e-08, cutoff_position_error_max_m=0.111613, cutoff_velocity_error_max_mps=0.000213943, sample_position_error_max_m=0.605893, sample_velocity_error_max_mps=0.000513166, final_position_error_m=0.443196, final_velocity_error_mps=0.000424505
+[PASS] o5_coast_kepler[m2_invalid_commands/o8_aux]: coast_position_error_max_m=0.0140117, coast_velocity_error_max_mps=1.64611e-05, post_burn_coast_position_error_max_m=0.0140117
+[PASS] orbit_events[m2_invalid_commands/o8_aux]: node_crossing_time_error_max_s=5.69823e-05, min_altitude_error_m=0.167632, max_altitude_error_m=0.166998
+[PASS] accounting[m2_invalid_commands/o8_aux]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=2.94186e-16, thrust_direction_error_max=1.17757e-16, final_propellant_kg=290.391, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=1.74903e-16, thrust_unit_vector_error_max=2.22478e-16, sample_propellant_rel_error_max=1.74903e-16, sample_delta_v_rel_error_max=2.7546e-14, sample_delta_v_excess_over_simpson_rel_max=2.74795e-14
+[PASS] o1_mass_law[m2_invalid_commands/o8_aux]: propellant_used_rel_error_max=8.95011e-17, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[m2_invalid_commands/o8_aux]: sensed_delta_v_rel_error_max=7.48448e-14, sensed_delta_v_excess_over_simpson_rel_max=7.47684e-14, reported_rocket_equation_rel_error_max=5.06786e-14
+[PASS] o7_direction[m2_invalid_commands/o8_aux]: sign_violations=0, plane_rotation_max_rad=1.98372e-16, inclination_change_max_rad=3.33067e-16, burn000001_sma_change_m=19436.5, burn000001_apoapsis_alt_km=288.872, burn000001_periapsis_alt_km=250.001, burn000002_sma_change_m=-6510.7, burn000002_apoapsis_alt_km=275.853, burn000002_periapsis_alt_km=249.998, burn000003_sma_change_m=-12976.7, burn000003_apoapsis_alt_km=266.694, burn000003_periapsis_alt_km=233.204
+[PASS] event_order[m2_invalid_commands_empty_tank]: violations=0
+[PASS] traceability[m2_invalid_commands_empty_tank]: violations=0
+[PASS] outcomes[m2_invalid_commands_empty_tank]: violations=0
+[PASS] identities[m2_invalid_commands_empty_tank]: violations=0
+[PASS] orbit_events_contract[m2_invalid_commands_empty_tank]: violations=0
+[PASS] o4_reference[m2_invalid_commands_empty_tank]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0, ignition_velocity_error_max_mps=0, thrust_direction_vs_reference_max=0, cutoff_position_error_max_m=0, cutoff_velocity_error_max_mps=0, sample_position_error_max_m=0.298332, sample_velocity_error_max_mps=0.000349028, final_position_error_m=0.298332, final_velocity_error_mps=0.000349028
+[PASS] o5_coast_kepler[m2_invalid_commands_empty_tank]: coast_position_error_max_m=0.298332, coast_velocity_error_max_mps=0.000349027, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[m2_invalid_commands_empty_tank]: node_crossing_time_error_max_s=3.32363e-05, min_altitude_error_m=0.00629163, max_altitude_error_m=5.4948e-08
+[PASS] accounting[m2_invalid_commands_empty_tank]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=0, thrust_direction_error_max=0, final_propellant_kg=0, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=0, thrust_unit_vector_error_max=0, sample_propellant_rel_error_max=0, sample_delta_v_rel_error_max=0, sample_delta_v_excess_over_simpson_rel_max=0
+[PASS] cli_summary[m2_invalid_commands_empty_tank]: violations=0
+[PASS] determinism[m2_invalid_commands_empty_tank]: violations=0
+[PASS] rejections_change_nothing[m2_invalid_commands_empty_tank]: violations=0
+[PASS] event_order[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] traceability[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] outcomes[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] identities[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] orbit_events_contract[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] o4_reference[m2_invalid_commands_no_propulsion]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0, ignition_velocity_error_max_mps=0, thrust_direction_vs_reference_max=0, cutoff_position_error_max_m=0, cutoff_velocity_error_max_mps=0, sample_position_error_max_m=0.298332, sample_velocity_error_max_mps=0.000349028, final_position_error_m=0.298332, final_velocity_error_mps=0.000349028
+[PASS] o5_coast_kepler[m2_invalid_commands_no_propulsion]: coast_position_error_max_m=0.298332, coast_velocity_error_max_mps=0.000349027, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[m2_invalid_commands_no_propulsion]: node_crossing_time_error_max_s=3.32363e-05, min_altitude_error_m=0.00629163, max_altitude_error_m=5.4948e-08
+[PASS] cli_summary[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] determinism[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] rejections_change_nothing[m2_invalid_commands_no_propulsion]: violations=0
+[PASS] dr0018_boundary[stop_inside_burn]: violations=0
+[PASS] event_order[dr0018/stop_inside_burn]: violations=0
+[PASS] traceability[dr0018/stop_inside_burn]: violations=0
+[PASS] outcomes[dr0018/stop_inside_burn]: violations=0
+[PASS] identities[dr0018/stop_inside_burn]: violations=0
+[PASS] orbit_events_contract[dr0018/stop_inside_burn]: violations=0
+[PASS] o4_reference[dr0018/stop_inside_burn]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=8.9435e-10, cutoff_position_error_max_m=0, cutoff_velocity_error_max_mps=0, sample_position_error_max_m=0.00628402, sample_velocity_error_max_mps=0.000227335, final_position_error_m=0.00628402, final_velocity_error_mps=0.000227335
+[PASS] o5_coast_kepler[dr0018/stop_inside_burn]: coast_position_error_max_m=0.000690237, coast_velocity_error_max_mps=1.02791e-06, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[dr0018/stop_inside_burn]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.000467595, max_altitude_error_m=0.000231737
+[PASS] accounting[dr0018/stop_inside_burn]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=2.92676e-14, thrust_acceleration_rel_error_max=1.46367e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=290.391, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=0, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=8.74514e-17, sample_delta_v_rel_error_max=2.26931e-14, sample_delta_v_excess_over_simpson_rel_max=7.54226e-15
+[PASS] dr0018_boundary[stop_before_ignition]: violations=0
+[PASS] event_order[dr0018/stop_before_ignition]: violations=0
+[PASS] traceability[dr0018/stop_before_ignition]: violations=0
+[PASS] outcomes[dr0018/stop_before_ignition]: violations=0
+[PASS] identities[dr0018/stop_before_ignition]: violations=0
+[PASS] orbit_events_contract[dr0018/stop_before_ignition]: violations=0
+[PASS] o4_reference[dr0018/stop_before_ignition]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0, ignition_velocity_error_max_mps=0, thrust_direction_vs_reference_max=0, cutoff_position_error_max_m=0, cutoff_velocity_error_max_mps=0, sample_position_error_max_m=0.000356997, sample_velocity_error_max_mps=4.12822e-07, final_position_error_m=0.000356997, final_velocity_error_mps=4.12822e-07
+[PASS] o5_coast_kepler[dr0018/stop_before_ignition]: coast_position_error_max_m=0.000356997, coast_velocity_error_max_mps=4.1282e-07, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[dr0018/stop_before_ignition]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.000122059, max_altitude_error_m=2.04891e-08
+[PASS] accounting[dr0018/stop_before_ignition]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=0, thrust_direction_error_max=0, final_propellant_kg=300, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=0, thrust_unit_vector_error_max=0, sample_propellant_rel_error_max=0, sample_delta_v_rel_error_max=0, sample_delta_v_excess_over_simpson_rel_max=0
+[PASS] dr0018_boundary[stop_at_ignition]: violations=0
+[PASS] event_order[dr0018/stop_at_ignition]: violations=0
+[PASS] traceability[dr0018/stop_at_ignition]: violations=0
+[PASS] outcomes[dr0018/stop_at_ignition]: violations=0
+[PASS] identities[dr0018/stop_at_ignition]: violations=0
+[PASS] orbit_events_contract[dr0018/stop_at_ignition]: violations=0
+[PASS] o4_reference[dr0018/stop_at_ignition]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=1.13533e-10, cutoff_position_error_max_m=0, cutoff_velocity_error_max_mps=0, sample_position_error_max_m=0.000690236, sample_velocity_error_max_mps=1.02791e-06, final_position_error_m=0.000690236, final_velocity_error_mps=1.02791e-06
+[PASS] o5_coast_kepler[dr0018/stop_at_ignition]: coast_position_error_max_m=0.000690237, coast_velocity_error_max_mps=1.02791e-06, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[dr0018/stop_at_ignition]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.000467595, max_altitude_error_m=2.04891e-08
+[PASS] accounting[dr0018/stop_at_ignition]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=0, thrust_direction_error_max=1.66533e-16, final_propellant_kg=300, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=0, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=0, sample_delta_v_rel_error_max=0, sample_delta_v_excess_over_simpson_rel_max=0
+[PASS] dr0018_boundary[stop_at_cutoff]: violations=0
+[PASS] event_order[dr0018/stop_at_cutoff]: violations=0
+[PASS] traceability[dr0018/stop_at_cutoff]: violations=0
+[PASS] outcomes[dr0018/stop_at_cutoff]: violations=0
+[PASS] identities[dr0018/stop_at_cutoff]: violations=0
+[PASS] orbit_events_contract[dr0018/stop_at_cutoff]: violations=0
+[PASS] o4_reference[dr0018/stop_at_cutoff]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=3.29902e-09, cutoff_position_error_max_m=0.0266595, cutoff_velocity_error_max_mps=0.000454449, sample_position_error_max_m=0.0266595, sample_velocity_error_max_mps=0.000454449, final_position_error_m=0.0266595, final_velocity_error_mps=0.000454449
+[PASS] o5_coast_kepler[dr0018/stop_at_cutoff]: coast_position_error_max_m=0.000690237, coast_velocity_error_max_mps=1.02791e-06, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[dr0018/stop_at_cutoff]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.000467595, max_altitude_error_m=0.0019207
+[PASS] accounting[dr0018/stop_at_cutoff]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.46367e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=280.782, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=1.74903e-16, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=1.74903e-16, sample_delta_v_rel_error_max=2.13622e-14, sample_delta_v_excess_over_simpson_rel_max=4.93507e-15
+[PASS] o1_mass_law[dr0018/stop_at_cutoff]: propellant_used_rel_error_max=1.66704e-16, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[dr0018/stop_at_cutoff]: sensed_delta_v_rel_error_max=1.32539e-14, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=1.79318e-14
+[PASS] o7_direction[dr0018/stop_at_cutoff]: sign_violations=0, plane_rotation_max_rad=7.39989e-17, inclination_change_max_rad=1.11022e-16, burn000001_sma_change_m=79056.2, burn000001_apoapsis_alt_km=408.049, burn000001_periapsis_alt_km=250.064
+[PASS] same_tick_submission_reporting: violations=0
+[PASS] o3_free_space: velocity_rel_error_max=1e-05, propellant_rel_error_max=2.148e-16, timing_violations=0, prograde_position_error_dt10_m=0.011297, prograde_position_order=-5.14394e-07, retrograde_position_error_dt10_m=0.011297, retrograde_position_order=-5.16922e-07, position_order_deviation_from_4_max=4
+[PASS] thresholds_all_consumed: violations=0
+[PASS] thresholds_cover_all_metrics: violations=0
+[PASS] report_only_metrics_finite: violations=0
+thresholds: provisional; overall: PASS -> review_scratch/poison_thresholds.json
+POISONED THRESHOLD PROOF exit 0 checks 213 passed True

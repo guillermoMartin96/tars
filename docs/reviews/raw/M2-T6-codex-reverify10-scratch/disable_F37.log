@@ -1,0 +1,36 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_cli_summary_is_reconciled_with_events __________________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x111ce5c60>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+
+    def test_cli_summary_is_reconciled_with_events(runs):
+        """F8: a CLI summary without the commands fails."""
+        _, scenario, run = _slice(runs)
+        good = {
+            "unsubmitted_command_ids": [],
+            "commands": [
+                {"command_id": "slice-prograde-001", "status": "accepted", "reason": None,
+                 "burn_id": "burn#000001", "submit_tick": 0}
+            ],
+            "final_propellant_kg": run.final_propulsion.propellant_kg,
+            "final_total_mass_kg": run.final_propulsion.total_mass_kg,
+            "final_engine_state": "idle",
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good, scenario) == []
+        assert m2.cli_summary_violations(run.events, {**good, "commands": []}, scenario)
+        # F37 (T6 review): unsubmitted IDs reconciled with the timeline.
+        for wrong in (["slice-prograde-001"], ["invented"], [None]):
+            bad = {**good, "unsubmitted_command_ids": wrong}
+>           assert m2.cli_summary_violations(run.events, bad, scenario)
+E           AssertionError: assert []
+E            +  where [] = <function pytest_configure.<locals>.disabled at 0x111cfbe20>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn', scenar...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...], {'unsubmitted_command_ids': ['slice-prograde-001'], 'commands': [{'command_id': 'slice-prograde-001', 'status': 'accep...rn_id': 'burn#000001', ...}], 'final_propellant_kg': 287.62057980802416, 'final_total_mass_kg': 1287.620579808024, ...}, ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0010 A): one 77.3 s ...eline', 'ignition_t_s': 600.0, 'direction': 'prograde', 'duration_s': 77.3, 'on_insufficient_propellant': 'reject'}),)))
+E            +    where <function pytest_configure.<locals>.disabled at 0x111cfbe20> = m2.cli_summary_violations
+E            +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn', scenar...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+
+tests/test_m2_validation.py:775: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_cli_summary_is_reconciled_with_events
+1 failed, 290 deselected in 5.30s

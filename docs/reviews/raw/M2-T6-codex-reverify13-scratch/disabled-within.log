@@ -1,0 +1,20 @@
+.....F                                                                   [100%]
+=================================== FAILURES ===================================
+_______________ test_overflowing_finite_velocities_are_rejected ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108ccff20>
+
+    def test_overflowing_finite_velocities_are_rejected(monkeypatch):
+        """F48: finite 1e200 velocities overflow the norms; the finite-safe comparison
+        rejects them instead of accepting inf <= tol * inf."""
+>       assert not m2.within(math.inf, math.inf)
+E       assert not True
+E        +  where True = <function unsafe at 0x106294f40>(inf, inf)
+E        +    where <function unsafe at 0x106294f40> = m2.within
+E        +    and   inf = math.inf
+E        +    and   inf = math.inf
+
+tests/test_gmat_m2.py:2121: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_overflowing_finite_velocities_are_rejected
+1 failed, 5 passed, 175 deselected in 10.44s

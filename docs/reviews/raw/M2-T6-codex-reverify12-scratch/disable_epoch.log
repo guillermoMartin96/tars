@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_time_shifted_staged_report_is_rejected __________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-192/test_time_shifted_staged_repor0')
+
+    def test_time_shifted_staged_report_is_rejected(tmp_path):
+        """F46: every epoch shifted by one day, digests recomputed consistently, is rejected
+        by the staged evaluation that run uses before publishing."""
+        name = "m2_prograde_burn"
+        dst = _copy_refs(tmp_path)
+        report = dst / f"{name}_report.txt"
+        lines = []
+        for line in report.read_text().splitlines():
+            f = line.split()
+            f[1] = repr(float(f[1]) + 1.0)
+            lines.append(" ".join(f))
+        report.write_text("\n".join(lines) + "\n")
+        _rehash(dst, name)
+        rejected, check = _cli()._evaluate(name, base=dst)
+>       assert check is None and any("configured epoch" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:1957: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_time_shifted_staged_report_is_rejected - A...
+1 failed in 5.95s

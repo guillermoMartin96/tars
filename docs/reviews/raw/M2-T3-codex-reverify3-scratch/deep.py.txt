@@ -1,0 +1,36 @@
+import sys, dataclasses, hashlib, json
+sys.path.insert(0,'tests')
+from test_commands import _sim,_cmd,_run_until,ENGINE,DRY,PROP,_sample_events,APPROVED_REJECTION_CODES
+from tars.sim.propulsion import SpacecraftSpec,TankSpec,BurnRejection
+from tars.sim.burn_events import propulsion_sampled_event
+from tars.sim.commands import BurnCommand
+import numpy as np
+
+def fingerprint(s):
+ return (s._y.tobytes(),s._tick,tuple(s._pending),s._active,s._burn_count,getattr(s,"_committed_propellant_kg",None),frozenset(s._used_command_ids),s.engine_transitions)
+seen=set()
+def check(s,d):
+ before=fingerprint(s); r=s.submit(d); assert r.reason is not None; assert before==fingerprint(s); __import__('tars.sim.burn_events',fromlist=['command_event']).command_event(r).model_dump_json(); seen.add(r.reason.value); print('atomic',r.reason.value)
+check(_sim(),{})
+check(_sim(),_cmd(duration_s=0.))
+check(_sim(),_cmd(ignition_t_s=-1.))
+s=_sim();s.submit(_cmd());check(s,_cmd(command_id='other',ignition_t_s=601.))
+check(s,_cmd());_run_until(s,610.);check(s,_cmd(command_id='other',ignition_t_s=610.))
+check(_sim(propellant=0.),_cmd());check(_sim(propellant=1.),_cmd())
+check(_sim(spacecraft=False),_cmd());check(_sim(),_cmd(duration_s=5e-324))
+assert seen==APPROVED_REJECTION_CODES
+for direction in ('prograde','retrograde'):
+ s=_sim();s.submit(_cmd(direction=direction));_run_until(s,620.)
+ state=s.snapshot();p=s.propulsion_snapshot();sc=SpacecraftSpec(DRY,ENGINE,TankSpec(PROP))
+ e=propulsion_sampled_event(p,state,sc)
+ y=s._y; rhs=s._powered_derivative(s._active)(state.t,y)
+ acceleration=rhs[3:6]-s._force_model.acceleration(state.t,state.r,state.v)
+ np.testing.assert_allclose(e.thrust_acceleration_mps2,acceleration,rtol=1e-12,atol=1e-15)
+ print('truth RHS matches',direction)
+ # converter accepts inconsistent times even at the same tick
+ changed=dataclasses.replace(state,t=state.t+123.)
+ print('same tick wrong time accepted',propulsion_sampled_event(p,changed,sc).t,changed.t)
+from tars.events import to_jsonl
+print('event hash',hashlib.sha256(to_jsonl(_sample_events().values()).encode()).hexdigest())
+from tars.events.schema import StateSampled,SpacecraftConfigured
+print('M1 still accepts float version',StateSampled(schema_version=1.,tick=0,t=0.,r=[1.,2.,3.],v=[1.,2.,3.],altitude_m=1.).schema_version)

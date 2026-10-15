@@ -1,0 +1,13 @@
+from pathlib import Path
+base=Path('docs/reviews/raw')
+for name in ['probe','edge','deep','adversarial','followup']:
+    p=base/f'M2-T3-codex-reverify2-scratch/{name}.py.txt'
+    s=p.read_text()
+    if name=='deep': s=s[:s.index('e=SpacecraftConfigured(')]
+    if name=='followup':
+        start=s.index("print('N5 accepted'")
+        end=s.index('for ex in')
+        s=s[:start]+"print('N5 rejected',r.reason,r.schema_errors);assert r.command is None\n"+s[end:]
+    Path(f'review_scratch/{name}.py.txt').write_text(s)
+for name in ['probe_more','probe_unicode']:
+    Path(f'review_scratch/{name}.py.txt').write_text((base/f'M2-T3-codex-reverify-scratch/{name}.py.txt').read_text())

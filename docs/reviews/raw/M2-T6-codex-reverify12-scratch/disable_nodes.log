@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_solver_nodes_are_reconciled_on_tickless_segments _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d069520>
+
+    def test_solver_nodes_are_reconciled_on_tickless_segments(monkeypatch):
+        """F45: a segment containing no telemetry tick still reconciles its solver nodes."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+        seen = {"tickless": 0}
+    
+        def poisoned(fun, t_span, *a, **k):
+            sol = original(fun, t_span, *a, **k)
+            lo, hi = t_span
+            if math.floor(hi / 10.0) * 10.0 <= lo and sol.y.shape[1] > 2:  # no tick in (lo, hi]
+                seen["tickless"] += 1
+                sol.y[:6, 1:-1] = -sol.y[:6, 1:-1]
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", poisoned)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="solver nodes"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:1931: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_solver_nodes_are_reconciled_on_tickless_segments
+1 failed in 0.66s

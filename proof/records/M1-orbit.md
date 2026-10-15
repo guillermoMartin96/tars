@@ -58,3 +58,8 @@
 - **REV-012 (deferred by the Tech Lead):** investigate the GMAT epoch-column drift before introducing any time-dependent force model.
 - **Merge:** merging `milestone-1-orbit` into `main` requires Tech Lead approval. Milestone 2 does not start until it is approved.
 - **Cross-provider review:** not required for M1 (Tech Lead, 2026-10-05).
+
+## Post-merge note (2026-10-10): REV-012 / M1-D5 resolved
+- The deferred GMAT epoch-column drift (M1-D5) has a verified root cause: per-command double-MJD epoch re-rounding in GMAT (VAL-0010; DR-0016 approved).
+- It has no effect on this record's results. The M1 comparison aligns on `ElapsedS` labels, at states verified to 9e-10 s, and the committed reference reproduces byte-for-byte.
+- This record's PASS, evidence and thresholds are unchanged.

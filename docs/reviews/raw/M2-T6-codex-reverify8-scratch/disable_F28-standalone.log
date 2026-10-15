@@ -1,0 +1,71 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics[nan] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f530bc0>, bad = nan
+
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics(monkeypatch, bad):
+        """F28: report-only T5 audit metrics must be finite in standalone O9 too."""
+        cli = _cli()
+        original = m2.audit_run
+    
+        def poisoned(scenario, expected, run):
+            audit = original(scenario, expected, run)
+            audit.metrics["o2_rocket_equation"]["sensed_delta_v_rel_error_max"] = bad
+            return audit
+    
+        monkeypatch.setattr(m2, "audit_run", poisoned)
+        rejected, check = cli._evaluate("m2_prograde_burn")
+>       assert check is None and any("non-finite metrics" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:1510: AssertionError
+_ test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics[inf] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f531b80>, bad = inf
+
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics(monkeypatch, bad):
+        """F28: report-only T5 audit metrics must be finite in standalone O9 too."""
+        cli = _cli()
+        original = m2.audit_run
+    
+        def poisoned(scenario, expected, run):
+            audit = original(scenario, expected, run)
+            audit.metrics["o2_rocket_equation"]["sensed_delta_v_rel_error_max"] = bad
+            return audit
+    
+        monkeypatch.setattr(m2, "audit_run", poisoned)
+        rejected, check = cli._evaluate("m2_prograde_burn")
+>       assert check is None and any("non-finite metrics" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:1510: AssertionError
+_ test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics[-inf] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10f43b410>
+bad = -inf
+
+    @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
+    def test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics(monkeypatch, bad):
+        """F28: report-only T5 audit metrics must be finite in standalone O9 too."""
+        cli = _cli()
+        original = m2.audit_run
+    
+        def poisoned(scenario, expected, run):
+            audit = original(scenario, expected, run)
+            audit.metrics["o2_rocket_equation"]["sensed_delta_v_rel_error_max"] = bad
+            return audit
+    
+        monkeypatch.setattr(m2, "audit_run", poisoned)
+        rejected, check = cli._evaluate("m2_prograde_burn")
+>       assert check is None and any("non-finite metrics" in r for r in rejected)
+E       AssertionError: assert (Check(validator='o9_gmat[m2_prograde_burn]', metrics={'step_spacing_error_max_s': 2.337619662284851e-07, 'burn_duratio...ing_error_max_s': 8e-05}, threshold_status='provisional', notes='GMAT R2026a, aligned stepping (DR-0016)', failures=[]) is None)
+
+tests/test_gmat_m2.py:1510: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics[nan]
+FAILED tests/test_gmat_m2.py::test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics[inf]
+FAILED tests/test_gmat_m2.py::test_standalone_evaluation_rejects_non_finite_report_only_audit_metrics[-inf]
+3 failed, 136 deselected in 11.52s

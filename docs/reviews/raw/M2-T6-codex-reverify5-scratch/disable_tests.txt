@@ -1,0 +1,20 @@
+import importlib.util, inspect, math, re
+import pytest
+from tars.validation import m2
+s=importlib.util.spec_from_file_location('tests_gmat','tests/test_gmat_m2.py'); t=importlib.util.module_from_spec(s); s.loader.exec_module(t)
+source=inspect.getsource(m2.dop853_reference)
+source=re.sub(r'            if not np.all\(np.isfinite\(alts\)\):[^\n]*\n                raise RuntimeError[^\n]*\n','',source)
+ns=dict(m2.__dict__); exec(source,ns)
+mp=pytest.MonkeyPatch(); mp.setattr(m2,'dop853_reference',ns['dop853_reference'])
+try:
+ t.test_dense_output_must_be_finite(mp); print('disabled dense test UNEXPECTED PASS')
+except BaseException as e: print('disabled dense test FAILS',type(e).__name__,str(e))
+finally: mp.undo()
+module=t._proof_module(); source=inspect.getsource(module._merge_audits).replace('m2.worst(dst.get(k, -math.inf), x)','max(dst.get(k, -math.inf), x)')
+ns=dict(module.__dict__); exec(source,ns); module._merge_audits=ns['_merge_audits']
+t._proof_module=lambda:module
+for test in [t.test_merging_auxiliary_audits_keeps_nan,t.test_nan_in_an_auxiliary_audit_fails_the_mission]:
+ mp=pytest.MonkeyPatch()
+ try: test(mp); print('disabled merge',test.__name__,'UNEXPECTED PASS',flush=True)
+ except BaseException as e: print('disabled merge',test.__name__,'FAILS',type(e).__name__,str(e),flush=True)
+ finally: mp.undo()

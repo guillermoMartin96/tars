@@ -1,0 +1,57 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+..................................F..................................... [ 85%]
+.......................F..........F...                                   [100%]
+=================================== FAILURES ===================================
+_______ test_boundary_burn_at_large_time_executes_without_negative_mass ________
+
+    def test_boundary_burn_at_large_time_executes_without_negative_mass():
+        """N1 case under DR-0017: ignition ~1e9 s, tank = mdot * 0.1 s, exact-depletion
+        command. The step-back residual (~1.5e-8 kg) is a negligible delta-v error for the
+        1000 kg reference vehicle, which executes with propellant never negative; for a
+        1e-10 kg dry mass the same residual is a large delta-v error and is rejected."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        duration = tank / ENGINE.mass_flow_kgps
+        tiny = SpacecraftSpec(dry_mass_kg=1e-10, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+        sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=tiny)
+        _run_until(sim, 9.0e8)
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:652: Failed
+_____________ test_schedule_burn_always_enforces_the_timing_budget _____________
+
+    def test_schedule_burn_always_enforces_the_timing_budget():
+        """The simulator passes the spacecraft's dry mass; no burn bypasses DR-0017."""
+        hot = SpacecraftSpec(
+            dry_mass_kg=1.0, engine=EngineSpec(thrust_n=1.0e5, isp_s=300.0), tank=TankSpec(50.0)
+        )
+        sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e10, spacecraft=hot)
+        _run_until(sim, 7.0e10)
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:895: Failed
+____ test_reviewer_over_budget_configurations_are_rejected_by_the_simulator ____
+
+    def test_reviewer_over_budget_configurations_are_rejected_by_the_simulator():
+        """F1: both reviewer reproductions were accepted by schedule_burn; one executed."""
+        cases = [
+            (EngineSpec(3e-7, 3e-7 / STANDARD_GRAVITY), 3.0, 1e16, 3.0, 9999999999999998.0),
+            (EngineSpec(1e-280, 1e20 / STANDARD_GRAVITY), 1e-310, 1e-310, 1e-10, 1e-11),
+        ]
+        for engine, dry, prop, ignition, duration in cases:
+            sc = SpacecraftSpec(dry_mass_kg=dry, engine=engine, tank=TankSpec(propellant_kg=prop))
+            sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0, spacecraft=sc)
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:993: Failed
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_boundary_burn_at_large_time_executes_without_negative_mass
+FAILED tests/test_simulator_propulsion.py::test_schedule_burn_always_enforces_the_timing_budget
+FAILED tests/test_simulator_propulsion.py::test_reviewer_over_budget_configurations_are_rejected_by_the_simulator
+3 failed, 251 passed in 1.78s

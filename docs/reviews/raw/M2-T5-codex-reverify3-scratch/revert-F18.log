@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_event_schema_version_is_enforced _____________________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x1127798a0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+
+    def test_event_schema_version_is_enforced(runs):
+        """F18: every event must carry the integer schema version 1 and re-validate."""
+        _, scenario, run = _slice(runs)
+        events = [e.model_copy(update={"schema_version": 999}) for e in run.events]
+>       assert any("schema_version" in v for v in m2.check_event_order(scenario, events))
+E       assert False
+E        +  where False = any(<generator object test_event_schema_version_is_enforced.<locals>.<genexpr> at 0x11401dff0>)
+
+tests/test_m2_validation.py:1063: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_event_schema_version_is_enforced - a...
+1 failed, 123 deselected in 5.45s

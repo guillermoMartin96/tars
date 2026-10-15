@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_every_history_record_is_validated[bad-digest] ______________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-135/test_every_history_record_is_v0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x112d78f20>
+edit = <function _then_rechain.<locals>.run at 0x112d39300>
+
+    @pytest.mark.parametrize(
+        "edit",
+        [
+            _then_rechain(lambda h: h[0].update(generated_utc="1900-01-01T00:00:00+00:00")),
+            _then_rechain(lambda h: h[0].update(tars_git_revision="0" * 40)),
+            _then_rechain(lambda h: h[0].update(reason=None)),
+            _then_rechain(lambda h: h[0].update(report_sha256="not-a-digest")),
+            _then_rechain(lambda h: h.append({**h[-1], "mission": "invented"})),
+            _then_rechain(lambda h: h.__setitem__(slice(0, 2), [h[1], h[0]])),  # latest kept
+            lambda h: h.__delitem__(slice(0, 3)),  # deletion without re-chaining: chain breaks
+            lambda h: h[0].update(reason="edited"),  # any unchained edit: chain breaks
+        ],
+        ids=["old-timestamp", "zero-revision", "null-reason", "bad-digest", "unknown-mission",
+             "reordered", "deleted", "edited"],
+    )  # fmt: skip
+    def test_every_history_record_is_validated(tmp_path, monkeypatch, edit):
+        """F14: each value rule, chronology, and the chain itself reject their case."""
+>       assert _with_history(tmp_path, monkeypatch, edit)
+E       AssertionError: assert []
+E        +  where [] = _with_history(PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-135/test_every_history_record_is_v0'), <_pytest.monkeypatch.MonkeyPatch object at 0x112d78f20>, <function _then_rechain.<locals>.run at 0x112d39300>)
+
+tests/test_gmat_m2.py:864: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_every_history_record_is_validated[bad-digest]
+1 failed in 2.98s

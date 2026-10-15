@@ -1,0 +1,24 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_each_simulator_metric_fails_on_its_corruption[ours_vs_gmat_final_velocity_error_mps] _
+
+metric = 'ours_vs_gmat_final_velocity_error_mps'
+
+    @pytest.mark.parametrize("metric", sorted(EVENT_CASES))
+    def test_each_simulator_metric_fails_on_its_corruption(metric):
+        name = "m2_prograde_burn"
+        kind, update = EVENT_CASES[metric]
+        events = _event_edit(run_scenario(BY_NAME[name].build()).events, kind, **update)
+        scenario, predicted, arcs, rows = _labelled(name)
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        ref = m2.dop853_reference(
+            scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+        )
+        metrics = gmat_m2.o9_metrics(scenario, predicted, events, labelled, ref)
+>       assert metrics[metric] > _limits(name)[metric]
+E       assert 0.0 > 0.0007
+
+tests/test_gmat_m2.py:624: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_each_simulator_metric_fails_on_its_corruption[ours_vs_gmat_final_velocity_error_mps]
+1 failed in 2.93s

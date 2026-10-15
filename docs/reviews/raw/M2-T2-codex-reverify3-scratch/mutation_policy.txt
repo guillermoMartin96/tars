@@ -1,0 +1,150 @@
+........................................................................ [ 38%]
+........................................................................ [ 76%]
+...........................................F                             [100%]
+=================================== FAILURES ===================================
+___________ test_huge_integer_policy_is_schema_invalid_in_plan_burn ____________
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), propellant_kg = 300.0
+ignition_t_s = 0.0, duration_s = 1.0
+policy = <[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] int object at 0x7f9fa5176e00>
+earliest_t_s = 0.0
+
+    def plan_burn(
+        engine: EngineSpec,
+        propellant_kg: float,
+        ignition_t_s: float,
+        duration_s: float,
+        policy: InsufficientPropellantPolicy | str = InsufficientPropellantPolicy.REJECT,
+        earliest_t_s: float = 0.0,
+    ) -> BurnPlan:
+        """Validate a duration-based burn and compute its exact schedule (DR-0014 1A, 2A, 3C).
+    
+        Sufficiency is decided in the time domain against the depletion time
+        t_dep = fl(propellant / mdot). A burn is sufficient iff duration <= t_dep, and its
+        consumption is clamped to the loaded propellant. A burn one ulp longer is
+        insufficient. This rule is exact, not a tolerance (REV-T1-03).
+    
+        Raises:
+            BurnRejectedError: with a machine-readable reason. No plan exists for a
+                rejected burn.
+        """
+        # All arithmetic below is float64, whatever scalar type was passed (REV-T1-01).
+        propellant_kg = burn_scalar("propellant_kg", propellant_kg)
+        ignition_t_s = burn_scalar("ignition_t_s", ignition_t_s)
+        duration_s = burn_scalar("duration_s", duration_s)
+        earliest_t_s = burn_scalar("earliest_t_s", earliest_t_s)
+        if propellant_kg < 0.0:
+            raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, "propellant_kg must be >= 0")
+        try:
+>           policy = InsufficientPropellantPolicy(policy)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+src/tars/sim/propulsion.py:365: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/enum.py:751: in __call__
+    return cls.__new__(cls, value)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <enum 'InsufficientPropellantPolicy'>
+value = <[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] int object at 0x7f9fa5176e00>
+
+    def __new__(cls, value):
+        # all enum instances are actually created during class construction
+        # without calling this method; this method is called by the metaclass'
+        # __call__ (i.e. Color(3) ), and by pickle
+        if type(value) is cls:
+            # For lookups like Color(Color.RED)
+            return value
+        # by-value search for a matching enum member
+        # see if it's in the reverse mapping (for hashable values)
+        try:
+            return cls._value2member_map_[value]
+        except KeyError:
+            # Not found, no need to do long O(n) search
+            pass
+        except TypeError:
+            # not there, now do long search -- O(n) behavior
+            for member in cls._member_map_.values():
+                if member._value_ == value:
+                    return member
+        # still not found -- verify that members exist, in-case somebody got here mistakenly
+        # (such as via super when trying to override __new__)
+        if not cls._member_map_:
+            raise TypeError("%r has no members defined" % cls)
+        #
+        # still not found -- try _missing_ hook
+        try:
+            exc = None
+            result = cls._missing_(value)
+        except Exception as e:
+            exc = e
+            result = None
+        try:
+            if isinstance(result, cls):
+                return result
+            elif (
+                    Flag is not None and issubclass(cls, Flag)
+                    and cls._boundary_ is EJECT and isinstance(result, int)
+                ):
+                return result
+            else:
+>               ve_exc = ValueError("%r is not a valid %s" % (value, cls.__qualname__))
+                                                              ^^^^^
+E               ValueError: Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/enum.py:1168: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_huge_integer_policy_is_schema_invalid_in_plan_burn():
+        with pytest.raises(BurnRejectedError) as err:
+>           plan_burn(ENGINE, PROP, 0.0, 1.0, policy=10**10000)
+
+tests/test_simulator_propulsion.py:789: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), propellant_kg = 300.0
+ignition_t_s = 0.0, duration_s = 1.0
+policy = <[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] int object at 0x7f9fa5176e00>
+earliest_t_s = 0.0
+
+    def plan_burn(
+        engine: EngineSpec,
+        propellant_kg: float,
+        ignition_t_s: float,
+        duration_s: float,
+        policy: InsufficientPropellantPolicy | str = InsufficientPropellantPolicy.REJECT,
+        earliest_t_s: float = 0.0,
+    ) -> BurnPlan:
+        """Validate a duration-based burn and compute its exact schedule (DR-0014 1A, 2A, 3C).
+    
+        Sufficiency is decided in the time domain against the depletion time
+        t_dep = fl(propellant / mdot). A burn is sufficient iff duration <= t_dep, and its
+        consumption is clamped to the loaded propellant. A burn one ulp longer is
+        insufficient. This rule is exact, not a tolerance (REV-T1-03).
+    
+        Raises:
+            BurnRejectedError: with a machine-readable reason. No plan exists for a
+                rejected burn.
+        """
+        # All arithmetic below is float64, whatever scalar type was passed (REV-T1-01).
+        propellant_kg = burn_scalar("propellant_kg", propellant_kg)
+        ignition_t_s = burn_scalar("ignition_t_s", ignition_t_s)
+        duration_s = burn_scalar("duration_s", duration_s)
+        earliest_t_s = burn_scalar("earliest_t_s", earliest_t_s)
+        if propellant_kg < 0.0:
+            raise BurnRejectedError(BurnRejection.SCHEMA_INVALID, "propellant_kg must be >= 0")
+        try:
+            policy = InsufficientPropellantPolicy(policy)
+        except ValueError:
+            raise BurnRejectedError(
+>               BurnRejection.SCHEMA_INVALID, f"unknown policy {_describe(policy)}"
+                                                               ^^^^^^^^^^
+            ) from None
+E           ValueError: Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit
+
+src/tars/sim/propulsion.py:368: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_huge_integer_policy_is_schema_invalid_in_plan_burn
+1 failed, 187 passed in 1.40s

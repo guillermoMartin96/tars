@@ -1,0 +1,16 @@
+[PASS] mission: failed=0, orbits_short_of_target=0
+[PASS] invariants: energy_rel_drift_max=3.82693e-10, angular_momentum_rel_drift_max=1.91347e-10, eccentricity_vector_drift_max=5.85589e-10, sma_drift_max_m=0.00253654
+[PASS] kepler_reference: position_error_max_m=0.298364, position_error_final_m=0.298364, velocity_error_max_mps=0.000349092, velocity_error_final_mps=0.000349092
+[PASS] period: analytic_period_s=5370.3, measured_mean_period_s=5370.3, period_error_max_s=5.23407e-06, node_crossing_time_error_max_s=3.84703e-05, orbits_measured=10
+[PASS] convergence: fitted_order=4.32893, order_deviation_from_4=0.328933
+[PASS] determinism: distinct_hashes_minus_one=0
+[PASS] architecture: violations=0
+convergence (dt s -> position error m, |dE/E|):
+       60 -> 1.1612e+03, 2.978e-06
+       30 -> 4.3522e+01, 9.300e-08
+       20 -> 6.6851e+00, 1.225e-08
+       10 -> 2.9833e-01, 3.826e-10
+        5 -> 1.4905e-02, 1.194e-11
+      2.5 -> 8.2243e-04, 3.974e-13
+        1 -> 1.5233e-05, 1.028e-14
+thresholds: approved; overall: PASS -> review_scratch/m1_proof.json

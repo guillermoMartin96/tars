@@ -1,0 +1,36 @@
+import sys,json
+sys.path.insert(0,'tests')
+from test_commands import _sim,_cmd,_sample_events
+from tars.sim.commands import BurnCommand
+from tars.sim.burn_events import command_event
+from pydantic import BaseModel
+
+def probe(name,payload):
+ s=_sim()
+ try:
+  r=s.submit(payload)
+  print(name, r.status,r.reason, 'alias',r.command is payload)
+  print('event',command_event(r).model_dump_json()[:100])
+ except Exception as e: print(name,'ESCAPES',type(e).__name__,ascii(str(e)))
+probe('huge int',_cmd(duration_s=10**10000))
+class Numeric:
+ def __float__(self): raise RuntimeError('numeric failure')
+probe('numeric object',_cmd(duration_s=Numeric()))
+class BadDict(dict):
+ def get(self,*args): raise RuntimeError('get failure')
+probe('dict subclass',BadDict(issuer=[],duration_s='bad'))
+class DumpCommand(BurnCommand):
+ def model_dump(self,**kwargs): return self
+x=DumpCommand(**_cmd()).model_copy(update={'schema_version':2,'issuer':[]})
+probe('overridden dump',x)
+class DumpRaises(BaseModel):
+ def model_dump(self,**kwargs): raise RuntimeError('dump failure')
+probe('model dump exception',DumpRaises())
+for cls,e in _sample_events().items():
+ for key,value in e.model_dump().items():
+  if isinstance(value,str) and key not in ('type','direction','reason','on_insufficient_propellant','planned_end_cause','end_cause','engine_state','burn_id','command_id'):
+   try:
+    bad=cls.model_validate({**e.model_dump(),key:'\ud800'})
+    try: bad.model_dump_json(); print('unicode',cls.__name__,key,'SERIALIZES')
+    except Exception as err: print('unicode',cls.__name__,key,'ACCEPTED BUT UNWRITABLE',type(err).__name__)
+   except Exception: print('unicode',cls.__name__,key,'REJECTED')

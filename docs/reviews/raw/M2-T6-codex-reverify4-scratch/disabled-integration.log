@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_dop853_reference_rejects_non_finite_integration _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x104ff7d70>
+
+    def test_dop853_reference_rejects_non_finite_integration(monkeypatch):
+        """F16: the reference never hands on a non-finite state."""
+        import scipy.integrate
+    
+        original = scipy.integrate.solve_ivp
+    
+        def broken(*a, **k):
+            sol = original(*a, **k)
+            sol.y[:, -1] = math.nan
+            return sol
+    
+        monkeypatch.setattr(scipy.integrate, "solve_ivp", broken)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="non-finite"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:983: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_dop853_reference_rejects_non_finite_integration
+1 failed in 0.63s

@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_coverage_uses_the_same_tick_report_rule _________________
+
+    def test_coverage_uses_the_same_tick_report_rule():
+        """F13: a burn submitted and ignited at 600 s is reported at tick 61. Observed to a
+        600 s horizon (the log truncated at tick 60), no BurnStarted is expected; to 610 s it
+        is. A valid scenario cannot stop at its own submission tick, so the 600 s horizon is
+        exercised at the function level."""
+        from tars.sim.scenario import ScenarioV2
+        from tars.validation.m2 import predict_burns
+    
+        mission = BY_NAME["m2_burn_to_depletion"]
+        raw = mission.build().model_dump(mode="json")
+        raw["stop"] = {"duration_s": 610.0}
+        raw["commands"] = raw["commands"][:1]
+        scenario = ScenarioV2.model_validate(raw)
+        events = run_scenario(scenario).events
+        predicted = predict_burns(scenario, mission.expected[:1])
+        started = next(e for e in events if e.type == "BurnStarted")
+        assert (started.tick, started.event_t_s) == (61, 600.0)
+        full = gmat_m2.coverage_problems(scenario, predicted, events, {}, 610.0)
+        assert not any("burn boundaries" in p for p in full)
+        cut = [e for e in events if e.tick <= 60]
+        early = gmat_m2.coverage_problems(scenario, predicted, cut, {}, 600.0)
+>       assert not any("burn boundaries" in p for p in early)
+E       assert not True
+E        +  where True = any(<generator object test_coverage_uses_the_same_tick_report_rule.<locals>.<genexpr> at 0x10e446810>)
+
+tests/test_gmat_m2.py:812: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_coverage_uses_the_same_tick_report_rule - ...
+1 failed in 0.12s

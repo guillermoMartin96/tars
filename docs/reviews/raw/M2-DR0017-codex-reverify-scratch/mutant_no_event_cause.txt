@@ -1,0 +1,36 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 85%]
+........................F.............                                   [100%]
+=================================== FAILURES ===================================
+_________ test_cutoff_events_distinguish_depletion_from_normal_cutoff __________
+
+    def test_cutoff_events_distinguish_depletion_from_normal_cutoff():
+        """DR-0017 safeguard 6: machine-readable end cause on every cutoff transition."""
+        sim = _sim(spacecraft=_spacecraft(propellant=5.0))
+        sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=10.0)
+        sim.schedule_burn(
+            "retrograde",
+            ignition_t_s=620.0,
+            duration_s=100.0,
+            policy=InsufficientPropellantPolicy.BURN_TO_DEPLETION,
+        )
+        events = []
+        while sim.t < 700.0:
+            sim.step()
+            events.extend(sim.engine_transitions)
+>       assert [(e.kind, e.end_cause) for e in events] == [
+            ("ignition", None),
+            ("cutoff", BurnEndCause.COMPLETED),
+            ("ignition", None),
+            ("cutoff", BurnEndCause.PROPELLANT_DEPLETED),
+        ]
+E       AssertionError: assert [('ignition',...utoff', None)] == [('ignition',...t_depleted'>)]
+E         
+E         At index 1 diff: ('cutoff', None) != ('cutoff', <BurnEndCause.COMPLETED: 'completed'>)
+E         Use -v to get more diff
+
+tests/test_simulator_propulsion.py:915: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_cutoff_events_distinguish_depletion_from_normal_cutoff
+1 failed, 253 passed in 1.63s

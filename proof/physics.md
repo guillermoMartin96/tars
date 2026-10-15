@@ -25,3 +25,15 @@ Exact tolerances must be established from justified model/validation work, not i
 - Thresholds (versioned): `proof/thresholds/m1.json` (status and approval recorded in the file; see DR-0008).
 - Validators: `toolbox/validators/m1_proof.py`, `toolbox/validators/determinism.py`, `toolbox/scripts/gmat_m1.py compare`.
 - Proof record: `proof/records/M1-orbit.md`.
+
+## Milestone 2 (in progress)
+The draft M2 Proof requirements P1–P12 are in [`docs/milestones/M2-propulsion.md`](../docs/milestones/M2-propulsion.md) §10. Oracles and threshold method are in DR-0015.
+- Validators (T5): `toolbox/validators/m2_proof.py` (O1–O8 and contract checks); measurements in VAL-0013.
+- `proof/thresholds/m2.json` is **approved** (DR-0023, 2026-10-14): the T5/T6 values were finalized unchanged after the T7 three-platform measurement (VAL-0016).
+- Cross-platform final state (DR-0023 decision 4): every M2 mission's final position and velocity agree across platforms within 1e-4 m and 1e-7 m/s (Euclidean). There are two enforcement points:
+  - the M2 Proof compares the running platform with the reference-host golden record, `proof/references/m2_final_states.json` (sha256-pinned);
+  - the CI job `m2-cross-platform` (`toolbox/validators/m2_cross_platform.py gate`) compares macOS x86_64, Linux x86_64 and macOS arm64 at one revision.
+
+  Archived evidence is in `proof/records/evidence/M2-T7/cross-platform/` (VAL-0017).
+- O9 (T6): committed GMAT R2026a finite-burn references, `toolbox/scripts/gmat_m2.py compare`; VAL-0014.
+- M1 thresholds and gates are unchanged and remain required (P10).

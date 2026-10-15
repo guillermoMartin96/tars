@@ -1,0 +1,333 @@
+I001 [*] Import block is un-sorted or un-formatted
+  --> review_scratch/artifact_sweep.py:1:1
+   |
+ 1 | / import importlib.util
+ 2 | | import json
+ 3 | | import shutil
+ 4 | | from pathlib import Path
+ 5 | | from unittest.mock import patch
+ 6 | | from tars.validation import gmat_m2 as g
+ 7 | | from tars.validation.thresholds import (
+ 8 | |     load_thresholds,
+ 9 | |     load_scoped_thresholds,
+10 | |     M1_THRESHOLDS,
+11 | |     M2_THRESHOLDS,
+12 | | )
+13 | | from tars.sim.runner import run_scenario
+   | |________________________________________^
+14 |
+15 |   spec = importlib.util.spec_from_file_location("cli", "toolbox/scripts/gmat_m2.py")
+   |
+help: Organize imports
+   |
+5  | from unittest.mock import patch
+6  +
+7  + from tars.sim.runner import run_scenario
+8  | from tars.validation import gmat_m2 as g
+9  | from tars.validation.thresholds import (
+   -     load_thresholds,
+   -     load_scoped_thresholds,
+10 |     M1_THRESHOLDS,
+11 |     M2_THRESHOLDS,
+12 +     load_scoped_thresholds,
+13 +     load_thresholds,
+14 | )
+   - from tars.sim.runner import run_scenario
+15 |
+   |
+
+B023 Function definition does not bind loop variable `edit`
+  --> review_scratch/artifact_sweep.py:64:39
+   |
+62 |                     mutate(v)
+63 |                 elif v is not None:
+64 |                     obj[k] = 1e100 if edit == "inflate" else float("nan")
+   |                                       ^^^^
+65 |
+66 |         if edit != "delete":
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> review_scratch/baseline_verify.py:1:1
+  |
+1 | / import hashlib
+2 | | import json
+3 | | import struct
+4 | | import subprocess
+5 | | from pathlib import Path
+6 | | from tars.validation.thresholds import load_thresholds, load_scoped_thresholds
+7 | | from tars.validation.m2_missions import MISSIONS
+  | |________________________________________________^
+8 |
+9 |   repo = "/Users/guillermomartin/.superset/worktrees/tars/actually-splash-f90f9ba4"
+  |
+help: Organize imports
+  |
+5 | from pathlib import Path
+  - from tars.validation.thresholds import load_thresholds, load_scoped_thresholds
+6 +
+7 | from tars.validation.m2_missions import MISSIONS
+8 + from tars.validation.thresholds import load_scoped_thresholds, load_thresholds
+9 |
+  |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/baseline_verify.py:71:15
+   |
+69 |     assert Path(p).read_bytes() == old("a0169e7", p), p
+70 | print("Protected T5 baseline and M1 golden assets unchanged:", len(selected))
+71 | x = json.load(open("previous-m2-report.json"))["results"]
+   |               ^^^^
+72 | y = json.load(open("review_scratch/m2.json"))["results"]
+73 | by = {r["validator"]: r for r in y}
+   |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/baseline_verify.py:72:15
+   |
+70 | print("Protected T5 baseline and M1 golden assets unchanged:", len(selected))
+71 | x = json.load(open("previous-m2-report.json"))["results"]
+72 | y = json.load(open("review_scratch/m2.json"))["results"]
+   |               ^^^^
+73 | by = {r["validator"]: r for r in y}
+74 | assert len(x) == 212 and len(y) == 213
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> review_scratch/cli_summary_probe.py:1:1
+  |
+1 | / import importlib.util
+2 | | import json
+3 | | from tars.sim.runner import run_scenario
+4 | | from tars.validation import m2
+5 | | from tars.validation.m2_missions import MISSIONS
+6 | | from tars.validation.thresholds import Check
+  | |____________________________________________^
+7 |
+8 |   spec = importlib.util.spec_from_file_location("cli", "toolbox/scripts/run_mission.py")
+  |
+help: Organize imports
+  |
+2 | import json
+3 +
+4 | from tars.sim.runner import run_scenario
+  |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/cli_summary_proof.py:30:19
+   |
+28 | print("proof exit:", rc, "corrupted CLI summary dictionaries:", mutations)
+29 | assert rc == 0 and mutations > 0
+30 | clean = json.load(open("review_scratch/m2.json"))
+   |                   ^^^^
+31 | bad = json.load(open("review_scratch/cli_summary_m2.json"))
+32 | print("all check records identical:", clean["results"] == bad["results"])
+   |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/cli_summary_proof.py:31:17
+   |
+29 | assert rc == 0 and mutations > 0
+30 | clean = json.load(open("review_scratch/m2.json"))
+31 | bad = json.load(open("review_scratch/cli_summary_m2.json"))
+   |                 ^^^^
+32 | print("all check records identical:", clean["results"] == bad["results"])
+33 | assert clean["results"] == bad["results"]
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> review_scratch/dense_velocity_probe.py:1:1
+  |
+1 | / import importlib.util
+2 | | import json
+3 | | from unittest.mock import patch
+4 | | import scipy.integrate
+  | |______________________^
+5 |
+6 |   spec = importlib.util.spec_from_file_location("cli", "toolbox/scripts/gmat_m2.py")
+  |
+help: Organize imports
+  |
+3 | from unittest.mock import patch
+4 +
+5 | import scipy.integrate
+  |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/dense_velocity_probe.py:47:19
+   |
+45 |     print("proof exit:", rc, "corrupted dense outputs:", calls)
+46 |     assert rc == 0
+47 | clean = json.load(open("review_scratch/m2.json"))
+   |                   ^^^^
+48 | bad = json.load(open("review_scratch/dense_velocity_m2.json"))
+49 | print("all check records identical:", clean["results"] == bad["results"])
+   |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/dense_velocity_probe.py:48:17
+   |
+46 |     assert rc == 0
+47 | clean = json.load(open("review_scratch/m2.json"))
+48 | bad = json.load(open("review_scratch/dense_velocity_m2.json"))
+   |                 ^^^^
+49 | print("all check records identical:", clean["results"] == bad["results"])
+50 | assert clean["results"] == bad["results"]
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> review_scratch/disable_plugin.py:1:1
+  |
+1 | / import os
+2 | | import math
+3 | | import numpy as np
+4 | | from tars.validation import m2, gmat_m2, thresholds
+  | |___________________________________________________^
+help: Organize imports
+  |
+1 + import math
+2 | import os
+  - import math
+3 +
+4 | import numpy as np
+  - from tars.validation import m2, gmat_m2, thresholds
+5 |
+6 + from tars.validation import gmat_m2, m2, thresholds
+7 +
+8 |
+  |
+
+F401 [*] `math` imported but unused
+ --> review_scratch/disable_plugin.py:2:8
+  |
+1 | import os
+2 | import math
+  |        ^^^^
+3 | import numpy as np
+4 | from tars.validation import m2, gmat_m2, thresholds
+  |
+help: Remove unused import: `math`
+  |
+1 | import os
+  - import math
+2 | import numpy as np
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> review_scratch/kepler_velocity_probe.py:1:1
+  |
+1 | / import importlib.util
+2 | | import inspect
+3 | | import json
+4 | | from unittest.mock import patch
+5 | | import numpy as np
+6 | | from tars.astro import kepler
+  | |_____________________________^
+7 |
+8 |   spec = importlib.util.spec_from_file_location("cli", "toolbox/scripts/gmat_m2.py")
+  |
+help: Organize imports
+  |
+4 | from unittest.mock import patch
+5 +
+6 | import numpy as np
+7 +
+8 | from tars.astro import kepler
+  |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/kepler_velocity_probe.py:47:19
+   |
+45 |     print("proof exit:", rc, "corrupted Kepler outputs:", calls)
+46 |     assert rc == 0
+47 | clean = json.load(open("review_scratch/m2.json"))
+   |                   ^^^^
+48 | bad = json.load(open("review_scratch/kepler_velocity_m2.json"))
+49 | print("all check records identical:", clean["results"] == bad["results"])
+   |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/kepler_velocity_probe.py:48:17
+   |
+46 |     assert rc == 0
+47 | clean = json.load(open("review_scratch/m2.json"))
+48 | bad = json.load(open("review_scratch/kepler_velocity_m2.json"))
+   |                 ^^^^
+49 | print("all check records identical:", clean["results"] == bad["results"])
+50 | assert clean["results"] == bad["results"]
+   |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> review_scratch/reference_time_probe.py:1:1
+  |
+1 | / import importlib.util
+2 | | import json
+3 | | from unittest.mock import patch
+4 | | import scipy.integrate
+5 | | from tars.validation import m2
+  | |______________________________^
+6 |
+7 |   spec = importlib.util.spec_from_file_location("cli", "toolbox/scripts/gmat_m2.py")
+  |
+help: Organize imports
+  |
+3 | from unittest.mock import patch
+4 +
+5 | import scipy.integrate
+6 +
+7 | from tars.validation import m2
+  |
+
+F401 [*] `tars.validation.m2` imported but unused
+ --> review_scratch/reference_time_probe.py:5:29
+  |
+3 | from unittest.mock import patch
+4 | import scipy.integrate
+5 | from tars.validation import m2
+  |                             ^^
+6 |
+7 | spec = importlib.util.spec_from_file_location("cli", "toolbox/scripts/gmat_m2.py")
+  |
+help: Remove unused import: `tars.validation.m2`
+  |
+4 | import scipy.integrate
+  - from tars.validation import m2
+5 |
+  |
+
+B905 `zip()` without an explicit `strict=` parameter
+  --> review_scratch/reference_time_probe.py:19:9
+   |
+17 |     # Corrupt only raw independent solver DATA, keeping every helper unchanged.
+18 |     closure = dict(
+19 |         zip(args[0].__code__.co_freevars, (c.cell_contents for c in args[0].__closure__))
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+20 |     )
+21 |     if closure.get("sign", 0.0) != 0.0:
+   |
+help: Add explicit value for parameter `strict=`
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/reference_time_probe.py:46:19
+   |
+44 |     print("proof exit:", rc, "corrupted solver outputs:", calls)
+45 |     assert rc == 0
+46 | clean = json.load(open("review_scratch/m2.json"))
+   |                   ^^^^
+47 | bad = json.load(open("review_scratch/time_poison_m2.json"))
+48 | print("report keys", list(clean))
+   |
+
+SIM115 Use a context manager for opening files
+  --> review_scratch/reference_time_probe.py:47:17
+   |
+45 |     assert rc == 0
+46 | clean = json.load(open("review_scratch/m2.json"))
+47 | bad = json.load(open("review_scratch/time_poison_m2.json"))
+   |                 ^^^^
+48 | print("report keys", list(clean))
+49 | print("all check records identical:", clean["results"] == bad["results"])
+   |
+
+Found 21 errors.
+[*] 9 fixable with the `--fix` option (1 hidden fix can be enabled with the `--unsafe-fixes` option).

@@ -180,7 +180,7 @@ def test_threshold_groups_must_match_validators(tmp_path):
     bad = tmp_path / "m1.json"
     bad.write_text(json.dumps(data))
     with pytest.raises(ValueError, match="kepler_refrence"):
-        load_thresholds(bad)
+        load_thresholds(bad, authenticate=False)  # structural check (F33 pin tested in T6)
 
 
 def test_period_metrics_require_ascending_node_start():

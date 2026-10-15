@@ -73,8 +73,97 @@ The committed GMAT script, report and metadata are the reference our simulator i
 - Recompute the summary from the committed reports: `uv run python toolbox/scripts/gmat_m1.py realistic-summary`.
 - Re-running GMAT (`realistic`) is subject to the same replacement policy (`--replace-reason`).
 
-## Deferred: REV-012 epoch-column drift
-The ~0.1 ms drift between GMAT's `TTModJulian` column and the `ElapsedS` label is **explicitly deferred** (Tech Lead, 2026-10-05). It is not an M1 blocker.
-- **Trigger:** investigate it **before the first time-dependent force model** (Earth rotation, ephemerides, drag in gated validation).
-- **Then:** align comparisons on GMAT's epoch rather than the script counter.
-- **Note:** the informational drag runs are time-dependent but not gated. A 0.1 ms timing difference is negligible at their km scale (about 0.8 m).
+## REV-012 epoch-column drift: RESOLVED (2026-10-10)
+The drift was deferred by the Tech Lead on 2026-10-05, then investigated before M2's first time-dependent (scheduled-thrust) force model. The root cause is verified GMAT behavior: **VAL-0010**, DR-0016 (approved), evidence in `docs/science/experiments/rev-012/`, CI-reproduced by `tests/test_rev012_evidence.py`.
+- **Epoch drift (M-a).** Each `Propagate` command re-rounds the double A.1 MJD epoch, so drift grows with the number of commands. For M1 (895 × 60 s) this gives −1.063e-4 s, reproduced bit-exactly on all rows.
+  - The integrated states are at the requested elapsed times (9e-10 s), so **M1's approved comparison, which aligns on the `ElapsedS` labels, is unaffected**.
+  - The committed M1 reference still reproduces byte-for-byte.
+- **Stop-time rounding (M-b).** GMAT rounds the final step to a time stop condition to 1 µs (`TIME_ROUNDOFF`). This, not epoch quantization, explains the M2 probe's 1.85e-7 s burn shortfall.
+- **Method for M2 burn references (DR-0016).**
+  - Use aligned stepping (`InitialStepSize = MaxStep` dividing every stop time), with mandatory alignment verification, and stream report rows from one `Propagate` per arc.
+  - Do **not** align comparisons on GMAT's epoch or `Sat.ElapsedSecs` columns: both carry the M-a drift. The earlier guidance in this section said the opposite and is superseded.
+- Measured on the reference burn at 53 700 s: GMAT vs independent DOP853 is 1.17 cm with natural stepping and 12 µm with aligned stepping.
+
+# GMAT reference: Milestone 2 finite burns (T6, O9)
+
+`m2/` holds committed GMAT R2026a references for the M2 missions `m2_prograde_burn`, `m2_retrograde_burn` and `m2_invalid_commands`. CI compares against them without GMAT. Authority: DR-0015 option A (GMAT as a gated reference), DR-0016 A (aligned stepping and mandatory verification), DR-0009 (references are evidence).
+
+| File (per mission) | Purpose |
+|---|---|
+| `<mission>.script` | Generated from the scenario by `toolbox/scripts/gmat_m2.py`. Do not edit. |
+| `<mission>_report.txt` | One row per GMAT integrator step: arc number, A1 MJD, r, v, total mass. |
+| `<mission>_metadata.json` | Provenance: GMAT build, console sha256, scenario hash, script/report sha256, constants, model, replace reason. |
+| `<mission>_console.log` | GmatConsole output (paths scrubbed). |
+
+## Configuration (generated from scenario inputs only)
+- **Earth:** point mass, WGS 84 `Mu` and radius, as M1.
+- **Spacecraft:** dry mass and tank fuel from the scenario; `AllowNegativeFuelMass = false`.
+- **Engine:** one `ChemicalThruster` per direction used.
+  - Local VNB axes, `ThrustDirection1 = ±1` (prograde/retrograde, DR-0012).
+  - `C1 = F` [N], `K1 = Isp` [s], and **every other C2..C16, K2..K16 explicitly 0**.
+  - `GravitationalAccel = 9.80665` (standard g0; GMAT's default differs, VAL-0009).
+  - `DecrementMass = true`, `DutyCycle = 1`, `ThrustScaleFactor = 1`.
+- **Burns:** `BeginFiniteBurn`/`EndFiniteBurn` around exactly the predicted burn arcs. The arcs come from the commanded times via `tars.validation.m2.predict_burns`, never from simulator output.
+- **Integrator:** PrinceDormand78, Accuracy 1e-13.
+- **Aligned stepping (DR-0016 A):** every arc is one `Propagate` with `InitialStepSize = MaxStep = h`:
+  - h = 60 s on grid-aligned coasts;
+  - h = 1 s during burns;
+  - h = the arc length for the short arcs that realign a cutoff to the 60 s telemetry grid (for example 677.3 → 720 s).
+  - Every stop then lands on a natural step, so GMAT's microsecond stop rounding (M-b) is a no-op.
+- **Row times** are assigned from the step schedule. GMAT R2026a writes the first arc's start state, then one row per step; later arcs do not repeat their start. GMAT's epoch and `ElapsedSecs` columns are **not** used as time labels, because they carry the per-command re-rounding (M-a).
+
+## Mandatory alignment verification (DR-0016), run before a reference is stored and on every compare
+- the row count of every arc equals the schedule;
+- step spacing from GMAT's epoch column agrees with the schedule (measured 2.3e-7 s, the epoch resolution);
+- burn duration from GMAT's own mass agrees with the predicted burn (measured ≤ 1.4e-10 s);
+- every coast row agrees with exact Kepler propagation of its arc's GMAT start state (measured ≤ 4.0e-6 m).
+
+## Workflow
+```bash
+uv run python toolbox/scripts/gmat_m2.py generate --out runs/gmat_m2_preview   # previews only
+uv run python toolbox/scripts/gmat_m2.py run --gmat-console "$HOME/Applications/GMAT R2026a/bin/GmatConsole" --gmat-version R2026a
+uv run python toolbox/scripts/gmat_m2.py compare             # O9; also inside m2_proof.py
+```
+
+- **Replacement guard.** `run` refuses to touch any existing reference artifact or manifest entry without `--replace-reason`. The reason is stored in the metadata and in the history of `APPROVED_DIGESTS.json`.
+- **Staged validation and publication.** `run` stages every artifact and validates it completely before replacing anything: provenance, alignment, coverage, every O9 gate and every T5 audit gate, failing closed on missing limits. On failure nothing is replaced. Publication then:
+  1. withdraws the mission's approval;
+  2. replaces each artifact atomically;
+  3. publishes the new manifest last.
+
+  An interruption at any step leaves either the old reference intact or an unapproved mission that every check rejects. It never leaves an accepted mix.
+- **`generate`** writes previews only and never touches the references.
+- **`compare` rejects a reference when** the simulator run fails its T5 audit, an expected observation is missing, an O9 metric has no threshold, or:
+  - the metadata lacks a required field, or names a binary other than the approved GMAT R2026a install (pinned sha256);
+  - the console log is not bound by its digest or does not record success;
+  - the digests (script, report, console log and metadata) are not in the reviewed `APPROVED_DIGESTS.json`, or this reference's latest history record disagrees with its metadata;
+  - any non-state script line differs from the regenerated script (constants, every engine coefficient, g0, masses, arcs, steps);
+  - the initial-state literals differ beyond the approved DR-0009 bound;
+  - the metadata constants differ;
+  - a sha256 does not match;
+  - the rows are not step-aligned.
+- **Reproducibility.** Re-running GMAT reproduces every committed report byte for byte (`tests/test_gmat_m2.py::test_gmat_reproduces_the_committed_report`, skipped where GMAT is not installed).
+- **Replacement history.** There have been four generations of each reference, all with byte-identical reports:
+  1. `1de827e`, the initial reference;
+  2. `a346fbe`, after the header comment was reworded;
+  3. `94f0e75`, after provenance fields were added (review M2-T6 F1/F3);
+  4. `2d33617`, after the manifest began binding metadata (review M2-T6 F8/F9).
+
+  Every generation is a record in the manifest history, reconstructed from the committed metadata.
+- **History semantics** (review M2-T6 F14):
+  - Each record must name a GMAT mission and carry a plausible UTC timestamp, a non-null revision, a non-empty reason and a report digest.
+  - Records are in time order. Each holds the sha256 of the previous record, so the history is a hash chain; the first record holds null.
+  - Editing, inserting, reordering or deleting records breaks the chain or the ordering and is rejected.
+  - **Approval anchor** (review M2-T6 F32). The manifest's sha256 is pinned in reviewed source (`src/tars/validation/approved_digests.py`), so even a consistent wholesale rewrite of the chain is rejected. After `run` stores a new generation, it prints the new digest. `compare` rejects the reference until a reviewed change pins that digest.
+- **Thresholds.** Every non-null limit must be finite and nonnegative. An overflowing JSON number such as `1e999`, which parses as infinity, is rejected at load (review M2-T6 F15).
+- **Threshold files are authenticated** against digests pinned in `approved_digests.py` (review M2-T6 F33). A changed threshold file, including finite inflation, is rejected unless a reviewed change updates the pin.
+- **What provenance can and cannot prove.** The checks above make silent or accidental substitution detectable. They cannot prove GMAT origin against deliberate fabrication.
+- **The reproduction test** verifies that the installed executable *is* the approved GMAT (sha256), that it reports success, and that it reproduces the committed reports byte for byte. That is authenticated, independent reproducibility evidence. Together with review of `APPROVED_DIGESTS.json` changes, it is the basis for trusting the references; by itself it cannot prove the historical origin of stored bytes.
+- `generate` refuses symlinked or protected destinations.
+
+## Depletion is not compared with GMAT
+- **What happens.** GMAT's stop-condition logic takes a full step past the stop before backing up.
+  - In a burn to depletion, that step drives the tank negative: −0.0064 kg in the T6 probe.
+  - With `AllowNegativeFuelMass = false`, GMAT stops with "The value of … for field FuelMass … is not an allowed value" (VAL-0009 finding 4).
+- **Not worked around.** Allowing negative fuel would change the reference model.
+- **Validated instead analytically:** O1, O2 and the DR-0017 D1a residual, as DR-0015 provides.

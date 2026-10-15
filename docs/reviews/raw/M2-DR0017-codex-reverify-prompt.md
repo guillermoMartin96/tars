@@ -1,0 +1,9 @@
+You are the independent reviewer (separate provider) re-verifying fixes to your own review of the TARS DR-0017 implementation; this is the final verification for M2 task T2. Snapshot: current directory (commit 3e5b716). Do not modify src/ or tests/; scratch only under ./review_scratch/.
+
+Your review: docs/reviews/raw/M2-DR0017-codex.md (scripts in docs/reviews/raw/M2-DR0017-codex-scratch/). Implementer record: docs/reviews/M2-DR0017-review-01.md (F1 High, F2 Medium, F3 Low; all ACCEPTED). Fix diff: ./FIX.diff (5b47206..3e5b716). Decision: docs/decisions/requests/DR-0017-burn-timing-fidelity-and-depletion-boundary.md (Resolution, seven safeguards).
+
+Run: `PYTHONPATH=src .venv/bin/python -m pytest -q -p no:cacheprovider`; `.venv/bin/ruff check . && .venv/bin/ruff format --check .`; `PYTHONPATH=src .venv/bin/python toolbox/validators/determinism.py` (expect 7a4e1877...); `PYTHONPATH=src .venv/bin/python toolbox/validators/m1_proof.py --out review_scratch/m1.json`.
+
+Tasks: (1) re-run your reproductions, randomized probes (including adversarial searches for underestimates of the timing delta-v error against high-precision arithmetic across extreme but spec-valid configurations, both interval orderings, depletion step-down), and mutations; report each safeguard 1-7 as MET / PARTIAL / NOT MET and F1-F3 as RESOLVED / PARTIAL / NOT RESOLVED with evidence; (2) check whether the conservative estimate is ever so conservative that it rejects physically reasonable burns at ordinary mission times (e.g. the DR-0010 reference case up to ~1e9 s); (3) check for regressions (earlier T1/T2 fixes, M1 bit-identity); (4) give the final T2 verdict.
+
+Output (final message, Markdown): table Item | Status | Evidence; NEW findings as ### N<n> — title / **Severity:** / **Claim:** / **Evidence:** / **Suggested fix:**; one-line verdict for T2 (PASS / CONDITIONAL PASS / FAIL) and what you ran.

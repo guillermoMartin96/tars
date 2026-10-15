@@ -1,0 +1,199 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+______ test_no_propulsion_cli_summary_must_be_empty[final_propellant_kg] _______
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10e8e9e40>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'final_propellant_kg'
+
+    @pytest.mark.parametrize(
+        "field",
+        ["final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+         "active_burn_id_at_stop", "pending_burn_ids_at_stop"],
+    )  # fmt: skip
+    def test_no_propulsion_cli_summary_must_be_empty(runs, field):
+        """F41 (T6 review): without propulsion every final propulsion field is empty."""
+        _, scenario, run = runs["m2_invalid_commands_no_propulsion"]
+        good = {
+            "commands": [
+                {"command_id": r.command_id, "status": str(r.status),
+                 "reason": r.reason and str(r.reason), "burn_id": r.burn_id, "submit_tick": r.tick}
+                for r in run.receipts
+            ],
+            "unsubmitted_command_ids": [],
+            "final_propellant_kg": None,
+            "final_total_mass_kg": None,
+            "final_engine_state": None,
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good, scenario) == []
+        wrong = {
+            "final_propellant_kg": 1e9, "final_total_mass_kg": 1e9, "final_engine_state": "burning",
+            "active_burn_id_at_stop": "burn#000001", "pending_burn_ids_at_stop": ["burn#000002"],
+        }[field]  # fmt: skip
+>       assert m2.cli_summary_violations(run.events, {**good, field: wrong}, scenario)
+E       AssertionError: assert []
+E        +  where [] = <function cli_summary_violations at 0x10e900fe0>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...], {'commands': [{'command_id': 'inv-schema-001', 'status': 'rejected', 'reason': 'schema_invalid', 'burn_id': None, ...}...None, ...}, ...], 'unsubmitted_command_ids': [], 'final_propellant_kg': 1000000000.0, 'final_total_mass_kg': None, ...}, ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 reference mission (T5)...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))))
+E        +    where <function cli_summary_violations at 0x10e900fe0> = m2.cli_summary_violations
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 ref...t', burn_id=None, plan=None, tick=122, t=1220.0, schema_errors=())], unsubmitted_command_ids=[], final_propulsion=None).events
+
+tests/test_m2_validation.py:1109: AssertionError
+______ test_no_propulsion_cli_summary_must_be_empty[final_total_mass_kg] _______
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10e8e9e40>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'final_total_mass_kg'
+
+    @pytest.mark.parametrize(
+        "field",
+        ["final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+         "active_burn_id_at_stop", "pending_burn_ids_at_stop"],
+    )  # fmt: skip
+    def test_no_propulsion_cli_summary_must_be_empty(runs, field):
+        """F41 (T6 review): without propulsion every final propulsion field is empty."""
+        _, scenario, run = runs["m2_invalid_commands_no_propulsion"]
+        good = {
+            "commands": [
+                {"command_id": r.command_id, "status": str(r.status),
+                 "reason": r.reason and str(r.reason), "burn_id": r.burn_id, "submit_tick": r.tick}
+                for r in run.receipts
+            ],
+            "unsubmitted_command_ids": [],
+            "final_propellant_kg": None,
+            "final_total_mass_kg": None,
+            "final_engine_state": None,
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good, scenario) == []
+        wrong = {
+            "final_propellant_kg": 1e9, "final_total_mass_kg": 1e9, "final_engine_state": "burning",
+            "active_burn_id_at_stop": "burn#000001", "pending_burn_ids_at_stop": ["burn#000002"],
+        }[field]  # fmt: skip
+>       assert m2.cli_summary_violations(run.events, {**good, field: wrong}, scenario)
+E       AssertionError: assert []
+E        +  where [] = <function cli_summary_violations at 0x10e900fe0>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...], {'commands': [{'command_id': 'inv-schema-001', 'status': 'rejected', 'reason': 'schema_invalid', 'burn_id': None, ...}...None, ...}, ...], 'unsubmitted_command_ids': [], 'final_propellant_kg': None, 'final_total_mass_kg': 1000000000.0, ...}, ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 reference mission (T5)...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))))
+E        +    where <function cli_summary_violations at 0x10e900fe0> = m2.cli_summary_violations
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 ref...t', burn_id=None, plan=None, tick=122, t=1220.0, schema_errors=())], unsubmitted_command_ids=[], final_propulsion=None).events
+
+tests/test_m2_validation.py:1109: AssertionError
+_______ test_no_propulsion_cli_summary_must_be_empty[final_engine_state] _______
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10e8e9e40>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'final_engine_state'
+
+    @pytest.mark.parametrize(
+        "field",
+        ["final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+         "active_burn_id_at_stop", "pending_burn_ids_at_stop"],
+    )  # fmt: skip
+    def test_no_propulsion_cli_summary_must_be_empty(runs, field):
+        """F41 (T6 review): without propulsion every final propulsion field is empty."""
+        _, scenario, run = runs["m2_invalid_commands_no_propulsion"]
+        good = {
+            "commands": [
+                {"command_id": r.command_id, "status": str(r.status),
+                 "reason": r.reason and str(r.reason), "burn_id": r.burn_id, "submit_tick": r.tick}
+                for r in run.receipts
+            ],
+            "unsubmitted_command_ids": [],
+            "final_propellant_kg": None,
+            "final_total_mass_kg": None,
+            "final_engine_state": None,
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good, scenario) == []
+        wrong = {
+            "final_propellant_kg": 1e9, "final_total_mass_kg": 1e9, "final_engine_state": "burning",
+            "active_burn_id_at_stop": "burn#000001", "pending_burn_ids_at_stop": ["burn#000002"],
+        }[field]  # fmt: skip
+>       assert m2.cli_summary_violations(run.events, {**good, field: wrong}, scenario)
+E       AssertionError: assert []
+E        +  where [] = <function cli_summary_violations at 0x10e900fe0>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...], {'commands': [{'command_id': 'inv-schema-001', 'status': 'rejected', 'reason': 'schema_invalid', 'burn_id': None, ...}...rn_id': None, ...}, ...], 'unsubmitted_command_ids': [], 'final_propellant_kg': None, 'final_total_mass_kg': None, ...}, ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 reference mission (T5)...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))))
+E        +    where <function cli_summary_violations at 0x10e900fe0> = m2.cli_summary_violations
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 ref...t', burn_id=None, plan=None, tick=122, t=1220.0, schema_errors=())], unsubmitted_command_ids=[], final_propulsion=None).events
+
+tests/test_m2_validation.py:1109: AssertionError
+_____ test_no_propulsion_cli_summary_must_be_empty[active_burn_id_at_stop] _____
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10e8e9e40>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'active_burn_id_at_stop'
+
+    @pytest.mark.parametrize(
+        "field",
+        ["final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+         "active_burn_id_at_stop", "pending_burn_ids_at_stop"],
+    )  # fmt: skip
+    def test_no_propulsion_cli_summary_must_be_empty(runs, field):
+        """F41 (T6 review): without propulsion every final propulsion field is empty."""
+        _, scenario, run = runs["m2_invalid_commands_no_propulsion"]
+        good = {
+            "commands": [
+                {"command_id": r.command_id, "status": str(r.status),
+                 "reason": r.reason and str(r.reason), "burn_id": r.burn_id, "submit_tick": r.tick}
+                for r in run.receipts
+            ],
+            "unsubmitted_command_ids": [],
+            "final_propellant_kg": None,
+            "final_total_mass_kg": None,
+            "final_engine_state": None,
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good, scenario) == []
+        wrong = {
+            "final_propellant_kg": 1e9, "final_total_mass_kg": 1e9, "final_engine_state": "burning",
+            "active_burn_id_at_stop": "burn#000001", "pending_burn_ids_at_stop": ["burn#000002"],
+        }[field]  # fmt: skip
+>       assert m2.cli_summary_violations(run.events, {**good, field: wrong}, scenario)
+E       AssertionError: assert []
+E        +  where [] = <function cli_summary_violations at 0x10e900fe0>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...], {'commands': [{'command_id': 'inv-schema-001', 'status': 'rejected', 'reason': 'schema_invalid', 'burn_id': None, ...}...rn_id': None, ...}, ...], 'unsubmitted_command_ids': [], 'final_propellant_kg': None, 'final_total_mass_kg': None, ...}, ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 reference mission (T5)...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))))
+E        +    where <function cli_summary_violations at 0x10e900fe0> = m2.cli_summary_violations
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 ref...t', burn_id=None, plan=None, tick=122, t=1220.0, schema_errors=())], unsubmitted_command_ids=[], final_propulsion=None).events
+
+tests/test_m2_validation.py:1109: AssertionError
+____ test_no_propulsion_cli_summary_must_be_empty[pending_burn_ids_at_stop] ____
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10e8e9e40>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+field = 'pending_burn_ids_at_stop'
+
+    @pytest.mark.parametrize(
+        "field",
+        ["final_propellant_kg", "final_total_mass_kg", "final_engine_state",
+         "active_burn_id_at_stop", "pending_burn_ids_at_stop"],
+    )  # fmt: skip
+    def test_no_propulsion_cli_summary_must_be_empty(runs, field):
+        """F41 (T6 review): without propulsion every final propulsion field is empty."""
+        _, scenario, run = runs["m2_invalid_commands_no_propulsion"]
+        good = {
+            "commands": [
+                {"command_id": r.command_id, "status": str(r.status),
+                 "reason": r.reason and str(r.reason), "burn_id": r.burn_id, "submit_tick": r.tick}
+                for r in run.receipts
+            ],
+            "unsubmitted_command_ids": [],
+            "final_propellant_kg": None,
+            "final_total_mass_kg": None,
+            "final_engine_state": None,
+            "active_burn_id_at_stop": None,
+            "pending_burn_ids_at_stop": [],
+        }  # fmt: skip
+        assert m2.cli_summary_violations(run.events, good, scenario) == []
+        wrong = {
+            "final_propellant_kg": 1e9, "final_total_mass_kg": 1e9, "final_engine_state": "burning",
+            "active_burn_id_at_stop": "burn#000001", "pending_burn_ids_at_stop": ["burn#000002"],
+        }[field]  # fmt: skip
+>       assert m2.cli_summary_violations(run.events, {**good, field: wrong}, scenario)
+E       AssertionError: assert []
+E        +  where [] = <function cli_summary_violations at 0x10e900fe0>([SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...], {'commands': [{'command_id': 'inv-schema-001', 'status': 'rejected', 'reason': 'schema_invalid', 'burn_id': None, ...}...rn_id': None, ...}, ...], 'unsubmitted_command_ids': [], 'final_propellant_kg': None, 'final_total_mass_kg': None, ...}, ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 reference mission (T5)...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))))
+E        +    where <function cli_summary_violations at 0x10e900fe0> = m2.cli_summary_violations
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands_no_pr..., on_insufficient_propellant='reject', commanded_ignition_t_s=2400.0, commanded_duration_s=0.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands_no_propulsion', description='Milestone 2 ref...t', burn_id=None, plan=None, tick=122, t=1220.0, schema_errors=())], unsubmitted_command_ids=[], final_propulsion=None).events
+
+tests/test_m2_validation.py:1109: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_no_propulsion_cli_summary_must_be_empty[final_propellant_kg]
+FAILED tests/test_m2_validation.py::test_no_propulsion_cli_summary_must_be_empty[final_total_mass_kg]
+FAILED tests/test_m2_validation.py::test_no_propulsion_cli_summary_must_be_empty[final_engine_state]
+FAILED tests/test_m2_validation.py::test_no_propulsion_cli_summary_must_be_empty[active_burn_id_at_stop]
+FAILED tests/test_m2_validation.py::test_no_propulsion_cli_summary_must_be_empty[pending_burn_ids_at_stop]
+5 failed, 125 deselected in 9.08s

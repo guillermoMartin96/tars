@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_gmat_coast_velocity_is_gated _______________________
+
+    def test_gmat_coast_velocity_is_gated():
+        """F36: a GMAT coast row with a 1e-6 m/s velocity error fails the coast velocity gate."""
+        scenario, predicted, arcs, rows = _labelled("m2_prograde_burn")
+        rows = [dataclasses.replace(r, v=r.v + 1e-6) if i == 300 else r for i, r in enumerate(rows)]
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        metrics = gmat_m2.alignment_metrics(
+            labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+        )
+>       assert (
+            metrics["coast_vs_kepler_velocity_error_max_mps"]
+            > LIMITS["all"]["coast_vs_kepler_velocity_error_max_mps"]
+        )
+E       assert 0.0 > 1e-07
+
+tests/test_gmat_m2.py:1785: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_gmat_coast_velocity_is_gated - assert 0.0 ...
+1 failed, 290 deselected in 0.29s

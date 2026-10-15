@@ -1,0 +1,1702 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+................F.................F............FFFFFFFFFFFFFFFFFFFFF.... [ 85%]
+F.FF.FF.FF.FF.FF.FF.FFFF.FFFFFFFF.F.FF                                   [100%]
+=================================== FAILURES ===================================
+___ test_burn_whose_represented_interval_differs_materially_is_unschedulable ___
+
+    def test_burn_whose_represented_interval_differs_materially_is_unschedulable():
+        """REV-T2-03: at t ~ 1e15 s, float64 event times are 0.125 s apart; a 0.1 s burn
+        cannot be represented and must be rejected, not silently stretched."""
+        depletion = InsufficientPropellantPolicy.BURN_TO_DEPLETION
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:500: Failed
+_______ test_boundary_burn_at_large_time_executes_without_negative_mass ________
+
+    def test_boundary_burn_at_large_time_executes_without_negative_mass():
+        """N1 case under DR-0017: ignition ~1e9 s, tank = mdot * 0.1 s, exact-depletion
+        command. The step-back residual (~1.5e-8 kg) is a negligible delta-v error for the
+        1000 kg reference vehicle, which executes with propellant never negative; for a
+        1e-10 kg dry mass the same residual is a large delta-v error and is rejected."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        duration = tank / ENGINE.mass_flow_kgps
+        tiny = SpacecraftSpec(dry_mass_kg=1e-10, engine=ENGINE, tank=TankSpec(propellant_kg=tank))
+        sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e8, spacecraft=tiny)
+        _run_until(sim, 9.0e8)
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:652: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-605.5-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0, ignition = 605.5
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 1.06083428004...e-14 ± 1.1e-23
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 1.060834280049428e-14 ± 1.1e-23
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-605.5-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0, ignition = 605.5
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 4.77549678316...e-11 ± 4.8e-20
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 4.7754967831645515e-11 ± 4.8e-20
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-605.5-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0, ignition = 605.5
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 2.26187228227...e-18 ± 2.3e-27
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 2.2618722822774434e-18 ± 2.3e-27
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 1000000.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 1.08655983516...e-11 ± 1.1e-20
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 1.0865598351606125e-11 ± 1.1e-20
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 1000000.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 4.89130403783...e-08 ± 4.9e-17
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 4.891304037837442e-08 ± 4.9e-17
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000.0-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0
+ignition = 1000000.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 2.31672337555...e-15 ± 2.3e-24
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 2.316723375559876e-15 ± 2.3e-24
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-33000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 33000000.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 6.95398126116...e-10 ± 7.0e-19
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 6.953981261164786e-10 ± 7.0e-19
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-33000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 33000000.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-33000000.0-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0
+ignition = 33000000.0, policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 1.48270260133...e-13 ± 1.5e-22
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 1.4827026013309743e-13 ± 1.5e-22
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 1.11263700567...e-08 ± 1.1e-17
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 1.1126370056741022e-08 ± 1.1e-17
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000.0-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 2.37232417041...e-12 ± 2.4e-21
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 2.3723241704148055e-12 ± 2.4e-21
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-77000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 77000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-77000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 77000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-77000000000.0-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0
+ignition = 77000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 6.07314987767...e-10 ± 6.1e-19
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 6.073149877670456e-10 ± 6.1e-19
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-10000000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 10000000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-10000000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 10000000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-10000000000000.0-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0
+ignition = 10000000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 3.88681592171...e-08 ± 3.9e-17
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 3.886815921710075e-08 ± 3.9e-17
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 1000000000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 1000000000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000000000.0-engine2-10000.0] _
+
+engine = EngineSpec(thrust_n=1.0, isp_s=3000.0), dry = 10000.0
+ignition = 1000000000000000.0
+policy = <InsufficientPropellantPolicy.REJECT: 'reject'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-605.5-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0, ignition = 605.5
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 4.66293670342...e-09 ± 4.7e-18
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 4.662936703421948e-09 ± 4.7e-18
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 1000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 2.72405031864...e-11 ± 2.7e-20
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 2.7240503186476296e-11 ± 2.7e-20
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 1000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-33000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 33000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 1.51037170326...e-09 ± 1.5e-18
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 1.5103717032612532e-09 ± 1.5e-18
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-33000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 33000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+>           assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+E           assert 0.0 == 8.81194068823...e-09 ± 8.8e-18
+E             
+E             comparison failed
+E             Obtained: 0.0
+E             Expected: 8.811940688234288e-09 ± 8.8e-18
+
+tests/test_simulator_propulsion.py:848: AssertionError
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 1000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-77000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 77000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-77000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 77000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-10000000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 10000000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-10000000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 10000000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000000000.0-engine0-1000.0] _
+
+engine = EngineSpec(thrust_n=490.0, isp_s=312.0), dry = 1000.0
+ignition = 1000000000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+_ test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000000000.0-engine1-1.0] _
+
+engine = EngineSpec(thrust_n=100000.0, isp_s=300.0), dry = 1.0
+ignition = 1000000000000000.0
+policy = <InsufficientPropellantPolicy.BURN_TO_DEPLETION: 'burn_to_depletion'>
+
+    @pytest.mark.parametrize(
+        ("engine", "dry"),
+        [
+            (ENGINE, DRY),  # reference: a ~ 0.38 m/s^2
+            (EngineSpec(thrust_n=1.0e5, isp_s=300.0), 1.0),  # extreme acceleration
+            (EngineSpec(thrust_n=1.0, isp_s=3000.0), 1.0e4),  # extreme low acceleration
+        ],
+    )
+    @pytest.mark.parametrize("ignition", [0.0, 605.5, 1.0e6, 3.3e7, 1.0e9, 7.7e10, 1.0e13, 1.0e15])
+    @pytest.mark.parametrize("policy", list(InsufficientPropellantPolicy))
+    def test_timing_delta_v_budget_classifies_like_an_independent_computation(
+        engine, dry, ignition, policy
+    ):
+        """DR-0017 B: accept iff the projected timing-induced delta-v error <= 1e-7 m/s,
+        across mission times and acceleration extremes, for both policies."""
+        prop, duration = 50.0, 0.1
+        if policy is InsufficientPropellantPolicy.BURN_TO_DEPLETION:
+            duration = 2.0 * prop / engine.mass_flow_kgps  # forces a depletion cutoff
+        expected_dv_err, representable = _independent_timing_dv_error(
+            engine, dry, prop, ignition, duration, policy
+        )
+        accept = representable and expected_dv_err <= TIMING_DELTA_V_BUDGET_MPS
+        if accept:
+            plan = plan_burn(engine, prop, ignition, duration, policy=policy, dry_mass_kg=dry)
+            assert plan.timing_delta_v_error_mps == pytest.approx(expected_dv_err, rel=1e-9, abs=1e-30)
+        else:
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:850: Failed
+__________________ test_timing_budget_boundary_on_both_sides ___________________
+
+    def test_timing_budget_boundary_on_both_sides():
+        """Reference engine: accepted at 1e9 s (error ~5e-8 m/s), rejected at 1e15 s."""
+        ok = plan_burn(ENGINE, PROP, 1.0e9, 0.1, dry_mass_kg=DRY)
+        assert 0.0 <= ok.timing_delta_v_error_mps <= TIMING_DELTA_V_BUDGET_MPS
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:859: Failed
+_ test_extreme_acceleration_is_rejected_where_the_reference_vehicle_is_accepted _
+
+    def test_extreme_acceleration_is_rejected_where_the_reference_vehicle_is_accepted():
+        """Same timing error, different physics: a 1e5 N engine on a 1 kg vehicle cannot
+        tolerate the representation error that is negligible for the reference vehicle."""
+        hot = EngineSpec(thrust_n=1.0e5, isp_s=300.0)
+        ignition, duration = 1.0e7, 0.1  # reference error ~1.4e-10 m/s at this time
+        plan_burn(ENGINE, PROP, ignition, duration, dry_mass_kg=DRY)  # accepted
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:870: Failed
+___________ test_depletion_residual_counts_toward_the_timing_budget ____________
+
+    def test_depletion_residual_counts_toward_the_timing_budget():
+        """D1a retains the residual; with a tiny dry mass that residual is a large share of
+        the end mass, so the burn is rejected rather than silently mis-delivering delta-v."""
+        tank = ENGINE.mass_flow_kgps * 0.1
+        policy = InsufficientPropellantPolicy.BURN_TO_DEPLETION
+        plan = plan_burn(ENGINE, tank, 1.0e9, 1.0, policy=policy, dry_mass_kg=DRY)
+        assert plan.end_cause is BurnEndCause.PROPELLANT_DEPLETED
+        assert plan.timing_delta_v_error_mps <= TIMING_DELTA_V_BUDGET_MPS
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:883: Failed
+_____________ test_schedule_burn_always_enforces_the_timing_budget _____________
+
+    def test_schedule_burn_always_enforces_the_timing_budget():
+        """The simulator passes the spacecraft's dry mass; no burn bypasses DR-0017."""
+        hot = SpacecraftSpec(
+            dry_mass_kg=1.0, engine=EngineSpec(thrust_n=1.0e5, isp_s=300.0), tank=TankSpec(50.0)
+        )
+        sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0e10, spacecraft=hot)
+        _run_until(sim, 7.0e10)
+>       with pytest.raises(BurnRejectedError) as err:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:895: Failed
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[10.0-30.0] _
+
+intended = 10.0, executed = 30.0
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0') >= (Decimal('1126.56761267052690665430092621620853346657091366866538111227') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[30.0-10.0] _
+
+intended = 30.0, executed = 10.0
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0') >= (Decimal('1126.56761267052690665430092621620853346657091366866538111227') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[0.0-61.0] _
+
+intended = 0.0, executed = 61.0
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0') >= (Decimal('5147.78700235356229879570581628153253772216149259836769730983') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[61.0-0.5] _
+
+intended = 61.0, executed = 0.5
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0') >= (Decimal('5127.30191273849384784782681954199420966657553900267075395870') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[50.3-50.299999999999955] _
+
+intended = 50.3, executed = 50.299999999999955
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0') >= (Decimal('5.29587839823999095428224645290476570691945052998148386286334E-12') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_is_never_underestimated_at_arithmetic_extremes[3e-07-3e-07-3.0-1e+16-9999999999999998.0-9999999999999996.0] _
+
+thrust = 3e-07, c = 3e-07, dry = 3.0, prop = 1e+16
+intended = 9999999999999998.0, executed = 9999999999999996.0
+
+    @pytest.mark.parametrize(
+        ("thrust", "c", "dry", "prop", "intended", "executed"),
+        [
+            # F1 cancellation (reviewer): huge tank, small dry mass, end mass ill-conditioned
+            (3e-7, 3e-7, 3.0, 1e16, 9999999999999998.0, 9999999999999996.0),
+            # F1 underflow (reviewer): subnormal masses, mdot * dt underflows
+            (1e-280, 1e20, 1e-310, 1e-310, 1e-11, 1.0000000000000004e-11),
+            # cancellation where an unslackened end mass underestimates by ~38 % (found by
+            # seeded search; the slack in the end-mass lower bound is required)
+            (
+                0.0012764678484075565,
+                0.0008405601224338024 * STANDARD_GRAVITY,
+                0.32186917193715897,
+                7.460733292860184e16,
+                4.81793673421924e17,
+                4.817936734219239e17,
+            ),
+            # dt underflow with ordinary vehicle (error is genuinely negligible)
+            (490.0, 312.0 * 9.80665, DRY, PROP, 5e-324, 1e-323),
+        ],
+    )
+    def test_timing_error_is_never_underestimated_at_arithmetic_extremes(
+        thrust, c, dry, prop, intended, executed
+    ):
+        engine = EngineSpec(thrust_n=thrust, isp_s=c / STANDARD_GRAVITY)
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+        assert not math.isnan(got)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))
+E       AssertionError: assert Decimal('0') >= (Decimal('1.00941670986363874583576815481977850468122320820419364645105E-7') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:981: AssertionError
+_ test_timing_error_is_never_underestimated_at_arithmetic_extremes[1e-280-1e+20-1e-310-1e-310-1e-11-1.0000000000000004e-11] _
+
+thrust = 1e-280, c = 1e+20, dry = 1e-310, prop = 1e-310, intended = 1e-11
+executed = 1.0000000000000004e-11
+
+    @pytest.mark.parametrize(
+        ("thrust", "c", "dry", "prop", "intended", "executed"),
+        [
+            # F1 cancellation (reviewer): huge tank, small dry mass, end mass ill-conditioned
+            (3e-7, 3e-7, 3.0, 1e16, 9999999999999998.0, 9999999999999996.0),
+            # F1 underflow (reviewer): subnormal masses, mdot * dt underflows
+            (1e-280, 1e20, 1e-310, 1e-310, 1e-11, 1.0000000000000004e-11),
+            # cancellation where an unslackened end mass underestimates by ~38 % (found by
+            # seeded search; the slack in the end-mass lower bound is required)
+            (
+                0.0012764678484075565,
+                0.0008405601224338024 * STANDARD_GRAVITY,
+                0.32186917193715897,
+                7.460733292860184e16,
+                4.81793673421924e17,
+                4.817936734219239e17,
+            ),
+            # dt underflow with ordinary vehicle (error is genuinely negligible)
+            (490.0, 312.0 * 9.80665, DRY, PROP, 5e-324, 1e-323),
+        ],
+    )
+    def test_timing_error_is_never_underestimated_at_arithmetic_extremes(
+        thrust, c, dry, prop, intended, executed
+    ):
+        engine = EngineSpec(thrust_n=thrust, isp_s=c / STANDARD_GRAVITY)
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+        assert not math.isnan(got)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))
+E       AssertionError: assert Decimal('0') >= (Decimal('2550.92705351469065341736459184667932265792125784344616304776') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:981: AssertionError
+_ test_timing_error_is_never_underestimated_at_arithmetic_extremes[0.0012764678484075565-0.008243078924665448-0.32186917193715897-7.460733292860184e+16-4.81793673421924e+17-4.817936734219239e+17] _
+
+thrust = 0.0012764678484075565, c = 0.008243078924665448
+dry = 0.32186917193715897, prop = 7.460733292860184e+16
+intended = 4.81793673421924e+17, executed = 4.817936734219239e+17
+
+    @pytest.mark.parametrize(
+        ("thrust", "c", "dry", "prop", "intended", "executed"),
+        [
+            # F1 cancellation (reviewer): huge tank, small dry mass, end mass ill-conditioned
+            (3e-7, 3e-7, 3.0, 1e16, 9999999999999998.0, 9999999999999996.0),
+            # F1 underflow (reviewer): subnormal masses, mdot * dt underflows
+            (1e-280, 1e20, 1e-310, 1e-310, 1e-11, 1.0000000000000004e-11),
+            # cancellation where an unslackened end mass underestimates by ~38 % (found by
+            # seeded search; the slack in the end-mass lower bound is required)
+            (
+                0.0012764678484075565,
+                0.0008405601224338024 * STANDARD_GRAVITY,
+                0.32186917193715897,
+                7.460733292860184e16,
+                4.81793673421924e17,
+                4.817936734219239e17,
+            ),
+            # dt underflow with ordinary vehicle (error is genuinely negligible)
+            (490.0, 312.0 * 9.80665, DRY, PROP, 5e-324, 1e-323),
+        ],
+    )
+    def test_timing_error_is_never_underestimated_at_arithmetic_extremes(
+        thrust, c, dry, prop, intended, executed
+    ):
+        engine = EngineSpec(thrust_n=thrust, isp_s=c / STANDARD_GRAVITY)
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+        assert not math.isnan(got)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))
+E       AssertionError: assert Decimal('0') >= (Decimal('0.00628815008003821998987594441154325251969463350391385474714483') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:981: AssertionError
+____ test_reviewer_over_budget_configurations_are_rejected_by_the_simulator ____
+
+    def test_reviewer_over_budget_configurations_are_rejected_by_the_simulator():
+        """F1: both reviewer reproductions were accepted by schedule_burn; one executed."""
+        cases = [
+            (EngineSpec(3e-7, 3e-7 / STANDARD_GRAVITY), 3.0, 1e16, 3.0, 9999999999999998.0),
+            (EngineSpec(1e-280, 1e20 / STANDARD_GRAVITY), 1e-310, 1e-310, 1e-10, 1e-11),
+        ]
+        for engine, dry, prop, ignition, duration in cases:
+            sc = SpacecraftSpec(dry_mass_kg=dry, engine=engine, tank=TankSpec(propellant_kg=prop))
+            sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0, spacecraft=sc)
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:993: Failed
+________________ test_classification_is_tight_around_the_budget ________________
+
+    def test_classification_is_tight_around_the_budget():
+        """F2: scan representation errors for a high-acceleration vehicle; many cases fall
+        within a factor of 2 of the 1e-7 m/s budget. Accept iff the exact error is within
+        budget, allowing only the conservative evaluation margin (1e-9 relative)."""
+        engine, dry, prop = EngineSpec(thrust_n=2.0e3, isp_s=300.0), 10.0, 50.0
+        near = 0
+        n = 4000
+        for k in range(n):
+            ignition = 10.0 ** (7.5 + k / n)  # ulp(t) ~ 4e-9 .. 1.5e-8 s
+            duration = 0.1 + k * (0.4 / n)
+            cutoff = ignition + duration
+            executed = cutoff - ignition
+            exact = float(_exact_timing_dv_error(engine, dry, prop, duration, executed))
+            if 0.5 * APPROVED_TIMING_BUDGET_MPS <= exact <= 2.0 * APPROVED_TIMING_BUDGET_MPS:
+                near += 1
+            try:
+                plan_burn(engine, prop, ignition, duration, dry_mass_kg=dry)
+                accepted = True
+            except BurnRejectedError as err:
+                assert err.reason is BurnRejection.BURN_UNSCHEDULABLE
+                accepted = False
+            if exact > APPROVED_TIMING_BUDGET_MPS:
+>               assert not accepted, (ignition, duration, exact)
+E               AssertionError: (33631791.3488667, 0.1107, 1.2174617581924768e-07)
+E               assert not True
+
+tests/test_simulator_propulsion.py:1027: AssertionError
+___ test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses ___
+
+    def test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses():
+        """F1 property: over seeded random huge-tank / small-dry-mass configurations near
+        depletion, the conservative estimate is never below the exact error."""
+        import random
+    
+        rng = random.Random(7)
+        checked = 0
+        while checked < 1500:
+            prop, dry = 10 ** rng.uniform(10, 17), 10 ** rng.uniform(-1, 2)
+            engine = EngineSpec(10 ** rng.uniform(-8, 2), 10 ** rng.uniform(-9, 3))
+            t_dep = prop / engine.mass_flow_kgps
+            intended = t_dep * (1 - 10 ** rng.uniform(-17, -14))
+            executed = math.nextafter(intended, 0.0)
+            if not (0.0 < executed <= t_dep and intended <= t_dep):
+                continue
+            exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+            got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+>           assert Decimal(got) >= exact * (1 - Decimal("1e-15")), (engine, dry, prop, intended)
+E           AssertionError: (EngineSpec(thrust_n=0.03231057824329872, isp_s=7.400063390597016e-09), 0.2834963826558839, 1848542133548.7454, 4151841.245870443)
+E           assert Decimal('0') >= (Decimal('5.28793355404633115157571736099294372697062156213076022183153E-11') * (1 - Decimal('1E-15')))
+E            +  where Decimal('0') = Decimal(0.0)
+E            +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:1051: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_burn_whose_represented_interval_differs_materially_is_unschedulable
+FAILED tests/test_simulator_propulsion.py::test_boundary_burn_at_large_time_executes_without_negative_mass
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-605.5-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-605.5-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-605.5-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000.0-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-33000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-33000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-33000000.0-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000.0-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-77000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-77000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-77000000000.0-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-10000000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-10000000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-10000000000000.0-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[reject-1000000000000000.0-engine2-10000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-605.5-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-33000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-33000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-77000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-77000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-10000000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-10000000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000000000.0-engine0-1000.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_delta_v_budget_classifies_like_an_independent_computation[burn_to_depletion-1000000000000000.0-engine1-1.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_budget_boundary_on_both_sides
+FAILED tests/test_simulator_propulsion.py::test_extreme_acceleration_is_rejected_where_the_reference_vehicle_is_accepted
+FAILED tests/test_simulator_propulsion.py::test_depletion_residual_counts_toward_the_timing_budget
+FAILED tests/test_simulator_propulsion.py::test_schedule_burn_always_enforces_the_timing_budget
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[10.0-30.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[30.0-10.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[0.0-61.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[61.0-0.5]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[50.3-50.299999999999955]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_at_arithmetic_extremes[3e-07-3e-07-3.0-1e+16-9999999999999998.0-9999999999999996.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_at_arithmetic_extremes[1e-280-1e+20-1e-310-1e-310-1e-11-1.0000000000000004e-11]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_at_arithmetic_extremes[0.0012764678484075565-0.008243078924665448-0.32186917193715897-7.460733292860184e+16-4.81793673421924e+17-4.817936734219239e+17]
+FAILED tests/test_simulator_propulsion.py::test_reviewer_over_budget_configurations_are_rejected_by_the_simulator
+FAILED tests/test_simulator_propulsion.py::test_classification_is_tight_around_the_budget
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_for_ill_conditioned_end_masses
+51 failed, 203 passed in 2.43s

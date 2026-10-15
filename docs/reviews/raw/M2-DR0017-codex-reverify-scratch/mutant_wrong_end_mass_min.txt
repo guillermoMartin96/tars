@@ -1,0 +1,99 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 85%]
+.........................FFFF.........                                   [100%]
+=================================== FAILURES ===================================
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[10.0-30.0] _
+
+intended = 10.0, executed = 30.0
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('821.5675949788192156120203435420989990234375') >= (Decimal('1126.56761267052690665430092621620853346657091366866538111227') * (1 - Decimal('1E-15')))
+E        +  where Decimal('821.5675949788192156120203435420989990234375') = Decimal(821.5675949788192)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[30.0-10.0] _
+
+intended = 30.0, executed = 10.0
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('821.5675949788192156120203435420989990234375') >= (Decimal('1126.56761267052690665430092621620853346657091366866538111227') * (1 - Decimal('1E-15')))
+E        +  where Decimal('821.5675949788192156120203435420989990234375') = Decimal(821.5675949788192)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[0.0-61.0] _
+
+intended = 0.0, executed = 61.0
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('1822.283697656705044209957122802734375') >= (Decimal('5147.78700235356229879570581628153253772216149259836769730983') * (1 - Decimal('1E-15')))
+E        +  where Decimal('1822.283697656705044209957122802734375') = Decimal(1822.283697656705)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+_ test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[61.0-0.5] _
+
+intended = 61.0, executed = 0.5
+
+    @pytest.mark.parametrize(
+        ("intended", "executed"),
+        [(10.0, 30.0), (30.0, 10.0), (0.0, 61.0), (61.0, 0.5), (50.3, (600.0 + 50.3) - 600.0)],
+    )
+    def test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value(intended, executed):
+        """F2: the error is the exact rocket-equation difference, so the end mass must be the
+        one after the longer interval. Large interval differences make a wrong mass choice
+        visible (|ln| changes at first order in dm/m)."""
+        engine, dry, prop = ENGINE, 2.0, 10.0  # t_dep ~ 62.4 s; all intervals within it
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))  # never an underestimate
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('1820.17652285826397928758524358272552490234375') >= (Decimal('5127.30191273849384784782681954199420966657553900267075395870') * (1 - Decimal('1E-15')))
+E        +  where Decimal('1820.17652285826397928758524358272552490234375') = Decimal(1820.176522858264)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:949: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[10.0-30.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[30.0-10.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[0.0-61.0]
+FAILED tests/test_simulator_propulsion.py::test_timing_error_uses_the_smaller_end_mass_and_matches_exact_value[61.0-0.5]
+4 failed, 250 passed in 1.61s

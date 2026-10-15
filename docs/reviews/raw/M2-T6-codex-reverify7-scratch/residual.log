@@ -1,0 +1,7 @@
+m2_burn_to_depletion residual +1e-8, ulp None {'propellant_used_rel_error_max': 0.0, 'depletion_residual_over_bound_max': 274624.32814801694} passes False
+m2_burn_to_depletion residual +1e-8, ulp inf {'propellant_used_rel_error_max': 0.0, 'depletion_residual_over_bound_max': 0.0} passes True
+m2_burn_to_depletion residual +1e-8, ulp -inf {'propellant_used_rel_error_max': 0.0, 'depletion_residual_over_bound_max': 0.0} passes True
+m2_burn_to_depletion residual +1e-8, ulp nan {'propellant_used_rel_error_max': 0.0, 'depletion_residual_over_bound_max': inf} passes False
+FULL clean run with invalid bound inf checks 28 failed [] report nonfinite []
+FULL clean run with invalid bound -inf checks 28 failed [] report nonfinite []
+FULL clean run with invalid bound nan checks 28 failed ['o1_mass_law[m2_burn_to_depletion]', 'o1_mass_law[m2_burn_to_depletion/o8_aux]'] report nonfinite []

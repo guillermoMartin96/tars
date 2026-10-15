@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_each_reference_metric_fails_on_its_corruption[burn_duration_from_mass_error_max_s] _
+
+metric = 'burn_duration_from_mass_error_max_s'
+
+    @pytest.mark.parametrize("metric", sorted(ROW_CASES))
+    def test_each_reference_metric_fails_on_its_corruption(metric):
+        name = "m2_prograde_burn"
+        scenario, predicted, arcs, rows = _labelled(name)
+        field, index, delta = ROW_CASES[metric]
+        index = index % len(rows)
+        rows = [
+            dataclasses.replace(r, **{field: getattr(r, field) + delta}) if i == index else r
+            for i, r in enumerate(rows)
+        ]
+        labelled, _ = gmat_m2.label_rows(rows, arcs)
+        metrics = gmat_m2.alignment_metrics(
+            labelled, arcs, predicted, scenario.constants.mu, m2.vehicle(scenario).mass_flow_kgps
+        )
+        ref = m2.dop853_reference(
+            scenario, *m2.expected_initial_state(scenario), predicted, sorted(labelled)
+        )
+        metrics |= gmat_m2.o9_metrics(scenario, predicted, run_scenario(scenario).events, labelled, ref)
+>       assert metrics[metric] > _limits(name)[metric]
+E       assert 0.0 > 1e-09
+
+tests/test_gmat_m2.py:610: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_each_reference_metric_fails_on_its_corruption[burn_duration_from_mass_error_max_s]
+1 failed in 2.84s

@@ -1,0 +1,62 @@
+baseline {'passed': True, 'checks': 76, 'failed': []}
+F1_rotated_initial {'passed': False, 'checks': 76, 'failed': ['o4_reference[m2_prograde_burn]', 'o8_convergence[m2_prograde_burn]', 'o4_reference[m2_retrograde_burn]', 'o8_convergence[m2_retrograde_burn]', 'o4_reference[m2_burn_to_depletion]', 'o8_convergence[m2_burn_to_depletion]', 'o4_reference[m2_invalid_commands]', 'o8_convergence[m2_invalid_commands]']}
+F2_stop_3000 {'passed': False, 'checks': 76, 'failed': ['outcomes[m2_prograde_burn]', 'o4_reference[m2_prograde_burn]', 'o8_convergence[m2_prograde_burn]', 'outcomes[m2_retrograde_burn]', 'o4_reference[m2_retrograde_burn]', 'o8_convergence[m2_retrograde_burn]', 'outcomes[m2_burn_to_depletion]', 'o4_reference[m2_burn_to_depletion]', 'o8_convergence[m2_burn_to_depletion]', 'outcomes[m2_invalid_commands]', 'o4_reference[m2_invalid_commands]', 'o8_convergence[m2_invalid_commands]', 'outcomes[m2_invalid_commands_empty_tank]', 'outcomes[m2_invalid_commands_no_propulsion]']}
+F3_doubled_powered_sample {'passed': True, 'checks': 76, 'failed': []}
+F3_bogus_boundary_completion {'passed': False, 'checks': 76, 'failed': ['dr0018_boundary[stop_inside_burn]']}
+F4_delete_depletion {'passed': False, 'checks': 76, 'failed': ['event_order[m2_burn_to_depletion]']}
+SimulationStarted.scenario_name {'passed': True, 'checks': 76, 'failed': []}
+SimulationStarted.scenario_hash {'passed': True, 'checks': 76, 'failed': []}
+SimulationStarted.software_version {'passed': True, 'checks': 76, 'failed': []}
+SimulationStarted.epoch {'passed': True, 'checks': 76, 'failed': []}
+SimulationStarted.time_scale {'passed': True, 'checks': 76, 'failed': []}
+SimulationStarted.seed {'passed': True, 'checks': 76, 'failed': []}
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t5-snap2/review_scratch/sweep.py", line 90, in <module>
+    for field,value in fields.items(): execute(typ+'.'+field,event_mut(typ,{field:value}))
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t5-snap2/review_scratch/sweep.py", line 50, in execute
+    checks=all_checks()
+           ^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t5-snap2/review_scratch/sweep.py", line 39, in all_checks
+    for mission in MISSIONS: checks+=p.mission_checks(mission,thresholds,False)[0]
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t5-snap2/toolbox/validators/m2_proof.py", line 85, in mission_checks
+    run = run_scenario(scenario)
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t5-snap2/review_scratch/sweep.py", line 26, in cached
+    return mutation(copy.deepcopy(cache[key]))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 162, in deepcopy
+    y = _reconstruct(x, memo, *rv)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 259, in _reconstruct
+    state = deepcopy(state, memo)
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+                             ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 196, in _deepcopy_list
+    append(deepcopy(a, memo))
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 143, in deepcopy
+    y = copier(memo)
+        ^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t5-snap2/.venv/lib/python3.12/site-packages/pydantic/main.py", line 994, in __deepcopy__
+    _object_setattr(m, '__dict__', deepcopy(self.__dict__, memo=memo))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 136, in deepcopy
+    y = copier(x, memo)
+        ^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 221, in _deepcopy_dict
+    y[deepcopy(key, memo)] = deepcopy(value, memo)
+      ^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/copy.py", line 134, in deepcopy
+    copier = _deepcopy_dispatch.get(cls)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

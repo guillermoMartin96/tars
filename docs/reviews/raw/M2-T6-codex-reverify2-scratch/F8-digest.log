@@ -1,0 +1,37 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_metadata_and_history_are_bound_to_the_manifest[host] ___________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-97/test_metadata_and_history_are_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x111ada2d0>
+change = 'host'
+
+    @pytest.mark.parametrize("change", ["metadata", "host", "history"])
+    def test_metadata_and_history_are_bound_to_the_manifest(tmp_path, monkeypatch, change):
+        """F8: changed metadata, or this reference's latest history record disagreeing with
+        its metadata, is rejected."""
+        name = "m2_prograde_burn"
+        dst = _copy_refs(tmp_path)
+        files = gmat_m2.reference_files(name, dst)
+        if change == "metadata":
+            meta = json.loads(files["metadata"].read_text())
+            meta["tars_git_revision"] = "1" * 40
+            files["metadata"].write_text(json.dumps(meta))
+        elif change == "host":  # a field only the manifest's metadata digest binds
+            meta = json.loads(files["metadata"].read_text())
+            meta["host_platform"] = "invented"
+            files["metadata"].write_text(json.dumps(meta))
+        else:
+            man = json.loads((dst / "APPROVED_DIGESTS.json").read_text())
+            mine = [h for h in man["history"] if h["mission"] == name][-1]
+            mine["report_sha256"] = "0" * 64
+            (dst / "APPROVED_DIGESTS.json").write_text(json.dumps(man))
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+        violations = _compare(name).violations
+>       assert violations
+E       assert []
+
+tests/test_gmat_m2.py:682: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_metadata_and_history_are_bound_to_the_manifest[host]
+1 failed in 3.21s

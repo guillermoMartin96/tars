@@ -1,0 +1,107 @@
+.FFFF                                                                    [100%]
+=================================== FAILURES ===================================
+___________ test_depletion_ratio_needs_a_finite_positive_bound[inf] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10638cbc0>, ulp = inf
+
+    @pytest.mark.parametrize("ulp", [None, math.inf, -math.inf, 0.0])
+    def test_depletion_ratio_needs_a_finite_positive_bound(monkeypatch, ulp):
+        """F26: with the normal bound the extra residual fails; an infinite, negative or
+        zero bound cannot turn it into a pass."""
+        if ulp is not None:
+            monkeypatch.setattr(m2, "_ulp", lambda x: ulp)
+        mission = BY_NAME["m2_burn_to_depletion"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        _with_residual(run)
+        o1, _, _ = m2.mass_and_rocket_metrics(
+            scenario, run.events, m2.predict_burns(scenario, mission.expected)
+        )
+>       assert o1["depletion_residual_over_bound_max"] > 1.0
+E       assert 0.0 > 1.0
+
+tests/test_gmat_m2.py:1472: AssertionError
+___________ test_depletion_ratio_needs_a_finite_positive_bound[-inf] ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10649d4f0>
+ulp = -inf
+
+    @pytest.mark.parametrize("ulp", [None, math.inf, -math.inf, 0.0])
+    def test_depletion_ratio_needs_a_finite_positive_bound(monkeypatch, ulp):
+        """F26: with the normal bound the extra residual fails; an infinite, negative or
+        zero bound cannot turn it into a pass."""
+        if ulp is not None:
+            monkeypatch.setattr(m2, "_ulp", lambda x: ulp)
+        mission = BY_NAME["m2_burn_to_depletion"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        _with_residual(run)
+        o1, _, _ = m2.mass_and_rocket_metrics(
+            scenario, run.events, m2.predict_burns(scenario, mission.expected)
+        )
+>       assert o1["depletion_residual_over_bound_max"] > 1.0
+E       assert 0.0 > 1.0
+
+tests/test_gmat_m2.py:1472: AssertionError
+___________ test_depletion_ratio_needs_a_finite_positive_bound[0.0] ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106e698b0>, ulp = 0.0
+
+    @pytest.mark.parametrize("ulp", [None, math.inf, -math.inf, 0.0])
+    def test_depletion_ratio_needs_a_finite_positive_bound(monkeypatch, ulp):
+        """F26: with the normal bound the extra residual fails; an infinite, negative or
+        zero bound cannot turn it into a pass."""
+        if ulp is not None:
+            monkeypatch.setattr(m2, "_ulp", lambda x: ulp)
+        mission = BY_NAME["m2_burn_to_depletion"]
+        scenario = mission.build()
+        run = run_scenario(scenario)
+        _with_residual(run)
+>       o1, _, _ = m2.mass_and_rocket_metrics(
+            scenario, run.events, m2.predict_burns(scenario, mission.expected)
+        )
+
+tests/test_gmat_m2.py:1469: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+scenario = ScenarioV2(schema_version=2, name='m2_burn_to_depletion', description='Milestone 2 reference mission (T5): propellant ...tion_t_s': 1800.0, 'direction': 'retrograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'burn_to_depletion'})))
+events = [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_burn_to_depletion', sc...mps=0.0, engine_state='idle', active_burn_id=None, pending_burn_ids=(), thrust_acceleration_mps2=(0.0, 0.0, 0.0)), ...]
+predicted = [PredictedBurn(burn_id='burn#000001', command_id='deplete-001', direction='prograde', submit_tick=60, ignition_t_s=600...ropellant_after_kg=1.0658141036401503e-14, mass_before_kg=1020.0, mass_after_kg=1000.0, delta_v_mps=60.58959971191325)]
+
+>   ???
+E   ZeroDivisionError: float division by zero
+
+<review-disabled>:715: ZeroDivisionError
+__________ test_infinite_depletion_bound_fails_the_integrated_mission __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1064a1760>
+
+    @pytest.mark.slow
+    def test_infinite_depletion_bound_fails_the_integrated_mission(monkeypatch):
+        """F26 integrated."""
+        from tars.validation.thresholds import load_scoped_thresholds
+    
+        module = _proof_module()
+        monkeypatch.setattr(m2, "_ulp", lambda x: math.inf)
+        original = module.run_scenario
+    
+        def with_residual(scenario, *a, **k):
+            run = original(scenario, *a, **k)
+            if scenario.name == "m2_burn_to_depletion":
+                _with_residual(run)
+            return run
+    
+        monkeypatch.setattr(module, "run_scenario", with_residual)
+        gates = module.Gates(load_scoped_thresholds(missions=frozenset(BY_NAME)))
+        checks, _ = module.mission_checks(BY_NAME["m2_burn_to_depletion"], gates, quick=True)
+        failed = {c.validator for c in checks if not c.passed}
+>       assert "o1_mass_law[m2_burn_to_depletion]" in failed
+E       AssertionError: assert 'o1_mass_law[m2_burn_to_depletion]' in {'cli_summary[m2_burn_to_depletion]', 'identities[m2_burn_to_depletion]', 'rejections_change_nothing[m2_burn_to_depletion]'}
+
+tests/test_gmat_m2.py:1494: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_depletion_ratio_needs_a_finite_positive_bound[inf]
+FAILED tests/test_gmat_m2.py::test_depletion_ratio_needs_a_finite_positive_bound[-inf]
+FAILED tests/test_gmat_m2.py::test_depletion_ratio_needs_a_finite_positive_bound[0.0]
+FAILED tests/test_gmat_m2.py::test_infinite_depletion_bound_fails_the_integrated_mission
+4 failed, 1 passed, 134 deselected in 7.17s

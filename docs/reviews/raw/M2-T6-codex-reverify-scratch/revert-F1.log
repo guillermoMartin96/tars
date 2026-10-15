@@ -1,0 +1,39 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_run_validates_a_staged_reference_and_replaces_nothing_on_failure _____
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-73/test_run_validates_a_staged_re0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10e282d80>
+
+    def test_run_validates_a_staged_reference_and_replaces_nothing_on_failure(tmp_path, monkeypatch):
+        """F1: a numerically bad GMAT output is rejected before anything is committed."""
+        name = "m2_prograde_burn"
+        dst = _copy_refs(tmp_path)
+        before = {p.name: p.read_bytes() for p in dst.iterdir()}
+        bad = tmp_path / "bad_report.txt"
+        lines = gmat_m2.reference_files(name)["report"].read_text().splitlines()
+        fields = lines[400].split()
+        fields[2] = repr(float(fields[2]) + 1e-3)  # +1 m in x (km)
+        lines[400] = " ".join(fields)
+        bad.write_text("\n".join(lines) + "\n")
+        console = tmp_path / "GmatConsole"
+        console.write_text(
+            "#!/bin/sh\n"
+            'out=$(sed -n "s/^GMAT S.Filename = \'\\(.*\\)\';$/\\1/p" "$2")\n'
+            f"cp '{bad}' \"$out\"\n"
+            "echo '*** GMAT Integration test (Console version) successful! ***'\n"
+        )
+        console.chmod(0o755)
+        monkeypatch.setattr(gmat_m2, "reference_dir", lambda: dst)
+        cli = _cli()
+        args = ["run", "--missions", name, "--gmat-console", str(console)]
+        code = cli.main([*args, "--gmat-version", "R2026a", "--replace-reason", "test"])
+>       assert code == 1
+E       assert 0 == 1
+
+tests/test_gmat_m2.py:402: AssertionError
+----------------------------- Captured stdout call -----------------------------
+m2_prograde_burn: GMAT reference validated and stored (1 rows)
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_run_validates_a_staged_reference_and_replaces_nothing_on_failure
+1 failed in 0.65s

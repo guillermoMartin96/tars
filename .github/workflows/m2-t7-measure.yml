@@ -1,0 +1,39 @@
+# M2 T7 three-platform measurement (DR-0015 threshold method; DR-0008 precedent).
+# Runs only on a pushed `t7-measure-*` tag or by hand. It measures and uploads a
+# bundle; it never changes thresholds, references or the reference snapshot.
+name: m2-t7-measure
+
+on:
+  push:
+    tags: ["t7-measure-*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install locked environment
+        run: uv sync --locked
+
+      - name: Collect the T7 measurement bundle
+        run: uv run python toolbox/scripts/m2_t7_measure.py collect --out runs/t7/${{ matrix.os }}-${{ github.run_id }} --label ${{ matrix.os }}-${{ github.run_id }}
+
+      - name: Upload bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t7-${{ matrix.os }}-${{ github.run_id }}
+          path: runs/t7/

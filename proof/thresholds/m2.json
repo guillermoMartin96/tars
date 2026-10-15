@@ -1,0 +1,139 @@
+{
+  "milestone": "M2 Propulsion",
+  "status": "approved",
+  "approved_by": "Guillermo (Tech Lead)",
+  "approved_on": "2026-10-14",
+  "basis": "DR-0023 (approved 2026-10-14): every value finalized unchanged from the provisional T5/T6 matrix after the T7 three-platform measurement (VAL-0016; DR-0015 method, DR-0008 precedent: macOS x86_64 reference host, Linux x86_64, macOS arm64; 11 bundles, 215/215 checks on each). Truncation-type limits are about 2x measured; round-off-type quantities use the magnitude-relative 1e-12 class; convergence orders use the approved DR-0008 policy |p - 4| <= 0.5. Exact contract checks (event order, traceability, outcomes, control, determinism, DR-0018 boundary, reference snapshot) are not tolerances and are not in this file. The DR-0017 timing-induced delta-v budget (1e-7 m/s per burn) is enforced by the simulator at acceptance and is not a trajectory-error bound. The cross_platform group (DR-0023 decision 4) closes DR-0015's open golden-final-state row. Any change to a value, dt, integrator, force model or scenario requires re-measurement, a reviewed change of this file and its digest in tars.validation.approved_digests in the same commit (DR-0020 condition 5).",
+  "limits": {
+    "o1_mass_law": {
+      "all": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      }
+    },
+    "o2_rocket_equation": {
+      "all": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      }
+    },
+    "o3_free_space": {
+      "all": {
+        "velocity_rel_error_max": 1e-12,
+        "propellant_rel_error_max": 1e-12,
+        "position_order_deviation_from_4_max": 0.5,
+        "timing_violations": 0.0
+      }
+    },
+    "o4_reference": {
+      "all": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "m2_invalid_commands": {
+        "ignition_position_error_max_m": 0.016,
+        "ignition_velocity_error_max_mps": 2e-05,
+        "thrust_direction_vs_reference_max": 2.6e-09,
+        "cutoff_position_error_max_m": 0.016,
+        "cutoff_velocity_error_max_mps": 2e-05
+      }
+    },
+    "o5_coast_kepler": {
+      "all": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      }
+    },
+    "o6_impulsive_limit": {
+      "all": {
+        "order_deviation_from_2_max": 0.05,
+        "slice_sma_change_ratio_deviation": 1e-05
+      }
+    },
+    "o7_direction": {
+      "all": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      }
+    },
+    "o8_convergence": {
+      "all": {
+        "order_deviation_from_4_max": 0.5
+      }
+    },
+    "accounting": {
+      "all": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      }
+    },
+    "orbit_events": {
+      "all": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      }
+    },
+    "o9_gmat": {
+      "all": {
+        "step_spacing_error_max_s": 1e-06,
+        "burn_duration_from_mass_error_max_s": 1e-09,
+        "coast_vs_kepler_position_error_max_m": 0.0001,
+        "coast_vs_kepler_velocity_error_max_mps": 1e-07,
+        "gmat_vs_dop853_position_error_max_m": 3e-05,
+        "gmat_vs_dop853_velocity_error_max_mps": 3.5e-08,
+        "gmat_vs_dop853_final_position_error_m": 3e-05,
+        "gmat_mass_vs_analytic_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_sample_position_error_max_m": 0.6,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.0007,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.002,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 3e-06,
+        "ours_vs_gmat_final_position_error_m": 0.6,
+        "ours_vs_gmat_final_velocity_error_mps": 0.0007,
+        "ours_vs_gmat_mass_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_node_crossing_error_max_s": 8e-05
+      },
+      "m2_invalid_commands": {
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.016,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 2e-05
+      }
+    },
+    "cross_platform": {
+      "all": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      }
+    }
+  },
+  "limit_basis": {
+    "o1_mass_law": "DR-0015 candidate 1e-12 (round-off class, relative to initial mass). depletion_residual_over_bound_max: analytic DR-0017 D1a bound mdot * 2 ulp(cutoff); exact, not a tolerance.",
+    "o2_rocket_equation": "DR-0015 candidate 1e-12 (round-off class, relative to delta-v), applied to the error in excess of the analytic RK4 (Simpson) truncation bound h^5/2880 * 24 F mdot^4 / m^5 summed over the burn's sub-steps. For the reference vehicle the bound is 5e-13 m/s (1.8e-14 relative), so the gate is effectively unchanged. The O6 high-thrust variants (up to 16x thrust, mdot^4 = 65 536x) carry a genuine truncation error up to 2.0e-11 relative, which the analytic bound predicts to 2-3 % (VAL-0013). The raw relative error is reported (sensed_delta_v_rel_error_max). Not a weakening: the round-off allowance is unchanged and the truncation term is computed, not tuned.",
+    "o3_free_space": "Velocity and propellant: round-off class 1e-12 (VAL-0011, T1 test bound). Position: genuine 4th-order truncation, checked by order |p - 4| <= 0.5 (DR-0008 policy), not by an absolute value. timing_violations: the reported ignition and cutoff must equal the requested interval exactly (review M2-T5 F5).",
+    "o4_reference": "Initial state vs the independently derived circular-orbit state: round-off class 1e-12 relative (review M2-T5 F1). Ignition states (BurnStarted) share the cutoff limits; ignition precedes cutoff, so its error is smaller (review F11). Thrust direction at every burning PropulsionSampled vs the reference velocity direction (|a/|a| - u_ref|): the O4 cutoff velocity limit divided by orbital speed (3e-6 / 7.7e3 = 4e-10; m2_invalid_commands 2e-5 / 7.7e3 = 2.6e-9), since the reference and simulated velocity directions differ by about |dv|/|v| (measured 1.3e-10..1.5e-10; 1.2e-9). Not a new independent tolerance (review F10). Every StateSampled (coast and powered, all runs including O6/O8 auxiliary runs): same limits as the final state; measured maxima 0.2906 m (prograde, at 53 400 s), 0.3127, 0.2891, 0.2973, 0.298 m (review F3/F6/F7). DR-0015 candidates: cutoff <= 2e-3 m / 3e-6 m/s (slice, retrograde, depletion: cutoff before 730 s), final <= 0.6 m / 7e-4 m/s at 53 700 s. m2_invalid_commands: last cutoff at 2420 s, after a longer coast; ~2x measured (8.0e-3 m, 1.0e-5 m/s). The cutoff error is dominated by the pre-burn coast, not the burn.",
+    "o5_coast_kepler": "~2x measured (max 0.314 m, retrograde); equals the approved M1 Kepler limits for the same horizon and dt.",
+    "o6_impulsive_limit": "DR-0015 candidates: |p - 2| <= 0.05 over every halving pair (5 levels); slice ratio <= 1e-5. Approved unchanged by DR-0023 decision 3. DR-0021 margin bound (measured deviation + worst simulator-seeded snapshot shift at the 1e-5 m class tolerance), worst over 11 bundles: prograde 0.039703, retrograde 0.040493 < 0.05. Future improvement, NOT adopted (needs separate approval and a reviewed snapshot baseline under DR-0021 condition 3): a dedicated O6 impulsive-SMA reproducibility class of 2e-8 m (measured cross-platform variation 1.86e-9 m), which would lower the bounds to 0.004172 / 0.003923; relevant only if the O6 limit is tightened below about 0.041.",
+    "o7_direction": "Signs exact. Plane rotation and inclination change: round-off class 1e-12 rad (measured <= 1.5e-16).",
+    "o8_convergence": "DR-0008 policy |p - 4| <= 0.5 on dt 10 -> 5 -> 2.5 s (DR-0015 candidate). 20 -> 10 is pre-asymptotic; dt = 1 s approaches the DOP853 cross-platform floor.",
+    "accounting": "Round-off class 1e-12 (relative to initial mass, or to the mission's total predicted delta-v). Includes per-sample propellant and sensed delta-v predicted from accepted commands and elapsed burn time, transition propellant, planned consumption and the thrust unit vector (reviews F9, F11, F12). Exact relations (mass = dry + propellant, idle intervals bit-identical, schedule, plan cutoffs, D1a cutoff, timing bound) are contract checks, not tolerances.",
+    "orbit_events": "Node-crossing time vs independently located reference crossings (DOP853 + Kepler bisection): 8e-5 s, ~2x measured (<= 4.0e-5 s) and equal to the approved M1 node-crossing limit for the same dt and horizon. Completion altitude extrema vs the reference's extrema over every executed tick (DOP853 dense output), both directions: 0.013 m, ~2x measured (<= 6.3e-3 m). Reporting sample-only extrema errs by about 2 m (review F14, F17).",
+    "o9_gmat": "T6 (DR-0015 O9, DR-0016 A aligned stepping); approved unchanged by DR-0023. The DR-0015 O9 candidates were re-derived as DR-0016 required (the 1e-7 kg and 2.5e-2 m candidates rested on the refuted VAL-0009 hypothesis and on unaligned stepping). Alignment verification: step spacing from GMAT's epoch column <= 1e-6 s (epoch resolution: 2 ulp of A1 MJD near 31 041 = 6.3e-7 s; measured 2.3e-7 s; an adaptive step cut would differ by seconds); burn duration from GMAT's mass <= 1e-9 s (about 2x the VAL-0010 maximum 6e-10 s; measured 1.4e-10 s); coast rows vs exact Kepler <= 1e-4 m and <= 1e-7 m/s (the approved M1 GMAT-vs-Kepler limits, DR-0009; measured 4.0e-6 m and 4.6e-9 m/s; the velocity gate added in review M2-T6 F36). GMAT vs DOP853 (independent RHS): 3e-5 m and 3.5e-8 m/s. FU-1: not tighter than the DOP853 reference's 11-15 um cross-platform floor (VAL-0010 addendum), so the limit is 2x the 15 um floor (velocity scaled by the measured velocity/position ratio ~1.2e-3 /s), not 2x the reference-host values (0.6-4.7 um, 0.7-5.4e-9 m/s), which lie below that floor. GMAT mass vs the analytic mass law and ours vs GMAT mass: 1.3e-9 kg, the O1 round-off class (1e-12 of the 1300 kg initial mass); measured 2.3e-11 kg. Ours vs GMAT: the same limits as O4 (final 0.6 m / 7e-4 m/s, DR-0015 O9 candidate; burn boundaries = O4 cutoff limits, m2_invalid_commands scoped as in O4); measured 0.290-0.313 m, equal to ours vs DOP853, so the difference is our RK4 error. Node crossings vs GMAT: 8e-5 s, as in T5. Depletion is not compared with GMAT (gmat_m2.GMAT_MISSIONS docstring; VAL-0009 finding 4). FU-1 closed by DR-0023 decision 2 (VAL-0016): the GMAT-vs-DOP853 limits stay 3e-5 m / 3.5e-8 m/s. Since DR-0021 the Proof compares GMAT with the approved, sha256-pinned DOP853 snapshot values, not with a fresh platform-dependent integration, so every O9 GMAT-vs-reference metric has zero cross-platform spread (11 bundles). Noise floor: the raw DOP853 reference still drifts by up to 8.62e-6 m (Euclidean) between platforms in record mode; the snapshot removes that drift from the verdict but freezes the baseline host's numerical error with it (host dependence). The measured 4.66e-6 m is the disagreement between the committed GMAT rows and the approved baseline: it shows two independent methods are consistent and does not bound either one's absolute error, so these limits do not establish absolute physical accuracy. 3e-5 m is about 2x the worst plausible residual after re-baselining on another host (4.66 + 8.62 um = 13.3 um). Detection (reverse triangle inequality): a GMAT or reference change is caught for certain above 30 + 4.66 = 34.7 um, and in a favourable direction from about 25.3 um.",
+    "cross_platform": "DR-0023 decision 4 (DR-0015 open row; DR-0006 method): Euclidean difference of every M2 mission's final position and velocity between platforms <= 1e-4 m and <= 1e-7 m/s, the approved M1 bounds (DR-0008). Measured (VAL-0016, 11 bundles): at most 7.2e-6 m and 8.4e-9 m/s (prograde slice; a burn amplifies drift about 2.5x over M1's 2.9e-6 m), margins 14x and 12x. Enforced twice: the M2 Proof compares every mission on the running platform with the reference-host golden record (proof/references/m2_final_states.json, sha256-pinned), and the CI gate toolbox/validators/m2_cross_platform.py compares all three required platforms at one revision."
+  }
+}

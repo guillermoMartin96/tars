@@ -1,0 +1,76 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________ test_missing_observations_are_not_vacuous_passes[StateSampled] ________
+
+drop = 'StateSampled'
+
+    @pytest.mark.parametrize("drop", ["StateSampled", "BurnEnded", "PropulsionSampled"])
+    def test_missing_observations_are_not_vacuous_passes(drop):
+        """F5: O9 requires every expected observation, from the scenario."""
+        name = "m2_prograde_burn"
+        run = run_scenario(BY_NAME[name].build())
+        keep_first = drop == "PropulsionSampled"
+        events, seen = [], False
+        for e in run.events:
+            if e.type == drop and (not keep_first or seen):
+                continue
+            seen = seen or e.type == drop
+            events.append(e)
+>       assert any(
+            "expected" in v or "differ" in v or "!=" in v for v in _compare(name, events).violations
+        )
+E       assert False
+E        +  where False = any(<generator object test_missing_observations_are_not_vacuous_passes.<locals>.<genexpr> at 0x10a3868e0>)
+
+tests/test_gmat_m2.py:534: AssertionError
+_________ test_missing_observations_are_not_vacuous_passes[BurnEnded] __________
+
+drop = 'BurnEnded'
+
+    @pytest.mark.parametrize("drop", ["StateSampled", "BurnEnded", "PropulsionSampled"])
+    def test_missing_observations_are_not_vacuous_passes(drop):
+        """F5: O9 requires every expected observation, from the scenario."""
+        name = "m2_prograde_burn"
+        run = run_scenario(BY_NAME[name].build())
+        keep_first = drop == "PropulsionSampled"
+        events, seen = [], False
+        for e in run.events:
+            if e.type == drop and (not keep_first or seen):
+                continue
+            seen = seen or e.type == drop
+            events.append(e)
+>       assert any(
+            "expected" in v or "differ" in v or "!=" in v for v in _compare(name, events).violations
+        )
+E       assert False
+E        +  where False = any(<generator object test_missing_observations_are_not_vacuous_passes.<locals>.<genexpr> at 0x10d1d9080>)
+
+tests/test_gmat_m2.py:534: AssertionError
+_____ test_missing_observations_are_not_vacuous_passes[PropulsionSampled] ______
+
+drop = 'PropulsionSampled'
+
+    @pytest.mark.parametrize("drop", ["StateSampled", "BurnEnded", "PropulsionSampled"])
+    def test_missing_observations_are_not_vacuous_passes(drop):
+        """F5: O9 requires every expected observation, from the scenario."""
+        name = "m2_prograde_burn"
+        run = run_scenario(BY_NAME[name].build())
+        keep_first = drop == "PropulsionSampled"
+        events, seen = [], False
+        for e in run.events:
+            if e.type == drop and (not keep_first or seen):
+                continue
+            seen = seen or e.type == drop
+            events.append(e)
+>       assert any(
+            "expected" in v or "differ" in v or "!=" in v for v in _compare(name, events).violations
+        )
+E       assert False
+E        +  where False = any(<generator object test_missing_observations_are_not_vacuous_passes.<locals>.<genexpr> at 0x10d44d3c0>)
+
+tests/test_gmat_m2.py:534: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_missing_observations_are_not_vacuous_passes[StateSampled]
+FAILED tests/test_gmat_m2.py::test_missing_observations_are_not_vacuous_passes[BurnEnded]
+FAILED tests/test_gmat_m2.py::test_missing_observations_are_not_vacuous_passes[PropulsionSampled]
+3 failed in 7.26s

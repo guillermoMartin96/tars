@@ -1,0 +1,94 @@
+..................................................FFF................... [ 40%]
+........................................................................ [ 80%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+__________ test_transition_states_in_free_space_match_the_closed_form __________
+
+    def test_transition_states_in_free_space_match_the_closed_form():
+        """REV-T2-05: event r, v are checked against exact free-space motion.
+    
+        Zero force, prograde burn: velocity direction is constant, so
+        v = v0 + c ln(m0/m) u and x = x0 + v0 T + c [T - (m/mdot) ln(m0/m)] u after ignition.
+        Coast before ignition is linear motion (exact under RK4). Ignition and cutoff
+        share one tick here (601 s, 604 s) to exercise interior events.
+        """
+        v0 = np.array([30.0, 40.0, 0.0])
+        u = v0 / 50.0
+        sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        _run_until(sim, 600.0)
+        sim.step()
+        ign, cut = sim.engine_transitions
+>       np.testing.assert_allclose(ign.r, v0 * 601.0, rtol=1e-15, atol=0)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-15, atol=0
+E       
+E       Mismatched elements: 2 / 3 (66.7%)
+E       Mismatch at indices:
+E        [0]: 0.0 (ACTUAL), 18030.0 (DESIRED)
+E        [1]: 0.0 (ACTUAL), 24040.0 (DESIRED)
+E       Max absolute difference among violations: 24040.
+E       Max relative difference among violations: 1.
+E        ACTUAL: array([0., 0., 0.])
+E        DESIRED: array([18030., 24040.,     0.])
+
+tests/test_simulator_propulsion.py:557: AssertionError
+______ test_transition_states_in_orbit_converge_to_independent_references ______
+
+    def test_transition_states_in_orbit_converge_to_independent_references():
+        """REV-T2-05: interior ignition (605.5 s) vs exact Kepler; cutoff vs independent
+        DOP853. Both converge at order 4 (|p - 4| <= 0.5, DR-0008), which a wrong or
+        zeroed event state cannot satisfy."""
+        from tars.astro import kepler
+    
+        r_k, _ = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+        ref = _independent_reference(605.5, 77.3, 1.0, 605.5 + 77.3)
+        errs = {"ign_r": [], "cut_r": [], "cut_v": []}
+        for dt in (20.0, 10.0, 5.0):
+            sim = _sim(dt=dt)
+            sim.schedule_burn("prograde", ignition_t_s=605.5, duration_s=77.3)
+            events = {}
+            while sim.t < 700.0:
+                sim.step()
+                events.update({e.kind: e for e in sim.engine_transitions})
+            errs["ign_r"].append(np.linalg.norm(events["ignition"].r - r_k))
+            errs["cut_r"].append(np.linalg.norm(events["cutoff"].r - ref[:3]))
+            errs["cut_v"].append(np.linalg.norm(events["cutoff"].v - ref[3:6]))
+        for series in errs.values():
+            for coarse, fine in pairwise(series):
+>               assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E               assert 4.0 <= 0.5
+E                +  where 4.0 = abs((0.0 - 4.0))
+E                +    where 0.0 = <built-in function log2>((np.float64(6628137.0) / np.float64(6628137.0)))
+E                +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:598: AssertionError
+__ test_boundary_event_state_equals_the_tick_snapshot_and_records_stay_stable __
+
+    def test_boundary_event_state_equals_the_tick_snapshot_and_records_stay_stable():
+        sim = _sim()
+        sim.schedule_burn("prograde", ignition_t_s=600.0, duration_s=20.0)
+        _run_until(sim, 590.0)
+        sim.step()  # ignition at the end of this tick, t = 600
+        (ign,) = sim.engine_transitions
+        snap = sim.snapshot()
+>       np.testing.assert_array_equal(ign.r, snap.r)
+E       AssertionError: 
+E       Arrays are not equal
+E       
+E       Mismatched elements: 3 / 3 (100%)
+E       Mismatch at indices:
+E        [0]: 0.0 (ACTUAL), 5060957.719345086 (DESIRED)
+E        [1]: 0.0 (ACTUAL), 2658549.292733019 (DESIRED)
+E        [2]: 0.0 (ACTUAL), 3354254.418746503 (DESIRED)
+E       Max absolute difference among violations: 5060957.71934509
+E       Max relative difference among violations: 1.
+E        ACTUAL: array([0., 0., 0.])
+E        DESIRED: array([5060957.719345, 2658549.292733, 3354254.418747])
+
+tests/test_simulator_propulsion.py:608: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_transition_states_in_free_space_match_the_closed_form
+FAILED tests/test_simulator_propulsion.py::test_transition_states_in_orbit_converge_to_independent_references
+FAILED tests/test_simulator_propulsion.py::test_boundary_event_state_equals_the_tick_snapshot_and_records_stay_stable
+3 failed, 175 passed in 1.57s

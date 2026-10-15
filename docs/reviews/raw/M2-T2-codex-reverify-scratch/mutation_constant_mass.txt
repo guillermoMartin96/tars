@@ -1,0 +1,152 @@
+........................FFF.......................FF.................... [ 40%]
+........................................................................ [ 80%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+_______________ test_sensed_delta_v_matches_the_rocket_equation ________________
+
+    def test_sensed_delta_v_matches_the_rocket_equation():
+        """O2: integral of F/m over the burn equals c ln(m0/mf). Round-off bound 1e-12
+        relative (measured 1.2e-14, VAL-0008)."""
+        sim, plan, dv0 = _burn_run(10.0)
+        sensed = sim.propulsion_snapshot().delta_v_sensed_mps - dv0
+        m0 = DRY + PROP
+        expected = rocket_equation_delta_v(
+            ENGINE.exhaust_velocity_mps, m0, m0 - plan.propellant_used_kg
+        )
+>       assert sensed == pytest.approx(expected, rel=1e-12, abs=0)
+E       assert 29.13615384615383 == 29.275767297714378 ± 2.9e-11
+E         
+E         comparison failed
+E         Obtained: 29.13615384615383
+E         Expected: 29.275767297714378 ± 2.9e-11
+
+tests/test_simulator_propulsion.py:350: AssertionError
+_______ test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0] ________
+
+direction = 'prograde', sign = 1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 3.998160784642648 <= 0.5
+E            +  where 3.998160784642648 = abs((0.0018392153573519258 - 4.0))
+E            +    where 0.0018392153573519258 = <built-in function log2>((np.float64(5.99573755877802) / np.float64(5.988098781272449)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:387: AssertionError
+______ test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0] ______
+
+direction = 'retrograde', sign = -1.0
+
+    @pytest.mark.parametrize(("direction", "sign"), [("prograde", 1.0), ("retrograde", -1.0)])
+    def test_split_steps_keep_fourth_order_through_a_burn(direction, sign):
+        """Ignition and cutoff both fall inside ticks for every dt used. Without exact
+        step splitting the error would be ~1 m/s-level and not converge at order 4
+        (VAL-0008: 168 km after 10 orbits). Order policy |p - 4| <= 0.5 (DR-0008)."""
+        ignition, duration, t_end = 605.5, 77.3, 700.0
+        ref = _independent_reference(ignition, duration, sign, t_end)
+        errs = []
+        for dt in (20.0, 10.0, 5.0):
+            sim, _, _ = _burn_run(dt, ignition, duration, direction, t_end)
+            errs.append(np.linalg.norm(sim.snapshot().r - ref[:3]))
+        for coarse, fine in pairwise(errs):
+>           assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E           assert 4.001821416405356 <= 0.5
+E            +  where 4.001821416405356 = abs((-0.0018214164053561705 - 4.0))
+E            +    where -0.0018214164053561705 = <built-in function log2>((np.float64(5.979491591335307) / np.float64(5.98704552460097)))
+E            +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:387: AssertionError
+__________ test_transition_states_in_free_space_match_the_closed_form __________
+
+    def test_transition_states_in_free_space_match_the_closed_form():
+        """REV-T2-05: event r, v are checked against exact free-space motion.
+    
+        Zero force, prograde burn: velocity direction is constant, so
+        v = v0 + c ln(m0/m) u and x = x0 + v0 T + c [T - (m/mdot) ln(m0/m)] u after ignition.
+        Coast before ignition is linear motion (exact under RK4). Ignition and cutoff
+        share one tick here (601 s, 604 s) to exercise interior events.
+        """
+        v0 = np.array([30.0, 40.0, 0.0])
+        u = v0 / 50.0
+        sim = Simulator(np.zeros(3), v0, _ZeroForce(), RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=601.0, duration_s=3.0)
+        _run_until(sim, 600.0)
+        sim.step()
+        ign, cut = sim.engine_transitions
+        np.testing.assert_allclose(ign.r, v0 * 601.0, rtol=1e-15, atol=0)
+        np.testing.assert_array_equal(ign.v, v0)
+        mdot = ENGINE.mass_flow_kgps
+        burn = cut.t - ign.t
+        with localcontext() as ctx:  # 40 digits: the float64 closed form loses ~1e-9 m
+            ctx.prec = 40
+            c, md = Decimal(ENGINE.exhaust_velocity_mps), Decimal(mdot)
+            m0, b = Decimal(DRY + PROP), Decimal(burn)
+            m = m0 - md * b
+            ln = (m0 / m).ln()
+            dv, disp = c * ln, c * (b - (m / md) * ln)
+            v_exact = [float(Decimal(v0[k]) + dv * Decimal(u[k])) for k in range(3)]
+            r_exact = [float(Decimal(v0[k]) * Decimal(604) + disp * Decimal(u[k])) for k in range(3)]
+        # Velocity: Simpson-exact to round-off. Position: one 3 s RK4 sub-step has a
+        # truncation error ~1e-14 m; the bound is a few ulp of |r| (~2.4e4 m, ulp 3.6e-12).
+>       np.testing.assert_allclose(cut.v, v_exact, rtol=1e-14, atol=0)
+E       AssertionError: 
+E       Not equal to tolerance rtol=1e-14, atol=0
+E       
+E       Mismatched elements: 2 / 3 (66.7%)
+E       Mismatch at indices:
+E        [0]: 30.678461538461537 (ACTUAL), 30.6785869394525 (DESIRED)
+E        [1]: 40.90461538461538 (ACTUAL), 40.904782585936665 (DESIRED)
+E       Max absolute difference among violations: 0.0001672
+E       Max relative difference among violations: 4.08757389e-06
+E        ACTUAL: array([30.678462, 40.904615,  0.      ])
+E        DESIRED: array([30.678587, 40.904783,  0.      ])
+
+tests/test_simulator_propulsion.py:572: AssertionError
+______ test_transition_states_in_orbit_converge_to_independent_references ______
+
+    def test_transition_states_in_orbit_converge_to_independent_references():
+        """REV-T2-05: interior ignition (605.5 s) vs exact Kepler; cutoff vs independent
+        DOP853. Both converge at order 4 (|p - 4| <= 0.5, DR-0008), which a wrong or
+        zeroed event state cannot satisfy."""
+        from tars.astro import kepler
+    
+        r_k, _ = kepler.propagate(R0, V0, 605.5, WGS84.mu)
+        ref = _independent_reference(605.5, 77.3, 1.0, 605.5 + 77.3)
+        errs = {"ign_r": [], "cut_r": [], "cut_v": []}
+        for dt in (20.0, 10.0, 5.0):
+            sim = _sim(dt=dt)
+            sim.schedule_burn("prograde", ignition_t_s=605.5, duration_s=77.3)
+            events = {}
+            while sim.t < 700.0:
+                sim.step()
+                events.update({e.kind: e for e in sim.engine_transitions})
+            errs["ign_r"].append(np.linalg.norm(events["ignition"].r - r_k))
+            errs["cut_r"].append(np.linalg.norm(events["cutoff"].r - ref[:3]))
+            errs["cut_v"].append(np.linalg.norm(events["cutoff"].v - ref[3:6]))
+        for series in errs.values():
+            for coarse, fine in pairwise(series):
+>               assert abs(math.log2(coarse / fine) - 4.0) <= 0.5
+E               assert 3.996917343005281 <= 0.5
+E                +  where 3.996917343005281 = abs((0.003082656994718957 - 4.0))
+E                +    where 0.003082656994718957 = <built-in function log2>((np.float64(3.5976401340866704) / np.float64(3.5899611373906364)))
+E                +      where <built-in function log2> = math.log2
+
+tests/test_simulator_propulsion.py:598: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_sensed_delta_v_matches_the_rocket_equation
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[prograde-1.0]
+FAILED tests/test_simulator_propulsion.py::test_split_steps_keep_fourth_order_through_a_burn[retrograde--1.0]
+FAILED tests/test_simulator_propulsion.py::test_transition_states_in_free_space_match_the_closed_form
+FAILED tests/test_simulator_propulsion.py::test_transition_states_in_orbit_converge_to_independent_references
+5 failed, 173 passed in 1.64s

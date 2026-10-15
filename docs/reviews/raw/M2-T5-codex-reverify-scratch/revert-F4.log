@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_missing_or_mismatched_depletion_event_is_detected[delete] ________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x10f6aea20>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'delete'
+
+    @pytest.mark.parametrize("change", ["delete", "mismatch"])
+    def test_missing_or_mismatched_depletion_event_is_detected(runs, change):
+        """F4: every depleted BurnEnded needs its PropellantDepleted immediately before."""
+        _, scenario, run = runs["m2_burn_to_depletion"]
+        if change == "delete":
+            events = [e for e in run.events if e.type != "PropellantDepleted"]
+        else:
+            events = _replace(run.events, lambda e: e.type == "PropellantDepleted", event_t_s=724.0)
+>       assert any("PropellantDepleted" in v for v in m2.check_event_order(scenario, events))
+E       assert False
+E        +  where False = any(<generator object test_missing_or_mismatched_depletion_event_is_detected.<locals>.<genexpr> at 0x1106c0930>)
+
+tests/test_m2_validation.py:628: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_missing_or_mismatched_depletion_event_is_detected[delete]
+1 failed in 5.42s

@@ -1,0 +1,70 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_baseline_verification_fails_closed_on_unreadable_records _________
+
+baseline = {'artifact': 'M2 approved reference snapshot (DR-0021 option A)', 'kind': 'baseline candidate', 'provenance': {'entryp..., 424944.09479826404, 6599124.328922474, 384789.98647103074, 485484.1382621217, ...]}, ...}, 'seed': 'ref'}, ...}, ...}
+
+    def test_baseline_verification_fails_closed_on_unreadable_records(baseline):
+        """A record the verifier cannot even evaluate (a missing part) is a problem, never
+        a crash and never a silent pass."""
+        data = _copy(baseline)
+        _key, rec = _first(data, "dop853.segment", "m2_prograde_burn/audit")
+        del rec["parts"]["anchor_ticks_m"]
+        problems = _verify(data)
+        assert any("verification raised" in p and "m2_prograde_burn/audit" in p for p in problems)
+        data = _copy(baseline)
+        _key, rec = _first(data, "o9.alignment_kepler", "m2_prograde_burn/o9")
+        del rec["parts"]["r_m"]
+>       assert any("verification raised" in p for p in _verify(data))
+E       assert False
+E        +  where False = any(<generator object test_baseline_verification_fails_closed_on_unreadable_records.<locals>.<genexpr> at 0x10f3bd630>)
+
+tests/test_reference_snapshot.py:672: AssertionError
+----------------------------- Captured stdout call -----------------------------
+  independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 2.13e-09
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 4.66e-06
+  independent agreement, max dop853 vs gmat m/s: 5.39e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max gmat node z m: 2.05e-08
+  independent agreement, max initial state rel: 0
+  independent agreement, max node z m: 2.17e-08
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 1.14e-09
+  independent agreement, max o6 kepler m/s: 1.36e-12
+  independent agreement, max o6 sma rel: 0
+  independent agreement, max simpson rel: 0
+  independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 2.13e-09
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 3.64e-06
+  independent agreement, max dop853 vs gmat m/s: 4.25e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max gmat node z m: 2.05e-08
+  independent agreement, max initial state rel: 0
+  independent agreement, max node z m: 2.17e-08
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 1.14e-09
+  independent agreement, max o6 kepler m/s: 1.36e-12
+  independent agreement, max o6 sma rel: 0
+  independent agreement, max simpson rel: 0
+=========================== short test summary info ============================
+FAILED tests/test_reference_snapshot.py::test_baseline_verification_fails_closed_on_unreadable_records
+1 failed, 56 deselected in 17.15s

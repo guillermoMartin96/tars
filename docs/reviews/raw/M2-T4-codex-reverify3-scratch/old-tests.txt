@@ -1,0 +1,57 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_______ test_unrepresentable_initial_orbit_is_a_validation_error[stop0] ________
+
+stop = {'duration_s': 10.0}
+
+    @pytest.mark.parametrize("stop", [{"duration_s": 10.0}, {"orbits": 1}])
+    def test_unrepresentable_initial_orbit_is_a_validation_error(stop):
+        """Re-verification 2, M1: a finite altitude whose r^3 overflows used to crash the
+        first gravity evaluation of a duration-stop run."""
+        data = {**_slice(), "commands": [], "stop": stop}
+        data["initial_orbit"] = {**data["initial_orbit"], "altitude_m": 1e103}
+>       with pytest.raises(ValidationError, match="not numerically representable"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValidationError
+
+../../tests/test_scenario_v2.py:393: Failed
+_______ test_unrepresentable_initial_orbit_is_a_validation_error[stop1] ________
+
+stop = {'orbits': 1}
+
+    @pytest.mark.parametrize("stop", [{"duration_s": 10.0}, {"orbits": 1}])
+    def test_unrepresentable_initial_orbit_is_a_validation_error(stop):
+        """Re-verification 2, M1: a finite altitude whose r^3 overflows used to crash the
+        first gravity evaluation of a duration-stop run."""
+        data = {**_slice(), "commands": [], "stop": stop}
+        data["initial_orbit"] = {**data["initial_orbit"], "altitude_m": 1e103}
+>       with pytest.raises(ValidationError, match="not numerically representable"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'not numerically representable'
+E         Actual message: "1 validation error for ScenarioV2\n  Value error, the orbits-stop tick limit is not representable [type=value_error, input_value={'schema_version': 2, 'na...mple_interval_s': 60.0}}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/value_error"
+
+../../tests/test_scenario_v2.py:393: AssertionError
+___ test_run_mission_rejects_unrepresentable_initial_orbit_without_traceback ___
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-18/test_run_mission_rejects_unrep0')
+
+    def test_run_mission_rejects_unrepresentable_initial_orbit_without_traceback(tmp_path):
+        from tests.conftest import M2_SLICE_SCENARIO
+    
+        data = json.loads(M2_SLICE_SCENARIO.read_text())
+        data.update(commands=[], stop={"duration_s": 10.0})
+        data["initial_orbit"]["altitude_m"] = 1e103
+        bad = tmp_path / "bad.json"
+        bad.write_text(json.dumps(data))
+        proc = _run("toolbox/scripts/run_mission.py", "--scenario", bad, "--out", tmp_path / "o")
+>       assert proc.returncode == 2 and "Traceback" not in proc.stderr
+E       AssertionError: assert (1 == 2)
+E        +  where 1 = CompletedProcess(args=['/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9b...n    return (-self.mu / r_norm**3) * r\n                       ~~~~~~^^~\nOverflowError: (34, \'Result too large\')\n').returncode
+
+../../tests/test_cli.py:296: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_scenario_v2.py::test_unrepresentable_initial_orbit_is_a_validation_error[stop0]
+FAILED tests/test_scenario_v2.py::test_unrepresentable_initial_orbit_is_a_validation_error[stop1]
+FAILED tests/test_cli.py::test_run_mission_rejects_unrepresentable_initial_orbit_without_traceback
+3 failed, 99 deselected in 0.45s

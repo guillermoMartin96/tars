@@ -1,0 +1,37 @@
+...F..                                                                   [100%]
+=================================== FAILURES ===================================
+________________ test_segment_must_start_at_the_requested_state ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c3c9eb0>
+
+    def test_segment_must_start_at_the_requested_state(monkeypatch):
+        def move_start(sol):
+            """Node 0 and the dense output at t = a moved together (reconciliation passes)."""
+            a = sol.t[0]
+            sol.y[0, 0] += 0.005
+            dense = sol.sol
+    
+            class Moved:
+                def __call__(self, t):
+                    out = dense(t)
+                    out[0, np.atleast_1d(t) == a] += 0.005
+                    return out
+    
+            sol.sol = Moved()
+    
+        _segment_probe(monkeypatch, move_start)
+        scenario = BY_NAME["m2_prograde_burn"].build()
+>       with pytest.raises(RuntimeError, match="first node"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE RuntimeError
+
+tests/test_gmat_m2.py:2090: Failed
+=============================== warnings summary ===============================
+tests/test_gmat_m2.py::test_overflowing_finite_velocities_are_rejected
+  /private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap14/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2803: RuntimeWarning: overflow encountered in multiply
+    s = (x.conj() * x).real
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_segment_must_start_at_the_requested_state
+1 failed, 5 passed, 175 deselected, 1 warning in 11.50s

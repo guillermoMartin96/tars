@@ -1,0 +1,558 @@
+FFFFFFFFF                                                                [100%]
+=================================== FAILURES ===================================
+________ test_returned_receipts_and_plans_are_fully_reconciled[command] ________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'command'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x108fcdb20>()
+
+tests/test_m2_validation.py:1040: AssertionError
+_____ test_returned_receipts_and_plans_are_fully_reconciled[schema_errors] _____
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'schema_errors'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x10a63ade0>()
+
+tests/test_m2_validation.py:1040: AssertionError
+________ test_returned_receipts_and_plans_are_fully_reconciled[detail] _________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'detail'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x108fcd760>()
+
+tests/test_m2_validation.py:1040: AssertionError
+_____ test_returned_receipts_and_plans_are_fully_reconciled[rejected_plan] _____
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'rejected_plan'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x10a63b740>()
+
+tests/test_m2_validation.py:1040: AssertionError
+_____ test_returned_receipts_and_plans_are_fully_reconciled[plan_ignition] _____
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'plan_ignition'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x108020360>()
+
+tests/test_m2_validation.py:1040: AssertionError
+____ test_returned_receipts_and_plans_are_fully_reconciled[plan_mass_flow] _____
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'plan_mass_flow'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x10a63ba60>()
+
+tests/test_m2_validation.py:1040: AssertionError
+______ test_returned_receipts_and_plans_are_fully_reconciled[plan_timing] ______
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'plan_timing'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x10a63aac0>()
+
+tests/test_m2_validation.py:1040: AssertionError
+___ test_returned_receipts_and_plans_are_fully_reconciled[final_plan_policy] ___
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'final_plan_policy'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+>           assert m2.check_result_consistency(variant, brun.events, tampered)
+E           AssertionError: assert []
+E            +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_prograde_burn_stop_inside_burn', description='Milestone 2 vertical slice (DR-001...eline', 'ignition_t_s': 600.0, 'direction': 'prograde', 'duration_s': 77.3, 'on_insufficient_propellant': 'reject'}),)), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn_stop_ins...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn_stop_inside_burn', description='Milestone 2 ver...23689461736918e-14), pending_plans=(), active_burn_id='burn#000001', pending_burn_ids=(), active_direction='prograde')))
+E            +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E            +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_prograde_burn_stop_ins...364345.88246594137], v=[-543.9378972817682, 4805.041218843849, 6062.453227638773], altitude_m=249999.99999450985), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn_stop_inside_burn', description='Milestone 2 ver...23689461736918e-14), pending_plans=(), active_burn_id='burn#000001', pending_burn_ids=(), active_direction='prograde')).events
+
+tests/test_m2_validation.py:1037: AssertionError
+_______ test_returned_receipts_and_plans_are_fully_reconciled[scenario] ________
+
+runs = {'m2_prograde_burn': (Mission(name='m2_prograde_burn', build=<function _load.<locals>.build at 0x108ecd9e0>, expected=...: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None))), ...}
+change = 'scenario'
+
+    @pytest.mark.parametrize(
+        "change",
+        ["command", "schema_errors", "detail", "rejected_plan", "plan_ignition", "plan_mass_flow",
+         "plan_timing", "final_plan_policy", "scenario"],
+    )  # fmt: skip
+    def test_returned_receipts_and_plans_are_fully_reconciled(runs, change):
+        """F16: complete receipts, every plan field, final-snapshot plans, scenario."""
+        _, scenario, run = runs["m2_invalid_commands"]
+        rec = run.receipts
+        acc = next(i for i, r in enumerate(rec) if r.plan is not None)
+        rej = next(i for i, r in enumerate(rec) if r.plan is None)
+    
+        def at(i, **kw):
+            return [dataclasses.replace(r, **kw) if j == i else r for j, r in enumerate(rec)]
+    
+        def plan(**kw):
+            return at(acc, plan=dataclasses.replace(rec[acc].plan, **kw))
+    
+        bad = {
+            "command": lambda: dataclasses.replace(run, receipts=at(acc, command=None)),
+            "schema_errors": lambda: dataclasses.replace(
+                run, receipts=at(rej, schema_errors=("x: y",))
+            ),
+            "detail": lambda: dataclasses.replace(run, receipts=at(rej, detail="fabricated")),
+            "rejected_plan": lambda: dataclasses.replace(run, receipts=at(rej, plan=rec[acc].plan)),
+            "plan_ignition": lambda: dataclasses.replace(run, receipts=plan(ignition_t_s=999.0)),
+            "plan_mass_flow": lambda: dataclasses.replace(run, receipts=plan(mass_flow_kgps=999.0)),
+            "plan_timing": lambda: dataclasses.replace(
+                run, receipts=plan(timing_delta_v_error_mps=999.0)
+            ),
+            "final_plan_policy": None,
+            "scenario": lambda: dataclasses.replace(run, scenario=BY_NAME["m2_prograde_burn"].build()),
+        }
+        if change == "final_plan_policy":
+            base = BY_NAME["m2_prograde_burn"].build()
+            variant = m2.boundary_variant(base, m2.BOUNDARY_CASES[0])
+            brun = run_scenario(variant)
+            fp = brun.final_propulsion
+            tampered = dataclasses.replace(
+                brun,
+                final_propulsion=dataclasses.replace(
+                    fp, active_plan=dataclasses.replace(fp.active_plan, policy="burn_to_depletion")
+                ),
+            )
+            assert m2.check_result_consistency(variant, brun.events, brun) == []
+            assert m2.check_result_consistency(variant, brun.events, tampered)
+            return
+        assert m2.check_result_consistency(scenario, run.events, run) == []
+>       assert m2.check_result_consistency(scenario, run.events, bad[change]())
+E       AssertionError: assert []
+E        +  where [] = <function check_result_consistency at 0x108f18220>(ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission (T5): invalid and ...eline', 'ignition_t_s': 1225.0, 'direction': 'prograde', 'duration_s': 10.0, 'on_insufficient_propellant': 'reject'}))), [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...], RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)))
+E        +    where <function check_result_consistency at 0x108f18220> = m2.check_result_consistency
+E        +    and   [SimulationStarted(schema_version=1, tick=0, t=0.0, type='SimulationStarted', scenario_name='m2_invalid_commands', sce..., on_insufficient_propellant='reject', commanded_ignition_t_s=3000.0, commanded_duration_s=5.0, schema_errors=()), ...] = RunResult(scenario=ScenarioV2(schema_version=2, name='m2_invalid_commands', description='Milestone 2 reference mission...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)).events
+E        +    and   RunResult(scenario=ScenarioV2(schema_version=2, name='m2_prograde_burn', description='Milestone 2 vertical slice (DR-0...te.IDLE: 'idle'>, active_plan=None, pending_plans=(), active_burn_id=None, pending_burn_ids=(), active_direction=None)) = <function test_returned_receipts_and_plans_are_fully_reconciled.<locals>.<lambda> at 0x10a6047c0>()
+
+tests/test_m2_validation.py:1040: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[command]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[schema_errors]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[detail]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[rejected_plan]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[plan_ignition]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[plan_mass_flow]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[plan_timing]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[final_plan_policy]
+FAILED tests/test_m2_validation.py::test_returned_receipts_and_plans_are_fully_reconciled[scenario]
+9 failed, 115 deselected in 14.01s

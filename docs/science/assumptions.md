@@ -6,18 +6,27 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 | ID | Title | Status | Applies to |
 |---|---|---|---|
 | SCI-0001 | Earth gravity is a Newtonian point mass | Active | M1 force model |
-| SCI-0002 | Restricted two-body: spacecraft is a massless point | Active | M1 dynamics |
+| SCI-0002 | Restricted two-body: spacecraft mass negligible relative to Earth | Revised (2026-10-09, DR-0011) | M1/M2 dynamics |
 | SCI-0003 | Earth-centred J2000-aligned frame treated as inertial | Active | M1 state/frame |
 | SCI-0004 | No perturbing forces (drag, SRP, third body, tides, relativity) | Active | M1 force model |
 | SCI-0005 | Earth constants from WGS 84 | Active | All physics |
 | SCI-0006 | Altitude measured above a spherical Earth | Active | Reporting/initial conditions |
 | SCI-0007 | Uniform simulation time from a labelled epoch | Active | Time propagation |
+| SCI-0008 | Ideal constant-thrust, constant-Isp engine; instantaneous on/off | Active (DR-0011) | M2 propulsion |
+| SCI-0009 | Standard gravity g0 = 9.80665 m/s² converts Isp to exhaust velocity | Active (DR-0011) | M2 propulsion |
+| SCI-0010 | Variable-mass equation of motion a = F/m (no ṁ·v term) | Active (DR-0011) | M2 dynamics |
+| SCI-0011 | Instantaneous ideal pointing through the centre of mass; no attitude dynamics | Active (DR-0011, DR-0012) | M2 thrust direction |
+| SCI-0012 | Single tank, all propellant usable, instantaneous flame-out at depletion | Active (DR-0011, DR-0014) | M2 propellant |
 
 ## Sources used throughout
 - **[NGA]** NGA.STND.0036_1.0.0_WGS84, *Department of Defense World Geodetic System 1984*, National Geospatial-Intelligence Agency, 2014. https://earth-info.nga.mil/GandG/wgs84/index.html
 - **[VAL]** D. A. Vallado, *Fundamentals of Astrodynamics and Applications*, 4th ed., Microcosm Press, 2013. Ch. 1–2 (two-body problem, Kepler's equation), Ch. 8–9 (perturbations).
-- **[CUR]** H. D. Curtis, *Orbital Mechanics for Engineering Students*, 3rd ed., Butterworth-Heinemann, 2014. Ch. 2–4 (two-body motion, orbital elements), Ch. 10 (perturbations).
+- **[CUR]** H. D. Curtis, *Orbital Mechanics for Engineering Students*, 3rd ed., Butterworth-Heinemann, 2014. Ch. 2–4 (two-body motion, orbital elements), Ch. 6 (orbital maneuvers, including non-impulsive), Ch. 10 (perturbations), Ch. 11 (rocket vehicle dynamics).
 - **[IERS]** G. Petit, B. Luzum (eds.), *IERS Conventions (2010)*, IERS Technical Note 36. Table 1.1 numerical standards; Ch. 2 reference frames.
+- **[SUT]** G. P. Sutton, O. Biblarz, *Rocket Propulsion Elements*, 9th ed., Wiley, 2017. Ch. 2 (specific impulse), ch. 4 (flight performance).
+- **[PM92]** A. R. Plastino, J. C. Muzzio, "On the use and abuse of Newton's second law for variable mass problems", *Celestial Mechanics and Dynamical Astronomy* 53, 227–232 (1992). doi:10.1007/BF00052611
+- **[NIST-gn]** NIST CODATA, standard acceleration of gravity g_n = 9.806 65 m s⁻² (exact). https://physics.nist.gov/cgi-bin/cuu/Value?gn
+- **[GMATMS]** GMAT R2026a Mathematical Specification (draft) §4.2.7; GMAT R2026a help pages `ChemicalThruster`, `ChemicalTank`.
 - **[GMATVV]** S. P. Hughes et al., *Verification and Validation of the General Mission Analysis Tool (GMAT)*, AIAA/AAS 2014. https://ntrs.nasa.gov/citations/20140017798. Documents GMAT Earth μ = 398600.4415 km³/s².
 
 ---
@@ -70,9 +79,9 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 
 ---
 
-# SCI-0002: Restricted two-body — spacecraft is a massless point
+# SCI-0002: Restricted two-body — spacecraft mass negligible relative to Earth (originally "spacecraft is a massless point")
 
-**Status:** Active  
+**Status:** Revised (2026-10-09, DR-0011; originally Active 2026-10-05)  
 **Introduced:** 2026-10-05  
 **Applies to:** M1 dynamics
 
@@ -80,6 +89,7 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 - The spacecraft's mass is negligible compared with Earth's. Earth's acceleration toward the spacecraft is ignored.
 - The equation of motion uses μ = G·M_Earth, not G(M_Earth + m).
 - The spacecraft is a point (no attitude, no extent).
+- **Revision (M2, DR-0011):** the spacecraft now has a finite, time-varying mass m = m_dry + m_prop. It is used only to compute thrust acceleration F/m (SCI-0010). The restricted two-body approximation for gravity is unchanged: μ = G·M_Earth, and Earth's reaction is neglected.
 
 ## Why we are making it
 For any spacecraft, m/M_Earth is of order 10⁻²¹, so the correction is far below numerical precision.
@@ -309,3 +319,199 @@ Not applicable.
 ## Related
 - DR: DR-0007
 - ADR: ADR-0002
+
+---
+
+# M2 propulsion assumptions
+
+Drafted at the M2 planning checkpoint and approved by the Tech Lead on 2026-10-09 (DR-0011, DR-0012, DR-0014).
+- Engine, tank and burn **values** are configurable reference-case parameters (DR-0010), not assumptions. The assumptions below concern the *model form*.
+- Numerical tolerances referenced as "per the approved M2 threshold DR" are **not yet set**: DR-0015 is conditionally approved, and REV-012 plus implementation measurements come first.
+
+# SCI-0008: Ideal constant-thrust, constant-Isp engine; instantaneous on/off
+
+**Status:** Active (approved via DR-0011, 2026-10-09)  
+**Introduced:** 2026-10-09  
+**Applies to:** M2 propulsion model
+
+## Assumption
+- While on, one engine delivers constant thrust F [N] at constant specific impulse Isp [s].
+- Thrust rises from zero to F and falls back instantaneously at ignition and cutoff.
+- There is no throttling, blow-down decay, minimum impulse bit, or pressure/temperature dependence.
+
+## Why we are making it
+- It gives exact analytic oracles: linear mass law and the rocket equation.
+- It matches GMAT `ChemicalThruster` with only C1 and K1 non-zero.
+
+## Sources
+- [SUT] ch. 2–4
+- [GMATMS] Eq. 4.112–4.115
+
+## Known limitations / expected error
+- Real start/stop transients last tens to hundreds of milliseconds. Pressure-fed systems lose thrust as the tank blows down.
+- For a 77 s burn, transients shift total impulse by an amount of order the transient time over the burn time. That is a sub-percent effect, not modelled.
+
+## Validation approach
+- O1 (mass law) and O2 (rocket equation), exact to round-off.
+- GMAT finite burn (VAL-0009).
+
+## Accepted discrepancy / tolerance
+Per the approved M2 threshold DR.
+
+## Revisit when
+- Throttling, pulse-mode attitude thrusters, or blow-down tanks are needed.
+
+## Related
+- DR-0011; VAL-0008, VAL-0009
+
+---
+
+# SCI-0009: Standard gravity converts Isp to exhaust velocity
+
+**Status:** Active (approved via DR-0011, 2026-10-09)  
+**Introduced:** 2026-10-09  
+**Applies to:** M2 propulsion model
+
+## Assumption
+- Effective exhaust velocity is c = Isp·g0 with **g0 = 9.80665 m/s²**, the exact standard acceleration of gravity.
+- Mass flow is ṁ = F/c.
+- g0 is a unit-conversion convention, not the local gravity (≈ 9.07 m/s² at 250 km).
+
+## Why we are making it
+- It is the definition used with published Isp values.
+
+## Sources
+- [NIST-gn]
+- [SUT] ch. 2
+
+## Known limitations / expected error
+- None for the definition itself.
+- **GMAT's `ChemicalThruster.GravitationalAccel` defaults to 9.81 m/s².** If not overridden, propellant use differs by 0.034% and the trajectory diverges by 7.85 m in the M2 probe (VAL-0009).
+
+## Validation approach
+- Single named constant `STANDARD_GRAVITY`, with a grep test like the WGS 84 constants test.
+- GMAT script configuration is checked exactly.
+
+## Accepted discrepancy / tolerance
+Zero: the constant must match exactly in reference comparisons.
+
+## Revisit when
+- Never for the definition. Revisit only if an engine data source quotes Isp in other units.
+
+## Related
+- DR-0011; VAL-0009
+
+---
+
+# SCI-0010: Variable-mass equation of motion a = F/m
+
+**Status:** Active (approved via DR-0011, 2026-10-09)  
+**Introduced:** 2026-10-09  
+**Applies to:** M2 dynamics
+
+## Assumption
+- The spacecraft's acceleration is the thrust force divided by the current total mass, plus gravity: v' = −μr/|r|³ + (F/m)û.
+- There is no ṁ·v term.
+
+## Why we are making it
+- This is the correct application of Newton's second law to a body that ejects mass. The exhaust momentum is already accounted for in the thrust F.
+- The form d(mv)/dt = F introduces a fictitious, frame-dependent force [PM92].
+
+## Sources
+- [PM92]
+- [CUR] ch. 11
+- [SUT] ch. 4
+
+## Known limitations / expected error
+- None within the point-mass model.
+- The GMAT Mathematical Specification (Eq. 4.2–4.3) is written in the d(mv)/dt form. GMAT's implementation was **measured** to integrate a = F/m (VAL-0009: SMA agreement 0.12 mm; the extra term would be about 0.95 m/s²).
+
+## Validation approach
+- O2 (rocket equation)
+- O3 (free-space closed form)
+- O9 (GMAT)
+
+## Accepted discrepancy / tolerance
+Per the approved M2 threshold DR.
+
+## Revisit when
+- Never for point-mass translational dynamics.
+
+## Related
+- DR-0011; VAL-0009
+
+---
+
+# SCI-0011: Instantaneous ideal pointing through the centre of mass
+
+**Status:** Active (approved via DR-0011, DR-0012, 2026-10-09)  
+**Introduced:** 2026-10-09  
+**Applies to:** M2 thrust direction
+
+## Assumption
+- Thrust acts exactly along the commanded direction, evaluated from the current state at every derivative evaluation: prograde = +v/|v|, retrograde = −v/|v|, using ECI velocity.
+- The line of action passes through the centre of mass.
+- There are no attitude dynamics, pointing errors, or torques.
+
+## Why we are making it
+- It defines "prograde" operationally, for an ideal attitude controller tracking the velocity vector.
+- It matches GMAT `Axes = VNB`.
+
+## Sources
+- [GMATMS] §4.2.7 (VNB)
+- [VAL] ch. 3
+
+## Known limitations / expected error
+- Real vehicles have pointing error and slew limits.
+- Holding the ignition direction instead changes SMA by 69 m for the M2 slice (VAL-0008), so the pointing model is material.
+
+## Validation approach
+- O7 sign/plane checks
+- O9 GMAT VNB comparison
+
+## Accepted discrepancy / tolerance
+Per the approved M2 threshold DR.
+
+## Revisit when
+- Attitude dynamics, inertial-hold burns, or out-of-plane maneuvers are introduced.
+
+## Related
+- DR-0012; VAL-0008
+
+---
+
+# SCI-0012: Single tank, all propellant usable, instantaneous flame-out
+
+**Status:** Active (approved via DR-0011, DR-0014, 2026-10-09)  
+**Introduced:** 2026-10-09  
+**Applies to:** M2 propellant accounting
+
+## Assumption
+- All loaded propellant is usable: no residuals, no ullage requirement, no mixture-ratio bookkeeping (one effective propellant mass).
+- When it reaches zero, thrust stops instantaneously at the exact depletion time t_ign + m_prop/ṁ. Propellant never goes negative.
+
+## Why we are making it
+- It is the simplest physically consistent depletion behavior.
+- It is exactly computable in advance, so integration steps can be split there.
+
+## Sources
+- [SUT] ch. 4 (propellant budget concepts)
+- GMAT `ChemicalTank` documentation: GMAT raises an exception at depletion by default rather than modelling flame-out.
+
+## Known limitations / expected error
+- Real systems keep unusable residuals (typically a few percent) and sputter near depletion.
+- Not GMAT-validatable (VAL-0009 finding 4); validated analytically only.
+
+## Validation approach
+- O1 at depletion
+- Mission test `burn_to_depletion`
+
+## Accepted discrepancy / tolerance
+- Exact to round-off for the depletion time and propellant floor.
+- **DR-0017 D1a (2026-10-10):** event times are float64. A depletion cutoff is the latest representable time not after depletion, so a burn-to-depletion can leave a residual of at most ṁ·2·ulp(cutoff). The residual is retained, not discarded, and its Δv effect is bounded by the DR-0017 timing budget (1e-7 m/s per burn). At mission times the residual is ~1e-14 kg.
+
+## Revisit when
+- Residual budgets, multiple tanks, or bipropellant mixture ratios matter.
+
+## Related
+- DR-0011, DR-0014

@@ -1,0 +1,14 @@
+import importlib.util
+from pathlib import Path
+from unittest.mock import patch
+s=importlib.util.spec_from_file_location('tests_gmat','tests/test_gmat_m2.py'); t=importlib.util.module_from_spec(s); s.loader.exec_module(t)
+original=Path.read_text
+hits=[]
+def edited(self,*a,**k):
+ text=original(self,*a,**k)
+ if self.name=='m2_proof.py':
+  hits.append(str(self)); text=text.replace('m2.worst(dst.get(k, -math.inf), x)','max(dst.get(k, -math.inf), x)')
+ return text
+with patch.object(Path,'read_text',edited):
+ t.test_no_builtin_max_or_min_accumulators_in_the_validators()
+print('Static guard PASSES with original F19 builtin max restored:',hits)

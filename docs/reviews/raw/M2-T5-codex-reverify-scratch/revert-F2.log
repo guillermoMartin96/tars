@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_premature_success_fails_outcomes_and_o4 _________________
+
+    def test_premature_success_fails_outcomes_and_o4():
+        """F2: a run that stops early is judged at the scenario's requested horizon."""
+        mission = BY_NAME["m2_prograde_burn"]
+        scenario = mission.build()
+        raw = scenario.model_dump(mode="json")
+        raw["stop"] = {"duration_s": 3000.0}
+        short = run_scenario(ScenarioV2.model_validate(raw))
+        predicted = m2.predict_burns(scenario, mission.expected)
+>       assert any("scenario stop" in v for v in m2.check_outcomes(scenario, short.events, predicted))
+E       assert False
+E        +  where False = any(<generator object test_premature_success_fails_outcomes_and_o4.<locals>.<genexpr> at 0x105780040>)
+
+tests/test_m2_validation.py:580: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_m2_validation.py::test_premature_success_fails_outcomes_and_o4
+1 failed in 0.15s

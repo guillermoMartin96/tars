@@ -1,0 +1,64 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____________________ test_threshold_files_are_authenticated ____________________
+
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-178/test_threshold_files_are_authe0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x107f4e570>
+
+    def test_threshold_files_are_authenticated(tmp_path, monkeypatch):
+        """F33: finite but inflated limits (1e100) are rejected by the pinned digest, by
+        default, wherever the file is read from."""
+        from tars.validation import thresholds as thresholds_module
+        from tars.validation.thresholds import M1_THRESHOLDS, load_scoped_thresholds, load_thresholds
+    
+        inflated = tmp_path / "m2.json"
+        inflated.write_text(
+            M2_THRESHOLDS.read_text().replace(
+                '"final_position_error_m": 0.6', '"final_position_error_m": 1e100'
+            )
+        )
+>       with pytest.raises(ValueError, match="not the approved file"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:1554: Failed
+______________ test_inflated_thresholds_cannot_pass_wrong_physics ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x107f6a090>
+tmp_path = PosixPath('/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-178/test_inflated_thresholds_canno0')
+
+    @pytest.mark.slow
+    def test_inflated_thresholds_cannot_pass_wrong_physics(monkeypatch, tmp_path):
+        """F33 integrated: the thrust x (1 + 1e-5) mutant fails O9; with an inflated
+        threshold file the evaluation is rejected instead of passing."""
+        from tars.validation import thresholds as thresholds_module
+    
+        original = simulator_module.thrust_acceleration
+        monkeypatch.setattr(
+            simulator_module, "thrust_acceleration", lambda *a: original(*a) * (1 + 1e-5)
+        )
+        cli = _cli()
+        _, check = cli._evaluate("m2_prograde_burn")
+        assert check is None or not check.passed
+        data = json.loads(M2_THRESHOLDS.read_text())
+        for group in data["limits"].values():
+            for scope in group.values():
+                for k in scope:
+                    scope[k] = 1e100
+        inflated = tmp_path / "m2.json"
+        inflated.write_text(json.dumps(data))
+        monkeypatch.setattr(thresholds_module, "M2_THRESHOLDS", inflated)
+        monkeypatch.setattr(
+            cli,
+            "load_scoped_thresholds",
+            lambda **kw: thresholds_module.load_scoped_thresholds(inflated, **kw),
+        )
+>       with pytest.raises(ValueError, match="not the approved file"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_gmat_m2.py:1597: Failed
+=========================== short test summary info ============================
+FAILED tests/test_gmat_m2.py::test_threshold_files_are_authenticated - Failed...
+FAILED tests/test_gmat_m2.py::test_inflated_thresholds_cannot_pass_wrong_physics
+2 failed, 157 deselected in 8.37s

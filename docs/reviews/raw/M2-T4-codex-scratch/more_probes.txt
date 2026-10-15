@@ -1,0 +1,10 @@
+SUBCLASS direct rejected runner accepted
+HASH bytes/str identical True
+WITH_DT ValidationError ["  Value error, max_duration_periods applies only to an orbits stop [type=value_error, input_value={'orbits': None, 'max_dur...1.1, 'duration_s': 30.0}, input_type=dict]", '    For further information visit https://errors.pydantic.dev/2.13/v/value_error']
+back_to_back [('BurnStarted', 1, 1.0, 'burn#000001'), ('BurnEnded', 1, 3.0, 'burn#000001'), ('BurnStarted', 1, 3.0, 'burn#000002'), ('BurnEnded', 1, 7.0, 'burn#000002')] idle
+stop_ignition [('BurnStarted', 3, 30.0, 'burn#000001')] burning
+stop_cutoff [('BurnStarted', 2, 20.0, 'burn#000001'), ('BurnEnded', 3, 30.0, 'burn#000001')] idle
+stop_active [('BurnStarted', 2, 20.0, 'burn#000001')] burning
+stop_pending [] scheduled
+ESCAPE escape 1 ['slice-prograde-001'] 0
+REPLAY True

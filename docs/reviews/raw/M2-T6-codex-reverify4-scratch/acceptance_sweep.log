@@ -1,0 +1,14 @@
+old-values {"rejected": ["history record 0: implausible generated_utc", "history record 0: invalid revision", "history record 0: missing reason", "history record 0: invalid report digest"], "passed": false}
+unknown {"rejected": ["history record 12: unknown mission 'invented'"], "passed": false}
+delete {"rejected": ["history record 0: chain broken"], "passed": false}
+reorder {"rejected": ["history record 1: out of chronological order"], "passed": false}
+chain-edit {"rejected": ["history record 1: chain broken"], "passed": false}
+rewrite-limit {"rejected": [], "passed": true}
+mandatory threshold deletions rejected: 47
+/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap5/.venv/lib/python3.12/site-packages/pydantic/main.py:542: UserWarning: Pydantic serializer warnings:
+  PydanticSerializationUnexpectedValue(Expected `list[float]` - serialized value may not be as expected [field_name='r', input_value=(nan, nan, nan), input_type=tuple])
+  return self.__pydantic_serializer__.to_json(
+event r {"rejected": ["simulator audit event_order: event 5 StateSampled: invalid against the schema (ValidationError)", "simulator audit identities: returned samples differ from StateSampled events", "simulator audit orbit_events_contract: tick 6: altitude_m != |r| - R", "simulator audit o4_reference: sample_position_error_max_m=inf > 0.6", "simulator audit o5_coast_kepler: coast_position_error_max_m=inf > 0.6"], "passed": null}
+event total_mass_kg {"rejected": ["simulator audit event_order: event 29 PropulsionSampled: invalid against the schema (ValidationError)", "simulator audit identities: tick 64: total mass != dry + propellant"], "passed": null}
+event thrust_acceleration_mps2 {"rejected": ["simulator audit event_order: event 29 PropulsionSampled: invalid against the schema (ValidationError)", "simulator audit o4_reference: thrust_direction_vs_reference_max=inf > 4e-10"], "passed": null}
+event delta_v_sensed_mps {"rejected": ["simulator audit accounting: sample_delta_v_excess_over_simpson_rel_max=33.6417 > 1e-12"], "passed": null}

@@ -1,0 +1,64 @@
+........................................................................ [ 28%]
+........................................................................ [ 56%]
+........................................................................ [ 85%]
+...............................F..F...                                   [100%]
+=================================== FAILURES ===================================
+_ test_timing_error_is_never_underestimated_at_arithmetic_extremes[1e-280-1e+20-1e-310-1e-310-1e-11-1.0000000000000004e-11] _
+
+thrust = 1e-280, c = 1e+20, dry = 1e-310, prop = 1e-310, intended = 1e-11
+executed = 1.0000000000000004e-11
+
+    @pytest.mark.parametrize(
+        ("thrust", "c", "dry", "prop", "intended", "executed"),
+        [
+            # F1 cancellation (reviewer): huge tank, small dry mass, end mass ill-conditioned
+            (3e-7, 3e-7, 3.0, 1e16, 9999999999999998.0, 9999999999999996.0),
+            # F1 underflow (reviewer): subnormal masses, mdot * dt underflows
+            (1e-280, 1e20, 1e-310, 1e-310, 1e-11, 1.0000000000000004e-11),
+            # cancellation where an unslackened end mass underestimates by ~38 % (found by
+            # seeded search; the slack in the end-mass lower bound is required)
+            (
+                0.0012764678484075565,
+                0.0008405601224338024 * STANDARD_GRAVITY,
+                0.32186917193715897,
+                7.460733292860184e16,
+                4.81793673421924e17,
+                4.817936734219239e17,
+            ),
+            # dt underflow with ordinary vehicle (error is genuinely negligible)
+            (490.0, 312.0 * 9.80665, DRY, PROP, 5e-324, 1e-323),
+        ],
+    )
+    def test_timing_error_is_never_underestimated_at_arithmetic_extremes(
+        thrust, c, dry, prop, intended, executed
+    ):
+        engine = EngineSpec(thrust_n=thrust, isp_s=c / STANDARD_GRAVITY)
+        got = timing_delta_v_error_mps(engine, dry, prop, intended, executed)
+        exact = _exact_timing_dv_error(engine, dry, prop, intended, executed)
+        assert not math.isnan(got)
+>       assert Decimal(got) >= exact * (1 - Decimal("1e-15"))
+E       AssertionError: assert Decimal('0') >= (Decimal('2550.92705351469065341736459184667932265792125784344616304776') * (1 - Decimal('1E-15')))
+E        +  where Decimal('0') = Decimal(0.0)
+E        +  and   Decimal('1E-15') = Decimal('1e-15')
+
+tests/test_simulator_propulsion.py:981: AssertionError
+____ test_reviewer_over_budget_configurations_are_rejected_by_the_simulator ____
+
+    def test_reviewer_over_budget_configurations_are_rejected_by_the_simulator():
+        """F1: both reviewer reproductions were accepted by schedule_burn; one executed."""
+        cases = [
+            (EngineSpec(3e-7, 3e-7 / STANDARD_GRAVITY), 3.0, 1e16, 3.0, 9999999999999998.0),
+            (EngineSpec(1e-280, 1e20 / STANDARD_GRAVITY), 1e-310, 1e-310, 1e-10, 1e-11),
+        ]
+        for engine, dry, prop, ignition, duration in cases:
+            sc = SpacecraftSpec(dry_mass_kg=dry, engine=engine, tank=TankSpec(propellant_kg=prop))
+            sim = Simulator(np.zeros(3), np.array([1.0, 0, 0]), _ZeroForce(), RK4(), 1.0, spacecraft=sc)
+>           with pytest.raises(BurnRejectedError) as err:
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE BurnRejectedError
+
+tests/test_simulator_propulsion.py:993: Failed
+=========================== short test summary info ============================
+FAILED tests/test_simulator_propulsion.py::test_timing_error_is_never_underestimated_at_arithmetic_extremes[1e-280-1e+20-1e-310-1e-310-1e-11-1.0000000000000004e-11]
+FAILED tests/test_simulator_propulsion.py::test_reviewer_over_budget_configurations_are_rejected_by_the_simulator
+2 failed, 252 passed in 1.63s

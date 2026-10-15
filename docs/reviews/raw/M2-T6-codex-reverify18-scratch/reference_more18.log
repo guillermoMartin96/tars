@@ -1,0 +1,38 @@
+RUN overflow_velocity_probe
+/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap19/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2803: RuntimeWarning: overflow encountered in multiply
+  s = (x.conj() * x).real
+rejected DOP853 stencil velocity inconsistent on [0.0, 60.0] {'nodes': 3, 'dense': 18}
+RUN anchor_phase
+Traceback (most recent call last):
+  File "review_scratch/anchor_phase.py", line 5, in <module>
+    runpy.run_path(
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "docs/reviews/raw/M2-T6-codex-reverify13-scratch/anchor_phase.py", line 44, in <module>
+    print("clean", evaluate(), flush=True)
+                   ^^^^^^^^^^
+  File "docs/reviews/raw/M2-T6-codex-reverify13-scratch/anchor_phase.py", line 39, in evaluate
+    _, ref = m2.reference_metrics(scenario, run.events, predicted)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap19/src/tars/validation/m2.py", line 1321, in reference_metrics
+    ref = dop853_reference(scenario, r0, v0, predicted, marks)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap19/src/tars/validation/m2.py", line 1218, in dop853_reference
+    _check_dense_consistency(sol, ticks, dense, y, b, f"[{a}, {b}]", veh, predicted)
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap19/src/tars/validation/m2.py", line 1033, in _check_dense_consistency
+    raise RuntimeError(f"DOP853 stencil velocity inconsistent on {where}")
+RuntimeError: DOP853 stencil velocity inconsistent on [0.0, 60.0]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-actually-splash-f90f9ba4/70aaf0ee-578a-4f8e-b31a-278306be87a9/scratchpad/t6-snap19/review_scratch/reference_probes18.py", line 6, in <module>
+    runpy.run_path("review_scratch/"+name+".py",run_name="__main__")
+  File "<frozen runpy>", line 287, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "review_scratch/anchor_phase.py", line 9, in <module>
+    assert "anchor tick positions disagree" in str(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -1,0 +1,83 @@
+exec(open('review_scratch/adversarial.py.txt').read().split('class Serializer:')[0])
+import builtins
+import json
+from pathlib import Path
+from tars.events import parse_event, to_jsonl, read_jsonl
+from pydantic import BaseModel
+count = 0
+
+def check(name, payload, control=None):
+    global count
+    s = _sim(); before = fingerprint(s)
+    try:
+        r = s.submit(payload)
+    except BaseException as exc:
+        assert control is not None and type(exc) is control, (name, type(exc))
+        assert fingerprint(s) == before
+        print(name, 'PROPAGATES', type(exc).__name__, 'ATOMIC')
+    else:
+        assert control is None, name
+        if r.reason: assert fingerprint(s) == before, name
+        else:
+            assert type(r.command) is BurnCommand and r.command is not payload
+            assert all(type(v) in (str, int, float) for v in r.command.__dict__.values())
+        ev = command_event(r)
+        assert parse_event(ev.model_dump_json()) == ev
+        print(name, r.status.value, r.reason, 'SERIALIZABLE')
+    count += 1
+
+class Bomb:
+    def __bool__(self): raise RuntimeError('bool')
+    def __repr__(self): raise RuntimeError('repr')
+
+for slot in ('__pydantic_extra__','__pydantic_fields_set__','__pydantic_private__'):
+    for value in (None, {}, {'injected': []}, [], Bomb()):
+        p = BurnCommand(**_cmd()); object.__setattr__(p, slot, value)
+        check(slot + ':' + type(value).__name__, p)
+for key, value in [('duration_s', 'bad'), ('issuer', []), ('schema_version', True), ('duration_s',float('nan')), ('command_id', 'bad#')]:
+    for method in ('setattr','dict'):
+        p = BurnCommand(**_cmd())
+        if method == 'setattr': object.__setattr__(p,key,value)
+        else: p.__dict__[key] = value
+        check('field-tamper:'+method+':'+key,p)
+p=BurnCommand(**_cmd()); object.__setattr__(p,'__dict__',{'command_id':'x'}); check('replace-dict-missing',p)
+p=BurnCommand(**_cmd()); p.__dict__['extra']=1; check('dict-extra',p)
+class Sub(BurnCommand): pass
+p=BurnCommand(**_cmd()); object.__setattr__(p,'__class__',Sub); check('class-to-sub',p)
+p=Sub(**_cmd()).model_copy(update={'issuer':[]}); object.__setattr__(p,'__class__',BurnCommand); check('class-to-exact-invalid',p)
+p=Sub(**_cmd()); object.__setattr__(p,'__class__',BurnCommand); check('class-to-exact-valid',p)
+for typ in (str,int,float):
+    cls=type('Sub'+typ.__name__,(typ,),{})
+    check('subclass-value:'+typ.__name__,_cmd(**{'issuer' if typ is str else 'duration_s':cls('ok' if typ is str else 1)}))
+    check('subclass-key:'+typ.__name__,_cmd()|{cls('extra' if typ is str else 2):1})
+for value in (True, False, float('nan'), 10**10000):
+    check('key:'+type(value).__name__,_cmd()|{value:1})
+    check('value:'+type(value).__name__,_cmd(duration_s=value))
+
+# Exercise every built-in ordinary exception class at both copying hooks.
+exceptions = sorted({c for c in vars(builtins).values() if isinstance(c,type) and issubclass(c,Exception)}, key=lambda c:c.__name__)
+for exc in exceptions + [KeyboardInterrupt,SystemExit,GeneratorExit]:
+    control = exc if not issubclass(exc,Exception) else None
+    for stage in ('iter','getitem','len'):
+        class HostileMap(Mapping):
+            def __iter__(self):
+                if stage=='iter': raise exc()
+                return iter(_cmd())
+            def __getitem__(self,k):
+                if stage=='getitem': raise exc()
+                return _cmd()[k]
+            def __len__(self):
+                if stage=='len': raise exc()
+                return len(_cmd())
+        # dict(Mapping) does not consult __len__; pin that no hostile len is called.
+        check('mapping:'+stage+':'+exc.__name__,HostileMap(),control if stage != 'len' else None)
+
+p=BurnCommand(**_cmd()); r=_sim().submit(p)
+p.__dict__.clear(); object.__setattr__(p,'__pydantic_private__',Bomb())
+assert r.command.duration_s == 77.3
+assert parse_event(command_event(r).model_dump_json()) == command_event(r)
+print('post-acceptance-tamper CANONICAL COPY SAFE')
+events=list(_sample_events().values())+[spacecraft_configured_event(SpacecraftSpec(DRY,ENGINE,TankSpec(PROP)),tick=0,t=0.)]
+# The full seven-event + M1 stream is covered in probe_more.
+Path('review_scratch/schemas.json').write_text(json.dumps({e.type:e.__class__.model_json_schema() for e in events}|{'BurnCommand':BurnCommand.model_json_schema()},sort_keys=True))
+print('BOUNDARY CASES',count,'ALL PASS')
