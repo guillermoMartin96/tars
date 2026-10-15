@@ -12,6 +12,8 @@ The repository has no multi-milestone roadmap document. Milestones are authorize
 
 ## Known forward requirements (recorded, not authorized)
 These are the only forward-looking commitments on record. They are not a roadmap: milestone objectives beyond M2 have not been defined in this repository.
+
+**Source:** the Tech Lead's instruction "TARS — M2 Final Acceptance and M3 Planning Authorization" (2026-10-15), sections B (architectural direction) and C (M5 requirement). The architectural decisions are recorded in full in ADR-0008, "Tech Lead decisions", and RES-0001 §12, on branch `research/flight-software-architecture` (commit `27ad862`). That branch is not merged; merging it needs separate approval.
 - **M5 (Tech Lead, 2026-10-15):** develop the Mission Laboratory alongside AI Navigator capabilities: isolated mission forks, maneuver comparisons and safe recommendations. Earlier milestones must not implement M5 capabilities.
 - **Architectural direction (Tech Lead, 2026-10-15; ADR-0008, on the research branch until merged separately):**
   - Python remains the validated simulation reference.

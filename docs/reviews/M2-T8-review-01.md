@@ -79,3 +79,20 @@ Verified:
 - [x] No Critical or High finding raised; none open
 
 **T8 review closed: PASS (unconditional).** The reviewer also states that M2 is ready for the Tech Lead's final milestone review. Completion remains the Tech Lead's decision.
+
+## Round 3 — pre-merge check of the Tech Lead acceptance commit
+**Reviewer:** Codex, session `01a140f4-cd5e-7e62-85a7-d76e82a671cf`, at `d5a5c28` (git clone). **Prompt:** `raw/M2-T8-codex-review03-prompt.md`. **Raw:** `raw/M2-T8-codex-review03.md`.
+
+**Verdict: PASS (unconditional).** The reviewer independently satisfied acceptance conditions 1, 2, 3, 5 and 6. Condition 4 (CI) is the implementer's.
+- **Condition 1:** the PR diff is M2 work and records. `3dfffb3` changes exactly the four records; later commits only add or revise the round-3 prompt.
+- **Condition 2:** protected paths are unchanged since `963dbe7`; all five sha256 pins match; all 24 existing M1 assets are byte-identical to `origin/main`.
+- **Condition 3:** the fresh M2 Proof gives 228/228, matching the committed evidence check by check. The evidence log names `017d7f6`, and only records changed after it.
+- **Condition 5:** round 2 records an unconditional PASS, and no blocking finding is open.
+- **Condition 6:** the working tree is clean, before and after the review.
+- **DR-0015:** the approval is supported by VAL-0010/DR-0016 and VAL-0013…0017/DR-0023. Residual risks and margins are unchanged. The records do not claim the merge has happened.
+
+| # | Sev. | Finding | Disposition | Resolution |
+|---|---|---|---|---|
+| T8-F6 | Low (non-blocking) | The new M5 and architectural-direction statements in `docs/milestones/README.md` cannot be corroborated from the snapshot | **ACCEPTED** | The README now cites its source: the Tech Lead's instruction of 2026-10-15 (sections B and C). The architectural decisions are recorded in ADR-0008 and RES-0001 §12 on `research/flight-software-architecture` (`27ad862`), which stays unmerged pending separate approval. |
+
+**T8 review gate: PASS.** No Critical or High finding was raised in any round, and none is open.
