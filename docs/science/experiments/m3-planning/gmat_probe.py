@@ -57,8 +57,15 @@ def cof(gm: float, radius: float, c20: float) -> str:
     )
 
 
-def script(epoch: str, cof_path: str, degree: int, drag: bool, flattening: float | None, report: str,
-           toe_a1mjd: float | None = None) -> str:
+def script(
+    epoch: str,
+    cof_path: str,
+    degree: int,
+    drag: bool,
+    flattening: float | None,
+    report: str,
+    toe_a1mjd: float | None = None,
+) -> str:
     r, v = [float(x) for x in pe.R0 / 1000.0], [float(x) for x in pe.V0 / 1000.0]
     lines = [
         "GMAT Earth.Mu = 398600.4418;",
@@ -71,16 +78,24 @@ def script(epoch: str, cof_path: str, degree: int, drag: bool, flattening: float
         # True-of-epoch axes fixed at the scenario epoch: GMAT's J2 axis at the epoch is then
         # (up to polar motion and pole drift during the run) this frame's z axis.
         cs = "TOE"
-        lines += ["Create CoordinateSystem TOE;", "GMAT TOE.Origin = Earth;", "GMAT TOE.Axes = TOEEq;",
-                  f"GMAT TOE.Epoch = {toe_a1mjd!r};"]
+        lines += [
+            "Create CoordinateSystem TOE;",
+            "GMAT TOE.Origin = Earth;",
+            "GMAT TOE.Axes = TOEEq;",
+            f"GMAT TOE.Epoch = {toe_a1mjd!r};",
+        ]
     lines += [
         "Create Spacecraft Sat;",
         "GMAT Sat.DateFormat = TTGregorian;",
         f"GMAT Sat.Epoch = '{epoch}';",
         f"GMAT Sat.CoordinateSystem = {cs};",
         "GMAT Sat.DisplayStateType = Cartesian;",
-        f"GMAT Sat.X = {r[0]!r};", f"GMAT Sat.Y = {r[1]!r};", f"GMAT Sat.Z = {r[2]!r};",
-        f"GMAT Sat.VX = {v[0]!r};", f"GMAT Sat.VY = {v[1]!r};", f"GMAT Sat.VZ = {v[2]!r};",
+        f"GMAT Sat.X = {r[0]!r};",
+        f"GMAT Sat.Y = {r[1]!r};",
+        f"GMAT Sat.Z = {r[2]!r};",
+        f"GMAT Sat.VX = {v[0]!r};",
+        f"GMAT Sat.VY = {v[1]!r};",
+        f"GMAT Sat.VZ = {v[2]!r};",
         "GMAT Sat.DryMass = 850.0;",
         "GMAT Sat.DragArea = 15.0;",
         "GMAT Sat.Cd = 2.2;",
@@ -133,8 +148,13 @@ def run_case(tmp: Path, name: str, **kw) -> np.ndarray:
     (HERE / "gmat_scripts" / f"{name}.script").write_text(
         text.replace(str(tmp), "<tmp>").replace(str(CONSOLE.parent.parent), "<GMAT>")
     )
-    proc = subprocess.run([str(CONSOLE), "--run", str(path)], cwd=CONSOLE.parent,
-                          capture_output=True, text=True, timeout=1800)
+    proc = subprocess.run(
+        [str(CONSOLE), "--run", str(path)],
+        cwd=CONSOLE.parent,
+        capture_output=True,
+        text=True,
+        timeout=1800,
+    )
     if proc.returncode != 0 or not report.exists():
         raise RuntimeError(f"{name}: GMAT failed\n{proc.stdout[-3000:]}\n{proc.stderr[-2000:]}")
     rows = [list(map(float, ln.split())) for ln in report.read_text().splitlines() if ln.strip()]
@@ -145,10 +165,21 @@ def run_case(tmp: Path, name: str, **kw) -> np.ndarray:
 
 def main() -> None:
     import hashlib, platform
-    version = subprocess.run([str(CONSOLE), "--version"], cwd=CONSOLE.parent, capture_output=True, text=True).stdout
-    results = {"gmat_console_sha256": hashlib.sha256(CONSOLE.read_bytes()).hexdigest(),
-               "gmat_version_output": [ln.strip() for ln in version.splitlines() if "Build Date" in ln or "Console Application" in ln],
-               "host": platform.platform(), "t_end_s": T_END, "cases": {}}
+
+    version = subprocess.run(
+        [str(CONSOLE), "--version"], cwd=CONSOLE.parent, capture_output=True, text=True
+    ).stdout
+    results = {
+        "gmat_console_sha256": hashlib.sha256(CONSOLE.read_bytes()).hexdigest(),
+        "gmat_version_output": [
+            ln.strip()
+            for ln in version.splitlines()
+            if "Build Date" in ln or "Console Application" in ln
+        ],
+        "host": platform.platform(),
+        "t_end_s": T_END,
+        "cases": {},
+    }
     py = {}
     mu, re = pe.MU_WGS84, pe.RE_WGS84
     j2 = -math.sqrt(5.0) * C20_EGM2008_TF
@@ -158,9 +189,14 @@ def main() -> None:
     py["j2_z"] = pe.dop(pe.make_accel(mu, re, j2=j2), pe.R0, pe.V0, T_END).y[:, -1]
     py["j2_jgm3_constants_z"] = pe.dop(
         pe.make_accel(3.986004415e14, 6378136.3, j2=-math.sqrt(5.0) * -4.84165374886470e-04),
-        pe.R0, pe.V0, T_END).y[:, -1]
+        pe.R0,
+        pe.V0,
+        T_END,
+    ).y[:, -1]
     py["drag_sph_z"] = pe.dop(pe.make_accel(mu, re, drag=b), pe.R0, pe.V0, T_END).y[:, -1]
-    py["drag_geod_z"] = pe.dop(pe.make_accel(mu, re, drag=b, altitude="geodetic"), pe.R0, pe.V0, T_END).y[:, -1]
+    py["drag_geod_z"] = pe.dop(
+        pe.make_accel(mu, re, drag=b, altitude="geodetic"), pe.R0, pe.V0, T_END
+    ).y[:, -1]
 
     e2026, e2000 = "01 Jan 2026 00:00:00.000", "01 Jan 2000 12:00:00.000"
     # A1 = TT - 32.184 s + 0.0343817 s (GMAT A1 definition); GMAT ModJulian = JD - 2430000.
@@ -172,26 +208,119 @@ def main() -> None:
         (tmp / "zero_fileGM415.cof").write_text(cof(3.986004415e14, 6378137.0, 0.0))
         (tmp / "zero_wgs84.cof").write_text(cof(3.986004418e14, 6378137.0, 0.0))
         cases = {
-            "j2_jgm3_2026": (dict(epoch=e2026, cof_path=jgm3, degree=2, drag=False, flattening=None), "j2_jgm3_constants_z"),
-            "j2_custom_2026": (dict(epoch=e2026, cof_path=str(tmp / "j2.cof"), degree=2, drag=False, flattening=None), "j2_z"),
-            "j2_custom_2000": (dict(epoch=e2000, cof_path=str(tmp / "j2.cof"), degree=2, drag=False, flattening=None), "j2_z"),
-            "c20zero_fileGM415": (dict(epoch=e2026, cof_path=str(tmp / "zero_fileGM415.cof"), degree=2, drag=False, flattening=None), "kepler_gm415"),
-            "drag_sph_2026": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=0.0), "drag_sph_z"),
-            "drag_geod_2026": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=None), "drag_geod_z"),
-            "j2_custom_2026_TOE": (dict(epoch=e2026, cof_path=str(tmp / "j2.cof"), degree=2, drag=False, flattening=None, toe_a1mjd=a1_2026), "j2_z"),
-            "drag_sph_2026_TOE": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=0.0, toe_a1mjd=a1_2026), "drag_sph_z"),
-            "drag_geod_2026_TOE_defaultf": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=None, toe_a1mjd=a1_2026), "drag_geod_z"),
-            "drag_geod_2026_TOE_wgs84f": (dict(epoch=e2026, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=pe.F_WGS84, toe_a1mjd=a1_2026), "drag_geod_z"),
-            "drag_sph_2000": (dict(epoch=e2000, cof_path=str(tmp / "zero_wgs84.cof"), degree=0, drag=True, flattening=0.0), "drag_sph_z"),
+            "j2_jgm3_2026": (
+                dict(epoch=e2026, cof_path=jgm3, degree=2, drag=False, flattening=None),
+                "j2_jgm3_constants_z",
+            ),
+            "j2_custom_2026": (
+                dict(
+                    epoch=e2026, cof_path=str(tmp / "j2.cof"), degree=2, drag=False, flattening=None
+                ),
+                "j2_z",
+            ),
+            "j2_custom_2000": (
+                dict(
+                    epoch=e2000, cof_path=str(tmp / "j2.cof"), degree=2, drag=False, flattening=None
+                ),
+                "j2_z",
+            ),
+            "c20zero_fileGM415": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "zero_fileGM415.cof"),
+                    degree=2,
+                    drag=False,
+                    flattening=None,
+                ),
+                "kepler_gm415",
+            ),
+            "drag_sph_2026": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "zero_wgs84.cof"),
+                    degree=0,
+                    drag=True,
+                    flattening=0.0,
+                ),
+                "drag_sph_z",
+            ),
+            "drag_geod_2026": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "zero_wgs84.cof"),
+                    degree=0,
+                    drag=True,
+                    flattening=None,
+                ),
+                "drag_geod_z",
+            ),
+            "j2_custom_2026_TOE": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "j2.cof"),
+                    degree=2,
+                    drag=False,
+                    flattening=None,
+                    toe_a1mjd=a1_2026,
+                ),
+                "j2_z",
+            ),
+            "drag_sph_2026_TOE": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "zero_wgs84.cof"),
+                    degree=0,
+                    drag=True,
+                    flattening=0.0,
+                    toe_a1mjd=a1_2026,
+                ),
+                "drag_sph_z",
+            ),
+            "drag_geod_2026_TOE_defaultf": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "zero_wgs84.cof"),
+                    degree=0,
+                    drag=True,
+                    flattening=None,
+                    toe_a1mjd=a1_2026,
+                ),
+                "drag_geod_z",
+            ),
+            "drag_geod_2026_TOE_wgs84f": (
+                dict(
+                    epoch=e2026,
+                    cof_path=str(tmp / "zero_wgs84.cof"),
+                    degree=0,
+                    drag=True,
+                    flattening=pe.F_WGS84,
+                    toe_a1mjd=a1_2026,
+                ),
+                "drag_geod_z",
+            ),
+            "drag_sph_2000": (
+                dict(
+                    epoch=e2000,
+                    cof_path=str(tmp / "zero_wgs84.cof"),
+                    degree=0,
+                    drag=True,
+                    flattening=0.0,
+                ),
+                "drag_sph_z",
+            ),
         }
         for name, (kw, ref) in cases.items():
             y0, y1 = run_case(tmp, name, **kw)
-            entry = {"python_model": ref,
-                     "initial_state_echo_diff_m": float(np.linalg.norm(y0[:3] - pe.R0)),
-                     "final_pos_diff_vs_python_m": float(np.linalg.norm(y1[:3] - py[ref][:3])),
-                     "final_vel_diff_vs_python_mps": float(np.linalg.norm(y1[3:] - py[ref][3:]))}
+            entry = {
+                "python_model": ref,
+                "initial_state_echo_diff_m": float(np.linalg.norm(y0[:3] - pe.R0)),
+                "final_pos_diff_vs_python_m": float(np.linalg.norm(y1[:3] - py[ref][:3])),
+                "final_vel_diff_vs_python_mps": float(np.linalg.norm(y1[3:] - py[ref][3:])),
+            }
             if name == "c20zero_fileGM415":
-                entry["final_pos_diff_vs_kepler_wgs84_m"] = float(np.linalg.norm(y1[:3] - py["kepler_wgs84"][:3]))
+                entry["final_pos_diff_vs_kepler_wgs84_m"] = float(
+                    np.linalg.norm(y1[:3] - py["kepler_wgs84"][:3])
+                )
             results["cases"][name] = entry
             print(name, json.dumps(entry))
     OUT.write_text(json.dumps(results, indent=2))
