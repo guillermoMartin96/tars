@@ -1,8 +1,8 @@
-# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (in progress: T1–T6 complete; T7 at the threshold decision)
+# Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (T1–T7 complete; T8 Proof evaluated)
 
-**Milestone result:** not yet claimed. M2 Proof (P1–P12, `docs/milestones/M2-propulsion.md` §10) is evaluated at T8.
+**Milestone result:** not claimed. The T8 evaluation of P1–P12 is in the **T8** section below. Declaring M2 complete and merging need Tech Lead approval.
 - This record collects completed task evidence only (REV-013 lesson).
-- Thresholds: none approved for M2 yet. `proof/thresholds/m2.json` is **provisional** (T5); approval follows the T7 threshold DR. DR-0015 is conditional; GMAT gate recalibration is tracked as FU-1.
+- Thresholds: `proof/thresholds/m2.json` is **approved** (DR-0023, 2026-10-14; values unchanged from T5/T6). DR-0015's conditions are met (REV-012: VAL-0010/DR-0016; measurements: T5–T7, DR-0023). FU-1 is closed (DR-0023).
 
 ## T1 — Standalone propulsion model: COMPLETE
 - **Code:** `src/tars/sim/propulsion.py`, `STANDARD_GRAVITY`.
@@ -202,7 +202,7 @@
   - The Proof takes about 135 s.
 - **Next:** T7 (authorized 2026-10-13; see below).
 
-## T7 — Three-platform measurement and threshold decision: MEASUREMENT COMPLETE, DECISION PENDING (2026-10-13)
+## T7 — Three-platform measurement and threshold decision: COMPLETE (accepted by the Tech Lead at `963dbe7`, 2026-10-14)
 - **Measured:** 11 bundles on the DR-0008 matrix at `2870392`: the macOS x86_64 reference host, Linux x86_64 ×5 on four CPU types, and macOS arm64 ×5. Clean trees, identical input digests. VAL-0016; evidence in `proof/records/evidence/M2-T7/`.
 - **Results:**
   - M2 Proof 215/215 on all 11.
@@ -216,7 +216,99 @@
   - O6: no change (a dedicated SMA class only with a future tightening).
   - Add an M2 cross-platform final-state gate at the M1 bounds (proposed, not implemented).
 - **Independent review:** `docs/reviews/M2-T7-review-01.md`. Round 1 was REQUEST_CHANGES (T7-F1 to F6, all accepted and corrected, no proposed value changed); round 2 was an **unconditional PASS** (session `01a1380d-c632-74f0-aa96-0fe350a30cbe`). CI is green (run 38496630761).
-- **Not changed:** thresholds, reference values, snapshot tolerances and checks. `m2.json` stays provisional until DR-0023 is approved. T8 is not started, and PR #3 is not merged.
+- **Not changed (measurement phase):** thresholds, reference values, snapshot tolerances and checks.
+- **DR-0023 approved (2026-10-14) and applied** (`27e5b8b`…`963dbe7`):
+  - `m2.json` approved with every value unchanged, digest updated in the same commit;
+  - FU-1 closed with the O9 gates retained; O6 unchanged;
+  - new three-platform final-state gate (≤ 1e-4 m, ≤ 1e-7 m/s): `tars.validation.m2_cross_platform`, the CI job `m2-cross-platform`, the pinned golden `proof/references/m2_final_states.json`, 13 new M2 Proof checks (228 in total), archived evidence `evidence/M2-T7/cross-platform/` (VAL-0017; max 7.23e-6 m and 8.43e-9 m/s).
+  - Review rounds 3 (REQUEST_CHANGES, T7-F7 High, fixed in `4c0d2ef`) and 4 (**unconditional PASS**, session `01a13c65-4bc4-78f3-8576-450dfc0f1205`).
+  - CI green on all three platforms and the gate (runs 38647201980 and 38647208848).
+
+## T8 — Full M2 Proof, Proof record, README, external review (2026-10-14)
+- **Authorized:** Tech Lead, 2026-10-14, after accepting T7 at `963dbe7`. Scope per the M2 plan §9: full Proof run, Proof record, README update, external review, dispositions. No threshold, reference baseline, contract or validation semantics changed.
+- **Delivered:**
+  - `toolbox/scripts/run_m2_proof.sh` (`1cf57ef`): the complete M2 suite, including every M1 gate, writing `proof/records/evidence/M2/`. It never writes the M1 evidence.
+  - README M2 section (`c304b53`).
+  - This section.
+- **Proven revision:** `c304b53` (clean tree), the full run of 2026-10-15T00:18Z on the reference host: macOS x86_64, i9-9880H, Python 3.12.15, NumPy 2.5.3, SciPy 1.18.1, `uv.lock` sha256 `6d784550…`. Later commits change only records and evidence.
+- **Evidence:** `proof/records/evidence/M2/`:
+  - `proof_run.log` (every step exit 0, `overall: PASS`);
+  - `m2_proof_report.json` and `m2_proof_stdout.txt`;
+  - `gmat_m1_reference.json` and `gmat_m2_reference.json`;
+  - `m1_non_gmat.json` and `m1_cross_platform.json`;
+  - `m2_final_states_record.json` (this platform's cross-platform record);
+  - four `mission_*_summary.json` files.
+- **Reproduce:** `toolbox/scripts/run_m2_proof.sh <dir>` (set `UV=` if uv is not on PATH). Pass a directory other than the committed evidence to preserve it.
+- **Thresholds:** `proof/thresholds/m2.json`, approved (DR-0023); `proof/thresholds/m1.json`, approved (DR-0008/DR-0009), unchanged against `main`.
+- **Report metadata:** the M2 Proof report's `task` field reads `"T5"`. It names the task that introduced the report format; it is a label, not a check.
+
+### Commands executed (all exit 0)
+| Step | Result |
+|---|---|
+| `uv sync --locked` | locked environment |
+| `ruff check .`, `ruff format --check .` | clean |
+| `pytest -q` | **1,185 passed** (3 overflow warnings from deliberate overflow tests), 28 min |
+| `determinism.py` (M1) | byte-identical across processes; sha256 `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` (golden) |
+| `determinism.py --scenario` × 4 M2 scenario files | byte-identical: prograde `42316356…`, retrograde `1c0037c2…`, depletion `6bd23e70…`, invalid commands `7e52dd1d…` |
+| `cross_platform.py` (M1) | bit-identical to the golden (Δ = 0) |
+| `m1_proof.py` | PASS against unchanged `m1.json` |
+| `gmat_m1.py compare`, `gmat_m2.py compare` | PASS (committed references; GMAT not needed) |
+| `reference_snapshot.py verify-baseline` (baseline 3) | PASS: inventory, independent recomputation, node enumeration, DOP853 vs GMAT |
+| `m2_proof.py` | **228 / 228 PASS**, thresholds approved; metrics, thresholds and results identical, check by check, to the run Codex reviewed at `f44d181` |
+| `run_mission.py` × 4 M2 scenarios | all `success` |
+| `m2_cross_platform.py collect` | clean-tree record; Δ = 0 against the golden (the same host) |
+
+### M2 Proof requirements (M2 plan §10)
+Every gated value is from `m2_proof_report.json` at `c304b53`, worst case over the missions it applies to. Limits are the approved `m2.json` values. The highest utilization of any limit is 0.66 (O8 order deviation, 0.330 of 0.5).
+
+| # | Requirement | Result | Evidence |
+|---|---|---|---|
+| P1 | Accepted prograde burn ignites at the commanded time and ends at ignition + duration | ✅ Ignition 600.0 s, cutoff 677.3 s, `end_cause: completed` (slice; its event log sha256 `42316356…` is byte-identical to the T4 evidence). Contract checks (`traceability`, `outcomes`, `event_order`) 0 violations on all 16 audited runs | report; `mission_m2_prograde_burn_summary.json` |
+| P2 | Propellant per ṁ = F/(Isp·g0) (O1); sensed Δv matches the rocket equation (O2) | ✅ O1 ≤ 2.2e-16 relative (limit 1e-12); depletion residual 0.30 of its bound (≤ 1). O2 excess over the analytic Simpson bound ≤ 7.5e-14 (1e-12); reported rocket equation ≤ 6.7e-14 (1e-12) | `o1_mass_law`, `o2_rocket_equation` |
+| P3 | Prograde raises, retrograde lowers SMA/energy/apoapsis; plane unchanged (O7) | ✅ Sign violations 0; plane rotation ≤ 2.7e-16 rad and inclination change ≤ 3.3e-16 rad (1e-12) | `o7_direction` |
+| P4 | Agreement with analytic and independent references (O3–O6, O8) | ✅ O3 velocity 1.8e-14 (1e-12), order deviation 0.195 (0.5). O4 vs DOP853 ≤ 0.313 m / 3.64e-4 m/s (0.6 m / 7e-4 m/s). O5 coast ≤ 0.314 m (0.6). O6 \|p − 2\| ≤ 0.0041 (0.05), slice ratio 2.6e-6 (1e-5). O8 order deviation ≤ 0.330 (0.5) | `o3`…`o8`; VAL-0013 |
+| P5 | GMAT finite burn within limits; configuration exact (O9); REV-012 investigated | ✅ GMAT vs DOP853 4.66e-6 m (3e-5); GMAT coast vs Kepler 4.0e-6 m (1e-4); GMAT mass 2.25e-11 kg (1.3e-9). Simulator vs GMAT 0.313 m (0.6), burn boundaries 8.0e-3 m (1.6e-2), node crossings 3.99e-5 s (8e-5). Reference integrity 0 violations; snapshot verified. REV-012 resolved (VAL-0010, DR-0016) | `o9_gmat`, `o9_reference_integrity`, `gmat_m2_reference.json`; VAL-0014 |
+| P6 | Byte-identical replay on the same platform; cross-platform within approved bounds | ✅ Cross-process byte identity for the four M2 scenario files and M1; in-process determinism for all six missions. Golden cross-platform 0 violations (Δ = 0 on the reference host). Three-platform gate: VAL-0017 (max 7.23e-6 m / 8.43e-9 m/s vs 1e-4 / 1e-7), re-run by CI on every push | `determinism`, `cross_platform_golden`, `cross_platform`; VAL-0017 |
+| P7 | Invalid commands rejected with the correct reason and no state change; depletion exact; propellant never negative | ✅ All 10 rejection codes exercised (invalid-commands and its empty-tank and no-propulsion variants); `rejections_change_nothing` 0 violations (4 control comparisons); depletion D1a exact (O1 residual) | `rejections_change_nothing`, `identities`, `outcomes`; `tests/test_m2_validation.py` |
+| P8 | No setters for r/v/mass/propellant; commands only via `submit()`; core scan clean; no LLM/3D dependencies | ✅ Architecture scan clean (`test_repository_passes_architecture_scan`). `test_no_public_api_mutates_physical_state`, `test_simulator_state_is_read_only_to_direction_laws_and_forces` and `test_force_models_cannot_mutate_simulator_state` pass. Runtime dependencies are only NumPy and Pydantic | pytest; `pyproject.toml` |
+| P9 | Schema-valid events; JSONL round-trips | ✅ Event schema and round-trip tests pass (`tests/test_events.py`, `tests/test_commands.py`); the Proof re-validates every event (`identities`, `event_order`) | pytest; report |
+| P10 | M1 unchanged | ✅ Golden event-log sha256 `7a4e1877…` exact; M1 Proof PASS; GMAT M1 PASS; M1 cross-platform Δ = 0. `m1.json`, `m1_final_state.json` and the M1 GMAT reference files are unchanged against `main` | `m1_non_gmat.json`, `gmat_m1_reference.json`, `m1_cross_platform.json` |
+| P11 | SCI-0008…0012 Active; ADR for propulsion; DRs resolved | ✅ SCI-0008…0012 Active (DR-0011/0012/0014); ADR-0007 Accepted. DR-0010…0014, 0016 and 0017 resolved; DR-0018…0023 approved. DR-0015 is "conditionally approved", and both its conditions are now satisfied (REV-012 reviewed: VAL-0010, DR-0016; measurements on the implementation: T5–T7, DR-0023). Its status line is left for the Tech Lead | `docs/science/assumptions.md`, `docs/decisions/` |
+| P12 | External review completed; every finding dispositioned; no open Critical/High | ⏳ T1–T7 reviews closed: T1 (review gate PASS), T2, T3, T4, T5, T6 (round 18) and T7 (round 4) all PASS, every finding dispositioned. The T8 milestone review is recorded in `docs/reviews/M2-T8-review-01.md` | `docs/reviews/M2-*.md` |
+
+### Standard gate (proof/PROOF.md)
+| Check | Status |
+|---|---|
+| Unit, integration, physics, mission tests | ✅ 1,185 tests; M2 Proof 228/228; four missions `success` |
+| Seed/replay | ✅ no stochastic behaviour; seed 0 recorded; byte-identical replay |
+| Architecture invariants | ✅ P8 |
+| Machine-readable events validate | ✅ P9 |
+| Scientific assumptions recorded | ✅ SCI-0008…0012; VAL-0008…0017 |
+| Engineering decisions recorded | ✅ DR-0010…0023; ADR-0007 |
+| External review / findings / no open Critical-High | ⏳ P12 |
+| No secrets, debug artifacts or accidental files | ✅ `runs/` is git-ignored; evidence is intentional |
+| Branch pushed; revision identified | ✅ `c304b53` |
+
+### Discrepancies (carried, all explained)
+| ID | Description | Classification | Status |
+|---|---|---|---|
+| M2-D1 | Simulator vs DOP853/GMAT ≈ 0.31 m at 53 700 s | Numerical: our RK4 truncation at dt = 10 s (O4 = O9, GMAT vs DOP853 4.7 µm) | Accepted (DR-0023) |
+| M2-D2 | Event-log hashes differ across platforms; final state ≤ 7.23e-6 m | Numerical: platform floating point | Accepted (DR-0023 gate) |
+| M2-D3 | Fitted RK4 orders 4.14–4.33 (O8), 3.80–3.88 (O3 position) | Numerical (pre-asymptotic) | Accepted (approved limits) |
+| M2-D4 | Sensed-Δv error at high mass flow equals the RK4 (Simpson) truncation | Numerical; predicted by the analytic bound to 2–3 % | Accepted; O2 gates the excess over the bound |
+| M2-D5 | DOP853 reference cross-platform floor 11–15 µm | Reference reproducibility | Removed from the verdict by the snapshot (DR-0021); FU-1 closed (DR-0023) |
+
+### Known limitations allowed at the prototype bar
+- **Model scope:** ideal constant thrust and Isp; instantaneous on/off; velocity-tracking pointing through the centre of mass; one engine and one tank. No attitude, J2, drag, sensors or throttling (M2 plan §2 non-goals).
+- **Commands:**
+  - Burns execute in submission order.
+  - The DR-0017 bound covers timing-induced Δv, not trajectory error.
+  - A burn active at the stop has no `BurnEnded` (DR-0018 A).
+- **GMAT:** runs on the reference host only; CI compares the committed, digest-pinned references.
+- **Evidence is unauthenticated** (DR-0019 B, DR-0022 B): a cross-platform record forged consistently, with a recomputed checksum, would be accepted. The macOS x86_64 CI slot is the GitHub Intel runner; the reference host enters through the pinned golden.
+- **Margins:** the O8 margin is 1.5×. The O6 margin bound is 0.0405 against 0.05; a dedicated SMA tolerance class is a future improvement needing approval.
+- **Validators** need the dev dependency group (SciPy).
+- **FU-2** (lint cleanup of experiment scripts) stays deferred by the Tech Lead.
 
 ## REV-012 — resolved
 VAL-0010, DR-0016; CI-reproduced by `tests/test_rev012_evidence.py`.

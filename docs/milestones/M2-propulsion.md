@@ -1,8 +1,7 @@
 # Milestone 2 — Propulsion & Orbital Maneuvers: plan and draft Proof
 
-**Status:** T1–T6 COMPLETE (final independent PASS each; T6 unconditional PASS in review round 18, 2026-10-13). T7 measurement complete (VAL-0016). The threshold decision **DR-0023** awaits the Tech Lead. DR-0018 A, DR-0019 B, DR-0020 A, DR-0021 A and DR-0022 B are approved. `proof/thresholds/m2.json` stays provisional until DR-0023 is approved. Draft PR #3, not merged.
-- See `proof/records/M2-propulsion.md`.
-- Merge to `main` needs separate authorization.  
+**Status:** T1–T7 COMPLETE (T7 accepted at `963dbe7`, 2026-10-14). DR-0023 approved and applied: `proof/thresholds/m2.json` is **approved**, FU-1 closed, three-platform final-state gate in CI. **T8** (full Proof, Proof record, README, external review) evaluated at `c304b53`; see `proof/records/M2-propulsion.md`. Draft PR #3, not merged.
+- M2 completion and the merge to `main` need separate Tech Lead authorization.  
 **Branch:** `milestone-2-propulsion-f90f9ba4`, from `main` at `63bec8d`  
 **Date:** 2026-10-09  
 **Definition of done:** prototype phase (proof/definition-of-done.md), unless the Tech Lead sets a stricter bar.
@@ -249,7 +248,7 @@ Later Decision Requests:
 ## 12a. Tracked follow-ups
 | ID | Follow-up | Constraint |
 |---|---|---|
-| FU-1 | **DR-0015 GMAT gate recalibration** (O9 rows), with aligned stepping (DR-0016) | Re-derive from measurements. Account for the observed **11–15 µm cross-platform noise floor** of the DOP853 reference at 53 700 s (VAL-0010 addendum). No gate tighter than that floor unless the reference is made platform-robust. Threshold DR at T7. |
+| FU-1 (**closed**, DR-0023) | **DR-0015 GMAT gate recalibration** (O9 rows), with aligned stepping (DR-0016) | Re-derive from measurements. Account for the observed **11–15 µm cross-platform noise floor** of the DOP853 reference at 53 700 s (VAL-0010 addendum). No gate tighter than that floor unless the reference is made platform-robust. Threshold DR at T7. |
 | FU-2 | Experiment-script lint cleanup (`docs/science/experiments/m2-planning`) | **Deferred**; do not perform (Tech Lead, 2026-10-10). |
 
 ## 13. Proposed first implementation task
