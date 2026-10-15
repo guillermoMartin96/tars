@@ -52,7 +52,7 @@ The GMAT probe was run twice, and both runs gave identical numbers.
 | Error ratio when dt is halved: drag only, B 25.8 | **10.4, 9.0, 13.6**: order degraded (see below) |
 | J2 node rate: fit / first-order analytic (osculating a0) | −5.4385 / −5.4099 °/day (+0.53%; cf. VAL-0007, GMAT −5.439) |
 | Drag decay, fitted mean dā/dt vs first-order estimate at h0 with the King-Hele rotation factor | B 25.8: −12.8 km/day, +11.0% vs estimate; B 100: −3.05 km/day, +2.6% |
-| Table density continuity at band edges | Continuous to ≤ 1.4e-3 relative (25 km); ≤ 1e-4 elsewhere (table rounding). **The scale height, and so dρ/dh, jumps at every edge**; for example 37.1 → 45.5 km at 250 km. |
+| Table density at band edges | **Finite jumps** from table rounding: 1.4e-3 relative at 25 km, 1.5e-5 at 250 km, ≤ 1e-4 elsewhere. **The scale height, and so dρ/dh, also changes at every edge**; for example 37.1 → 45.5 km at 250 km. |
 
 **Sensitivity of the final position after 53 700 s** (DOP853; J2 + drag with B 25.8 unless marked "J2 only"):
 | Change | Δ final position |
@@ -93,6 +93,6 @@ The GMAT probe was run twice, and both runs gave identical numbers.
    - 0.7 m of altitude datum moves the final state by 9 m, and 1% in B moves it by 4.8 km.
    - The altitude definition and atmosphere rotation are tens of km.
    - Any drag reference must match the configuration *exactly*; "realistic" references can only be informational.
-4. **The piecewise-exponential table is C0 but not C1.** RK4's convergence order degrades when an orbit crosses a band edge: ratios 9.0–13.6 instead of 16 for drag only. An order-4 convergence oracle needs a smooth configuration, such as one band, or must account for edge crossings.
-5. **The first-order decay estimate is not a tight oracle** at these decay rates. The density grows as the orbit decays (+11% at B 25.8). A semi-analytic oracle must integrate the decay with density evaluated along the decaying orbit.
+4. **The literal piecewise-exponential table is discontinuous at band edges.** Table rounding gives finite density jumps (1.4e-3 relative at 25 km, 1.5e-5 at 250 km, ≤ 1e-4 elsewhere), and the scale height also changes. RK4's error ratios degrade when an orbit crosses a band edge: 9.0–13.6 instead of 16 for drag only. These are not an asymptotic order. An order-4 convergence oracle needs a smooth configuration, such as one band, or must account for edge crossings. (Corrected after review M3P-F1, which pointed out that an earlier wording called the table C0.)
+5. **The first-order decay estimate is not a tight oracle** at these decay rates. The density grows as the orbit decays (+11% at B 25.8). A semi-analytic oracle must integrate the decay with density evaluated along the decaying orbit, and even then it stays approximate: orbit averaging and the rotation factor carry their own errors (review M3P-F3).
 6. **The J2 constant choice matters at the metre level**, which is above the 0.3 m RK4 error. Tide system (zero-tide vs tide-free), source and GM labelling (TT vs TCG) must be decided explicitly and matched exactly in references.

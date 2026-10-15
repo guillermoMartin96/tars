@@ -700,7 +700,7 @@ All 10 approved rejection codes are exercised.
   - GMAT R2026a (build Mar 26 2026), with a generated `.cof`, the `Exponential` atmosphere, and states in EarthMJ2000Eq or in true-of-epoch (TOEEq) axes fixed at the epoch.
 - **Results (full tables in the experiment README and JSON):**
   - **RK4 dt = 10 s vs DOP853:** J2 0.30 m; drag (B 25.8) 4.6 m; J2 + drag 2.1 m (B 25.8) / 0.70 m (B 100).
-  - **Convergence:** J2 error ratios 22.4 / 20.0 / 18.3. Drag-only ratios 10.4 / 9.0 / 13.6: the density table is C0 with jumps in dρ/dh at band edges.
+  - **Convergence:** J2 error ratios 22.4 / 20.0 / 18.3. Drag-only ratios 10.4 / 9.0 / 13.6: the literal density table has finite value jumps (≤ 1.4e-3 relative, from rounding) and scale-height changes at band edges.
   - **Displacement from point mass after 10 orbits:** J2 741 km (matching GMAT's 741 km in VAL-0007); drag 363 km; both 1 161 km.
   - **J2 node rate:** fitted −5.4385 °/day against first-order −5.4099 °/day (+0.53%, osculating a₀).
   - **Drag decay:** −12.8 km/day (B 25.8), −3.05 km/day (B 100). The first-order fixed-density estimate is off by 11% / 2.6%.

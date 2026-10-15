@@ -51,7 +51,7 @@ Nothing here is implemented. Every value below is a *candidate* until this reque
 | [MSIS00] | J. M. Picone et al., "NRLMSISE-00 empirical model of the atmosphere", JGR 107(A12), 1468 (2002), doi:10.1029/2002JA009430 | Candidate A4 |
 | [MSIS2] | J. T. Emmert et al., "NRLMSIS 2.0: A whole-atmosphere empirical model of temperature and neutral species densities", Earth and Space Science 8(3), 2021, doi:10.1029/2020EA001321 | Candidate A4 (successor to NRLMSISE-00) |
 | [CIRA] | COSPAR International Reference Atmosphere CIRA-2012, as summarized by S. Bruinsma et al., *J. Space Weather Space Clim.* 7, A4 (2017), doi:10.1051/swsc/2017003 (**secondary**) | CIRA-2012 selected NRLMSISE-00, JB2008 and DTM2009 (later DTM2013/DTM2020) as the thermosphere reference models |
-| [KH] | D. King-Hele, *Satellite Orbits in an Atmosphere*, Blackie 1987 (**secondary**: cited through standard textbook usage, not re-read) | Atmosphere-rotation factor F = (1 − r ω_E cos i / v)² for decay estimates |
+| [KH] | D. King-Hele, *Satellite Orbits in an Atmosphere*, Blackie 1987 (**secondary**: cited through standard textbook usage, not re-read) | Atmosphere-rotation factor F = (1 − r ω_E cos i / v)² for decay estimates. **Approximate:** it neglects part of the relative-speed variation along an inclined orbit (review M3P-F3) |
 
 **Source disagreements recorded, not resolved here:**
 - **The value of J2.** Each candidate is labelled with its tide system:
@@ -63,7 +63,7 @@ Nothing here is implemented. Every value below is a *candidate* until this reque
   - WGS 84 normal field 1.0826298e-3 [NGA]. This is a geometric value and must not be used as a dynamic J2.
 - **GM.** 3.986004418e14 is the WGS 84 value [NGA] and the IERS *TCG-compatible* value [IERS-1]. The IERS TT-compatible value is 3.986004415e14 [IERS-1 §1.2], which is also the EGM2008 scaling GM [IERS-6] and GMAT's default.
   - **The accepted M1 record SCI-0005 states that 3.986004418e14 is "TT-compatible".** [IERS-1] labels it TCG-compatible. That is a documentation inaccuracy in an accepted M1 record. It does not change any M1 result, because GMAT was configured with the same value. This request does not edit SCI-0005; see Q3.
-- **Earth rotation rate.** 7.292115e-5 rad/s is the WGS 84 / GRS80 nominal value [NGA][IERS-1 T1.2]. 7.29211514670698e-5 rad/s is the IERS ERA rate [IERS-1], which GMAT uses [GMAT-MS] [derived: 2π × 1.00273781191135448 / 86400]. The relative difference is 2e-9, which is negligible here.
+- **Earth rotation rate.** 7.292115e-5 rad/s is the WGS 84 / GRS80 nominal value [NGA][IERS-1 T1.2]. 7.29211514670698e-5 rad/s is the IERS ERA rate [IERS-1], which GMAT uses [GMAT-MS] [derived: 2π × 1.00273781191135448 / 86400]. The relative difference is 2e-8 (corrected after review M3P-F5), which is negligible here.
 
 ### 3.2 Measurements (planning experiment; VAL-0018; `docs/science/experiments/m3-planning/`)
 All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. **[fact, measured]**
@@ -138,7 +138,7 @@ All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. 
 | Form | ρ = ρ₀ exp(−(h − h₀)/H) | A1 per band, 28 bands 0–1000 km [GMAT-data; VAL5 §8.6] | Layered hydrostatic and diffusion model [US76] | Empirical; species, temperature [MSIS00][MSIS2][CIRA] |
 | Inputs | h | h | h | h, geodetic lat/lon, local solar time, day of year, F10.7, F10.7A, Ap/Kp (JB2008: more indices) |
 | Time / epoch dependence | None | None | None | Yes: UT1/UTC, Sun position, space-weather history |
-| Smoothness | C∞ | **C0 only: dρ/dh jumps at band edges** [measured]; RK4 order degrades on crossings | Piecewise (layer formulas) | Smooth in h; driven by stepwise daily/3-hour inputs |
+| Smoothness | C∞ | **Not continuous as published: finite density jumps at band edges from table rounding (1.4e-3 relative at 25 km, 1.5e-5 at 250 km, ≤ 1e-4 elsewhere), plus scale-height (dρ/dh) changes** [measured; review M3P-F1]; RK4's measured error ratios degrade on band crossings | Piecewise (layer formulas) | Smooth in h; driven by stepwise daily/3-hour inputs |
 | Realism at 250 km | Only near h₀ | A static mean profile; no solar-cycle variation | Moderate-activity mean only | Best available; still ~10–30% density error ([CIRA] secondary) |
 | External exact-configuration reference | GMAT `Exponential` with a one-row file | **GMAT `Exponential` with the identical file: 2 mm from the Python model at 10 orbits (true-of-epoch axes, spherical height)** [measured] | Not in GMAT | GMAT has JR, MSISE90 and NRLMSISE00 (single-precision Fortran, a stated GMAT caution) |
 | Implementation and verification cost | Very low | Low (table lookup) | Moderate | High: large empirical code or a new dependency (DR), space-weather data management, time scales |
@@ -187,7 +187,7 @@ All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. 
   - J-ax-3 would add Earth-orientation modelling and data that M3 does not otherwise need. DR-0025 §2 discusses the residual bound.
 - **Smoothness vs realism of the density profile.**
   - A1 is smooth and analytically tractable, but realistic only near h₀.
-  - A2 is realistic in shape over 0–1000 km and GMAT-matchable, but C0 only.
+  - A2 is realistic in shape over 0–1000 km and GMAT-matchable, but the literal table is discontinuous at band edges (value jumps from rounding, and slope changes). Enforcing continuity, for example by recomputing each base density from the band below, would change the model and is an owner choice (Q5a); it would also no longer be GMAT's table.
   - **A2 contains A1 as the one-band case** [derived], so one implementation serves both, with a smooth configuration available for order checks.
 - **Spherical vs geodetic height.** Both are simple and defensible. Geodetic is the physically meaningful one, and the effect is tens of km.
 - **One standard vs physically preferred tide convention.** K-A is the same standard document as DR-0003, but tide-free. A zero-tide value (K-C) is arguably more physical when no tides are modelled. The trajectory difference is metres.
@@ -251,7 +251,7 @@ All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. 
 - Absolute realism is limited by the static atmosphere. Drag-driven predictions such as lifetime are indicative only, and must never be presented as forecasts.
 - The fixed pole means the J2 node and ground-track geometry differ from the real Earth by about 0.15° of pole offset in 2026.
 - The geodetic conversion (if adopted) is a new numerical algorithm with its own error budget (DR-0025).
-- C0 density continuity at band edges degrades RK4's convergence order on crossings.
+- The literal table is discontinuous at band edges (value jumps up to 1.4e-3 relative, plus slope changes). RK4's measured error ratios degrade on crossings; the measured ratios do not establish an asymptotic order.
 - The GMAT geodetic-height drag residual (0.38 m in true-of-epoch axes) is not yet separated into polar motion and algorithm difference. The spherical-height residual is 2 mm.
 
 ## 12. Rejected alternatives and why
@@ -271,6 +271,7 @@ All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. 
 | Q3 | GM for M3: keep WGS 84 3.986004418e14 (DR-0003)? Also, should SCI-0005's "TT-compatible" wording get an erratum note (IERS labels it TCG-compatible; TT = 3.986004415e14)? An erratum note does not change any M1/M2 result | Keep 3.986004418e14 for M3. Add an erratum note to SCI-0005, with Tech Lead approval, as M1 records are accepted evidence |
 | Q4 | J2 and atmosphere axis: fixed frame z (J-ax-1), mean pole of date (J-ax-2), or full pole of date (J-ax-3)? | J-ax-1 |
 | Q5 | Atmosphere model: A2 (table, plus the one-band subset), A1 only, or A3? A4 deferred? | A2; A4 deferred |
+| Q5a | For A2: use the literal published table (discontinuous at band edges, exactly GMAT's file), or a continuity-enforced variant (a different model and dataset identity, no longer an exact GMAT match)? Added after review M3P-F1 | Literal table, with the discontinuity documented; owner's choice |
 | Q6 | Height for density: geodetic (H-geod) or spherical (H-sph)? | H-geod (most consequential choice) |
 | Q7 | Atmosphere rotation: rigid co-rotation about z with ω_E (WGS 84 nominal)? | Yes |
 | Q8 | Lower validity limit of the drag model and re-entry semantics: no limit (run to impact at h ≤ 0), or an owner-set altitude ending the run as `reentry` (DR-0026)? No value is proposed without a source or explicit owner judgment | Owner judgment needed; DR-0026 offers the mechanism |

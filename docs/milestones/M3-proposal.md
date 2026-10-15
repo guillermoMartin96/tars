@@ -97,7 +97,7 @@
 |---|---|---|---|---|
 | T0 | Decision requests: G1 models and constants (**DR-0024**), G2 validation strategy and references (**DR-0025**), G3 architecture (**DR-0026**). **Drafted 2026-10-15, with planning experiments (VAL-0018) and one independent Codex review of the checkpoint** | G0 (approved) | Approved DRs; SCI entries Proposed → Active | Codex (planning checkpoint review, `docs/reviews/M3-planning-review-01.md`) |
 | T1 | J2 force model, pure; analytic unit tests (secular Ω̇, ω̇ rates, energy and polar angular-momentum conservation) | G1 | Unit-level VAL record | Codex |
-| T2 | Drag force model and spacecraft Cd/A; force-context extension (mass); analytic tests (decay rate vs analytic estimate; zero drag above the cutoff; energy monotonicity) | G1, G3 | Unit-level VAL record; architecture scan; M1/M2 byte-identity | Codex |
+| T2 | Drag force model and spacecraft Cd/A; force-context extension (mass); analytic tests (decay rate vs an approximate semi-analytic estimate; behaviour outside the table per the G1 domain policy; energy monotonicity) | G1, G3 | Unit-level VAL record; architecture scan; M1/M2 byte-identity | Codex |
 | T3 | Scenario and runner integration, contract amendment, new reference scenarios (J2-only, drag-only, J2+drag, J2+drag+M2 burn) | T1, T2 | Mission tests; M1/M2 goldens unchanged | Codex |
 | T4 | Validators and an M3 Proof script; **provisional** `m3.json`; independent DOP853 reference with the same force models | T3 | Measured metrics (VAL) | Codex |
 | T5 | GMAT M3 references (J2 and the chosen atmosphere, exact configuration), digest-pinned; reference snapshot extension or a separate M3 snapshot (DR-0021 procedure) | G2, T4 | Committed references; O-gates | Codex |
@@ -117,7 +117,7 @@ Every task follows the M2 workflow:
 | Q2 | J2 conservation: energy (with the J2 potential) and the polar angular-momentum component h_z | Conservative-force integration | Analytic invariants |
 | Q3 | Independent DOP853 integration with identical force models | Full trajectory, J2 and drag | Independent integrator (SciPy, dev dependency) |
 | Q4 | Drag decay vs analytic estimate for a near-circular orbit in an exponential atmosphere: Δa per revolution ≈ −2π ρ (Cd·A/m) a² | Drag magnitude and direction | Analytic, approximate (tolerance from theory, not tuned) |
-| Q5 | Drag direction: anti-parallel to v_rel; energy strictly decreasing; no drag above the model's top altitude | Sign and frame errors | Exact rules |
+| Q5 | Drag direction: anti-parallel to v_rel; energy strictly decreasing; behaviour outside the table per the approved G1 domain policy (DR-0024 recommends extrapolation, not a cutoff) | Sign and frame errors | Exact rules |
 | Q6 | RK4 convergence order with J2 and drag, including with M2 burns | Integration correctness | Numerical self-consistency |
 | Q7 | GMAT R2026a with matched J2 constant and atmosphere configuration (exact-configuration gate as in O9) | External trusted tool | External |
 | Q8 | M1/M2 regression: golden hashes, M2 Proof 228/228, M2 snapshot unchanged | No regression | Existing gates |
