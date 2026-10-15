@@ -8,7 +8,7 @@ The repository has no multi-milestone roadmap document. Milestones are authorize
 |---|---|---|
 | M1 Orbit | (predates this directory) [Proof record](../../proof/records/M1-orbit.md) | PASS, merged |
 | M2 Propulsion & Orbital Maneuvers | [M2-propulsion.md](M2-propulsion.md), [Proof record](../../proof/records/M2-propulsion.md) | PASS; accepted by the Tech Lead 2026-10-15; merge to `main` authorized (PR #3) |
-| M3 | PROPOSED (not authorized) | Planning proposal: [M3-proposal.md](M3-proposal.md). Awaiting the Tech Lead's objective decision (G0). Nothing is authorized |
+| M3 J2 + atmospheric drag | [M3-proposal.md](M3-proposal.md), [baseline and impact](M3-baseline-and-impact.md), DR-0024/0025/0026 | PLANNING. G0 approved 2026-10-15 (Option A); G1–G3 drafted (OPEN). **Implementation not authorized; not started** |
 
 ## Known forward requirements (recorded, not authorized)
 These are the only forward-looking commitments on record. They are not a roadmap: milestone objectives beyond M2 have not been defined in this repository.
@@ -21,3 +21,6 @@ These are the only forward-looking commitments on record. They are not a roadmap
   - Deterministic authorization stands between AI recommendations and commands.
   - No C or Rust implementation is authorized.
 - **From the playbook:** no 3D work until the headless simulator and the AI crew satisfy their Proof (`playbook/architecture.md`).
+- **Added by the Tech Lead's M3 planning instruction (2026-10-15):**
+  - **Mission Laboratory intent (M5; not designed or implemented).** The chain is: live spacecraft/mission state → isolated mission-state fork → candidate maneuver/scenario simulations → outcome comparison → safety/constraint evaluation → AI recommendation → human/authorization boundary → only then potential execution. The AI must not modify live spacecraft state by running an exploratory simulation. Earlier milestones use this only to avoid architecture that makes deterministic isolated simulation unnecessarily hard (DR-0026 §8).
+  - **Planning constraint:** revisit the language/runtime decision before implementing software intended to cross from simulator or ground tooling into flight-runtime or embedded execution. Recorded in ADR-0008 (research branch) as PC-1.

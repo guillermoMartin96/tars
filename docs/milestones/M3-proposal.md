@@ -1,6 +1,7 @@
-# Milestone 3 — planning proposal (PROPOSED; not authorized)
+# Milestone 3 — planning proposal (G0 approved: Option A; implementation not authorized)
 
-**Status:** PROPOSAL for Tech Lead decision. No M3 implementation is authorized. Nothing here changes validated M1/M2 behaviour.  
+**Status:** PLANNING. **G0 APPROVED (Tech Lead, 2026-10-15): Option A, J2 + atmospheric drag.** G1–G3 drafted as DR-0024, DR-0025 and DR-0026 (OPEN, BLOCKED ON OWNER). No M3 implementation is authorized, and nothing here changes validated M1/M2 behaviour.  
+**Planning baseline:** `main` = `d92ab894907d06b2b13aefff6c005caa0026a68f` (verified in `M3-baseline-and-impact.md`).  
 **Date:** 2026-10-15  
 **Prepared after:** M2 accepted (2026-10-15) and merged (PR #3, merge commit `d92ab89`).  
 **Requested by:** the Tech Lead's instruction "M2 Final Acceptance and M3 Planning Authorization", section C.
@@ -55,6 +56,8 @@
 
 **Recommendation: Option A.** The rest of this proposal details Option A. Option B could follow as M4, before M5.
 
+**G0 decision (Tech Lead, 2026-10-15): Option A APPROVED.** M3's purpose is to improve orbital and environmental fidelity before later sensors, navigation, AI Navigator and Mission Laboratory work. This proposal remains planning material, not implementation authorization. Where the G1–G3 drafts refine §3–§5 below, the Decision Requests take precedence.
+
 ## 3. Proposed M3 scope (Option A)
 ### In scope
 1. **J2 zonal gravity:**
@@ -92,7 +95,7 @@
 ## 4. Proposed tasks, gates and review checkpoints
 | # | Task | Depends on | Gate / output | Independent review |
 |---|---|---|---|---|
-| T0 | Decision requests: G1 models and constants, G2 validation strategy and references, G3 architecture (force-context signature, scenario v3/extension, events) | G0 | Approved DRs; SCI entries Proposed → Active | Codex review of the DRs' technical claims (optional, at the Tech Lead's discretion) |
+| T0 | Decision requests: G1 models and constants (**DR-0024**), G2 validation strategy and references (**DR-0025**), G3 architecture (**DR-0026**). **Drafted 2026-10-15, with planning experiments (VAL-0018) and one independent Codex review of the checkpoint** | G0 (approved) | Approved DRs; SCI entries Proposed → Active | Codex (planning checkpoint review, `docs/reviews/M3-planning-review-01.md`) |
 | T1 | J2 force model, pure; analytic unit tests (secular Ω̇, ω̇ rates, energy and polar angular-momentum conservation) | G1 | Unit-level VAL record | Codex |
 | T2 | Drag force model and spacecraft Cd/A; force-context extension (mass); analytic tests (decay rate vs analytic estimate; zero drag above the cutoff; energy monotonicity) | G1, G3 | Unit-level VAL record; architecture scan; M1/M2 byte-identity | Codex |
 | T3 | Scenario and runner integration, contract amendment, new reference scenarios (J2-only, drag-only, J2+drag, J2+drag+M2 burn) | T1, T2 | Mission tests; M1/M2 goldens unchanged | Codex |
@@ -107,7 +110,7 @@ Every task follows the M2 workflow:
 - every finding dispositioned (ACCEPTED, REJECTED_WITH_REASONING or ESCALATED_FOR_INVESTIGATION), with unresolved High findings blocking;
 - a stop at each Tech Lead gate.
 
-## 5. Numerical and physical validation requirements (proposed oracles)
+## 5. Numerical and physical validation requirements (proposed oracles; superseded in detail by DR-0025)
 | # | Oracle | What it proves | Independence |
 |---|---|---|---|
 | Q1 | J2 secular rates: Ω̇ = −(3/2) n J2 (R_e/p)² cos i, and ω̇ | J2 implementation and frame | Analytic (first-order; a mean-vs-osculating caveat as in VAL-0007) |
@@ -160,11 +163,11 @@ None of these needs the M2 code to change. Changes to existing M2 structures (fo
 ## 9. Decision gates requested
 | Gate | Decision | Blocks |
 |---|---|---|
-| **G0** | M3 objective: Option A (recommended), B, C, or the Tech Lead's own original objective | Everything |
-| **G1** | Physical models and constants (DR) | T1, T2 |
-| **G2** | Validation strategy, GMAT configuration, snapshot treatment (DR) | T4–T6 |
-| **G3** | Force-context, scenario and event architecture (DR) | T2, T3 |
+| **G0** | M3 objective. **APPROVED 2026-10-15: Option A** | Everything (now unblocked for planning only) |
+| **G1** | Physical models and constants: **DR-0024, OPEN** | T1, T2 |
+| **G2** | Validation strategy, GMAT configuration, snapshot treatment: **DR-0025, OPEN** | T4–T6 |
+| **G3** | Force-context, scenario and event architecture, physics versioning: **DR-0026, OPEN** | T1 (signature), T2, T3 |
 | G4 | M3 thresholds (after T6 measurement) | Proof |
 | G5 | M3 acceptance and merge | — |
 
-**Requested response:** G0 choice, and authorization to draft the T0 Decision Requests (G1–G3). Drafting them is research and documentation; it changes no code.
+**Requested response (updated 2026-10-15):** G0 is approved and the T0 Decision Requests are drafted. The open requests are the answers to DR-0024 Q1–Q10, DR-0025 Q-G2-1…8 and DR-0026 Q-G3-1…11, and a separate authorization before T1 begins.
