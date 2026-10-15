@@ -227,9 +227,14 @@
 ## T8 — Full M2 Proof, Proof record, README, external review (2026-10-14)
 - **Authorized:** Tech Lead, 2026-10-14, after accepting T7 at `963dbe7`. Scope per the M2 plan §9: full Proof run, Proof record, README update, external review, dispositions. No threshold, reference baseline, contract or validation semantics changed.
 - **Delivered:**
-  - `toolbox/scripts/run_m2_proof.sh` (`1cf57ef`): the complete M2 suite, including every M1 gate, writing `proof/records/evidence/M2/`. It never writes the M1 evidence.
+  - `toolbox/scripts/run_m2_proof.sh` (`1cf57ef`; review fixes `42878c6` and later, see `docs/reviews/M2-T8-review-01.md`): every M1 and M2 gate a single host can run, writing `proof/records/evidence/M2/`.
+    - It refuses the M1 evidence directory.
+    - Its clean-tree check fails closed.
+    - It exits 0 only if every step passed, every cited artifact exists and the evidence was published.
+    - The three-platform gate is the CI job `m2-cross-platform` and is not part of the script.
   - README M2 section (`c304b53`).
   - This section.
+- **CI at the proven revision:** push run 38659242411: `check` on ubuntu-latest, macos-latest and macos-15-intel, and `m2-cross-platform`, all success.
 - **Proven revision:** `c304b53` (clean tree), the full run of 2026-10-15T00:18Z on the reference host: macOS x86_64, i9-9880H, Python 3.12.15, NumPy 2.5.3, SciPy 1.18.1, `uv.lock` sha256 `6d784550…`. Later commits change only records and evidence.
 - **Evidence:** `proof/records/evidence/M2/`:
   - `proof_run.log` (every step exit 0, `overall: PASS`);
@@ -263,12 +268,12 @@ Every gated value is from `m2_proof_report.json` at `c304b53`, worst case over t
 
 | # | Requirement | Result | Evidence |
 |---|---|---|---|
-| P1 | Accepted prograde burn ignites at the commanded time and ends at ignition + duration | ✅ Ignition 600.0 s, cutoff 677.3 s, `end_cause: completed` (slice; its event log sha256 `42316356…` is byte-identical to the T4 evidence). Contract checks (`traceability`, `outcomes`, `event_order`) 0 violations on all 16 audited runs | report; `mission_m2_prograde_burn_summary.json` |
+| P1 | Accepted prograde burn ignites at the commanded time and ends at ignition + duration | ✅ Ignition 600.0 s, cutoff 677.3 s, `end_cause: completed` (slice; its event log sha256 `42316356…` is byte-identical to the T4 evidence). Contract checks (`traceability`, `outcomes`, `event_order`) 0 violations on all 28 audited runs (6 missions, 8 O8 and 10 O6 auxiliary runs, 4 stop-boundary variants), aggregated into 16 report groups | report; `mission_m2_prograde_burn_summary.json` |
 | P2 | Propellant per ṁ = F/(Isp·g0) (O1); sensed Δv matches the rocket equation (O2) | ✅ O1 ≤ 2.2e-16 relative (limit 1e-12); depletion residual 0.30 of its bound (≤ 1). O2 excess over the analytic Simpson bound ≤ 7.5e-14 (1e-12); reported rocket equation ≤ 6.7e-14 (1e-12) | `o1_mass_law`, `o2_rocket_equation` |
 | P3 | Prograde raises, retrograde lowers SMA/energy/apoapsis; plane unchanged (O7) | ✅ Sign violations 0; plane rotation ≤ 2.7e-16 rad and inclination change ≤ 3.3e-16 rad (1e-12) | `o7_direction` |
 | P4 | Agreement with analytic and independent references (O3–O6, O8) | ✅ O3 velocity 1.8e-14 (1e-12), order deviation 0.195 (0.5). O4 vs DOP853 ≤ 0.313 m / 3.64e-4 m/s (0.6 m / 7e-4 m/s). O5 coast ≤ 0.314 m (0.6). O6 \|p − 2\| ≤ 0.0041 (0.05), slice ratio 2.6e-6 (1e-5). O8 order deviation ≤ 0.330 (0.5) | `o3`…`o8`; VAL-0013 |
 | P5 | GMAT finite burn within limits; configuration exact (O9); REV-012 investigated | ✅ GMAT vs DOP853 4.66e-6 m (3e-5); GMAT coast vs Kepler 4.0e-6 m (1e-4); GMAT mass 2.25e-11 kg (1.3e-9). Simulator vs GMAT 0.313 m (0.6), burn boundaries 8.0e-3 m (1.6e-2), node crossings 3.99e-5 s (8e-5). Reference integrity 0 violations; snapshot verified. REV-012 resolved (VAL-0010, DR-0016) | `o9_gmat`, `o9_reference_integrity`, `gmat_m2_reference.json`; VAL-0014 |
-| P6 | Byte-identical replay on the same platform; cross-platform within approved bounds | ✅ Cross-process byte identity for the four M2 scenario files and M1; in-process determinism for all six missions. Golden cross-platform 0 violations (Δ = 0 on the reference host). Three-platform gate: VAL-0017 (max 7.23e-6 m / 8.43e-9 m/s vs 1e-4 / 1e-7), re-run by CI on every push | `determinism`, `cross_platform_golden`, `cross_platform`; VAL-0017 |
+| P6 | Byte-identical replay on the same platform; cross-platform within approved bounds | ✅ Cross-process byte identity for the four M2 scenario files and M1; in-process determinism for all six missions. Golden cross-platform 0 violations (Δ = 0 on the reference host). Three-platform gate: VAL-0017 (max 7.23e-6 m / 8.43e-9 m/s vs 1e-4 / 1e-7); at the proven revision, CI run 38659242411 job `m2-cross-platform` PASS: 7.23e-6 m / 8.43e-9 m/s, evidence violations 0 (macOS x86_64 i7-8700B, Linux x86_64 EPYC 7763, macOS arm64 M1) | `determinism`, `cross_platform_golden`, `cross_platform`; VAL-0017 |
 | P7 | Invalid commands rejected with the correct reason and no state change; depletion exact; propellant never negative | ✅ All 10 rejection codes exercised (invalid-commands and its empty-tank and no-propulsion variants); `rejections_change_nothing` 0 violations (4 control comparisons); depletion D1a exact (O1 residual) | `rejections_change_nothing`, `identities`, `outcomes`; `tests/test_m2_validation.py` |
 | P8 | No setters for r/v/mass/propellant; commands only via `submit()`; core scan clean; no LLM/3D dependencies | ✅ Architecture scan clean (`test_repository_passes_architecture_scan`). `test_no_public_api_mutates_physical_state`, `test_simulator_state_is_read_only_to_direction_laws_and_forces` and `test_force_models_cannot_mutate_simulator_state` pass. Runtime dependencies are only NumPy and Pydantic | pytest; `pyproject.toml` |
 | P9 | Schema-valid events; JSONL round-trips | ✅ Event schema and round-trip tests pass (`tests/test_events.py`, `tests/test_commands.py`); the Proof re-validates every event (`identities`, `event_order`) | pytest; report |

@@ -1,24 +1,39 @@
 #!/usr/bin/env bash
-# Run the complete Milestone 2 Proof suite (T8) and write evidence to proof/records/evidence/M2/.
+# Run the complete single-host Milestone 2 Proof suite (T8) and write evidence to
+# proof/records/evidence/M2/ (or EVIDENCE_DIR).
 # Usage: toolbox/scripts/run_m2_proof.sh [EVIDENCE_DIR]   (from the repository root; requires uv)
-# The M2 suite includes every M1 gate (P10). It never writes proof/records/evidence/M1/.
-# Exit code: 0 only if every step passes.
+# - Includes every M1 gate (P10) and every M2 gate that one host can run. The DR-0023
+#   three-platform final-state gate needs evidence from three platforms of one CI run; it is
+#   the CI job `m2-cross-platform`, not part of this script. This script collects this
+#   host's record and checks it against the pinned golden (inside the M2 Proof).
+# - Refuses an evidence directory that is, or is inside, proof/records/evidence/M1/.
+# - Exit code: 0 only if every step passes, every required artifact exists and the evidence
+#   was published. The verdict is printed after publication.
 set -uo pipefail
 
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd -P)"
 cd "$REPO_ROOT"
 UV="${UV:-uv}"
 EV="${1:-proof/records/evidence/M2}"
+
+# Resolve the destination without creating it, then guard it before anything is written.
+resolve() { python3 -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$1"; }
+EV_ABS="$(resolve "$EV")" || { echo "cannot resolve evidence directory $EV" >&2; exit 2; }
+M1_ABS="$(resolve proof/records/evidence/M1)"
+case "$EV_ABS/" in
+  "$M1_ABS"/*) echo "refusing to write into the M1 evidence directory: $EV_ABS" >&2; exit 2 ;;
+esac
+if [ "$EV_ABS" = "$REPO_ROOT" ]; then
+  echo "refusing to write evidence into the repository root" >&2; exit 2
+fi
+
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 # Cleanliness is checked before any evidence is written (evidence files themselves are outputs).
 # Only an evidence directory inside the repository is excluded; a git error counts as not clean.
-mkdir -p "$EV"
-EV_ABS="$(cd "$EV" && pwd -P)"
-ROOT_ABS="$(pwd -P)"
 SPEC=(.)
-case "$EV_ABS/" in "$ROOT_ABS"/*) SPEC+=(":(exclude)${EV_ABS#"$ROOT_ABS"/}") ;; esac
+case "$EV_ABS/" in "$REPO_ROOT"/*) SPEC+=(":(exclude)${EV_ABS#"$REPO_ROOT"/}") ;; esac
 if STATUS="$(git status --porcelain --untracked-files=normal -- "${SPEC[@]}")" && [ -z "$STATUS" ]; then
   CLEAN=yes
 else
@@ -66,10 +81,47 @@ for s in scenarios/m2_*.json; do
   step "run_mission $b" "$UV" run python toolbox/scripts/run_mission.py --scenario "$s" --out "$TMP/mission_$b"
 done
 
-echo "overall: $([ "$FAILED" -eq 0 ] && echo PASS || echo FAIL)" | tee -a "$LOG"
-mkdir -p "$EV"
-cp "$LOG" "$TMP"/*.json "$TMP"/*.txt "$EV"/
-for d in "$TMP"/mission_*; do
-  cp "$d/summary.json" "$EV/$(basename "$d")_summary.json"
+# Every artifact the record cites must exist before anything is published.
+REQUIRED=(m2_final_states_record.json m1_cross_platform.json m1_non_gmat.json
+  gmat_m1_reference.json gmat_m2_reference.json m2_proof_report.json m2_proof_stdout.txt)
+for s in scenarios/m2_*.json; do REQUIRED+=("mission_$(basename "$s" .json)/summary.json"); done
+for f in "${REQUIRED[@]}"; do
+  if [ ! -s "$TMP/$f" ]; then
+    echo "missing artifact: $f" | tee -a "$LOG"
+    FAILED=1
+  fi
 done
+
+# Publish. Previously published artifacts of the same names are removed first, so a
+# file from an earlier run can never stand in for one this run did not produce.
+publish() {
+  mkdir -p "$EV" || return 1
+  rm -f "$EV"/proof_run.log "$EV"/mission_*_summary.json || return 1
+  for f in "${REQUIRED[@]}"; do
+    case "$f" in
+      mission_*/summary.json) rm -f "$EV/${f%/summary.json}_summary.json" || return 1 ;;
+      *) rm -f "$EV/$f" || return 1 ;;
+    esac
+  done
+  for f in "${REQUIRED[@]}"; do
+    [ -e "$TMP/$f" ] || continue
+    case "$f" in
+      mission_*/summary.json) cp "$TMP/$f" "$EV/${f%/summary.json}_summary.json" || return 1 ;;
+      *) cp "$TMP/$f" "$EV/$f" || return 1 ;;
+    esac
+  done
+}
+if ! publish; then
+  echo "evidence publication to $EV failed" | tee -a "$LOG"
+  FAILED=1
+fi
+
+VERDICT=$([ "$FAILED" -eq 0 ] && echo PASS || echo FAIL)
+echo "overall: $VERDICT" >> "$LOG"
+if ! cp "$LOG" "$EV/proof_run.log" 2>/dev/null; then
+  echo "evidence publication to $EV failed (proof_run.log)"
+  VERDICT=FAIL
+  FAILED=1
+fi
+echo "overall: $VERDICT"
 exit "$FAILED"

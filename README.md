@@ -56,8 +56,11 @@ uv run --no-sync python toolbox/validators/determinism.py --scenario scenarios/m
 uv run --no-sync python toolbox/validators/m2_cross_platform.py collect --out runs/xp/local.json
 ```
 
-`toolbox/scripts/run_m2_proof.sh` runs the whole M2 suite, including every M1 gate, and
-writes `proof/records/evidence/M2/` (pass another directory to keep the committed evidence).
+`toolbox/scripts/run_m2_proof.sh` runs every M1 and M2 gate that a single host can run and
+writes `proof/records/evidence/M2/` (pass another directory to keep the committed evidence;
+it refuses the M1 evidence directory). The three-platform final-state gate (DR-0023) needs
+evidence from Linux x86_64, macOS x86_64 and macOS arm64 of one CI run; it is the CI job
+`m2-cross-platform`.
 Thresholds are `proof/thresholds/m2.json` (approved, DR-0023); reference values come from
 the sha256-pinned snapshot `toolbox/references/snapshot/m2/` (DR-0021). The commands and
 events contract is `docs/contracts/m2-commands-and-events.md`.
