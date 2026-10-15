@@ -51,3 +51,31 @@ It found no inconsistency in the physics, architecture, events, replay, limitati
 - The clean-tree check was tested on clean and dirty trees with in-repository, absolute and outside destinations.
 - The full suite was then re-run with the corrected script (below).
 - **Full re-run with the corrected script** at `017d7f6` (clean tree, reference host, 2026-10-15T01:27Z): all 20 steps exit 0, `overall: PASS`, 1,185 tests passed. `m2_proof_report.json` is byte-identical to the `c304b53` run. The committed evidence and the Proof record now cite `017d7f6`.
+
+## Round 2 — re-verification of T8-F1 to T8-F5
+**Reviewer:** Codex, session `01a13d4b-a7ac-7382-aef2-0b1b8f8bbf87`, at `31f2fc1` (git clone). **Prompt:** `raw/M2-T8-codex-review02-prompt.md`. **Raw:** `raw/M2-T8-codex-review02.md`.
+
+**Verdict: PASS (unconditional; no new substantive findings). T8-F1 to T8-F5 are resolved.**
+
+Verified:
+- **Script, exercised with a stub `uv`:**
+  - default and successful publication, a failed step, a failed publication, a missing artifact, and removal of stale artifacts;
+  - the guards for M1 and the repository root, including absolute and relative paths, descendants, symlinks, `..` and trailing slashes, all refuse before any step runs;
+  - the clean-tree flag for relative, absolute and outside destinations, for dirty trees and for git errors;
+  - quoting with spaces, and `set -u`.
+- **Descriptions:** the script, README, scripts table and Proof record accurately state the single-host scope, the separate CI gate and the 28 runs in 16 groups.
+- **Evidence:** the log names `017d7f6`, a clean tree, and 20 steps all exiting 0.
+- **Fresh M2 Proof:** 228/228. It matches the committed report check by check; only the CPU metadata in notes differs. Ruff is clean.
+- **Protected files:** none changed since `963dbe7`, and the M1 assets are unchanged against `main`.
+- The full pytest suite was not re-run, because no Python changed since round 1, where 1,185 tests passed.
+
+**Note (no severity):** `git diff c304b53..HEAD` shows the report as added, because the `c304b53` evidence was first committed in `9101970`. The reviewer compared `9101970..HEAD` instead: `m2_proof_report.json` is byte-identical.
+
+## Review gate
+- [x] Reviewer and revisions recorded (rounds 1 and 2)
+- [x] Scope explicit
+- [x] Every substantive finding has severity, evidence and a disposition (T8-F1 to T8-F5: ACCEPTED)
+- [x] Accepted fixes re-tested by the implementer and re-verified by the reviewer
+- [x] No Critical or High finding raised; none open
+
+**T8 review closed: PASS (unconditional).** The reviewer also states that M2 is ready for the Tech Lead's final milestone review. Completion remains the Tech Lead's decision.

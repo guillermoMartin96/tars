@@ -1,6 +1,6 @@
 # Proof Record — Milestone 2: Propulsion & Orbital Maneuvers (T1–T7 complete; T8 Proof evaluated)
 
-**Milestone result:** not claimed. The T8 evaluation of P1–P12 is in the **T8** section below. Declaring M2 complete and merging need Tech Lead approval.
+**Milestone result:** T8 Proof evaluation **PASS** at `017d7f6`: P1–P12 met (prototype definition of done), independent review unconditional PASS. M2 is **not declared complete**; that and the merge await the Tech Lead's final milestone review.
 - This record collects completed task evidence only (REV-013 lesson).
 - Thresholds: `proof/thresholds/m2.json` is **approved** (DR-0023, 2026-10-14; values unchanged from T5/T6). DR-0015's conditions are met (REV-012: VAL-0010/DR-0016; measurements: T5–T7, DR-0023). FU-1 is closed (DR-0023).
 
@@ -280,7 +280,7 @@ Every gated value is from `m2_proof_report.json` at `017d7f6`, worst case over t
 | P9 | Schema-valid events; JSONL round-trips | ✅ Event schema and round-trip tests pass (`tests/test_events.py`, `tests/test_commands.py`); the Proof re-validates every event (`identities`, `event_order`) | pytest; report |
 | P10 | M1 unchanged | ✅ Golden event-log sha256 `7a4e1877…` exact; M1 Proof PASS; GMAT M1 PASS; M1 cross-platform Δ = 0. `m1.json`, `m1_final_state.json` and the M1 GMAT reference files are unchanged against `main` | `m1_non_gmat.json`, `gmat_m1_reference.json`, `m1_cross_platform.json` |
 | P11 | SCI-0008…0012 Active; ADR for propulsion; DRs resolved | ✅ SCI-0008…0012 Active (DR-0011/0012/0014); ADR-0007 Accepted. DR-0010…0014, 0016 and 0017 resolved; DR-0018…0023 approved. DR-0015 is "conditionally approved", and both its conditions are now satisfied (REV-012 reviewed: VAL-0010, DR-0016; measurements on the implementation: T5–T7, DR-0023). Its status line is left for the Tech Lead | `docs/science/assumptions.md`, `docs/decisions/` |
-| P12 | External review completed; every finding dispositioned; no open Critical/High | ⏳ T1–T7 reviews closed: T1 (review gate PASS), T2, T3, T4, T5, T6 (round 18) and T7 (round 4) all PASS, every finding dispositioned. The T8 milestone review is recorded in `docs/reviews/M2-T8-review-01.md` | `docs/reviews/M2-*.md` |
+| P12 | External review completed; every finding dispositioned; no open Critical/High | ✅ T1–T7 reviews closed: T1 (review gate PASS), T2, T3, T4, T5, T6 (round 18) and T7 (round 4) all PASS, every finding dispositioned. **T8 milestone review** (`docs/reviews/M2-T8-review-01.md`): round 1 REQUEST_CHANGES (T8-F1…F5, all Medium/Low, ACCEPTED and fixed); round 2 **unconditional PASS** (Codex session `01a13d4b-a7ac-7382-aef2-0b1b8f8bbf87`, at `31f2fc1`). No Critical or High finding open | `docs/reviews/M2-*.md` |
 
 ### Standard gate (proof/PROOF.md)
 | Check | Status |
@@ -291,7 +291,7 @@ Every gated value is from `m2_proof_report.json` at `017d7f6`, worst case over t
 | Machine-readable events validate | ✅ P9 |
 | Scientific assumptions recorded | ✅ SCI-0008…0012; VAL-0008…0017 |
 | Engineering decisions recorded | ✅ DR-0010…0023; ADR-0007 |
-| External review / findings / no open Critical-High | ⏳ P12 |
+| External review / findings / no open Critical-High | ✅ P12 |
 | No secrets, debug artifacts or accidental files | ✅ `runs/` is git-ignored; evidence is intentional |
 | Branch pushed; revision identified | ✅ `017d7f6` |
 
