@@ -13,7 +13,17 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 # Cleanliness is checked before any evidence is written (evidence files themselves are outputs).
-CLEAN=$([ -z "$(git status --porcelain --untracked-files=normal -- . ":(exclude)$EV")" ] && echo yes || echo no)
+# Only an evidence directory inside the repository is excluded; a git error counts as not clean.
+mkdir -p "$EV"
+EV_ABS="$(cd "$EV" && pwd -P)"
+ROOT_ABS="$(pwd -P)"
+SPEC=(.)
+case "$EV_ABS/" in "$ROOT_ABS"/*) SPEC+=(":(exclude)${EV_ABS#"$ROOT_ABS"/}") ;; esac
+if STATUS="$(git status --porcelain --untracked-files=normal -- "${SPEC[@]}")" && [ -z "$STATUS" ]; then
+  CLEAN=yes
+else
+  CLEAN=no
+fi
 FAILED=0
 LOG="$TMP/proof_run.log"
 
