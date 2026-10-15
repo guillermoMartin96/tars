@@ -12,15 +12,15 @@ The snapshot is the current directory: a git clone of the branch at HEAD, with g
   5. the T8 review is an unconditional PASS with no unresolved blocking findings;
   6. the working tree is clean, and no unreviewed changes have been introduced.
 - The Tech Lead also directed that DR-0015 be updated from conditionally approved to approved, citing evidence for both conditions, with the accepted residual risks and margins preserved.
-- The implementer's acceptance commit is HEAD (`git show HEAD`). It is records-only:
+- The implementer's acceptance commit is `3dfffb3` (`git show 3dfffb3`). It is records-only. Later commits only add this prompt under `docs/reviews/raw/`. The commit changes:
   - `proof/records/M2-propulsion.md` (header);
   - `docs/decisions/requests/DR-0015-…md`;
   - `docs/milestones/M2-propulsion.md`;
   - `docs/milestones/README.md`.
 
 ## Tasks
-1. Confirm that HEAD changes only those four record files, and that `git diff cd8fdd8..HEAD` and `git diff 017d7f6..HEAD` touch no code, test, scenario, threshold, reference, golden, snapshot, contract, validator or CI file.
-2. Check every factual statement added by HEAD against the repository: the digests (`shasum -a 256`), the paths unchanged since `963dbe7`, the M1 assets identical to `origin/main`, 228/228, the evidence revision, and the review status. Check DR-0015's cited evidence for both conditions: VAL-0010/DR-0016, and VAL-0013…0017/DR-0023. Flag anything wrong, overstated or unsupported, and any residual risk or margin that was dropped or altered.
+1. Confirm that `3dfffb3` changes only those four record files, that later commits add only review prompts, and that `git diff cd8fdd8..HEAD` and `git diff 017d7f6..HEAD` touch no code, test, scenario, threshold, reference, golden, snapshot, contract, validator or CI file.
+2. Check every factual statement added by `3dfffb3` against the repository: the digests (`shasum -a 256`), the paths unchanged since `963dbe7`, the M1 assets identical to `origin/main`, 228/228, the evidence revision, and the review status. Check DR-0015's cited evidence for both conditions: VAL-0010/DR-0016, and VAL-0013…0017/DR-0023. Flag anything wrong, overstated or unsupported, and any residual risk or margin that was dropped or altered.
 3. Independently check conditions 1, 2, 3, 5 and 6 yourself:
    - for condition 1, inspect `git diff --name-status origin/main..HEAD` and the content of modifications to files that pre-exist on `origin/main`;
    - for condition 3, run `PYTHONPATH=src .venv/bin/python toolbox/validators/m2_proof.py --out review_scratch/m2.json` and compare it with `proof/records/evidence/M2/m2_proof_report.json`.
