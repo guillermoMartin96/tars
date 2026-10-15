@@ -17,7 +17,7 @@
 | | `src/`, `tests/`, `scenarios/`: no J2, drag, atmosphere or density code. The only J2 mention is `EARTH_J2_APPROX`, informational for M1 VAL-0007 | `git grep` at `d92ab89` |
 | | No M3 scenario, threshold, reference, validator or golden exists | `git ls-tree` |
 | | Remote branches: `main`, `milestone-1-orbit`, `milestone-2-propulsion-…`, `milestone-3-planning` (planning documents only), `research/flight-software-architecture` (documents only), two historical review/investigation branches | `git branch -r` |
-| Planning branch | `milestone-3-planning`, created from `d92ab89`. It changes documentation and research artifacts only: `docs/milestones/`, `docs/decisions/requests/DR-0024…0026`, `docs/science/experiments/m3-planning/`, an appended planning entry in `docs/science/validation.md`, `docs/reviews/` | `git diff --stat d92ab89..milestone-3-planning` |
+| Planning branch | `milestone-3-planning`, created from `d92ab89`. It changes documentation and research artifacts only: `docs/milestones/`, `docs/decisions/requests/DR-0024…0027`, `docs/decisions/0009-…` (ADR-0009), `docs/science/experiments/m3-planning/`, `docs/science/assumptions.md` (SCI-0013…0017 appended; an appended correction note in SCI-0005), `docs/science/validation.md` (VAL-0018 appended; an appended correction note in VAL-0007), `docs/reviews/` | `git diff --stat d92ab89..milestone-3-planning` |
 
 **Note on the prompt's branch name:** the instruction mentions `research/flight-architecture`. The branch that exists is `research/flight-software-architecture` (head `27ad862` before this checkpoint). It is treated as the same branch. This is a naming difference, not a conflict.
 
@@ -41,7 +41,7 @@ Each entry is identified by its git object id at `d92ab89` (`git rev-parse d92ab
 | `proof/thresholds/` (m1.json, m2.json) | tree `f5d6dfee…` | Approved M1 (DR-0008/0009) and M2 (DR-0023) thresholds | sha256-pinned in `approved_digests.py` |
 | `proof/references/` (m1_final_state.json, m2_final_states.json) | tree `cadf6438…` | M1 golden (events hash `7a4e1877…`); M2 reference-host golden | M2 golden sha256-pinned; M1 hash is a hard constraint |
 | `toolbox/references/gmat/m1_two_body.{script,report,metadata}` | `db60a883…`, `aa32cbb4…`, `eb0973a0…` | M1 against GMAT (VAL-0004, DR-0009) | Committed reference; replacement only with explicit review |
-| `toolbox/references/gmat/informational/` | tree `336a1387…` | VAL-0007: realistic-model divergence, informational | Historical record. **Caveat:** its J2/realistic runs used the JGM-3 file GM (DR-0025 §13); recorded, not edited |
+| `toolbox/references/gmat/informational/` | tree `336a1387…` | VAL-0007: realistic-model divergence, informational | Historical record. **Caveat:** its J2/realistic runs used the JGM-3 file GM (DR-0025 §13). Artifacts not edited; an appended, owner-approved correction note in VAL-0007 records it (no acceptance decision changes) |
 | `toolbox/references/gmat/m2/` | tree `359fbf01…` | O9 GMAT finite-burn references and manifest (VAL-0014) | Manifest sha256-pinned |
 | `toolbox/references/snapshot/m2/` | tree `c806ed4d…` | DR-0021 approved reference snapshot, baseline 3 | sha256-pinned; DR-0021 condition 3 |
 | `docs/contracts/m2-commands-and-events.md` | `da1d9553…` | M2 command and event contract | Accepted contract |

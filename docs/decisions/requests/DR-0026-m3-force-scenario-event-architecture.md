@@ -1,6 +1,6 @@
 # Decision Request: M3 force, scenario and event architecture; physics versioning (gate G3)
 
-**Status:** OPEN (PROPOSED; not approved)  
+**Status:** RESOLVED — D3 APPROVED with constraints (Tech Lead, 2026-10-15); the decay-termination value stays OPEN (DR-0027). Recorded as ADR-0009. Where the request body differs from the Resolution, the Resolution governs. Implementation not authorized by this resolution.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -283,6 +283,27 @@ See `docs/milestones/M3-baseline-and-impact.md` for the full A/B/C classificatio
 Answers to Q-G3-1 to Q-G3-11, or `discuss`.
 
 ## Resolution
-**Decision:** _pending_  
-**Reasoning/notes:**  
+**Decision:** **D3 APPROVED with constraints** (Tech Lead, 2026-10-15, "M3 planning decision checkpoint", section 3). Nothing in this resolution authorizes Rust, C, FFI, firmware, RTOS, real-time execution or embedded deployment work, or any M3 implementation.
+
+| # | Closure | Status |
+|---|---|---|
+| Q-G3-1 | A small **immutable** force-evaluation context with the minimum shared runtime state forces need, including current total mass; the old force signature preserved through an adapter so frozen M1/M2 behaviour stays reproducible. **Mutable mass is never injected into force implementations** (D1 rejected) | APPROVED |
+| Q-G3-2 | Density is a separate component consumed by drag. `PhysicsConfiguration` with deterministic canonical serialization and a SHA-256 identity (`physics_id`). Scenario v3 is **additive** and never mutates historical v1/v2 artifacts. `PhysicsConfigured` event as proposed (§5.5) | APPROVED |
+| Q-G3-3 | Validation **fails closed** when the expected physics identity does not match the active physics configuration | APPROVED |
+| Q-G3-4 | Earth/model constants are pinned physics configuration; no inline constant overrides in scenarios (with DR-0024) | APPROVED |
+| Q-G3-5 | **Owner decision differs from the recommendation (a).** Every historical physics/model version is **retained for as long as a frozen validation artifact or a supported historical scenario depends on it.** No time-based deletion period | APPROVED (owner's rule) |
+| Q-G3-6 | A decay run ends at an **explicitly defined event or model-validity boundary**. No universal re-entry altitude is invented to close this request; the numerical definition stays OPEN (DR-0027 item A). No default value in code or scenarios | APPROVED (principle); value OPEN |
+| Q-G3-7 | Per-sample environment telemetry: **not addressed by the owner.** No telemetry event is authorized by this resolution; adding one later needs its own decision | Not authorized; no decision |
+| Q-G3-8 | Force composition and order are deterministic and documented: point mass, J2, drag, then thrust (§5.2) | APPROVED |
+| Q-G3-9 | `escape` keeps the two-body energy check: part of the approved D3 text (§5.6), recorded as a known simplification. Not separately addressed by the owner; flagged in the checkpoint report | APPROVED via D3 (flagged) |
+| Q-G3-10 | v3 spacecraft may carry mass and drag properties without an engine (§5.2, §5.4): part of the approved D3 text; consistent with DR-0024 Q9 (initial mass is a scenario input) | APPROVED via D3 |
+| Q-G3-11 | ADR-0009 written after this resolution: `docs/decisions/0009-m3-force-context-and-physics-identity.md` (Accepted as a design decision; not implemented) | APPROVED; done |
+| — | No general plugin framework in M3 (D4 rejected) | APPROVED |
+
+**Reasoning/notes:**
+- Q-G3-5 replaces recommendation (a). Consequence for the design: the code that evaluates a model version (for example `zonal_j2@1`) must stay executable while any frozen artifact or supported scenario records that version. A new version is added beside it, never in place of it. M1/M2's v1/v2 paths are already retained on the same principle.
+- Q-G3-7 and Q-G3-9 are flagged so they cannot become implied decisions.
+
 **Follow-up:**
+- DR-0027 item A (termination value).
+- ADR-0009 status moves to "Accepted — implemented" only after the M3 implementation and Proof.

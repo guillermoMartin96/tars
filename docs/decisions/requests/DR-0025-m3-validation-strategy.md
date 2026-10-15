@@ -1,6 +1,6 @@
 # Decision Request: M3 validation strategy for J2 and drag (gate G2)
 
-**Status:** OPEN (PROPOSED; not approved)  
+**Status:** RESOLVED — principles APPROVED (Tech Lead, 2026-10-15); several items explicitly DEFERRED to T0 or later evidence, see "Resolution". No numerical threshold is approved. Where the request body differs from the Resolution, the Resolution governs.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -213,6 +213,35 @@ Each threshold needs one of: an analytical derivation, documented measurement, a
 Answers to Q-G2-1 to Q-G2-8, or `discuss`.
 
 ## Resolution
-**Decision:** _pending_  
-**Reasoning/notes:**  
+**Decision:** principles APPROVED (Tech Lead, 2026-10-15, "M3 planning decision checkpoint", section 2). Each owner question is closed below, either by an owner decision or by an explicit deferral, so that nothing is decided by implication.
+
+**Approved principles:**
+1. **Evidence classes.** All M3 validation evidence is classified as one of: independent external reference; partially independent numerical reference; same-model / invariant check; regression check (§2, §11).
+2. **GMAT.** GMAT counts as an independent external oracle **only** when its setup is independently specified and documented while representing the same intended physical problem. Every GMAT comparison records the force model (gravity degree/order, the `.cof` file and its GM/R/C̄20, tide model), frame and axes of the state exchange, constants (Earth.Mu, EquatorialRadius, Flattening, rotation), atmosphere model and its table file (with digest), drag model (Cd, area, mass, `DragModel`), propagator, step-size and error-control settings, and any other solver setting needed to reproduce the comparison.
+3. **DOP853** with the same force equations or constants is **partially independent**, never fully independent.
+4. **No blind reuse of the M2 measured-order rule** (DR-0008 |p − 4| ≤ 0.5). Numerical-order and convergence tests are applied only where their mathematical assumptions hold, in particular on smooth configurations (point mass, J2, the one-band atmosphere).
+5. **Discontinuous atmosphere.** For the piecewise table, convergence, error and stability evidence appropriate to a discontinuous right-hand side is used instead of an artificial fourth-order measurement across band boundaries. Together with DR-0024 Q5a: **tests at and immediately around every band boundary** are required.
+6. **dt = 10 s is PROVISIONAL.** Candidate timesteps are measured in the designated measurement task, after the physical models and the reference setup exist.
+7. **No M3 numerical acceptance threshold is approved during planning.** Thresholds are proposed in a later Decision Request, from measured evidence, with margin and rationale.
+8. **Frozen M1/M2 evidence is preserved.** Perturbations-off regression must reproduce it exactly wherever the existing contracts require exact reproduction (M1 golden hash, M2 Proof, M2 cross-platform goldens, M2 reference snapshot).
+9. **VAL-0007 correction note** explaining the actual GM used by that GMAT run; the historical measurement is not rewritten.
+
+| # | Closure | Status |
+|---|---|---|
+| Q-G2-1 | GMAT exact-configuration **method** (a) derived Earth-orientation bound, (b) driving the reference with GMAT's reported axis, or (c) informational only: the owner approved the documentation and independence conditions (principle 2) but **did not choose a method**. T0 must establish which configurations actually represent the intended physics; the method is chosen after T0 | DEFERRED to the T0 checkpoint |
+| Q-G2-2 | The four-class independence classification is APPROVED (principle 1). The sub-rule "constants are verified by identity checks, not trajectory gates" was not separately addressed; it stays a PROPOSED method, classed as a same-model check | Classification APPROVED; identity-check rule PROPOSED |
+| Q-G2-3 | Option (a) APPROVED in substance: order gates only on smooth configurations (principle 4), with discontinuity-appropriate evidence and boundary tests for the table (principle 5). Option (d) (continuity-enforced values) is **excluded** by DR-0024 Q5a. Options (b) (step splitting at band crossings) and (c) (C1 interpolation) are **not approved**; (c) would alter the source model | APPROVED (a); (c), (d) excluded; (b) not approved |
+| Q-G2-4 | dt = 10 s PROVISIONAL; measurement in the designated task (principle 6) | APPROVED |
+| Q-G2-5 | Reference missions: **not decided.** T0 builds and exercises candidate configurations (J2, drag/atmosphere, boundary cases) and proposes the list | DEFERRED to the T0 checkpoint |
+| Q-G2-6 | M3 reference-snapshot treatment: **not decided**; decided when the M3 validators are designed (T4), with evidence | DEFERRED (T4) |
+| Q-G2-7 | Source for geodetic-height test points: **not decided.** T0 must verify geodetic-height behaviour and identify the source it used | DEFERRED to the T0 checkpoint |
+| Q-G2-8 | VAL-0007 correction note: APPROVED and added (`docs/science/validation.md`, VAL-0007 "Historical correction note") | APPROVED; done |
+| — | Numerical thresholds for M3 | Not approved; later threshold DR (G4) |
+
+**Reasoning/notes:**
+- Deferred items carry no default. Code and documents must not treat a recommendation in §14 as the decision.
+- §13's statements about what does not transfer from M1/M2 stand unchanged.
+
 **Follow-up:**
+- T0 checkpoint: Q-G2-1 method, Q-G2-5 reference missions, Q-G2-7 geodetic source, and candidate C_d/A (DR-0024 Q9).
+- T4: Q-G2-6. Later: the threshold DR (G4).

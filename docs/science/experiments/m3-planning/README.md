@@ -96,3 +96,12 @@ The GMAT probe was run twice, and both runs gave identical numbers.
 4. **The literal piecewise-exponential table is discontinuous at band edges.** Table rounding gives finite density jumps (1.4e-3 relative at 25 km, 1.5e-5 at 250 km, ≤ 1e-4 elsewhere), and the scale height also changes. RK4's error ratios degrade when an orbit crosses a band edge: 9.0–13.6 instead of 16 for drag only. These are not an asymptotic order. An order-4 convergence oracle needs a smooth configuration, such as one band, or must account for edge crossings. (Corrected after review M3P-F1, which pointed out that an earlier wording called the table C0.)
 5. **The first-order decay estimate is not a tight oracle** at these decay rates. The density grows as the orbit decays (+11% at B 25.8). A semi-analytic oracle must integrate the decay with density evaluated along the decaying orbit, and even then it stays approximate: orbit averaging and the rotation factor carry their own errors (review M3P-F3).
 6. **The J2 constant choice matters at the metre level**, which is above the 0.3 m RK4 error. Tide system (zero-tide vs tide-free), source and GM labelling (TT vs TCG) must be decided explicitly and matched exactly in references.
+
+## Q10 table check (added 2026-10-15, after the owner's G1 decision)
+`q10_table_check.py` compares the GMAT R2026a exponential-atmosphere table with the data file published in the author's code repository (`CelesTrak/fundamentals-of-astrodynamics` @ `49df0479c950917c0a2c5ac31f2db6477bba57f6`, `software/misc/pascal/ATMOSEXP.DAT`), field by field as decimals, and quantifies the density jump at every band boundary. Output: `q10_table_check_results.json`; a rerun is byte-identical.
+
+```
+python -I q10_table_check.py "<GMAT>/data/atmosphere/earth/EarthExponentialAtmosphereData.txt" <checkout>/software/misc/pascal/ATMOSEXP.DAT q10_table_check_results.json
+```
+
+Result: 25 of 28 rows identical; the 0 km base altitude (0.0 vs 0.010 km) and the 900 km scale height (181.05 vs 181.045 km) differ; the 1000 km row is absent from the author's file. Largest boundary jump +1.36e-3 (25 km). Interpretation: DR-0024 §3.4; open residuals: DR-0027 item B.

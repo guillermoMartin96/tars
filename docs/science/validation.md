@@ -152,6 +152,11 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
 - This confirms SCI-0001 and SCI-0004 as stated and quantifies them. J2 and drag must precede any mission that depends on real ground tracks, node timing, or orbit lifetime.
 
 - **Status:** informational; no gate. GMAT epoch-column drift REV-012 is deferred (see the GMAT README).
+- **Historical correction note (2026-10-15; DR-0025 Q-G2-8, approved by the Tech Lead).** The entry above is left as written; this note corrects its implied constants.
+  - **Historical result (unchanged):** the measured divergences, node drifts, SMA changes and altitude ranges in the table, from the committed scripts and reports in `toolbox/references/gmat/informational/`.
+  - **Incorrect historical description:** the generated scripts set `Earth.Mu = 398600.4418` and `Earth.EquatorialRadius = 6378.137` (WGS 84), which presents the runs as using the project's constants. Nothing in the record says otherwise.
+  - **Corrected interpretation:** these runs use a gravity field (`GravityField.Earth.PotentialFile = 'JGM3.cof'`), and GMAT's gravity field applies the GM and reference radius from the `.cof` file header, not `Earth.Mu`. The JGM-3 file header gives GM = 3.98600441500000e+14 m³/s² and R = 6.37813630000000e+06 m, and its C̄2,0 = −4.84165374886470e-04 (so J2 ≈ 1.0826267e-3). Established by the M3 planning GMAT probe (VAL-0018: a GMAT run with a generated `.cof` matches the Kepler solution with GM 3.986004415e14 to 1.4e-5 m and differs from WGS 84 by 0.627 m). So the J2-only, 4×4 and drag cases used the JGM-3 GM, R and J2.
+  - **Effect on prior acceptance decisions: none.** VAL-0007 is informational and gates nothing (DR-0005). The GM difference is about 0.6 m over 10 orbits, negligible against the 741–1 325 km results and the conclusions drawn from them. The gating M1/M2 GMAT references use a point-mass force with `Earth.Mu` and are unaffected (SCI-0005 correction note).
 
 ## VAL-0008 — PLANNING: finite-burn numerics with RK4 (M2; not a gate)
 - **Date / revision:** 2026-10-09 / `63bec8d` (research scripts; no project propulsion code exists)

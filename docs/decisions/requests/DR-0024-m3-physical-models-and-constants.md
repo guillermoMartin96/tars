@@ -1,6 +1,6 @@
 # Decision Request: M3 physical models and constants: J2 and atmospheric drag (gate G1)
 
-**Status:** OPEN (PROPOSED; not approved)  
+**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). One numerical sub-decision stays OPEN in DR-0027. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -9,7 +9,7 @@
 - Companion requests: DR-0025 (G2, validation) and DR-0026 (G3, architecture).
 - Impact analysis: `docs/milestones/M3-baseline-and-impact.md`.
 
-Nothing here is implemented. Every value below is a *candidate* until this request is resolved. Statements are labelled **[fact]** (sourced or measured), **[derived]** (computed here from facts) or **[recommendation]**.
+Nothing here is implemented. The body below is the request as drafted; the decisions are in "Resolution". Statements are labelled **[fact]** (sourced or measured), **[derived]** (computed here from facts) or **[recommendation]**.
 
 ## 1. Problem statement
 - M1 and M2 model Earth as a point mass (SCI-0001) with no perturbing forces (SCI-0004). VAL-0007 measured that this departs from realistic low-Earth-orbit (LEO) physics by 0.7–1.3 thousand km in 15 hours at the reference orbit. **[fact]**
@@ -99,6 +99,43 @@ All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. 
 | Atmosphere co-rotating vs not rotating | **40 km** |
 | Ballistic coefficient +1% | 4.8 km |
 | Altitude datum −0.7 m (for density) | 9.2 m |
+
+### 3.4 Q10 verification of the atmosphere table (performed 2026-10-15, after the owner's decision)
+The owner asked for the table to be checked against the printed or source material before DR-0024 closes. **What was checked, exactly:**
+- **Printed book: not checked.** No printed or electronic copy of Vallado's *Fundamentals* (any edition) is available to the project. This check does not claim to have read Table 8-4.
+- **Author-published source checked:** the data file of the exponential model in the author's own code repository, `CelesTrak/fundamentals-of-astrodynamics` ("Code related to 'Fundamentals of Astrodynamics and Applications' 5th ed. by David Vallado"), commit `49df0479c950917c0a2c5ac31f2db6477bba57f6` (2026-09-29):
+  - `software/misc/pascal/ATMOSEXP.DAT`, sha256 `d2be19cc…ef4c` (27 rows, 0.010–900 km);
+  - the routines that read it, `software/fortran/ASTPERT.FOR` (`SUBROUTINE ATMOS`, "References: Vallado 2007, 562, Ex 8-4") and `software/misc/pascal/ASTPERT.PAS` (`PROCEDURE ATMOS`).
+- **Author errata checked:** the consolidated errata for the 3rd (2011), 4th (2019) and 5th (2025) editions in the same repository (`documentation/Fundamentals of Astrodynamics Errata/`). **None of them lists a correction to the exponential-atmosphere table** or to §8.6.
+- **Compared against:** GMAT R2026a `data/atmosphere/earth/EarthExponentialAtmosphereData.txt`, sha256 `75762f67…a85e` (28 rows, 0–1000 km), the file DR-0024 proposed.
+- **Method:** `docs/science/experiments/m3-planning/q10_table_check.py` compares the parsed decimal values field by field (output `q10_table_check_results.json`; a rerun is byte-identical).
+
+**Result [fact, measured]:**
+| Rows | Finding |
+|---|---|
+| 25 rows, 25–800 km | **Identical** in base altitude, base density and scale height |
+| 0 km row | Density 1.225 kg/m³ and H 7.249 km identical. **Base altitude differs: 0.010 km in the author's file, 0.0 km in GMAT's** |
+| 900 km row | Base and density identical. **Scale height 181.045 km (author's file) vs 181.05 km (GMAT)**: the GMAT value is the author's value rounded to two decimals; relative difference 2.8e-5 |
+| 1000 km row (3.019e-15 kg/m³, 268.00 km) | **Not present in the author's file.** Not verifiable from any source available to the project; GMAT's provenance statement (it cites Vallado 5th ed. §8.6) is the only support |
+
+**Additional finding from the author's code (supports Q6):** the author's `ATMOS` routine computes **geodetic height** (`Hellp`, by iterating geodetic latitude with the ellipsoid eccentricity) before the table lookup, and selects the band whose base lies below the height.
+
+**Consequences:**
+- Every band an M3 LEO validation orbit can reach (0–900 km base rows; orbits at or below roughly 900 km) is confirmed against an author-published source, except the 0 km base altitude (which only affects heights below 10 m).
+- The 900 km scale-height rounding and the unverified 1000 km row matter only above 900 km. No planned M3 reference mission is there, but the pinned dataset must still say which value it carries. Recorded as DR-0027 item B (OPEN); the dataset is not changed here.
+- **Discontinuities of the source table (owner: preserve, document, quantify, test).** Value jumps at every boundary, from `q10_table_check_results.json` (relative jump = tabulated base density of the upper band ÷ the lower band evaluated at the boundary − 1):
+  - largest: **+1.36e-3 at 25 km**;
+  - 30–1000 km: all |jump| ≤ 9.6e-5 (80 km +9.6e-5; 110 km −8.0e-5; 120 km −7.8e-5; 250 km −1.5e-5; 1000 km −1.6e-5);
+  - in addition, the logarithmic slope −1/H changes at every boundary (for example H 37.105 → 45.546 km at 250 km).
+  These are properties of the published model, not defects to be repaired.
+
+### 3.5 Consistency of keeping WGS 84 GM and a with the EGM2008 J2 (owner's stop condition)
+The owner approved keeping GM and a "unless the research shows that doing so creates a mathematically inconsistent model that materially affects M3 acceptance". **Finding: the stop condition is not met.** The evidence:
+- **The model is mathematically well-defined.** U = (μ/r)[1 − J2 (a/r)² P₂(sin φ)] is a valid degree-2 potential for any positive μ, a and J2. Using one μ in both terms keeps it conservative and self-consistent.
+- **What the mix does change is fidelity to the EGM2008 field**, which is scaled with GM = 3.986004415e14 and a = 6378136.3 m [IERS-6]. Taking C̄2,0 with the WGS 84 a changes the J2 term's coefficient μ J2 a² by a relative **2.2e-7** (radius) plus **7.5e-10** (GM) [derived]. For comparison, the tide-system ambiguity of J2 itself is **9.0e-6** relative (§3.1), 40 times larger.
+- **Measured effect:** 0.16–0.18 m (radius) and 0.63–0.70 m (GM, mostly through the central term, which M1/M2 already use) over 10 orbits (§3.3). These are differences from a different physical definition, not errors in the chosen one.
+- **M3 acceptance compares like with like.** Every M3 reference (validator reference, DOP853, GMAT exact configuration) will be configured with the pinned constants. GMAT needs particular care: its gravity field takes GM and R from the `.cof` file, not `Earth.Mu` (§3.2), so an exact-configuration GMAT reference must carry the project's GM, a and J2 in a generated `.cof` file. That is a T0 requirement (DR-0025 Resolution), not a reason to change constants.
+- **The TT/TCG labelling** (SCI-0005 correction note) concerns which value of GM IERS recommends for TT-scaled orbits. The 7.5e-10 relative difference is the 0.63–0.70 m above. It does not alter any acceptance comparison, because references used the same GM (§4 of the SCI-0005 correction note).
 
 ## 4. Candidate approaches
 ### 4.1 J2 formulation
@@ -305,6 +342,31 @@ All measurements are from the M1 initial state over the 53 700 s M1/M2 horizon. 
 Answers to Q1–Q10. For example: "Q1 K-A, Q2 a, Q3 keep + erratum, Q4 J-ax-1, Q5 A2, Q6 H-geod, Q7 yes, Q8 <decision>, Q9 <basis>, Q10 verify first", or `discuss`.
 
 ## Resolution
-**Decision:** _pending_  
-**Reasoning/notes:**  
+**Decision:** APPROVED with conditions (Tech Lead, 2026-10-15, "M3 planning decision checkpoint", section 1). Recorded here by the implementer; no item below was decided by the implementer. Labels: **APPROVED** (owner decision), **OPEN** (explicitly not decided), **DEFERRED** (decided later, at a named point).
+
+| # | Decision | Status |
+|---|---|---|
+| Q1 | **J2 = 1.0826261739e-3**, EGM2008 tide-free (−√5 × −0.484165143790815e-3, [NGA] Table 5.1). The zero-tide alternative is not adopted | APPROVED |
+| Q2 | J2 reference radius = the existing WGS 84 a = 6378137.0 m (K-A). The owner's stop condition (a material inconsistency) was checked and is **not met** (§3.5) | APPROVED |
+| Q3 | GM stays the WGS 84 3.986004418e14 m³/s² (DR-0003). **SCI-0005 gets an explicit historical correction note** for its TT/TCG wording; the old text is not rewritten (`docs/science/assumptions.md`, SCI-0005 "Historical correction note") | APPROVED; note added |
+| Q4 | J2 axis, ellipsoid axis and atmosphere-rotation axis = **the frame z axis (J-ax-1, D-rot-1)**. The owner's section 1 text does not name an axis option; the approval comes from the D3 approval in DR-0026, whose §5.7 states "In M3 the body axis is the frame z axis (DR-0024 J-ax-1)", and from the approval of "the proposed pinned Earth rotation rate", which D-rot-1 applies about z. Listed explicitly so that it is not an implied decision; **flagged for owner confirmation** in the checkpoint report | APPROVED via DR-0026 D3 (confirmation requested) |
+| Q5 | Atmosphere = the piecewise-exponential Vallado/GMAT table (A2), subject to Q10. A4 (MSIS-class) deferred to a later fidelity milestone. A1 retained only as the one-band subset for analytic and unit tests | APPROVED |
+| Q5a | **The tabulated densities are preserved exactly as published.** No value is altered to force continuity. Discontinuities are documented and quantified (§3.4), and tests are required at and immediately around **every** band boundary (DR-0025 Resolution) | APPROVED |
+| Q6 | Density height = **geodetic height relative to the WGS 84 ellipsoid** (a, 1/f = 298.257223563 [NGA]). SCI-0006 (reported altitude, impact) is unchanged for v1/v2 | APPROVED |
+| Q7 | Atmospheric relative velocity v_rel = v − ω_E × r, with the pinned **ω_E = 7.292115e-5 rad/s** [NGA] | APPROVED |
+| Q8 | **No indefinite extrapolation below the modelled domain.** An explicit validity boundary and a re-entry/termination event are required. The table's own lower edge (0 km; §3.4) is the model's lower bound; the drag model's physical lower limit (a re-entry altitude) has **no defensible source-backed number yet**, so its value is **OPEN in DR-0027 item A**. No default value exists in code or scenarios. Above the top band, the table's own top-band exponential applies as the source defines (not a cutoff) | APPROVED (principle); numerical value OPEN (DR-0027 A) |
+| Q9 | C_d, reference area A, initial mass and initial state are **explicit scenario inputs**, never hidden constants. Values for validation scenarios are proposed with their basis at T0 and approved with the reference missions | APPROVED (principle); values DEFERRED to the T0 checkpoint |
+| Q10 | Verified against the author-published data file and errata (§3.4). 25 of 28 rows identical; 0 km base altitude, 900 km scale height and the 1000 km row recorded as residuals in DR-0027 item B. The printed table was not available | Verification done; residual OPEN (DR-0027 B) |
+| — | Earth/model constants (GM, a, J2, 1/f, ω_E, density dataset) are **pinned physics configuration**, never scenario overrides (also DR-0026) | APPROVED |
+| — | Drag uses the spacecraft's **current total mass** at every derivative evaluation | APPROVED |
+
+**Science records:** SCI-0013 to SCI-0017 added to `docs/science/assumptions.md` with status "Approved (DR-0024); not implemented". SCI-0001, SCI-0004, SCI-0005 and SCI-0006 stay Active for M1/M2 configurations and are not edited (SCI-0005 gains an appended correction note only).
+
+**Reasoning/notes:**
+- Q4 rests on the D3 approval rather than on an explicit section 1 sentence. It is flagged so the owner can confirm or overrule it before T1.
+- The approved items do not change any M1/M2 contract, threshold, reference, golden, validator or acceptance logic.
+
 **Follow-up:**
+- DR-0027 (OPEN): A, the re-entry/termination altitude; B, the Q10 residual table cells above 900 km and at 0 km.
+- T0 (authorized after the planning merge): reference configurations, boundary tests, geodetic-height and Earth-rotation checks (DR-0025 Resolution).
+- T1 and later: not authorized.
