@@ -132,6 +132,13 @@ No OPEN or DEFERRED item has a default.
 | M3P6-F2 | MINOR | ACCEPTED; was not applied → **corrected** | I-6 §1 | DR-0028 amendment 3 item 2 (E5a/E5b assertions, E5c coverage guard); same record |
 | M3P6-F3 | MINOR | ACCEPTED; was not applied → **corrected** | I-6 §1 | DR-0028 amendment 3 item 3 (`wrap()` returns (−π, π], exact); same record |
 
+## Review findings (M3 Planning Review 07, targeted)
+Review-06 findings M3P6-F1, F2 and F3: **RESOLVED** (reviewer's dispositions).
+
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P7-F1 | MINOR | ACCEPTED; **not applied** (I-6 §5 stop) | Pending | `docs/reviews/M3-planning-review-07.md`. The `wrap()` exactness and interval guarantee (script docstring; DR-0028 amendment 3 item 3) needs a finite-input restriction: ±∞ raise ValueError, and NaN returns NaN |
+
 ## Gates
 | Gate | State |
 |---|---|
