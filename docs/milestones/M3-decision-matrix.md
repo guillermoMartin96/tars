@@ -124,6 +124,13 @@ No OPEN or DEFERRED item has a default.
 |---|---|---|---|---|
 | M3P5-F1 | MINOR | ACCEPTED; was not applied (I-4 §5 stop) → **corrected** | I-5 §1–2 | DR-0028 "Resolution amendment 2" (signed formulas, convention, verification); `docs/reviews/M3-planning-review-05.md`, "Resolution of findings" |
 
+## Review findings (planning review 06, targeted)
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P6-F1 | MINOR | ACCEPTED; **not applied** (I-5 §5 stop) | Pending | `docs/reviews/M3-planning-review-06.md`. DR-0028 amendment 2: the exact line-of-nodes result (Δi = −δ, ΔΩ = 0) needs the domain 0 < i − δ < π |
+| M3P6-F2 | MINOR | ACCEPTED; **not applied** | Pending | Same record. Verification script: E5's 180° node jump is reported, not asserted |
+| M3P6-F3 | MINOR | ACCEPTED; **not applied** | Pending | Same record. Verification script: `wrap()` returns [−π, π), declared (−π, π] |
+
 ## Gates
 | Gate | State |
 |---|---|
