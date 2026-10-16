@@ -118,6 +118,11 @@ No OPEN or DEFERRED item has a default.
 | M3P4-F1 | MINOR | ACCEPTED; corrected | I-4 §1 | DR-0028 "Resolution amendment 1" item 1; SCI-0013 status update 3; DR-0024 amendment log; `docs/reviews/M3-planning-review-04.md`, "Resolution of findings" |
 | M3P4-F2 | MINOR | ACCEPTED; corrected | I-4 §1 | DR-0028 "Resolution amendment 1" item 2; SCI-0013 status update 3; same review record |
 
+## Review findings (planning review 05)
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P5-F1 | MINOR | ACCEPTED; **not applied** (I-4 §5 stop) | Pending | `docs/reviews/M3-planning-review-05.md`. Signs of two first-order formulas in DR-0028 amendment 1 item 1 reversed for the stated passive convention; magnitudes and bounds unaffected |
+
 ## Gates
 | Gate | State |
 |---|---|
