@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -19,6 +19,7 @@ No OPEN or DEFERRED item has a default.
 - **I-4:** "M3 Planning — Review 04 Corrections and Final Verification" (Tech Lead, 2026-10-16), sections 1–7.
 - **I-5:** "M3 Planning — M3P5-F1 Correction and Review 06" (Tech Lead, 2026-10-16), sections 1–7.
 - **I-6:** "Continue M3 planning on `milestone-3-planning` from commit `dcabcb2`" (Tech Lead, 2026-10-16), sections 1–6.
+- **I-7:** "Continue the TARS spacecraft simulator M3 planning work from branch `milestone-3-planning`, currently at commit `0dac6d3`" (Tech Lead, 2026-10-16), sections 1–6.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -137,7 +138,7 @@ Review-06 findings M3P6-F1, F2 and F3: **RESOLVED** (reviewer's dispositions).
 
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P7-F1 | MINOR | ACCEPTED; **not applied** (I-6 §5 stop) | Pending | `docs/reviews/M3-planning-review-07.md`. The `wrap()` exactness and interval guarantee (script docstring; DR-0028 amendment 3 item 3) needs a finite-input restriction: ±∞ raise ValueError, and NaN returns NaN |
+| M3P7-F1 | MINOR | ACCEPTED; was not applied (I-6 §5 stop) → **corrected** | I-7 §2 | DR-0028 "Resolution amendment 4" (`wrap()` domain = finite floats; NaN and ±∞ raise ValueError; finite behaviour unchanged); `docs/reviews/M3-planning-review-07.md`, "Resolution of findings" |
 
 ## Gates
 | Gate | State |

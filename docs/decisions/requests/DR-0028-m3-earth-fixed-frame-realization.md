@@ -4,6 +4,7 @@
 **Resolution amendment 1 (2026-10-16, append-only):** two limitation statements in the Resolution are corrected under reviews M3P4-F1 (node error bound) and M3P4-F2 (local solar time). The decision itself (A, B, R-1…R-4) is unchanged. See "Resolution amendment 1" at the end.  
 **Resolution amendment 2 (2026-10-16, append-only):** the signs of two first-order formulas in amendment 1, item 1, are corrected under review M3P5-F1. Magnitudes, bounds and the decision are unchanged. See "Resolution amendment 2" at the end.  
 **Resolution amendment 3 (2026-10-16, append-only):** under review 06 (M3P6-F1, F2, F3), the line-of-nodes exact result is given its domain and the full identity, the 180° node discontinuity is asserted, and the verification script's angle wrapping is made to match the documented (−π, π]. The signed formulas, the convention and the decision are unchanged. See "Resolution amendment 3" at the end.  
+**Resolution amendment 4 (2026-10-16, append-only):** under review 07 (M3P7-F1), the wrapping guarantee is restricted to finite angles, and non-finite inputs raise ValueError. Finite-input behaviour, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 4" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -391,6 +392,7 @@ Removing any single one of E5a, E5b or E5c therefore makes the script fail, as t
 - It then applies r − 2π if r > π, or r + 2π if r ≤ −π. These steps are exact by Sterbenz's lemma.
 - The result is the unique float in (−π, π] that differs from a by an exact integer multiple of 2π, where π and 2π are the float constants. In particular wrap(+π) = wrap(−π) = +π.
 - **Deterministic:** its only branches are exact comparisons.
+  - **Domain restricted by Resolution amendment 4 (review M3P7-F1).** The guarantee above holds for **finite** float inputs only. As committed at `f999626`, wrap(±∞) raised math.fmod's ValueError and wrap(NaN) returned NaN. Non-finite inputs now raise the guard's ValueError. The text above is kept as originally written.
 
 **Tests.**
 - **Exact reduction:** 22 inputs, compared exactly with an independent rational (Fraction) reduction. The inputs are ±π, ±0, the float neighbours of ±π, ±2π, ±10⁶, and π + 2πk and −π − 2πk for k = 1…5.
@@ -430,6 +432,57 @@ Removing any single one of E5a, E5b or E5c therefore makes the script fail, as t
 | Remove the E5a assertion | exit 1 |
 | Remove the E5b assertion | exit 1 |
 | Remove the E5c coverage guard | exit 1 |
+| Reverse the Δi sign | exit 1 |
+| Reverse the ΔΩ sign | exit 1 |
+
+## Resolution amendment 4 (2026-10-16; review M3P7-F1)
+**Authority:** Tech Lead, instruction "Continue the TARS spacecraft simulator M3 planning work from branch `milestone-3-planning`, currently at commit `0dac6d3`" (I-7), section 2.
+- **Unchanged:**
+  - the decision (J-ax-1), the identity transformation of M3, atmospheric co-rotation as air motion, the constants, the thresholds and the scope;
+  - the signed first-order formulas Δi ≈ −δ cos(Ω − φ) and ΔΩ ≈ +δ cot i sin(Ω − φ);
+  - the passive convention R = Rot(e, −δ) and the interval (−π, π], including wrap(±π) = +π.
+- **History is preserved.** Amendment 3 is kept, with a pointer under its item 3.
+
+### The wrapping contract
+- **Domain:** `wrap(a)` accepts **finite** float angles only.
+- **Finite inputs (unchanged):** the result is the unique float in (−π, π] that differs from a by an exact integer multiple of 2π, where π and 2π are the float constants. The result is exact, by fmod exactness and Sterbenz's lemma, and wrap(+π) = wrap(−π) = +π.
+- **Non-finite inputs:** NaN (of either sign), +∞ and −∞ raise `ValueError("wrap: non-finite angle: …")`. No guarantee of the finite contract applies to them.
+- **Why the guard is needed.** Without it, the function silently returned NaN for NaN, and for ±∞ raised math.fmod's own ValueError ("math domain error"). That error was not part of the documented contract.
+- **Where wrap is used in the script:** only to take differences of two finite atan2 results, which are always finite. No computed result depends on the non-finite behaviour.
+
+### Tests
+| Test | What it checks |
+|---|---|
+| `wrap_nonfinite_tests` | NaN, −NaN, +∞ and −∞ must each raise ValueError **with the guard's message**. Any other exception, a different ValueError, or a return value is a failure |
+
+- **Why the message is checked as well as the type.** math.fmod already raises ValueError for ±∞, so a type-only check would not detect a removed guard for those two inputs.
+- **Finite behaviour unchanged.** The finite-input wrap tests are unchanged: 22 inputs against the exact rational reference, both endpoints, 30 exactly equivalent pairs, and determinism. Their outputs are identical.
+
+### Mutants
+- **New built-in mutant** `M3P7-F1_nonfinite_guard_removed`. It is the `f999626` implementation, without the guard.
+  - It must fail the non-finite tests in all four categories, and it does: 4 of 4.
+  - Requiring all four, not just one, makes the ±∞ message check load-bearing, not only the NaN cases.
+  - It produces no finite-wrap failures, so the new test is specific to the defect.
+- **Existing mutants.** Their earlier failure counts are unchanged. The previous [−π, π) wrap mutant now also fails the four non-finite checks, which it never guarded against.
+
+### Results
+- **Verdict PASS.** Two consecutive runs produce byte-identical output.
+- **Every pre-existing section of the output is identical to `f999626`:** grid, tolerances, exact properties, wrapping, first-order checks and their mutants.
+- **New output section:** `wrap_nonfinite`.
+- **Finite-input equivalence.** Bitwise comparison of the guarded wrap against the `f999626` implementation on 200 001 finite floats found 0 differences. The floats were random bit patterns and uniform angles in ±50, plus ±π, ±0, the subnormal extremes and ±max.
+
+**File-level mutation (the script edited in place; each must exit 1):**
+
+| Edit | Result |
+|---|---|
+| Remove the non-finite guard | exit 1 |
+| Weaken the guard test to a type-only check | exit 1 |
+| Disable the non-finite tests | exit 1 |
+| Restore the previous wrap | exit 1 |
+| Restore the unrestricted line-of-nodes claim | exit 1 |
+| Remove E5a | exit 1 |
+| Remove E5b | exit 1 |
+| Remove E5c | exit 1 |
 | Reverse the Δi sign | exit 1 |
 | Reverse the ΔΩ sign | exit 1 |
 

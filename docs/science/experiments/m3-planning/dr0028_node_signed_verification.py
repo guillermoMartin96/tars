@@ -15,6 +15,8 @@ Revision history: first version at commit bcb7f9b (DR-0028 amendment 2). Revised
 review 06 (DR-0028 amendment 3): wrap() now returns (-pi, pi] as documented (M3P6-F3); E2 tests
 the full line-of-nodes identity including equator crossings and endpoints (M3P6-F1); E5 asserts
 the node discontinuity with a coverage guard (M3P6-F2). The first-order checks are unchanged.
+Revised for review 07 (DR-0028 amendment 4, M3P7-F1): wrap() accepts finite angles only and
+raises ValueError for NaN and +/-inf; all finite-input behaviour is unchanged.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -82,14 +84,33 @@ def elements(h):
     return inc, (math.atan2(h[0], -h[1]) if rho > 0.0 else None)
 
 
-def wrap(a):
-    """Reduce a float angle to (-PI, PI], exactly, with PI and TAU = 2 PI the float constants.
+NONFINITE_MESSAGE = "wrap: non-finite angle"
 
-    math.fmod is exact in IEEE arithmetic, giving r with |r| < TAU and r = a - m TAU exactly.
-    The single correction r -/+ TAU is applied only when |r| >= TAU/2, so it is exact by
-    Sterbenz's lemma. The result is therefore the unique float in (-PI, PI] that differs from
-    a by an exact integer multiple of TAU; in particular wrap(PI) = wrap(-PI) = +PI.
+
+def wrap(a):
+    """Reduce a finite float angle to (-PI, PI], exactly (PI and TAU = 2 PI the float constants).
+
+    Domain: finite floats only. NaN, +inf and -inf raise ValueError(NONFINITE_MESSAGE)
+    (DR-0028 amendment 4, M3P7-F1); no guarantee below applies to them.
+
+    For finite a: math.fmod is exact in IEEE arithmetic, giving r with |r| < TAU and
+    r = a - m TAU exactly. The single correction r -/+ TAU is applied only when |r| >= TAU/2,
+    so it is exact by Sterbenz's lemma. The result is therefore the unique float in (-PI, PI]
+    that differs from a by an exact integer multiple of TAU; in particular
+    wrap(PI) = wrap(-PI) = +PI.
     """
+    if not math.isfinite(a):
+        raise ValueError(f"{NONFINITE_MESSAGE}: {a!r}")
+    r = math.fmod(a, TAU)
+    if r > PI:
+        r -= TAU
+    elif r <= -PI:
+        r += TAU
+    return r
+
+
+def wrap_without_nonfinite_guard(a):
+    """The f999626 implementation (no domain guard), kept only as a mutant (M3P7-F1)."""
     r = math.fmod(a, TAU)
     if r > PI:
         r -= TAU
@@ -308,6 +329,37 @@ def wrap_tests(wrap_fn):
     report["wrap_minus_pi"] = wrap_fn(-PI)
     if equivalent < 5:
         failures.append(f"wrap: only {equivalent} exactly representable equivalent pairs")
+    return failures, report
+
+
+def wrap_nonfinite_tests(wrap_fn):
+    """Return (failures, report): each non-finite input must raise the guard's ValueError.
+
+    The message is checked as well as the type, because math.fmod itself raises a ValueError
+    ("math domain error") for +/-inf: a type-only check would not detect a removed guard.
+    """
+    failures, report = [], {}
+    cases = {
+        "nan": math.nan,
+        "negative_nan": math.copysign(math.nan, -1.0),
+        "plus_inf": math.inf,
+        "minus_inf": -math.inf,
+    }
+    for name, a in cases.items():
+        try:
+            got = wrap_fn(a)
+        except ValueError as exc:
+            ok = str(exc).startswith(NONFINITE_MESSAGE)
+            report[name] = "ValueError (guard)" if ok else "ValueError (not the guard)"
+            if not ok:
+                failures.append(f"wrap-nonfinite: {name} raised another ValueError: {exc}")
+        except Exception as exc:  # any other outcome is a contract violation, not a crash
+            report[name] = f"{type(exc).__name__} (not ValueError)"
+            failures.append(f"wrap-nonfinite: {name} raised {type(exc).__name__}: {exc}")
+        else:
+            report[name] = f"returned {got!r}"
+            failures.append(f"wrap-nonfinite: {name} returned {got!r} instead of raising")
+    report["cases_checked"] = len(cases)
     return failures, report
 
 
@@ -533,9 +585,13 @@ def suppress_jump(oracle, only_inc=None):
 def by_test(failures):
     """Count failures by the regression test that raised them."""
     keys = {"E2": 0, "E5a": 0, "E5b": 0, "E5c": 0, "E5d": 0, "wrap": 0, "other": 0}
+    keys["wrap_nonfinite"] = 0
     for f in failures:
         head = f.split()[0]
-        keys[head if head in keys else ("wrap" if head.startswith("wrap") else "other")] += 1
+        if head.startswith("wrap-nonfinite"):
+            keys["wrap_nonfinite"] += 1
+        else:
+            keys[head if head in keys else ("wrap" if head.startswith("wrap") else "other")] += 1
     return keys
 
 
@@ -543,7 +599,8 @@ def run_exact(**kwargs):
     wrap_fn = kwargs.get("wrap_fn", wrap)
     failures, report = exact_properties(**kwargs)
     w_failures, w_report = wrap_tests(wrap_fn)
-    return failures + w_failures, report, w_report
+    nf_failures, nf_report = wrap_nonfinite_tests(wrap_fn)
+    return failures + w_failures + nf_failures, report, w_report, nf_report
 
 
 # Each defect mutant names the regression tests (failure prefixes) that must each reject it, so
@@ -561,19 +618,30 @@ EXACT_MUTANTS = {
     ),
     "M3P6-F2_jump_assertion_disabled": ({"assert_jump": False}, ("E5c",)),
     "M3P6-F3_previous_wrap_minus_pi_to_pi": ({"wrap_fn": wrap_previous}, ("wrap",)),
+    "M3P7-F1_nonfinite_guard_removed": (
+        {"wrap_fn": wrap_without_nonfinite_guard},
+        ("wrap_nonfinite",),
+    ),
 }
+
+# Minimum failure counts beyond "at least one". The guard-removed mutant must fail in every
+# non-finite category (NaN, -NaN, +inf, -inf), so that the message check that distinguishes
+# the guard from math.fmod's own ValueError for +/-inf is load-bearing too.
+MIN_DESIGNATED_FAILURES = {"M3P7-F1_nonfinite_guard_removed": {"wrap_nonfinite": 4}}
 
 
 def main(out_path):
-    exact_failures, exact_report, wrap_report = run_exact()
+    exact_failures, exact_report, wrap_report, nonfinite_report = run_exact()
     exact_mutants = {}
     for name, (kwargs, tests) in EXACT_MUTANTS.items():
-        failures, _, _ = run_exact(**kwargs)
+        failures, _, _, _ = run_exact(**kwargs)
         counts = by_test(failures)
         exact_mutants[name] = {
             "designated_tests": list(tests),
             "failures_by_test": counts,
-            "rejected_by_designated_test": all(counts[t] > 0 for t in tests),
+            "rejected_by_designated_test": all(
+                counts[t] >= MIN_DESIGNATED_FAILURES.get(name, {}).get(t, 1) for t in tests
+            ),
         }
     under_test_failures, under_test_stats = check_formulas(formulas_amendment2)
     mutants = {}
@@ -606,6 +674,7 @@ def main(out_path):
         },
         "exact_properties": exact_report,
         "wrap_convention": wrap_report,
+        "wrap_nonfinite": nonfinite_report,
         "exact_property_failures": exact_failures,
         "formulas_under_test": {
             "delta_i": "-delta cos(Omega - phi)",

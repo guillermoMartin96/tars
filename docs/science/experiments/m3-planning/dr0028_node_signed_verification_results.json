@@ -84,6 +84,13 @@
   "wrap_pi": 3.14159265359,
   "wrap_minus_pi": 3.14159265359
  },
+ "wrap_nonfinite": {
+  "nan": "ValueError (guard)",
+  "negative_nan": "ValueError (guard)",
+  "plus_inf": "ValueError (guard)",
+  "minus_inf": "ValueError (guard)",
+  "cases_checked": 4
+ },
  "exact_property_failures": [],
  "formulas_under_test": {
   "delta_i": "-delta cos(Omega - phi)",
@@ -133,7 +140,8 @@
     "E5c": 0,
     "E5d": 0,
     "wrap": 0,
-    "other": 0
+    "other": 0,
+    "wrap_nonfinite": 0
    },
    "rejected_by_designated_test": true
   },
@@ -149,7 +157,8 @@
     "E5c": 0,
     "E5d": 0,
     "wrap": 0,
-    "other": 0
+    "other": 0,
+    "wrap_nonfinite": 0
    },
    "rejected_by_designated_test": true
   },
@@ -165,7 +174,8 @@
     "E5c": 0,
     "E5d": 0,
     "wrap": 0,
-    "other": 0
+    "other": 0,
+    "wrap_nonfinite": 0
    },
    "rejected_by_designated_test": true
   },
@@ -180,7 +190,8 @@
     "E5c": 2,
     "E5d": 0,
     "wrap": 0,
-    "other": 0
+    "other": 0,
+    "wrap_nonfinite": 0
    },
    "rejected_by_designated_test": true
   },
@@ -195,7 +206,24 @@
     "E5c": 0,
     "E5d": 0,
     "wrap": 28,
-    "other": 0
+    "other": 0,
+    "wrap_nonfinite": 4
+   },
+   "rejected_by_designated_test": true
+  },
+  "M3P7-F1_nonfinite_guard_removed": {
+   "designated_tests": [
+    "wrap_nonfinite"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 4
    },
    "rejected_by_designated_test": true
   }

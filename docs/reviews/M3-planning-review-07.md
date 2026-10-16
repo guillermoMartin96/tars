@@ -82,3 +82,25 @@ The fmod/Sterbenz argument is correct for finite binary64 inputs, so this is a d
 - This is not an unconditional PASS, so the I-6 §5 stop condition applies.
 - **No acceptance report has been prepared, and no review 08 has been started.** The branch is not merged, and T0, T1 and T2 have not started.
 - **Returned to the Tech Lead:** authorization to correct M3P7-F1, and whether to run a further review.
+
+## Resolution of findings (appended 2026-10-16; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "Continue the TARS spacecraft simulator M3 planning work from branch `milestone-3-planning`, currently at commit `0dac6d3`" (2026-10-16), referred to as **I-7**. It authorizes:
+- the narrow M3P7-F1 correction;
+- exactly one further review (review 08), conditional on successful local validation.
+
+It does not authorize planning acceptance, a merge or any implementation.
+
+### M3P7-F1 (MINOR): the exact wrapping guarantee needs a finite-input restriction
+- **Correction:** DR-0028 "Resolution amendment 4" (appended), with a pointer under amendment 3, item 3. In `dr0028_node_signed_verification.py`:
+  - `wrap()` documents finite floats as its domain;
+  - it raises `ValueError("wrap: non-finite angle: …")` for NaN, +∞ and −∞;
+  - its finite-input behaviour is unchanged.
+- **Tests:** `wrap_nonfinite_tests` covers NaN, −NaN, +∞ and −∞, checking both the exception type and the guard's message.
+- **New mutant:** `M3P7-F1_nonfinite_guard_removed` (the `f999626` implementation) is rejected in 4 of 4 non-finite categories, with no finite-wrap failures.
+- **Evidence:**
+  - every pre-existing output section is identical to `f999626`, and all earlier mutant counts are unchanged;
+  - 200 001 finite floats are bitwise identical to the previous implementation;
+  - two runs are byte-identical;
+  - ten file-level mutations each exit 1, including removing the guard and weakening its test to a type-only check.
+- **Residual uncertainty:** none.
+- **Changes an acceptance decision?** No.

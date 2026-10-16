@@ -165,3 +165,12 @@ What changed:
 
 Result: PASS; a rerun is byte-identical. Interpretation: DR-0028 "Resolution amendment 3".
 
+## Signed verification, wrap domain (2026-10-16, review M3P7-F1)
+`wrap()` now accepts finite angles only. NaN, −NaN, +∞ and −∞ raise `ValueError("wrap: non-finite angle: …")`, and `wrap_nonfinite_tests` checks that.
+
+Results:
+- A new mutant, the unguarded `f999626` implementation, must fail in all four categories, and does.
+- Finite-input behaviour and every pre-existing output section are unchanged. Two runs are byte-identical.
+
+Interpretation: DR-0028 "Resolution amendment 4".
+
