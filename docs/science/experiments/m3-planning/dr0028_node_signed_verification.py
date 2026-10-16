@@ -1,13 +1,20 @@
-"""DR-0028 / review M3P5-F1: signed verification of the pole-tilt node and inclination formulas.
+"""DR-0028 / reviews M3P5-F1, M3P6-F1..F3: signed verification of the pole-tilt node and
+inclination formulas, the exact line-of-nodes identity, the node discontinuity and angle wrapping.
 
 Planning research artifact (not production code, not a Proof gate).
 
 Usage:
     python dr0028_node_signed_verification.py <out.json>
 
-Exit status 0 only if (a) every exact property and every check of the signed first-order
-formulas passes, and (b) every deliberately mutated formula is rejected by at least one check.
-Standard library only.
+Exit status 0 only if (a) every exact property, wrapping test and check of the signed
+first-order formulas passes, and (b) every deliberate mutant (of a formula, of the wrapping
+function, of the exact line-of-nodes claim, of the oracle's node discontinuity, or of the
+discontinuity assertion itself) is rejected by at least one check. Standard library only.
+
+Revision history: first version at commit bcb7f9b (DR-0028 amendment 2). Revised for
+review 06 (DR-0028 amendment 3): wrap() now returns (-pi, pi] as documented (M3P6-F3); E2 tests
+the full line-of-nodes identity including equator crossings and endpoints (M3P6-F1); E5 asserts
+the node discontinuity with a coverage guard (M3P6-F2). The first-order checks are unchanged.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -18,7 +25,7 @@ revision 2", r_B = R r_A):
 - In each frame, from the unit angular-momentum vector h:
       i     = atan2(hypot(h_x, h_y), h_z)     (well conditioned for all i)
       Omega = atan2(h_x, -h_y)                (undefined when hypot(h_x, h_y) = 0)
-- Differences are B minus A; Delta Omega is wrapped to (-pi, pi].
+- Differences are B minus A; Delta Omega is wrapped to (-pi, pi]: wrap(+pi) = wrap(-pi) = +pi.
 
 Formulas under test (first order in delta; DR-0028 amendment 2):
       Delta i     ~ -delta cos(Omega - phi)
@@ -31,8 +38,11 @@ above. It never evaluates the formulas under test.
 import json
 import math
 import sys
+from fractions import Fraction
 
 EPS = sys.float_info.epsilon
+PI = math.pi
+TAU = 2.0 * math.pi  # exact doubling of the float pi
 
 
 # ---------------------------------------------------------------- oracle (finite rotation)
@@ -73,15 +83,32 @@ def elements(h):
 
 
 def wrap(a):
+    """Reduce a float angle to (-PI, PI], exactly, with PI and TAU = 2 PI the float constants.
+
+    math.fmod is exact in IEEE arithmetic, giving r with |r| < TAU and r = a - m TAU exactly.
+    The single correction r -/+ TAU is applied only when |r| >= TAU/2, so it is exact by
+    Sterbenz's lemma. The result is therefore the unique float in (-PI, PI] that differs from
+    a by an exact integer multiple of TAU; in particular wrap(PI) = wrap(-PI) = +PI.
+    """
+    r = math.fmod(a, TAU)
+    if r > PI:
+        r -= TAU
+    elif r <= -PI:
+        r += TAU
+    return r
+
+
+def wrap_previous(a):
+    """The bcb7f9b implementation, kept only as a mutant (M3P6-F3): it returns [-pi, pi)."""
     return a - 2.0 * math.pi * math.floor((a + math.pi) / (2.0 * math.pi))
 
 
-def finite(inc, node, phi, delta):
+def finite(inc, node, phi, delta, wrap_fn=wrap):
     """Exact (finite-rotation) Delta i and Delta Omega, B minus A. Delta Omega None if undefined."""
     h_b = apply(tilt_matrix(phi, delta), h_from_elements(inc, node))
     i_b, node_b = elements(h_b)
     i_a, node_a = elements(h_from_elements(inc, node))
-    d_node = None if node_a is None or node_b is None else wrap(node_b - node_a)
+    d_node = None if node_a is None or node_b is None else wrap_fn(node_b - node_a)
     return i_b - i_a, d_node
 
 
@@ -196,7 +223,97 @@ def check_formulas(formula):
     return failures, stats
 
 
-def exact_properties():
+# ------------------------------------------- exact line-of-nodes identity (M3P6-F1)
+def line_of_nodes_exact(inc, delta):
+    """Exact (Delta i, Delta Omega) for a tilt about the line of nodes (phi = Omega).
+
+    With j = i - delta, h_B = (sin j sin Omega, -sin j cos Omega, cos j) (DR-0028 amendment 3),
+    and with i in [0, pi] from atan2(hypot, h_z):
+      0 < j < pi        : i_B = j,          Delta i = -delta,          Delta Omega = 0
+      -pi < j < 0       : i_B = -j,         Delta i = delta - 2 i,     Delta Omega = +pi
+      pi < j < 2 pi     : i_B = 2 pi - j,   Delta i = 2 pi - 2 i + delta, Delta Omega = +pi
+      j = 0 or j = pi   : equatorial in B; node undefined (returned as None)
+    Valid for 0 < i < pi (A's node defined) and -pi < j < 2 pi.
+    """
+    j = inc - delta
+    if 0.0 < j < PI:
+        return -delta, 0.0
+    if -PI < j < 0.0:
+        return delta - 2.0 * inc, PI
+    if PI < j < TAU:
+        return TAU - 2.0 * inc + delta, PI
+    return None
+
+
+def line_of_nodes_unrestricted(inc, delta):
+    """The amendment-2 claim without its domain (M3P6-F1 original defect), kept as a mutant."""
+    return -delta, 0.0
+
+
+def circ(a, b, wrap_fn=wrap):
+    """Circular distance |a - b| modulo 2 pi."""
+    return abs(wrap_fn(a - b))
+
+
+def pair_noise(inc_a, inc_b):
+    """noise() with the larger 1/sin amplification of the two frames (same derivation)."""
+    return 64.0 * EPS / max(min(math.sin(inc_a), math.sin(inc_b)), EPS)
+
+
+LOW_INC = (0.1, 2.0, 10.0, 30.0)  # degrees; bottom crossings use delta > i (positive tilt)
+HIGH_INC = (179.9, 178.0, 170.0, 150.0)  # top crossings use delta < i - 180 (negative tilt)
+CROSS_BY = (0.05, 3.0, 25.0)  # degrees beyond the equator
+MIN_CROSSINGS_PER_SIGN = len(LOW_INC) * len(CROSS_BY) * len(NODES)  # every constructed case
+
+
+# ---------------------------------------------------------------- wrapping (M3P6-F3)
+def wrap_reference(a):
+    """Exact rational reduction of the float a into (-PI, PI] modulo TAU (float constants)."""
+    big_a, big_pi, big_tau = Fraction(a), Fraction(PI), Fraction(TAU)
+    m = -((-(big_a - big_pi)) // big_tau)  # ceil((a - PI) / TAU)
+    return big_a - m * big_tau
+
+
+def wrap_tests(wrap_fn):
+    """Return (failures, report) for the wrapping convention (-PI, PI]."""
+    failures, report = [], {}
+    up, down = math.nextafter(PI, math.inf), math.nextafter(PI, -math.inf)
+    inputs = [PI, -PI, 0.0, -0.0, up, down, -up, -down, TAU, -TAU, 1.0e6, -1.0e6]
+    inputs += [PI + k * TAU for k in range(1, 6)] + [-PI - k * TAU for k in range(1, 6)]
+    for a in inputs:
+        got = wrap_fn(a)
+        ref = wrap_reference(a)
+        if not -PI < got <= PI:
+            failures.append(f"wrap({a!r}) = {got!r} outside (-pi, pi]")
+        if Fraction(got) != ref:
+            failures.append(f"wrap({a!r}) = {got!r}, exact reduction {float(ref)!r}")
+        if wrap_fn(a) != got:
+            failures.append(f"wrap({a!r}) not deterministic")
+    # The two endpoints, explicitly.
+    for a in (PI, -PI):
+        if wrap_fn(a) != PI:
+            failures.append(f"wrap endpoint ({a!r}) = {wrap_fn(a)!r}, expected +pi")
+    # Equivalent angles: b = a + k TAU, used only when the float sum is exact.
+    equivalent = 0
+    for a in (PI, -PI, 1.0, -2.5, 3.0):
+        for k in (-3, -2, -1, 1, 2, 3):
+            b = a + k * TAU
+            if Fraction(b) - Fraction(a) == k * Fraction(TAU):
+                equivalent += 1
+                if wrap_fn(a) != wrap_fn(b):
+                    failures.append(f"wrap({a!r}) != wrap({b!r}) for exact equivalents")
+    report["inputs_checked"] = len(inputs)
+    report["exact_equivalent_pairs"] = equivalent
+    report["wrap_pi"] = wrap_fn(PI)
+    report["wrap_minus_pi"] = wrap_fn(-PI)
+    if equivalent < 5:
+        failures.append(f"wrap: only {equivalent} exactly representable equivalent pairs")
+    return failures, report
+
+
+def exact_properties(
+    oracle=finite, wrap_fn=wrap, line_of_nodes=line_of_nodes_exact, assert_jump=True
+):
     """Exact (finite-delta) properties, independent of any first-order formula."""
     failures, report = [], {}
 
@@ -229,20 +346,80 @@ def exact_properties():
     if worst > 16.0 * EPS:  # entries are O(1); a few roundings each
         failures.append(f"E1 rotation convention deviation {worst:.3e}")
 
-    # E2. Tilt about the line of nodes (phi = Omega): the node is fixed and Delta i = -delta
-    # exactly (the rotation axis lies in both equators and in the orbit plane).
-    worst_i = worst_node = 0.0
+    # E2. Tilt about the line of nodes (phi = Omega): the full exact identity
+    # (line_of_nodes_exact), on interior, crossing and endpoint cases (M3P6-F1).
+    counts = {"interior": 0, "crossing_positive_tilt": 0, "crossing_negative_tilt": 0}
+    worst = 0.0
+    jump_asserts = {"positive": 0, "negative": 0}
+    cases = []
     for inc_deg in (30.0, 51.6, 90.0, 120.0):
+        for delta_deg in (-20.0, -5.0, -0.15, 0.15, 5.0, 20.0):
+            cases.append(("interior", inc_deg, delta_deg))
+    for inc_deg, delta_deg in ((2.0, -5.0), (2.0, 1.5), (178.0, 5.0), (178.0, -1.5)):
+        cases.append(("interior", inc_deg, delta_deg))
+    for inc_deg in LOW_INC:
+        for by in CROSS_BY:
+            cases.append(("crossing_positive_tilt", inc_deg, inc_deg + by))
+    for inc_deg in HIGH_INC:
+        for by in CROSS_BY:
+            cases.append(("crossing_negative_tilt", inc_deg, inc_deg - 180.0 - by))
+    if ("crossing_positive_tilt", 2.0, 5.0) not in [(c, i, round(d, 9)) for c, i, d in cases]:
+        failures.append("E2 counterexample i = 2 deg, delta = 5 deg missing")
+    for kind, inc_deg, delta_deg in cases:
         for node_deg in NODES:
-            for delta_deg in (-20.0, -5.0, -0.15, 0.15, 5.0, 20.0):
-                inc, node, delta = (math.radians(x) for x in (inc_deg, node_deg, delta_deg))
-                d_i, d_node = finite(inc, node, node, delta)
-                worst_i = max(worst_i, abs(d_i - (-delta)) / noise(inc))
-                worst_node = max(worst_node, abs(d_node) / noise(inc))
-    report["E2_line_of_nodes_max_dev_delta_i_noise_units"] = worst_i
-    report["E2_line_of_nodes_max_abs_delta_node_noise_units"] = worst_node
-    if worst_i > 1.0 or worst_node > 1.0:
-        failures.append(f"E2 line-of-nodes tilt: {worst_i:.3e}, {worst_node:.3e} noise units")
+            inc, node, delta = (math.radians(x) for x in (inc_deg, node_deg, delta_deg))
+            d_i, d_node = oracle(inc, node, node, delta, wrap_fn)
+            expected = line_of_nodes(inc, delta)
+            i_b = inc + d_i
+            tol = pair_noise(inc, i_b)
+            if expected is None or d_node is None:
+                failures.append(f"E2 {kind} unexpected undefined node i={inc_deg} d={delta_deg}")
+                continue
+            exp_i, exp_node = expected
+            dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol
+            worst = max(worst, dev)
+            if dev > 1.0:
+                failures.append(f"E2 {kind} i={inc_deg} d={delta_deg} node={node_deg}: {dev:.3e}")
+            counts[kind] += 1
+            # E5 part 1 (M3P6-F2): every crossing must show the +pi node discontinuity.
+            if kind != "interior" and assert_jump:
+                sign = "positive" if delta > 0.0 else "negative"
+                jump_asserts[sign] += 1
+                if circ(d_node, PI, wrap) > tol:
+                    failures.append(f"E5a no node jump i={inc_deg} d={delta_deg} node={node_deg}")
+    report["E2_case_counts"] = counts
+    # Review-06 counterexample, recorded explicitly: i = 2 deg, Omega = phi = 0, delta = +5 deg.
+    d_i, d_node = oracle(math.radians(2.0), 0.0, 0.0, math.radians(5.0), wrap_fn)
+    report["E2_counterexample_i2_delta5_delta_i_deg"] = math.degrees(d_i)
+    report["E2_counterexample_i2_delta5_delta_node_deg"] = (
+        None if d_node is None else math.degrees(d_node)
+    )
+    report["E2_counterexample_i2_delta5_expected_deg"] = [1.0, 180.0]
+    report["E2_max_dev_noise_units"] = worst
+    # Endpoints j = 0 and j = pi: B is equatorial. Each computed component of h_B carries at
+    # most 16 eps error (see noise()), plus <= 2 eps from rounding delta = i - pi, so the
+    # computed hypot(h_x, h_y) must be <= 16 sqrt(2) eps + 2 eps < 32 eps.
+    endpoints, worst_rho = 0, 0.0
+    for inc_deg in (2.0, 30.0, 90.0, 178.0):
+        inc = math.radians(inc_deg)
+        top = inc - PI  # pick the float delta with inc - delta == PI exactly
+        for cand in (top, math.nextafter(top, math.inf), math.nextafter(top, -math.inf)):
+            if inc - cand == PI:
+                top = cand
+                break
+        for node_deg in NODES:
+            node = math.radians(node_deg)
+            for delta in (inc, top):
+                endpoints += 1
+                if line_of_nodes(inc, delta) is not None:
+                    failures.append(f"E2 endpoint claims a defined node: i={inc_deg}")
+                h_b = apply(tilt_matrix(node, delta), h_from_elements(inc, node))
+                rho = math.hypot(h_b[0], h_b[1])
+                worst_rho = max(worst_rho, rho / EPS)
+                if rho > 32.0 * EPS:
+                    failures.append(f"E2 endpoint not equatorial: i={inc_deg} rho={rho:.3e}")
+    report["E2_endpoint_cases"] = endpoints
+    report["E2_endpoint_max_hypot_in_eps"] = worst_rho
 
     # E3. Tilt axis 90 deg behind the node (phi = Omega - 90 deg). Exact closed form, derived
     # by hand for Omega = 90 deg, phi = 0 and extended by symmetry about z:
@@ -280,20 +457,41 @@ def exact_properties():
     if ratio > 1.0:
         failures.append(f"E4 inclination bound exceeded: {ratio:.3e} x 64 eps")
 
-    # E5. Singularities: an equatorial orbit has no node; for i < |delta| the node can jump.
+    # E5. Singularities and the node discontinuity (M3P6-F2). Part 1 is asserted in E2 for
+    # every crossing case. Part 2: an equatorial orbit has no node. Part 3: at i = 0.1 deg with
+    # |delta| = 0.15 deg, sweep the tilt azimuth; the line-of-nodes azimuth (phi = Omega for
+    # delta > 0, phi = Omega + 180 deg for delta < 0, the same rotation) crosses the equator and
+    # the node must jump by pi there. Tolerance: pair_noise(i_A, i_B), as in E2.
     _, node_eq = elements(h_from_elements(0.0, 0.0))
     report["E5_equatorial_node_undefined"] = node_eq is None
     if node_eq is not None:
-        failures.append("E5 equatorial node not reported as undefined")
-    jump = 0.0
-    for k in range(360):
-        _, d_node = finite(math.radians(0.1), 0.0, math.radians(k), math.radians(0.15))
-        if d_node is not None:
-            jump = max(jump, abs(d_node))
-    report["E5_max_node_jump_deg_i_0p1_delta_0p15"] = math.degrees(jump)
+        failures.append("E5d equatorial node not reported as undefined")
+    inc = math.radians(0.1)
+    for sign, cross_k in (("positive", 0), ("negative", 180)):
+        delta = math.radians(0.15) * (1.0 if sign == "positive" else -1.0)
+        defined, largest = 0, 0.0
+        for k in range(360):
+            d_i, d_node = oracle(inc, 0.0, math.radians(k), delta, wrap_fn)
+            if d_node is None:
+                continue
+            defined += 1
+            largest = max(largest, abs(d_node))
+            if k == cross_k and assert_jump:
+                jump_asserts[sign] += 1
+                if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i):
+                    failures.append(f"E5b sweep: no node jump at phi = {k} deg, tilt {sign}")
+        report[f"E5_sweep_{sign}_tilt_defined_samples"] = defined
+        report[f"E5_sweep_{sign}_tilt_max_abs_delta_node_deg"] = math.degrees(largest)
+        if defined < 359:  # at most one azimuth may hit an exact endpoint
+            failures.append(f"E5b sweep: only {defined} defined samples, tilt {sign}")
+    # Coverage guard: the jump assertions must actually have run, for both tilt signs.
+    report["E5_jump_assertions"] = jump_asserts
+    for sign in ("positive", "negative"):
+        if jump_asserts[sign] < MIN_CROSSINGS_PER_SIGN + 1:
+            failures.append(f"E5c coverage: {jump_asserts[sign]} jump assertions, tilt {sign}")
 
     # E6. Review-04 example (preserved): h_A = (sin 30, 0, cos 30), R = Rx(-0.15 deg).
-    d_i, d_node = finite(math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15))
+    d_i, d_node = oracle(math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15), wrap_fn)
     lin_i, lin_node = formulas_amendment2(
         math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15)
     )
@@ -320,8 +518,63 @@ def rounded(x):
     return x
 
 
+def suppress_jump(oracle, only_inc=None):
+    """Mutant oracle: hides the node discontinuity (Delta Omega forced to 0 when |.| > pi/2)."""
+
+    def mutant(inc, node, phi, delta, wrap_fn=wrap):
+        d_i, d_node = oracle(inc, node, phi, delta, wrap_fn)
+        if d_node is not None and abs(d_node) > PI / 2.0 and (only_inc in (None, inc)):
+            d_node = 0.0
+        return d_i, d_node
+
+    return mutant
+
+
+def by_test(failures):
+    """Count failures by the regression test that raised them."""
+    keys = {"E2": 0, "E5a": 0, "E5b": 0, "E5c": 0, "E5d": 0, "wrap": 0, "other": 0}
+    for f in failures:
+        head = f.split()[0]
+        keys[head if head in keys else ("wrap" if head.startswith("wrap") else "other")] += 1
+    return keys
+
+
+def run_exact(**kwargs):
+    wrap_fn = kwargs.get("wrap_fn", wrap)
+    failures, report = exact_properties(**kwargs)
+    w_failures, w_report = wrap_tests(wrap_fn)
+    return failures + w_failures, report, w_report
+
+
+# Each defect mutant names the regression tests (failure prefixes) that must each reject it, so
+# that removing any one of those checks makes the script fail. E5a: crossing-case jumps; E5b:
+# azimuth-sweep jumps; E5c: the coverage guard on the number of executed jump assertions.
+EXACT_MUTANTS = {
+    "M3P6-F1_unrestricted_line_of_nodes_claim": (
+        {"line_of_nodes": line_of_nodes_unrestricted},
+        ("E2",),
+    ),
+    "M3P6-F2_oracle_jump_suppressed": ({"oracle": suppress_jump(finite)}, ("E5a", "E5b")),
+    "M3P6-F2_oracle_jump_suppressed_at_i_0p1_deg_only": (
+        {"oracle": suppress_jump(finite, math.radians(0.1))},
+        ("E5a", "E5b"),
+    ),
+    "M3P6-F2_jump_assertion_disabled": ({"assert_jump": False}, ("E5c",)),
+    "M3P6-F3_previous_wrap_minus_pi_to_pi": ({"wrap_fn": wrap_previous}, ("wrap",)),
+}
+
+
 def main(out_path):
-    exact_failures, exact_report = exact_properties()
+    exact_failures, exact_report, wrap_report = run_exact()
+    exact_mutants = {}
+    for name, (kwargs, tests) in EXACT_MUTANTS.items():
+        failures, _, _ = run_exact(**kwargs)
+        counts = by_test(failures)
+        exact_mutants[name] = {
+            "designated_tests": list(tests),
+            "failures_by_test": counts,
+            "rejected_by_designated_test": all(counts[t] > 0 for t in tests),
+        }
     under_test_failures, under_test_stats = check_formulas(formulas_amendment2)
     mutants = {}
     for name, formula in MUTANTS.items():
@@ -331,6 +584,7 @@ def main(out_path):
         not exact_failures
         and not under_test_failures
         and all(m["rejected"] for m in mutants.values())
+        and all(m["rejected_by_designated_test"] for m in exact_mutants.values())
     )
     result = {
         "verdict": "PASS" if ok else "FAIL",
@@ -351,6 +605,7 @@ def main(out_path):
             "order_threshold": P_MIN,
         },
         "exact_properties": exact_report,
+        "wrap_convention": wrap_report,
         "exact_property_failures": exact_failures,
         "formulas_under_test": {
             "delta_i": "-delta cos(Omega - phi)",
@@ -359,6 +614,7 @@ def main(out_path):
             "failures": under_test_failures,
         },
         "mutants": mutants,
+        "exact_and_wrap_mutants": exact_mutants,
     }
     with open(out_path, "w", encoding="ascii") as fh:
         json.dump(rounded(result), fh, indent=1)

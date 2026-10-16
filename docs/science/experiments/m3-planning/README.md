@@ -154,3 +154,14 @@ Results:
 
 Interpretation: DR-0028 "Resolution amendment 2". The earlier `dr0028_node_sensitivity.py` compares absolute values only and is kept unchanged as amendment 1 evidence.
 
+## Signed verification, revised (2026-10-16, reviews M3P6-F1, F2, F3)
+`dr0028_node_signed_verification.py` was revised in place; the earlier version remains at commit `bcb7f9b`. The first-order checks and their results are unchanged.
+
+What changed:
+- **`wrap()`** now returns values in (−π, π] exactly. It is tested against an exact rational reduction, at both endpoints, and on exactly equivalent pairs.
+- **E2** tests the full exact line-of-nodes identity: 168 interior, 144 equator-crossing (both tilt signs) and 48 endpoint cases, including the counterexample i = 2°, δ = 5°.
+- **E5** now asserts the node discontinuity: E5a for the crossings, E5b for the azimuth sweep, and E5c, a coverage guard.
+- **Five new mutants** must each be rejected by their designated tests: the unrestricted claim, the jump suppressed (two variants), the assertions disabled, and the previous wrap.
+
+Result: PASS; a rerun is byte-identical. Interpretation: DR-0028 "Resolution amendment 3".
+

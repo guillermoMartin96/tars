@@ -3,6 +3,7 @@
 **Status:** RESOLVED — APPROVED: J-ax-1, with requirements (Tech Lead, 2026-10-15, "M3 Planning — Resolve Review 03 and DR-0028", section 2). See "Resolution"; where the body below differs from the Resolution, the Resolution governs. No Earth-orientation implementation is authorized.  
 **Resolution amendment 1 (2026-10-16, append-only):** two limitation statements in the Resolution are corrected under reviews M3P4-F1 (node error bound) and M3P4-F2 (local solar time). The decision itself (A, B, R-1…R-4) is unchanged. See "Resolution amendment 1" at the end.  
 **Resolution amendment 2 (2026-10-16, append-only):** the signs of two first-order formulas in amendment 1, item 1, are corrected under review M3P5-F1. Magnitudes, bounds and the decision are unchanged. See "Resolution amendment 2" at the end.  
+**Resolution amendment 3 (2026-10-16, append-only):** under review 06 (M3P6-F1, F2, F3), the line-of-nodes exact result is given its domain and the full identity, the 180° node discontinuity is asserted, and the verification script's angle wrapping is made to match the documented (−π, π]. The signed formulas, the convention and the decision are unchanged. See "Resolution amendment 3" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -247,8 +248,11 @@ These checks use the matrix R and the element definitions only, never the formul
 | **Tilt about the line of nodes** (φ = Ω), any finite δ | Δi = −δ exactly; ΔΩ = 0 exactly | −δ and 0 | Exact for both signs of δ |
 | **Tilt axis 90° behind the node** (φ = Ω − 90°) | ĥ_B = (sin i, sin δ cos i, cos δ cos i) for Ω = 90°, φ = 0, extended by symmetry about z. So ΔΩ = atan(sin δ cot i) and cos i_B = cos δ cos i | +δ cot i | ΔΩ has the sign of δ cot i |
 
+- **Line-of-nodes row qualified by Resolution amendment 3, item 1 (review M3P6-F1).** "Any finite δ" is wrong as written. Δi = −δ and ΔΩ = 0 hold exactly only for i − π < δ < i, that is, 0 < i − δ < π. Outside that domain, the inclination folds and the node jumps by 180°; at its endpoints, the node is undefined. The row is kept as originally written.
+
 ### Verification script
 `docs/science/experiments/m3-planning/dr0028_node_signed_verification.py`, output `dr0028_node_signed_verification_results.json`. A rerun is byte-identical. The script exits 0 only if every check below passes and every mutant is rejected.
+- **Revised by Resolution amendment 3 (review 06).** This section describes the script as committed at `bcb7f9b`. Amendment 3 records the revision, which corrects the wrapping, extends E2 and asserts E5. The first-order checks and their results are unchanged.
 
 **Oracle (independent of the formulas under test):**
 - R is built from Rodrigues' formula. The script checks that R is a proper rotation, equals Rx(−δ) for φ = 0, and that Rᵀẑ equals Rot(e, +δ)ẑ.
@@ -265,6 +269,8 @@ These checks use the matrix R and the element definitions only, never the formul
 | E4 | \|Δi\| ≤ \|δ\| for tilts up to ±30°, at every inclination from 0° to 180° in 5° steps |
 | E5 | An equatorial orbit has no node, and at i = 0.1° with δ = 0.15° the node jumps by 180° |
 | E6 | The review-04 example |
+
+- **E2 and E5 superseded by Resolution amendment 3, items 1 and 2 (reviews M3P6-F1, M3P6-F2).** As committed at `bcb7f9b`, E2 tested only the interior of the domain, and E5's 180° jump was reported but not asserted. The rows above are kept as originally written.
 
 **Signed first-order checks.**
 - **Grid:**
@@ -296,4 +302,134 @@ These checks use the matrix R and the element definitions only, never the formul
 | cos and sin swapped | 1576 |
 
 Editing the formula under test in place, reversing either sign or both, makes the script exit 1.
+
+## Resolution amendment 3 (2026-10-16; reviews M3P6-F1, M3P6-F2, M3P6-F3)
+**Authority:** Tech Lead, instruction "Continue M3 planning on `milestone-3-planning` from commit `dcabcb2`" (I-6), section 1.
+- **The decision is unchanged.** J-ax-1, the identity transformation of M3, atmospheric co-rotation as air motion, the constants and the scope are as resolved.
+- **The signed first-order formulas are unchanged:** Δi ≈ −δ cos(Ω − φ) and ΔΩ ≈ +δ cot i sin(Ω − φ).
+- **The convention is unchanged.** It is the one stated in amendment 2:
+  - δ > 0 means B's pole is A's pole rotated by +δ about e = (cos φ, sin φ, 0), in the active right-hand sense;
+  - components transform passively, v_B = R v_A with R = Rot(e, −δ);
+  - i ∈ [0, π] is computed as atan2(√(h_x² + h_y²), h_z), and Ω as atan2(h_x, −h_y);
+  - differences are B minus A, and ΔΩ lies in (−π, π].
+- **History is preserved.** Amendment 2 is kept, with pointers at its line-of-nodes row, its verification section and its E2/E5 rows.
+
+### Item 1 (M3P6-F1): the line-of-nodes identity and its domain
+This item is an **exact geometric identity** for finite δ, not an approximation.
+
+**Setup.** Tilt about the line of nodes means φ = Ω, so e = (cos Ω, sin Ω, 0) is A's node direction. A's node is defined, so 0 < i < π.
+
+**Derivation.**
+1. Let u = (sin Ω, −cos Ω, 0). Then ĥ_A = sin i · u + cos i · ẑ, and e × u = −ẑ, e × ẑ = u.
+2. Rot(e, a) therefore maps u to cos a · u − sin a · ẑ, and ẑ to cos a · ẑ + sin a · u.
+3. With a = −δ and j = i − δ:
+
+   ĥ_B = sin j · u + cos j · ẑ = (sin j sin Ω, −sin j cos Ω, cos j).
+
+**Result (any finite δ, with −π < j < 2π):**
+
+| j = i − δ | Tilt range for given i | i_B | Δi | ΔΩ |
+|---|---|---|---|---|
+| 0 < j < π (interior) | i − π < δ < i | j | −δ | 0 |
+| j = 0 (endpoint) | δ = i | 0 | −i | undefined: B is equatorial |
+| j = π (endpoint) | δ = i − π | π | π − i | undefined: B is equatorial |
+| −π < j < 0 (crossing, positive tilt) | i < δ < i + π | −j | δ − 2i | +π |
+| π < j < 2π (crossing, negative tilt) | i − 2π < δ < i − π | 2π − j | 2π − 2i + δ | +π |
+
+**What happens at a crossing.** Beyond an endpoint, sin j < 0, so ĥ_B = |sin j|(−u) + cos j ẑ.
+- **Inclination:** it folds back into [0, π].
+- **Node:** ẑ × ĥ_B reverses, so the ascending node of B is the other intersection of the two planes, Ω_B = Ω + π.
+- **At the endpoints themselves:** the orbit lies in B's equator and has no node.
+
+**Consequences.**
+- **Domain of the amendment-2 claim.** "Δi = −δ and ΔΩ = 0 for any finite δ" holds exactly on the interior row only, i − π < δ < i.
+- **Counterexample (review 06):** i = 2°, Ω = φ = 0, δ = +5° gives j = −3°, so i_B = 3°, Δi = +1° (= δ − 2i) and ΔΩ = +180°. The oracle reproduces this exactly.
+- **Exact versus first order.** At φ = Ω, the first-order formula gives Δi ≈ −δ cos 0 = −δ, which coincides with the interior row. But the first-order formulas need |δ| ≪ sin i, a stronger condition than the exact domain. Near an endpoint, the first-order ΔΩ (zero here) misses the discontinuity entirely.
+
+**Tests (E2).** Each case is evaluated at all six node longitudes.
+
+| Case | Count | Configurations |
+|---|---|---|
+| Interior | 168 | The earlier grid, plus near-equatorial interior cases (2°, −5°), (2°, +1.5°), (178°, +5°), (178°, −1.5°) |
+| Crossing, positive tilt | 72 | i = 0.1°, 2°, 10°, 30°, crossing by 0.05°, 3° or 25°; includes the counterexample |
+| Crossing, negative tilt | 72 | i = 179.9°, 178°, 170°, 150°, crossing by 0.05°, 3° or 25° |
+| Endpoints | 48 | δ = i and δ = i − π, for i = 2°, 30°, 90°, 178° |
+
+The top endpoint uses the float δ for which i − δ = π exactly.
+
+**Tolerances.**
+- **Interior and crossing cases.** The tolerance is 64 ε / min(sin i_A, sin i_B). This is the amendment-2 noise bound, using the larger 1/sin amplification of the two frames. The node is compared by circular distance. The largest deviation measured was 0.03 tolerance units.
+- **Endpoints.** The computed √(h_x² + h_y²) of ĥ_B must be ≤ 32 ε. Each component carries at most 16 ε, plus at most 2 ε from rounding δ = i − π, and 16√2 ε + 2 ε < 32 ε. The largest value measured was 0.81 ε.
+- **Classification.** The expected-value function must report the node as undefined at both endpoints.
+
+### Item 2 (M3P6-F2): the node discontinuity is asserted
+All E5 checks use the E2 tolerance, and they are now assertions, not observations.
+
+| Check | What it asserts |
+|---|---|
+| **E5a** | For every crossing case (72 per tilt sign), the circular distance between ΔΩ and +π is within tolerance |
+| **E5b** | For an azimuth sweep at i = 0.1°, \|δ\| = 0.15°, Ω = 0, φ = 0…359°, for both tilt signs, the node jumps by π at the line-of-nodes azimuth, and at least 359 of 360 samples are defined (measured 360 of 360) |
+| **E5c** | A coverage guard: each tilt sign must have executed at least 73 jump assertions (72 crossings plus 1 sweep). Measured: 73 and 73 |
+| **E5d** | An equatorial orbit has no node, unchanged |
+
+- **Why E5a uses circular distance.** Under exact arithmetic the jump is +π, by the (−π, π] convention. A computed difference within rounding of ±π can reduce to either representative.
+- **Line-of-nodes azimuth in E5b.** It is φ = Ω for δ > 0 and φ = Ω + 180° for δ < 0, which is the same rotation.
+
+**Mutants, each rejected by its designated tests.**
+
+| Mutant | Designated tests | Failing checks |
+|---|---|---|
+| Oracle with the jump suppressed everywhere | E5a and E5b | 144 and 2 |
+| Oracle with the jump suppressed only at i = 0.1° (review 06's mutation) | E5a and E5b | 18 and 2 |
+| Jump assertions disabled | E5c | 2 |
+
+Removing any single one of E5a, E5b or E5c therefore makes the script fail, as the file-level mutations below confirm.
+
+### Item 3 (M3P6-F3): angle wrapping
+**Implementation.**
+- `wrap(a)` computes r = fmod(a, 2π), which is exact in IEEE arithmetic.
+- It then applies r − 2π if r > π, or r + 2π if r ≤ −π. These steps are exact by Sterbenz's lemma.
+- The result is the unique float in (−π, π] that differs from a by an exact integer multiple of 2π, where π and 2π are the float constants. In particular wrap(+π) = wrap(−π) = +π.
+- **Deterministic:** its only branches are exact comparisons.
+
+**Tests.**
+- **Exact reduction:** 22 inputs, compared exactly with an independent rational (Fraction) reduction. The inputs are ±π, ±0, the float neighbours of ±π, ±2π, ±10⁶, and π + 2πk and −π − 2πk for k = 1…5.
+- **Endpoints:** ±π, checked explicitly.
+- **Equivalent angles:** 30 exactly representable pairs (a, a + 2πk) give identical results.
+- **Determinism:** each input gives the same result on repeated calls.
+- **Why the exact reduction is the reference.** A float such as π + 2π is generally not exactly congruent to π modulo the float 2π. Each float input is therefore compared with its own exact reduction, and only exactly representable equivalents are used for the equality test.
+
+**Mutant.** The previous implementation, which returns [−π, π), is rejected with 28 failing wrap checks.
+
+**Earlier script.** `dr0028_node_sensitivity.py` (amendment 1 evidence) uses a [−π, π) reduction internally. It reports only absolute values and declares no interval, so its outputs are unaffected; it is unchanged.
+
+### Script revision and results
+`dr0028_node_signed_verification.py` is revised in place; the amendment-2 version remains at commit `bcb7f9b`. Verdict: PASS, exit 0, and a rerun is byte-identical.
+
+**First-order checks:** unchanged, and they reproduce identically.
+- 506 and 532 order samples, with observed order 1.98–3.00;
+- 1064 sign checks;
+- the four first-order mutants rejected (2128, 1120, 1008 and 1576 failing checks).
+
+**Exact and wrapping mutants:** all five rejected by their designated tests.
+
+| Mutant | Rejected by | Failing checks |
+|---|---|---|
+| Unrestricted line-of-nodes claim | E2 | 192 |
+| Jump suppressed everywhere | E5a and E5b | 144 and 2 |
+| Jump suppressed only at i = 0.1° | E5a and E5b | 18 and 2 |
+| Jump assertions disabled | E5c | 2 |
+| Previous wrap | wrap tests | 28 |
+
+**File-level mutation (the script edited in place; each must exit 1):**
+
+| Edit | Result |
+|---|---|
+| Restore the previous wrap | exit 1 |
+| Restore the unrestricted line-of-nodes claim | exit 1 |
+| Remove the E5a assertion | exit 1 |
+| Remove the E5b assertion | exit 1 |
+| Remove the E5c coverage guard | exit 1 |
+| Reverse the Δi sign | exit 1 |
+| Reverse the ΔΩ sign | exit 1 |
 

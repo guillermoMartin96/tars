@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -18,6 +18,7 @@ No OPEN or DEFERRED item has a default.
 - **I-3:** "M3 Planning — Resolve Review 03 and DR-0028" (Tech Lead, 2026-10-15), sections 1–8.
 - **I-4:** "M3 Planning — Review 04 Corrections and Final Verification" (Tech Lead, 2026-10-16), sections 1–7.
 - **I-5:** "M3 Planning — M3P5-F1 Correction and Review 06" (Tech Lead, 2026-10-16), sections 1–7.
+- **I-6:** "Continue M3 planning on `milestone-3-planning` from commit `dcabcb2`" (Tech Lead, 2026-10-16), sections 1–6.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -127,9 +128,9 @@ No OPEN or DEFERRED item has a default.
 ## Review findings (planning review 06, targeted)
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P6-F1 | MINOR | ACCEPTED; **not applied** (I-5 §5 stop) | Pending | `docs/reviews/M3-planning-review-06.md`. DR-0028 amendment 2: the exact line-of-nodes result (Δi = −δ, ΔΩ = 0) needs the domain 0 < i − δ < π |
-| M3P6-F2 | MINOR | ACCEPTED; **not applied** | Pending | Same record. Verification script: E5's 180° node jump is reported, not asserted |
-| M3P6-F3 | MINOR | ACCEPTED; **not applied** | Pending | Same record. Verification script: `wrap()` returns [−π, π), declared (−π, π] |
+| M3P6-F1 | MINOR | ACCEPTED; was not applied (I-5 §5 stop) → **corrected** | I-6 §1 | DR-0028 "Resolution amendment 3" item 1 (full line-of-nodes identity, domain, crossings, endpoints); `docs/reviews/M3-planning-review-06.md`, "Resolution of findings" |
+| M3P6-F2 | MINOR | ACCEPTED; was not applied → **corrected** | I-6 §1 | DR-0028 amendment 3 item 2 (E5a/E5b assertions, E5c coverage guard); same record |
+| M3P6-F3 | MINOR | ACCEPTED; was not applied → **corrected** | I-6 §1 | DR-0028 amendment 3 item 3 (`wrap()` returns (−π, π], exact); same record |
 
 ## Gates
 | Gate | State |

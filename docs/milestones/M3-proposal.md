@@ -7,6 +7,7 @@
 - Review 03 findings M3P3-F1/F2 corrected.
 - The planning merge and T0 each still need the Tech Lead's separate explicit authorization.  
 
+**Status update (2026-10-16, sixth checkpoint):** review 06 findings M3P6-F1..F3 corrected as DR-0028 Resolution amendment 3 (line-of-nodes identity domain; asserted node discontinuity; angle wrapping), with the verification script revised. No decision changed. Planning acceptance, the planning merge and T0 each still need the Tech Lead's separate explicit authorization; T1 and later are not authorized.  
 **Status update (2026-10-16, fifth checkpoint):** review 05 finding M3P5-F1 corrected as DR-0028 Resolution amendment 2 (signs of two first-order formulas; no decision changed), with a signed verification script. The planning merge and T0 each still need the Tech Lead's separate explicit authorization; T1 and later are not authorized.  
 **Status update (2026-10-16, fourth checkpoint):** review 04 findings M3P4-F1/F2 corrected as an append-only DR-0028 Resolution amendment 1 (limitation statements only; no decision changed). The planning merge and T0 each still need the Tech Lead's separate explicit authorization; T1 and later are not authorized.  
 **Planning baseline:** `main` = `d92ab894907d06b2b13aefff6c005caa0026a68f` (verified in `M3-baseline-and-impact.md`).  

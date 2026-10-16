@@ -95,3 +95,40 @@ No M3 implementation exists.
 - This is not an unconditional PASS, so the I-5 §5 stop condition applies.
 - **No acceptance report has been prepared.** The branch is not ready for acceptance, it is not merged, and T0, T1 and T2 have not started.
 - **Returned to the Tech Lead:** authorization to correct M3P6-F1 to F3, and whether to run review 07.
+
+## Resolution of findings (appended 2026-10-16; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "Continue M3 planning on `milestone-3-planning` from commit `dcabcb2`" (2026-10-16), referred to as **I-6**. It authorizes:
+- the M3P6-F1, F2 and F3 corrections;
+- exactly one further review (review 07).
+
+It does not authorize planning acceptance, T0 or any implementation.
+
+### M3P6-F1 (MINOR): domain of the exact line-of-nodes result
+- **Correction:** DR-0028 "Resolution amendment 3", item 1 (appended). It contains:
+  - the full exact identity ĥ_B = (sin j sin Ω, −sin j cos Ω, cos j) with j = i − δ, and its derivation;
+  - the interior domain i − π < δ < i, where Δi = −δ and ΔΩ = 0;
+  - the crossing rows: positive tilt gives Δi = δ − 2i, negative tilt gives Δi = 2π − 2i + δ, and ΔΩ = +π in both;
+  - the endpoints δ = i and δ = i − π, where B is equatorial and the node is undefined;
+  - the counterexample i = 2°, δ = 5°, which gives Δi = +1° and ΔΩ = +180°;
+  - the exact identity distinguished from the first-order approximation.
+- **Pointers** were added under amendment 2's line-of-nodes row and its E2/E5 rows. Amendment 2's text is kept.
+- **Tests (E2):** 168 interior, 72 crossing with positive tilt, 72 crossing with negative tilt, and 48 endpoint cases.
+- **Regression:** the unrestricted claim, as a mutant, is rejected by E2 (192 failing checks). Restoring it in the script makes the script exit 1.
+
+### M3P6-F2 (MINOR): the node discontinuity is now asserted
+- **Correction:** amendment 3, item 2. The script now asserts:
+  - **E5a:** the jump of +π, by circular distance with a documented tolerance, for all 72 crossings per tilt sign;
+  - **E5b:** the azimuth-sweep jump for both tilt signs, with at least 359 defined samples;
+  - **E5c:** a coverage guard of at least 73 executed jump assertions per tilt sign.
+- **Regression:** the review's own mutation (jump suppressed at i = 0.1°) is rejected by E5a and E5b, and suppression everywhere is rejected by both as well.
+- **Disabling the assertions** is rejected by E5c. Removing E5a, E5b or E5c from the script each makes the script exit 1.
+
+### M3P6-F3 (MINOR): wrapping endpoint convention
+- **Correction:** amendment 3, item 3. `wrap()` now uses exact fmod plus one exact correction, returning values in (−π, π], with wrap(±π) = +π.
+- **Tests:**
+  - 22 inputs, compared with an independent exact rational reduction;
+  - both endpoints;
+  - 30 exactly equivalent pairs;
+  - determinism.
+- **Regression:** the previous [−π, π) implementation is rejected (28 failing checks), and restoring it in the script makes the script exit 1.
+- **Unaffected:** the first-order results reproduce identically.
