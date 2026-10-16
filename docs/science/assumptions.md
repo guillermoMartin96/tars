@@ -17,11 +17,11 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 | SCI-0010 | Variable-mass equation of motion a = F/m (no ṁ·v term) | Active (DR-0011) | M2 dynamics |
 | SCI-0011 | Instantaneous ideal pointing through the centre of mass; no attitude dynamics | Active (DR-0011, DR-0012) | M2 thrust direction |
 | SCI-0012 | Single tank, all propellant usable, instantaneous flame-out at depletion | Active (DR-0011, DR-0014) | M2 propellant |
-| SCI-0013 | Earth J2 zonal field about the frame z axis (fixed pole), EGM2008 tide-free J2 with WGS 84 GM and a | Approved (DR-0024); not implemented. Axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028) | M3 configurations |
-| SCI-0014 | Atmosphere rigidly co-rotating with Earth about the frame z axis; no winds | Approved (DR-0024); not implemented. Axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028) | M3 configurations |
+| SCI-0013 | Earth J2 zonal field about the frame z axis (fixed pole), EGM2008 tide-free J2 with WGS 84 GM and a | Approved (DR-0024); not implemented. Axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028); APPROVED J-ax-1 2026-10-15 (DR-0028) | M3 configurations |
+| SCI-0014 | Atmosphere rigidly co-rotating with Earth about the frame z axis; no winds | Approved (DR-0024); not implemented. Axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028); APPROVED J-ax-1 2026-10-15 (DR-0028) | M3 configurations |
 | SCI-0015 | Static piecewise-exponential atmosphere (Vallado/GMAT table), preserved as published | Approved (DR-0024); not implemented; table conditionally approved and termination input approved with conditions (DR-0027); domain behaviour OPEN | M3 configurations |
 | SCI-0016 | Cannonball drag: constant C_d and A from the scenario, current total mass, no lift | Approved (DR-0024); not implemented | M3 configurations |
-| SCI-0017 | Density height = geodetic height above the WGS 84 ellipsoid | Approved (DR-0024); not implemented. Ellipsoid axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028) | M3 configurations (density only; also the termination-altitude convention, DR-0027 A-2) |
+| SCI-0017 | Density height = geodetic height above the WGS 84 ellipsoid | Approved (DR-0024); not implemented. Ellipsoid axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028); APPROVED J-ax-1 2026-10-15 (DR-0028) | M3 configurations (density only; also the termination-altitude convention, DR-0027 A-2) |
 
 ## Sources used throughout
 - **[NGA]** NGA.STND.0036_1.0.0_WGS84, *Department of Defense World Geodetic System 1984*, National Geospatial-Intelligence Agency, 2014. https://earth-info.nga.mil/GandG/wgs84/index.html
@@ -535,6 +535,17 @@ Per the approved M2 threshold DR.
 
 **Status:** Approved (DR-0024, Tech Lead 2026-10-15); not implemented. Axis choice approved via DR-0026 D3, flagged for confirmation (DR-0024 Q4)  
 **Status update (2026-10-15, append-only):** the "approved via DR-0026 D3" attribution above is withdrawn (review M3P2-F1). The owner decided DR-0024 Q4 explicitly: **the Earth-fixed +Z axis** is the common symmetry axis, with Earth-fixed and inertial representations kept distinct (DR-0024 Resolution, "Q4 coordinate conventions"). Whether that axis coincides with the frame z axis, as written below (DR-0028 A1, recommended), or follows the pole of date is **OPEN in DR-0028**.  
+**Status update 2 (2026-10-15, append-only):** **DR-0028 APPROVED J-ax-1.** M3 uses a **non-rotating Earth-axis-aligned reference model**:
+- its +Z axis coincides with Earth's symmetry/spin axis by assumption and is fixed in the inertial frame, so the "frame z axis" wording below holds;
+- there is no Earth rotation angle, precession, nutation, polar motion or time-dependent orientation;
+- it is **not** a physically accurate rotating terrestrial frame.
+
+Limitations (DR-0028 Resolution):
+- 117–123 m over 10 orbits against a pole-of-date Earth in 2026 (25 m at J2000), growing with time and epoch distance from J2000;
+- no longitude, ground track, site visibility or local solar time;
+- Earth-fixed navigation measurements, tesserals and MSIS-class atmospheres each need a separately authorized Earth-orientation model.
+
+Conventions and tests: DR-0024 "Q4 coordinate conventions, revision 2" (FC-1…FC-10). Extension point: ADR-0009 item 17 (not implemented).  
 **Introduced:** 2026-10-15  
 **Applies to:** M3 physics configurations only. SCI-0001 and SCI-0004 remain Active for M1/M2 configurations.
 
@@ -573,6 +584,9 @@ Not set. Thresholds come from a later threshold DR.
 
 **Status:** Approved (DR-0024 Q7, Tech Lead 2026-10-15); not implemented  
 **Status update (2026-10-15, append-only):** the rotation axis is **the Earth-fixed +Z axis**, shared with J2 and the ellipsoid (DR-0024 Q4, owner decision). v_rel is evaluated with the frame transformations in DR-0024 "Q4 coordinate conventions" (FC-1…FC-9). Whether +Z coincides with the frame z axis, as written below, is **OPEN in DR-0028**.  
+**Status update 2 (2026-10-15, append-only):** DR-0028 APPROVED J-ax-1, so +Z is the frame z axis, as written below.
+- The co-rotation is a velocity field of the air in the inertial frame, v_air = ω_E Ẑ × r. It is not a rotating frame and needs no Earth rotation angle.
+- The identity transformation between the inertial frame and the Earth-axis-aligned model has zero derivative. That never removes the ω_E Ẑ × r term (DR-0024 revision 2, FC-2(b)).  
 **Introduced:** 2026-10-15  
 **Applies to:** M3 drag
 
@@ -682,6 +696,7 @@ Not set.
 
 **Status:** Approved (DR-0024 Q6, Tech Lead 2026-10-15); not implemented  
 **Status update (2026-10-15, append-only):** the ellipsoid axis is **the Earth-fixed +Z axis** (DR-0024 Q4, owner decision); geodetic height is evaluated from the Earth-fixed position (DR-0024 "Q4 coordinate conventions", FC-4). Whether +Z coincides with the frame z axis, as written below, is **OPEN in DR-0028**. Geodetic height is also the convention of the per-scenario termination altitude (DR-0027 A-2).  
+**Status update 2 (2026-10-15, append-only):** DR-0028 APPROVED J-ax-1. The ellipsoid is evaluated about the frame z axis of the non-rotating Earth-axis-aligned model, as written below. The transformation is the identity, so the "Earth-fixed position" of the previous update is the inertial position itself. Geodetic height is axisymmetric about +Z (FC-4), and no longitude or rotation angle is involved.  
 **Introduced:** 2026-10-15  
 **Applies to:** M3 atmosphere density only. SCI-0006 (reported altitude, impact) is unchanged for v1/v2.
 

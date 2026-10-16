@@ -36,3 +36,53 @@ See the checkpoint report for the run outputs: Proof in an isolated clone at `8a
 ## Status after this review
 - Not an unconditional PASS, so the stop condition applies. **No acceptance report has been prepared, the planning branch is not ready to merge, and T0 has not started.**
 - **Returned to the Tech Lead:** authorization to apply M3P3-F1 and M3P3-F2 and whether to run another review round. DR-0028 remains OPEN.
+
+## Resolution of findings (appended 2026-10-15; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "M3 Planning — Resolve Review 03 and DR-0028" (2026-10-15), referred to as **I-3**. Section 1 authorizes only:
+- the M3P3-F1 and M3P3-F2 corrections;
+- resolving DR-0028 as J-ax-1;
+- updating directly affected planning documents;
+- one new review.
+
+### M3P3-F1 (MINOR): velocity transformation needs a fixed-pole qualification
+- **Original finding:** the revision-1 relation v_EF = R(t)(v_I − ω × r_I) was stated generally. In general v_B = R v_A + Ṙ r_A. FC-9 left the velocity tests unqualified. Disposition at review time: ACCEPTED.
+- **Authorized decision (I-3 §3):**
+  - document the general relationship;
+  - state that J-ax-1 uses a constant identity rotation, so the derivative term is zero;
+  - distinguish rotating and pole-of-date frames, where it cannot be omitted;
+  - update FC-1…FC-9, adding checks that would detect omission of the derivative term, without bringing time-dependent rotation into M3 scope;
+  - weaken nothing.
+- **Exact correction:**
+  - DR-0024 "Q4 coordinate conventions" revision 1 is kept unchanged under a "superseded" banner.
+  - **Revision 2 is appended.** It contains:
+    - the general relation v_B = R v_A + Ṙ r_A, with its fixed-axis special case and the conditions under which that case holds;
+    - the M3 model (DR-0028 J-ax-1): the transformation to the inertial frame is the constant identity, so Ṙ = 0;
+    - an explicit statement that atmospheric co-rotation, v_air = ω_E Ẑ × r, is air physics rather than a frame derivative, and must not be dropped because Ṙ = 0;
+    - the revised specifications FC-1…FC-10, each with its change from revision 1. FC-1 is strengthened to an exact identity. FC-2(b) is added (it detects dropping co-rotation). FC-3/FC-4 are restated as axisymmetry properties. FC-9 is extended to the velocity tests. **FC-10 is a future-gated derivative-term check**: a finite-difference comparison, a known-answer case where omitting Ṙ r_A returns zero, and a test rotation that does not reduce to the fixed-axis shortcut.
+- **Evidence:** differentiating r_B = R(t) r_A gives v_B = Ṙ r_A + R v_A (product rule). With Ṙ = −R[Ω×], v_B = R(v_A − Ω × r_A), which reduces to revision 1 only for Ω = ω_E Ẑ. For R ≡ I₃, Ṙ = 0.
+- **Residual uncertainty:** none on the mathematics. Tolerances for FC tests come from the later threshold DR.
+- **Changes an acceptance decision?** No.
+
+### M3P3-F2 (MINOR): amendment log abbreviated the withdrawn Q4 attribution
+- **Original finding:** the DR-0024 amendment log quoted the withdrawn Q4 row with an ellipsis, omitting the §5.7 quotation and the attribution to the pinned rotation rate / D-rot-1. Disposition at review time: ACCEPTED.
+- **Authorized decision (I-3 §4):**
+  - preserve the complete withdrawn text verbatim;
+  - remove the ellipsis abbreviation;
+  - preserve the history;
+  - record the correction as an append-only amendment;
+  - keep the original and amended records distinguishable.
+- **Exact correction:**
+  - In the first log entry, the abbreviated quotation was replaced in place by a bracketed pointer: "[abbreviated quotation removed 2026-10-15 under review M3P3-F2; …]". This in-place edit, and the abbreviated form, are recorded in the new entry; the abbreviated form remains in commit `8a725b6`.
+  - **A new "M3P3-F2" entry is appended.** It quotes the complete withdrawn row verbatim from `23bafd2`, markdown included, in a code block. It then distinguishes three records: the original (withdrawn, commit `54a49e4`), the amended row (current) and the realization (DR-0028).
+- **Evidence:** a byte comparison of the quoted row with `git show 23bafd2:docs/decisions/requests/DR-0024-m3-physical-models-and-constants.md` is recorded in the checkpoint report. The DR-0026 Q-G3-9 log already quoted its row in full, and its rows are unchanged.
+- **Residual uncertainty:** none.
+- **Changes an acceptance decision?** No.
+
+### DR-0028 (owner decision, I-3 §2)
+- **Decision:** APPROVED J-ax-1, with requirements R-1…R-4.
+- **Recorded in:**
+  - DR-0028 Resolution, with the limitations, the implications for future capabilities and the extension point;
+  - SCI-0013/0014/0017, "status update 2";
+  - ADR-0009 item 17 and a note at DR-0026 §5.7;
+  - the decision matrix, M3-proposal and the milestones README.
+- **Not authorized:** no Earth-orientation implementation.

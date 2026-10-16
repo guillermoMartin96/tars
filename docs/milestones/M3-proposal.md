@@ -2,6 +2,10 @@
 
 **Status:** PLANNING. **G0 APPROVED (Tech Lead, 2026-10-15): Option A, J2 + atmospheric drag.** **G1–G3 RESOLVED (Tech Lead, 2026-10-15):** DR-0024, DR-0025 and DR-0026, recorded as ADR-0009; DR-0027 (termination value, table residuals) OPEN. The T0 spike is authorized after the planning branch merges; **T1 and later are not authorized**, and nothing here changes validated M1/M2 behaviour.  
 **Status update (2026-10-15, second checkpoint):** DR-0024 Q4 and DR-0026 Q-G3-9 decided explicitly by the owner, with constraints. DR-0027 resolved with conditions (no numerical altitude; domain behaviour and crossing semantics proposed at T0). **DR-0028 OPEN** (Earth-fixed frame realization). **The planning merge and T0 both now need the Tech Lead's explicit approval of the planning checkpoint** ("Do not merge or begin T0 until I explicitly approve the checkpoint"). M3 implementation has not started; T1 and later are not authorized.  
+**Status update (2026-10-15, third checkpoint):**
+- **DR-0028 APPROVED: J-ax-1**, a non-rotating Earth-axis-aligned model with no Earth rotation angle and no Earth-orientation implementation.
+- Review 03 findings M3P3-F1/F2 corrected.
+- The planning merge and T0 each still need the Tech Lead's separate explicit authorization.  
 **Planning baseline:** `main` = `d92ab894907d06b2b13aefff6c005caa0026a68f` (verified in `M3-baseline-and-impact.md`).  
 **Date:** 2026-10-15  
 **Prepared after:** M2 accepted (2026-10-15) and merged (PR #3, merge commit `d92ab89`).  
@@ -166,7 +170,7 @@ None of these needs the M2 code to change. Changes to existing M2 structures (fo
 | Gate | Decision | Blocks |
 |---|---|---|
 | **G0** | M3 objective. **APPROVED 2026-10-15: Option A** | Everything (now unblocked for planning only) |
-| **G1** | Physical models and constants: **DR-0024, RESOLVED 2026-10-15** (Q4 axis flagged for confirmation); DR-0027 OPEN. *Update 2026-10-15: Q4 APPROVED with constraints; its realization OPEN (DR-0028). DR-0027 RESOLVED WITH CONDITIONS; T0 proposals pending* | T1/T2 (DR-0028); T2 (DR-0027 T0 items) |
+| **G1** | Physical models and constants: **DR-0024, RESOLVED 2026-10-15** (Q4 axis flagged for confirmation); DR-0027 OPEN. *Update 2026-10-15: Q4 APPROVED with constraints; its realization OPEN (DR-0028). DR-0027 RESOLVED WITH CONDITIONS; T0 proposals pending. Update (third checkpoint): DR-0028 APPROVED J-ax-1* | T1/T2 (DR-0028; lifted by the J-ax-1 decision); T2 (DR-0027 T0 items) |
 | **G2** | Validation strategy: **DR-0025, RESOLVED 2026-10-15** (principles; Q-G2-1, 5, 7 deferred to the T0 checkpoint, Q-G2-6 to T4) | T4–T6 |
 | **G3** | Architecture and physics versioning: **DR-0026, RESOLVED 2026-10-15 (D3); ADR-0009**. *Update 2026-10-15: Q-G3-9 APPROVED with constraints (approximate diagnostic only); Q-G3-7 NOT AUTHORIZED* | — |
 | G4 | M3 thresholds (after T6 measurement) | Proof |
@@ -175,3 +179,10 @@ None of these needs the M2 code to change. Changes to existing M2 structures (fo
 **Requested response (updated 2026-10-15, after the decision checkpoint):** G0–G3 are resolved. Open: DR-0027; the items deferred to the T0 checkpoint; confirmation of DR-0024 Q4 and DR-0026 Q-G3-9; and a separate authorization before T1 begins.
 
 **Requested response (updated 2026-10-15, second checkpoint; supersedes the paragraph above):** Q4 and Q-G3-9 are decided; DR-0027 is resolved with conditions. Open: DR-0028; the DR-0027 items proposed at T0; the items deferred to the T0 checkpoint (DR-0025 Q-G2-1, Q-G2-5, Q-G2-7; DR-0024 Q9 values); Q-G2-6 (T4). Needed from the Tech Lead: explicit approval of the planning checkpoint before the planning merge and before T0; a separate authorization before T1. The full matrix is in `M3-decision-matrix.md`.
+
+**Requested response (updated 2026-10-15, third checkpoint; supersedes the paragraph above where it differs):** DR-0028 is decided (J-ax-1). Still open:
+- the DR-0027 items proposed at T0;
+- the T0-checkpoint deferrals (DR-0025 Q-G2-1, Q-G2-5, Q-G2-7; DR-0024 Q9 values);
+- Q-G2-6 (T4).
+
+Needed from the Tech Lead: acceptance of the planning checkpoint; then, separately, authorization of the planning merge and of T0; later, a separate authorization before T1.

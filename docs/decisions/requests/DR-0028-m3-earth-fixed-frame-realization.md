@@ -1,6 +1,6 @@
 # Decision Request: realization of the M3 Earth-fixed frame (follow-up to DR-0024 Q4)
 
-**Status:** OPEN (BLOCKED ON OWNER)  
+**Status:** RESOLVED — APPROVED: J-ax-1, with requirements (Tech Lead, 2026-10-15, "M3 Planning — Resolve Review 03 and DR-0028", section 2). See "Resolution"; where the body below differs from the Resolution, the Resolution governs. No Earth-orientation implementation is authorized.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -48,6 +48,54 @@ Two things that approval does not fix are needed before T1:
 `A1`/`A2`/`A3` and `B1`/`B2 <convention>`, or `discuss`.
 
 ## Resolution
-**Decision:** _pending_  
-**Reasoning/notes:**  
+**Decision:** **APPROVED: J-ax-1** (Tech Lead, 2026-10-15, instruction "M3 Planning — Resolve Review 03 and DR-0028", section 2). "For M3, use a simplified nonrotating Earth-axis-aligned reference model." Recorded by the implementer; no item below was decided by the implementer.
+
+| # | Item | Status |
+|---|---|---|
+| A | **J-ax-1.** The model's +Z axis is defined, **by assumption**, to coincide with the selected Earth symmetry/spin axis, and that axis is **fixed in the M3 inertial frame** (SCI-0003). A2 (mean pole of date) and A3 (ITRF / full Earth orientation) are not adopted for M3 | APPROVED |
+| B | **No Earth rotation angle is required for M3** (option B1). Option B2 (a pinned θ(t) convention) is not adopted | APPROVED |
+| R-1 | No time-dependent Earth orientation, precession, nutation or polar motion | APPROVED (requirement) |
+| R-2 | The simplified frame is **not identified as a physically accurate rotating Earth-fixed terrestrial frame**. Records call it the "non-rotating Earth-axis-aligned reference model" (EA), not ITRF, ECEF or "Earth-fixed" without qualification | APPROVED (requirement) |
+| R-3 | Its approximation, limitations and implications for future mission capabilities are documented (below; SCI-0013) | APPROVED (requirement); done |
+| R-4 | A clear architectural extension point for future Earth-fixed frame transformations is preserved (below; ADR-0009 item 17) | APPROVED (requirement); recorded, not implemented |
+| — | **No additional Earth-orientation implementation is authorized** | NOT AUTHORIZED |
+
+**What the model is.**
+- **Frames and transformation:** EA and the inertial frame I share their axes; R_EA←I is the constant identity, so its derivative is zero (DR-0024 "Q4 coordinate conventions, revision 2").
+- **Physics on that axis:**
+  - J2, the WGS 84 ellipsoid (geodetic height) and the atmosphere's rigid rotation (v_air = ω_E Ẑ × r) all use this +Z.
+  - Atmospheric co-rotation (DR-0024 Q7) is a velocity field of the air in I, not a rotating frame, so it needs no rotation angle.
+- **Unchanged:** the approved constants (GM, a, J2, 1/f, ω_E) and every DR-0024/DR-0027 atmosphere constraint.
+
+**Approximation and limitations.**
+- **The real spin axis is not fixed in I.**
+  - Precession and nutation move the pole of date about 0.15° (θ_A = 521″, DR-0024 §3.3) from the EarthMJ2000Eq z axis in 2026. Polar motion adds a further, smaller wander, not quantified by the project.
+  - Measured effect (VAL-0018, J2 only, 53 700 s): **117 m** against a 2026 mean-pole model, **25 m** at J2000, and **123.5 m** against GMAT in EarthMJ2000Eq axes. GMAT reproduces the M3 model to 0.19 m when states are exchanged in its true-of-epoch axes fixed at the epoch.
+- **Accumulation:** node and inclination geometry relative to the true equator are offset by up to the pole offset, and the error grows with propagation time and with distance of the epoch from J2000.
+- **No longitude, no ground position:** without an Earth rotation angle the model has no terrestrial longitude, so it cannot give sub-satellite points, ground tracks, site visibility or local solar time.
+- **Not a terrestrial frame:** the model must not be used where an ITRF/ECEF frame is meant.
+
+**Implications for future mission capabilities.** Each of the following needs a separately authorized Earth-orientation model; none is enabled by M3:
+- ground tracks, ground-station or site visibility windows, and landing or re-entry footprints;
+- navigation using Earth-fixed measurements (GNSS in ITRF, ground-station range/Doppler);
+- node-timing or orbit-determination comparisons with real-world data beyond the stated error;
+- longitude-dependent gravity (tesserals) or a time- and location-dependent atmosphere (MSIS-class).
+
+The M5 Mission Laboratory can compare candidate maneuvers within the model. Absolute geographic statements are out of scope.
+
+**Extension point (R-4; design record only).**
+- The axis is part of the pinned physics configuration under a versioned model identifier. Its name is chosen at T1 design, under DR-0026's versioning rule.
+- Forces and the density component read the axis, and any future orientation, only through the immutable force-evaluation context and physics configuration (ADR-0009). They never construct it themselves.
+- A future Earth-orientation model would be added as a **new versioned component** (an injected, immutable orientation provider, as DR-0026 §5.7 anticipated). It would come with:
+  - its own Decision Request;
+  - the general velocity relation v_B = R v_A + Ṙ r_A;
+  - frame-consistency checks FC-9 and FC-10.
+- Existing M3 model versions are retained under the D3 retention rule.
+- **Nothing in this extension point is implemented or authorized now.**
+
+**Reasoning/notes:** the decision matches the recommendation in this request (A1, B1) and the realization the M3 planning experiments measured against GMAT.
+
 **Follow-up:**
+- DR-0024 "Q4 coordinate conventions, revision 2" and FC-1…FC-10.
+- SCI-0013, SCI-0014 and SCI-0017 status updates; ADR-0009 item 17.
+- T1/T2 are no longer blocked by this DR; they remain NOT AUTHORIZED.

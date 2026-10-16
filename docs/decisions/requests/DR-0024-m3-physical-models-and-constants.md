@@ -1,6 +1,6 @@
 # Decision Request: M3 physical models and constants: J2 and atmospheric drag (gate G1)
 
-**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). Q4 APPROVED with constraints in a second decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation"); its realization in the inertial frame is OPEN in DR-0028. DR-0027 is resolved with conditions; its open sub-items are listed there. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution.  
+**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). Q4 APPROVED with constraints in a second decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation"); its realization in the inertial frame is OPEN in DR-0028. *(Update 2026-10-15: DR-0028 APPROVED J-ax-1, a non-rotating Earth-axis-aligned model; see "Q4 coordinate conventions, revision 2".)* DR-0027 is resolved with conditions; its open sub-items are listed there. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -354,7 +354,7 @@ Answers to Q1–Q10. For example: "Q1 K-A, Q2 a, Q3 keep + erratum, Q4 J-ax-1, Q
 | Q1 | **J2 = 1.0826261739e-3**, EGM2008 tide-free (−√5 × −0.484165143790815e-3, [NGA] Table 5.1). The zero-tide alternative is not adopted | APPROVED |
 | Q2 | J2 reference radius = the existing WGS 84 a = 6378137.0 m (K-A). The owner's stop condition (a material inconsistency) was checked and is **not met** (§3.5) | APPROVED |
 | Q3 | GM stays the WGS 84 3.986004418e14 m³/s² (DR-0003). **SCI-0005 gets an explicit historical correction note** for its TT/TCG wording; the old text is not rewritten (`docs/science/assumptions.md`, SCI-0005 "Historical correction note") | APPROVED; note added |
-| Q4 | **Owner decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation", section 1):** "Use the Earth-fixed +Z axis as the common physical symmetry/rotation axis for J2, the reference ellipsoid, and atmospheric rotation." Constraints: explicitly distinguish Earth-fixed and inertial coordinate representations; use correct frame transformations when evaluating dynamics and atmospheric relative velocity; record coordinate conventions and the required frame-consistency tests (below, "Q4 coordinate conventions"). **How the Earth-fixed +Z axis is placed in the inertial frame (J-ax-1 fixed, or the pole of date, J-ax-2/3) is not named by the decision and is OPEN in DR-0028.** The earlier record of this row ("APPROVED via DR-0026 D3") was withdrawn after review M3P2-F1 (amendment log) | APPROVED with constraints; realization OPEN (DR-0028) |
+| Q4 | **Owner decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation", section 1):** "Use the Earth-fixed +Z axis as the common physical symmetry/rotation axis for J2, the reference ellipsoid, and atmospheric rotation." Constraints: explicitly distinguish Earth-fixed and inertial coordinate representations; use correct frame transformations when evaluating dynamics and atmospheric relative velocity; record coordinate conventions and the required frame-consistency tests (below, "Q4 coordinate conventions"). **How the Earth-fixed +Z axis is placed in the inertial frame (J-ax-1 fixed, or the pole of date, J-ax-2/3) is not named by the decision and is OPEN in DR-0028.** *(Resolved 2026-10-15: DR-0028 APPROVED J-ax-1; conventions revision 2.)* The earlier record of this row ("APPROVED via DR-0026 D3") was withdrawn after review M3P2-F1 (amendment log) | APPROVED with constraints; realization OPEN (DR-0028). *Update 2026-10-15: realization APPROVED, J-ax-1 (DR-0028)* |
 | Q5 | Atmosphere = the piecewise-exponential Vallado/GMAT table (A2), subject to Q10. A4 (MSIS-class) deferred to a later fidelity milestone. A1 retained only as the one-band subset for analytic and unit tests | APPROVED |
 | Q5a | **The tabulated densities are preserved exactly as published.** No value is altered to force continuity. Discontinuities are documented and quantified (§3.4), and tests are required at and immediately around **every** band boundary (DR-0025 Resolution) | APPROVED |
 | Q6 | Density height = **geodetic height relative to the WGS 84 ellipsoid** (a, 1/f = 298.257223563 [NGA]). SCI-0006 (reported altitude, impact) is unchanged for v1/v2 | APPROVED |
@@ -374,10 +374,11 @@ Answers to Q1–Q10. For example: "Q1 K-A, Q2 a, Q3 keep + erratum, Q4 J-ax-1, Q
 **Follow-up:**
 - DR-0027 (OPEN): A, the re-entry/termination altitude; B, the Q10 residual table cells above 900 km and at 0 km. *(Resolved with conditions 2026-10-15; open sub-items listed in DR-0027.)*
 - T0 (authorized after the planning merge): reference configurations, boundary tests, geodetic-height and Earth-rotation checks (DR-0025 Resolution). *(Narrowed 2026-10-15: the Tech Lead's continuation instruction, section 7, says "Do not merge or begin T0 until I explicitly approve the checkpoint." T0 now needs that explicit approval as well as the planning merge.)*
-- DR-0028 (OPEN): realization of the Earth-fixed +Z axis.
+- DR-0028 (OPEN): realization of the Earth-fixed +Z axis. *(APPROVED J-ax-1, 2026-10-15.)*
 - T1 and later: not authorized.
 
 ### Q4 coordinate conventions (recorded 2026-10-15 under the Q4 constraints; nothing implemented)
+> **Revision 1. Superseded by "Q4 coordinate conventions, revision 2" below** (DR-0028 resolution and review M3P3-F1, 2026-10-15). Kept unchanged for traceability. Its velocity relation assumes rotation about a fixed pole and is not general (M3P3-F1), and DR-0028 replaced its rotating Earth-fixed frame with a non-rotating Earth-axis-aligned model.
 **Representations.** Two coordinate representations are kept distinct, and every vector carries its frame in code and records:
 - **Inertial, I:** the ECI frame of SCI-0003 (EarthMJ2000Eq-aligned, treated as inertial). The simulator state (r_I, v_I) is integrated here only. The equations of motion are written here.
 - **Earth-fixed, EF:** right-handed, rotating with the Earth at ω_E = 7.292115e-5 rad/s [NGA] about its +Z axis. The J2 field, the WGS 84 ellipsoid and the co-rotating atmosphere are defined here, all about the same +Z.
@@ -404,6 +405,51 @@ Under DR-0028 A1 the first two equal their direct inertial evaluations identical
 | FC-9 | Under DR-0028 A2/A3, if chosen: FC-3 and FC-4 are replaced by checks against an independent Earth-orientation implementation; recorded here so that the choice cannot silently drop the tests |
 
 **Amendment log (append-only).**
-- 2026-10-15, review M3P2-F1 and the owner's Q4 decision: the Q4 row formerly read "J2 axis, ellipsoid axis and atmosphere-rotation axis = the frame z axis (J-ax-1, D-rot-1). The owner's section 1 text does not name an axis option; the approval comes from the D3 approval in DR-0026 … flagged for owner confirmation in the checkpoint report", with status "APPROVED via DR-0026 D3 (confirmation requested)". That attribution overstated the owner's decision and is withdrawn. The row now records the owner's explicit decision.
+- 2026-10-15, review M3P2-F1 and the owner's Q4 decision: the Q4 row formerly read [abbreviated quotation removed 2026-10-15 under review M3P3-F2; the complete withdrawn row is quoted verbatim in the M3P3-F2 amendment below], with status "APPROVED via DR-0026 D3 (confirmation requested)". That attribution overstated the owner's decision and is withdrawn. The row now records the owner's explicit decision.
 - 2026-10-15, DR-0027 resolution: the Q8 row formerly ended "Above the top band, the table's own top-band exponential applies as the source defines (not a cutoff)", under status "APPROVED (principle)". The owner had not decided behaviour above the table. The sentence was an implementer statement and is withdrawn; the owner now requires the domain behaviour to be defined explicitly (DR-0027 B4).
 - 2026-10-15, review M3P2-F3: §3.4 "Consequences" gains a correction under its first bullet. The original bullet is kept as written.
+- **2026-10-15, review M3P3-F2 (correction authorized by the Tech Lead, "M3 Planning — Resolve Review 03 and DR-0028", §4).** The first entry of this log quoted the withdrawn Q4 row in abbreviated form, with an ellipsis that omitted the §5.7 quotation and the attribution to the pinned rotation rate / D-rot-1. That abbreviated quotation was replaced in place by a bracketed pointer to this entry; nothing else in that entry changed. The abbreviated form remains in the git history (commit `8a725b6`). **The complete withdrawn Q4 Resolution row, verbatim from commit `23bafd2` (markdown included), was:**
+
+  ```text
+  | Q4 | J2 axis, ellipsoid axis and atmosphere-rotation axis = **the frame z axis (J-ax-1, D-rot-1)**. The owner's section 1 text does not name an axis option; the approval comes from the D3 approval in DR-0026, whose §5.7 states "In M3 the body axis is the frame z axis (DR-0024 J-ax-1)", and from the approval of "the proposed pinned Earth rotation rate", which D-rot-1 applies about z. Listed explicitly so that it is not an implied decision; **flagged for owner confirmation** in the checkpoint report | APPROVED via DR-0026 D3 (confirmation requested) |
+  ```
+
+  **Distinguishing the records:**
+  - *Original (withdrawn, 2026-10-15, commit `54a49e4`):* the row above.
+  - *Amended (current):* the Q4 row in the Resolution table, recording the owner's explicit decision of 2026-10-15 (I-2 §1).
+  - *Realization (current):* DR-0028, APPROVED J-ax-1, with revision 2 of the coordinate conventions below.
+- **2026-10-15, DR-0028 resolution and review M3P3-F1:** "Q4 coordinate conventions" revision 1 is marked superseded, and revision 2 is appended below. Revision 1's text is unchanged.
+
+### Q4 coordinate conventions, revision 2 (2026-10-15; DR-0028 APPROVED J-ax-1; review M3P3-F1; nothing implemented)
+**General relationship (any two frames A and B, recorded for correctness and for future work).** If r_B = R(t) r_A, with R(t) a proper rotation, then differentiating gives
+
+  v_B = R(t) v_A + Ṙ(t) r_A, with Ṙ(t) = dR(t)/dt.
+
+- With Ṙ = −R [Ω_A×], where Ω_A is the angular velocity of B relative to A expressed in A, this becomes v_B = R(t)(v_A − Ω_A × r_A).
+- Revision 1 wrote that form with Ω_A = ω_E Ẑ. That is valid **only** when B rotates relative to A about a fixed axis at exactly ω_E. For a pole-of-date or full Earth-orientation frame, Ω includes precession, nutation and polar-motion rates, and **Ṙ r_A cannot in general be omitted or replaced by ω_E Ẑ × r_A**.
+
+**The M3 model (DR-0028 J-ax-1).**
+- **Frames.** M3 uses the inertial frame I (SCI-0003) and a **non-rotating Earth-axis-aligned reference model**, EA.
+  - EA's +Z axis is defined, **by assumption**, to coincide with Earth's symmetry/spin axis, and EA is fixed in I.
+  - **The transformation is the constant identity:** R_EA←I = I₃ for all t, so Ṙ = 0 and v_EA = v_I exactly. The derivative term is zero because the rotation is constant, not because it was neglected.
+  - EA is **not** a physically accurate rotating Earth-fixed terrestrial frame (not ITRF, not a pole-of-date frame).
+  - No Earth rotation angle, precession, nutation, polar motion or time-dependent orientation exists in M3.
+- **J2 and the ellipsoid.** Both are evaluated in EA, about +Z. Because R is the identity, they are numerically the same as the direct evaluation in I.
+- **Atmospheric co-rotation (Q7, unchanged).** The atmosphere is modelled as a rigid velocity field in I: v_air(r) = ω × r, with ω = ω_E Ẑ and ω_E = 7.292115e-5 rad/s (positive = eastward rotation). The drag formula uses v_rel = v_I − ω × r_I.
+  - This term is **air motion (physics)**, not a frame-transformation derivative.
+  - It is required even though Ṙ = 0. The zero derivative term must never be read as permission to drop atmospheric rotation.
+- **Units:** SI. **No frame other than I and EA is defined in M3.**
+
+**Frame-consistency specifications, revision 2.** They are for T1/T2. Tolerances are not set here and come from the later threshold DR. Each revision-1 requirement is kept or strengthened; none is removed.
+| ID | Revision 2 requirement | Change from revision 1 |
+|---|---|---|
+| FC-1 | The M3 I↔EA transformation is the constant identity: positions and velocities map unchanged, exactly (bitwise), at every t. Round trip I → EA → I is exact | Strengthened: exact identity instead of an arbitrary-rotation round trip (no rotation exists in M3) |
+| FC-2 | v_rel = v_I − ω × r_I. (a) For ω_E = 0, v_rel = v_I. (b) **For a point at rest in I (v_I = 0) away from the axis, v_rel = −ω × r ≠ 0.** (b) detects omitting atmospheric rotation on the grounds that the frame derivative is zero | Kept; (b) added |
+| FC-3 | **Axisymmetry of J2:** for any rotation Q_z about +Z, a_J2(Q_z r) = Q_z a_J2(r), at equatorial, polar and mid-latitude points. A property test of the model; no Earth rotation angle is involved | Kept as a property of the model rather than of a frame |
+| FC-4 | **Axisymmetry of geodetic height:** h(Q_z r) = h(r) for any rotation Q_z about +Z; values agree with the source chosen under DR-0025 Q-G2-7 | Kept as a property of the model |
+| FC-5 | Signs: at r = a X̂ the air velocity is +ω_E a Ŷ (eastward). For a prograde equatorial circular orbit \|v_rel\| = \|v\| − ω_E r; for a retrograde one, \|v\| + ω_E r | Unchanged |
+| FC-6 | J2 direction at the equator (inward) and at the pole (outward along +Z), §4.1 sign check | Unchanged |
+| FC-7 | One shared axis: J2, the ellipsoid and the atmosphere rotation read the same pinned +Z and ω_E from the physics configuration (identity test, DR-0026) | Unchanged |
+| FC-8 | An inclined or polar orbit gives a cross-track component of ω × r, so v_rel is not parallel to v | Unchanged |
+| FC-9 | **Future-gated (outside M3 scope).** Any later Earth-orientation model (pole of date, rotating terrestrial frame) must: replace FC-1 by an independent check of R(t) against a reference implementation; replace FC-3/FC-4 by checks against that reference; and satisfy FC-10. It must be a new versioned model with its own decision; it is not authorized | Extended to the velocity tests (M3P3-F1) |
+| FC-10 | **Future-gated derivative-term check (specification only; no time-dependent rotation is implemented in M3).** For any time-dependent R(t): (a) v_B from the general formula agrees with a finite-difference derivative of r_B(t) = R(t) r_A(t) to the stated order; (b) **known-answer case:** a point fixed in A (v_A = 0) off the rotation axis must have v_B = Ṙ r_A ≠ 0, so an implementation that omits the derivative term returns 0 and fails; (c) for an orientation whose angular velocity is not ω_E Ẑ (for example a test rotation with a tilted or time-varying axis), the result must differ from the fixed-axis shortcut R(v_A − ω_E Ẑ × r_A), which detects substituting the M3 shortcut for the general relation | New (M3P3-F1) |

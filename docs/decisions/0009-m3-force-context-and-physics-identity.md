@@ -32,8 +32,17 @@ DR-0026 §4: D1 (inject mutable mass into forces), D2 (an immutable context argu
 **Added 2026-10-15 (owner decisions after review 02; DR-0024 Q4, DR-0026 Q-G3-9, DR-0027):**
 
 14. **Earth-fixed and inertial representations are distinct.** J2, the reference ellipsoid and atmospheric rotation share one Earth-fixed +Z axis. The state is integrated in the inertial frame. Forces evaluated from Earth-fixed quantities are transformed explicitly (DR-0024 "Q4 coordinate conventions"; tests FC-1…FC-9). How +Z sits in the inertial frame is OPEN (DR-0028).
+    *(Update 2026-10-15: DR-0028 APPROVED J-ax-1; see item 17.)*
 15. **The `escape` check stays the two-body specific-energy diagnostic, as an approximation.** It is not an exact escape criterion in perturbed dynamics and not independent authorization for safety-critical actions.
 16. **The termination altitude is an explicit per-scenario input** (metres, geodetic, no default). The atmosphere dataset is the GMAT table pinned verbatim by digest; its domain behaviour is OPEN (DR-0027).
+
+**Added 2026-10-15 (DR-0028 APPROVED J-ax-1):**
+
+17. **Earth axis model and extension point.**
+    - M3 uses a non-rotating Earth-axis-aligned reference model. Its +Z coincides with Earth's spin axis by assumption, it is fixed in the inertial frame, and its transformation to the inertial frame is the constant identity. There is no Earth rotation angle or time-dependent orientation, and the model is not a terrestrial Earth-fixed frame.
+    - The axis is pinned physics configuration under a versioned model identifier. Forces and the density component receive it only through the immutable context and configuration.
+    - **Extension point:** a future Earth-orientation model is a new versioned, injected, immutable orientation component. It needs its own DR, uses the general velocity relation v_B = R v_A + Ṙ r_A, and satisfies FC-9/FC-10 (DR-0024 revision 2).
+    - Not implemented; not authorized.
 
 ## Reasoning
 - D2/D3 keep forces pure and state ownership with the simulator (ADR-0002), which D1 would break and which future isolated mission forks need.

@@ -188,6 +188,7 @@ validators / references ──► PhysicsConfiguration.physics_id (refuse mismat
 - **Every force returns an ECI acceleration.** Body-frame work (the J2 axis, the ellipsoid) is internal to the component.
   - In M3 the body axis is the frame z axis (DR-0024 J-ax-1), so no Earth-orientation provider exists.
     - *(Note added 2026-10-15: proposal text. The owner approved the Earth-fixed +Z axis as the common axis, with distinct Earth-fixed and inertial representations (DR-0024 Q4); its realization is OPEN in DR-0028.)*
+    - *(Note added 2026-10-15: DR-0028 APPROVED J-ax-1, so the body axis is the frame z axis of a non-rotating Earth-axis-aligned model; no Earth-orientation provider is implemented in M3. The provider below is the recorded extension point (ADR-0009 item 17), not authorized.)*
   - A future time-dependent orientation would be an injected, immutable provider. It is not built now.
 - **Time stays t = tick · dt** in elapsed TT seconds (ADR-0002, SCI-0007). M3 forces do not depend on absolute time.
   - The signature already carries t, so third body, SRP and tesserals can later obtain absolute time from a typed epoch in the configuration, which they would require.

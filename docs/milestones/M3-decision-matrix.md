@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-15, second planning checkpoint (after review 02). This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -15,6 +15,7 @@ No OPEN or DEFERRED item has a default.
 **Instruction sources:**
 - **I-1:** "M3 planning decision checkpoint" (Tech Lead, 2026-10-15), sections 1–8.
 - **I-2:** "M3 planning checkpoint continuation" (Tech Lead, 2026-10-15), sections 1–7.
+- **I-3:** "M3 Planning — Resolve Review 03 and DR-0028" (Tech Lead, 2026-10-15), sections 1–8.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -23,7 +24,7 @@ No OPEN or DEFERRED item has a default.
 | Q2 | J2 reference radius = WGS 84 a; stop condition checked, not met (§3.5) | APPROVED | I-1 §1 | SCI-0013 |
 | Q3 | GM = WGS 84 3.986004418e14; SCI-0005 historical correction note | APPROVED; note added | I-1 §1, §4 | SCI-0005 (appended note) |
 | Q4 | Earth-fixed +Z is the common axis of J2, the ellipsoid and atmosphere rotation; Earth-fixed and inertial representations distinct; correct transformations; conventions and tests FC-1…FC-9 recorded | APPROVED w/ constraints | I-2 §1 | SCI-0013/0014/0017 status updates; ADR-0009 item 14 |
-| Q4 realization | Placement of +Z_EF in the inertial frame (J-ax-1 vs pole of date); Earth rotation angle θ(t) | **OPEN** | — | DR-0028 |
+| Q4 realization | J-ax-1: a non-rotating Earth-axis-aligned model; +Z coincides with the spin axis by assumption and is fixed in the inertial frame; identity transformation (zero derivative); no Earth rotation angle; not a terrestrial frame. Conventions revision 2, FC-1…FC-10 | was OPEN → **APPROVED** | I-3 §2, §3 | DR-0028; SCI-0013/0014/0017 status update 2; ADR-0009 item 17 |
 | Q5 | Piecewise Vallado/GMAT table (A2); one-band subset retained for tests; A4 deferred | APPROVED | I-1 §1 | SCI-0015 |
 | Q5a | Values preserved as published; discontinuities documented, quantified, tested at every boundary | APPROVED | I-1 §1 | SCI-0015; DR-0025 principle 5 |
 | Q6 | Density height = geodetic, WGS 84 | APPROVED | I-1 §1 | SCI-0017 |
@@ -76,10 +77,15 @@ No OPEN or DEFERRED item has a default.
 | B-5 | No claim of agreement with the printed textbook | CONDITION | I-2 §2 |
 
 ## DR-0028: Earth-fixed frame realization
-| Item | Question | Status |
-|---|---|---|
-| A | +Z_EF placement: J-ax-1 (model-defined, coincident with inertial z) / J-ax-2 / J-ax-3 | **OPEN**; recommendation A1 |
-| B | Earth rotation angle θ(t) for Earth-fixed outputs | **OPEN**; recommendation B1 (none in M3) |
+| Item | Decision | Status | Source |
+|---|---|---|---|
+| A | J-ax-1: model +Z coincident with Earth's symmetry/spin axis by assumption, fixed in the M3 inertial frame | was OPEN → **APPROVED** | I-3 §2 |
+| B | No Earth rotation angle in M3 (B1) | was OPEN → **APPROVED** | I-3 §2 |
+| R-1 | No time-dependent orientation, precession, nutation or polar motion | APPROVED (requirement) | I-3 §2 |
+| R-2 | Not identified as a physically accurate rotating terrestrial frame | APPROVED (requirement) | I-3 §2 |
+| R-3 | Approximation, limitations and future-capability implications documented | APPROVED; done (DR-0028, SCI-0013) | I-3 §2 |
+| R-4 | Architectural extension point for future Earth-fixed transformations | APPROVED; recorded (ADR-0009 item 17), not implemented | I-3 §2 |
+| — | Any additional Earth-orientation implementation (rotation angle, pole of date, EOP) | **NOT AUTHORIZED** | I-3 §2, §7 |
 
 ## Historical corrections and standing decisions
 | Item | Status | Source |
@@ -98,9 +104,15 @@ No OPEN or DEFERRED item has a default.
 | M3P2-F2 | BLOCKER | REJECTED_WITH_REASONING (records); prompt corrected | I-2 §1: next review receives the complete instructions | same |
 | M3P2-F3 | MINOR | ACCEPTED | I-2 §1: correction authorized | same |
 
+## Review findings (planning review 03)
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P3-F1 | MINOR | ACCEPTED; corrected | I-3 §3 | DR-0024 "Q4 coordinate conventions, revision 2" (general relation; FC-1…FC-10); `docs/reviews/M3-planning-review-03.md`, "Resolution of findings" |
+| M3P3-F2 | MINOR | ACCEPTED; corrected | I-3 §4 | DR-0024 amendment log (M3P3-F2 entry, complete verbatim row); same review record |
+
 ## Gates
 | Gate | State |
 |---|---|
 | Planning merge | Needs the Tech Lead's explicit checkpoint approval (I-2 §7). Section 7 of I-1 alone no longer suffices |
 | T0 | Needs the explicit checkpoint approval and the planning merge (I-1 §8, narrowed by I-2 §7) |
-| T1 and later | NOT AUTHORIZED; blocked also on DR-0028 |
+| T1 and later | NOT AUTHORIZED. Was also blocked on DR-0028; that block is lifted by the J-ax-1 decision. T2 still depends on the DR-0027 T0 proposals (A-4, A-5, A-6, A-s, B-4) and the T0-checkpoint deferrals |
