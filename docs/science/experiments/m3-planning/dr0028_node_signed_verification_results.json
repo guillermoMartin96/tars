@@ -1,0 +1,99 @@
+{
+ "verdict": "PASS",
+ "grid": {
+  "inclinations_deg": {
+   "inclined": [
+    30.0,
+    51.6,
+    120.0
+   ],
+   "near_polar": [
+    89.0,
+    90.0,
+    91.0
+   ],
+   "near_equatorial": [
+    2.0,
+    5.0,
+    175.0,
+    178.0
+   ]
+  },
+  "node_longitudes_deg": [
+   0.0,
+   37.0,
+   90.0,
+   145.0,
+   200.0,
+   300.0
+  ],
+  "tilt_azimuths_deg": [
+   0.0,
+   60.0,
+   135.0,
+   210.0,
+   300.0
+  ],
+  "tilt_signs": [
+   1,
+   -1
+  ],
+  "steps": "delta_k = sign * 1e-2 sin(i) * 2^-k rad, k = 0..4"
+ },
+ "tolerances": {
+  "noise_rad": "64 eps / sin i",
+  "significance_factor": 1000.0,
+  "order_threshold": 1.5
+ },
+ "exact_properties": {
+  "E1_rotation_convention_max_deviation": 2.22044604925e-16,
+  "E2_line_of_nodes_max_dev_delta_i_noise_units": 0.0171524196489,
+  "E2_line_of_nodes_max_abs_delta_node_noise_units": 0.03125,
+  "E3_closed_form_max_dev_in_noise_units": 0.0246964028402,
+  "E4_max_excess_of_abs_delta_i_over_abs_delta_in_64eps_units": 0.0198059082031,
+  "E5_equatorial_node_undefined": true,
+  "E5_max_node_jump_deg_i_0p1_delta_0p15": 180.0,
+  "E6_review04_node_b_deg": 90.2598055437,
+  "E6_review04_delta_node_deg": 0.259805543688,
+  "E6_review04_first_order_delta_node_deg": 0.259807621135,
+  "E6_review04_delta_i_deg": 0.000340085438377,
+  "E6_review04_first_order_delta_i_deg": -9.18485099361e-18
+ },
+ "exact_property_failures": [],
+ "formulas_under_test": {
+  "delta_i": "-delta cos(Omega - phi)",
+  "delta_node": "+delta cot(i) sin(Omega - phi)",
+  "stats": {
+   "order_samples_delta_i": 506,
+   "order_samples_delta_node": 532,
+   "observed_order_delta_i_min_max": [
+    1.98258814278,
+    3.00000347893
+   ],
+   "observed_order_delta_node_min_max": [
+    1.99664497841,
+    3.00000367363
+   ],
+   "sign_checks": 1064
+  },
+  "failures": []
+ },
+ "mutants": {
+  "amendment1_original_both_signs_reversed": {
+   "failing_checks": 2128,
+   "rejected": true
+  },
+  "delta_i_sign_reversed": {
+   "failing_checks": 1120,
+   "rejected": true
+  },
+  "delta_node_sign_reversed": {
+   "failing_checks": 1008,
+   "rejected": true
+  },
+  "cos_sin_swapped": {
+   "failing_checks": 1576,
+   "rejected": true
+  }
+ }
+}

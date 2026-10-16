@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -17,6 +17,7 @@ No OPEN or DEFERRED item has a default.
 - **I-2:** "M3 planning checkpoint continuation" (Tech Lead, 2026-10-15), sections 1–7.
 - **I-3:** "M3 Planning — Resolve Review 03 and DR-0028" (Tech Lead, 2026-10-15), sections 1–8.
 - **I-4:** "M3 Planning — Review 04 Corrections and Final Verification" (Tech Lead, 2026-10-16), sections 1–7.
+- **I-5:** "M3 Planning — M3P5-F1 Correction and Review 06" (Tech Lead, 2026-10-16), sections 1–7.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -121,7 +122,7 @@ No OPEN or DEFERRED item has a default.
 ## Review findings (planning review 05)
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P5-F1 | MINOR | ACCEPTED; **not applied** (I-4 §5 stop) | Pending | `docs/reviews/M3-planning-review-05.md`. Signs of two first-order formulas in DR-0028 amendment 1 item 1 reversed for the stated passive convention; magnitudes and bounds unaffected |
+| M3P5-F1 | MINOR | ACCEPTED; was not applied (I-4 §5 stop) → **corrected** | I-5 §1–2 | DR-0028 "Resolution amendment 2" (signed formulas, convention, verification); `docs/reviews/M3-planning-review-05.md`, "Resolution of findings" |
 
 ## Gates
 | Gate | State |

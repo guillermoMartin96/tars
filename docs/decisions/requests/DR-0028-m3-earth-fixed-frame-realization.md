@@ -2,6 +2,7 @@
 
 **Status:** RESOLVED — APPROVED: J-ax-1, with requirements (Tech Lead, 2026-10-15, "M3 Planning — Resolve Review 03 and DR-0028", section 2). See "Resolution"; where the body below differs from the Resolution, the Resolution governs. No Earth-orientation implementation is authorized.  
 **Resolution amendment 1 (2026-10-16, append-only):** two limitation statements in the Resolution are corrected under reviews M3P4-F1 (node error bound) and M3P4-F2 (local solar time). The decision itself (A, B, R-1…R-4) is unchanged. See "Resolution amendment 1" at the end.  
+**Resolution amendment 2 (2026-10-16, append-only):** the signs of two first-order formulas in amendment 1, item 1, are corrected under review M3P5-F1. Magnitudes, bounds and the decision are unchanged. See "Resolution amendment 2" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -134,6 +135,8 @@ These hold for δ ≪ i and δ ≪ 180° − i, that is, away from the near-equa
 | Node-point displacement along the orbit | δ \|sin(Ω − φ)\| / sin i | **δ / sin i** |
 | Node-longitude change ΔΩ, each frame measuring from its own x axis | −δ cot i sin(Ω − φ) | δ \|cot i\|, which is ≤ δ / sin i |
 
+- **Signs superseded by Resolution amendment 2 (review M3P5-F1).** The two signed estimates in this table (Δi and ΔΩ) have reversed signs for the stated convention. They are kept as originally written. The corrected forms are Δi ≈ −δ cos(Ω − φ) and ΔΩ ≈ +δ cot i sin(Ω − φ). The "Largest value over φ" column and the node-point row are unaffected.
+
 - **The node error is amplified by up to about 1/sin i.** It exceeds δ at every inclination below 90° (or above 90° for retrograde orbits).
 - **Two node measures.** δ/sin i is the envelope: it is how far the node point moves along the orbit. The node *longitude* moves by at most δ|cot i|.
 - **Node longitude depends on convention.** It also depends on where each frame puts its longitude origin, its x axis or equinox. The estimate above assumes the origin is carried by the same rotation, as in review 04's example. Another origin, such as an equinox of date, adds a convention-dependent term.
@@ -196,3 +199,101 @@ Replaces the words "or local solar time" in the "No longitude, no ground positio
 - Local solar time and other Sun-relative geometry remain **outside M3 scope**.
 - They would need a separately authorized solar ephemeris and time convention. They would not need an Earth-orientation model.
 - **No solar ephemeris, Earth-orientation provider or local-solar-time implementation is authorized.**
+
+## Resolution amendment 2 (2026-10-16; review M3P5-F1)
+**Authority:** Tech Lead, instruction "M3 Planning — M3P5-F1 Correction and Review 06" (I-5), sections 1–2.
+- **The decision is unchanged.** J-ax-1, the constant identity transformation of M3, atmospheric co-rotation as air motion, the constants and the scope are as resolved.
+- **History is preserved.** Amendment 1's table keeps its original signed formulas, followed by a pointer to this section.
+- **Not affected:** amendment 1's magnitudes, bounds, envelopes and example values, and its item 2 (local solar time).
+
+### Convention, stated in full
+- **Rotation sense.** Rot(u, a) is the active right-hand rotation by angle a about the unit axis u. The tilt axis is e = (cos φ, sin φ, 0), in A's equator at azimuth φ.
+- **What a positive tilt means.** δ > 0 means frame B's axes are frame A's axes rotated by +δ about e, so B's pole is A's pole tilted by +δ. δ < 0 tilts it the other way.
+- **How components transform.** Components transform passively, v_B = R v_A with R = Rot(e, −δ). For φ = 0 this is Rx(−δ), the review-04 convention.
+- **Consistency with DR-0024.** This is the form r_B = R r_A of DR-0024 "Q4 coordinate conventions, revision 2", for a constant R, so Ṙ = 0.
+  - The tilt R is an analysis device, used only to quantify the J-ax-1 approximation.
+  - It is not an M3 transformation: in M3, R_EA←I is the identity.
+- **Elements, in each frame,** from the unit angular-momentum vector ĥ:
+  - i = atan2(√(h_x² + h_y²), h_z);
+  - Ω = atan2(h_x, −h_y), which is undefined when h_x = h_y = 0.
+- **Differences** are B minus A, with ΔΩ wrapped to (−π, π].
+
+### Corrected first-order formulas (approximations, valid for |δ| ≪ sin i)
+Δi ≈ −δ cos(Ω − φ)
+
+ΔΩ ≈ +δ cot i sin(Ω − φ)
+
+**Derivation.**
+1. To first order, R = Rot(e, −δ) ≈ I − δ[e×], so ĥ_B ≈ ĥ_A − δ e × ĥ_A.
+2. With ĥ_A = (sin i sin Ω, −sin i cos Ω, cos i):
+
+   e × ĥ_A = (sin φ cos i, −cos φ cos i, −sin i cos(Ω − φ)).
+
+3. **Inclination.** Δh_z = +δ sin i cos(Ω − φ). Since cos i = h_z, −sin i Δi = Δh_z, which gives Δi ≈ −δ cos(Ω − φ).
+4. **Node.** With X = h_x and Y = −h_y:
+   - ΔX = −δ sin φ cos i and ΔY = −δ cos φ cos i;
+   - ΔΩ = (Y ΔX − X ΔY)/(X² + Y²) = δ cot i sin(Ω − φ).
+5. **Dimensions.** Every term is an angle times a dimensionless trigonometric factor.
+
+**Cause of the error.** Amendment 1 used ĥ_B ≈ ĥ_A + δ e × ĥ_A, the active sense, while stating the passive convention.
+
+### Agreement with exact (finite-rotation) results
+These checks use the matrix R and the element definitions only, never the formulas under test.
+
+| Case | Exact result | First-order formula | Agreement |
+|---|---|---|---|
+| **Review-04 example:** i = 30°, Ω = 90°, φ = 0, δ = +0.15° | Ω_B = 90.2598055437°, so ΔΩ = +0.2598055° | +δ cot 30° = +0.2598076° | Signs agree. The difference, 2.1e-6°, is third order |
+| Same example, inclination | Δi = +3.4e-4° | 0, since cos 90° = 0 | Second order, as expected |
+| **Tilt about the line of nodes** (φ = Ω), any finite δ | Δi = −δ exactly; ΔΩ = 0 exactly | −δ and 0 | Exact for both signs of δ |
+| **Tilt axis 90° behind the node** (φ = Ω − 90°) | ĥ_B = (sin i, sin δ cos i, cos δ cos i) for Ω = 90°, φ = 0, extended by symmetry about z. So ΔΩ = atan(sin δ cot i) and cos i_B = cos δ cos i | +δ cot i | ΔΩ has the sign of δ cot i |
+
+### Verification script
+`docs/science/experiments/m3-planning/dr0028_node_signed_verification.py`, output `dr0028_node_signed_verification_results.json`. A rerun is byte-identical. The script exits 0 only if every check below passes and every mutant is rejected.
+
+**Oracle (independent of the formulas under test):**
+- R is built from Rodrigues' formula. The script checks that R is a proper rotation, equals Rx(−δ) for φ = 0, and that Rᵀẑ equals Rot(e, +δ)ẑ.
+- i and Ω are derived from the transformed ĥ.
+- The formulas under test are evaluated only in the comparison step.
+
+**Exact properties (any finite δ):**
+
+| ID | Property |
+|---|---|
+| E1 | The rotation convention above |
+| E2 | Tilt about the line of nodes gives Δi = −δ and ΔΩ = 0 exactly |
+| E3 | The φ = Ω − 90° closed form |
+| E4 | \|Δi\| ≤ \|δ\| for tilts up to ±30°, at every inclination from 0° to 180° in 5° steps |
+| E5 | An equatorial orbit has no node, and at i = 0.1° with δ = 0.15° the node jumps by 180° |
+| E6 | The review-04 example |
+
+**Signed first-order checks.**
+- **Grid:**
+  - inclined orbits: i = 30°, 51.6°, 120°;
+  - near-polar orbits: 89°, 90°, 91°;
+  - near-equatorial orbits: 2°, 5°, 175°, 178°;
+  - six node longitudes, five tilt azimuths, and both tilt signs.
+- **Steps:** δ_k = ±10⁻² sin i · 2⁻ᵏ rad, for k = 0…4.
+  - The node's expansion parameter is δ/sin i, because the node is singular when |δ| ~ sin i.
+  - The steps keep |δ|/sin i ≤ 10⁻², which is the singularity handling for near-equatorial cases.
+- **Order check.**
+  - The observed order is p = log₂(E(δ₃)/E(δ₄)), where E = |exact − formula|.
+  - A correct first-order term leaves an error of order 2 or higher, while a wrong one leaves an O(δ) error, which gives p → 1. The script requires p ≥ 1.5, the midpoint between the two.
+  - **Measured:** p is between 1.98 and 3.00 for both formulas, over 506 (Δi) and 532 (ΔΩ) samples. The order is 3 where the second-order coefficient vanishes.
+- **Sign check.** The sign of the exact result must equal the sign of the formula at the smallest step: 1064 checks.
+- **Rounding tolerance.**
+  - The noise bound is 64 ε / sin i, with ε = 2.2e-16.
+  - It allows about 16 ε of component error, which is amplified by 1/sin i through atan2 for Ω and doubled for a difference of two angles; that gives 32 ε / sin i, and a factor-2 margin brings it to 64 ε / sin i.
+  - Samples are used for the order and sign checks only when they exceed 1000 × noise. This keeps the noise shift in p below 0.003.
+  - The exact-property checks use the same noise bound. The largest deviation found was 0.03 noise units.
+
+**Mutation sensitivity (each must be rejected):**
+
+| Mutant | Failing checks |
+|---|---|
+| Amendment 1's original formulas (both signs reversed) | 2128 |
+| Δi sign reversed | 1120 |
+| ΔΩ sign reversed | 1008 |
+| cos and sin swapped | 1576 |
+
+Editing the formula under test in place, reversing either sign or both, makes the script exit 1.
+

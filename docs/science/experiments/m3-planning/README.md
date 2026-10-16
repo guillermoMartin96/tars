@@ -129,3 +129,28 @@ Result, δ = 0.15°:
 - At i = 0.1°, the node longitude can jump by 180°.
 
 Interpretation: DR-0028 "Resolution amendment 1", item 1.
+
+## DR-0028 signed node verification (added 2026-10-16, review M3P5-F1)
+`dr0028_node_signed_verification.py` is a self-checking, standard-library script. It exits 0 only if both conditions hold:
+- every exact property and every signed first-order check passes;
+- every mutated formula is rejected.
+
+What it does:
+- Its oracle uses only an explicit Rodrigues rotation matrix and the element definitions; it never evaluates the formulas under test.
+- It covers inclined, near-polar and near-equatorial orbits, several node longitudes and tilt azimuths, and both tilt signs.
+- It checks signs and the convergence order of the linearization error.
+
+Output: `dr0028_node_signed_verification_results.json`; a rerun is byte-identical.
+
+```
+python -I dr0028_node_signed_verification.py dr0028_node_signed_verification_results.json
+```
+
+Results:
+- **Verdict:** PASS.
+- **Observed error order:** 1.98–3.00, over 1038 samples.
+- **Sign checks:** 1064, all agreeing.
+- **Mutants:** all four rejected (both signs reversed as in amendment 1, each sign reversed alone, cos/sin swapped).
+
+Interpretation: DR-0028 "Resolution amendment 2". The earlier `dr0028_node_sensitivity.py` compares absolute values only and is kept unchanged as amendment 1 evidence.
+
