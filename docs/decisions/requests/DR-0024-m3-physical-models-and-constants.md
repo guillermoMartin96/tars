@@ -1,6 +1,6 @@
 # Decision Request: M3 physical models and constants: J2 and atmospheric drag (gate G1)
 
-**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). One numerical sub-decision stays OPEN in DR-0027. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution.  
+**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). Q4 APPROVED with constraints in a second decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation"); its realization in the inertial frame is OPEN in DR-0028. DR-0027 is resolved with conditions; its open sub-items are listed there. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -122,6 +122,11 @@ The owner asked for the table to be checked against the printed or source materi
 
 **Consequences:**
 - Every band an M3 LEO validation orbit can reach (0–900 km base rows; orbits at or below roughly 900 km) is confirmed against an author-published source, except the 0 km base altitude (which only affects heights below 10 m).
+  - **Correction (review M3P2-F3, authorized by the Tech Lead 2026-10-15; the sentence above is kept as originally written and is wrong).** The base-altitude discrepancy affects the density **throughout the lowest band**, not only below 10 m. Both sources use ρ = 1.225 exp(−(h − h₀)/7.249 km) in that band, with h₀ = 0.0 km (GMAT) or 0.010 km (author). For every height where both select it (0.010 ≤ h < 25 km), ρ_author/ρ_GMAT = exp(0.010/7.249) = **1.0013805** (GMAT lower by **0.13785 %**), a constant ratio. Below 0.010 km the author's table selects no band.
+  - Consequently **the 0–25 km band is not confirmed** against the author's source. The bands confirmed in all three fields are the 25 rows from 25 km to 800 km; the 900 km row is confirmed in base altitude and density only.
+  - Further consequence: with the author's base altitude, the value jump at 25 km is **−1.89e-5** instead of GMAT's **+1.36e-3**. The largest discontinuity of the pinned table therefore comes from this disputed cell.
+  - Effect on drag: the drag acceleration is proportional to ρ, so 0.138 % throughout 0–25 km. No M3 LEO validation orbit reaches that band. It matters only if a termination altitude is set below 25 km (DR-0027 A). No trajectory effect was simulated.
+  - Evidence: `docs/science/experiments/m3-planning/q10_residual_consequences.py` and its results JSON (computed from the per-row values in `q10_table_check_results.json`; a rerun is byte-identical).
 - The 900 km scale-height rounding and the unverified 1000 km row matter only above 900 km. No planned M3 reference mission is there, but the pinned dataset must still say which value it carries. Recorded as DR-0027 item B (OPEN); the dataset is not changed here.
 - **Discontinuities of the source table (owner: preserve, document, quantify, test).** Value jumps at every boundary, from `q10_table_check_results.json` (relative jump = tabulated base density of the upper band ÷ the lower band evaluated at the boundary − 1):
   - largest: **+1.36e-3 at 25 km**;
@@ -349,24 +354,56 @@ Answers to Q1–Q10. For example: "Q1 K-A, Q2 a, Q3 keep + erratum, Q4 J-ax-1, Q
 | Q1 | **J2 = 1.0826261739e-3**, EGM2008 tide-free (−√5 × −0.484165143790815e-3, [NGA] Table 5.1). The zero-tide alternative is not adopted | APPROVED |
 | Q2 | J2 reference radius = the existing WGS 84 a = 6378137.0 m (K-A). The owner's stop condition (a material inconsistency) was checked and is **not met** (§3.5) | APPROVED |
 | Q3 | GM stays the WGS 84 3.986004418e14 m³/s² (DR-0003). **SCI-0005 gets an explicit historical correction note** for its TT/TCG wording; the old text is not rewritten (`docs/science/assumptions.md`, SCI-0005 "Historical correction note") | APPROVED; note added |
-| Q4 | J2 axis, ellipsoid axis and atmosphere-rotation axis = **the frame z axis (J-ax-1, D-rot-1)**. The owner's section 1 text does not name an axis option; the approval comes from the D3 approval in DR-0026, whose §5.7 states "In M3 the body axis is the frame z axis (DR-0024 J-ax-1)", and from the approval of "the proposed pinned Earth rotation rate", which D-rot-1 applies about z. Listed explicitly so that it is not an implied decision; **flagged for owner confirmation** in the checkpoint report | APPROVED via DR-0026 D3 (confirmation requested) |
+| Q4 | **Owner decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation", section 1):** "Use the Earth-fixed +Z axis as the common physical symmetry/rotation axis for J2, the reference ellipsoid, and atmospheric rotation." Constraints: explicitly distinguish Earth-fixed and inertial coordinate representations; use correct frame transformations when evaluating dynamics and atmospheric relative velocity; record coordinate conventions and the required frame-consistency tests (below, "Q4 coordinate conventions"). **How the Earth-fixed +Z axis is placed in the inertial frame (J-ax-1 fixed, or the pole of date, J-ax-2/3) is not named by the decision and is OPEN in DR-0028.** The earlier record of this row ("APPROVED via DR-0026 D3") was withdrawn after review M3P2-F1 (amendment log) | APPROVED with constraints; realization OPEN (DR-0028) |
 | Q5 | Atmosphere = the piecewise-exponential Vallado/GMAT table (A2), subject to Q10. A4 (MSIS-class) deferred to a later fidelity milestone. A1 retained only as the one-band subset for analytic and unit tests | APPROVED |
 | Q5a | **The tabulated densities are preserved exactly as published.** No value is altered to force continuity. Discontinuities are documented and quantified (§3.4), and tests are required at and immediately around **every** band boundary (DR-0025 Resolution) | APPROVED |
 | Q6 | Density height = **geodetic height relative to the WGS 84 ellipsoid** (a, 1/f = 298.257223563 [NGA]). SCI-0006 (reported altitude, impact) is unchanged for v1/v2 | APPROVED |
 | Q7 | Atmospheric relative velocity v_rel = v − ω_E × r, with the pinned **ω_E = 7.292115e-5 rad/s** [NGA] | APPROVED |
-| Q8 | **No indefinite extrapolation below the modelled domain.** An explicit validity boundary and a re-entry/termination event are required. The table's own lower edge (0 km; §3.4) is the model's lower bound; the drag model's physical lower limit (a re-entry altitude) has **no defensible source-backed number yet**, so its value is **OPEN in DR-0027 item A**. No default value exists in code or scenarios. Above the top band, the table's own top-band exponential applies as the source defines (not a cutoff) | APPROVED (principle); numerical value OPEN (DR-0027 A) |
+| Q8 | **No indefinite extrapolation below the modelled domain.** An explicit validity boundary and a re-entry/termination event are required. The table's own lower edge (0 km; §3.4) is the model's lower bound; the drag model's physical lower limit (a re-entry altitude) has **no defensible source-backed number yet**, so its value is **OPEN in DR-0027 item A**. No default value exists in code or scenarios. The termination altitude is an explicit per-scenario input in metres, geodetic, with no implicit default (DR-0027 Resolution A). **Behaviour above the top band and at any other unsupported altitude is not decided:** it must be defined explicitly (DR-0027 Resolution B, condition B4). The sentence formerly here about the top band was an implementer statement, not an owner decision (amendment log) | APPROVED (principle); termination input APPROVED with conditions (DR-0027 A); domain behaviour OPEN |
 | Q9 | C_d, reference area A, initial mass and initial state are **explicit scenario inputs**, never hidden constants. Values for validation scenarios are proposed with their basis at T0 and approved with the reference missions | APPROVED (principle); values DEFERRED to the T0 checkpoint |
-| Q10 | Verified against the author-published data file and errata (§3.4). 25 of 28 rows identical; 0 km base altitude, 900 km scale height and the 1000 km row recorded as residuals in DR-0027 item B. The printed table was not available | Verification done; residual OPEN (DR-0027 B) |
+| Q10 | Verified against the author-published data file and errata (§3.4). 25 of 28 rows identical; 0 km base altitude, 900 km scale height and the 1000 km row recorded as residuals in DR-0027 item B. The printed table was not available. **DR-0027 B (Tech Lead, 2026-10-15): the GMAT table is pinned verbatim as the initial reference, with conditions** | Verification done; dataset CONDITIONALLY APPROVED (DR-0027 B) |
 | — | Earth/model constants (GM, a, J2, 1/f, ω_E, density dataset) are **pinned physics configuration**, never scenario overrides (also DR-0026) | APPROVED |
 | — | Drag uses the spacecraft's **current total mass** at every derivative evaluation | APPROVED |
 
 **Science records:** SCI-0013 to SCI-0017 added to `docs/science/assumptions.md` with status "Approved (DR-0024); not implemented". SCI-0001, SCI-0004, SCI-0005 and SCI-0006 stay Active for M1/M2 configurations and are not edited (SCI-0005 gains an appended correction note only).
 
 **Reasoning/notes:**
-- Q4 rests on the D3 approval rather than on an explicit section 1 sentence. It is flagged so the owner can confirm or overrule it before T1.
+- Q4 rests on the D3 approval rather than on an explicit section 1 sentence. It is flagged so the owner can confirm or overrule it before T1. *(Superseded 2026-10-15: the owner decided Q4 explicitly; see the Q4 row and DR-0028.)*
 - The approved items do not change any M1/M2 contract, threshold, reference, golden, validator or acceptance logic.
 
 **Follow-up:**
-- DR-0027 (OPEN): A, the re-entry/termination altitude; B, the Q10 residual table cells above 900 km and at 0 km.
-- T0 (authorized after the planning merge): reference configurations, boundary tests, geodetic-height and Earth-rotation checks (DR-0025 Resolution).
+- DR-0027 (OPEN): A, the re-entry/termination altitude; B, the Q10 residual table cells above 900 km and at 0 km. *(Resolved with conditions 2026-10-15; open sub-items listed in DR-0027.)*
+- T0 (authorized after the planning merge): reference configurations, boundary tests, geodetic-height and Earth-rotation checks (DR-0025 Resolution). *(Narrowed 2026-10-15: the Tech Lead's continuation instruction, section 7, says "Do not merge or begin T0 until I explicitly approve the checkpoint." T0 now needs that explicit approval as well as the planning merge.)*
+- DR-0028 (OPEN): realization of the Earth-fixed +Z axis.
 - T1 and later: not authorized.
+
+### Q4 coordinate conventions (recorded 2026-10-15 under the Q4 constraints; nothing implemented)
+**Representations.** Two coordinate representations are kept distinct, and every vector carries its frame in code and records:
+- **Inertial, I:** the ECI frame of SCI-0003 (EarthMJ2000Eq-aligned, treated as inertial). The simulator state (r_I, v_I) is integrated here only. The equations of motion are written here.
+- **Earth-fixed, EF:** right-handed, rotating with the Earth at ω_E = 7.292115e-5 rad/s [NGA] about its +Z axis. The J2 field, the WGS 84 ellipsoid and the co-rotating atmosphere are defined here, all about the same +Z.
+- **Relation:** r_EF = R(t) r_I and v_EF = R(t)(v_I − ω × r_I), with ω = ω_E Ẑ (ω along +Z, positive for eastward rotation). R(t) is a proper rotation. How +Z_EF sits in I and which angle θ(t) R(t) uses are **OPEN in DR-0028**. Under the recommended DR-0028 A1, R(t) = R₃(θ(t)), a rotation about the shared z axis.
+
+**How each model is evaluated.** Accelerations are evaluated from EF quantities and expressed in I before they are summed with the point-mass and thrust terms:
+- J2: a_I = R(t)ᵀ a_J2,EF(r_EF), with the formula of §4.1 in EF.
+- Geodetic height: h = h_geod(r_EF) on the WGS 84 ellipsoid (a, 1/f [NGA]) about +Z_EF.
+- Atmospheric relative velocity: v_rel,I = v_I − ω × r_I = R(t)ᵀ v_EF. It is the spacecraft's velocity relative to the co-rotating air expressed in I, and it is the vector the drag formula uses (Q7).
+
+Under DR-0028 A1 the first two equal their direct inertial evaluations identically, because every model is axisymmetric about the shared +Z. That equality is a test (FC-3, FC-4), not an assumption hidden in the code.
+
+**Required frame-consistency tests (T1/T2; tolerances are not set here and come from DR-0025's later threshold DR):**
+| ID | Test |
+|---|---|
+| FC-1 | Round trip I → EF → I returns r and v, for arbitrary test rotations, including the velocity term |
+| FC-2 | R(t)ᵀ v_EF equals v_I − ω × r_I; with ω_E = 0, v_rel = v_I |
+| FC-3 | The J2 acceleration computed through EF and rotated to I equals the direct evaluation, for arbitrary rotation angles about +Z (DR-0028 A1), at equatorial, polar and mid-latitude points |
+| FC-4 | Geodetic height computed from r_EF equals that computed from r_I for arbitrary rotation angles about +Z (DR-0028 A1); and it matches the source chosen for DR-0025 Q-G2-7 |
+| FC-5 | Sign and direction of rotation: at r = a X̂_EF, the co-rotating air velocity is +ω_E a Ŷ (eastward). For a prograde equatorial circular orbit, \|v_rel\| = \|v\| − ω_E r; for a retrograde one, \|v\| + ω_E r |
+| FC-6 | J2 direction at the equator (inward, extra pull) and at the pole (outward along +Z), §4.1 sign check |
+| FC-7 | One shared axis: J2, the ellipsoid and the atmosphere rotation read the same pinned axis and ω_E from the physics configuration (configuration-identity test, DR-0026) |
+| FC-8 | A polar or inclined orbit gives a cross-track component of ω × r, so v_rel is not parallel to v (direction check of the drag vector) |
+| FC-9 | Under DR-0028 A2/A3, if chosen: FC-3 and FC-4 are replaced by checks against an independent Earth-orientation implementation; recorded here so that the choice cannot silently drop the tests |
+
+**Amendment log (append-only).**
+- 2026-10-15, review M3P2-F1 and the owner's Q4 decision: the Q4 row formerly read "J2 axis, ellipsoid axis and atmosphere-rotation axis = the frame z axis (J-ax-1, D-rot-1). The owner's section 1 text does not name an axis option; the approval comes from the D3 approval in DR-0026 … flagged for owner confirmation in the checkpoint report", with status "APPROVED via DR-0026 D3 (confirmation requested)". That attribution overstated the owner's decision and is withdrawn. The row now records the owner's explicit decision.
+- 2026-10-15, DR-0027 resolution: the Q8 row formerly ended "Above the top band, the table's own top-band exponential applies as the source defines (not a cutoff)", under status "APPROVED (principle)". The owner had not decided behaviour above the table. The sentence was an implementer statement and is withdrawn; the owner now requires the domain behaviour to be defined explicitly (DR-0027 B4).
+- 2026-10-15, review M3P2-F3: §3.4 "Consequences" gains a correction under its first bullet. The original bullet is kept as written.

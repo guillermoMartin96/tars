@@ -29,6 +29,12 @@ DR-0026 §4: D1 (inject mutable mass into forces), D2 (an immutable context argu
 12. **A decay run ends at an explicitly defined event or model-validity boundary.** Its numerical definition is OPEN (DR-0027).
 13. **No general plugin framework** in M3.
 
+**Added 2026-10-15 (owner decisions after review 02; DR-0024 Q4, DR-0026 Q-G3-9, DR-0027):**
+
+14. **Earth-fixed and inertial representations are distinct.** J2, the reference ellipsoid and atmospheric rotation share one Earth-fixed +Z axis. The state is integrated in the inertial frame. Forces evaluated from Earth-fixed quantities are transformed explicitly (DR-0024 "Q4 coordinate conventions"; tests FC-1…FC-9). How +Z sits in the inertial frame is OPEN (DR-0028).
+15. **The `escape` check stays the two-body specific-energy diagnostic, as an approximation.** It is not an exact escape criterion in perturbed dynamics and not independent authorization for safety-critical actions.
+16. **The termination altitude is an explicit per-scenario input** (metres, geodetic, no default). The atmosphere dataset is the GMAT table pinned verbatim by digest; its domain behaviour is OPEN (DR-0027).
+
 ## Reasoning
 - D2/D3 keep forces pure and state ownership with the simulator (ADR-0002), which D1 would break and which future isolated mission forks need.
 - An identity that includes values and dataset digests makes physics changes visible, instead of relying on file names or schema versions alone.
@@ -53,7 +59,7 @@ DR-0026 §4: D1 (inject mutable mass into forces), D2 (an immutable context argu
 - A second language implementation is authorized (ADR-0008 AT items; no Rust, C, FFI, RTOS or embedded work is authorized here).
 
 ## Related
-- Decision Requests: DR-0024, DR-0025, DR-0026, DR-0027.
+- Decision Requests: DR-0024, DR-0025, DR-0026, DR-0027, DR-0028.
 - Scientific assumptions: SCI-0013 to SCI-0017.
 - Proof: M3 Proof (not yet defined).
 - Code/PR/commit: none (not implemented).

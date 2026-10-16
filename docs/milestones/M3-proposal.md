@@ -1,6 +1,7 @@
 # Milestone 3 — planning proposal (G0 approved: Option A; implementation not authorized)
 
 **Status:** PLANNING. **G0 APPROVED (Tech Lead, 2026-10-15): Option A, J2 + atmospheric drag.** **G1–G3 RESOLVED (Tech Lead, 2026-10-15):** DR-0024, DR-0025 and DR-0026, recorded as ADR-0009; DR-0027 (termination value, table residuals) OPEN. The T0 spike is authorized after the planning branch merges; **T1 and later are not authorized**, and nothing here changes validated M1/M2 behaviour.  
+**Status update (2026-10-15, second checkpoint):** DR-0024 Q4 and DR-0026 Q-G3-9 decided explicitly by the owner, with constraints. DR-0027 resolved with conditions (no numerical altitude; domain behaviour and crossing semantics proposed at T0). **DR-0028 OPEN** (Earth-fixed frame realization). **The planning merge and T0 both now need the Tech Lead's explicit approval of the planning checkpoint** ("Do not merge or begin T0 until I explicitly approve the checkpoint"). M3 implementation has not started; T1 and later are not authorized.  
 **Planning baseline:** `main` = `d92ab894907d06b2b13aefff6c005caa0026a68f` (verified in `M3-baseline-and-impact.md`).  
 **Date:** 2026-10-15  
 **Prepared after:** M2 accepted (2026-10-15) and merged (PR #3, merge commit `d92ab89`).  
@@ -96,7 +97,7 @@
 | # | Task | Depends on | Gate / output | Independent review |
 |---|---|---|---|---|
 | P0 | Planning Decision Requests: G1 (**DR-0024**), G2 (**DR-0025**), G3 (**DR-0026**). Drafted and reviewed 2026-10-15 (VAL-0018; `M3-planning-review-01.md`); **resolved by the Tech Lead 2026-10-15**; ADR-0009; DR-0027 OPEN. (Called "T0" in earlier drafts; renamed because the Tech Lead's T0 is the spike below.) | G0 (approved) | Resolved DRs; SCI-0013…0017 approved (not implemented) | Codex (`M3-planning-review-01.md`, `M3-planning-review-02.md`) |
-| T0 | **Reference-configuration spike (authorized 2026-10-15, after the planning merge):** executable reference configurations for the planned J2 and drag/atmosphere cases; GMAT configurations verified to represent the intended physics; planning measurements reproduced; every band boundary exercised and the discontinuities quantified; geodetic height and atmosphere-relative velocity verified; perturbations-off compatibility with M1/M2; any new DR identified. **Minimum isolated spike code only; no production architecture, no thresholds, no M1/M2 regeneration** | P0 | Spike evidence (VAL record); candidate reference missions, C_d/A, GMAT method; T1 READY / BLOCKED recommendation | Codex (T0 review); stop at checkpoint |
+| T0 | **Reference-configuration spike (authorized 2026-10-15, after the planning merge; since narrowed: it also needs the Tech Lead's explicit approval of the planning checkpoint):** also the DR-0027 A-4/A-5/A-6/A-s/B-4 proposals; labelled DR-0028 realization; executable reference configurations for the planned J2 and drag/atmosphere cases; GMAT configurations verified to represent the intended physics; planning measurements reproduced; every band boundary exercised and the discontinuities quantified; geodetic height and atmosphere-relative velocity verified; perturbations-off compatibility with M1/M2; any new DR identified. **Minimum isolated spike code only; no production architecture, no thresholds, no M1/M2 regeneration** | P0 | Spike evidence (VAL record); candidate reference missions, C_d/A, GMAT method; T1 READY / BLOCKED recommendation | Codex (T0 review); stop at checkpoint |
 | T1 | J2 force model, pure; analytic unit tests (secular Ω̇, ω̇ rates, energy and polar angular-momentum conservation) | G1 | Unit-level VAL record | Codex |
 | T2 | Drag force model and spacecraft Cd/A; force-context extension (mass); analytic tests (decay rate vs an approximate semi-analytic estimate; behaviour outside the table per the G1 domain policy; energy monotonicity) | G1, G3 | Unit-level VAL record; architecture scan; M1/M2 byte-identity | Codex |
 | T3 | Scenario and runner integration, contract amendment, new reference scenarios (J2-only, drag-only, J2+drag, J2+drag+M2 burn) | T1, T2 | Mission tests; M1/M2 goldens unchanged | Codex |
@@ -165,10 +166,12 @@ None of these needs the M2 code to change. Changes to existing M2 structures (fo
 | Gate | Decision | Blocks |
 |---|---|---|
 | **G0** | M3 objective. **APPROVED 2026-10-15: Option A** | Everything (now unblocked for planning only) |
-| **G1** | Physical models and constants: **DR-0024, RESOLVED 2026-10-15** (Q4 axis flagged for confirmation); DR-0027 OPEN | T2 (DR-0027) |
+| **G1** | Physical models and constants: **DR-0024, RESOLVED 2026-10-15** (Q4 axis flagged for confirmation); DR-0027 OPEN. *Update 2026-10-15: Q4 APPROVED with constraints; its realization OPEN (DR-0028). DR-0027 RESOLVED WITH CONDITIONS; T0 proposals pending* | T1/T2 (DR-0028); T2 (DR-0027 T0 items) |
 | **G2** | Validation strategy: **DR-0025, RESOLVED 2026-10-15** (principles; Q-G2-1, 5, 7 deferred to the T0 checkpoint, Q-G2-6 to T4) | T4–T6 |
-| **G3** | Architecture and physics versioning: **DR-0026, RESOLVED 2026-10-15 (D3); ADR-0009** | — |
+| **G3** | Architecture and physics versioning: **DR-0026, RESOLVED 2026-10-15 (D3); ADR-0009**. *Update 2026-10-15: Q-G3-9 APPROVED with constraints (approximate diagnostic only); Q-G3-7 NOT AUTHORIZED* | — |
 | G4 | M3 thresholds (after T6 measurement) | Proof |
 | G5 | M3 acceptance and merge | — |
 
 **Requested response (updated 2026-10-15, after the decision checkpoint):** G0–G3 are resolved. Open: DR-0027; the items deferred to the T0 checkpoint; confirmation of DR-0024 Q4 and DR-0026 Q-G3-9; and a separate authorization before T1 begins.
+
+**Requested response (updated 2026-10-15, second checkpoint; supersedes the paragraph above):** Q4 and Q-G3-9 are decided; DR-0027 is resolved with conditions. Open: DR-0028; the DR-0027 items proposed at T0; the items deferred to the T0 checkpoint (DR-0025 Q-G2-1, Q-G2-5, Q-G2-7; DR-0024 Q9 values); Q-G2-6 (T4). Needed from the Tech Lead: explicit approval of the planning checkpoint before the planning merge and before T0; a separate authorization before T1. The full matrix is in `M3-decision-matrix.md`.

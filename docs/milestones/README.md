@@ -8,7 +8,7 @@ The repository has no multi-milestone roadmap document. Milestones are authorize
 |---|---|---|
 | M1 Orbit | (predates this directory) [Proof record](../../proof/records/M1-orbit.md) | PASS, merged |
 | M2 Propulsion & Orbital Maneuvers | [M2-propulsion.md](M2-propulsion.md), [Proof record](../../proof/records/M2-propulsion.md) | PASS; accepted by the Tech Lead 2026-10-15; merge to `main` authorized (PR #3) |
-| M3 J2 + atmospheric drag | [M3-proposal.md](M3-proposal.md), [baseline and impact](M3-baseline-and-impact.md), DR-0024/0025/0026 | PLANNING. G0 approved 2026-10-15 (Option A). G1–G3 resolved 2026-10-15 (DR-0024/0025/0026; ADR-0009); DR-0027 OPEN. T0 spike authorized after the planning merge; **T1 and later not authorized; M3 implementation not started** |
+| M3 J2 + atmospheric drag | [M3-proposal.md](M3-proposal.md), [baseline and impact](M3-baseline-and-impact.md), DR-0024…0028 | PLANNING. G0 approved 2026-10-15 (Option A). G1–G3 resolved 2026-10-15 (DR-0024/0025/0026; ADR-0009); DR-0027 resolved with conditions and DR-0028 OPEN (2026-10-15, second checkpoint; [decision matrix](M3-decision-matrix.md)). Planning merge and T0 need the Tech Lead's explicit checkpoint approval; **T1 and later not authorized; M3 implementation not started** |
 
 ## Known forward requirements (recorded, not authorized)
 These are the only forward-looking commitments on record. They are not a roadmap: milestone objectives beyond M2 have not been defined in this repository.

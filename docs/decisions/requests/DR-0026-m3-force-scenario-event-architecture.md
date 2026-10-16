@@ -1,6 +1,6 @@
 # Decision Request: M3 force, scenario and event architecture; physics versioning (gate G3)
 
-**Status:** RESOLVED — D3 APPROVED with constraints (Tech Lead, 2026-10-15); the decay-termination value stays OPEN (DR-0027). Recorded as ADR-0009. Where the request body differs from the Resolution, the Resolution governs. Implementation not authorized by this resolution.  
+**Status:** RESOLVED — D3 APPROVED with constraints (Tech Lead, 2026-10-15); the decay-termination value stays OPEN (DR-0027). Q-G3-9 APPROVED with constraints in a second decision (Tech Lead, 2026-10-15). Recorded as ADR-0009. Where the request body differs from the Resolution, the Resolution governs. Implementation not authorized by this resolution.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -187,6 +187,7 @@ validators / references ──► PhysicsConfiguration.physics_id (refuse mismat
 - **SI internally.** Datasets are converted at load and their digest covers the source bytes.
 - **Every force returns an ECI acceleration.** Body-frame work (the J2 axis, the ellipsoid) is internal to the component.
   - In M3 the body axis is the frame z axis (DR-0024 J-ax-1), so no Earth-orientation provider exists.
+    - *(Note added 2026-10-15: proposal text. The owner approved the Earth-fixed +Z axis as the common axis, with distinct Earth-fixed and inertial representations (DR-0024 Q4); its realization is OPEN in DR-0028.)*
   - A future time-dependent orientation would be an injected, immutable provider. It is not built now.
 - **Time stays t = tick · dt** in elapsed TT seconds (ADR-0002, SCI-0007). M3 forces do not depend on absolute time.
   - The signature already carries t, so third body, SRP and tesserals can later obtain absolute time from a typed epoch in the configuration, which they would require.
@@ -295,14 +296,18 @@ Answers to Q-G3-1 to Q-G3-11, or `discuss`.
 | Q-G3-6 | A decay run ends at an **explicitly defined event or model-validity boundary**. No universal re-entry altitude is invented to close this request; the numerical definition stays OPEN (DR-0027 item A). No default value in code or scenarios | APPROVED (principle); value OPEN |
 | Q-G3-7 | Per-sample environment telemetry: **not addressed by the owner.** No telemetry event is authorized by this resolution; adding one later needs its own decision | Not authorized; no decision |
 | Q-G3-8 | Force composition and order are deterministic and documented: point mass, J2, drag, then thrust (§5.2) | APPROVED |
-| Q-G3-9 | `escape` keeps the two-body energy check: part of the approved D3 text (§5.6), recorded as a known simplification. Not separately addressed by the owner; flagged in the checkpoint report | APPROVED via D3 (flagged) |
+| Q-G3-9 | **Owner decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation", section 1):** retain the two-body specific-energy `escape` diagnostic **as an approximation**. Constraints: it is **not** an exact escape criterion in perturbed (J2, drag, thrust) dynamics, and it is **not** independent authorization for safety-critical actions. Records, events and documents describe it as an approximate diagnostic. The earlier record of this row ("APPROVED via D3 (flagged)") was withdrawn after review M3P2-F1 (amendment log) | APPROVED with constraints |
 | Q-G3-10 | v3 spacecraft may carry mass and drag properties without an engine (§5.2, §5.4): part of the approved D3 text; consistent with DR-0024 Q9 (initial mass is a scenario input) | APPROVED via D3 |
 | Q-G3-11 | ADR-0009 written after this resolution: `docs/decisions/0009-m3-force-context-and-physics-identity.md` (Accepted as a design decision; not implemented) | APPROVED; done |
 | — | No general plugin framework in M3 (D4 rejected) | APPROVED |
 
 **Reasoning/notes:**
 - Q-G3-5 replaces recommendation (a). Consequence for the design: the code that evaluates a model version (for example `zonal_j2@1`) must stay executable while any frozen artifact or supported scenario records that version. A new version is added beside it, never in place of it. M1/M2's v1/v2 paths are already retained on the same principle.
-- Q-G3-7 and Q-G3-9 are flagged so they cannot become implied decisions.
+- Q-G3-7 and Q-G3-9 are flagged so they cannot become implied decisions. *(2026-10-15: Q-G3-9 is now decided explicitly by the owner; Q-G3-7 remains NOT AUTHORIZED.)*
+- Q-G3-9 constraint, in practice: the specific energy ε = v²/2 − μ/r omits the J2 potential and the non-conservative work of drag and thrust, so ε ≥ 0 neither proves nor excludes escape in perturbed dynamics. The `escape` outcome keeps its v1/v2 meaning (a run end when ε ≥ 0). Any later safety or authorization logic (for example M5's constraint evaluation) must not use it as its sole evidence.
+
+**Amendment log (append-only).**
+- 2026-10-15, review M3P2-F1 and the owner's Q-G3-9 decision: the Q-G3-9 row formerly read "`escape` keeps the two-body energy check: part of the approved D3 text (§5.6), recorded as a known simplification. Not separately addressed by the owner; flagged in the checkpoint report", with status "APPROVED via D3 (flagged)". That attribution overstated the owner's decision and is withdrawn. The row now records the owner's explicit decision.
 
 **Follow-up:**
 - DR-0027 item A (termination value).

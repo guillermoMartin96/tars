@@ -105,3 +105,12 @@ python -I q10_table_check.py "<GMAT>/data/atmosphere/earth/EarthExponentialAtmos
 ```
 
 Result: 25 of 28 rows identical; the 0 km base altitude (0.0 vs 0.010 km) and the 900 km scale height (181.05 vs 181.045 km) differ; the 1000 km row is absent from the author's file. Largest boundary jump +1.36e-3 (25 km). Interpretation: DR-0024 §3.4; open residuals: DR-0027 item B.
+
+## Q10 residual consequences (added 2026-10-15, review M3P2-F3)
+`q10_residual_consequences.py` evaluates both sources as piecewise-exponential tables, using only the per-row values recorded in `q10_table_check_results.json`, and reports the density ratio at sample heights. Output: `q10_residual_consequences_results.json`; a rerun is byte-identical.
+
+```
+python -I q10_residual_consequences.py q10_table_check_results.json q10_residual_consequences_results.json
+```
+
+Result: in the lowest band (0.010–25 km) the GMAT density is 0.13785 % below the author's file at every height (ratio exp(0.010/7.249)). With the author's base altitude the 25 km jump would be −1.89e-5 instead of +1.36e-3. The 900 km scale-height rounding gives up to +1.5e-5 below 1000 km. Above 1000 km, where the author's file has no row, the sources diverge: +19.6 % at 1100 km, +145 % at 1500 km. Interpretation: DR-0024 §3.4 (correction), DR-0027 Resolution "Disputed cells".
