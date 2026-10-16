@@ -35,3 +35,49 @@ Recorded in the checkpoint report: the Proof in an isolated clone at `58f0d18`, 
 ## Status after this review
 - Not an unconditional PASS, so the I-3 §6 stop condition applies. **No planning acceptance report has been prepared, the branch is not ready for acceptance, it is not merged, and T0, T1 and T2 have not started.**
 - **Returned to the Tech Lead:** authorization to correct M3P4-F1 and M3P4-F2, and whether to run another review round.
+
+## Resolution of findings (appended 2026-10-16; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "M3 Planning — Review 04 Corrections and Final Verification" (2026-10-16), referred to as **I-4**. Section 1 authorizes:
+- the M3P4-F1 and M3P4-F2 corrections;
+- one further independent Codex review (review 05).
+
+It does not authorize a merge, T0 or any implementation.
+
+### M3P4-F1 (MINOR): pole tilt does not bound the ascending-node error
+- **Original finding:** DR-0028 said node and inclination geometry are "offset by up to the pole offset". Codex showed a node-longitude change of 0.2598° for a 0.15° tilt at i = 30°. Disposition at review time: ACCEPTED.
+- **Refinement of the review-time disposition.** That disposition wrote that the node longitude changes by "roughly δ/sin i". More precisely, to first order:
+  - the node *point* moves along the orbit by up to δ/sin i;
+  - the node *longitude*, with frame-carried x axes, moves by up to δ|cot i|. That is never more than δ/sin i.
+  - Codex's 0.2598° equals δ cot 30°. Both measures are unbounded as i → 0.
+- **Authorized decision (I-4 §1):**
+  - inclination bounded by the tilt;
+  - node amplified by about tilt/sin i away from singular configurations;
+  - near-equatorial nodes poorly conditioned or undefined;
+  - the counterexample preserved and its assumptions verified;
+  - geometric bounds distinguished from approximations.
+- **Exact correction:**
+  - **DR-0028 "Resolution amendment 1", item 1** (appended). It contains the exact geometric bound |Δi| ≤ δ; first-order estimates for Δi, the node-point shift and the node longitude, each labelled as an approximation with its validity condition; the longitude-origin dependence; the review-04 example with its assumptions; near-equatorial values; and a trajectory statement limited to the measured VAL-0018 values.
+  - The original DR-0028 bullet is kept, with a pointer.
+  - **SCI-0013 status update 3** (appended).
+  - **DR-0024 amendment-log entry** for the §11 sentence "node and ground-track geometry differ … by about 0.15° of pole offset". The §11 sentence itself is kept.
+- **Evidence:** `docs/science/experiments/m3-planning/dr0028_node_sensitivity.py`, output `dr0028_node_sensitivity_results.json`. It is standard-library geometry, and a rerun is byte-identical.
+  - The review example is reproduced as 90.2598055437°.
+  - The largest |Δi|/δ over all sweeps is 1.0.
+  - The swept node maxima agree with |cot i| and 1/sin i to within 0.4 %.
+- **Residual uncertainty:** none on the geometry. The real-Earth tilt δ(t) is taken from DR-0024 §3.3 and was not re-derived.
+- **Changes an acceptance decision?** No.
+
+### M3P4-F2 (MINOR): local solar time does not need an Earth rotation angle
+- **Original finding:** DR-0028 and SCI-0013 listed local solar time among the outputs that need an Earth rotation angle. Disposition at review time: ACCEPTED.
+- **Authorized decision (I-4 §1):**
+  - record that the rotation terms cancel in the solar hour angle;
+  - record that M3 lacks the solar ephemeris and time convention;
+  - keep local solar time out of scope;
+  - authorize no solar ephemeris, orientation provider or local-solar-time implementation.
+- **Exact correction:**
+  - **DR-0028 "Resolution amendment 1", item 2** (appended). It contains the derivation H = (α_sc − θ) − (α_Sun − θ) = α_sc − α_Sun; the MLTAN definition quoted from [McK] §II; what M3 lacks (solar ephemeris, a time convention connecting simulation time to it, a mean-Sun convention); the fact that no M3 force needs it; and the scope and non-authorization.
+  - The restriction on longitude, ground tracks and visibility is kept.
+  - The original bullet is kept, with a pointer. SCI-0013 status update 3 records the same correction.
+- **Evidence:** the derivation above. The source PDF was read on 2026-10-16 (sha256 recorded in DR-0028).
+- **Residual uncertainty:** none.
+- **Changes an acceptance decision?** No.

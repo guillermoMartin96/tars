@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -16,6 +16,7 @@ No OPEN or DEFERRED item has a default.
 - **I-1:** "M3 planning decision checkpoint" (Tech Lead, 2026-10-15), sections 1–8.
 - **I-2:** "M3 planning checkpoint continuation" (Tech Lead, 2026-10-15), sections 1–7.
 - **I-3:** "M3 Planning — Resolve Review 03 and DR-0028" (Tech Lead, 2026-10-15), sections 1–8.
+- **I-4:** "M3 Planning — Review 04 Corrections and Final Verification" (Tech Lead, 2026-10-16), sections 1–7.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -83,9 +84,10 @@ No OPEN or DEFERRED item has a default.
 | B | No Earth rotation angle in M3 (B1) | was OPEN → **APPROVED** | I-3 §2 |
 | R-1 | No time-dependent orientation, precession, nutation or polar motion | APPROVED (requirement) | I-3 §2 |
 | R-2 | Not identified as a physically accurate rotating terrestrial frame | APPROVED (requirement) | I-3 §2 |
-| R-3 | Approximation, limitations and future-capability implications documented | APPROVED; done (DR-0028, SCI-0013) | I-3 §2 |
+| R-3 | Approximation, limitations and future-capability implications documented | APPROVED; done (DR-0028, SCI-0013). Two limitation statements corrected 2026-10-16 (Resolution amendment 1; SCI-0013 status update 3): node error not bounded by the pole tilt (M3P4-F1); local solar time needs a solar ephemeris and time convention, not an Earth rotation angle (M3P4-F2) | I-3 §2; I-4 §1 |
 | R-4 | Architectural extension point for future Earth-fixed transformations | APPROVED; recorded (ADR-0009 item 17), not implemented | I-3 §2 |
 | — | Any additional Earth-orientation implementation (rotation angle, pole of date, EOP) | **NOT AUTHORIZED** | I-3 §2, §7 |
+| — | Solar ephemeris, Earth-orientation provider, local-solar-time output | **NOT AUTHORIZED** | I-4 §1 |
 
 ## Historical corrections and standing decisions
 | Item | Status | Source |
@@ -109,6 +111,12 @@ No OPEN or DEFERRED item has a default.
 |---|---|---|---|---|
 | M3P3-F1 | MINOR | ACCEPTED; corrected | I-3 §3 | DR-0024 "Q4 coordinate conventions, revision 2" (general relation; FC-1…FC-10); `docs/reviews/M3-planning-review-03.md`, "Resolution of findings" |
 | M3P3-F2 | MINOR | ACCEPTED; corrected | I-3 §4 | DR-0024 amendment log (M3P3-F2 entry, complete verbatim row); same review record |
+
+## Review findings (planning review 04)
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P4-F1 | MINOR | ACCEPTED; corrected | I-4 §1 | DR-0028 "Resolution amendment 1" item 1; SCI-0013 status update 3; DR-0024 amendment log; `docs/reviews/M3-planning-review-04.md`, "Resolution of findings" |
+| M3P4-F2 | MINOR | ACCEPTED; corrected | I-4 §1 | DR-0028 "Resolution amendment 1" item 2; SCI-0013 status update 3; same review record |
 
 ## Gates
 | Gate | State |

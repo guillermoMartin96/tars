@@ -114,3 +114,18 @@ python -I q10_residual_consequences.py q10_table_check_results.json q10_residual
 ```
 
 Result: in the lowest band (0.010–25 km) the GMAT density is 0.13785 % below the author's file at every height (ratio exp(0.010/7.249)). With the author's base altitude the 25 km jump would be −1.89e-5 instead of +1.36e-3. The 900 km scale-height rounding gives up to +1.5e-5 below 1000 km. Above 1000 km, where the author's file has no row, the sources diverge: +19.6 % at 1100 km, +145 % at 1500 km. Interpretation: DR-0024 §3.4 (correction), DR-0027 Resolution "Disputed cells".
+
+## DR-0028 node sensitivity (added 2026-10-16, review M3P4-F1)
+`dr0028_node_sensitivity.py` is standard-library geometry. It compares the inclination, ascending-node longitude and node point of one orbit seen from two frames whose poles differ by a small tilt δ. It reproduces the review-04 example and sweeps the tilt direction for several inclinations. Output: `dr0028_node_sensitivity_results.json`; a rerun is byte-identical.
+
+```
+python -I dr0028_node_sensitivity.py dr0028_node_sensitivity_results.json
+```
+
+Result, δ = 0.15°:
+- |Δi| ≤ δ in every case.
+- The node point moves by up to δ/sin i, and the node longitude by up to δ|cot i|; both agree with the first-order estimates to within 0.4 %.
+- Review-04 example: the node moves to 90.2598055437°.
+- At i = 0.1°, the node longitude can jump by 180°.
+
+Interpretation: DR-0028 "Resolution amendment 1", item 1.

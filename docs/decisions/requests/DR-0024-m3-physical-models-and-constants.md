@@ -419,6 +419,11 @@ Under DR-0028 A1 the first two equal their direct inertial evaluations identical
   - *Amended (current):* the Q4 row in the Resolution table, recording the owner's explicit decision of 2026-10-15 (I-2 §1).
   - *Realization (current):* DR-0028, APPROVED J-ax-1, with revision 2 of the coordinate conventions below.
 - **2026-10-15, DR-0028 resolution and review M3P3-F1:** "Q4 coordinate conventions" revision 1 is marked superseded, and revision 2 is appended below. Revision 1's text is unchanged.
+- **2026-10-16, review M3P4-F1 (correction authorized by the Tech Lead, "M3 Planning — Review 04 Corrections and Final Verification", §1).** §11 says "The fixed pole means the J2 node and ground-track geometry differ from the real Earth by about 0.15° of pole offset in 2026." The sentence is kept as written. Read it as follows:
+  - 0.15° is the **pole offset**, and it bounds only the inclination difference.
+  - The ascending-node difference is amplified, to first order, by up to about 1/sin i: by δ/sin i along the orbit and δ|cot i| in longitude. It is ill-conditioned for near-equatorial orbits.
+  - The geometric bound, the estimates and the verified review-04 example are in DR-0028 "Resolution amendment 1", item 1.
+  - The §5 phrase "loss of realism is ~0.15° of pole offset" describes the pole offset itself and needs no correction.
 
 ### Q4 coordinate conventions, revision 2 (2026-10-15; DR-0028 APPROVED J-ax-1; review M3P3-F1; nothing implemented)
 **General relationship (any two frames A and B, recorded for correctness and for future work).** If r_B = R(t) r_A, with R(t) a proper rotation, then differentiating gives

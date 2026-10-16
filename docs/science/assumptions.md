@@ -546,6 +546,16 @@ Limitations (DR-0028 Resolution):
 - Earth-fixed navigation measurements, tesserals and MSIS-class atmospheres each need a separately authorized Earth-orientation model.
 
 Conventions and tests: DR-0024 "Q4 coordinate conventions, revision 2" (FC-1…FC-10). Extension point: ADR-0009 item 17 (not implemented).  
+**Status update 3 (2026-10-16, append-only; reviews M3P4-F1, M3P4-F2; DR-0028 Resolution amendment 1).** Two limitation statements in status update 2 are corrected. The approval and the model are unchanged.
+- **Pole tilt (M3P4-F1).** With δ ≈ 0.15° the angle between the model axis and the real pole:
+  - the inclination difference is bounded geometrically by δ;
+  - the ascending-node difference is not. To first order (δ ≪ i), the node point moves along the orbit by up to δ/sin i, and the node longitude by up to δ|cot i|;
+  - near-equatorial nodes are poorly conditioned or undefined;
+  - the 117–123 m and 25 m figures are measurements for the VAL-0018 configuration only. No general growth law is claimed (the phrase "growing with time and epoch distance from J2000" in status update 2 is withdrawn).
+- **Local solar time (M3P4-F2).** Local solar time does not need an Earth rotation angle: the angle cancels in the solar hour angle α_sc − α_Sun.
+  - M3 lacks a solar ephemeris and a time convention for it, so it stays outside M3 scope.
+  - Longitude, ground tracks and site visibility still need an Earth rotation angle, as stated.
+  - No solar ephemeris, Earth-orientation provider or local-solar-time implementation is authorized.
 **Introduced:** 2026-10-15  
 **Applies to:** M3 physics configurations only. SCI-0001 and SCI-0004 remain Active for M1/M2 configurations.
 

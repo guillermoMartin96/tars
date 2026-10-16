@@ -1,6 +1,7 @@
 # Decision Request: realization of the M3 Earth-fixed frame (follow-up to DR-0024 Q4)
 
 **Status:** RESOLVED — APPROVED: J-ax-1, with requirements (Tech Lead, 2026-10-15, "M3 Planning — Resolve Review 03 and DR-0028", section 2). See "Resolution"; where the body below differs from the Resolution, the Resolution governs. No Earth-orientation implementation is authorized.  
+**Resolution amendment 1 (2026-10-16, append-only):** two limitation statements in the Resolution are corrected under reviews M3P4-F1 (node error bound) and M3P4-F2 (local solar time). The decision itself (A, B, R-1…R-4) is unchanged. See "Resolution amendment 1" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -72,7 +73,9 @@ Two things that approval does not fix are needed before T1:
   - Precession and nutation move the pole of date about 0.15° (θ_A = 521″, DR-0024 §3.3) from the EarthMJ2000Eq z axis in 2026. Polar motion adds a further, smaller wander, not quantified by the project.
   - Measured effect (VAL-0018, J2 only, 53 700 s): **117 m** against a 2026 mean-pole model, **25 m** at J2000, and **123.5 m** against GMAT in EarthMJ2000Eq axes. GMAT reproduces the M3 model to 0.19 m when states are exchanged in its true-of-epoch axes fixed at the epoch.
 - **Accumulation:** node and inclination geometry relative to the true equator are offset by up to the pole offset, and the error grows with propagation time and with distance of the epoch from J2000.
+  - **Superseded by Resolution amendment 1, item 1 (review M3P4-F1).** Only the inclination difference is bounded by the pole offset. The ascending-node difference is not, and the growth statement was not measured. The sentence above is kept as originally written.
 - **No longitude, no ground position:** without an Earth rotation angle the model has no terrestrial longitude, so it cannot give sub-satellite points, ground tracks, site visibility or local solar time.
+  - **Partly superseded by Resolution amendment 1, item 2 (review M3P4-F2).** The restriction on longitude, sub-satellite points, ground tracks and site visibility stands. Local solar time does not need an Earth rotation angle; M3 lacks it for other reasons. The sentence above is kept as originally written.
 - **Not a terrestrial frame:** the model must not be used where an ITRF/ECEF frame is meant.
 
 **Implications for future mission capabilities.** Each of the following needs a separately authorized Earth-orientation model; none is enabled by M3:
@@ -99,3 +102,97 @@ The M5 Mission Laboratory can compare candidate maneuvers within the model. Abso
 - DR-0024 "Q4 coordinate conventions, revision 2" and FC-1…FC-10.
 - SCI-0013, SCI-0014 and SCI-0017 status updates; ADR-0009 item 17.
 - T1/T2 are no longer blocked by this DR; they remain NOT AUTHORIZED.
+
+## Resolution amendment 1 (2026-10-16; reviews M3P4-F1 and M3P4-F2)
+**Authority:** Tech Lead, instruction "M3 Planning — Review 04 Corrections and Final Verification" (I-4), section 1. That instruction authorizes these two corrections only.
+- **The decision is unchanged.** J-ax-1 stands: R_EA←I is the constant identity, atmospheric co-rotation is a velocity field of the air, there is no Earth rotation angle, and A, B and R-1…R-4 are as resolved.
+- **History is preserved.** The two corrected bullets stay in "Approximation and limitations" exactly as first written, each followed by a pointer to this section.
+- **Sources:**
+  - [McK] D. P. McKinley, "Long Term Mean Local Time of the Ascending Node Prediction", a.i. solutions / NASA GSFC, NTRS 20080012667, §II. PDF sha256 `542421d3…f475c`, read 2026-10-16.
+  - Everything else is derived geometry, checked numerically by `docs/science/experiments/m3-planning/dr0028_node_sensitivity.py` (output `dr0028_node_sensitivity_results.json`; a rerun is byte-identical).
+
+### Item 1 (M3P4-F1): pole tilt, inclination and ascending node
+Replaces the "Accumulation" bullet.
+
+**Notation.**
+- δ is the angle between the model's +Z axis and the real spin axis. It is about 0.15° in 2026 (θ_A = 521″, DR-0024 §3.3) and depends on the epoch.
+- ĥ is the orbit's unit angular-momentum vector.
+- i is the inclination and Ω the ascending-node longitude. Each is measured in the frame named.
+- All angles are in radians in the formulas below. Every estimate is linear in δ, so degrees may be used consistently.
+
+**Geometric bound: exact, for any δ and any orbit.**
+- The inclination is the angle between ĥ and the pole: i = ∠(ĥ, pole).
+- Two poles δ apart therefore give |i_EA − i_true| ≤ δ, by the triangle inequality on the unit sphere. The bound is attained for a suitable tilt direction.
+- Numerical check: the largest |Δi|/δ found was 1.0, both for δ = 0.15° over 8 inclinations × 360 tilt azimuths and for δ = 5° over a 37 × 36 grid. It never exceeded 1.
+
+**First-order estimates: approximations, not bounds.**
+These hold for δ ≪ i and δ ≪ 180° − i, that is, away from the near-equatorial singular configurations. They assume a tilt by δ about an equatorial axis at azimuth φ.
+
+| Quantity | Estimate | Largest value over φ |
+|---|---|---|
+| Inclination change Δi | δ cos(Ω − φ) | δ (consistent with the exact bound) |
+| Node-point displacement along the orbit | δ \|sin(Ω − φ)\| / sin i | **δ / sin i** |
+| Node-longitude change ΔΩ, each frame measuring from its own x axis | −δ cot i sin(Ω − φ) | δ \|cot i\|, which is ≤ δ / sin i |
+
+- **The node error is amplified by up to about 1/sin i.** It exceeds δ at every inclination below 90° (or above 90° for retrograde orbits).
+- **Two node measures.** δ/sin i is the envelope: it is how far the node point moves along the orbit. The node *longitude* moves by at most δ|cot i|.
+- **Node longitude depends on convention.** It also depends on where each frame puts its longitude origin, its x axis or equinox. The estimate above assumes the origin is carried by the same rotation, as in review 04's example. Another origin, such as an equinox of date, adds a convention-dependent term.
+- **Numerical agreement (δ = 0.15°):**
+  - the swept maxima of ΔΩ/δ and of the node-point shift/δ agree with |cot i| and 1/sin i to better than 0.4 % at every swept inclination (1°, 5°, 10°, 30°, 51.6°, 120°, 170°);
+  - at i = 90°, ΔΩ is second order (6.5e-4 δ) and the node point moves by δ.
+
+**Review 04 counterexample: preserved, assumptions verified.**
+- **Assumptions:**
+  - ĥ = (sin 30°, 0, cos 30°), so i = 30° and the node is at 90°;
+  - the tilted components are R ĥ with R = Rx(−0.15°), a passive rotation about the common x axis, so φ = 0 and x_B = x_A;
+  - Ω = atan2(h_x, −h_y), measured from each frame's own x axis.
+- **Results (independent recomputation):**
+  - the node moves to **90.2598055437°**, so ΔΩ = 0.2598055°, larger than δ = 0.15°;
+  - the first-order δ cot i is 0.2598076°;
+  - the node point moves 0.2999979° along the orbit, against δ/sin i = 0.30°;
+  - Δi = 3.4e-4°. This is second order, because this tilt axis is perpendicular to the line of nodes.
+- **Conclusion:** the review's value is the node-longitude measure, and it is confirmed exactly.
+
+**Near-equatorial orbits.**
+- As i → 0° (or 180°), 1/sin i → ∞. The node is poorly conditioned, and it is undefined for an exactly equatorial orbit.
+- When i ≤ δ, the orbit can be equatorial in one frame, or its node can jump by up to 180°.
+- Measured, δ = 0.15°, largest |ΔΩ| over tilt azimuths:
+
+| Inclination | Largest \|ΔΩ\| | Note |
+|---|---|---|
+| 0.3° | 30.0° | |
+| 0.15° | 89.5° | node undefined at one sampled azimuth |
+| 0.1° | 180° | |
+
+- **No node statement is made for such orbits.**
+
+**Trajectory difference.**
+- The accumulated position difference depends on the orbit, the propagation duration and the epoch.
+- The project has measured it only for the VAL-0018 configuration (250 km circular, i = 51.6°, J2 only, 53 700 s):
+  - 117 m against a 2026 mean-pole model;
+  - 25 m at J2000;
+  - 123.5 m against GMAT in EarthMJ2000Eq axes.
+- No general bound or growth law is claimed.
+
+### Item 2 (M3P4-F2): local solar time
+Replaces the words "or local solar time" in the "No longitude, no ground position" bullet.
+
+**What still needs an Earth rotation angle (unchanged).** Terrestrial longitude, sub-satellite points, geographic ground tracks and site or ground-station visibility.
+
+**Local solar time does not inherently need one.**
+- θ is the Earth rotation (sidereal) angle, and α is right ascension in one consistent equatorial frame.
+- The spacecraft's sub-point has east longitude λ = α_sc − θ, and the sub-solar point has λ_Sun = α_Sun − θ.
+- The Sun's hour angle at the spacecraft's meridian is therefore H = λ − λ_Sun = α_sc − α_Sun, and **θ cancels**.
+- The local apparent solar time is (12 h + H / (15°/h)) mod 24 h.
+- At the ascending node, α_sc = Ω. With the mean Sun in place of the true Sun this gives the mean local time of the ascending node, which [McK] §II defines as "the angle between the orbit's ascending node and the mean Sun". Neither the equation nor the definition contains θ.
+
+**What M3 lacks.**
+- **A solar ephemeris:** α_Sun at each simulation time, in the same equatorial frame as α_sc (the M3 inertial frame I).
+- **A time convention connecting simulation time to that ephemeris.** SCI-0007 labels the epoch (2026-01-01T00:00:00 TT), but no M3 model consumes it. Making the epoch an ephemeris argument would be a model change.
+- **For mean local time:** a mean-Sun (equation-of-time) convention.
+- **No M3 force needs local solar time.** The approved atmosphere is static, with no diurnal variation (DR-0024 §10).
+
+**Scope.**
+- Local solar time and other Sun-relative geometry remain **outside M3 scope**.
+- They would need a separately authorized solar ephemeris and time convention. They would not need an Earth-orientation model.
+- **No solar ephemeris, Earth-orientation provider or local-solar-time implementation is authorized.**
