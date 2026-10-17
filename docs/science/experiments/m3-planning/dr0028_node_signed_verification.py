@@ -23,6 +23,11 @@ and error is checked with math.isfinite before any tolerance, order or sign comp
 non-finite value is a failure; each formula must reach a minimum number of valid order samples
 and of valid sign checks; the exact properties E1-E4 and E6 reject non-finite values instead of
 letting max() and comparisons drop them. All finite-input results are unchanged.
+Revised for review 09 (DR-0028 amendment 6, M3P9-F1..F3): new built-in mutants make each
+assertion load-bearing for its own reason: oracle +/-inf (whole grid and a single sample) must
+be rejected as non-finite; a doubled first-order coefficient must be rejected by the order check
+and a reversed sign by the sign check, each per formula; a 1 % inclination error in the oracle
+must be rejected by E3 and by E4. No check, formula, tolerance or finite result is changed.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -721,6 +726,36 @@ def oracle_with_nonfinite(component, value):
     return mutant
 
 
+def oracle_with_nonfinite_at(component, value, series):
+    """Mutant oracle (M3P9-F1): one output non-finite at a single sample only.
+
+    `series` = (i, Omega, phi in degrees, tilt sign); the sample is the smallest step of that
+    series (step_scale(i) * 2^-(HALVINGS-1), computed exactly as check_formulas does).
+    """
+    inc_deg, node_deg, phi_deg, sign = series
+    target_inc = math.radians(inc_deg)
+    target = (
+        target_inc,
+        math.radians(node_deg),
+        math.radians(phi_deg),
+        sign * step_scale(target_inc) * 2.0 ** -(HALVINGS - 1),
+    )
+
+    def mutant(inc, node, phi, delta, wrap_fn=wrap):
+        out = list(finite(inc, node, phi, delta, wrap_fn))
+        if (inc, node, phi, delta) == target:
+            out[component] = value
+        return tuple(out)
+
+    return mutant
+
+
+def oracle_delta_i_scaled(inc, node, phi, delta, wrap_fn=wrap):
+    """Mutant oracle (M3P9-F3): Delta i 1 % too large, Delta Omega exact."""
+    d_i, d_node = finite(inc, node, phi, delta, wrap_fn)
+    return 1.01 * d_i, d_node
+
+
 def tilt_with_nan(phi, delta):
     """Mutant rotation matrix (M3P8-F1 audit) with one NaN entry."""
     r = tilt_matrix(phi, delta)
@@ -780,6 +815,10 @@ EXACT_MUTANTS = {
         {"oracle": oracle_with_nonfinite(1, math.nan)},
         ("E2", "E3", "E5b", "E6"),
     ),
+    # M3P9-F3: a finite oracle error that only the E3 deviation and E4 bound assertions see
+    # among those two tests (E3 and E4 record no non-finite failure for a finite oracle), so
+    # removing either assertion leaves this mutant unrejected by its designated test.
+    "M3P9-F3_oracle_delta_i_scaled_1pct": ({"oracle": oracle_delta_i_scaled}, ("E3", "E4")),
 }
 
 # Minimum failure counts beyond "at least one". The guard-removed mutant must fail in every
@@ -800,12 +839,15 @@ def formula_with(component, value):
 
 
 def by_formula_test(failures):
-    """Count first-order failures by check and, for nonfinite and coverage, by formula."""
+    """Count first-order failures by check and by formula ("order" and "sign" also in total)."""
     keys = {"order": 0, "sign": 0}
     keys.update({f"{c}_{n}": 0 for c in ("nonfinite", "coverage") for n in COMPONENTS})
+    keys.update({f"{c}_{n}": 0 for c in ("order", "sign") for n in COMPONENTS})  # M3P9-F2
     for f in failures:
         head, name = f.split()[:2]
-        keys[head if head in ("order", "sign") else f"{head}_{name}"] += 1
+        keys[f"{head}_{name}"] += 1
+        if head in ("order", "sign"):
+            keys[head] += 1
     return keys
 
 
@@ -832,34 +874,102 @@ for _index, _name in enumerate(COMPONENTS):
         _minima,
     )
 
+# M3P9-F1: the oracle half of nonfinite_reason must reject +/-inf as well as NaN, everywhere
+# (600 failures) and at a single sample. The single sample is the smallest step of a series
+# that is a valid order and sign sample of both formulas at the committed formulas; the minima
+# equal the observed counts, so losing it must fail both coverage minima of that formula.
+SINGLE_SAMPLE_SERIES = (30.0, 37.0, 0.0, 1.0)
+for _index, _name in enumerate(COMPONENTS):
+    for _label, _value in (("plus_inf", math.inf), ("minus_inf", -math.inf)):
+        FORMULA_DEFECT_MUTANTS[f"M3P9-F1_oracle_{_name}_{_label}"] = (
+            {"formula": formulas_amendment2, "oracle": oracle_with_nonfinite(_index, _value)},
+            {f"nonfinite_{_name}": SERIES_PER_COMPONENT, f"coverage_{_name}": 2},
+        )
+        FORMULA_DEFECT_MUTANTS[f"M3P9-F1_oracle_{_name}_{_label}_single_sample"] = (
+            {
+                "formula": formulas_amendment2,
+                "oracle": oracle_with_nonfinite_at(_index, _value, SINGLE_SAMPLE_SERIES),
+            },
+            {f"nonfinite_{_name}": 1, f"coverage_{_name}": 2},
+        )
+
+
+# M3P9-F2: each assertion must reject a defect that only it can see, for each formula. A
+# doubled first-order coefficient keeps every sign but leaves an O(delta) error, so it must fail
+# the order check in every series where the first-order term is nonzero (sign_check_minimum:
+# there the doubled term differs from the correct one by the whole first-order term). A
+# reversed sign must fail the sign check in each of those series. The other formula is exact.
+def formula_scaled(component, factor):
+    """Mutant formula (M3P9-F2): one first-order coefficient multiplied by `factor`."""
+
+    def mutant(inc, node, phi, delta):
+        out = list(formulas_amendment2(inc, node, phi, delta))
+        out[component] *= factor
+        return tuple(out)
+
+    return mutant
+
+
+for _index, _name in enumerate(COMPONENTS):
+    FORMULA_DEFECT_MUTANTS[f"M3P9-F2_{_name}_coefficient_doubled"] = (
+        {"formula": formula_scaled(_index, 2.0)},
+        {f"order_{_name}": sign_check_minimum(_name)},
+    )
+    FORMULA_DEFECT_MUTANTS[f"M3P9-F2_{_name}_sign_reversed"] = (
+        {"formula": formula_scaled(_index, -1.0)},
+        {f"sign_{_name}": sign_check_minimum(_name)},
+    )
+
+
+def mutant_failures(run, **kwargs):
+    """(failures, exception) for one built-in defect mutant (M3P9 / I-9 section 6).
+
+    A mutant that raises was not rejected by any check: the exception is recorded and the
+    mutant counts as not rejected, so the verdict is FAIL. This applies to mutants only; the
+    formulas under test and the exact properties are never wrapped, and raise as before.
+    """
+    try:
+        return run(**kwargs)[0], None
+    except Exception as exc:  # recorded and failed closed, never treated as a rejection
+        return [], f"{type(exc).__name__}: {exc}"
+
 
 def main(out_path):
     exact_failures, exact_report, wrap_report, nonfinite_report = run_exact()
     exact_mutants = {}
     for name, (kwargs, tests) in EXACT_MUTANTS.items():
-        failures, _, _, _ = run_exact(**kwargs)
+        failures, exception = mutant_failures(run_exact, **kwargs)
         counts = by_test(failures)
         exact_mutants[name] = {
             "designated_tests": list(tests),
             "failures_by_test": counts,
-            "rejected_by_designated_test": all(
-                counts[t] >= MIN_DESIGNATED_FAILURES.get(name, {}).get(t, 1) for t in tests
-            ),
+            "rejected_by_designated_test": exception is None
+            and all(counts[t] >= MIN_DESIGNATED_FAILURES.get(name, {}).get(t, 1) for t in tests),
         }
+        if exception is not None:
+            exact_mutants[name]["exception"] = exception
     under_test_failures, under_test_stats = check_formulas(formulas_amendment2)
     mutants = {}
     for name, formula in MUTANTS.items():
-        failures, _ = check_formulas(formula)
-        mutants[name] = {"failing_checks": len(failures), "rejected": bool(failures)}
+        failures, exception = mutant_failures(check_formulas, formula=formula)
+        mutants[name] = {
+            "failing_checks": len(failures),
+            "rejected": exception is None and bool(failures),
+        }
+        if exception is not None:
+            mutants[name]["exception"] = exception
     formula_defect_mutants = {}
     for name, (kwargs, minima) in FORMULA_DEFECT_MUTANTS.items():
-        failures, _ = check_formulas(**kwargs)
+        failures, exception = mutant_failures(check_formulas, **kwargs)
         counts = by_formula_test(failures)
         formula_defect_mutants[name] = {
             "designated_minimum_failures": minima,
             "failures_by_check": counts,
-            "rejected_by_designated_checks": all(counts[t] >= m for t, m in minima.items()),
+            "rejected_by_designated_checks": exception is None
+            and all(counts[t] >= m for t, m in minima.items()),
         }
+        if exception is not None:
+            formula_defect_mutants[name]["exception"] = exception
     ok = (
         not exact_failures
         and not under_test_failures

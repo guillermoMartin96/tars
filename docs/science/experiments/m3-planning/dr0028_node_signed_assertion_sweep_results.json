@@ -1,0 +1,255 @@
+{
+ "script": "dr0028_node_signed_verification.py",
+ "kind": "measurement (no verdict)",
+ "assertion_sites": 35,
+ "detected": 17,
+ "survives": 18,
+ "exception": 0,
+ "results": [
+  {
+   "line": 293,
+   "function": "check_formulas",
+   "assertion": "failures.append(f\"nonfinite {name} {reason} delta={d!r} {tag}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 307,
+   "function": "check_formulas",
+   "assertion": "failures.append(f\"order {name} p={p:.3f} {tag}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 321,
+   "function": "check_formulas",
+   "assertion": "failures.append(f\"sign {name} num={n:.3e} lin={lin_v:.3e} {tag}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 329,
+   "function": "check_formulas",
+   "assertion": "failures.append(f\"coverage {name} {check}: {count} valid samples < {minimum}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 411,
+   "function": "wrap_tests",
+   "assertion": "failures.append(f\"wrap({a!r}) = {got!r} outside (-pi, pi]\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 413,
+   "function": "wrap_tests",
+   "assertion": "failures.append(f\"wrap({a!r}) = {got!r}, exact reduction {float(ref)!r}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 415,
+   "function": "wrap_tests",
+   "assertion": "failures.append(f\"wrap({a!r}) not deterministic\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 419,
+   "function": "wrap_tests",
+   "assertion": "failures.append(f\"wrap endpoint ({a!r}) = {wrap_fn(a)!r}, expected +pi\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 428,
+   "function": "wrap_tests",
+   "assertion": "failures.append(f\"wrap({a!r}) != wrap({b!r}) for exact equivalents\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 434,
+   "function": "wrap_tests",
+   "assertion": "failures.append(f\"wrap: only {equivalent} exactly representable equivalent pairs\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 458,
+   "function": "wrap_nonfinite_tests",
+   "assertion": "failures.append(f\"wrap-nonfinite: {name} raised another ValueError: {exc}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 461,
+   "function": "wrap_nonfinite_tests",
+   "assertion": "failures.append(f\"wrap-nonfinite: {name} raised {type(exc).__name__}: {exc}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 464,
+   "function": "wrap_nonfinite_tests",
+   "assertion": "failures.append(f\"wrap-nonfinite: {name} returned {got!r} instead of raising\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 509,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E1 non-finite rotation matrix phi={phi_deg} d={delta_deg}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 514,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E1 rotation convention deviation {worst:.3e}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 534,
+   "function": "exact_properties",
+   "assertion": "failures.append(\"E2 counterexample i = 2 deg, delta = 5 deg missing\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 543,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E2 {kind} unexpected undefined node i={inc_deg} d={delta_deg}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 547,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E2 {kind} non-finite i={inc_deg} d={delta_deg} node={node_deg}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 552,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E2 {kind} i={inc_deg} d={delta_deg} node={node_deg}: {dev:.3e}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 559,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E5a no node jump i={inc_deg} d={delta_deg} node={node_deg}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 585,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E2 endpoint claims a defined node: i={inc_deg}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 589,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E2 endpoint non-finite: i={inc_deg} rho={rho!r}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 593,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E2 endpoint not equatorial: i={inc_deg} rho={rho:.3e}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 610,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E3 non-finite i={inc_deg} node={node_deg} d={delta_deg}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 617,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E3 closed form deviation {worst:.3e} noise units\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 630,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E4 non-finite i={inc_deg} node={node_deg} d={delta_deg}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 637,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E4 inclination bound exceeded: {ratio:.3e} x 64 eps\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 647,
+   "function": "exact_properties",
+   "assertion": "failures.append(\"E5d equatorial node not reported as undefined\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 657,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E5b sweep: non-finite node difference at phi = {k} deg\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 664,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E5b sweep: no node jump at phi = {k} deg, tilt {sign}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 668,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E5b sweep: only {defined} defined samples, tilt {sign}\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 673,
+   "function": "exact_properties",
+   "assertion": "failures.append(f\"E5c coverage: {jump_asserts[sign]} jump assertions, tilt {sign}\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 681,
+   "function": "exact_properties",
+   "assertion": "failures.append(\"E6 review-04 example non-finite\")",
+   "exit_code": 1,
+   "outcome": "detected"
+  },
+  {
+   "line": 690,
+   "function": "exact_properties",
+   "assertion": "failures.append(\"E6 review-04 example not reproduced\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  },
+  {
+   "line": 692,
+   "function": "exact_properties",
+   "assertion": "failures.append(\"E6 review-04 example sign disagreement\")",
+   "exit_code": 0,
+   "outcome": "survives"
+  }
+ ]
+}

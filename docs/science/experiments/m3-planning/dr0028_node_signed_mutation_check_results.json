@@ -3,208 +3,1085 @@
  "script": "dr0028_node_signed_verification.py",
  "baseline": {
   "exit_code": 0,
-  "outcome": "PASS verdict"
+  "outcome": "PASS verdict",
+  "expectations_already_true_at_baseline": []
  },
- "mutations": 33,
- "detected": 33,
+ "mutations": 109,
+ "detected": 109,
+ "groups": {
+  "M3P8-F1 injection": {
+   "mutations": 6,
+   "detected": 6
+  },
+  "M3P8-F1 coverage": {
+   "mutations": 6,
+   "detected": 6
+  },
+  "M3P8-F1 validation": {
+   "mutations": 4,
+   "detected": 4
+  },
+  "M3P8-F1 audit": {
+   "mutations": 7,
+   "detected": 7
+  },
+  "M3P9-F1 oracle": {
+   "mutations": 6,
+   "detected": 6
+  },
+  "M3P9-F2 order and sign": {
+   "mutations": 8,
+   "detected": 8
+  },
+  "M3P9-F3 exact properties": {
+   "mutations": 2,
+   "detected": 2
+  },
+  "earlier": {
+   "mutations": 10,
+   "detected": 10
+  },
+  "review-09 injection matrix": {
+   "mutations": 60,
+   "detected": 60
+  }
+ },
+ "negative_controls": {
+  "syntax_error": {
+   "failure_kind": "syntax error",
+   "observed_outcome": "exit 1, no output; process failure: SyntaxError: '(' was never closed",
+   "classified_as_detected": false,
+   "result": "PASS"
+  },
+  "import_failure": {
+   "failure_kind": "import failure",
+   "observed_outcome": "exit 1, no output; process failure: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
+   "classified_as_detected": false,
+   "result": "PASS"
+  },
+  "missing_script": {
+   "failure_kind": "missing file",
+   "observed_outcome": "exit 2, no output; process failure: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
+   "classified_as_detected": false,
+   "result": "PASS"
+  },
+  "neutral_edit": {
+   "failure_kind": "no defect (exit 0)",
+   "observed_outcome": "exit 0, PASS verdict",
+   "classified_as_detected": false,
+   "result": "PASS"
+  },
+  "wrong_reason": {
+   "failure_kind": "FAIL verdict for another reason",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection not shown: formulas under test: at least 1 failure(s) starting 'sign delta_node '",
+   "classified_as_detected": false,
+   "result": "PASS"
+  }
+ },
  "results": {
   "delta_i_formula_returns_nan": {
    "group": "M3P8-F1 injection",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of the delta_i formula",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_i_formula_returns_plus_inf": {
    "group": "M3P8-F1 injection",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of the delta_i formula",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_i_formula_returns_minus_inf": {
    "group": "M3P8-F1 injection",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of the delta_i formula",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_node_formula_returns_nan": {
    "group": "M3P8-F1 injection",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of the delta_node formula",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_node_formula_returns_plus_inf": {
    "group": "M3P8-F1 injection",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of the delta_node formula",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_node_formula_returns_minus_inf": {
    "group": "M3P8-F1 injection",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of the delta_node formula",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_i_coverage_disabled": {
    "group": "M3P8-F1 coverage",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "delta_i coverage minima",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "delta_node_coverage_disabled": {
    "group": "M3P8-F1 coverage",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "delta_node coverage minima",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "sign_coverage_removed": {
    "group": "M3P8-F1 coverage",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "sign coverage minima",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "order_coverage_removed": {
    "group": "M3P8-F1 coverage",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "order coverage minima",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_nan not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_nan not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "coverage_comparison_disabled": {
    "group": "M3P8-F1 coverage",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "coverage comparison",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "sign_counter_moved_outside_gate": {
    "group": "M3P8-F1 coverage",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "sign coverage counter",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "finite_validation_removed": {
    "group": "M3P8-F1 validation",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of oracle and formula values",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_nan not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "formula_check_weakened_to_isnan": {
    "group": "M3P8-F1 validation",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of formula values (+/-inf)",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_plus_inf not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_i_minus_inf not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "oracle_check_removed": {
    "group": "M3P8-F1 validation",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "finite validation of oracle values",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "invalid_sample_not_discarded": {
    "group": "M3P8-F1 validation",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "invalid samples excluded from coverage",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_delta_i_plus_inf not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "E1_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E1 finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_rotation_matrix_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "E2_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "exception: ValueError",
-   "detected": true
+   "target_property": "E2 finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan",
+   "result": "PASS"
   },
   "E2_endpoint_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E2 endpoint finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_rotation_matrix_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "E3_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E3 finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "E4_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E4 finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "E5b_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "exception: ValueError",
-   "detected": true
+   "target_property": "E5b finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan",
+   "result": "PASS"
   },
   "E6_finite_check_removed": {
    "group": "M3P8-F1 audit",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E6 finite check",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "oracle_delta_i_plus_inf_single_sample": {
+   "group": "M3P9-F1 oracle",
+   "target_property": "finite validation of the delta_i oracle (one value)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i oracle=inf '",
+    "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "oracle_delta_i_minus_inf_single_sample": {
+   "group": "M3P9-F1 oracle",
+   "target_property": "finite validation of the delta_i oracle (one value)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i oracle=-inf '",
+    "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "oracle_delta_node_plus_inf_single_sample": {
+   "group": "M3P9-F1 oracle",
+   "target_property": "finite validation of the delta_node oracle (one value)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node oracle=inf '",
+    "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "oracle_delta_node_minus_inf_single_sample": {
+   "group": "M3P9-F1 oracle",
+   "target_property": "finite validation of the delta_node oracle (one value)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node oracle=-inf '",
+    "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "oracle_check_weakened_to_isnan": {
+   "group": "M3P9-F1 oracle",
+   "target_property": "finite validation of oracle values (+/-inf)",
+   "expected_rejection": [
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf_single_sample not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf_single_sample not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError: math domain error; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError: math domain error; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError: math domain error; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError: math domain error",
+   "result": "PASS"
+  },
+  "oracle_check_weakened_to_isinf": {
+   "group": "M3P9-F1 oracle",
+   "target_property": "finite validation of oracle values (NaN)",
+   "expected_rejection": [
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "delta_i_coefficient_doubled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "delta_i order check",
+   "expected_rejection": [
+    "formulas under test: exactly 560 failure(s) starting 'order delta_i '",
+    "formulas under test: exactly 0 failure(s) starting 'sign delta_i '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "delta_node_coefficient_doubled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "delta_node order check",
+   "expected_rejection": [
+    "formulas under test: exactly 504 failure(s) starting 'order delta_node '",
+    "formulas under test: exactly 0 failure(s) starting 'sign delta_node '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "order_assertion_disabled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "order check (both formulas)",
+   "expected_rejection": [
+    "built-in mutant M3P9-F2_delta_i_coefficient_doubled not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F2_delta_node_coefficient_doubled not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "delta_i_order_assertion_disabled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "delta_i order check",
+   "expected_rejection": [
+    "built-in mutant M3P9-F2_delta_i_coefficient_doubled not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "delta_node_order_assertion_disabled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "delta_node order check",
+   "expected_rejection": [
+    "built-in mutant M3P9-F2_delta_node_coefficient_doubled not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "sign_assertion_disabled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "sign check (both formulas)",
+   "expected_rejection": [
+    "built-in mutant M3P9-F2_delta_i_sign_reversed not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F2_delta_node_sign_reversed not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "delta_i_sign_assertion_disabled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "delta_i sign check",
+   "expected_rejection": [
+    "built-in mutant M3P9-F2_delta_i_sign_reversed not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "delta_node_sign_assertion_disabled": {
+   "group": "M3P9-F2 order and sign",
+   "target_property": "delta_node sign check",
+   "expected_rejection": [
+    "built-in mutant M3P9-F2_delta_node_sign_reversed not rejected (formula_defect_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "E3_assertion_removed": {
+   "group": "M3P9-F3 exact properties",
+   "target_property": "E3 closed-form deviation assertion",
+   "expected_rejection": [
+    "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "E4_assertion_removed": {
+   "group": "M3P9-F3 exact properties",
+   "target_property": "E4 inclination-bound assertion",
+   "expected_rejection": [
+    "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P5_delta_i_sign_reversed": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "delta_i sign check",
+   "expected_rejection": [
+    "formulas under test: exactly 560 failure(s) starting 'sign delta_i '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P5_delta_node_sign_reversed": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "delta_node sign check",
+   "expected_rejection": [
+    "formulas under test: exactly 504 failure(s) starting 'sign delta_node '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P6-F1_unrestricted_claim_restored": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E2 line-of-nodes identity",
+   "expected_rejection": [
+    "exact properties: at least 1 failure(s) starting 'E2 '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P6-F2_E5a_removed": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E5a node-jump assertion",
+   "expected_rejection": [
+    "built-in mutant M3P6-F2_oracle_jump_suppressed not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P6-F2_E5b_removed": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E5b node-jump assertion",
+   "expected_rejection": [
+    "built-in mutant M3P6-F2_oracle_jump_suppressed not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P6-F2_E5c_removed": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "E5c jump-assertion coverage guard",
+   "expected_rejection": [
+    "built-in mutant M3P6-F2_jump_assertion_disabled not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P6-F3_previous_wrap_implementation": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "wrap interval (-pi, pi]",
+   "expected_rejection": [
+    "exact properties: at least 1 failure(s) starting 'wrap('"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P7-F1_guard_removed": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "wrap non-finite guard",
+   "expected_rejection": [
+    "exact properties: at least 1 failure(s) starting 'wrap-nonfinite: '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P7-F1_message_check_weakened_to_type_only": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "wrap non-finite test (message check)",
+   "expected_rejection": [
+    "built-in mutant M3P7-F1_nonfinite_guard_removed not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   },
   "M3P7-F1_nonfinite_tests_disabled": {
    "group": "earlier",
-   "exit_code": 1,
-   "outcome": "FAIL verdict",
-   "detected": true
+   "target_property": "wrap non-finite tests",
+   "expected_rejection": [
+    "built-in mutant M3P7-F1_nonfinite_guard_removed not rejected (exact_and_wrap_mutants)"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_last_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (last_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_one_series": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (one_series)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_positive_tilt": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (positive_tilt)",
+   "expected_rejection": [
+    "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_near_equatorial": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (near_equatorial)",
+   "expected_rejection": [
+    "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_nan_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_last_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (last_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_one_series": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (one_series)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_positive_tilt": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (positive_tilt)",
+   "expected_rejection": [
+    "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_near_equatorial": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (near_equatorial)",
+   "expected_rejection": [
+    "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_plus_inf_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_last_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (last_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_one_series": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (one_series)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_positive_tilt": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (positive_tilt)",
+   "expected_rejection": [
+    "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_near_equatorial": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (near_equatorial)",
+   "expected_rejection": [
+    "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_i_minus_inf_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i formula (near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_last_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (last_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_one_series": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (one_series)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_positive_tilt": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (positive_tilt)",
+   "expected_rejection": [
+    "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_near_equatorial": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (near_equatorial)",
+   "expected_rejection": [
+    "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_nan_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_last_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (last_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_one_series": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (one_series)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_positive_tilt": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (positive_tilt)",
+   "expected_rejection": [
+    "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_near_equatorial": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (near_equatorial)",
+   "expected_rejection": [
+    "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_plus_inf_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_last_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (last_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_one_series": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (one_series)",
+   "expected_rejection": [
+    "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_positive_tilt": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (positive_tilt)",
+   "expected_rejection": [
+    "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_near_equatorial": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (near_equatorial)",
+   "expected_rejection": [
+    "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_formula_delta_node_minus_inf_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node formula (near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_nan_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_nan_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_nan_negative_tilt_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (negative_tilt_near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_plus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_plus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_plus_inf_negative_tilt_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (negative_tilt_near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_minus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_minus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_i_minus_inf_negative_tilt_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_i oracle (negative_tilt_near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_nan_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_nan_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_nan_negative_tilt_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (negative_tilt_near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=nan '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_plus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_plus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_plus_inf_negative_tilt_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (negative_tilt_near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_minus_inf_all": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (all)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_minus_inf_first_step": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (first_step)",
+   "expected_rejection": [
+    "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "review09_oracle_delta_node_minus_inf_negative_tilt_near_polar": {
+   "group": "review-09 injection matrix",
+   "target_property": "finite validation of the delta_node oracle (negative_tilt_near_polar)",
+   "expected_rejection": [
+    "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=-inf '"
+   ],
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
   }
  }
 }
