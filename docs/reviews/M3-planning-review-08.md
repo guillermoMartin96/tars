@@ -90,3 +90,23 @@ All built-in mutants were still rejected.
 - This is not an unconditional PASS, so the I-7 §5 stop condition applies.
 - **No acceptance report has been prepared, and no review 09 has been started.** The branch is not merged, and T0, T1 and T2 have not started.
 - **Returned to the Tech Lead:** a decision on M3P8-F1, and on any further review.
+
+## Resolution of findings (appended 2026-10-16; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "Continue TARS M3 planning from `milestone-3-planning` at `0ac630b`" (2026-10-16), referred to as **I-8**. It authorizes:
+- the narrow M3P8-F1 correction, with a bounded audit of the same failure class in the same script;
+- exactly one further review (review 09), conditional on successful validation.
+
+It does not authorize planning acceptance, a merge or any implementation.
+
+### M3P8-F1 (MINOR): non-finite inclination predictions can pass the signed verification
+- **Correction:** DR-0028 "Resolution amendment 5" (appended), with a pointer under amendment 2's "Verification script". In `dr0028_node_signed_verification.py`:
+  - every oracle and first-order value is checked with `math.isfinite` before any tolerance, order or sign comparison; a non-finite value is a failure, and its series is discarded from coverage;
+  - each formula must reach a minimum number of valid samples, enforced separately: order 506 (Δi) and 532 (ΔΩ), the existing counts; sign 560 (Δi) and 504 (ΔΩ), derived from the grid's exact zero set of each first-order term.
+- **Audit (I-8 §4):** the exact properties E1–E4 and E6 let a NaN pass through `max()` or a false comparison. They are corrected in the same way. No separate mathematical issue or out-of-scope work was found.
+- **Mutants:** ten first-order defect mutants (Δi and ΔΩ each as NaN, +∞, −∞ and 0; oracle Δi and ΔΩ as NaN) and three audit mutants, each rejected by its designated checks. A non-finite mutant must be reported in all 600 series and fail both coverage minima of its formula.
+- **Entrypoint mutations:** `dr0028_node_signed_mutation_check.py` runs 33 file-level mutations as separate processes. All 33 exit nonzero: 31 by a FAIL verdict, and 2 (E2 and E5b finite checks removed) by the wrap guard's ValueError.
+- **Evidence:**
+  - two runs of each script are byte-identical;
+  - every pre-existing output value is identical to `0ac630b`, except that the `cos_sin_swapped` mutant now has 1578 failing checks instead of 1576, because it also fails both sign minima.
+- **Residual uncertainty:** none known. The order minima rely on the measured gate margins (1.2 % and 0.6 % for Δi, against a rounding effect of at most 0.1 %); the run reports them.
+- **Changes an acceptance decision?** No.

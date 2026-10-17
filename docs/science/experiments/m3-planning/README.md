@@ -174,3 +174,19 @@ Results:
 
 Interpretation: DR-0028 "Resolution amendment 4".
 
+## Signed verification, finite validation and coverage (2026-10-16, review M3P8-F1)
+Before this revision, a first-order formula returning NaN or ±∞ skipped the order and sign checks without a failure, and the script could still pass.
+
+What changed:
+- **Finite validation.** Every oracle and first-order value is checked with `math.isfinite` before any tolerance, order or sign comparison. A non-finite value is a failure, and that series counts towards no coverage minimum.
+- **Per-formula coverage.** Each formula must reach a minimum number of valid samples, separately for the order and sign checks: Δi 506 and 560, ΔΩ 532 and 504. The sign minima are derived from the grid; the order minima are the existing counts. The derivations are in DR-0028 amendment 5.
+- **Audit.** The exact properties E1–E4 and E6 now reject non-finite values instead of letting `max()` or a comparison drop them.
+- **Mutants.** Ten new first-order mutants (NaN, ±∞ and zero predictions; NaN oracle values) and three audit mutants are each rejected by their designated checks.
+
+`dr0028_node_signed_mutation_check.py` runs 33 file-level mutations of the verification script, each through its real entrypoint in a separate process, and requires each to exit nonzero. Output: `dr0028_node_signed_mutation_check_results.json`; a rerun is byte-identical.
+
+```
+python -I dr0028_node_signed_mutation_check.py dr0028_node_signed_mutation_check_results.json
+```
+
+Results: both scripts PASS; 33 of 33 mutations detected. Every finite result is unchanged; only new keys were added. Interpretation: DR-0028 "Resolution amendment 5".

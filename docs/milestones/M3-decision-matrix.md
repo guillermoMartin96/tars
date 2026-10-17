@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -20,6 +20,7 @@ No OPEN or DEFERRED item has a default.
 - **I-5:** "M3 Planning — M3P5-F1 Correction and Review 06" (Tech Lead, 2026-10-16), sections 1–7.
 - **I-6:** "Continue M3 planning on `milestone-3-planning` from commit `dcabcb2`" (Tech Lead, 2026-10-16), sections 1–6.
 - **I-7:** "Continue the TARS spacecraft simulator M3 planning work from branch `milestone-3-planning`, currently at commit `0dac6d3`" (Tech Lead, 2026-10-16), sections 1–6.
+- **I-8:** "Continue TARS M3 planning from `milestone-3-planning` at `0ac630b`" (Tech Lead, 2026-10-16), sections 1–8.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -145,7 +146,7 @@ Review-07 finding M3P7-F1: **RESOLVED** (reviewer's disposition).
 
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P8-F1 | MINOR | ACCEPTED; **not applied** (I-7 §5 stop) | Pending | `docs/reviews/M3-planning-review-08.md`. Signed verification script: a non-finite (NaN) first-order prediction skips the order and sign checks and still passes; there is no per-component coverage requirement. Not a mathematical error: the committed formulas are finite and verified |
+| M3P8-F1 | MINOR | ACCEPTED; was not applied (I-7 §5 stop) → **corrected** | I-8 §2–§5 | DR-0028 "Resolution amendment 5" (finite validation before every comparison; per-formula minimum valid samples: order 506/532, sign 560/504; bounded audit of E1–E6; 33 entrypoint mutations detected; finite results unchanged); `docs/reviews/M3-planning-review-08.md`, "Resolution of findings". Original record: a non-finite (NaN) first-order prediction skipped the order and sign checks and still passed; there was no per-component coverage requirement. Not a mathematical error |
 
 ## Gates
 | Gate | State |

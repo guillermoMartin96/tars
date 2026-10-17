@@ -5,6 +5,7 @@
 **Resolution amendment 2 (2026-10-16, append-only):** the signs of two first-order formulas in amendment 1, item 1, are corrected under review M3P5-F1. Magnitudes, bounds and the decision are unchanged. See "Resolution amendment 2" at the end.  
 **Resolution amendment 3 (2026-10-16, append-only):** under review 06 (M3P6-F1, F2, F3), the line-of-nodes exact result is given its domain and the full identity, the 180° node discontinuity is asserted, and the verification script's angle wrapping is made to match the documented (−π, π]. The signed formulas, the convention and the decision are unchanged. See "Resolution amendment 3" at the end.  
 **Resolution amendment 4 (2026-10-16, append-only):** under review 07 (M3P7-F1), the wrapping guarantee is restricted to finite angles, and non-finite inputs raise ValueError. Finite-input behaviour, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 4" at the end.  
+**Resolution amendment 5 (2026-10-16, append-only):** under review 08 (M3P8-F1), the verification script rejects non-finite values before every comparison and requires a minimum number of valid samples for each formula's order and sign checks; a bounded audit applies the same rule to the exact properties. All finite results, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 5" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -254,6 +255,7 @@ These checks use the matrix R and the element definitions only, never the formul
 ### Verification script
 `docs/science/experiments/m3-planning/dr0028_node_signed_verification.py`, output `dr0028_node_signed_verification_results.json`. A rerun is byte-identical. The script exits 0 only if every check below passes and every mutant is rejected.
 - **Revised by Resolution amendment 3 (review 06).** This section describes the script as committed at `bcb7f9b`. Amendment 3 records the revision, which corrects the wrapping, extends E2 and asserts E5. The first-order checks and their results are unchanged.
+- **Hardened by Resolution amendment 5 (review M3P8-F1).** As committed up to `cf9f3d6`, a non-finite first-order value was skipped silently by the order and sign checks, and no per-formula sample minimum was enforced. Amendment 5 adds both. The results are unchanged.
 
 **Oracle (independent of the formulas under test):**
 - R is built from Rodrigues' formula. The script checks that R is a proper rotation, equals Rx(−δ) for φ = 0, and that Rᵀẑ equals Rot(e, +δ)ẑ.
@@ -486,3 +488,100 @@ Removing any single one of E5a, E5b or E5c therefore makes the script fail, as t
 | Reverse the Δi sign | exit 1 |
 | Reverse the ΔΩ sign | exit 1 |
 
+## Resolution amendment 5 (2026-10-16; review M3P8-F1)
+**Authority:** Tech Lead, instruction "Continue TARS M3 planning from `milestone-3-planning` at `0ac630b`" (I-8), sections 2–5.
+- **Unchanged:**
+  - the decision (J-ax-1), the identity transformation of M3, atmospheric co-rotation as air motion, the constants, the thresholds and the scope;
+  - the signed first-order formulas Δi ≈ −δ cos(Ω − φ) and ΔΩ ≈ +δ cot i sin(Ω − φ), the passive convention R = Rot(e, −δ), the interval (−π, π] and the finite-only `wrap()` contract of amendment 4;
+  - the oracle, the grid, the noise bound, the significance factor (10³) and the order threshold (1.5).
+- **History is preserved.** Earlier amendments are kept, with a pointer under amendment 2's "Verification script".
+- **Nature of the finding.** It was a verification-harness defect, not a mathematical one. The committed formulas were always finite, and their PASS was genuine.
+
+### The defect (as committed up to `cf9f3d6`)
+- Every comparison with NaN is false. A NaN first-order value therefore failed the significance gates (`err >= tol`, `|lin| >= tol`) and the series was skipped, with no failure recorded.
+- ±∞ passes every `>= tol` gate. The order estimate then became log2(∞/∞) = NaN, and `NaN < 1.5` is false, so no order failure was recorded; a sign check could even be counted as valid.
+- Nothing required each formula to reach a minimum number of samples. Review 08's counterexample (Δi returned as NaN) exited 0 with verdict PASS, 0 Δi order samples and 504 sign checks.
+
+### The correction
+- **Finite validation before any comparison.** `nonfinite_reason` checks the oracle value and the first-order value of each component at every step with `math.isfinite`.
+  - A non-finite value is recorded as a `nonfinite <component>` failure, so the process exits 1.
+  - That component's series is then discarded for both the order and sign checks, so it can never count towards coverage.
+  - Nothing is filtered silently, and no fallback value is substituted.
+  - With both values finite, |oracle| ≤ π, so their difference cannot overflow; no third check is needed.
+  - A non-numeric value makes `math.isfinite` raise TypeError. The process ends nonzero; it is never reported as PASS.
+- **Per-formula coverage minima, each enforced separately.** Only samples that are finite and pass the existing significance gate count.
+
+| Formula | Check | Minimum | Observed | Derivation |
+|---|---|---|---|---|
+| Δi | order | 506 | 506 | committed count, unchanged since `bcb7f9b` (see below) |
+| ΔΩ | order | 532 | 532 | committed count, unchanged since `bcb7f9b` (see below) |
+| Δi | sign | 560 | 560 | 600 series minus the 40 where cos(Ω − φ) = 0 exactly |
+| ΔΩ | sign | 504 | 504 | 600 series minus the 40 where sin(Ω − φ) = 0 and the 56 more at i = 90° (cot i = 0) |
+
+- **Sign minima are derived from the grid.**
+  - The grid has 10 inclinations × 6 nodes × 5 tilt azimuths × 2 signs = 600 series per formula.
+  - A sign check is meaningful only where the first-order term is nonzero. Node and azimuth are integer degrees, so the zero set is exact: Ω − φ ∈ {90°, 270°} for Δi (the pairs (90°, 0°) and (300°, 210°)); Ω − φ ∈ {0°, 180°} (the pairs (0°, 0°) and (300°, 300°)) or i = 90° for ΔΩ.
+  - `sign_check_minimum` computes these counts from the grid. At the committed formulas, every applicable series sits at least 4.6 × 10³ times above the gate, and every excluded one at most 3 × 10⁻⁹ times it.
+- **Order minima are the existing coverage.**
+  - Which series pass the order gate depends on the size of the O(δ²) error relative to 10³ × noise, so the count has no closed form.
+  - It is nevertheless fixed. Rounding moves an error by at most the noise bound, which is 10⁻³ of the gate. The nearest samples sit at 1.0123 and 0.9940 of the gate for Δi, and at 1.55 and 0.495 for ΔΩ. Both margins exceed 10⁻³.
+  - The script reports these nearest ratios under `gate_ratio_nearest`. The minima therefore keep every existing order sample; none is reduced.
+- **New output keys:** `sign_checks_delta_i`, `sign_checks_delta_node`, `minimum_valid_samples`, `gate_ratio_nearest` and `formula_defect_mutants`.
+
+### Bounded audit of the same failure class (I-8 section 4)
+| Location | Finding | Action |
+|---|---|---|
+| First-order checks | Non-finite values skipped silently; no per-formula minimum; ±∞ could increment the sign counter | Corrected (above) |
+| E1 rotation convention | `max()` drops a NaN that is not its first argument, so a NaN matrix entry would pass | Corrected: non-finite deviation or matrix entry is a failure |
+| E2 identity and endpoints | `dev = max(NaN, …)` is NaN and `NaN > 1` is false; a NaN `hypot` passes `rho > 32 eps` | Corrected: non-finite values are failures; the endpoint check now uses the `tilt_fn` parameter (default `tilt_matrix`, results identical) so a mutant can reach it |
+| E3 closed form, E4 bound | `max()` drops NaN | Corrected; E3 and E4 now call the `oracle` parameter (default `finite`, results identical) so mutants can reach them |
+| E5b sweep | A NaN node would reach `circ`, where the wrap guard raises | Corrected: an explicit failure is recorded first |
+| E6 review-04 example | `abs(NaN − 90.2598…) > 5e-11` is false | Corrected: non-finite values are failures |
+| Empty sample sets | Only the first-order checks and the E5b sweep filter samples at run time; E5b already has a guard (≥ 359 defined samples per sign), and E2 skips a case only after recording a failure | No other change |
+| Swallowed exceptions | `wrap_nonfinite_tests` catches every exception but records each as a failure; nothing else catches | No change |
+| Missing assertions | E6 reports its Δi but asserts only the node. This is by design: E6 reproduces the review-04 node example, and Δi is checked over the whole grid by the first-order checks | No change (documented) |
+
+No separate mathematical issue, contract change or out-of-scope work was found.
+
+### Mutants
+**First-order defect mutants** (new section `formula_defect_mutants`). Each must be rejected by every designated check, with at least the given number of failures.
+
+| Mutant | Designated checks (minimum failures) | Observed |
+|---|---|---|
+| Δi = NaN, +∞, −∞ (three mutants) | nonfinite Δi (600), coverage Δi (2) | 600, 2 each |
+| ΔΩ = NaN, +∞, −∞ (three mutants) | nonfinite ΔΩ (600), coverage ΔΩ (2) | 600, 2 each |
+| Δi = 0 | coverage Δi (1) | 1 (plus 560 order failures) |
+| ΔΩ = 0 | coverage ΔΩ (1) | 1 (plus 504 order failures) |
+| Oracle Δi = NaN | nonfinite Δi (600), coverage Δi (2) | 600, 2 |
+| Oracle ΔΩ = NaN | nonfinite ΔΩ (600), coverage ΔΩ (2) | 600, 2 |
+
+- Requiring 600 non-finite failures, one per series, means a check weakened to catch only some values or some series is detected.
+- Requiring 2 coverage failures means both the order and the sign minimum of that formula are load-bearing.
+- The zero mutants are finite but skip every sign check. They show that skipped samples cannot satisfy coverage.
+
+**Audit mutants** (in `exact_and_wrap_mutants`):
+
+| Mutant | Designated tests | Failures |
+|---|---|---|
+| NaN rotation-matrix entry | E1, E2 (endpoints) | 20, 48 |
+| Oracle Δi = NaN | E2, E3, E4, E6 | 312, 144, 6660, 1 |
+| Oracle ΔΩ = NaN | E2, E3, E5b, E6 | 312, 144, 722, 1 |
+
+**Existing mutants.** All are still rejected, with unchanged failure counts, with one exception. `cos_sin_swapped` has 1578 failing checks instead of 1576, because it also skips 4 Δi and 36 ΔΩ sign checks and so fails both sign minima.
+
+### File-level mutation through the entrypoint
+`dr0028_node_signed_mutation_check.py` (output `dr0028_node_signed_mutation_check_results.json`) applies each edit to a copy of the script. It runs the copy as a separate `python -I` process and requires a nonzero exit. The unmutated script must exit 0 with verdict PASS. Verdict PASS: 33 of 33 detected, and a rerun is byte-identical.
+
+| Group | Edits | Detected |
+|---|---|---|
+| Injection | Δi formula returns NaN, +∞, −∞; ΔΩ formula returns NaN, +∞, −∞ | 6/6 (FAIL verdict) |
+| Coverage | Δi coverage disabled; ΔΩ coverage disabled; sign minimum removed; order minimum removed; comparison disabled; sign counter moved outside its gate | 6/6 (FAIL verdict) |
+| Validation | finite validation removed; formula check weakened to `isnan`; oracle check removed; invalid sample not discarded | 4/4 (FAIL verdict) |
+| Audit | finite check removed from E1, E2, E2 endpoints, E3, E4, E5b, E6 | 7/7: 5 by FAIL verdict; E2 and E5b by the ValueError of the amendment-4 wrap guard |
+| Earlier findings | Δi sign reversed; ΔΩ sign reversed; unrestricted line-of-nodes claim; E5a, E5b, E5c removed; previous wrap; wrap guard removed; guard test weakened to type-only; non-finite wrap tests disabled | 10/10 (FAIL verdict) |
+
+- **E2 and E5b detection.** With those checks removed, the oracle-ΔΩ-NaN mutant passes a NaN to `circ`, and the wrap guard ends the process with ValueError before a verdict is written. The harness records this as "exception: ValueError", not as a FAIL verdict.
+
+### Results
+- **Verdict PASS, exit 0.** Two consecutive runs produce byte-identical output.
+- **Finite results unchanged.** Comparing the output with `0ac630b`, every pre-existing value is identical (grid, tolerances, exact properties, wrapping, first-order statistics, every existing mutant count), except `cos_sin_swapped` as explained above. Only new keys were added, including zero entries for E1, E3, E4 and E6 in the failure counts of each existing exact mutant.
