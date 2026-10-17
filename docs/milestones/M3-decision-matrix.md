@@ -158,6 +158,14 @@ Review-08 finding M3P8-F1: **RESOLVED** (reviewer's disposition).
 | M3P9-F2 | MINOR | ACCEPTED; was not applied (I-8 §7 stop) → **corrected** | I-9 §4 | DR-0028 "Resolution amendment 6" (per formula: doubled coefficient designated to the order check, reversed sign to the sign check, 560/504 failures each; order and sign assertion removal for Δi, ΔΩ and both detected); `docs/reviews/M3-planning-review-09.md`, "Resolution of findings". Original record: disabling the order or sign assertion still passed |
 | M3P9-F3 | NOTE | ACCEPTED as a NOTE → **E3/E4 mutation coverage added** | I-9 §5 | DR-0028 "Resolution amendment 6" (1 % oracle inclination error designated to E3 and E4; both assertion removals detected; step-size selection documented as intentional, unchanged). The assertion-removal sweep leaves 18 of 35 assertions not individually load-bearing (outside I-9 scope): **open for the Tech Lead** |
 
+## Review findings (M3 Planning Review 10)
+Review-09 findings M3P9-F1 and M3P9-F2: **RESOLVED**; M3P9-F3: **RESOLVED (E3/E4 coverage)** (reviewer's dispositions).
+
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P10-F1 | MINOR | ACCEPTED; **not applied** (I-9 §9 stop) | Pending | `docs/reviews/M3-planning-review-10.md`. Verification defect: the mutation check accepts a built-in mutant that raised an unrelated exception (e.g. an import failure inside the mutant) as evidence that an assertion was removed. Not a mathematical error, and no false passing verdict of the verification script |
+| M3P10-F2 | NOTE | ACCEPTED as a NOTE; no change proposed | Pending (whether to protect the 18 surviving assertions) | `docs/reviews/M3-planning-review-10.md`. Optional improvement: 18 of 35 assertions are not individually load-bearing under mutation; no correctness defect found |
+
 ## Gates
 | Gate | State |
 |---|---|
