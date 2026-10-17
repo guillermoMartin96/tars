@@ -1,5 +1,5 @@
-"""DR-0028 amendments 5 and 6 / reviews M3P8-F1, M3P9-F1..F3: file-level mutation check of
-dr0028_node_signed_verification.py through its real entrypoint.
+"""DR-0028 amendments 5-7 / reviews M3P8-F1, M3P9-F1..F3, M3P10-F1: file-level mutation check
+of dr0028_node_signed_verification.py through its real entrypoint.
 
 Planning research artifact (not production code, not a Proof gate).
 
@@ -10,23 +10,33 @@ Each mutation replaces one exact text fragment of the verification script (the f
 occur exactly once), writes the mutated copy to a temporary directory and runs it as a separate
 process (`python -I <copy> <out.json>`), exactly as the script is normally run.
 
-A mutation is detected only for its intended reason (M3P9 / I-9 section 6). Each mutation
-declares its expected rejection as predicates on the script's output, and the run must show
-it: the process exits 1 with nothing on stderr, writes a FAIL verdict, and every predicate
-holds. Examples: "the built-in mutant M3P9-F2_delta_i_coefficient_doubled is no longer rejected
-by its designated check" (an assertion was removed), or "the formulas under test report exactly
-600 'nonfinite delta_i formula=nan' failures" (a defect was injected). Any other outcome is NOT
-detected and fails this check: exit 0; a FAIL verdict for another reason; any exception that
-ends the process (a syntax error, import failure, missing file or any other crash); or a
-fragment that does not occur exactly once. (A built-in mutant that raises inside the script is
-recorded there as not rejected, with its exception; amendment 6.) The unmutated script must
-exit 0 with verdict PASS, and no expectation may already be met by its output (all of its
-predicates holding), so no expectation is vacuous.
+Each mutation declares its expected rejection as predicates on the script's output, and every
+run is classified into exactly one category (M3P10-F1; I-10 section 2):
+- "invalid mutation setup": the fragment does not occur exactly once (the copy is not run), or a
+  built-in mutant named by the expectation never exercised its defect;
+- "process failure": the process wrote no output (a syntax error, import failure, missing file
+  or any other crash), or its exit status and verdict are inconsistent;
+- "normal execution": exit 0 with verdict PASS (the mutation survived);
+- "unexpected exception": a built-in mutant raised an exception that the mutation's expectation
+  does not allow, by mutant, exception type, message and call stack;
+- "rejected for another reason": exit 1 with verdict FAIL, but the expected rejection is not
+  shown;
+- "expected rejection": exit 1 with verdict FAIL, no unexpected exception, and every predicate
+  holds. Only this category is a detection.
 
-Negative controls (I-9 section 6) show that the classification fails closed: a syntax error,
-an import failure, a missing script, a neutral edit, and a real defect paired with the wrong
-expected reason must each be classified as NOT detected, or this check fails.
-Exit status 0 only if the baseline passes and every mutation is detected. Standard library only.
+A built-in mutant counts as "not rejected" (the evidence that an assertion was removed) only if
+it completed without an exception, its designated checks stayed silent, and its injected defect
+was exercised (some call differed from the reference implementation). An exception is accepted
+only where a "raised" predicate allows exactly that mutant, type, message prefix and stack.
+These allowances are limited to the E2 and E5b wrap-guard cases and to the order-estimate
+math domain error of the four mutations that let an oracle +/-inf through the finite validation.
+
+The unmutated script must exit 0 with verdict PASS, and no expectation may already be met by its
+output. Controls (I-10 section 3) each declare the category they must receive: process-level
+failures, a neutral edit, invalid setup, a wrong reason, exceptions raised or suppressed inside
+built-in mutants, an allowed exception at the wrong location or of the wrong type, and valid
+mutations. Exit status 0 only if the baseline passes, every mutation is detected and every
+control receives its declared category. Standard library only.
 """
 
 import json
@@ -75,10 +85,30 @@ E4_ASSERT = (
 )
 
 
+# The wrap guard (amendment 4), with the line that follows it, so the fragment is unique.
+WRAP_GUARD = (
+    "    if not math.isfinite(a):\n"
+    '        raise ValueError(f"{NONFINITE_MESSAGE}: {a!r}")\n'
+    "    r = math.fmod(a, TAU)\n"
+)
+WRAP_GUARD_RAISE = 'wrap: raise ValueError(f"{NONFINITE_MESSAGE}: {a!r}")'
+E2_IDENTITY_LINE = "dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol"
+E5B_JUMP_LINE = "if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i):"
+ORDER_ESTIMATE_LINE = "check_formulas: p = math.log2(e[-2] / e[-1])"
+
+
 # ------------------------------------------------------------------- expected rejections
 def not_rejected(section, mutant):
-    """Predicate: a built-in mutant is no longer rejected (the assertion guarding it is gone)."""
+    """Predicate: a built-in mutant completed without an exception, exercised its defect, and
+    was not rejected by its designated checks (the assertion guarding it is gone)."""
     return ("not_rejected", section, mutant)
+
+
+def raised(section, mutant, exc_type, message, stack):
+    """Predicate and allowance: a built-in mutant raised exactly this exception type, with a
+    message starting with `message`, through exactly this call stack (function: source line,
+    frames of the verification script), and was therefore not rejected."""
+    return ("raised", section, mutant, exc_type, message, tuple(stack))
 
 
 def under_test(prefix, count=None):
@@ -101,10 +131,44 @@ FLAGS = {
 }
 
 
+def unexercised(section, mutant):
+    """Predicate: a built-in mutant completed without an exception and was not rejected because
+    nothing exercised its defect (it is listed in mutants_with_defect_not_exercised); used only
+    together with report_missing, which shows that the exercising test itself was disabled."""
+    return ("unexercised", section, mutant)
+
+
+def report_missing(section, key):
+    """Predicate: the script's report `section` has no entry `key` (a test was not run)."""
+    return ("report_missing", section, key)
+
+
+def matches(predicate, exception):
+    _, _, _, exc_type, message, stack = predicate
+    return (
+        exception["type"] == exc_type
+        and exception["message"].startswith(message)
+        and tuple(exception["stack"]) == stack
+    )
+
+
 def holds(predicate, out):
-    kind, a, b = predicate
+    kind, a, b = predicate[:3]
     if kind == "not_rejected":
-        return out[a][b][FLAGS[a]] is False
+        entry = out[a][b]
+        return entry[FLAGS[a]] is False and "exception" not in entry and entry["defect_exercised"]
+    if kind == "raised":
+        entry = out[a][b]
+        return entry[FLAGS[a]] is False and matches(predicate, entry.get("exception", {}))
+    if kind == "unexercised":
+        entry = out[a][b]
+        return (
+            entry[FLAGS[a]] is False
+            and "exception" not in entry
+            and b in out["mutants_with_defect_not_exercised"]
+        )
+    if kind == "report_missing":
+        return b not in out[a]
     if kind == "under_test":
         failures = out["formulas_under_test"]["failures"]
     else:
@@ -114,9 +178,16 @@ def holds(predicate, out):
 
 
 def describe(predicate):
-    kind, a, b = predicate
+    kind, a, b = predicate[:3]
     if kind == "not_rejected":
-        return f"built-in mutant {b} not rejected ({a})"
+        return f"built-in mutant {b} completed, defect exercised, not rejected ({a})"
+    if kind == "unexercised":
+        return f"built-in mutant {b} completed, not rejected, defect not exercised ({a})"
+    if kind == "report_missing":
+        return f"report {a} has no entry {b!r} (test not run)"
+    if kind == "raised":
+        _, _, _, exc_type, message, stack = predicate
+        return f"built-in mutant {b} raised {exc_type}({message!r}...) at {' > '.join(stack)} ({a})"
     where = "formulas under test" if kind == "under_test" else "exact properties"
     many = "at least 1" if b is None else f"exactly {b}"
     return f"{where}: {many} failure(s) starting {a!r}"
@@ -207,6 +278,40 @@ def injection_matrix():
     return rows
 
 
+def wrap_guard_at(site):
+    """Allowance (M3P10-F1): with an E2 or E5b finite check removed, the oracle-NaN mutant
+    reaches circ() at that site, and the amendment-4 wrap guard raises ValueError there."""
+    return raised(
+        "exact_and_wrap_mutants",
+        "M3P8-F1_audit_oracle_delta_node_nan",
+        "ValueError",
+        "wrap: non-finite angle: ",
+        [
+            "run_exact: failures, report = exact_properties(**kwargs)",
+            site,
+            "circ: return abs(wrap_fn(a - b))",
+            WRAP_GUARD_RAISE,
+        ],
+    )
+
+
+# Allowance (M3P10-F1): when the finite validation is weakened (isnan), bypassed or does not
+# discard an invalid sample, a single-sample oracle +/-inf reaches the order estimate as
+# e[-1] = inf, and log2(finite / inf) = log2(0) raises "math domain error" there, for exactly the
+# four single-sample mutants.
+ORDER_ESTIMATE_RAISES = [
+    raised(
+        "formula_defect_mutants",
+        f"M3P9-F1_oracle_{name}_{label}_single_sample",
+        "ValueError",
+        "math domain error",
+        [ORDER_ESTIMATE_LINE],
+    )
+    for name in ("delta_i", "delta_node")
+    for label in ("plus_inf", "minus_inf")
+]
+
+
 def not_designated(mutant):
     return [not_rejected("formula_defect_mutants", mutant)]
 
@@ -293,7 +398,9 @@ MUTATIONS = [
         "finite validation of oracle and formula values",
         "reason = nonfinite_reason(num[name], lin[name])",
         "reason = None",
-        not_designated("M3P8-F1_delta_i_nan") + not_designated("M3P8-F1_audit_oracle_delta_i_nan"),
+        not_designated("M3P8-F1_delta_i_nan")
+        + not_designated("M3P8-F1_audit_oracle_delta_i_nan")
+        + ORDER_ESTIMATE_RAISES,
     ),
     (
         "formula_check_weakened_to_isnan",
@@ -310,7 +417,8 @@ MUTATIONS = [
         ORACLE_CHECK,
         "if num is None:",
         not_designated("M3P8-F1_audit_oracle_delta_i_nan")
-        + not_designated("M3P9-F1_oracle_delta_i_plus_inf"),
+        + not_designated("M3P9-F1_oracle_delta_i_plus_inf")
+        + ORDER_ESTIMATE_RAISES,
     ),
     (
         "invalid_sample_not_discarded",
@@ -320,7 +428,7 @@ MUTATIONS = [
         "                                continue\n"
         "                            errs[name].append",
         "                            errs[name].append",
-        not_designated("M3P8-F1_delta_i_plus_inf"),
+        not_designated("M3P8-F1_delta_i_plus_inf") + ORDER_ESTIMATE_RAISES,
     ),
     # M3P8-F1 audit: finite checks of the exact properties removed.
     (
@@ -337,7 +445,7 @@ MUTATIONS = [
         "E2 finite check",
         "if not all(math.isfinite(x) for x in (d_i, d_node, exp_i, exp_node)):",
         "if False:",
-        not_designated_exact("M3P8-F1_audit_oracle_delta_node_nan"),
+        [wrap_guard_at("exact_properties: " + E2_IDENTITY_LINE)],
     ),
     (
         "E2_endpoint_finite_check_removed",
@@ -369,7 +477,7 @@ MUTATIONS = [
         "E5b finite check",
         "if not math.isfinite(d_node):",
         "if False:",
-        not_designated_exact("M3P8-F1_audit_oracle_delta_node_nan"),
+        [wrap_guard_at("exact_properties: " + E5B_JUMP_LINE)],
     ),
     (
         "E6_finite_check_removed",
@@ -402,11 +510,11 @@ MUTATIONS = [
         ORACLE_CHECK,
         "if num is None or math.isnan(num):",
         [
-            not_rejected("formula_defect_mutants", f"M3P9-F1_oracle_{name}_{label}{scope}")
+            not_rejected("formula_defect_mutants", f"M3P9-F1_oracle_{name}_{label}")
             for name in COMPONENT_NAMES
             for label in ("plus_inf", "minus_inf")
-            for scope in ("", "_single_sample")
-        ],
+        ]
+        + ORDER_ESTIMATE_RAISES,
     ),
     (
         "oracle_check_weakened_to_isinf",
@@ -563,8 +671,8 @@ MUTATIONS = [
         "M3P7-F1_guard_removed",
         "earlier",
         "wrap non-finite guard",
-        '    if not math.isfinite(a):\n        raise ValueError(f"{NONFINITE_MESSAGE}: {a!r}")\n',
-        "",
+        WRAP_GUARD,
+        "    r = math.fmod(a, TAU)\n",
         [exact("wrap-nonfinite: ")],
     ),
     (
@@ -581,45 +689,152 @@ MUTATIONS = [
         "wrap non-finite tests",
         "for name, a in cases.items():",
         "for name, a in {}.items():",
-        not_designated_exact("M3P7-F1_nonfinite_guard_removed"),
+        [unexercised("exact_and_wrap_mutants", "M3P7-F1_nonfinite_guard_removed")]
+        + [report_missing("wrap_nonfinite", k) for k in ("nan", "plus_inf", "minus_inf")],
     ),
     *injection_matrix(),
 ]
 
 
-# Negative controls: (name, failure kind, old fragment, new fragment or None, expected rejection).
-# new = None runs a script path that does not exist.
+SCALED = "        out[component] *= factor\n"
+E2_FINITE = "if not all(math.isfinite(x) for x in (d_i, d_node, exp_i, exp_node)):"
+E5B_FINITE = "if not math.isfinite(d_node):"
+
+EXPECTED = "expected rejection"
+CATEGORIES = (
+    "invalid mutation setup",
+    "process failure",
+    "normal execution",
+    "unexpected exception",
+    "rejected for another reason",
+    EXPECTED,
+)
+
+# Controls (I-9 section 6, I-10 section 3): (name, what it shows, edits, expectation, category).
+# edits: a list of (old fragment, new fragment), or None to run a script path that does not
+# exist. expectation: the name of the mutation whose declared expected rejection is claimed.
 CONTROLS = [
-    ("syntax_error", "syntax error", FORMULA, "return (", [under_test("nonfinite delta_i ")]),
+    (
+        "syntax_error",
+        "a syntax error is a process failure, not a detection",
+        [(FORMULA, "return (")],
+        "delta_i_formula_returns_nan",
+        "process failure",
+    ),
     (
         "import_failure",
-        "import failure",
-        "import json\n",
-        "import json\nimport m3p9_control_missing_module\n",
-        [under_test("nonfinite delta_i ")],
+        "an import failure that ends the process is not a detection",
+        [("import json\n", "import json\nimport m3p9_control_missing_module\n")],
+        "delta_i_formula_returns_nan",
+        "process failure",
     ),
-    ("missing_script", "missing file", FORMULA, None, [under_test("nonfinite delta_i ")]),
+    (
+        "missing_script",
+        "a missing script is not a detection",
+        None,
+        "delta_i_formula_returns_nan",
+        "process failure",
+    ),
     (
         "neutral_edit",
-        "no defect (exit 0)",
-        "import json\n",
-        "import json  # neutral edit\n",
-        [under_test("nonfinite delta_i ")],
+        "a run that completes with verdict PASS is normal execution",
+        [("import json\n", "import json  # neutral edit\n")],
+        "delta_i_formula_returns_nan",
+        "normal execution",
+    ),
+    (
+        "fragment_absent",
+        "a mutation whose fragment does not occur is invalid setup and is not run",
+        [("m3p10 control: this fragment does not occur", "x")],
+        "delta_i_formula_returns_nan",
+        "invalid mutation setup",
     ),
     (
         "wrong_reason",
-        "FAIL verdict for another reason",
-        FORMULA,
-        FORMULA.replace("-delta", "delta", 1),
-        [under_test("sign delta_node ")],
+        "a mutant rejected for an unrelated reason is not detected",
+        [(FORMULA, FORMULA.replace("-delta", "delta", 1))],
+        "M3P5_delta_node_sign_reversed",
+        "rejected for another reason",
+    ),
+    (
+        "import_failure_inside_mutant",
+        "an import failure inside a built-in mutant is not detection (M3P10-F1)",
+        [
+            (
+                SCALED,
+                "        if factor == 2.0:\n"
+                "            import m3p10_control_missing_module  # noqa: F401\n" + SCALED,
+            )
+        ],
+        "order_assertion_disabled",
+        "unexpected exception",
+    ),
+    (
+        "runtime_exception_inside_mutant",
+        "an unrelated runtime exception inside a built-in mutant is not detection",
+        [(SCALED, "        if factor == -1.0:\n            _ = factor / 0.0\n" + SCALED)],
+        "sign_assertion_disabled",
+        "unexpected exception",
+    ),
+    (
+        "exception_suppressed_inside_mutant",
+        "an exception caught and suppressed by a mutant (which then returns the reference "
+        "result) is not detection: its defect is no longer exercised",
+        [
+            (
+                SCALED,
+                "        if factor == 2.0:\n"
+                "            try:\n"
+                "                import m3p10_control_missing_module  # noqa: F401\n"
+                "            except ImportError:\n"
+                "                return formulas_amendment2(inc, node, phi, delta)\n" + SCALED,
+            )
+        ],
+        "order_assertion_disabled",
+        "invalid mutation setup",
+    ),
+    (
+        "allowed_exception_wrong_location",
+        "the allowed wrap-guard exception raised at E5b, claimed for the E2 removal, is not "
+        "accepted",
+        [(E5B_FINITE, "if False:")],
+        "E2_finite_check_removed",
+        "unexpected exception",
+    ),
+    (
+        "allowed_exception_wrong_type",
+        "the allowed exception at the right location but of another type (TypeError) is not "
+        "accepted",
+        [
+            (E2_FINITE, "if False:"),
+            (WRAP_GUARD, WRAP_GUARD.replace("raise ValueError", "raise TypeError")),
+        ],
+        "E2_finite_check_removed",
+        "unexpected exception",
+    ),
+    (
+        "valid_mutant_rejected_by_targeted_check",
+        "an injected defect rejected by its targeted check is detected",
+        "delta_i_coefficient_doubled",
+        "delta_i_coefficient_doubled",
+        EXPECTED,
+    ),
+    (
+        "valid_mutant_completes_without_rejection",
+        "with the Delta i order assertion removed, the designated built-in mutant completes, "
+        "exercises its defect and is not rejected; that is detected as the removal",
+        "delta_i_order_assertion_disabled",
+        "delta_i_order_assertion_disabled",
+        EXPECTED,
     ),
 ]
+MUTATION_INDEX = {m[0]: m for m in MUTATIONS}
 
 
 def run(source, workdir, label):
     """Run one copy of the script; return (exit code, output or None, last stderr line).
 
-    source = None runs a path that does not exist (negative control)."""
+    source = None runs a path that does not exist (control)."""
     copy = workdir / f"{label}.py"
     out = workdir / f"{label}.json"
     if source is not None:
@@ -639,22 +854,84 @@ def run(source, workdir, label):
     return proc.returncode, output, last
 
 
+def recorded_exceptions(output):
+    """(section, mutant, exception) for every built-in mutant that raised."""
+    return [
+        (section, name, entry["exception"])
+        for section in FLAGS
+        for name, entry in output[section].items()
+        if "exception" in entry
+    ]
+
+
 def classify(code, output, last, expected):
-    """Return (observed outcome, detected for the intended reason)."""
+    """Return (category, observed outcome). Only EXPECTED is a detection."""
     if output is None:
-        return f"exit {code}, no output; process failure: {last or 'no stderr'}", False
+        return "process failure", f"exit {code}, no output: {last or 'no stderr'}"
     observed = f"exit {code}, {output['verdict']} verdict"
+    if code == 0 and output["verdict"] == "PASS":
+        return "normal execution", observed
     if code != 1 or output["verdict"] != "FAIL":
-        return observed, False
+        return "process failure", observed + " (inconsistent exit status and verdict)"
+    allowed = {(p[1], p[2]): p for p in expected if p[0] == "raised"}
+    unexpected = [
+        f"{name} raised {exc['type']}: {exc['message']} at {' > '.join(exc['stack'])}"
+        for section, name, exc in recorded_exceptions(output)
+        if not ((section, name) in allowed and matches(allowed[section, name], exc))
+    ]
+    if unexpected:
+        return "unexpected exception", observed + "; " + "; ".join(unexpected)
+    unexercised = [
+        p[2]
+        for p in expected
+        if p[0] == "not_rejected" and not output[p[1]][p[2]]["defect_exercised"]
+    ]
+    if unexercised:
+        return "invalid mutation setup", observed + "; defect not exercised: " + ", ".join(
+            unexercised
+        )
     failed = [describe(p) for p in expected if not holds(p, output)]
     if failed:
-        return observed + "; expected rejection not shown: " + "; ".join(failed), False
-    raised = [
-        f"{b} raised {out}"
-        for kind, a, b in expected
-        if kind == "not_rejected" and (out := output[a][b].get("exception"))
-    ]
-    return observed + "; expected rejection shown" + "".join(f"; {r}" for r in raised), True
+        return "rejected for another reason", observed + "; not shown: " + "; ".join(failed)
+    allowed_seen = [f"{p[2]} raised {p[3]} as allowed" for p in allowed.values()]
+    return EXPECTED, observed + "; expected rejection shown" + "".join(
+        f"; {a}" for a in allowed_seen
+    )
+
+
+def apply_edits(original, edits):
+    """The mutated source, or None with the reason if some fragment is not unique."""
+    source = original
+    for old, new in edits:
+        count = source.count(old)
+        if count != 1:
+            return None, f"not run: fragment occurs {count} times"
+        source = source.replace(old, new)
+    return source, None
+
+
+def run_control(control, original, workdir):
+    """Run one control; return its report entry."""
+    name, shows, edits, claimed, category = control
+    expected = MUTATION_INDEX[claimed][5]
+    if isinstance(edits, str):  # a mutation of MUTATIONS, by name
+        edits = [MUTATION_INDEX[edits][3:5]]
+    if edits is None:
+        actual, observed = classify(*run(None, workdir, f"control_{name}"), expected)
+    else:
+        source, problem = apply_edits(original, edits)
+        if source is None:
+            actual, observed = "invalid mutation setup", problem
+        else:
+            actual, observed = classify(*run(source, workdir, f"control_{name}"), expected)
+    return {
+        "shows": shows,
+        "claimed_expectation": claimed,
+        "expected_classification": category,
+        "actual_classification": actual,
+        "observed_outcome": observed,
+        "result": "PASS" if actual == category else "FAIL",
+    }
 
 
 def main(out_path):
@@ -670,6 +947,7 @@ def main(out_path):
         }
         vacuous = []
         if output is not None:
+            baseline_ok = baseline_ok and not recorded_exceptions(output)
             for name, _, _, _, _, expected in MUTATIONS:
                 if all(holds(p, output) for p in expected):
                     vacuous.append(name)
@@ -681,30 +959,16 @@ def main(out_path):
                 "target_property": target,
                 "expected_rejection": [describe(p) for p in expected],
             }
-            occurrences = original.count(old)
-            if name in results or occurrences != 1:
-                entry["observed_outcome"] = f"not run: fragment occurs {occurrences} times"
-                entry["result"] = "FAIL"
-                results[name + ("#duplicate" if name in results else "")] = entry
-                continue
-            code, output, last = run(original.replace(old, new), workdir, name)
-            entry["observed_outcome"], detected = classify(code, output, last, expected)
-            entry["result"] = "PASS" if detected else "FAIL"
-            results[name] = entry
-        controls = {}
-        for name, kind, old, new, expected in CONTROLS:
-            source = None if new is None else original.replace(old, new)
-            if new is not None and original.count(old) != 1:
-                observed, detected = "not run: fragment not unique", True  # fails closed
+            source, problem = apply_edits(original, [(old, new)])
+            if name in results or source is None:
+                category, observed = "invalid mutation setup", problem or "duplicate name"
             else:
-                code, output, last = run(source, workdir, f"control_{name}")
-                observed, detected = classify(code, output, last, expected)
-            controls[name] = {
-                "failure_kind": kind,
-                "observed_outcome": observed,
-                "classified_as_detected": detected,
-                "result": "FAIL" if detected else "PASS",
-            }
+                category, observed = classify(*run(source, workdir, name), expected)
+            entry["classification"] = category
+            entry["observed_outcome"] = observed
+            entry["result"] = "PASS" if category == EXPECTED else "FAIL"
+            results[name + ("#duplicate" if name in results else "")] = entry
+        controls = {c[0]: run_control(c, original, workdir) for c in CONTROLS}
     groups = {}
     for entry in results.values():
         g = groups.setdefault(entry["group"], {"mutations": 0, "detected": 0})
@@ -720,7 +984,7 @@ def main(out_path):
         "mutations": len(MUTATIONS),
         "detected": detected,
         "groups": groups,
-        "negative_controls": controls,
+        "controls": controls,
         "results": results,
     }
     with open(out_path, "w", encoding="ascii") as fh:

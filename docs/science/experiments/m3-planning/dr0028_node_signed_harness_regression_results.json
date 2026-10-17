@@ -1,0 +1,216 @@
+{
+ "verdict": "PASS",
+ "original": "896d52d",
+ "regression_controls_fail_against_original": true,
+ "all_controls_pass_against_corrected": true,
+ "results": {
+  "syntax_error": {
+   "shows": "a syntax error is a process failure, not a detection",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "process failure",
+   "original_harness": {
+    "classified_as_detected": false,
+    "observed_outcome": "exit 1, no output; process failure: SyntaxError: '(' was never closed",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "process failure",
+    "observed_outcome": "exit 1, no output: SyntaxError: '(' was never closed",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "import_failure": {
+   "shows": "an import failure that ends the process is not a detection",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "process failure",
+   "original_harness": {
+    "classified_as_detected": false,
+    "observed_outcome": "exit 1, no output; process failure: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "process failure",
+    "observed_outcome": "exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "missing_script": {
+   "shows": "a missing script is not a detection",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "process failure",
+   "original_harness": {
+    "classified_as_detected": false,
+    "observed_outcome": "exit 2, no output; process failure: <python>: can't open file '<tmp>/old_missing_script.py': [Errno 2] No such file or directory",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "process failure",
+    "observed_outcome": "exit 2, no output: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "neutral_edit": {
+   "shows": "a run that completes with verdict PASS is normal execution",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "normal execution",
+   "original_harness": {
+    "classified_as_detected": false,
+    "observed_outcome": "exit 0, PASS verdict",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "normal execution",
+    "observed_outcome": "exit 0, PASS verdict",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "fragment_absent": {
+   "shows": "a mutation whose fragment does not occur is invalid setup and is not run",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "invalid mutation setup",
+   "original_harness": {
+    "classified_as_detected": false,
+    "observed_outcome": "not run: fragment occurs 0 times",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "observed_outcome": "not run: fragment occurs 0 times",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "wrong_reason": {
+   "shows": "a mutant rejected for an unrelated reason is not detected",
+   "claimed_expectation": "M3P5_delta_node_sign_reversed",
+   "expected_classification": "rejected for another reason",
+   "original_harness": {
+    "classified_as_detected": false,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection not shown: formulas under test: exactly 504 failure(s) starting 'sign delta_node '",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "rejected for another reason",
+    "observed_outcome": "exit 1, FAIL verdict; not shown: formulas under test: exactly 504 failure(s) starting 'sign delta_node '",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "import_failure_inside_mutant": {
+   "shows": "an import failure inside a built-in mutant is not detection (M3P10-F1)",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "unexpected exception",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module'; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module'",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "unexpected exception",
+    "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
+    "result": "PASS"
+   },
+   "regression_control": true
+  },
+  "runtime_exception_inside_mutant": {
+   "shows": "an unrelated runtime exception inside a built-in mutant is not detection",
+   "claimed_expectation": "sign_assertion_disabled",
+   "expected_classification": "unexpected exception",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "unexpected exception",
+    "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
+    "result": "PASS"
+   },
+   "regression_control": true
+  },
+  "exception_suppressed_inside_mutant": {
+   "shows": "an exception caught and suppressed by a mutant (which then returns the reference result) is not detection: its defect is no longer exercised",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "observed_outcome": "exit 1, FAIL verdict; defect not exercised: M3P9-F2_delta_i_coefficient_doubled, M3P9-F2_delta_node_coefficient_doubled",
+    "result": "PASS"
+   },
+   "regression_control": true
+  },
+  "allowed_exception_wrong_location": {
+   "shows": "the allowed wrap-guard exception raised at E5b, claimed for the E2 removal, is not accepted",
+   "claimed_expectation": "E2_finite_check_removed",
+   "expected_classification": "unexpected exception",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "unexpected exception",
+    "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
+    "result": "PASS"
+   },
+   "regression_control": true
+  },
+  "allowed_exception_wrong_type": {
+   "shows": "the allowed exception at the right location but of another type (TypeError) is not accepted",
+   "claimed_expectation": "E2_finite_check_removed",
+   "expected_classification": "unexpected exception",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "unexpected exception",
+    "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
+    "result": "PASS"
+   },
+   "regression_control": true
+  },
+  "valid_mutant_rejected_by_targeted_check": {
+   "shows": "an injected defect rejected by its targeted check is detected",
+   "claimed_expectation": "delta_i_coefficient_doubled",
+   "expected_classification": "expected rejection",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "expected rejection",
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "PASS"
+   },
+   "regression_control": false
+  },
+  "valid_mutant_completes_without_rejection": {
+   "shows": "with the Delta i order assertion removed, the designated built-in mutant completes, exercises its defect and is not rejected; that is detected as the removal",
+   "claimed_expectation": "delta_i_order_assertion_disabled",
+   "expected_classification": "expected rejection",
+   "original_harness": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "expected rejection",
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "PASS"
+   },
+   "regression_control": false
+  }
+ }
+}

@@ -28,6 +28,13 @@ assertion load-bearing for its own reason: oracle +/-inf (whole grid and a singl
 be rejected as non-finite; a doubled first-order coefficient must be rejected by the order check
 and a reversed sign by the sign check, each per formula; a 1 % inclination error in the oracle
 must be rejected by E3 and by E4. No check, formula, tolerance or finite result is changed.
+Revised for review 10 (DR-0028 amendment 7, M3P10-F1 and F2): each built-in mutant's injected
+function is recorded against its reference implementation, so the output shows whether the
+defect was exercised; a mutant whose defect is never exercised is invalid and fails the run. An
+exception raised by a mutant is recorded with its type, message and call stack within this
+script. Six new built-in mutants make six further assertions load-bearing (E2 x3, E5d, finite
+and non-finite wrapping); E5d's call to elements() becomes the elements_fn parameter (default
+elements, results identical). No check, formula, tolerance or finite result is changed.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -51,6 +58,7 @@ above. It never evaluates the formulas under test.
 import json
 import math
 import sys
+import traceback
 from fractions import Fraction
 
 EPS = sys.float_info.epsilon
@@ -472,6 +480,7 @@ def exact_properties(
     line_of_nodes=line_of_nodes_exact,
     assert_jump=True,
     tilt_fn=tilt_matrix,
+    elements_fn=elements,
 ):
     """Exact (finite-delta) properties, independent of any first-order formula.
 
@@ -641,7 +650,7 @@ def exact_properties(
     # |delta| = 0.15 deg, sweep the tilt azimuth; the line-of-nodes azimuth (phi = Omega for
     # delta > 0, phi = Omega + 180 deg for delta < 0, the same rotation) crosses the equator and
     # the node must jump by pi there. Tolerance: pair_noise(i_A, i_B), as in E2.
-    _, node_eq = elements(h_from_elements(0.0, 0.0))
+    _, node_eq = elements_fn(h_from_elements(0.0, 0.0))
     report["E5_equatorial_node_undefined"] = node_eq is None
     if node_eq is not None:
         failures.append("E5d equatorial node not reported as undefined")
@@ -756,6 +765,49 @@ def oracle_delta_i_scaled(inc, node, phi, delta, wrap_fn=wrap):
     return 1.01 * d_i, d_node
 
 
+def wrap_inexact_reduction(a):
+    """Mutant wrap (M3P10-F2): inexact reduction a - TAU round(a / TAU), right interval."""
+    if not math.isfinite(a):
+        raise ValueError(f"{NONFINITE_MESSAGE}: {a!r}")
+    r = a - TAU * round(a / TAU)
+    if r <= -PI:
+        r += TAU
+    return r
+
+
+def wrap_nonfinite_typeerror(a):
+    """Mutant wrap (M3P10-F2): the non-finite guard raises TypeError instead of ValueError."""
+    if not math.isfinite(a):
+        raise TypeError(f"{NONFINITE_MESSAGE}: {a!r}")
+    return wrap(a)
+
+
+def line_of_nodes_interior_undefined(inc, delta):
+    """Mutant line-of-nodes claim (M3P10-F2): the interior regime 0 < j < pi made undefined."""
+    if 0.0 < inc - delta < PI:
+        return None
+    return line_of_nodes_exact(inc, delta)
+
+
+def line_of_nodes_crossing_node_unchanged(inc, delta):
+    """Mutant line-of-nodes claim (M3P10-F2): Delta Omega = 0 in the equator-crossing regimes."""
+    expected = line_of_nodes_exact(inc, delta)
+    return None if expected is None else (expected[0], 0.0)
+
+
+def line_of_nodes_endpoints_defined(inc, delta):
+    """Mutant line-of-nodes claim (M3P10-F2): the closed interval 0 <= j <= pi, so the two
+    endpoints (B equatorial, node undefined) are claimed to have a defined node."""
+    if 0.0 <= inc - delta <= PI:
+        return -delta, 0.0
+    return line_of_nodes_exact(inc, delta)
+
+
+def elements_equatorial_node_defined(h):
+    """Mutant elements() (M3P10-F2): reports a node even for an equatorial orbit."""
+    return math.atan2(math.hypot(h[0], h[1]), h[2]), math.atan2(h[0], -h[1])
+
+
 def tilt_with_nan(phi, delta):
     """Mutant rotation matrix (M3P8-F1 audit) with one NaN entry."""
     r = tilt_matrix(phi, delta)
@@ -819,12 +871,38 @@ EXACT_MUTANTS = {
     # among those two tests (E3 and E4 record no non-finite failure for a finite oracle), so
     # removing either assertion leaves this mutant unrejected by its designated test.
     "M3P9-F3_oracle_delta_i_scaled_1pct": ({"oracle": oracle_delta_i_scaled}, ("E3", "E4")),
+    # M3P10-F2 (assertions of category A): each mutant fails exactly one assertion of its test,
+    # so removing that assertion leaves the mutant unrejected by its designated test.
+    "M3P10-F2_wrap_inexact_reduction": ({"wrap_fn": wrap_inexact_reduction}, ("wrap",)),
+    "M3P10-F2_wrap_nonfinite_raises_typeerror": (
+        {"wrap_fn": wrap_nonfinite_typeerror},
+        ("wrap_nonfinite",),
+    ),
+    "M3P10-F2_line_of_nodes_interior_undefined": (
+        {"line_of_nodes": line_of_nodes_interior_undefined},
+        ("E2",),
+    ),
+    "M3P10-F2_line_of_nodes_crossing_node_unchanged": (
+        {"line_of_nodes": line_of_nodes_crossing_node_unchanged},
+        ("E2",),
+    ),
+    "M3P10-F2_line_of_nodes_endpoints_defined": (
+        {"line_of_nodes": line_of_nodes_endpoints_defined},
+        ("E2",),
+    ),
+    "M3P10-F2_equatorial_node_defined": (
+        {"elements_fn": elements_equatorial_node_defined},
+        ("E5d",),
+    ),
 }
 
 # Minimum failure counts beyond "at least one". The guard-removed mutant must fail in every
 # non-finite category (NaN, -NaN, +inf, -inf), so that the message check that distinguishes
 # the guard from math.fmod's own ValueError for +/-inf is load-bearing too.
-MIN_DESIGNATED_FAILURES = {"M3P7-F1_nonfinite_guard_removed": {"wrap_nonfinite": 4}}
+MIN_DESIGNATED_FAILURES = {
+    "M3P7-F1_nonfinite_guard_removed": {"wrap_nonfinite": 4},
+    "M3P10-F2_wrap_nonfinite_raises_typeerror": {"wrap_nonfinite": 4},
+}
 
 
 def formula_with(component, value):
@@ -921,57 +999,164 @@ for _index, _name in enumerate(COMPONENTS):
     )
 
 
-def mutant_failures(run, **kwargs):
-    """(failures, exception) for one built-in defect mutant (M3P9 / I-9 section 6).
+# Reference implementation of each injectable function (M3P10-F1). Each built-in mutant's
+# injected function is compared with it on every call, so the output shows whether the defect
+# was exercised. Settings that are not functions are compared with their default.
+REFERENCE_IMPLEMENTATIONS = {
+    "formula": formulas_amendment2,
+    "oracle": finite,
+    "wrap_fn": wrap,
+    "line_of_nodes": line_of_nodes_exact,
+    "tilt_fn": tilt_matrix,
+    "elements_fn": elements,
+}
+SETTING_DEFAULTS = {"assert_jump": True}
 
-    A mutant that raises was not rejected by any check: the exception is recorded and the
-    mutant counts as not rejected, so the verdict is FAIL. This applies to mutants only; the
-    formulas under test and the exact properties are never wrapped, and raise as before.
-    """
+
+def same_value(a, b):
+    """Equality of results, with NaN equal to NaN (so an unchanged NaN is not a difference)."""
+    if isinstance(a, (list, tuple)) and isinstance(b, (list, tuple)):
+        return len(a) == len(b) and all(same_value(x, y) for x, y in zip(a, b, strict=True))
+    if isinstance(a, float) and isinstance(b, float) and math.isnan(a) and math.isnan(b):
+        return True
+    return type(a) is type(b) and a == b
+
+
+def outcome(fn, args, kw):
+    """("value", result) or ("raised", (exception type, message)) for one call."""
     try:
-        return run(**kwargs)[0], None
+        return "value", fn(*args, **kw)
+    except Exception as exc:
+        return "raised", (type(exc), str(exc))
+
+
+def instrumented(kwargs):
+    """Wrap each injected function in a recorder; return (kwargs, record).
+
+    The recorder calls the mutant, then the reference implementation with the same arguments,
+    and counts the calls whose outcomes differ: different results, or an exception on one side
+    only, or exceptions of a different type or message. The mutant's own result, or exception,
+    is passed on unchanged.
+    """
+    wrapped, record = {}, {}
+    for key, value in kwargs.items():
+        reference = REFERENCE_IMPLEMENTATIONS.get(key)
+        if reference is None:
+            wrapped[key] = value
+            record[key] = {"setting": value, "default": SETTING_DEFAULTS[key]}
+            continue
+        counts = record[key] = {"calls": 0, "differing": 0}
+
+        def recorder(*args, _impl=value, _ref=reference, _counts=counts, **kw):
+            _counts["calls"] += 1
+            try:
+                result = _impl(*args, **kw)
+            except Exception as exc:
+                _counts["differing"] += outcome(_ref, args, kw) != (
+                    "raised",
+                    (type(exc), str(exc)),
+                )
+                raise
+            kind, expected = outcome(_ref, args, kw)
+            _counts["differing"] += kind != "value" or not same_value(result, expected)
+            return result
+
+        wrapped[key] = recorder
+    return wrapped, record
+
+
+def exercised(record):
+    """A mutant's defect was exercised if some injected function returned a result different
+    from its reference at least once, or a setting differs from its default."""
+    return any(
+        r["differing"] > 0 if "calls" in r else r["setting"] != r["default"]
+        for r in record.values()
+    )
+
+
+def exception_record(exc):
+    """Type, message and call stack (function: source line, frames of this script only)."""
+    here = exception_record.__code__.co_filename
+    frames = traceback.extract_tb(exc.__traceback__)[1:]  # without mutant_failures itself
+    return {
+        "type": type(exc).__name__,
+        "message": str(exc),
+        "stack": [f"{f.name}: {f.line}" for f in frames if f.filename == here],
+    }
+
+
+def mutant_failures(run, **kwargs):
+    """(failures, exception, defect record) for one built-in defect mutant.
+
+    A mutant that raises was not rejected by any check: the exception is recorded with its
+    location (M3P10-F1) and the mutant counts as not rejected, so the verdict is FAIL. This
+    applies to mutants only; the formulas under test and the exact properties are never
+    wrapped, and raise as before.
+    """
+    wrapped, record = instrumented(kwargs)
+    try:
+        return run(**wrapped)[0], None, record
     except Exception as exc:  # recorded and failed closed, never treated as a rejection
-        return [], f"{type(exc).__name__}: {exc}"
+        return [], exception_record(exc), record
+
+
+def mutant_entry(entry, exception, record):
+    """Add the defect record, and the exception if any, to a mutant's output entry."""
+    entry["defect_calls"] = record
+    entry["defect_exercised"] = exercised(record)
+    if exception is not None:
+        entry["exception"] = exception
+    return entry
 
 
 def main(out_path):
     exact_failures, exact_report, wrap_report, nonfinite_report = run_exact()
     exact_mutants = {}
     for name, (kwargs, tests) in EXACT_MUTANTS.items():
-        failures, exception = mutant_failures(run_exact, **kwargs)
+        failures, exception, record = mutant_failures(run_exact, **kwargs)
         counts = by_test(failures)
-        exact_mutants[name] = {
-            "designated_tests": list(tests),
-            "failures_by_test": counts,
-            "rejected_by_designated_test": exception is None
-            and all(counts[t] >= MIN_DESIGNATED_FAILURES.get(name, {}).get(t, 1) for t in tests),
-        }
-        if exception is not None:
-            exact_mutants[name]["exception"] = exception
+        exact_mutants[name] = mutant_entry(
+            {
+                "designated_tests": list(tests),
+                "failures_by_test": counts,
+                "rejected_by_designated_test": exception is None
+                and all(
+                    counts[t] >= MIN_DESIGNATED_FAILURES.get(name, {}).get(t, 1) for t in tests
+                ),
+            },
+            exception,
+            record,
+        )
     under_test_failures, under_test_stats = check_formulas(formulas_amendment2)
     mutants = {}
     for name, formula in MUTANTS.items():
-        failures, exception = mutant_failures(check_formulas, formula=formula)
-        mutants[name] = {
-            "failing_checks": len(failures),
-            "rejected": exception is None and bool(failures),
-        }
-        if exception is not None:
-            mutants[name]["exception"] = exception
+        failures, exception, record = mutant_failures(check_formulas, formula=formula)
+        mutants[name] = mutant_entry(
+            {"failing_checks": len(failures), "rejected": exception is None and bool(failures)},
+            exception,
+            record,
+        )
     formula_defect_mutants = {}
     for name, (kwargs, minima) in FORMULA_DEFECT_MUTANTS.items():
-        failures, exception = mutant_failures(check_formulas, **kwargs)
+        failures, exception, record = mutant_failures(check_formulas, **kwargs)
         counts = by_formula_test(failures)
-        formula_defect_mutants[name] = {
-            "designated_minimum_failures": minima,
-            "failures_by_check": counts,
-            "rejected_by_designated_checks": exception is None
-            and all(counts[t] >= m for t, m in minima.items()),
-        }
-        if exception is not None:
-            formula_defect_mutants[name]["exception"] = exception
+        formula_defect_mutants[name] = mutant_entry(
+            {
+                "designated_minimum_failures": minima,
+                "failures_by_check": counts,
+                "rejected_by_designated_checks": exception is None
+                and all(counts[t] >= m for t, m in minima.items()),
+            },
+            exception,
+            record,
+        )
+    # Invalid mutant setup (M3P10-F1): a built-in mutant whose defect is never exercised tests
+    # nothing, so the run fails.
+    sections = (mutants, formula_defect_mutants, exact_mutants)
+    unexercised = sorted(n for s in sections for n, m in s.items() if not m["defect_exercised"])
     ok = (
-        not exact_failures
+        not unexercised
+        and not exact_failures
         and not under_test_failures
         and all(m["rejected"] for m in mutants.values())
         and all(m["rejected_by_designated_test"] for m in exact_mutants.values())
@@ -1008,6 +1193,7 @@ def main(out_path):
         "mutants": mutants,
         "formula_defect_mutants": formula_defect_mutants,
         "exact_and_wrap_mutants": exact_mutants,
+        "mutants_with_defect_not_exercised": unexercised,
     }
     with open(out_path, "w", encoding="ascii") as fh:
         json.dump(rounded(result), fh, indent=1)

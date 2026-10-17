@@ -46,35 +46,109 @@
    "detected": 60
   }
  },
- "negative_controls": {
+ "controls": {
   "syntax_error": {
-   "failure_kind": "syntax error",
-   "observed_outcome": "exit 1, no output; process failure: SyntaxError: '(' was never closed",
-   "classified_as_detected": false,
+   "shows": "a syntax error is a process failure, not a detection",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "process failure",
+   "actual_classification": "process failure",
+   "observed_outcome": "exit 1, no output: SyntaxError: '(' was never closed",
    "result": "PASS"
   },
   "import_failure": {
-   "failure_kind": "import failure",
-   "observed_outcome": "exit 1, no output; process failure: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
-   "classified_as_detected": false,
+   "shows": "an import failure that ends the process is not a detection",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "process failure",
+   "actual_classification": "process failure",
+   "observed_outcome": "exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
    "result": "PASS"
   },
   "missing_script": {
-   "failure_kind": "missing file",
-   "observed_outcome": "exit 2, no output; process failure: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
-   "classified_as_detected": false,
+   "shows": "a missing script is not a detection",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "process failure",
+   "actual_classification": "process failure",
+   "observed_outcome": "exit 2, no output: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
    "result": "PASS"
   },
   "neutral_edit": {
-   "failure_kind": "no defect (exit 0)",
+   "shows": "a run that completes with verdict PASS is normal execution",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "normal execution",
+   "actual_classification": "normal execution",
    "observed_outcome": "exit 0, PASS verdict",
-   "classified_as_detected": false,
+   "result": "PASS"
+  },
+  "fragment_absent": {
+   "shows": "a mutation whose fragment does not occur is invalid setup and is not run",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "observed_outcome": "not run: fragment occurs 0 times",
    "result": "PASS"
   },
   "wrong_reason": {
-   "failure_kind": "FAIL verdict for another reason",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection not shown: formulas under test: at least 1 failure(s) starting 'sign delta_node '",
-   "classified_as_detected": false,
+   "shows": "a mutant rejected for an unrelated reason is not detected",
+   "claimed_expectation": "M3P5_delta_node_sign_reversed",
+   "expected_classification": "rejected for another reason",
+   "actual_classification": "rejected for another reason",
+   "observed_outcome": "exit 1, FAIL verdict; not shown: formulas under test: exactly 504 failure(s) starting 'sign delta_node '",
+   "result": "PASS"
+  },
+  "import_failure_inside_mutant": {
+   "shows": "an import failure inside a built-in mutant is not detection (M3P10-F1)",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "unexpected exception",
+   "actual_classification": "unexpected exception",
+   "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
+   "result": "PASS"
+  },
+  "runtime_exception_inside_mutant": {
+   "shows": "an unrelated runtime exception inside a built-in mutant is not detection",
+   "claimed_expectation": "sign_assertion_disabled",
+   "expected_classification": "unexpected exception",
+   "actual_classification": "unexpected exception",
+   "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
+   "result": "PASS"
+  },
+  "exception_suppressed_inside_mutant": {
+   "shows": "an exception caught and suppressed by a mutant (which then returns the reference result) is not detection: its defect is no longer exercised",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "observed_outcome": "exit 1, FAIL verdict; defect not exercised: M3P9-F2_delta_i_coefficient_doubled, M3P9-F2_delta_node_coefficient_doubled",
+   "result": "PASS"
+  },
+  "allowed_exception_wrong_location": {
+   "shows": "the allowed wrap-guard exception raised at E5b, claimed for the E2 removal, is not accepted",
+   "claimed_expectation": "E2_finite_check_removed",
+   "expected_classification": "unexpected exception",
+   "actual_classification": "unexpected exception",
+   "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
+   "result": "PASS"
+  },
+  "allowed_exception_wrong_type": {
+   "shows": "the allowed exception at the right location but of another type (TypeError) is not accepted",
+   "claimed_expectation": "E2_finite_check_removed",
+   "expected_classification": "unexpected exception",
+   "actual_classification": "unexpected exception",
+   "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
+   "result": "PASS"
+  },
+  "valid_mutant_rejected_by_targeted_check": {
+   "shows": "an injected defect rejected by its targeted check is detected",
+   "claimed_expectation": "delta_i_coefficient_doubled",
+   "expected_classification": "expected rejection",
+   "actual_classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "result": "PASS"
+  },
+  "valid_mutant_completes_without_rejection": {
+   "shows": "with the Delta i order assertion removed, the designated built-in mutant completes, exercises its defect and is not rejected; that is detected as the removal",
+   "claimed_expectation": "delta_i_order_assertion_disabled",
+   "expected_classification": "expected rejection",
+   "actual_classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   }
  },
@@ -85,6 +159,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -94,6 +169,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -103,6 +179,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -112,6 +189,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -121,6 +199,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -130,6 +209,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -137,8 +217,9 @@
    "group": "M3P8-F1 coverage",
    "target_property": "delta_i coverage minima",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -146,8 +227,9 @@
    "group": "M3P8-F1 coverage",
    "target_property": "delta_node coverage minima",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -155,9 +237,10 @@
    "group": "M3P8-F1 coverage",
    "target_property": "sign coverage minima",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -165,9 +248,10 @@
    "group": "M3P8-F1 coverage",
    "target_property": "order coverage minima",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_nan not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_delta_node_nan not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_nan completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -175,9 +259,10 @@
    "group": "M3P8-F1 coverage",
    "target_property": "coverage comparison",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -185,9 +270,10 @@
    "group": "M3P8-F1 coverage",
    "target_property": "sign coverage counter",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_zero not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_delta_node_zero not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -195,19 +281,25 @@
    "group": "M3P8-F1 validation",
    "target_property": "finite validation of oracle and formula values",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_nan not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
    "result": "PASS"
   },
   "formula_check_weakened_to_isnan": {
    "group": "M3P8-F1 validation",
    "target_property": "finite validation of formula values (+/-inf)",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_plus_inf not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_delta_i_minus_inf not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_delta_i_minus_inf completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -215,27 +307,38 @@
    "group": "M3P8-F1 validation",
    "target_property": "finite validation of oracle values",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
    "result": "PASS"
   },
   "invalid_sample_not_discarded": {
    "group": "M3P8-F1 validation",
    "target_property": "invalid samples excluded from coverage",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_delta_i_plus_inf not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
    "result": "PASS"
   },
   "E1_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E1 finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_rotation_matrix_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_rotation_matrix_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -243,17 +346,19 @@
    "group": "M3P8-F1 audit",
    "target_property": "E2 finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan raised ValueError('wrap: non-finite angle: '...) at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\") (exact_and_wrap_mutants)"
    ],
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan",
+   "classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
    "result": "PASS"
   },
   "E2_endpoint_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E2 endpoint finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_rotation_matrix_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_rotation_matrix_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -261,8 +366,9 @@
    "group": "M3P8-F1 audit",
    "target_property": "E3 finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -270,8 +376,9 @@
    "group": "M3P8-F1 audit",
    "target_property": "E4 finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -279,17 +386,19 @@
    "group": "M3P8-F1 audit",
    "target_property": "E5b finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan raised ValueError('wrap: non-finite angle: '...) at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\") (exact_and_wrap_mutants)"
    ],
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan",
+   "classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
    "result": "PASS"
   },
   "E6_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E6 finite check",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -300,6 +409,7 @@
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i oracle=inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -310,6 +420,7 @@
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i oracle=-inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -320,6 +431,7 @@
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node oracle=inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -330,6 +442,7 @@
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node oracle=-inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -337,25 +450,27 @@
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of oracle values (+/-inf)",
    "expected_rejection": [
-    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf_single_sample not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf_single_sample not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
+    "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError: math domain error; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError: math domain error; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError: math domain error; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError: math domain error",
+   "classification": "expected rejection",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
    "result": "PASS"
   },
   "oracle_check_weakened_to_isinf": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of oracle values (NaN)",
    "expected_rejection": [
-    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan not rejected (formula_defect_mutants)",
-    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan not rejected (formula_defect_mutants)"
+    "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P8-F1_audit_oracle_delta_node_nan completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -366,6 +481,7 @@
     "formulas under test: exactly 560 failure(s) starting 'order delta_i '",
     "formulas under test: exactly 0 failure(s) starting 'sign delta_i '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -376,6 +492,7 @@
     "formulas under test: exactly 504 failure(s) starting 'order delta_node '",
     "formulas under test: exactly 0 failure(s) starting 'sign delta_node '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -383,9 +500,10 @@
    "group": "M3P9-F2 order and sign",
    "target_property": "order check (both formulas)",
    "expected_rejection": [
-    "built-in mutant M3P9-F2_delta_i_coefficient_doubled not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F2_delta_node_coefficient_doubled not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F2_delta_i_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F2_delta_node_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -393,8 +511,9 @@
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_i order check",
    "expected_rejection": [
-    "built-in mutant M3P9-F2_delta_i_coefficient_doubled not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F2_delta_i_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -402,8 +521,9 @@
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_node order check",
    "expected_rejection": [
-    "built-in mutant M3P9-F2_delta_node_coefficient_doubled not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F2_delta_node_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -411,9 +531,10 @@
    "group": "M3P9-F2 order and sign",
    "target_property": "sign check (both formulas)",
    "expected_rejection": [
-    "built-in mutant M3P9-F2_delta_i_sign_reversed not rejected (formula_defect_mutants)",
-    "built-in mutant M3P9-F2_delta_node_sign_reversed not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F2_delta_i_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)",
+    "built-in mutant M3P9-F2_delta_node_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -421,8 +542,9 @@
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_i sign check",
    "expected_rejection": [
-    "built-in mutant M3P9-F2_delta_i_sign_reversed not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F2_delta_i_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -430,8 +552,9 @@
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_node sign check",
    "expected_rejection": [
-    "built-in mutant M3P9-F2_delta_node_sign_reversed not rejected (formula_defect_mutants)"
+    "built-in mutant M3P9-F2_delta_node_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -439,8 +562,9 @@
    "group": "M3P9-F3 exact properties",
    "target_property": "E3 closed-form deviation assertion",
    "expected_rejection": [
-    "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -448,8 +572,9 @@
    "group": "M3P9-F3 exact properties",
    "target_property": "E4 inclination-bound assertion",
    "expected_rejection": [
-    "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -459,6 +584,7 @@
    "expected_rejection": [
     "formulas under test: exactly 560 failure(s) starting 'sign delta_i '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -468,6 +594,7 @@
    "expected_rejection": [
     "formulas under test: exactly 504 failure(s) starting 'sign delta_node '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -477,6 +604,7 @@
    "expected_rejection": [
     "exact properties: at least 1 failure(s) starting 'E2 '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -484,8 +612,9 @@
    "group": "earlier",
    "target_property": "E5a node-jump assertion",
    "expected_rejection": [
-    "built-in mutant M3P6-F2_oracle_jump_suppressed not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P6-F2_oracle_jump_suppressed completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -493,8 +622,9 @@
    "group": "earlier",
    "target_property": "E5b node-jump assertion",
    "expected_rejection": [
-    "built-in mutant M3P6-F2_oracle_jump_suppressed not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P6-F2_oracle_jump_suppressed completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -502,8 +632,9 @@
    "group": "earlier",
    "target_property": "E5c jump-assertion coverage guard",
    "expected_rejection": [
-    "built-in mutant M3P6-F2_jump_assertion_disabled not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P6-F2_jump_assertion_disabled completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -513,6 +644,7 @@
    "expected_rejection": [
     "exact properties: at least 1 failure(s) starting 'wrap('"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -522,6 +654,7 @@
    "expected_rejection": [
     "exact properties: at least 1 failure(s) starting 'wrap-nonfinite: '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -529,8 +662,9 @@
    "group": "earlier",
    "target_property": "wrap non-finite test (message check)",
    "expected_rejection": [
-    "built-in mutant M3P7-F1_nonfinite_guard_removed not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P7-F1_nonfinite_guard_removed completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -538,8 +672,12 @@
    "group": "earlier",
    "target_property": "wrap non-finite tests",
    "expected_rejection": [
-    "built-in mutant M3P7-F1_nonfinite_guard_removed not rejected (exact_and_wrap_mutants)"
+    "built-in mutant M3P7-F1_nonfinite_guard_removed completed, not rejected, defect not exercised (exact_and_wrap_mutants)",
+    "report wrap_nonfinite has no entry 'nan' (test not run)",
+    "report wrap_nonfinite has no entry 'plus_inf' (test not run)",
+    "report wrap_nonfinite has no entry 'minus_inf' (test not run)"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -549,6 +687,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -558,6 +697,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -567,6 +707,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -576,6 +717,7 @@
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -585,6 +727,7 @@
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -594,6 +737,7 @@
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -603,6 +747,7 @@
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -612,6 +757,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -621,6 +767,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -630,6 +777,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -639,6 +787,7 @@
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -648,6 +797,7 @@
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -657,6 +807,7 @@
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -666,6 +817,7 @@
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -675,6 +827,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -684,6 +837,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -693,6 +847,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -702,6 +857,7 @@
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -711,6 +867,7 @@
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -720,6 +877,7 @@
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -729,6 +887,7 @@
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -738,6 +897,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -747,6 +907,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -756,6 +917,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -765,6 +927,7 @@
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -774,6 +937,7 @@
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -783,6 +947,7 @@
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -792,6 +957,7 @@
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -801,6 +967,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -810,6 +977,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -819,6 +987,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -828,6 +997,7 @@
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -837,6 +1007,7 @@
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -846,6 +1017,7 @@
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -855,6 +1027,7 @@
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -864,6 +1037,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -873,6 +1047,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -882,6 +1057,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -891,6 +1067,7 @@
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -900,6 +1077,7 @@
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -909,6 +1087,7 @@
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -918,6 +1097,7 @@
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -927,6 +1107,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -936,6 +1117,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -945,6 +1127,7 @@
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -954,6 +1137,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -963,6 +1147,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -972,6 +1157,7 @@
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -981,6 +1167,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -990,6 +1177,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -999,6 +1187,7 @@
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1008,6 +1197,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1017,6 +1207,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1026,6 +1217,7 @@
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1035,6 +1227,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1044,6 +1237,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1053,6 +1247,7 @@
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1062,6 +1257,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1071,6 +1267,7 @@
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   },
@@ -1080,6 +1277,7 @@
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
+   "classification": "expected rejection",
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
    "result": "PASS"
   }

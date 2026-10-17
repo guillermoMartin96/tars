@@ -1,0 +1,220 @@
+{
+ "verdict": "PASS",
+ "script": "dr0028_node_signed_verification.py",
+ "assertions": 18,
+ "categories": {
+  "A": 6,
+  "B": 9,
+  "C": 3,
+  "D": 0
+ },
+ "results": [
+  {
+   "id": "W1",
+   "test": "finite wrap",
+   "line": 419,
+   "category": "B",
+   "protects": "results lie in (-pi, pi]",
+   "defect": "the previous [-pi, pi) wrap",
+   "independent_check": "exact reduction",
+   "independent_failures_without_assertion": 14,
+   "independent_failures_with_assertion": 14,
+   "result": "PASS"
+  },
+  {
+   "id": "W2",
+   "test": "finite wrap",
+   "line": 421,
+   "category": "A",
+   "protects": "each result equals the exact rational reduction (amendments 3 and 4)",
+   "built_in_mutant": "M3P10-F2_wrap_inexact_reduction",
+   "designated_test": "wrap",
+   "designated_failures_with_assertion": 2,
+   "designated_failures_without_assertion": 0,
+   "result": "PASS"
+  },
+  {
+   "id": "W3",
+   "test": "finite wrap",
+   "line": 423,
+   "category": "C",
+   "protects": "two calls with the same input agree",
+   "rationale": "wrap() is a stateless function of one float in IEEE arithmetic, so it cannot return different results for the same input unless mutable state is added to it. W2 checks every result against the exact reduction. W3 is a diagnostic for such a change; a mutant that it alone rejects would have to be correct on the first call and wrong on the second, which is not a plausible defect of this implementation.",
+   "result": "PASS"
+  },
+  {
+   "id": "W4",
+   "test": "finite wrap",
+   "line": 427,
+   "category": "B",
+   "protects": "wrap(+pi) = wrap(-pi) = +pi",
+   "defect": "the previous [-pi, pi) wrap (wrap(-pi) = -pi)",
+   "independent_check": "exact reduction",
+   "independent_failures_without_assertion": 14,
+   "independent_failures_with_assertion": 14,
+   "result": "PASS"
+  },
+  {
+   "id": "W5",
+   "test": "finite wrap",
+   "line": 436,
+   "category": "B",
+   "protects": "angles differing by an exact multiple of 2 pi wrap to the same result",
+   "defect": "fmod without the correction step (not periodic on (-pi, pi])",
+   "independent_check": "exact reduction",
+   "independent_failures_without_assertion": 9,
+   "independent_failures_with_assertion": 9,
+   "result": "PASS"
+  },
+  {
+   "id": "W6",
+   "test": "finite wrap",
+   "line": 442,
+   "category": "C",
+   "protects": "W5 has at least 5 exactly representable pairs to test",
+   "rationale": "A coverage guard on the fixed input list of W5 (30 pairs are found). It can fail only if that list in the code is edited, and it protects W5 from becoming vacuous, not a computed property.",
+   "result": "PASS"
+  },
+  {
+   "id": "N1",
+   "test": "non-finite wrap",
+   "line": 469,
+   "category": "A",
+   "protects": "a non-finite input raises ValueError, not another exception type (amendment 4)",
+   "built_in_mutant": "M3P10-F2_wrap_nonfinite_raises_typeerror",
+   "designated_test": "wrap_nonfinite",
+   "designated_failures_with_assertion": 4,
+   "designated_failures_without_assertion": 0,
+   "result": "PASS"
+  },
+  {
+   "id": "E1",
+   "test": "E1",
+   "line": 523,
+   "category": "B",
+   "protects": "the tilt transform is the passive Rot(e, -delta), a proper rotation",
+   "defect": "the active transform Rot(e, +delta)",
+   "independent_check": "E2 endpoint not equatorial",
+   "independent_failures_without_assertion": 36,
+   "independent_failures_with_assertion": 36,
+   "result": "PASS"
+  },
+  {
+   "id": "E2a",
+   "test": "E2",
+   "line": 543,
+   "category": "C",
+   "protects": "the review-06 counterexample (i = 2 deg, delta = 5 deg) is among the E2 cases",
+   "rationale": "A guard on the fixed E2 case list in the code. The case it requires is constructed from LOW_INC and CROSS_BY and is checked by the E2 identity like every other case; the guard fails only if those constants are edited.",
+   "result": "PASS"
+  },
+  {
+   "id": "E2b",
+   "test": "E2",
+   "line": 552,
+   "category": "A",
+   "protects": "no E2 case is skipped because a node is reported undefined (E2 cannot become vacuous)",
+   "built_in_mutant": "M3P10-F2_line_of_nodes_interior_undefined",
+   "designated_test": "E2",
+   "designated_failures_with_assertion": 168,
+   "designated_failures_without_assertion": 0,
+   "result": "PASS"
+  },
+  {
+   "id": "E2c",
+   "test": "E2",
+   "line": 561,
+   "category": "A",
+   "protects": "the exact line-of-nodes identity in every regime (amendment 3)",
+   "built_in_mutant": "M3P10-F2_line_of_nodes_crossing_node_unchanged",
+   "designated_test": "E2",
+   "designated_failures_with_assertion": 144,
+   "designated_failures_without_assertion": 0,
+   "result": "PASS"
+  },
+  {
+   "id": "E2d",
+   "test": "E2",
+   "line": 594,
+   "category": "A",
+   "protects": "the node is undefined at the endpoints j = 0 and j = pi (amendment 3)",
+   "built_in_mutant": "M3P10-F2_line_of_nodes_endpoints_defined",
+   "designated_test": "E2",
+   "designated_failures_with_assertion": 48,
+   "designated_failures_without_assertion": 0,
+   "result": "PASS"
+  },
+  {
+   "id": "E2e",
+   "test": "E2",
+   "line": 602,
+   "category": "B",
+   "protects": "B is equatorial at the endpoints",
+   "defect": "the active transform Rot(e, +delta)",
+   "independent_check": "E1 rotation convention",
+   "independent_failures_without_assertion": 1,
+   "independent_failures_with_assertion": 1,
+   "result": "PASS"
+  },
+  {
+   "id": "E5b-nonfinite",
+   "test": "E5b",
+   "line": 666,
+   "category": "B",
+   "protects": "a non-finite node difference in the azimuth sweep is a failure",
+   "defect": "a NaN node difference",
+   "independent_check": "E5b sweep: only",
+   "independent_failures_without_assertion": 2,
+   "independent_failures_with_assertion": 2,
+   "result": "PASS"
+  },
+  {
+   "id": "E5b-defined",
+   "test": "E5b",
+   "line": 677,
+   "category": "B",
+   "protects": "the sweep has at least 359 defined samples per tilt sign",
+   "defect": "no node at the sweep's crossing azimuths, so the jump is never asserted",
+   "independent_check": "E5c coverage",
+   "independent_failures_without_assertion": 2,
+   "independent_failures_with_assertion": 2,
+   "result": "PASS"
+  },
+  {
+   "id": "E5d",
+   "test": "E5d",
+   "line": 656,
+   "category": "A",
+   "protects": "an equatorial orbit has no node",
+   "built_in_mutant": "M3P10-F2_equatorial_node_defined",
+   "designated_test": "E5d",
+   "designated_failures_with_assertion": 1,
+   "designated_failures_without_assertion": 0,
+   "result": "PASS"
+  },
+  {
+   "id": "E6-value",
+   "test": "E6",
+   "line": 699,
+   "category": "B",
+   "protects": "the review-04 node example 90.2598055437 deg",
+   "defect": "Delta Omega 0.01 % too large",
+   "independent_check": "E3 closed form",
+   "independent_failures_without_assertion": 1,
+   "independent_failures_with_assertion": 1,
+   "result": "PASS"
+  },
+  {
+   "id": "E6-sign",
+   "test": "E6",
+   "line": 701,
+   "category": "B",
+   "protects": "the review-04 example's node change and first-order term agree in sign",
+   "defect": "Delta Omega with the wrong sign",
+   "independent_check": "E3 closed form",
+   "independent_failures_without_assertion": 1,
+   "independent_failures_with_assertion": 1,
+   "result": "PASS"
+  }
+ ]
+}
