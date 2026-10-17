@@ -147,7 +147,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "both first-order signs reversed",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -158,7 +164,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "Delta i sign reversed",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -169,7 +181,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 2800
+     "differing": 2800,
+     "defect": "Delta Omega sign reversed",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -180,7 +198,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "cos and sin swapped",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -208,7 +232,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i formula returns nan",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -234,7 +264,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i formula returns inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -260,7 +296,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i formula returns -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -285,7 +327,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i formula returns 0",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -311,11 +359,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i oracle value NaN everywhere",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -341,7 +401,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_node formula returns nan",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -367,7 +433,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_node formula returns inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -393,7 +465,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_node formula returns -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -418,7 +496,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 2800
+     "differing": 2800,
+     "defect": "delta_node formula returns 0",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -444,11 +528,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_node oracle value NaN everywhere",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -474,11 +570,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i oracle value inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -504,11 +612,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 1
+     "differing": 1,
+     "defect": "delta_i oracle value inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -534,11 +654,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i oracle value -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -564,11 +696,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 1
+     "differing": 1,
+     "defect": "delta_i oracle value -inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -594,11 +738,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_node oracle value inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -624,11 +780,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 1
+     "differing": 1,
+     "defect": "delta_node oracle value inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -654,11 +822,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_node oracle value -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -684,11 +864,23 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 0
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
     },
     "oracle": {
      "calls": 3000,
-     "differing": 1
+     "differing": 1,
+     "defect": "delta_node oracle value -inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -713,7 +905,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i first-order coefficient doubled",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -738,7 +936,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 3000
+     "differing": 3000,
+     "defect": "delta_i first-order sign reversed",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -763,7 +967,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 2800
+     "differing": 2800,
+     "defect": "delta_node first-order coefficient doubled",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -788,7 +998,13 @@
    "defect_calls": {
     "formula": {
      "calls": 3000,
-     "differing": 2800
+     "differing": 2800,
+     "defect": "delta_node first-order sign reversed",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -817,7 +1033,13 @@
    "defect_calls": {
     "line_of_nodes": {
      "calls": 360,
-     "differing": 192
+     "differing": 192,
+     "defect": "Delta i = -delta, Delta Omega = 0 in every regime (no domain 0 < i - delta < pi)",
+     "changes": true,
+     "intended": 192,
+     "unchanged": 168,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -845,7 +1067,13 @@
    "defect_calls": {
     "oracle": {
      "calls": 7838,
-     "differing": 612
+     "differing": 612,
+     "defect": "node difference of more than pi/2 replaced by 0 (jump suppressed)",
+     "changes": true,
+     "intended": 612,
+     "unchanged": 7226,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -873,7 +1101,13 @@
    "defect_calls": {
     "oracle": {
      "calls": 7838,
-     "differing": 212
+     "differing": 212,
+     "defect": "node difference of more than pi/2 replaced by 0 (jump suppressed) at i = 0.1 deg only",
+     "changes": true,
+     "intended": 212,
+     "unchanged": 7626,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -899,8 +1133,10 @@
    "rejected_by_designated_test": true,
    "defect_calls": {
     "assert_jump": {
+     "defect": "the jump assertions switched off (assert_jump = False)",
      "setting": false,
-     "default": true
+     "default": true,
+     "intended": true
     }
    },
    "defect_exercised": true
@@ -927,7 +1163,13 @@
    "defect_calls": {
     "wrap_fn": {
      "calls": 7767,
-     "differing": 195
+     "differing": 195,
+     "defect": "the bcb7f9b reduction a - 2 pi floor((a + pi) / 2 pi): [-pi, pi), no non-finite guard",
+     "changes": true,
+     "intended": 195,
+     "unchanged": 7572,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -954,7 +1196,13 @@
    "defect_calls": {
     "wrap_fn": {
      "calls": 7765,
-     "differing": 4
+     "differing": 4,
+     "defect": "the non-finite guard removed: a non-finite input does not raise the guard's ValueError",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7761,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -982,7 +1230,13 @@
    "defect_calls": {
     "tilt_fn": {
      "calls": 68,
-     "differing": 68
+     "differing": 68,
+     "defect": "rotation matrix entry [1][1] = NaN",
+     "changes": true,
+     "intended": 68,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1012,7 +1266,13 @@
    "defect_calls": {
     "oracle": {
      "calls": 7838,
-     "differing": 7838
+     "differing": 7838,
+     "defect": "delta_i oracle value NaN everywhere",
+     "changes": true,
+     "intended": 7838,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1042,7 +1302,13 @@
    "defect_calls": {
     "oracle": {
      "calls": 7838,
-     "differing": 7838
+     "differing": 7838,
+     "defect": "delta_node oracle value NaN everywhere",
+     "changes": true,
+     "intended": 7838,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1070,7 +1336,13 @@
    "defect_calls": {
     "oracle": {
      "calls": 7838,
-     "differing": 7825
+     "differing": 7825,
+     "defect": "delta_i oracle value 1 % too large",
+     "changes": true,
+     "intended": 7825,
+     "unchanged": 13,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1097,7 +1369,13 @@
    "defect_calls": {
     "wrap_fn": {
      "calls": 7765,
-     "differing": 4
+     "differing": 4,
+     "defect": "the inexact reduction a - 2 pi round(a / 2 pi) for finite input",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7761,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1124,7 +1402,13 @@
    "defect_calls": {
     "wrap_fn": {
      "calls": 7765,
-     "differing": 4
+     "differing": 4,
+     "defect": "a non-finite input raises TypeError instead of ValueError (same message)",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7761,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1151,7 +1435,13 @@
    "defect_calls": {
     "line_of_nodes": {
      "calls": 360,
-     "differing": 168
+     "differing": 168,
+     "defect": "node reported undefined in the interior regime 0 < i - delta < pi",
+     "changes": true,
+     "intended": 168,
+     "unchanged": 192,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1178,7 +1468,13 @@
    "defect_calls": {
     "line_of_nodes": {
      "calls": 360,
-     "differing": 144
+     "differing": 144,
+     "defect": "Delta Omega = 0 instead of +pi in the equator-crossing regimes",
+     "changes": true,
+     "intended": 144,
+     "unchanged": 216,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1205,7 +1501,13 @@
    "defect_calls": {
     "line_of_nodes": {
      "calls": 360,
-     "differing": 48
+     "differing": 48,
+     "defect": "a defined node (Delta i = -delta, Delta Omega = 0) at the endpoints j = 0 and j = pi",
+     "changes": true,
+     "intended": 48,
+     "unchanged": 312,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
@@ -1232,11 +1534,184 @@
    "defect_calls": {
     "elements_fn": {
      "calls": 1,
-     "differing": 1
+     "differing": 1,
+     "defect": "a node reported for an equatorial orbit",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_wrap_not_periodic": {
+   "designated_tests": [
+    "wrap"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 6,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "wrap_fn": {
+     "calls": 7765,
+     "differing": 6,
+     "defect": "an input one or more turns from 1.0 rad reduced to 1.01 instead of 1.0",
+     "changes": true,
+     "intended": 6,
+     "unchanged": 7759,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_node_origin_offset": {
+   "designated_tests": [
+    "E1"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 1,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "tilt_fn": {
+     "calls": 68,
+     "differing": 68,
+     "defect": "an extra rotation of 0.01 rad about the pole (node-longitude origin offset)",
+     "changes": true,
+     "intended": 68,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_tilt_axis_quantized": {
+   "designated_tests": [
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 24,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "tilt_fn": {
+     "calls": 68,
+     "differing": 24,
+     "defect": "tilt-axis azimuth rounded to the nearest multiple of 15 deg",
+     "changes": true,
+     "intended": 24,
+     "unchanged": 44,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_oracle_node_nan_at_sweep_azimuth": {
+   "designated_tests": [
+    "E5b"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 2,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 2,
+     "defect": "NaN node difference at sweep azimuth 1 deg",
+     "changes": true,
+     "intended": 2,
+     "unchanged": 7836,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_oracle_node_undefined_at_sweep_azimuths": {
+   "designated_tests": [
+    "E5b"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 2,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 4,
+     "defect": "no node at sweep azimuths 1 and 2 deg",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7834,
+     "missing": 0,
+     "unintended": 0
     }
    },
    "defect_exercised": true
   }
  },
- "mutants_with_defect_not_exercised": []
+ "mutants_with_defect_not_exercised": [],
+ "exercise_criterion": "amendment 8 (M3P11-F1): each injected function shows exactly its declared intended defect (intended >= 1, missing = 0, unintended = 0); 'differing' is reported only",
+ "mutants_without_declared_defect": []
 }

@@ -35,6 +35,14 @@ exception raised by a mutant is recorded with its type, message and call stack w
 script. Six new built-in mutants make six further assertions load-bearing (E2 x3, E5d, finite
 and non-finite wrapping); E5d's call to elements() becomes the elements_fn parameter (default
 elements, results identical). No check, formula, tolerance or finite result is changed.
+Revised for review 11 (DR-0028 amendment 8, M3P11-F1 and F2): a mutant's defect counts as
+exercised only if every call of its injected function shows exactly its declared intended defect
+(DEFECTS: shown at least once, never missing where it applies, and no other difference), not
+merely any difference from the reference; "differing" is still reported but decides nothing.
+observe() lets the mutation check make the same observation independently, on this unmutated
+script with a mutant taken from a mutated copy. Five new built-in mutants make five further
+assertions load-bearing (W5, E1, E2e, and the two E5b sweep assertions). No check, formula,
+tolerance or finite result is changed.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -808,6 +816,68 @@ def elements_equatorial_node_defined(h):
     return math.atan2(math.hypot(h[0], h[1]), h[2]), math.atan2(h[0], -h[1])
 
 
+def wrap_not_periodic(a):
+    """Mutant wrap (M3P11-F2, W5): not periodic. An input one or more turns away from 1.0 rad
+    (whose exact reduction is 1.0) is reduced to 1.01; 1.0 itself and every other input are exact.
+    """
+    r = wrap(a)
+    return r + 0.01 if r == 1.0 and a != 1.0 else r
+
+
+def rot_z(a):
+    c, s = math.cos(a), math.sin(a)
+    return [[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]]
+
+
+def matmul(a, b):
+    return [[sum(a[r][k] * b[k][c] for k in range(3)) for c in range(3)] for r in range(3)]
+
+
+NODE_ORIGIN_OFFSET = 0.01  # rad
+
+
+def tilt_node_origin_offset(phi, delta):
+    """Mutant rotation matrix (M3P11-F2, E1): an extra rotation of 0.01 rad about the pole (an
+    offset of the node-longitude origin). It is still a proper rotation, it keeps B's pole, and
+    it keeps the E2 endpoints equatorial, but it is not the passive Rot(e, -delta)."""
+    return matmul(rot_z(NODE_ORIGIN_OFFSET), tilt_matrix(phi, delta))
+
+
+AXIS_TABLE_STEP_DEG = 15.0
+
+
+def tilt_axis_quantized(phi, delta):
+    """Mutant rotation matrix (M3P11-F2, E2e): the tilt-axis azimuth taken from a 15 deg table
+    (rounded to the nearest multiple of 15 deg). Exact at E1's azimuths, which are all multiples
+    of 15 deg; a wrong tilt axis at the E2 endpoint nodes 37, 145 and 200 deg."""
+    step = AXIS_TABLE_STEP_DEG
+    return tilt_matrix(math.radians(step * round(math.degrees(phi) / step)), delta)
+
+
+SWEEP_INC = math.radians(0.1)  # the E5b sweep (exact_properties, E5 part 3)
+
+
+def oracle_node_nan_at_sweep_azimuth(inc, node, phi, delta, wrap_fn=wrap):
+    """Mutant oracle (M3P11-F2, E5b-nonfinite): a NaN node difference at one non-crossing azimuth
+    of the E5b sweep (i = 0.1 deg, Omega = 0, phi = 1 deg), for both tilt signs. Each sweep keeps
+    359 defined samples (the allowed minimum), and both crossing azimuths still assert the jump.
+    """
+    d_i, d_node = finite(inc, node, phi, delta, wrap_fn)
+    if (inc, node, phi) == (SWEEP_INC, 0.0, math.radians(1.0)):
+        d_node = math.nan
+    return d_i, d_node
+
+
+def oracle_node_undefined_at_sweep_azimuths(inc, node, phi, delta, wrap_fn=wrap):
+    """Mutant oracle (M3P11-F2, E5b-defined): no node at two non-crossing azimuths of the E5b
+    sweep (phi = 1 and 2 deg), for both tilt signs: 358 defined samples per sweep, while both
+    crossing azimuths still assert the jump."""
+    d_i, d_node = finite(inc, node, phi, delta, wrap_fn)
+    if (inc, node) == (SWEEP_INC, 0.0) and phi in (math.radians(1.0), math.radians(2.0)):
+        d_node = None
+    return d_i, d_node
+
+
 def tilt_with_nan(phi, delta):
     """Mutant rotation matrix (M3P8-F1 audit) with one NaN entry."""
     r = tilt_matrix(phi, delta)
@@ -893,6 +963,18 @@ EXACT_MUTANTS = {
     "M3P10-F2_equatorial_node_defined": (
         {"elements_fn": elements_equatorial_node_defined},
         ("E5d",),
+    ),
+    # M3P11-F2 (five assertions reclassified as category A): the same construction.
+    "M3P11-F2_wrap_not_periodic": ({"wrap_fn": wrap_not_periodic}, ("wrap",)),
+    "M3P11-F2_node_origin_offset": ({"tilt_fn": tilt_node_origin_offset}, ("E1",)),
+    "M3P11-F2_tilt_axis_quantized": ({"tilt_fn": tilt_axis_quantized}, ("E2",)),
+    "M3P11-F2_oracle_node_nan_at_sweep_azimuth": (
+        {"oracle": oracle_node_nan_at_sweep_azimuth},
+        ("E5b",),
+    ),
+    "M3P11-F2_oracle_node_undefined_at_sweep_azimuths": (
+        {"oracle": oracle_node_undefined_at_sweep_azimuths},
+        ("E5b",),
     ),
 }
 
@@ -1030,47 +1112,410 @@ def outcome(fn, args, kw):
         return "raised", (type(exc), str(exc))
 
 
-def instrumented(kwargs):
+def same_outcome(a, b):
+    """Equality of two outcomes: the same result (same_value), or the same exception."""
+    if a[0] != b[0]:
+        return False
+    return same_value(a[1], b[1]) if a[0] == "value" else a[1] == b[1]
+
+
+# --------------------------------------- intended defects (M3P11-F1, DR-0028 amendment 8)
+# Each built-in mutant declares, for each injected function, its intended defect: a description
+# and expected(args, kw, reference outcome). expected returns None where the defect does not
+# apply (the mutant must then behave exactly as the reference), or else a predicate that the
+# mutant's outcome must satisfy there. Every call is classified (call_kind):
+#   intended    the defect applies and the mutant shows it;
+#   unchanged   the defect does not apply and the mutant equals the reference;
+#   missing     the defect applies but the mutant equals the reference;
+#   unintended  any other outcome: another difference, or a difference where none is intended.
+# A defect is exercised only if it is shown at least once, is never missing and nothing else
+# differs (exercised). A difference alone (rounding, a reassociated fallback, a change in another
+# component) is not evidence (review 11, M3P11-F1). The observation uses only the injected
+# function's arguments and outcomes, never the result of a check.
+CALL_KINDS = ("intended", "unchanged", "missing", "unintended")
+
+
+def exactly(expected):
+    return lambda got: same_outcome(got, expected)
+
+
+def values(ref):
+    """The reference result, or None if the reference raised."""
+    return ref[1] if ref[0] == "value" else None
+
+
+def defect_outcome(compute, description, where=lambda args, ref: True):
+    """The defect: the outcome compute(args, ref) wherever where(args, ref) holds."""
+
+    def expected(args, kw, ref):
+        return exactly(compute(args, ref)) if where(args, ref) else None
+
+    return (description, expected, True)
+
+
+def defect_none():
+    """No defect: an injected function that is the reference implementation itself."""
+    return ("none (the reference implementation)", lambda args, kw, ref: None, False)
+
+
+def defect_scaled(factors, description):
+    """Each component of a result pair multiplied by its factor (exact for 2 and -1)."""
+
+    def compute(args, ref):
+        pair = zip(factors, values(ref), strict=True)
+        return "value", tuple(x if f == 1.0 else f * x for f, x in pair)
+
+    return defect_outcome(compute, description, lambda args, ref: values(ref) is not None)
+
+
+def defect_component(index, value, description, where=None):
+    """One component of a result pair replaced by `value`, where where(args) holds."""
+
+    def compute(args, ref):
+        pair = list(values(ref))
+        pair[index] = value
+        return "value", tuple(pair)
+
+    def applies(args, ref):
+        return values(ref) is not None and (where is None or where(args))
+
+    return defect_outcome(compute, description, applies)
+
+
+def at_sample(series):
+    """where(args): the smallest step of one first-order grid series (as check_formulas)."""
+    inc_deg, node_deg, phi_deg, sign = series
+    inc = math.radians(inc_deg)
+    step = sign * step_scale(inc) * 2.0 ** -(HALVINGS - 1)
+    target = (inc, math.radians(node_deg), math.radians(phi_deg), step)
+    return lambda args: tuple(args[:4]) == target
+
+
+def swapped_trig(args, ref):
+    inc, node, phi, delta = args
+    return "value", (-delta * math.sin(node - phi), delta / math.tan(inc) * math.cos(node - phi))
+
+
+def defect_jump_suppressed(only_inc=None):
+    def applies(args, ref):
+        pair = values(ref)
+        return (
+            pair is not None
+            and pair[1] is not None
+            and abs(pair[1]) > PI / 2.0
+            and only_inc in (None, args[0])
+        )
+
+    where = "" if only_inc is None else f" at i = {math.degrees(only_inc):.1f} deg only"
+    return defect_outcome(
+        lambda args, ref: ("value", (ref[1][0], 0.0)),
+        f"node difference of more than pi/2 replaced by 0 (jump suppressed){where}",
+        applies,
+    )
+
+
+def wrap_reduce(compute):
+    """A finite-input wrap defect: the outcome of compute(a) for every finite a."""
+    return lambda args, ref: outcome(compute, args, {})
+
+
+def nonfinite_input(args, ref):
+    return not math.isfinite(args[0])
+
+
+def finite_input(args, ref):
+    return math.isfinite(args[0])
+
+
+def previous_reduction(a):
+    return a - 2.0 * math.pi * math.floor((a + math.pi) / (2.0 * math.pi))
+
+
+def inexact_reduction(a):
+    r = a - TAU * round(a / TAU)
+    return r + TAU if r <= -PI else r
+
+
+def guard_not_raised(args, kw, ref):
+    if math.isfinite(args[0]):
+        return None
+    return lambda got: (
+        not (
+            got[0] == "raised"
+            and got[1][0] is ValueError
+            and got[1][1].startswith(NONFINITE_MESSAGE)
+        )
+    )
+
+
+def origin_offset(args, ref):
+    c, s = math.cos(NODE_ORIGIN_OFFSET), math.sin(NODE_ORIGIN_OFFSET)
+    rz, m = [[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]], ref[1]
+    return "value", [
+        [sum(rz[r][k] * m[k][q] for k in range(3)) for q in range(3)] for r in range(3)
+    ]
+
+
+def nan_entry(args, ref):
+    m = [row[:] for row in ref[1]]
+    m[1][1] = math.nan
+    return "value", m
+
+
+def quantized_axis(args, ref):
+    phi, delta = args
+    return "value", tilt_matrix(math.radians(15.0 * round(math.degrees(phi) / 15.0)), delta)
+
+
+def has_value(args, ref):
+    return ref[0] == "value"
+
+
+LINE_OF_NODES_DEFECTS = {
+    "unrestricted": defect_outcome(
+        lambda args, ref: ("value", (-args[1], 0.0)),
+        "Delta i = -delta, Delta Omega = 0 in every regime (no domain 0 < i - delta < pi)",
+    ),
+    "interior_undefined": defect_outcome(
+        lambda args, ref: ("value", None),
+        "node reported undefined in the interior regime 0 < i - delta < pi",
+        lambda args, ref: 0.0 < args[0] - args[1] < PI,
+    ),
+    "crossing_node_unchanged": defect_outcome(
+        lambda args, ref: ("value", (ref[1][0], 0.0)),
+        "Delta Omega = 0 instead of +pi in the equator-crossing regimes",
+        lambda args, ref: values(ref) is not None and ref[1][1] == PI,
+    ),
+    "endpoints_defined": defect_outcome(
+        lambda args, ref: ("value", (-args[1], 0.0)),
+        "a defined node (Delta i = -delta, Delta Omega = 0) at the endpoints j = 0 and j = pi",
+        lambda args, ref: args[0] - args[1] in (0.0, PI),
+    ),
+}
+WRAP_DEFECTS = {
+    "previous": defect_outcome(
+        wrap_reduce(previous_reduction),
+        "the bcb7f9b reduction a - 2 pi floor((a + pi) / 2 pi): [-pi, pi), no non-finite guard",
+    ),
+    "previous_guarded": defect_outcome(
+        wrap_reduce(previous_reduction),
+        "the bcb7f9b reduction a - 2 pi floor((a + pi) / 2 pi) for finite input: [-pi, pi)",
+        finite_input,
+    ),
+    "guard_removed": (
+        "the non-finite guard removed: a non-finite input does not raise the guard's ValueError",
+        guard_not_raised,
+        True,
+    ),
+    "inexact_reduction": defect_outcome(
+        wrap_reduce(inexact_reduction),
+        "the inexact reduction a - 2 pi round(a / 2 pi) for finite input",
+        finite_input,
+    ),
+    "typeerror": defect_outcome(
+        lambda args, ref: ("raised", (TypeError, f"{NONFINITE_MESSAGE}: {args[0]!r}")),
+        "a non-finite input raises TypeError instead of ValueError (same message)",
+        nonfinite_input,
+    ),
+    "not_periodic": defect_outcome(
+        lambda args, ref: ("value", ref[1] + 0.01),
+        "an input one or more turns from 1.0 rad reduced to 1.01 instead of 1.0",
+        lambda args, ref: values(ref) == 1.0 and args[0] != 1.0,
+    ),
+}
+TILT_DEFECTS = {
+    "nan_entry": defect_outcome(nan_entry, "rotation matrix entry [1][1] = NaN", has_value),
+    "node_origin_offset": defect_outcome(
+        origin_offset,
+        "an extra rotation of 0.01 rad about the pole (node-longitude origin offset)",
+        has_value,
+    ),
+    "axis_quantized": defect_outcome(
+        quantized_axis,
+        "tilt-axis azimuth rounded to the nearest multiple of 15 deg",
+        has_value,
+    ),
+}
+
+
+def equatorial_node(args, ref):
+    h = args[0]
+    return "value", (ref[1][0], math.atan2(h[0], -h[1]))
+
+
+def sweep_azimuths(*phi_deg):
+    """where(args): the E5b sweep's oracle calls at these azimuths (both tilt signs)."""
+    targets = {(SWEEP_INC, 0.0, math.radians(p)) for p in phi_deg}
+    return lambda args: tuple(args[:3]) in targets
+
+
+JUMP_ASSERTIONS_OFF = ("the jump assertions switched off (assert_jump = False)", False)
+
+# The intended defect of every built-in mutant, for each injected function or setting. The two
+# M3P8-F1_audit_oracle_*_nan names occur in two sections with the same oracle defect; the
+# first-order section also injects the reference formula (defect_none).
+DEFECTS = {
+    "amendment1_original_both_signs_reversed": {
+        "formula": defect_scaled((-1.0, -1.0), "both first-order signs reversed")
+    },
+    "delta_i_sign_reversed": {"formula": defect_scaled((-1.0, 1.0), "Delta i sign reversed")},
+    "delta_node_sign_reversed": {
+        "formula": defect_scaled((1.0, -1.0), "Delta Omega sign reversed")
+    },
+    "cos_sin_swapped": {"formula": defect_outcome(swapped_trig, "cos and sin swapped")},
+}
+for _index, _name in enumerate(COMPONENTS):
+    _factors = {f: tuple(f if k == _index else 1.0 for k in range(2)) for f in (2.0, -1.0)}
+    _oracle_nan = defect_component(_index, math.nan, f"{_name} oracle value NaN everywhere")
+    DEFECTS[f"M3P8-F1_audit_oracle_{_name}_nan"] = {"formula": defect_none(), "oracle": _oracle_nan}
+    for _label, _value in (("nan", math.nan), ("plus_inf", math.inf), ("minus_inf", -math.inf)):
+        DEFECTS[f"M3P8-F1_{_name}_{_label}"] = {
+            "formula": defect_component(_index, _value, f"{_name} formula returns {_value!r}")
+        }
+    for _label, _value in (("plus_inf", math.inf), ("minus_inf", -math.inf)):
+        DEFECTS[f"M3P9-F1_oracle_{_name}_{_label}"] = {
+            "formula": defect_none(),
+            "oracle": defect_component(_index, _value, f"{_name} oracle value {_value!r}"),
+        }
+        DEFECTS[f"M3P9-F1_oracle_{_name}_{_label}_single_sample"] = {
+            "formula": defect_none(),
+            "oracle": defect_component(
+                _index,
+                _value,
+                f"{_name} oracle value {_value!r} at one sample only",
+                at_sample(SINGLE_SAMPLE_SERIES),
+            ),
+        }
+    DEFECTS[f"M3P8-F1_{_name}_zero"] = {
+        "formula": defect_component(_index, 0.0, f"{_name} formula returns 0")
+    }
+    DEFECTS[f"M3P9-F2_{_name}_coefficient_doubled"] = {
+        "formula": defect_scaled(_factors[2.0], f"{_name} first-order coefficient doubled")
+    }
+    DEFECTS[f"M3P9-F2_{_name}_sign_reversed"] = {
+        "formula": defect_scaled(_factors[-1.0], f"{_name} first-order sign reversed")
+    }
+DEFECTS.update(
+    {
+        "M3P6-F1_unrestricted_line_of_nodes_claim": {
+            "line_of_nodes": LINE_OF_NODES_DEFECTS["unrestricted"]
+        },
+        "M3P6-F2_oracle_jump_suppressed": {"oracle": defect_jump_suppressed()},
+        "M3P6-F2_oracle_jump_suppressed_at_i_0p1_deg_only": {
+            "oracle": defect_jump_suppressed(math.radians(0.1))
+        },
+        "M3P6-F2_jump_assertion_disabled": {"assert_jump": JUMP_ASSERTIONS_OFF},
+        "M3P6-F3_previous_wrap_minus_pi_to_pi": {"wrap_fn": WRAP_DEFECTS["previous"]},
+        "M3P7-F1_nonfinite_guard_removed": {"wrap_fn": WRAP_DEFECTS["guard_removed"]},
+        "M3P8-F1_audit_rotation_matrix_nan": {"tilt_fn": TILT_DEFECTS["nan_entry"]},
+        "M3P9-F3_oracle_delta_i_scaled_1pct": {
+            "oracle": defect_scaled((1.01, 1.0), "delta_i oracle value 1 % too large")
+        },
+        "M3P10-F2_wrap_inexact_reduction": {"wrap_fn": WRAP_DEFECTS["inexact_reduction"]},
+        "M3P10-F2_wrap_nonfinite_raises_typeerror": {"wrap_fn": WRAP_DEFECTS["typeerror"]},
+        "M3P10-F2_line_of_nodes_interior_undefined": {
+            "line_of_nodes": LINE_OF_NODES_DEFECTS["interior_undefined"]
+        },
+        "M3P10-F2_line_of_nodes_crossing_node_unchanged": {
+            "line_of_nodes": LINE_OF_NODES_DEFECTS["crossing_node_unchanged"]
+        },
+        "M3P10-F2_line_of_nodes_endpoints_defined": {
+            "line_of_nodes": LINE_OF_NODES_DEFECTS["endpoints_defined"]
+        },
+        "M3P10-F2_equatorial_node_defined": {
+            "elements_fn": defect_outcome(
+                equatorial_node,
+                "a node reported for an equatorial orbit",
+                lambda args, ref: values(ref) is not None and ref[1][1] is None,
+            )
+        },
+        "M3P11-F2_wrap_not_periodic": {"wrap_fn": WRAP_DEFECTS["not_periodic"]},
+        "M3P11-F2_node_origin_offset": {"tilt_fn": TILT_DEFECTS["node_origin_offset"]},
+        "M3P11-F2_tilt_axis_quantized": {"tilt_fn": TILT_DEFECTS["axis_quantized"]},
+        "M3P11-F2_oracle_node_nan_at_sweep_azimuth": {
+            "oracle": defect_component(
+                1, math.nan, "NaN node difference at sweep azimuth 1 deg", sweep_azimuths(1.0)
+            )
+        },
+        "M3P11-F2_oracle_node_undefined_at_sweep_azimuths": {
+            "oracle": defect_component(
+                1, None, "no node at sweep azimuths 1 and 2 deg", sweep_azimuths(1.0, 2.0)
+            )
+        },
+    }
+)
+
+
+def call_kind(intended, args, kw, ref, got):
+    """Classify one call of an injected function against its intended defect (CALL_KINDS)."""
+    if intended is None:  # no declared defect: nothing can be evidence
+        return "unintended"
+    present = intended[1](args, kw, ref)
+    if present is None or present(ref):
+        return "unchanged" if same_outcome(got, ref) else "unintended"
+    if present(got):
+        return "intended"
+    return "missing" if same_outcome(got, ref) else "unintended"
+
+
+def instrumented(kwargs, defects):
     """Wrap each injected function in a recorder; return (kwargs, record).
 
     The recorder calls the mutant, then the reference implementation with the same arguments,
-    and counts the calls whose outcomes differ: different results, or an exception on one side
-    only, or exceptions of a different type or message. The mutant's own result, or exception,
-    is passed on unchanged.
+    and classifies the call against the mutant's intended defect (call_kind). "differing"
+    (amendment 7) still counts every call whose outcome differs in any way; it is reported for
+    comparison and decides nothing. A setting is compared with its declared defective value. The
+    mutant's own result, or exception, is passed on unchanged.
     """
     wrapped, record = {}, {}
     for key, value in kwargs.items():
-        reference = REFERENCE_IMPLEMENTATIONS.get(key)
-        if reference is None:
+        intended = defects.get(key)
+        description = None if intended is None else intended[0]
+        if key in SETTING_DEFAULTS:
             wrapped[key] = value
-            record[key] = {"setting": value, "default": SETTING_DEFAULTS[key]}
+            default = SETTING_DEFAULTS[key]
+            record[key] = {
+                "defect": description,
+                "setting": value,
+                "default": default,
+                "intended": intended is not None and value == intended[1] != default,
+            }
             continue
-        counts = record[key] = {"calls": 0, "differing": 0}
+        counts = record[key] = {"calls": 0, "differing": 0, "defect": description}
+        counts.update(changes=intended is None or intended[2], **dict.fromkeys(CALL_KINDS, 0))
 
-        def recorder(*args, _impl=value, _ref=reference, _counts=counts, **kw):
-            _counts["calls"] += 1
+        def note(args, kw, got, _ref=REFERENCE_IMPLEMENTATIONS[key], _d=intended, _c=counts):
+            ref = outcome(_ref, args, kw)
+            _c["calls"] += 1
+            _c["differing"] += not same_outcome(got, ref)
+            _c[call_kind(_d, args, kw, ref, got)] += 1
+
+        def recorder(*args, _impl=value, _note=note, **kw):
             try:
                 result = _impl(*args, **kw)
             except Exception as exc:
-                _counts["differing"] += outcome(_ref, args, kw) != (
-                    "raised",
-                    (type(exc), str(exc)),
-                )
+                _note(args, kw, ("raised", (type(exc), str(exc))))
                 raise
-            kind, expected = outcome(_ref, args, kw)
-            _counts["differing"] += kind != "value" or not same_value(result, expected)
+            _note(args, kw, ("value", result))
             return result
 
         wrapped[key] = recorder
     return wrapped, record
 
 
+def key_exercised(r):
+    """One injected function or setting shows exactly its intended defect (M3P11-F1)."""
+    if "setting" in r:
+        return r["intended"]
+    clean = r["defect"] is not None and r["missing"] == 0 and r["unintended"] == 0
+    return clean and (r["intended"] > 0) == r["changes"]
+
+
 def exercised(record):
-    """A mutant's defect was exercised if some injected function returned a result different
-    from its reference at least once, or a setting differs from its default."""
-    return any(
-        r["differing"] > 0 if "calls" in r else r["setting"] != r["default"]
-        for r in record.values()
+    """A mutant's defect was exercised only if every injected function and setting shows
+    exactly its intended defect (key_exercised) and at least one of them is a real defect."""
+    return all(key_exercised(r) for r in record.values()) and any(
+        r.get("changes", True) for r in record.values()
     )
 
 
@@ -1085,7 +1530,7 @@ def exception_record(exc):
     }
 
 
-def mutant_failures(run, **kwargs):
+def mutant_failures(run, defects, **kwargs):
     """(failures, exception, defect record) for one built-in defect mutant.
 
     A mutant that raises was not rejected by any check: the exception is recorded with its
@@ -1093,11 +1538,28 @@ def mutant_failures(run, **kwargs):
     applies to mutants only; the formulas under test and the exact properties are never
     wrapped, and raise as before.
     """
-    wrapped, record = instrumented(kwargs)
+    wrapped, record = instrumented(kwargs, defects)
     try:
         return run(**wrapped)[0], None, record
     except Exception as exc:  # recorded and failed closed, never treated as a rejection
         return [], exception_record(exc), record
+
+
+# The test that each section of built-in mutants is run through (main).
+SECTION_RUNS = {
+    "mutants": check_formulas,
+    "formula_defect_mutants": check_formulas,
+    "exact_and_wrap_mutants": run_exact,
+}
+
+
+def observe(run, defects, **kwargs):
+    """Independent observation of an injected defect (M3P11-F1): the defect record of `kwargs`
+    under `run`, whose failures are discarded. The mutation check calls it in a separate process
+    on the unmutated script, with injected functions taken from a mutated copy, so that neither
+    the copy's own recorder nor any check decides whether the defect occurred."""
+    _, exception, record = mutant_failures(run, defects, **kwargs)
+    return {"defect_calls": record, "defect_exercised": exercised(record), "exception": exception}
 
 
 def mutant_entry(entry, exception, record):
@@ -1113,7 +1575,7 @@ def main(out_path):
     exact_failures, exact_report, wrap_report, nonfinite_report = run_exact()
     exact_mutants = {}
     for name, (kwargs, tests) in EXACT_MUTANTS.items():
-        failures, exception, record = mutant_failures(run_exact, **kwargs)
+        failures, exception, record = mutant_failures(run_exact, DEFECTS.get(name, {}), **kwargs)
         counts = by_test(failures)
         exact_mutants[name] = mutant_entry(
             {
@@ -1130,7 +1592,9 @@ def main(out_path):
     under_test_failures, under_test_stats = check_formulas(formulas_amendment2)
     mutants = {}
     for name, formula in MUTANTS.items():
-        failures, exception, record = mutant_failures(check_formulas, formula=formula)
+        failures, exception, record = mutant_failures(
+            check_formulas, DEFECTS.get(name, {}), formula=formula
+        )
         mutants[name] = mutant_entry(
             {"failing_checks": len(failures), "rejected": exception is None and bool(failures)},
             exception,
@@ -1138,7 +1602,9 @@ def main(out_path):
         )
     formula_defect_mutants = {}
     for name, (kwargs, minima) in FORMULA_DEFECT_MUTANTS.items():
-        failures, exception, record = mutant_failures(check_formulas, **kwargs)
+        failures, exception, record = mutant_failures(
+            check_formulas, DEFECTS.get(name, {}), **kwargs
+        )
         counts = by_formula_test(failures)
         formula_defect_mutants[name] = mutant_entry(
             {
@@ -1151,11 +1617,19 @@ def main(out_path):
             record,
         )
     # Invalid mutant setup (M3P10-F1): a built-in mutant whose defect is never exercised tests
-    # nothing, so the run fails.
+    # nothing, so the run fails. Since amendment 8 (M3P11-F1) "exercised" means that exactly the
+    # declared intended defect occurred (exercised), and every injected function and setting of
+    # every built-in mutant must declare one.
     sections = (mutants, formula_defect_mutants, exact_mutants)
     unexercised = sorted(n for s in sections for n, m in s.items() if not m["defect_exercised"])
+    injected = [(n, {"formula"}) for n in MUTANTS]
+    injected += [
+        (n, set(k)) for n, (k, _) in (*FORMULA_DEFECT_MUTANTS.items(), *EXACT_MUTANTS.items())
+    ]
+    undeclared = sorted({n for n, keys in injected if not keys <= set(DEFECTS.get(n, {}))})
     ok = (
         not unexercised
+        and not undeclared
         and not exact_failures
         and not under_test_failures
         and all(m["rejected"] for m in mutants.values())
@@ -1194,6 +1668,11 @@ def main(out_path):
         "formula_defect_mutants": formula_defect_mutants,
         "exact_and_wrap_mutants": exact_mutants,
         "mutants_with_defect_not_exercised": unexercised,
+        "exercise_criterion": (
+            "amendment 8 (M3P11-F1): each injected function shows exactly its declared intended "
+            "defect (intended >= 1, missing = 0, unintended = 0); 'differing' is reported only"
+        ),
+        "mutants_without_declared_defect": undeclared,
     }
     with open(out_path, "w", encoding="ascii") as fh:
         json.dump(rounded(result), fh, indent=1)

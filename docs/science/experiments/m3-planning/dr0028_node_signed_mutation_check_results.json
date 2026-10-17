@@ -1,13 +1,33 @@
 {
  "verdict": "PASS",
  "script": "dr0028_node_signed_verification.py",
+ "exercise_criterion": "amendment 8 (M3P11-F1): a detection requires the intended defect established as exercised by the independent probe (intended >= 1, missing = 0, unintended = 0) and the expected rejection shown",
  "baseline": {
   "exit_code": 0,
   "outcome": "PASS verdict",
-  "expectations_already_true_at_baseline": []
+  "expectations_already_true_at_baseline": [],
+  "direct_exercise_predicates_checked_at_baseline": 77,
+  "direct_exercise_already_met_at_baseline": []
  },
  "mutations": 109,
  "detected": 109,
+ "summary": {
+  "mutations_attempted": 109,
+  "validly_exercised": 109,
+  "not_exercised": 0,
+  "exercise_not_observed_no_output": 0,
+  "detected_for_intended_reason": 109,
+  "by_classification": {
+   "invalid mutation setup": 0,
+   "process failure": 0,
+   "normal execution": 0,
+   "unexpected exception": 0,
+   "rejected for another reason": 0,
+   "expected rejection": 109
+  },
+  "controls": 23,
+  "controls_with_declared_outcome": 23
+ },
  "groups": {
   "M3P8-F1 injection": {
    "mutations": 6,
@@ -52,6 +72,8 @@
    "claimed_expectation": "delta_i_formula_returns_nan",
    "expected_classification": "process failure",
    "actual_classification": "process failure",
+   "expected_exercise": null,
+   "exercise_established": null,
    "observed_outcome": "exit 1, no output: SyntaxError: '(' was never closed",
    "result": "PASS"
   },
@@ -60,6 +82,8 @@
    "claimed_expectation": "delta_i_formula_returns_nan",
    "expected_classification": "process failure",
    "actual_classification": "process failure",
+   "expected_exercise": null,
+   "exercise_established": null,
    "observed_outcome": "exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
    "result": "PASS"
   },
@@ -68,14 +92,18 @@
    "claimed_expectation": "delta_i_formula_returns_nan",
    "expected_classification": "process failure",
    "actual_classification": "process failure",
+   "expected_exercise": null,
+   "exercise_established": null,
    "observed_outcome": "exit 2, no output: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
    "result": "PASS"
   },
   "neutral_edit": {
-   "shows": "a run that completes with verdict PASS is normal execution",
+   "shows": "a run that completes with verdict PASS is normal execution; the probe sees no defect",
    "claimed_expectation": "delta_i_formula_returns_nan",
    "expected_classification": "normal execution",
    "actual_classification": "normal execution",
+   "expected_exercise": false,
+   "exercise_established": false,
    "observed_outcome": "exit 0, PASS verdict",
    "result": "PASS"
   },
@@ -84,15 +112,19 @@
    "claimed_expectation": "delta_i_formula_returns_nan",
    "expected_classification": "invalid mutation setup",
    "actual_classification": "invalid mutation setup",
+   "expected_exercise": null,
+   "exercise_established": null,
    "observed_outcome": "not run: fragment occurs 0 times",
    "result": "PASS"
   },
   "wrong_reason": {
-   "shows": "a mutant rejected for an unrelated reason is not detected",
+   "shows": "a Delta i sign reversal claimed as the Delta Omega sign reversal is not detected: the claimed defect is not exercised (amendment 8; amendment 7 classified it 'rejected for another reason')",
    "claimed_expectation": "M3P5_delta_node_sign_reversed",
-   "expected_classification": "rejected for another reason",
-   "actual_classification": "rejected for another reason",
-   "observed_outcome": "exit 1, FAIL verdict; not shown: formulas under test: exactly 504 failure(s) starting 'sign delta_node '",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
    "result": "PASS"
   },
   "import_failure_inside_mutant": {
@@ -100,6 +132,8 @@
    "claimed_expectation": "order_assertion_disabled",
    "expected_classification": "unexpected exception",
    "actual_classification": "unexpected exception",
+   "expected_exercise": false,
+   "exercise_established": false,
    "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
    "result": "PASS"
   },
@@ -108,6 +142,8 @@
    "claimed_expectation": "sign_assertion_disabled",
    "expected_classification": "unexpected exception",
    "actual_classification": "unexpected exception",
+   "expected_exercise": false,
+   "exercise_established": false,
    "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
    "result": "PASS"
   },
@@ -116,7 +152,9 @@
    "claimed_expectation": "order_assertion_disabled",
    "expected_classification": "invalid mutation setup",
    "actual_classification": "invalid mutation setup",
-   "observed_outcome": "exit 1, FAIL verdict; defect not exercised: M3P9-F2_delta_i_coefficient_doubled, M3P9-F2_delta_node_coefficient_doubled",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
    "result": "PASS"
   },
   "allowed_exception_wrong_location": {
@@ -124,6 +162,8 @@
    "claimed_expectation": "E2_finite_check_removed",
    "expected_classification": "unexpected exception",
    "actual_classification": "unexpected exception",
+   "expected_exercise": true,
+   "exercise_established": true,
    "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
    "result": "PASS"
   },
@@ -132,6 +172,8 @@
    "claimed_expectation": "E2_finite_check_removed",
    "expected_classification": "unexpected exception",
    "actual_classification": "unexpected exception",
+   "expected_exercise": true,
+   "exercise_established": true,
    "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
    "result": "PASS"
   },
@@ -140,7 +182,9 @@
    "claimed_expectation": "delta_i_coefficient_doubled",
    "expected_classification": "expected rejection",
    "actual_classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
    "result": "PASS"
   },
   "valid_mutant_completes_without_rejection": {
@@ -148,7 +192,109 @@
    "claimed_expectation": "delta_i_order_assertion_disabled",
    "expected_classification": "expected rejection",
    "actual_classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0, unintended 0",
+   "result": "PASS"
+  },
+  "suppressed_import_reassociated_fallback": {
+   "shows": "review 11's counterexample: a suppressed import failure followed by the correct formulas with a reassociated product is not an exercised defect (M3P11-F1)",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 2060, unintended 940; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 1860, unintended 940",
+   "result": "PASS"
+  },
+  "defect_in_wrong_component": {
+   "shows": "a mutant that changes only the other formula (doubles the wrong component) does not exercise its intended defect",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 200, unintended 2800; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 3000",
+   "result": "PASS"
+  },
+  "incidental_rounding_only": {
+   "shows": "a mutant whose only change is a rounding-level difference (one ulp) in its own component does not exercise its intended defect",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 0, unintended 3000; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 2800",
+   "result": "PASS"
+  },
+  "partially_exercised_defect": {
+   "shows": "a mutant that shows its defect in one series only (and is correct everywhere else) is not exercised: the defect is missing where it applies",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 10, missing 2990, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 10, missing 2790, unintended 0",
+   "result": "PASS"
+  },
+  "exercised_rejected_for_another_reason": {
+   "shows": "a correctly exercised defect (Delta Omega coefficient doubled) whose run fails only because the Delta Omega order assertion is gone is not detected: the intended check did not reject it",
+   "claimed_expectation": "delta_node_coefficient_doubled",
+   "expected_classification": "rejected for another reason",
+   "actual_classification": "rejected for another reason",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect exercised: formula formula: intended 2800, missing 0, unintended 0; not shown: formulas under test: exactly 504 failure(s) starting 'order delta_node '",
+   "result": "PASS"
+  },
+  "script_record_claims_exercise": {
+   "shows": "a copy whose own record is edited to claim an exercised defect, with a mutant that returns the reference result, is not detection: the independent probe decides",
+   "claimed_expectation": "order_assertion_disabled",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
+   "result": "PASS"
+  },
+  "expected_exception_wrap_guard": {
+   "shows": "the allowed wrap-guard exception at E2 remains an expected rejection",
+   "claimed_expectation": "E2_finite_check_removed",
+   "expected_classification": "expected rejection",
+   "actual_classification": "expected rejection",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_node_nan oracle: intended 7838, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+   "result": "PASS"
+  },
+  "expected_exception_order_estimate": {
+   "shows": "the allowed order-estimate math domain error remains an expected rejection",
+   "claimed_expectation": "oracle_check_weakened_to_isnan",
+   "expected_classification": "expected rejection",
+   "actual_classification": "expected rejection",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F1_oracle_delta_i_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "result": "PASS"
+  },
+  "direct_injection_exercised": {
+   "shows": "a genuine injection into the formula under test is exercised and detected",
+   "claimed_expectation": "review09_formula_delta_i_nan_one_series",
+   "expected_classification": "expected rejection",
+   "actual_classification": "expected rejection",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "result": "PASS"
+  },
+  "direct_injection_wrong_component": {
+   "shows": "a NaN injected into the Delta Omega formula, claimed as the Delta i injection, is not exercised",
+   "claimed_expectation": "delta_i_formula_returns_nan",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
    "result": "PASS"
   }
  },
@@ -156,130 +302,615 @@
   "delta_i_formula_returns_nan": {
    "group": "M3P8-F1 injection",
    "target_property": "finite validation of the delta_i formula",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula value nan where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_i_formula_returns_plus_inf": {
    "group": "M3P8-F1 injection",
    "target_property": "finite validation of the delta_i formula",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula value inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_i_formula_returns_minus_inf": {
    "group": "M3P8-F1 injection",
    "target_property": "finite validation of the delta_i formula",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula value -inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_formula_returns_nan": {
    "group": "M3P8-F1 injection",
    "target_property": "finite validation of the delta_node formula",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula value nan where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_formula_returns_plus_inf": {
    "group": "M3P8-F1 injection",
    "target_property": "finite validation of the delta_node formula",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula value inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_formula_returns_minus_inf": {
    "group": "M3P8-F1 injection",
    "target_property": "finite validation of the delta_node formula",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula value -inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_i_coverage_disabled": {
    "group": "M3P8-F1 coverage",
    "target_property": "delta_i coverage minima",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_zero",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_zero formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns 0",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_coverage_disabled": {
    "group": "M3P8-F1 coverage",
    "target_property": "delta_node coverage minima",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_node_zero",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_node_zero formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_node_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node formula returns 0",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "sign_coverage_removed": {
    "group": "M3P8-F1 coverage",
    "target_property": "sign coverage minima",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_zero",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_node_zero",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_zero formula: intended 3000, missing 0, unintended 0; M3P8-F1_delta_node_zero formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns 0",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_delta_node_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node formula returns 0",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "order_coverage_removed": {
    "group": "M3P8-F1 coverage",
    "target_property": "order coverage minima",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_nan",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_node_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_delta_node_nan completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_nan formula: intended 3000, missing 0, unintended 0; M3P8-F1_delta_node_nan formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns nan",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_delta_node_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula returns nan",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "coverage_comparison_disabled": {
    "group": "M3P8-F1 coverage",
    "target_property": "coverage comparison",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_zero",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_node_zero",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_zero formula: intended 3000, missing 0, unintended 0; M3P8-F1_delta_node_zero formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns 0",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_delta_node_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node formula returns 0",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "sign_counter_moved_outside_gate": {
    "group": "M3P8-F1 coverage",
    "target_property": "sign coverage counter",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_zero",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_node_zero",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_zero completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_delta_node_zero completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_zero formula: intended 3000, missing 0, unintended 0; M3P8-F1_delta_node_zero formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns 0",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_delta_node_zero": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node formula returns 0",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "finite_validation_removed": {
    "group": "M3P8-F1 validation",
    "target_property": "finite validation of oracle and formula values",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_nan",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_audit_oracle_delta_i_nan",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_minus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_minus_inf_single_sample",
+      "raised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
@@ -289,23 +920,263 @@
     "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_nan formula: intended 3000, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_i_nan formula: intended 0, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_i_nan oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns nan",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_audit_oracle_delta_i_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i oracle value NaN everywhere",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "formula_check_weakened_to_isnan": {
    "group": "M3P8-F1 validation",
    "target_property": "finite validation of formula values (+/-inf)",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_plus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_minus_inf",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_delta_i_minus_inf completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_plus_inf formula: intended 3000, missing 0, unintended 0; M3P8-F1_delta_i_minus_inf formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_plus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_delta_i_minus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns -inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_check_removed": {
    "group": "M3P8-F1 validation",
    "target_property": "finite validation of oracle values",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_audit_oracle_delta_i_nan",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_plus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_minus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_minus_inf_single_sample",
+      "raised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P9-F1_oracle_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
@@ -315,12 +1186,204 @@
     "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_i_nan formula: intended 0, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_i_nan oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_i_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i oracle value NaN everywhere",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_plus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i oracle value inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "invalid_sample_not_discarded": {
    "group": "M3P8-F1 validation",
    "target_property": "invalid samples excluded from coverage",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_delta_i_plus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_minus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_minus_inf_single_sample",
+      "raised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)",
@@ -329,126 +1392,629 @@
     "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_delta_i_plus_inf formula: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_delta_i_plus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula returns inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E1_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E1 finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_rotation_matrix_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_rotation_matrix_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_rotation_matrix_nan tilt_fn: intended 68, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_rotation_matrix_nan": {
+      "defect_calls": {
+       "tilt_fn": {
+        "calls": 68,
+        "differing": 68,
+        "defect": "rotation matrix entry [1][1] = NaN",
+        "changes": true,
+        "intended": 68,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E2_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E2 finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_oracle_delta_node_nan",
+      "raised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_node_nan raised ValueError('wrap: non-finite angle: '...) at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\") (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_node_nan oracle: intended 7838, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_node_nan": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7838,
+        "defect": "delta_node oracle value NaN everywhere",
+        "changes": true,
+        "intended": 7838,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E2_endpoint_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E2 endpoint finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_rotation_matrix_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_rotation_matrix_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_rotation_matrix_nan tilt_fn: intended 68, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_rotation_matrix_nan": {
+      "defect_calls": {
+       "tilt_fn": {
+        "calls": 68,
+        "differing": 68,
+        "defect": "rotation matrix entry [1][1] = NaN",
+        "changes": true,
+        "intended": 68,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E3_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E3 finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_oracle_delta_i_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_i_nan oracle: intended 7838, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_i_nan": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7838,
+        "defect": "delta_i oracle value NaN everywhere",
+        "changes": true,
+        "intended": 7838,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E4_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E4 finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_oracle_delta_i_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_i_nan oracle: intended 7838, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_i_nan": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7838,
+        "defect": "delta_i oracle value NaN everywhere",
+        "changes": true,
+        "intended": 7838,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E5b_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E5b finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_oracle_delta_node_nan",
+      "raised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_node_nan raised ValueError('wrap: non-finite angle: '...) at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\") (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_node_nan oracle: intended 7838, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_node_nan": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7838,
+        "defect": "delta_node oracle value NaN everywhere",
+        "changes": true,
+        "intended": 7838,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E6_finite_check_removed": {
    "group": "M3P8-F1 audit",
    "target_property": "E6 finite check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P8-F1_audit_oracle_delta_i_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_i_nan oracle: intended 7838, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_i_nan": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7838,
+        "defect": "delta_i oracle value NaN everywhere",
+        "changes": true,
+        "intended": 7838,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_delta_i_plus_inf_single_sample": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of the delta_i oracle (one value)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "inf",
+    "(inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i oracle=inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 6000,
+        "defect": "delta_i oracle value inf where (inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 5999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_delta_i_minus_inf_single_sample": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of the delta_i oracle (one value)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "-inf",
+    "(inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i oracle=-inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 6000,
+        "defect": "delta_i oracle value -inf where (inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 5999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_delta_node_plus_inf_single_sample": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of the delta_node oracle (one value)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "inf",
+    "(inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node oracle=inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 6000,
+        "defect": "delta_node oracle value inf where (inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 5999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_delta_node_minus_inf_single_sample": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of the delta_node oracle (one value)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "-inf",
+    "(inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node oracle=-inf '",
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 6000,
+        "defect": "delta_node oracle value -inf where (inc_deg, node_deg, phi_deg, sign) == (30.0, 37.0, 0.0, 1.0) and d == deltas[-1]",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 5999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_check_weakened_to_isnan": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of oracle values (+/-inf)",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_plus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_minus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_plus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_minus_inf",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_i_minus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_plus_inf_single_sample",
+      "raised"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F1_oracle_delta_node_minus_inf_single_sample",
+      "raised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F1_oracle_delta_i_plus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P9-F1_oracle_delta_i_minus_inf completed, defect exercised, not rejected (formula_defect_mutants)",
@@ -460,217 +2026,1136 @@
     "built-in mutant M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError('math domain error'...) at check_formulas: p = math.log2(e[-2] / e[-1]) (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F1_oracle_delta_i_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F1_oracle_delta_i_plus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i oracle value inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_minus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i oracle value -inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_plus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node oracle value inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_minus_inf": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node oracle value -inf",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_i_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_i oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_plus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F1_oracle_delta_node_minus_inf_single_sample": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 1,
+        "defect": "delta_node oracle value -inf at one sample only",
+        "changes": true,
+        "intended": 1,
+        "unchanged": 2999,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "oracle_check_weakened_to_isinf": {
    "group": "M3P9-F1 oracle",
    "target_property": "finite validation of oracle values (NaN)",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_audit_oracle_delta_i_nan",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P8-F1_audit_oracle_delta_node_nan",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P8-F1_audit_oracle_delta_i_nan completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P8-F1_audit_oracle_delta_node_nan completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_i_nan formula: intended 0, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_i_nan oracle: intended 3000, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan formula: intended 0, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan oracle: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P8-F1_audit_oracle_delta_i_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i oracle value NaN everywhere",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P8-F1_audit_oracle_delta_node_nan": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 0,
+        "defect": "none (the reference implementation)",
+        "changes": false,
+        "intended": 0,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       },
+       "oracle": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node oracle value NaN everywhere",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_i_coefficient_doubled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_i order check",
+   "exercise_predicate": [
+    "formula",
+    "scaled",
+    2.0,
+    1.0
+   ],
    "expected_rejection": [
     "formulas under test: exactly 560 failure(s) starting 'order delta_i '",
     "formulas under test: exactly 0 failure(s) starting 'sign delta_i '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "first-order factors 2.0, 1.0",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_coefficient_doubled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_node order check",
+   "exercise_predicate": [
+    "formula",
+    "scaled",
+    1.0,
+    2.0
+   ],
    "expected_rejection": [
     "formulas under test: exactly 504 failure(s) starting 'order delta_node '",
     "formulas under test: exactly 0 failure(s) starting 'sign delta_node '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "first-order factors 1.0, 2.0",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "order_assertion_disabled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "order check (both formulas)",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_i_coefficient_doubled",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_node_coefficient_doubled",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F2_delta_i_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P9-F2_delta_node_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F2_delta_i_coefficient_doubled": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i first-order coefficient doubled",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F2_delta_node_coefficient_doubled": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node first-order coefficient doubled",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_i_order_assertion_disabled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_i order check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_i_coefficient_doubled",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F2_delta_i_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F2_delta_i_coefficient_doubled": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i first-order coefficient doubled",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_order_assertion_disabled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_node order check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_node_coefficient_doubled",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F2_delta_node_coefficient_doubled completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_node_coefficient_doubled formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F2_delta_node_coefficient_doubled": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node first-order coefficient doubled",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "sign_assertion_disabled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "sign check (both formulas)",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_i_sign_reversed",
+      "not_rejected"
+     ],
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_node_sign_reversed",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F2_delta_i_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)",
     "built-in mutant M3P9-F2_delta_node_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_sign_reversed formula: intended 3000, missing 0, unintended 0; M3P9-F2_delta_node_sign_reversed formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F2_delta_i_sign_reversed": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i first-order sign reversed",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     },
+     "M3P9-F2_delta_node_sign_reversed": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node first-order sign reversed",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_i_sign_assertion_disabled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_i sign check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_i_sign_reversed",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F2_delta_i_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_sign_reversed formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F2_delta_i_sign_reversed": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i first-order sign reversed",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "delta_node_sign_assertion_disabled": {
    "group": "M3P9-F2 order and sign",
    "target_property": "delta_node sign check",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "formula_defect_mutants",
+      "M3P9-F2_delta_node_sign_reversed",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F2_delta_node_sign_reversed completed, defect exercised, not rejected (formula_defect_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_node_sign_reversed formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F2_delta_node_sign_reversed": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "delta_node first-order sign reversed",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E3_assertion_removed": {
    "group": "M3P9-F3 exact properties",
    "target_property": "E3 closed-form deviation assertion",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P9-F3_oracle_delta_i_scaled_1pct",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F3_oracle_delta_i_scaled_1pct oracle: intended 7825, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F3_oracle_delta_i_scaled_1pct": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7825,
+        "defect": "delta_i oracle value 1 % too large",
+        "changes": true,
+        "intended": 7825,
+        "unchanged": 13,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "E4_assertion_removed": {
    "group": "M3P9-F3 exact properties",
    "target_property": "E4 inclination-bound assertion",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P9-F3_oracle_delta_i_scaled_1pct",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P9-F3_oracle_delta_i_scaled_1pct completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F3_oracle_delta_i_scaled_1pct oracle: intended 7825, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P9-F3_oracle_delta_i_scaled_1pct": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 7825,
+        "defect": "delta_i oracle value 1 % too large",
+        "changes": true,
+        "intended": 7825,
+        "unchanged": 13,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P5_delta_i_sign_reversed": {
    "group": "earlier",
    "target_property": "delta_i sign check",
+   "exercise_predicate": [
+    "formula",
+    "scaled",
+    -1.0,
+    1.0
+   ],
    "expected_rejection": [
     "formulas under test: exactly 560 failure(s) starting 'sign delta_i '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "first-order factors -1.0, 1.0",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P5_delta_node_sign_reversed": {
    "group": "earlier",
    "target_property": "delta_node sign check",
+   "exercise_predicate": [
+    "formula",
+    "scaled",
+    1.0,
+    -1.0
+   ],
    "expected_rejection": [
     "formulas under test: exactly 504 failure(s) starting 'sign delta_node '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 2800, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 2800,
+        "defect": "first-order factors 1.0, -1.0",
+        "changes": true,
+        "intended": 2800,
+        "unchanged": 200,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P6-F1_unrestricted_claim_restored": {
    "group": "earlier",
    "target_property": "E2 line-of-nodes identity",
+   "exercise_predicate": [
+    "injected",
+    "line_of_nodes",
+    "line_of_nodes_exact",
+    "LINE_OF_NODES_DEFECTS",
+    "unrestricted"
+   ],
    "expected_rejection": [
     "exact properties: at least 1 failure(s) starting 'E2 '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: line_of_nodes line_of_nodes: intended 192, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "line_of_nodes": {
+      "defect_calls": {
+       "line_of_nodes": {
+        "calls": 360,
+        "differing": 192,
+        "defect": "Delta i = -delta, Delta Omega = 0 in every regime (no domain 0 < i - delta < pi)",
+        "changes": true,
+        "intended": 192,
+        "unchanged": 168,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P6-F2_E5a_removed": {
    "group": "earlier",
    "target_property": "E5a node-jump assertion",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P6-F2_oracle_jump_suppressed",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P6-F2_oracle_jump_suppressed completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P6-F2_oracle_jump_suppressed oracle: intended 612, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P6-F2_oracle_jump_suppressed": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 612,
+        "defect": "node difference of more than pi/2 replaced by 0 (jump suppressed)",
+        "changes": true,
+        "intended": 612,
+        "unchanged": 7226,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P6-F2_E5b_removed": {
    "group": "earlier",
    "target_property": "E5b node-jump assertion",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P6-F2_oracle_jump_suppressed",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P6-F2_oracle_jump_suppressed completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P6-F2_oracle_jump_suppressed oracle: intended 612, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P6-F2_oracle_jump_suppressed": {
+      "defect_calls": {
+       "oracle": {
+        "calls": 7838,
+        "differing": 612,
+        "defect": "node difference of more than pi/2 replaced by 0 (jump suppressed)",
+        "changes": true,
+        "intended": 612,
+        "unchanged": 7226,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P6-F2_E5c_removed": {
    "group": "earlier",
    "target_property": "E5c jump-assertion coverage guard",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P6-F2_jump_assertion_disabled",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P6-F2_jump_assertion_disabled completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P6-F2_jump_assertion_disabled assert_jump = False",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P6-F2_jump_assertion_disabled": {
+      "defect_calls": {
+       "assert_jump": {
+        "defect": "the jump assertions switched off (assert_jump = False)",
+        "setting": false,
+        "default": true,
+        "intended": true
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P6-F3_previous_wrap_implementation": {
    "group": "earlier",
    "target_property": "wrap interval (-pi, pi]",
+   "exercise_predicate": [
+    "injected",
+    "wrap_fn",
+    "wrap",
+    "WRAP_DEFECTS",
+    "previous_guarded"
+   ],
    "expected_rejection": [
-    "exact properties: at least 1 failure(s) starting 'wrap('"
+    "exact properties: at least 1 failure(s) starting 'wrap('",
+    "exact properties: at least 1 failure(s) starting 'wrap endpoint ('"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: wrap_fn wrap_fn: intended 191, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "wrap_fn": {
+      "defect_calls": {
+       "wrap_fn": {
+        "calls": 7767,
+        "differing": 191,
+        "defect": "the bcb7f9b reduction a - 2 pi floor((a + pi) / 2 pi) for finite input: [-pi, pi)",
+        "changes": true,
+        "intended": 191,
+        "unchanged": 7576,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P7-F1_guard_removed": {
    "group": "earlier",
    "target_property": "wrap non-finite guard",
+   "exercise_predicate": [
+    "injected",
+    "wrap_fn",
+    "wrap",
+    "WRAP_DEFECTS",
+    "guard_removed"
+   ],
    "expected_rejection": [
     "exact properties: at least 1 failure(s) starting 'wrap-nonfinite: '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: wrap_fn wrap_fn: intended 4, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "wrap_fn": {
+      "defect_calls": {
+       "wrap_fn": {
+        "calls": 7765,
+        "differing": 4,
+        "defect": "the non-finite guard removed: a non-finite input does not raise the guard's ValueError",
+        "changes": true,
+        "intended": 4,
+        "unchanged": 7761,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P7-F1_message_check_weakened_to_type_only": {
    "group": "earlier",
    "target_property": "wrap non-finite test (message check)",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P7-F1_nonfinite_guard_removed",
+      "not_rejected"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P7-F1_nonfinite_guard_removed completed, defect exercised, not rejected (exact_and_wrap_mutants)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P7-F1_nonfinite_guard_removed wrap_fn: intended 4, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P7-F1_nonfinite_guard_removed": {
+      "defect_calls": {
+       "wrap_fn": {
+        "calls": 7765,
+        "differing": 4,
+        "defect": "the non-finite guard removed: a non-finite input does not raise the guard's ValueError",
+        "changes": true,
+        "intended": 4,
+        "unchanged": 7761,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "M3P7-F1_nonfinite_tests_disabled": {
    "group": "earlier",
    "target_property": "wrap non-finite tests",
+   "exercise_predicate": [
+    "built-in",
+    [
+     [
+      "exact_and_wrap_mutants",
+      "M3P7-F1_nonfinite_guard_removed",
+      "unexercised"
+     ]
+    ]
+   ],
    "expected_rejection": [
     "built-in mutant M3P7-F1_nonfinite_guard_removed completed, not rejected, defect not exercised (exact_and_wrap_mutants)",
     "report wrap_nonfinite has no entry 'nan' (test not run)",
@@ -678,607 +3163,2333 @@
     "report wrap_nonfinite has no entry 'minus_inf' (test not run)"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P7-F1_nonfinite_guard_removed wrap_fn: intended 4, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "M3P7-F1_nonfinite_guard_removed": {
+      "defect_calls": {
+       "wrap_fn": {
+        "calls": 7765,
+        "differing": 4,
+        "defect": "the non-finite guard removed: a non-finite input does not raise the guard's ValueError",
+        "changes": true,
+        "intended": 4,
+        "unchanged": 7761,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (all)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula value nan where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (first_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "abs(delta) == 1.0e-2 * math.sin(inc)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_i formula value nan where abs(delta) == 1.0e-2 * math.sin(inc)",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_last_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (last_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_i formula value nan where abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_one_series": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (one_series)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "(inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 5,
+        "defect": "delta_i formula value nan where (inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)",
+        "changes": true,
+        "intended": 5,
+        "unchanged": 2995,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_positive_tilt": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (positive_tilt)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "delta > 0.0"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1500, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1500,
+        "defect": "delta_i formula value nan where delta > 0.0",
+        "changes": true,
+        "intended": 1500,
+        "unchanged": 1500,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_near_equatorial": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (near_equatorial)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1200, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1200,
+        "defect": "delta_i formula value nan where round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)",
+        "changes": true,
+        "intended": 1200,
+        "unchanged": 1800,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_nan_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (near_polar)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "nan",
+    "round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 900, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 900,
+        "defect": "delta_i formula value nan where round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)",
+        "changes": true,
+        "intended": 900,
+        "unchanged": 2100,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (all)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula value inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (first_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_i formula value inf where abs(delta) == 1.0e-2 * math.sin(inc)",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_last_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (last_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_i formula value inf where abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_one_series": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (one_series)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "(inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 5,
+        "defect": "delta_i formula value inf where (inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)",
+        "changes": true,
+        "intended": 5,
+        "unchanged": 2995,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_positive_tilt": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (positive_tilt)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "delta > 0.0"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1500, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1500,
+        "defect": "delta_i formula value inf where delta > 0.0",
+        "changes": true,
+        "intended": 1500,
+        "unchanged": 1500,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_near_equatorial": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (near_equatorial)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1200, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1200,
+        "defect": "delta_i formula value inf where round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)",
+        "changes": true,
+        "intended": 1200,
+        "unchanged": 1800,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_plus_inf_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (near_polar)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "inf",
+    "round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 900, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 900,
+        "defect": "delta_i formula value inf where round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)",
+        "changes": true,
+        "intended": 900,
+        "unchanged": 2100,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (all)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_i formula value -inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (first_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_i formula value -inf where abs(delta) == 1.0e-2 * math.sin(inc)",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_last_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (last_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_i formula value -inf where abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_one_series": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (one_series)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "(inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 5,
+        "defect": "delta_i formula value -inf where (inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)",
+        "changes": true,
+        "intended": 5,
+        "unchanged": 2995,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_positive_tilt": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (positive_tilt)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "delta > 0.0"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1500, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1500,
+        "defect": "delta_i formula value -inf where delta > 0.0",
+        "changes": true,
+        "intended": 1500,
+        "unchanged": 1500,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_near_equatorial": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (near_equatorial)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1200, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1200,
+        "defect": "delta_i formula value -inf where round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)",
+        "changes": true,
+        "intended": 1200,
+        "unchanged": 1800,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_i_minus_inf_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i formula (near_polar)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    0,
+    "-inf",
+    "round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_i formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 900, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 900,
+        "defect": "delta_i formula value -inf where round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)",
+        "changes": true,
+        "intended": 900,
+        "unchanged": 2100,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (all)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula value nan where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (first_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "abs(delta) == 1.0e-2 * math.sin(inc)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_node formula value nan where abs(delta) == 1.0e-2 * math.sin(inc)",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_last_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (last_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_node formula value nan where abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_one_series": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (one_series)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "(inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 5,
+        "defect": "delta_node formula value nan where (inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)",
+        "changes": true,
+        "intended": 5,
+        "unchanged": 2995,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_positive_tilt": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (positive_tilt)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "delta > 0.0"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1500, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1500,
+        "defect": "delta_node formula value nan where delta > 0.0",
+        "changes": true,
+        "intended": 1500,
+        "unchanged": 1500,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_near_equatorial": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (near_equatorial)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1200, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1200,
+        "defect": "delta_node formula value nan where round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)",
+        "changes": true,
+        "intended": 1200,
+        "unchanged": 1800,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_nan_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (near_polar)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "nan",
+    "round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 900, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 900,
+        "defect": "delta_node formula value nan where round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)",
+        "changes": true,
+        "intended": 900,
+        "unchanged": 2100,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (all)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula value inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (first_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_node formula value inf where abs(delta) == 1.0e-2 * math.sin(inc)",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_last_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (last_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_node formula value inf where abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_one_series": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (one_series)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "(inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 5,
+        "defect": "delta_node formula value inf where (inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)",
+        "changes": true,
+        "intended": 5,
+        "unchanged": 2995,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_positive_tilt": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (positive_tilt)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "delta > 0.0"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1500, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1500,
+        "defect": "delta_node formula value inf where delta > 0.0",
+        "changes": true,
+        "intended": 1500,
+        "unchanged": 1500,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_near_equatorial": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (near_equatorial)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1200, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1200,
+        "defect": "delta_node formula value inf where round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)",
+        "changes": true,
+        "intended": 1200,
+        "unchanged": 1800,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_plus_inf_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (near_polar)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "inf",
+    "round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 900, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 900,
+        "defect": "delta_node formula value inf where round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)",
+        "changes": true,
+        "intended": 900,
+        "unchanged": 2100,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (all)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 3000,
+        "defect": "delta_node formula value -inf where True",
+        "changes": true,
+        "intended": 3000,
+        "unchanged": 0,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (first_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_node formula value -inf where abs(delta) == 1.0e-2 * math.sin(inc)",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_last_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (last_step)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 600,
+        "defect": "delta_node formula value -inf where abs(delta) == 1.0e-2 * math.sin(inc) * 2.0**-4",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 2400,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_one_series": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (one_series)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "(inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 1 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 5,
+        "defect": "delta_node formula value -inf where (inc, node, phi, delta > 0.0) == (math.radians(30.0), math.radians(37.0), 0.0, True)",
+        "changes": true,
+        "intended": 5,
+        "unchanged": 2995,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_positive_tilt": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (positive_tilt)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "delta > 0.0"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 300 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1500, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1500,
+        "defect": "delta_node formula value -inf where delta > 0.0",
+        "changes": true,
+        "intended": 1500,
+        "unchanged": 1500,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_near_equatorial": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (near_equatorial)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 240 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 1200, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 1200,
+        "defect": "delta_node formula value -inf where round(math.degrees(inc), 9) in (2.0, 5.0, 175.0, 178.0)",
+        "changes": true,
+        "intended": 1200,
+        "unchanged": 1800,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_formula_delta_node_minus_inf_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node formula (near_polar)",
+   "exercise_predicate": [
+    "formula",
+    "component",
+    1,
+    "-inf",
+    "round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 180 failure(s) starting 'nonfinite delta_node formula=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 900, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "formula": {
+      "defect_calls": {
+       "formula": {
+        "calls": 3000,
+        "differing": 900,
+        "defect": "delta_node formula value -inf where round(math.degrees(inc), 9) in (89.0, 90.0, 91.0)",
+        "changes": true,
+        "intended": 900,
+        "unchanged": 2100,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_nan_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (all)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "nan",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_i oracle value nan where True",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_nan_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (first_step)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "nan",
+    "d == deltas[0]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_i oracle value nan where d == deltas[0]",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_nan_negative_tilt_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (negative_tilt_near_polar)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "nan",
+    "sign < 0.0 and inc_deg in NEAR_POLAR"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 5640,
+        "defect": "delta_i oracle value nan where sign < 0.0 and inc_deg in NEAR_POLAR",
+        "changes": true,
+        "intended": 90,
+        "unchanged": 5550,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_plus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (all)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_i oracle value inf where True",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_plus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (first_step)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "inf",
+    "d == deltas[0]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_i oracle value inf where d == deltas[0]",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_plus_inf_negative_tilt_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (negative_tilt_near_polar)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "inf",
+    "sign < 0.0 and inc_deg in NEAR_POLAR"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 5640,
+        "defect": "delta_i oracle value inf where sign < 0.0 and inc_deg in NEAR_POLAR",
+        "changes": true,
+        "intended": 90,
+        "unchanged": 5550,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_minus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (all)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "-inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_i oracle value -inf where True",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_minus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (first_step)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "-inf",
+    "d == deltas[0]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_i oracle value -inf where d == deltas[0]",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_i_minus_inf_negative_tilt_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_i oracle (negative_tilt_near_polar)",
+   "exercise_predicate": [
+    "oracle values",
+    0,
+    "-inf",
+    "sign < 0.0 and inc_deg in NEAR_POLAR"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 5640,
+        "defect": "delta_i oracle value -inf where sign < 0.0 and inc_deg in NEAR_POLAR",
+        "changes": true,
+        "intended": 90,
+        "unchanged": 5550,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_nan_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (all)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "nan",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_node oracle value nan where True",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_nan_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (first_step)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "nan",
+    "d == deltas[0]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_node oracle value nan where d == deltas[0]",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_nan_negative_tilt_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (negative_tilt_near_polar)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "nan",
+    "sign < 0.0 and inc_deg in NEAR_POLAR"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 5640,
+        "defect": "delta_node oracle value nan where sign < 0.0 and inc_deg in NEAR_POLAR",
+        "changes": true,
+        "intended": 90,
+        "unchanged": 5550,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_plus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (all)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_node oracle value inf where True",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_plus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (first_step)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "inf",
+    "d == deltas[0]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_node oracle value inf where d == deltas[0]",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_plus_inf_negative_tilt_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (negative_tilt_near_polar)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "inf",
+    "sign < 0.0 and inc_deg in NEAR_POLAR"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 5640,
+        "defect": "delta_node oracle value inf where sign < 0.0 and inc_deg in NEAR_POLAR",
+        "changes": true,
+        "intended": 90,
+        "unchanged": 5550,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_minus_inf_all": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (all)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "-inf",
+    "True"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_node oracle value -inf where True",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_minus_inf_first_step": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (first_step)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "-inf",
+    "d == deltas[0]"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 3600,
+        "defect": "delta_node oracle value -inf where d == deltas[0]",
+        "changes": true,
+        "intended": 600,
+        "unchanged": 3000,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   },
   "review09_oracle_delta_node_minus_inf_negative_tilt_near_polar": {
    "group": "review-09 injection matrix",
    "target_property": "finite validation of the delta_node oracle (negative_tilt_near_polar)",
+   "exercise_predicate": [
+    "oracle values",
+    1,
+    "-inf",
+    "sign < 0.0 and inc_deg in NEAR_POLAR"
+   ],
    "expected_rejection": [
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "exercise_established": true,
+   "exercise_observation": {
+    "exercised": true,
+    "observations": {
+     "oracle values": {
+      "defect_calls": {
+       "oracle values": {
+        "calls": 5640,
+        "defect": "delta_node oracle value -inf where sign < 0.0 and inc_deg in NEAR_POLAR",
+        "changes": true,
+        "intended": 90,
+        "unchanged": 5550,
+        "missing": 0,
+        "unintended": 0
+       }
+      },
+      "defect_exercised": true,
+      "exception": null
+     }
+    }
+   },
    "result": "PASS"
   }
  }
