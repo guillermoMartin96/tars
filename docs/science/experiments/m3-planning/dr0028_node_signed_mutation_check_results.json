@@ -1,0 +1,210 @@
+{
+ "verdict": "PASS",
+ "script": "dr0028_node_signed_verification.py",
+ "baseline": {
+  "exit_code": 0,
+  "outcome": "PASS verdict"
+ },
+ "mutations": 33,
+ "detected": 33,
+ "results": {
+  "delta_i_formula_returns_nan": {
+   "group": "M3P8-F1 injection",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_i_formula_returns_plus_inf": {
+   "group": "M3P8-F1 injection",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_i_formula_returns_minus_inf": {
+   "group": "M3P8-F1 injection",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_node_formula_returns_nan": {
+   "group": "M3P8-F1 injection",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_node_formula_returns_plus_inf": {
+   "group": "M3P8-F1 injection",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_node_formula_returns_minus_inf": {
+   "group": "M3P8-F1 injection",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_i_coverage_disabled": {
+   "group": "M3P8-F1 coverage",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "delta_node_coverage_disabled": {
+   "group": "M3P8-F1 coverage",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "sign_coverage_removed": {
+   "group": "M3P8-F1 coverage",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "order_coverage_removed": {
+   "group": "M3P8-F1 coverage",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "coverage_comparison_disabled": {
+   "group": "M3P8-F1 coverage",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "sign_counter_moved_outside_gate": {
+   "group": "M3P8-F1 coverage",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "finite_validation_removed": {
+   "group": "M3P8-F1 validation",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "formula_check_weakened_to_isnan": {
+   "group": "M3P8-F1 validation",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "oracle_check_removed": {
+   "group": "M3P8-F1 validation",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "invalid_sample_not_discarded": {
+   "group": "M3P8-F1 validation",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "E1_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "E2_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "exception: ValueError",
+   "detected": true
+  },
+  "E2_endpoint_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "E3_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "E4_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "E5b_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "exception: ValueError",
+   "detected": true
+  },
+  "E6_finite_check_removed": {
+   "group": "M3P8-F1 audit",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P5_delta_i_sign_reversed": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P5_delta_node_sign_reversed": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P6-F1_unrestricted_claim_restored": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P6-F2_E5a_removed": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P6-F2_E5b_removed": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P6-F2_E5c_removed": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P6-F3_previous_wrap_implementation": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P7-F1_guard_removed": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P7-F1_message_check_weakened_to_type_only": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  },
+  "M3P7-F1_nonfinite_tests_disabled": {
+   "group": "earlier",
+   "exit_code": 1,
+   "outcome": "FAIL verdict",
+   "detected": true
+  }
+ }
+}

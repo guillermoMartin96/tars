@@ -1,5 +1,6 @@
-"""DR-0028 / reviews M3P5-F1, M3P6-F1..F3: signed verification of the pole-tilt node and
-inclination formulas, the exact line-of-nodes identity, the node discontinuity and angle wrapping.
+"""DR-0028 / reviews M3P5-F1, M3P6-F1..F3, M3P7-F1, M3P8-F1: signed verification of the pole-tilt
+node and inclination formulas, the exact line-of-nodes identity, the node discontinuity and angle
+wrapping.
 
 Planning research artifact (not production code, not a Proof gate).
 
@@ -17,6 +18,11 @@ the full line-of-nodes identity including equator crossings and endpoints (M3P6-
 the node discontinuity with a coverage guard (M3P6-F2). The first-order checks are unchanged.
 Revised for review 07 (DR-0028 amendment 4, M3P7-F1): wrap() accepts finite angles only and
 raises ValueError for NaN and +/-inf; all finite-input behaviour is unchanged.
+Revised for review 08 (DR-0028 amendment 5, M3P8-F1): every oracle value, first-order prediction
+and error is checked with math.isfinite before any tolerance, order or sign comparison, and a
+non-finite value is a failure; each formula must reach a minimum number of valid order samples
+and of valid sign checks; the exact properties E1-E4 and E6 reject non-finite values instead of
+letting max() and comparisons drop them. All finite-input results are unchanged.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -184,6 +190,50 @@ NEAR_EQUATORIAL = (2.0, 5.0, 175.0, 178.0)
 NODES = (0.0, 37.0, 90.0, 145.0, 200.0, 300.0)
 TILT_AZIMUTHS = (0.0, 60.0, 135.0, 210.0, 300.0)
 HALVINGS = 5  # delta_k = sign * s * 2^-k, k = 0..4
+GRID_INCLINATIONS = INCLINED + NEAR_POLAR + NEAR_EQUATORIAL
+COMPONENTS = ("delta_i", "delta_node")
+SERIES_PER_COMPONENT = len(GRID_INCLINATIONS) * len(NODES) * len(TILT_AZIMUTHS) * 2  # 600
+
+
+def sign_check_minimum(name):
+    """Number of grid series in which a sign check of `name` is applicable (M3P8-F1).
+
+    A sign check compares the sign of the finite result with the sign of the first-order term,
+    so it is meaningful only where that term is nonzero. On this grid it vanishes exactly
+    (in exact arithmetic; node and azimuth are integer degrees) only where
+      delta_i:    cos(Omega - phi) = 0, i.e. Omega - phi = 90 or 270 deg;
+      delta_node: sin(Omega - phi) = 0 or cot i = 0, i.e. Omega - phi = 0 or 180 deg, or i = 90.
+    Every other series must contribute one valid sign check. (At the committed formulas the
+    applicable series have min(|finite|, |first order|) >= 4.6e3 x the gate and the vanishing
+    ones <= 3e-9 x the gate, so the gate separates them with a wide margin.)
+    """
+    n = 0
+    for inc_deg in GRID_INCLINATIONS:
+        for node_deg in NODES:
+            for phi_deg in TILT_AZIMUTHS:
+                psi = (node_deg - phi_deg) % 360.0
+                if name == "delta_i":
+                    applicable = psi % 180.0 != 90.0
+                else:
+                    applicable = psi % 180.0 != 0.0 and inc_deg != 90.0
+                n += 2 if applicable else 0  # both tilt signs
+    return n
+
+
+# Minimum valid samples per formula and check (M3P8-F1). Only samples whose oracle value,
+# first-order value and error are all finite, and which pass the significance gate, count.
+# Sign checks: derived from the grid (sign_check_minimum: 560 and 504).
+# Order checks: the counts the unchanged order check has produced on this fixed grid since
+# bcb7f9b (506 and 532), so that no existing coverage can be lost. Which series pass the gate
+# (errors at the two smallest steps >= SIGNIFICANT x noise) depends on the size of the O(delta^2)
+# error, so it is not a closed-form count; it is nevertheless fixed, because rounding moves an
+# error by at most noise = gate / SIGNIFICANT, i.e. a gate ratio by at most 1e-3, while the
+# nearest samples on either side of the gate sit at ratios 1.0123 and 0.9940 (delta_i) and 1.55
+# and 0.495 (delta_node); the run reports these nearest ratios (stats "gate_ratio_nearest").
+MIN_VALID_SAMPLES = {
+    "delta_i": {"order": 506, "sign": sign_check_minimum("delta_i")},
+    "delta_node": {"order": 532, "sign": sign_check_minimum("delta_node")},
+}
 
 
 def step_scale(inc):
@@ -193,10 +243,31 @@ def step_scale(inc):
     return 1.0e-2 * math.sin(inc)
 
 
-def check_formulas(formula):
-    """Run the signed order and sign checks for one formula pair. Returns (failures, stats)."""
-    failures, orders_i, orders_node, sign_checks = [], [], [], 0
-    for inc_deg in INCLINED + NEAR_POLAR + NEAR_EQUATORIAL:
+def nonfinite_reason(num, lin):
+    """Why a (finite result, first-order value) pair is not a valid sample, or None (M3P8-F1).
+
+    NaN compares false with everything and +/-inf passes every ">= tol" gate, so either would
+    otherwise skip or corrupt the order and sign checks silently. Nothing is filtered: the
+    caller records the reason as a failure and the sample counts towards no coverage minimum.
+    """
+    if num is None or not math.isfinite(num):
+        return f"oracle={num!r}"
+    if not math.isfinite(lin):
+        return f"formula={lin!r}"
+    return None  # both finite: |num| <= pi and |lin| finite, so num - lin cannot overflow
+
+
+def check_formulas(formula, oracle=finite):
+    """Run the signed order and sign checks for one formula pair. Returns (failures, stats).
+
+    Failure messages start with the check that raised them: "nonfinite <component>",
+    "order <component>", "sign <component>" or "coverage <component>".
+    """
+    failures = []
+    orders = {name: [] for name in COMPONENTS}
+    signs = dict.fromkeys(COMPONENTS, 0)
+    nearest = {(name, check): [math.inf, 0.0] for name in COMPONENTS for check in ("order", "sign")}
+    for inc_deg in GRID_INCLINATIONS:
         inc = math.radians(inc_deg)
         tol = SIGNIFICANT * noise(inc)
         for node_deg in NODES:
@@ -204,34 +275,54 @@ def check_formulas(formula):
                 node, phi = math.radians(node_deg), math.radians(phi_deg)
                 for sign in (1.0, -1.0):
                     deltas = [sign * step_scale(inc) * 2.0**-k for k in range(HALVINGS)]
-                    err_i, err_node = [], []
-                    for d in deltas:
-                        num_i, num_node = finite(inc, node, phi, d)
-                        lin_i, lin_node = formula(inc, node, phi, d)
-                        err_i.append(abs(num_i - lin_i))
-                        err_node.append(abs(num_node - lin_node))
                     tag = f"i={inc_deg} node={node_deg} phi={phi_deg} sign={sign:+.0f}"
-                    for name, errs, store in (
-                        ("delta_i", err_i, orders_i),
-                        ("delta_node", err_node, orders_node),
-                    ):
-                        if errs[-2] >= tol and errs[-1] >= tol:
-                            p = math.log2(errs[-2] / errs[-1])
-                            store.append(p)
+                    errs = {name: [] for name in COMPONENTS}  # None once a value is invalid
+                    for d in deltas:
+                        num = dict(zip(COMPONENTS, oracle(inc, node, phi, d), strict=True))
+                        lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True))
+                        for name in COMPONENTS:
+                            if errs[name] is None:
+                                continue
+                            reason = nonfinite_reason(num[name], lin[name])
+                            if reason is not None:
+                                failures.append(f"nonfinite {name} {reason} delta={d!r} {tag}")
+                                errs[name] = None
+                                continue
+                            errs[name].append(abs(num[name] - lin[name]))
+                    for name in COMPONENTS:
+                        e = errs[name]
+                        if e is None:
+                            continue
+                        ratio = min(e[-2], e[-1]) / tol
+                        if e[-2] >= tol and e[-1] >= tol:
+                            p = math.log2(e[-2] / e[-1])
+                            orders[name].append(p)
+                            nearest[name, "order"][0] = min(nearest[name, "order"][0], ratio)
                             if p < P_MIN:
                                 failures.append(f"order {name} p={p:.3f} {tag}")
-                    # Sign check at the smallest step, with the finite result as the reference.
-                    d = deltas[-1]
-                    num_i, num_node = finite(inc, node, phi, d)
-                    lin_i, lin_node = formula(inc, node, phi, d)
-                    for name, num, lin in (
-                        ("delta_i", num_i, lin_i),
-                        ("delta_node", num_node, lin_node),
-                    ):
-                        if abs(num) >= tol and abs(lin) >= tol:
-                            sign_checks += 1
-                            if (num > 0.0) != (lin > 0.0):
-                                failures.append(f"sign {name} num={num:.3e} lin={lin:.3e} {tag}")
+                        else:
+                            nearest[name, "order"][1] = max(nearest[name, "order"][1], ratio)
+                    # Sign check at the smallest step, with the finite result as the reference
+                    # (num and lin still hold the values at deltas[-1]).
+                    for name in COMPONENTS:
+                        if errs[name] is None:
+                            continue
+                        n, lin_v = num[name], lin[name]
+                        ratio = min(abs(n), abs(lin_v)) / tol
+                        if abs(n) >= tol and abs(lin_v) >= tol:
+                            signs[name] += 1
+                            nearest[name, "sign"][0] = min(nearest[name, "sign"][0], ratio)
+                            if (n > 0.0) != (lin_v > 0.0):
+                                failures.append(f"sign {name} num={n:.3e} lin={lin_v:.3e} {tag}")
+                        else:
+                            nearest[name, "sign"][1] = max(nearest[name, "sign"][1], ratio)
+    # Coverage (M3P8-F1): each formula, each check, enforced separately.
+    for name in COMPONENTS:
+        for check, count in (("order", len(orders[name])), ("sign", signs[name])):
+            minimum = MIN_VALID_SAMPLES[name][check]
+            if not count >= minimum:
+                failures.append(f"coverage {name} {check}: {count} valid samples < {minimum}")
+    orders_i, orders_node = orders["delta_i"], orders["delta_node"]
     stats = {
         "order_samples_delta_i": len(orders_i),
         "order_samples_delta_node": len(orders_node),
@@ -239,7 +330,14 @@ def check_formulas(formula):
         "observed_order_delta_node_min_max": (
             [min(orders_node), max(orders_node)] if orders_node else None
         ),
-        "sign_checks": sign_checks,
+        "sign_checks": signs["delta_i"] + signs["delta_node"],
+        "sign_checks_delta_i": signs["delta_i"],
+        "sign_checks_delta_node": signs["delta_node"],
+        "minimum_valid_samples": MIN_VALID_SAMPLES,
+        "gate_ratio_nearest": {
+            f"{name}_{check}": {"lowest_counted": v[0], "highest_not_counted": v[1]}
+            for (name, check), v in nearest.items()
+        },
     }
     return failures, stats
 
@@ -364,9 +462,18 @@ def wrap_nonfinite_tests(wrap_fn):
 
 
 def exact_properties(
-    oracle=finite, wrap_fn=wrap, line_of_nodes=line_of_nodes_exact, assert_jump=True
+    oracle=finite,
+    wrap_fn=wrap,
+    line_of_nodes=line_of_nodes_exact,
+    assert_jump=True,
+    tilt_fn=tilt_matrix,
 ):
-    """Exact (finite-delta) properties, independent of any first-order formula."""
+    """Exact (finite-delta) properties, independent of any first-order formula.
+
+    Every value compared against a tolerance is first checked with math.isfinite (M3P8-F1
+    audit): max() silently drops a NaN that is not its first argument, and every comparison
+    with NaN is false, so a non-finite deviation would otherwise pass.
+    """
     failures, report = [], {}
 
     # E1. R is a proper rotation; R = Rx(-delta) for phi = 0; B's pole is A's pole rotated by
@@ -375,7 +482,7 @@ def exact_properties(
     for phi_deg in TILT_AZIMUTHS:
         for delta_deg in (-20.0, -0.15, 0.15, 20.0):
             phi, delta = math.radians(phi_deg), math.radians(delta_deg)
-            r = tilt_matrix(phi, delta)
+            r = tilt_fn(phi, delta)
             rrt = [[sum(r[a][k] * r[b][k] for k in range(3)) for b in range(3)] for a in range(3)]
             det = (
                 r[0][0] * (r[1][1] * r[2][2] - r[1][2] * r[2][1])
@@ -393,6 +500,9 @@ def exact_properties(
                 c, s = math.cos(-delta), math.sin(-delta)
                 rx = [[1.0, 0.0, 0.0], [0.0, c, -s], [0.0, s, c]]
                 dev = max(dev, max(abs(r[a][b] - rx[a][b]) for a in range(3) for b in range(3)))
+            if not math.isfinite(dev) or any(not math.isfinite(x) for row in r for x in row):
+                failures.append(f"E1 non-finite rotation matrix phi={phi_deg} d={delta_deg}")
+                continue
             worst = max(worst, dev)
     report["E1_rotation_convention_max_deviation"] = worst
     if worst > 16.0 * EPS:  # entries are O(1); a few roundings each
@@ -428,6 +538,9 @@ def exact_properties(
                 failures.append(f"E2 {kind} unexpected undefined node i={inc_deg} d={delta_deg}")
                 continue
             exp_i, exp_node = expected
+            if not all(math.isfinite(x) for x in (d_i, d_node, exp_i, exp_node)):
+                failures.append(f"E2 {kind} non-finite i={inc_deg} d={delta_deg} node={node_deg}")
+                continue
             dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol
             worst = max(worst, dev)
             if dev > 1.0:
@@ -465,8 +578,11 @@ def exact_properties(
                 endpoints += 1
                 if line_of_nodes(inc, delta) is not None:
                     failures.append(f"E2 endpoint claims a defined node: i={inc_deg}")
-                h_b = apply(tilt_matrix(node, delta), h_from_elements(inc, node))
+                h_b = apply(tilt_fn(node, delta), h_from_elements(inc, node))
                 rho = math.hypot(h_b[0], h_b[1])
+                if not math.isfinite(rho):
+                    failures.append(f"E2 endpoint non-finite: i={inc_deg} rho={rho!r}")
+                    continue
                 worst_rho = max(worst_rho, rho / EPS)
                 if rho > 32.0 * EPS:
                     failures.append(f"E2 endpoint not equatorial: i={inc_deg} rho={rho:.3e}")
@@ -482,9 +598,12 @@ def exact_properties(
         for node_deg in NODES:
             for delta_deg in (-1.0, -0.15, 0.15, 1.0):
                 inc, node, delta = (math.radians(x) for x in (inc_deg, node_deg, delta_deg))
-                d_i, d_node = finite(inc, node, node - math.pi / 2.0, delta)
+                d_i, d_node = oracle(inc, node, node - math.pi / 2.0, delta, wrap_fn)
                 exp_node = math.atan(math.sin(delta) / math.tan(inc))
                 exp_i = math.acos(math.cos(delta) * math.cos(inc)) - inc
+                if d_node is None or not all(math.isfinite(x) for x in (d_i, d_node)):
+                    failures.append(f"E3 non-finite i={inc_deg} node={node_deg} d={delta_deg}")
+                    continue
                 worst = max(
                     worst, abs(d_node - exp_node) / noise(inc), abs(d_i - exp_i) / noise(inc)
                 )
@@ -501,7 +620,10 @@ def exact_properties(
                     inc, node, phi, delta = (
                         math.radians(x) for x in (inc_deg, node_deg, phi_deg, delta_deg)
                     )
-                    d_i, _ = finite(inc, node, phi, delta)
+                    d_i, _ = oracle(inc, node, phi, delta, wrap_fn)
+                    if not math.isfinite(d_i):
+                        failures.append(f"E4 non-finite i={inc_deg} node={node_deg} d={delta_deg}")
+                        continue
                     ratio = max(ratio, (abs(d_i) - abs(delta)) / (64.0 * EPS))
     # Inclinations come from atan2(hypot, h_z), whose error is ~1x the component error, so the
     # noise of Delta i is <= 64 eps (see noise()); the excess is reported in those units.
@@ -526,6 +648,9 @@ def exact_properties(
             d_i, d_node = oracle(inc, 0.0, math.radians(k), delta, wrap_fn)
             if d_node is None:
                 continue
+            if not math.isfinite(d_node):
+                failures.append(f"E5b sweep: non-finite node difference at phi = {k} deg")
+                continue
             defined += 1
             largest = max(largest, abs(d_node))
             if k == cross_k and assert_jump:
@@ -547,6 +672,9 @@ def exact_properties(
     lin_i, lin_node = formulas_amendment2(
         math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15)
     )
+    if d_node is None or not all(math.isfinite(x) for x in (d_i, d_node, lin_i, lin_node)):
+        failures.append("E6 review-04 example non-finite")
+        return failures, report
     report["E6_review04_node_b_deg"] = 90.0 + math.degrees(d_node)
     report["E6_review04_delta_node_deg"] = math.degrees(d_node)
     report["E6_review04_first_order_delta_node_deg"] = math.degrees(lin_node)
@@ -582,10 +710,29 @@ def suppress_jump(oracle, only_inc=None):
     return mutant
 
 
+def oracle_with_nonfinite(component, value):
+    """Mutant oracle (M3P8-F1 audit): one finite-rotation output replaced by a non-finite value."""
+
+    def mutant(inc, node, phi, delta, wrap_fn=wrap):
+        out = list(finite(inc, node, phi, delta, wrap_fn))
+        out[component] = value
+        return tuple(out)
+
+    return mutant
+
+
+def tilt_with_nan(phi, delta):
+    """Mutant rotation matrix (M3P8-F1 audit) with one NaN entry."""
+    r = tilt_matrix(phi, delta)
+    r[1][1] = math.nan
+    return r
+
+
 def by_test(failures):
     """Count failures by the regression test that raised them."""
     keys = {"E2": 0, "E5a": 0, "E5b": 0, "E5c": 0, "E5d": 0, "wrap": 0, "other": 0}
     keys["wrap_nonfinite"] = 0
+    keys.update({"E1": 0, "E3": 0, "E4": 0, "E6": 0})  # M3P8-F1 audit
     for f in failures:
         head = f.split()[0]
         if head.startswith("wrap-nonfinite"):
@@ -622,12 +769,68 @@ EXACT_MUTANTS = {
         {"wrap_fn": wrap_without_nonfinite_guard},
         ("wrap_nonfinite",),
     ),
+    # M3P8-F1 audit: before amendment 5, a NaN here was dropped by max() or failed every ">"
+    # comparison, and E1-E4 and E6 passed.
+    "M3P8-F1_audit_rotation_matrix_nan": ({"tilt_fn": tilt_with_nan}, ("E1", "E2")),
+    "M3P8-F1_audit_oracle_delta_i_nan": (
+        {"oracle": oracle_with_nonfinite(0, math.nan)},
+        ("E2", "E3", "E4", "E6"),
+    ),
+    "M3P8-F1_audit_oracle_delta_node_nan": (
+        {"oracle": oracle_with_nonfinite(1, math.nan)},
+        ("E2", "E3", "E5b", "E6"),
+    ),
 }
 
 # Minimum failure counts beyond "at least one". The guard-removed mutant must fail in every
 # non-finite category (NaN, -NaN, +inf, -inf), so that the message check that distinguishes
 # the guard from math.fmod's own ValueError for +/-inf is load-bearing too.
 MIN_DESIGNATED_FAILURES = {"M3P7-F1_nonfinite_guard_removed": {"wrap_nonfinite": 4}}
+
+
+def formula_with(component, value):
+    """Mutant formula (M3P8-F1): the committed pair with one component replaced by `value`."""
+
+    def mutant(inc, node, phi, delta):
+        out = list(formulas_amendment2(inc, node, phi, delta))
+        out[component] = value
+        return tuple(out)
+
+    return mutant
+
+
+def by_formula_test(failures):
+    """Count first-order failures by check and, for nonfinite and coverage, by formula."""
+    keys = {"order": 0, "sign": 0}
+    keys.update({f"{c}_{n}": 0 for c in ("nonfinite", "coverage") for n in COMPONENTS})
+    for f in failures:
+        head, name = f.split()[:2]
+        keys[head if head in ("order", "sign") else f"{head}_{name}"] += 1
+    return keys
+
+
+# First-order defect mutants (M3P8-F1): keyword arguments for check_formulas, and the checks
+# that must each reject the mutant with at least the given number of failures. A non-finite
+# value must be reported in every one of the SERIES_PER_COMPONENT series (so no weakened check
+# can let some through) and must fail both coverage minima of its formula (order and sign). A
+# zero prediction is finite but skips every sign check of its formula, so the coverage minimum
+# must reject it. The oracle mutants make the oracle half of nonfinite_reason load-bearing.
+FORMULA_DEFECT_MUTANTS = {}
+for _index, _name in enumerate(COMPONENTS):
+    _minima = {f"nonfinite_{_name}": SERIES_PER_COMPONENT, f"coverage_{_name}": 2}
+    for _label, _value in (("nan", math.nan), ("plus_inf", math.inf), ("minus_inf", -math.inf)):
+        FORMULA_DEFECT_MUTANTS[f"M3P8-F1_{_name}_{_label}"] = (
+            {"formula": formula_with(_index, _value)},
+            _minima,
+        )
+    FORMULA_DEFECT_MUTANTS[f"M3P8-F1_{_name}_zero"] = (
+        {"formula": formula_with(_index, 0.0)},
+        {f"coverage_{_name}": 1},
+    )
+    FORMULA_DEFECT_MUTANTS[f"M3P8-F1_audit_oracle_{_name}_nan"] = (
+        {"formula": formulas_amendment2, "oracle": oracle_with_nonfinite(_index, math.nan)},
+        _minima,
+    )
 
 
 def main(out_path):
@@ -648,11 +851,21 @@ def main(out_path):
     for name, formula in MUTANTS.items():
         failures, _ = check_formulas(formula)
         mutants[name] = {"failing_checks": len(failures), "rejected": bool(failures)}
+    formula_defect_mutants = {}
+    for name, (kwargs, minima) in FORMULA_DEFECT_MUTANTS.items():
+        failures, _ = check_formulas(**kwargs)
+        counts = by_formula_test(failures)
+        formula_defect_mutants[name] = {
+            "designated_minimum_failures": minima,
+            "failures_by_check": counts,
+            "rejected_by_designated_checks": all(counts[t] >= m for t, m in minima.items()),
+        }
     ok = (
         not exact_failures
         and not under_test_failures
         and all(m["rejected"] for m in mutants.values())
         and all(m["rejected_by_designated_test"] for m in exact_mutants.values())
+        and all(m["rejected_by_designated_checks"] for m in formula_defect_mutants.values())
     )
     result = {
         "verdict": "PASS" if ok else "FAIL",
@@ -683,6 +896,7 @@ def main(out_path):
             "failures": under_test_failures,
         },
         "mutants": mutants,
+        "formula_defect_mutants": formula_defect_mutants,
         "exact_and_wrap_mutants": exact_mutants,
     }
     with open(out_path, "w", encoding="ascii") as fh:
