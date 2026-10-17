@@ -176,6 +176,14 @@ Review-10 findings M3P10-F1 and M3P10-F2: **NOT RESOLVED** (reviewer's dispositi
 | M3P11-F1 | MINOR | ACCEPTED; was not applied (I-10 §9 stop) → **corrected** | I-11 §2 | DR-0028 "Resolution amendment 8" (each built-in mutant declares its intended defect; exercised = shown, never missing, nothing else different; every mutation has an exercise predicate established by an independent probe; 23 controls, the four M3P11-F1 regression controls fail against `c16b3b5` and pass now; 109/109 exercised and detected for the intended reason); `docs/reviews/M3-planning-review-11.md`, "Resolution of findings". Original record: verification defect: "defect exercised" accepts any bitwise difference, so a suppressed import failure with a correct, reassociated fallback still counts as detection of an assertion removal that never happened. Not a mathematical error |
 | M3P11-F2 | MINOR | ACCEPTED; was not applied (I-10 §9 stop) → **corrected** | I-11 §3 | DR-0028 "Resolution amendment 8": W5, E1, E2e, E5b-nonfinite and E5b-defined reclassified A, each with a built-in mutant; 11 A, 4 B (property-wide arguments), 3 C, 0 D; sweep 28 detected / 7 surviving; `docs/reviews/M3-planning-review-11.md`, "Resolution of findings". Original record: verification defect: five category B assertions (W5, E1, E2e, E5b-nonfinite, E5b-defined) protect defects their stated substitutes miss; the 6 A / 9 B / 3 C classification is not supported. Not a mathematical error |
 
+## Review findings (M3 Planning Review 12)
+Review-11 findings M3P11-F1 and M3P11-F2, and review-10 findings M3P10-F1 and M3P10-F2: **NOT RESOLVED** (reviewer's disposition; see M3P12-F1 and M3P12-F2).
+
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P12-F1 | MINOR | ACCEPTED; **not applied** (I-11 §9 stop) | Pending | `docs/reviews/M3-planning-review-12.md`. Unsound verification claim: the oracle-values probe observes values only where the finite validation runs, which `check_formulas()` skips after a component's first invalid value, so a first-step-only oracle injection is certified as the all-steps mutation ("missing = 0"). Not a mathematical error |
+| M3P12-F2 | MINOR | ACCEPTED; **not applied** (I-11 §9 stop) | Pending | `docs/reviews/M3-planning-review-12.md`. Unsound verification claim: E6-sign's category B premise covers the formula's sign on the first-order grid, which never evaluates E6's tilt (0.15°); a formula sign reversal confined to that tilt passes with only E6-sign removed. The 11 A / 4 B / 3 C classification is not supported for E6-sign. Not a mathematical error |
+
 ## Gates
 | Gate | State |
 |---|---|
