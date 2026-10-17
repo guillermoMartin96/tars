@@ -9,7 +9,7 @@ The snapshot is the current directory: a git clone of the planning branch at HEA
 - **Changes under review:** `git diff faba9d6..HEAD`.
   - `03707a8` changes the verification script and the mutation check, adds the assertion-removal sweep, and regenerates the three results files.
   - `6396141` records the corrections in the documents.
-  - The commit after it adds only this prompt.
+  - The commits after it add only this prompt and an erratum to the review 09 record (the M1 Proof step count).
   - The previous versions are at `faba9d6`: `git show faba9d6:docs/science/experiments/m3-planning/dr0028_node_signed_verification.py`, and the same for `dr0028_node_signed_mutation_check.py`.
 - **Review history.** Each round has a record `docs/reviews/M3-planning-review-0N.md` and raw output `docs/reviews/raw/M3-planning-codex-review0N.md`. Read them; every finding must remain recorded with its disposition and its correction intact.
   - **Round 01:** M3P-F1…F5. ACCEPTED and corrected.
