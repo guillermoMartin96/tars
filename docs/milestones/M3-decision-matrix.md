@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-17, tenth planning checkpoint (review 10 correction M3P10-F1 and classification of the 18 assertions for M3P10-F2; no decision changed). Earlier: 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -22,6 +22,7 @@ No OPEN or DEFERRED item has a default.
 - **I-7:** "Continue the TARS spacecraft simulator M3 planning work from branch `milestone-3-planning`, currently at commit `0dac6d3`" (Tech Lead, 2026-10-16), sections 1–6.
 - **I-8:** "Continue TARS M3 planning from `milestone-3-planning` at `0ac630b`" (Tech Lead, 2026-10-16), sections 1–8.
 - **I-9:** "I-9 — M3 Planning Verification Hardening and Codex Review 10" (Tech Lead, 2026-10-17), sections 1–10.
+- **I-10:** "I-10 — Resolve M3P10-F1 and authorize Review 11" (Tech Lead, 2026-10-17), sections 1–10.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -163,8 +164,8 @@ Review-09 findings M3P9-F1 and M3P9-F2: **RESOLVED**; M3P9-F3: **RESOLVED (E3/E4
 
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P10-F1 | MINOR | ACCEPTED; **not applied** (I-9 §9 stop) | Pending | `docs/reviews/M3-planning-review-10.md`. Verification defect: the mutation check accepts a built-in mutant that raised an unrelated exception (e.g. an import failure inside the mutant) as evidence that an assertion was removed. Not a mathematical error, and no false passing verdict of the verification script |
-| M3P10-F2 | NOTE | ACCEPTED as a NOTE; no change proposed | Pending (whether to protect the 18 surviving assertions) | `docs/reviews/M3-planning-review-10.md`. Optional improvement: 18 of 35 assertions are not individually load-bearing under mutation; no correctness defect found |
+| M3P10-F1 | MINOR | ACCEPTED; was not applied (I-9 §9 stop) → **corrected** | I-10 §2–§3 | DR-0028 "Resolution amendment 7" (defect record per built-in mutant; six classification categories; "not rejected" requires a completed, exercised mutant; exceptions only by explicit allowance for the E2/E5b wrap guard and the order-estimate math domain error; 13 controls, the five regression controls fail against `896d52d` and pass now); `docs/reviews/M3-planning-review-10.md`, "Resolution of findings". Original record: an unrelated exception inside a built-in mutant counted as evidence of a removed assertion |
+| M3P10-F2 | NOTE | ACCEPTED as a NOTE → **classified** | I-10 §4 | DR-0028 "Resolution amendment 7": 6 A (new mutants), 9 B (independent check demonstrated), 3 C (rationale), 0 D; sweep now 23 detected / 12 surviving; `docs/reviews/M3-planning-review-10.md`, "Resolution of findings" |
 
 ## Gates
 | Gate | State |

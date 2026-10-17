@@ -7,6 +7,7 @@
 **Resolution amendment 4 (2026-10-16, append-only):** under review 07 (M3P7-F1), the wrapping guarantee is restricted to finite angles, and non-finite inputs raise ValueError. Finite-input behaviour, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 4" at the end.  
 **Resolution amendment 5 (2026-10-16, append-only):** under review 08 (M3P8-F1), the verification script rejects non-finite values before every comparison and requires a minimum number of valid samples for each formula's order and sign checks; a bounded audit applies the same rule to the exact properties. All finite results, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 5" at the end.  
 **Resolution amendment 6 (2026-10-17, append-only):** under review 09 (M3P9-F1, F2, F3), new mutants make the oracle ±∞ rejection and each formula's order and sign assertions load-bearing for their own reason, and E3 and E4 each gain a mutant; the file-level mutation check now accepts a detection only for its declared reason. No check, formula, tolerance, finite result or decision is changed. See "Resolution amendment 6" at the end.  
+**Resolution amendment 7 (2026-10-17, append-only):** under review 10 (M3P10-F1, F2), the mutation check no longer accepts an exception raised inside a built-in mutant as evidence of a removed assertion, except where an explicit allowance names the mutant, type, message and call stack; the 18 assertions that were not individually load-bearing are classified, and the six of category A gain mutants. No check, formula, tolerance, finite result or decision is changed. See "Resolution amendment 7" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -635,6 +636,7 @@ New built-in mutants in `formula_defect_mutants`. Each must be rejected by every
 - `main` now evaluates each built-in defect mutant through `mutant_failures`. An exception raised while a mutant is evaluated is recorded under `exception`, and the mutant counts as **not rejected**, so the verdict is FAIL and the exit status 1. A crash is never counted as a designated rejection. The formulas under test and the exact properties are not wrapped: an exception there still ends the process.
 - **Why this was needed.** With the oracle check weakened, the new single-sample ±∞ mutants make the order estimate evaluate log2(finite/∞) = log2(0), which raises "math domain error". Before this change, that crash would have ended the process before any verdict, so the file-level mutation would have been "detected" only by a crash.
 - **At the committed script no mutant raises**, so no `exception` key appears in the output.
+- **Superseded by Resolution amendment 7 (review M3P10-F1).** Recording a raising mutant as not rejected is kept, but the mutation check no longer accepts "not rejected" from a mutant that raised, or whose defect was not exercised; an exception counts only under an explicit allowance.
 
 ### File-level mutation check (I-9 §6)
 `dr0028_node_signed_mutation_check.py` (output `dr0028_node_signed_mutation_check_results.json`) is revised so that each mutation is detected only for its intended reason.
@@ -683,9 +685,123 @@ New built-in mutants in `formula_defect_mutants`. Each must be rejected by every
 - **What a survivor means.** No built-in mutant depends on that assertion alone. Either another assertion of the same test rejects every designated mutant, as for the previous-wrap mutant, which fails several finite wrap assertions at once; or no mutant exercises it.
 - **Every assertion named by M3P9-F1, F2 and F3 is detected individually:** the non-finite, order and sign assertions of the first-order checks, and the E3 and E4 assertions. The oracle finite check is a condition inside `nonfinite_reason`, not a separate statement; its removal and both weakenings are file-level mutations above.
 - **The 18 survivors are not corrected.** Protecting them needs new defect mutants for assertions that no review finding named, which is outside I-9 §3–§5. They are recorded for the Tech Lead's decision. None of them is a defect in a check: each assertion is present, and the sweep shows only that no mutant makes it individually load-bearing.
+- **Followed up by Resolution amendment 7 (review M3P10-F2, I-10 §4).** The 18 are classified (6 A, 9 B, 3 C, 0 D); the six of category A gain built-in mutants. The sweep now reports 23 detected and 12 surviving.
 
 ### Results
 - **Verdict PASS, exit 0.** Two consecutive runs of the verification script, of the mutation check and of the sweep each produce byte-identical output.
 - **Finite results unchanged.** Comparing the output with `faba9d6`, every pre-existing value is identical. The 53 differences are all added keys: the per-formula order and sign counts of the existing first-order mutants, and the 13 new mutants.
 - **Coverage unchanged:** order 506 (Δi) and 532 (ΔΩ), sign 560 (Δi) and 504 (ΔΩ), each equal to its minimum.
 - **Unchanged definitions.** An AST comparison with `faba9d6` shows that only `EXACT_MUTANTS`, `by_formula_test` and `main` changed among the existing top-level definitions, plus the new mutant helpers. The oracle, formulas, wrap, tolerances, grid, checks and minima are unchanged.
+
+## Resolution amendment 7 (2026-10-17; reviews M3P10-F1, M3P10-F2)
+**Authority:** Tech Lead, instruction "I-10 — Resolve M3P10-F1 and authorize Review 11" (I-10), sections 2–6.
+- **Unchanged:**
+  - the decision (J-ax-1), the identity transformation of M3, atmospheric co-rotation as air motion, the constants, the thresholds and the scope;
+  - the signed first-order formulas, the passive convention R = Rot(e, −δ), the interval (−π, π] and the finite-only `wrap()` contract;
+  - the oracle, the grid, the step sizes, the noise bound, the significance factor (10³), the order threshold (1.5), the four coverage minima (506, 532, 560, 504), and every check and assertion.
+- **The one change inside a test:** E5d now calls the `elements_fn` parameter (default `elements`, results identical), so a built-in mutant can reach it. The same was done for `tilt_fn` in amendment 5.
+- **History is preserved.** Amendment 6 is kept, with pointers under "Built-in mutants that raise" and "Assertion-removal sweep".
+- **Nature of the finding.** M3P10-F1 was a verification-harness defect, introduced by amendment 6, and not a mathematical one. It never produced a false PASS of the verification script.
+
+### M3P10-F1: the defect and its root cause
+- Amendment 6 recorded a built-in mutant that raises as **not rejected**, so that a crash would never count as a rejection. That is correct for the script's verdict.
+- The mutation check, however, used "not rejected" as the evidence that an assertion had been removed. It could not tell a mutant whose designated check stayed silent from a mutant that raised for an unrelated reason.
+- **Review 10's counterexample:** an unrelated import inside `formula_scaled()` (factor 2), with the order assertion intact, was classified as "order assertion disabled". The implementer reproduced it before the fix. The committed regression demonstration reproduces it against the reviewed harness (`896d52d`).
+- **A second gap of the same kind:** a mutant that catches an exception and returns the reference result is also "not rejected", although it tests nothing.
+
+### The correction (verification script)
+- **Defect record.** Each built-in mutant's injected function (`formula`, `oracle`, `wrap_fn`, `line_of_nodes`, `tilt_fn`, `elements_fn`) is wrapped in a recorder. On every call, the recorder compares the mutant's outcome with the reference implementation, results or exceptions, and counts the calls that differ. A setting (`assert_jump`) is compared with its default. The mutant's own result or exception passes through unchanged.
+- **`defect_exercised`** is true when some call differed. A built-in mutant whose defect is never exercised is invalid setup: it is listed in `mutants_with_defect_not_exercised`, and the verdict is FAIL. At the committed script, all 42 built-in mutants are exercised.
+- **Exception record.** A mutant's exception is recorded with its type, message and call stack. The stack lists the frames of the script only, as "function: source line", with no paths or line numbers.
+
+### The correction (mutation check)
+Every run receives exactly one category; only "expected rejection" is a detection.
+
+| Category | Meaning |
+|---|---|
+| invalid mutation setup | the fragment does not occur exactly once (not run), or a built-in mutant named by the expectation never exercised its defect |
+| process failure | no output (syntax error, import failure, missing file, any crash), or exit status and verdict inconsistent |
+| normal execution | exit 0, verdict PASS |
+| unexpected exception | a built-in mutant raised an exception that no allowance of this mutation matches |
+| rejected for another reason | exit 1 and FAIL, but the declared rejection is not shown |
+| expected rejection | exit 1 and FAIL, no unexpected exception, every predicate holds |
+
+- **"Not rejected" now requires** that the mutant completed without an exception, exercised its defect, and was not rejected by its designated checks.
+- **Allowed exceptions.** Each is named by mutant, exception type, message prefix and the exact call stack. Measured over all 109 mutations, exactly six make a built-in mutant raise, through two mechanisms. All other exceptions are unexpected.
+
+| Mutations | Mutant(s) | Exception | Stack |
+|---|---|---|---|
+| E2 finite check removed | oracle ΔΩ = NaN | ValueError "wrap: non-finite angle" (the amendment-4 guard) | run_exact > E2 identity line > circ > wrap guard |
+| E5b finite check removed | oracle ΔΩ = NaN | the same | run_exact > E5b jump line > circ > wrap guard |
+| oracle check weakened to `isnan`; oracle check removed; finite validation removed; invalid sample not discarded | the four single-sample oracle ±∞ mutants | ValueError "math domain error" | `check_formulas: p = math.log2(e[-2] / e[-1])` |
+
+- **The second row of allowances** is the documented `isnan` case. It occurs in four mutations, not one: each lets a single oracle ±∞ through the finite validation, so e[−1] = ∞, and log2(finite/∞) = log2(0) raises at the order estimate. The other three were never documented, because the earlier check did not inspect exceptions outside its predicates. They are allowed under the same narrow terms and are listed here.
+- **`M3P7-F1_nonfinite_tests_disabled`** now declares its reason precisely. The guard-removed mutant completes without rejection because nothing exercises it, and the `wrap_nonfinite` report has no per-case entries.
+- **`M3P7-F1_guard_removed`** now matches the guard together with the line after it, because the new inexact-wrap mutant contains the same guard text.
+
+### Controls (I-10 §3)
+Each control declares the category it must receive.
+
+| Control | Declared category | Original harness (`896d52d`) | Corrected |
+|---|---|---|---|
+| syntax error | process failure | met | met |
+| import failure (process) | process failure | met | met |
+| missing script | process failure | met | met |
+| neutral edit | normal execution | met | met |
+| fragment absent | invalid mutation setup | met | met |
+| Δi sign reversed, claimed as the ΔΩ sign removal | rejected for another reason | met | met |
+| **import failure inside a built-in mutant** | unexpected exception | **not met (counted as detection)** | met |
+| **ZeroDivisionError inside a built-in mutant** | unexpected exception | **not met** | met |
+| **exception suppressed inside a mutant, which returns the reference result** | invalid mutation setup | **not met** | met |
+| **allowed wrap-guard exception at E5b, claimed for the E2 removal** | unexpected exception | **not met** | met |
+| **allowed exception at E2 but of type TypeError** | unexpected exception | **not met** | met |
+| injected doubled Δi coefficient | expected rejection | met | met |
+| Δi order assertion removed (the built-in mutant completes without rejection) | expected rejection | met | met |
+
+`dr0028_node_signed_harness_regression.py` produces this table. It reads the reviewed harness and script from git at `896d52d`, runs every control against both versions, and requires the five M3P10-F1 regression controls (in bold) to fail against the original and pass against the corrected harness.
+
+### M3P10-F2: classification of the 18 assertions (I-10 §4)
+`dr0028_node_signed_assertion_classification.py` records each classification with executed evidence. For A, a built-in mutant is rejected by the designated test with the assertion present, and not without it. For B, with only that assertion removed, a defect of the kind it guards is still rejected by the named independent check.
+
+| Assertion | Category | Evidence |
+|---|---|---|
+| W2 finite wrap equals the exact rational reduction | A | new mutant: inexact reduction a − 2π round(a/2π) (2 failures; 0 without the assertion) |
+| N1 non-finite wrap raises ValueError, not another type | A | new mutant: the guard raises TypeError (4; 0) |
+| E2b no E2 case skipped as "undefined node" | A | new mutant: interior regime undefined (168; 0) |
+| E2c line-of-nodes identity in every regime | A | new mutant: ΔΩ = 0 in the crossing regimes (144; 0) |
+| E2d node undefined at the endpoints | A | new mutant: closed interval 0 ≤ j ≤ π (48; 0) |
+| E5d equatorial orbit has no node | A | new mutant: `elements` reports a node at the equator (1; 0) |
+| W1 result in (−π, π] | B | previous [−π, π) wrap still rejected by W2 (14) |
+| W4 wrap(±π) = +π | B | the same (14) |
+| W5 exact equivalents agree | B | fmod without the correction step still rejected by W2 (9) |
+| E1 rotation convention | B | active transform Rot(e, +δ) still rejected by E2 endpoints (36) |
+| E2e endpoints equatorial | B | the same defect still rejected by E1 (1) |
+| E5b non-finite sweep value | B | oracle ΔΩ = NaN still rejected by the E5b defined-sample guard (2) |
+| E5b defined-sample guard | B | no node at the sweep's crossing azimuths still rejected by E5c (2) |
+| E6 review-04 value | B | ΔΩ 0.01 % too large still rejected by E3 (the example is an E3 case: φ = Ω − 90°) |
+| E6 sign agreement | B | ΔΩ negated still rejected by E3 |
+| W3 determinism of wrap | C | wrap is stateless; a defect only W3 sees would need state and be wrong only on a second call |
+| W6 at least 5 equivalent pairs | C | guards W5's fixed input list against becoming vacuous; fails only if that code is edited |
+| E2a review-06 counterexample among the E2 cases | C | guards the fixed case list; the case is checked by E2c like every other |
+
+- **No category D.** No assertion's verification value is uncertain, and none conceals a correctness risk that would require a decision.
+- **Dependencies within B.**
+  - E1 and E2e protect each other against a sign error in `tilt_fn`. Removing both at once would lose that protection for the `tilt_fn` parameter. The oracle's own `tilt_matrix` stays protected by E2c, E3, E4 and the first-order checks.
+  - W1, W4 and W5 rest on W2 (A), E6 on E3 (protected since amendment 6), and E5b's defined-sample guard on E5c.
+- **Sweep, before and after:** 17 detected and 18 surviving (amendment 6), now 23 and 12. The difference is exactly the six assertions of category A. The 12 survivors are the 9 of B and the 3 of C.
+
+### Results
+- **Verdict PASS, exit 0** for the verification script, the mutation check (109/109 detected for the declared reason; 13/13 controls receive their declared category), the classification (18/18) and the regression demonstration. The sweep is a measurement. Each of the five outputs is byte-identical on a rerun.
+- **Finite results unchanged.** Comparing the output with `896d52d`, no pre-existing value changed. The 79 differences are added keys: `defect_calls` and `defect_exercised` for each of the 36 existing mutants, the six new mutants, and `mutants_with_defect_not_exercised` (empty).
+- **Coverage unchanged:** order 506 (Δi) and 532 (ΔΩ), sign 560 (Δi) and 504 (ΔΩ), each enforced separately. The 1 % Δi oracle error is still rejected by E3 and by E4.
+- **Before and after:**
+
+| Count | Amendment 6 | Amendment 7 |
+|---|---|---|
+| Built-in mutants | 36 | 42 |
+| File-level mutations detected | 109/109 (old classification) | 109/109 (category "expected rejection") |
+| Controls | 5 | 13 |
+| Sweep: detected / surviving | 17 / 18 | 23 / 12 |
+| Verification script run time | about 0.7 s | about 1.9 s (the recorder calls each reference too) |
+
+- **Unchanged definitions.** An AST comparison with `896d52d` shows that among the existing top-level definitions only `exact_properties` changed (the `elements_fn` parameter and E5d's call), together with `EXACT_MUTANTS`, `MIN_DESIGNATED_FAILURES`, `mutant_failures` and `main`.

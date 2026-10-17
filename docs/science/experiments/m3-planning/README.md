@@ -216,3 +216,30 @@ Results:
 - Every finite result is unchanged; only keys were added.
 
 Interpretation: DR-0028 "Resolution amendment 6".
+
+## Exception classification and assertion classification (2026-10-17, reviews M3P10-F1, F2)
+Review 10 showed that the mutation check counted an unrelated exception inside a built-in mutant (for example, an import failure) as evidence that an assertion had been removed.
+
+What changed:
+- **Defect record.** `dr0028_node_signed_verification.py` records each built-in mutant's injected function against its reference implementation, so the output shows whether the defect was exercised. An unexercised mutant fails the run. An exception is recorded with its type, message and in-script call stack.
+- **Six classification categories.** `dr0028_node_signed_mutation_check.py` classifies every run as one of: invalid mutation setup, process failure, normal execution, unexpected exception, rejected for another reason, or expected rejection. Only the last is a detection.
+  - "Not rejected" requires a completed, exercised mutant.
+  - An exception counts only under an explicit allowance (mutant, type, message, stack), for the E2/E5b wrap guard and the order-estimate math domain error.
+  - There are 13 controls, each with its declared category.
+- **`dr0028_node_signed_harness_regression.py`** (new) runs the controls against the reviewed harness (`896d52d`, read from git) and against the corrected one. The five M3P10-F1 regression controls fail there and pass now.
+- **`dr0028_node_signed_assertion_classification.py`** (new) classifies the 18 assertions the sweep found not individually load-bearing, each with executed evidence: 6 A, which gain built-in mutants; 9 B; 3 C; 0 D.
+
+```
+python -I dr0028_node_signed_assertion_classification.py dr0028_node_signed_assertion_classification_results.json
+python -I dr0028_node_signed_harness_regression.py dr0028_node_signed_harness_regression_results.json
+```
+
+The regression demonstration needs git, to read `896d52d`.
+
+Results:
+- All four checks PASS. 109 of 109 mutations are detected for their declared reason, and 13 of 13 controls receive their declared category.
+- The sweep reports 23 assertions detected and 12 surviving: the 9 of category B and the 3 of category C.
+- Each output is byte-identical on a rerun.
+- Every finite result is unchanged; only keys were added.
+
+Interpretation: DR-0028 "Resolution amendment 7".

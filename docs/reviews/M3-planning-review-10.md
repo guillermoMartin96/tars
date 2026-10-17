@@ -85,3 +85,34 @@
   - a decision on M3P10-F1;
   - whether to protect the 18 surviving assertions (M3P10-F2, and the scope question from amendment 6);
   - any further review.
+
+## Resolution of findings (appended 2026-10-17; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "I-10 — Resolve M3P10-F1 and authorize Review 11" (2026-10-17), referred to as **I-10**. It authorizes:
+- the correction of M3P10-F1 and its regression and negative controls;
+- the evaluation of the 18 assertions, with mutation coverage for those of category A;
+- exactly one further review (review 11), after local verification succeeds.
+
+It does not authorize planning acceptance, a merge, any implementation, or any change to approved formulas, constants, tolerances, thresholds or baselines.
+
+### M3P10-F1 (MINOR): a caught infrastructure exception could count as detection
+- **Reproduced before the fix:** the implementer's own reproduction (recorded above). `dr0028_node_signed_harness_regression.py` also reproduces it, by running the controls against the reviewed harness at `896d52d`.
+- **Root cause:** amendment 6 recorded a raising built-in mutant as "not rejected", which is correct for the verdict. The mutation check, however, read "not rejected" as evidence that an assertion had been removed.
+- **Correction:** DR-0028 "Resolution amendment 7" (appended), with pointers under amendment 6.
+  - **Verification script:** each built-in mutant's injected function is recorded against its reference implementation, showing whether the defect was exercised. An unexercised mutant fails the run. An exception is recorded with its type, message and in-script call stack.
+  - **Mutation check:** six classification categories. "Not rejected" requires a completed, exercised mutant. An exception is accepted only under an explicit allowance (mutant, type, message, stack).
+  - **Allowances:** they cover the E2/E5b wrap guard and the order-estimate math domain error. The latter is the documented `isnan` case, which occurs in four mutations through one mechanism.
+- **Controls:** 13, each with a declared category. The five M3P10-F1 regression controls fail against the original harness and pass against the corrected one: import failure and runtime exception inside a mutant; an exception suppressed inside a mutant; an allowed exception at the wrong location; an allowed exception of the wrong type.
+
+### M3P10-F2 (NOTE): the 18 assertions
+- **Evaluated under I-10 §4** (amendment 7), with executed evidence in `dr0028_node_signed_assertion_classification.py`.
+- **Result:** 6 A, 9 B, 3 C, 0 D. The six of category A (W2, N1, E2b, E2c, E2d, E5d) gain built-in mutants, and the sweep now reports 23 detected and 12 surviving.
+- **No category D**, so no decision is required by I-10 §4.
+
+### Evidence
+- **Repeatability:** two runs each of the verification script, the mutation check, the sweep, the classification and the regression demonstration are byte-identical.
+- **Results:** 109/109 mutations are detected for their declared reason, and 13/13 controls receive their category.
+- **Finite results and coverage:** every pre-existing output value is identical to `896d52d`; only keys were added. Coverage is unchanged: 506/532 order samples and 560/504 sign checks.
+
+### Status
+- **Residual uncertainty:** none known. The `isnan` allowance covers four mutations rather than one, and amendment 7 states this.
+- **Changes an acceptance decision?** No decision changed.
