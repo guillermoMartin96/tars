@@ -98,3 +98,50 @@
 - This is not an unconditional PASS, so the I-10 §9 stop condition applies.
 - **No acceptance report has been prepared, and no review 12 has been started.** The branch is not merged, and T0, T1 and T2 have not started.
 - **Returned to the Tech Lead:** decisions on M3P11-F1 and M3P11-F2, and on any further review.
+
+## Resolution of findings (appended 2026-10-17; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "I-11 — Resolve Review 11 Findings and Authorize Review 12" (2026-10-17), referred to as **I-11**.
+- **It authorizes:**
+  - the correction of M3P11-F1 and M3P11-F2, with supporting verification changes;
+  - exactly one further review (review 12), after local verification succeeds.
+- **It does not authorize:** planning acceptance, a merge, T0/T1/T2, changes to approved mathematical contracts, or any expansion of M3 scope.
+
+### M3P11-F1 (MINOR): a rounding difference could stand in for the intended exercised defect
+- **Reproduced before the fix.** At `cadccd8`, with the committed `run()` and `classify()`, review 11's construction was classified "expected rejection" for `order_assertion_disabled`, with the order assertion intact. Both doubled-coefficient mutants reported 940 of 3000 calls differing, `defect_exercised` true, and 0 order failures. `dr0028_node_signed_harness_regression.py` reproduces it against the reviewed harness at `c16b3b5`.
+- **Root cause.** "Exercised" was any difference in the output, not the intended defect.
+- **Correction.** DR-0028 "Resolution amendment 8" (appended), with pointers under amendment 7.
+  - Every built-in mutant declares its intended defect: where it applies, and what it must produce there.
+  - Every call is classified as intended, unchanged, missing or unintended. The defect is exercised only if it is shown at least once, never missing, and nothing else differs.
+  - Every file-level mutation declares an exercise predicate (four families). It is established by an independent probe process: the unmutated script's references, defects and tests, with only the injected function taken from the copy.
+  - A detection needs both an established exercise and the expected rejection. The exception allowances are unchanged and revalidated.
+- **Controls.** 23, of which 10 are new. The four M3P11-F1 regression controls fail against `c16b3b5` and pass now:
+  - the reassociated fallback;
+  - a change in the other component only;
+  - a one-ulp change only;
+  - a defect in one series only.
+  New non-regression controls cover:
+  - an exercised defect rejected for the wrong reason;
+  - a copy whose own record is edited to claim exercise;
+  - both expected-exception allowances;
+  - a genuine and a wrong-component direct injection.
+
+### M3P11-F2 (MINOR): five "redundant" assertions
+- **Reclassified as category A:** W5, E1, E2e, E5b-nonfinite and E5b-defined. Each gains a built-in mutant: a non-periodic wrap, a 0.01 rad node-origin offset, a 15°-quantized tilt axis, a NaN at one sweep azimuth, and no node at two sweep azimuths.
+- **Executed evidence for each:**
+  - the declared defect is exercised;
+  - there is no exception;
+  - with the assertion present, the designated test rejects the mutant through that assertion alone;
+  - with only that assertion removed, no exact-property or wrapping check reports anything.
+- **Classification:** 11 A, 4 B, 3 C, 0 D. The identities are checked against the script's 35 assertions and against the 18 survivors of the sweep at `896d52d`.
+- **The four B assertions** (W1, W4, E6-value, E6-sign) now carry property-wide arguments with executed premises. Amendment 7's dependency statements for E1/E2e, W5 and the E5b guard are corrected.
+- **Sweep:** 28 detected and 7 surviving; the survivors are exactly the B and C assertions.
+
+### Evidence
+- **Mutation check (corrected harness):** 109 attempted, 109 exercised, 109 detected for the intended reason. Not exercised, rejected for another reason, unexpected exception, process failure, invalid setup and normal execution: 0 each. 23/23 controls, and 0 of 77 direct predicates met by the unmutated script.
+- **Repeatability:** each of the five tools runs twice with byte-identical output.
+- **Preservation:** against `cadccd8`, no pre-existing output value changed or was removed (315 keys added). Coverage is unchanged: 506/532 and 560/504.
+
+### Status
+- **Residual uncertainty:** none known.
+- **Historical results** of amendment 7 (109/109 under the any-difference criterion; 6/9/3) are kept as they were and are not relabelled.
+- **Changes an acceptance decision?** No decision changed.

@@ -243,3 +243,29 @@ Results:
 - Every finite result is unchanged; only keys were added.
 
 Interpretation: DR-0028 "Resolution amendment 7".
+
+## Defect-specific exercise and corrected assertion classification (2026-10-17, reviews M3P11-F1, F2)
+Review 11 showed two problems:
+- the mutation check accepted any difference from the reference as an "exercised" defect, so a suppressed import failure with a correct, reassociated fallback still counted as detection;
+- five assertions classified as redundant each protect a defect that only they reject.
+
+What changed:
+- **Intended defects.** `dr0028_node_signed_verification.py` declares the intended defect of each of its 47 built-in mutants (`DEFECTS`).
+  - Every call is classified as intended, unchanged, missing or unintended.
+  - A defect is exercised only if it is shown, never missing, and nothing else differs. `differing` is still reported but decides nothing.
+  - Five new mutants protect W5, E1, E2e and the two E5b sweep assertions.
+- **Exercise predicates.** `dr0028_node_signed_mutation_check.py` gives every mutation an exercise predicate (built-in, formula, oracle values, injected).
+  - It establishes the predicate with an independent probe: this file run with `--probe` in a separate process, observing the copy's injected function against the unmutated script.
+  - A detection needs the defect exercised and the expected rejection shown.
+  - There are 23 controls.
+- **`dr0028_node_signed_harness_regression.py`** now also runs every control against the harness reviewed in review 11 (`c16b3b5`). The four M3P11-F1 regression controls fail there and pass now.
+- **`dr0028_node_signed_assertion_classification.py`** classifies the 18 as 11 A, 4 B and 3 C. It gives property-wide arguments for B and checks the identities against the `896d52d` sweep.
+
+Results:
+- **Mutation check:** 109 attempted, 109 exercised, and 109 detected for the intended reason; every other category is 0.
+- **Controls and predicates:** 23 of 23 controls pass, and none of the 77 direct exercise predicates is met by the unmutated script.
+- **Sweep:** 28 assertions detected and 7 surviving; the 7 are the B and C assertions.
+- **Repeatability:** each output is byte-identical on a rerun.
+- **Preservation:** every finite result is unchanged; only keys were added.
+
+Interpretation: DR-0028 "Resolution amendment 8".

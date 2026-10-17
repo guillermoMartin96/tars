@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-17, tenth planning checkpoint (review 10 correction M3P10-F1 and classification of the 18 assertions for M3P10-F2; no decision changed). Earlier: 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-17, eleventh planning checkpoint (review 11 corrections M3P11-F1 and M3P11-F2; no decision changed). Earlier: 2026-10-17, tenth planning checkpoint (review 10 correction M3P10-F1 and classification of the 18 assertions for M3P10-F2; no decision changed). Earlier: 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -23,6 +23,7 @@ No OPEN or DEFERRED item has a default.
 - **I-8:** "Continue TARS M3 planning from `milestone-3-planning` at `0ac630b`" (Tech Lead, 2026-10-16), sections 1–8.
 - **I-9:** "I-9 — M3 Planning Verification Hardening and Codex Review 10" (Tech Lead, 2026-10-17), sections 1–10.
 - **I-10:** "I-10 — Resolve M3P10-F1 and authorize Review 11" (Tech Lead, 2026-10-17), sections 1–10.
+- **I-11:** "I-11 — Resolve Review 11 Findings and Authorize Review 12" (Tech Lead, 2026-10-17), sections 1–10.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -172,8 +173,8 @@ Review-10 findings M3P10-F1 and M3P10-F2: **NOT RESOLVED** (reviewer's dispositi
 
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P11-F1 | MINOR | ACCEPTED; **not applied** (I-10 §9 stop) | Pending | `docs/reviews/M3-planning-review-11.md`. Verification defect: "defect exercised" accepts any bitwise difference, so a suppressed import failure with a correct, reassociated fallback still counts as detection of an assertion removal that never happened. Not a mathematical error |
-| M3P11-F2 | MINOR | ACCEPTED; **not applied** (I-10 §9 stop) | Pending | `docs/reviews/M3-planning-review-11.md`. Verification defect: five category B assertions (W5, E1, E2e, E5b-nonfinite, E5b-defined) protect defects their stated substitutes miss; the 6 A / 9 B / 3 C classification is not supported. Not a mathematical error |
+| M3P11-F1 | MINOR | ACCEPTED; was not applied (I-10 §9 stop) → **corrected** | I-11 §2 | DR-0028 "Resolution amendment 8" (each built-in mutant declares its intended defect; exercised = shown, never missing, nothing else different; every mutation has an exercise predicate established by an independent probe; 23 controls, the four M3P11-F1 regression controls fail against `c16b3b5` and pass now; 109/109 exercised and detected for the intended reason); `docs/reviews/M3-planning-review-11.md`, "Resolution of findings". Original record: verification defect: "defect exercised" accepts any bitwise difference, so a suppressed import failure with a correct, reassociated fallback still counts as detection of an assertion removal that never happened. Not a mathematical error |
+| M3P11-F2 | MINOR | ACCEPTED; was not applied (I-10 §9 stop) → **corrected** | I-11 §3 | DR-0028 "Resolution amendment 8": W5, E1, E2e, E5b-nonfinite and E5b-defined reclassified A, each with a built-in mutant; 11 A, 4 B (property-wide arguments), 3 C, 0 D; sweep 28 detected / 7 surviving; `docs/reviews/M3-planning-review-11.md`, "Resolution of findings". Original record: verification defect: five category B assertions (W5, E1, E2e, E5b-nonfinite, E5b-defined) protect defects their stated substitutes miss; the 6 A / 9 B / 3 C classification is not supported. Not a mathematical error |
 
 ## Gates
 | Gate | State |
