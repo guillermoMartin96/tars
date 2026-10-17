@@ -167,6 +167,14 @@ Review-09 findings M3P9-F1 and M3P9-F2: **RESOLVED**; M3P9-F3: **RESOLVED (E3/E4
 | M3P10-F1 | MINOR | ACCEPTED; was not applied (I-9 §9 stop) → **corrected** | I-10 §2–§3 | DR-0028 "Resolution amendment 7" (defect record per built-in mutant; six classification categories; "not rejected" requires a completed, exercised mutant; exceptions only by explicit allowance for the E2/E5b wrap guard and the order-estimate math domain error; 13 controls, the five regression controls fail against `896d52d` and pass now); `docs/reviews/M3-planning-review-10.md`, "Resolution of findings". Original record: an unrelated exception inside a built-in mutant counted as evidence of a removed assertion |
 | M3P10-F2 | NOTE | ACCEPTED as a NOTE → **classified** | I-10 §4 | DR-0028 "Resolution amendment 7": 6 A (new mutants), 9 B (independent check demonstrated), 3 C (rationale), 0 D; sweep now 23 detected / 12 surviving; `docs/reviews/M3-planning-review-10.md`, "Resolution of findings" |
 
+## Review findings (M3 Planning Review 11)
+Review-10 findings M3P10-F1 and M3P10-F2: **NOT RESOLVED** (reviewer's disposition; see M3P11-F1 and M3P11-F2).
+
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P11-F1 | MINOR | ACCEPTED; **not applied** (I-10 §9 stop) | Pending | `docs/reviews/M3-planning-review-11.md`. Verification defect: "defect exercised" accepts any bitwise difference, so a suppressed import failure with a correct, reassociated fallback still counts as detection of an assertion removal that never happened. Not a mathematical error |
+| M3P11-F2 | MINOR | ACCEPTED; **not applied** (I-10 §9 stop) | Pending | `docs/reviews/M3-planning-review-11.md`. Verification defect: five category B assertions (W5, E1, E2e, E5b-nonfinite, E5b-defined) protect defects their stated substitutes miss; the 6 A / 9 B / 3 C classification is not supported. Not a mathematical error |
+
 ## Gates
 | Gate | State |
 |---|---|
