@@ -136,3 +136,6 @@ It does not authorize planning acceptance, a merge, any implementation, or any c
 ### Status
 - **Residual uncertainty:** the 18 assertions that are not individually load-bearing (above).
 - **Changes an acceptance decision?** No decision changed. The 18 survivors are an open scope question for the Tech Lead.
+
+### Erratum (appended 2026-10-17)
+"Validation evidence at the reviewed commits" above, and the review 09 prompt, give the M1 Proof as "10 steps". The wrapper runs **9** steps, all exit 0; the count wrongly included its final exit line. The result (overall PASS, 1185 tests passed) is unaffected.
