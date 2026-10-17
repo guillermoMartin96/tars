@@ -101,3 +101,38 @@ The reviewer proposes no acceptance requirement; it asks that the limitations st
 - This is not an unconditional PASS, so the I-8 §7 stop condition applies.
 - **No acceptance report has been prepared, and no review 10 has been started.** The branch is not merged, and T0, T1 and T2 have not started.
 - **Returned to the Tech Lead:** decisions on M3P9-F1 and M3P9-F2, on whether M3P9-F3 warrants E3/E4 mutations, and on any further review.
+
+## Resolution of findings (appended 2026-10-17; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "I-9 — M3 Planning Verification Hardening and Codex Review 10" (2026-10-17), referred to as **I-9**. It authorizes:
+- the corrections of M3P9-F1 and M3P9-F2, and targeted mutation coverage for M3P9-F3 (E3 and E4);
+- exactly one further review (review 10), after local validation passes.
+
+It does not authorize planning acceptance, a merge, any implementation, or any change to approved formulas, constants, tolerances, thresholds or baselines.
+
+### M3P9-F1 (MINOR): oracle ±∞ rejection lacks regression protection
+- **Correction:** DR-0028 "Resolution amendment 6" (appended), with a pointer under amendment 5.
+  - Eight built-in mutants: oracle Δi and ΔΩ each as +∞ and −∞, over the whole grid (600 non-finite failures, both coverage minima) and at a single sample (1 non-finite failure; both coverage minima, since that series is a valid sample of both checks).
+  - File-level mutations: the oracle check weakened to `math.isnan` (all eight ±∞ mutants unrejected) and to `math.isinf` (both NaN oracle mutants unrejected); ±∞ injected into one oracle value of each formula through the entrypoint.
+- **Review 09's counterexample** (oracle check weakened to `isnan`) is now detected for its declared reason.
+
+### M3P9-F2 (MINOR): the order and sign assertions can each be disabled without rejection
+- **Correction:** amendment 6. Per formula, a doubled first-order coefficient must fail that formula's order check in all 560 (Δi) or 504 (ΔΩ) series where the first-order term is nonzero, with no sign failure; a reversed sign must fail that formula's sign check in the same series.
+- **File-level mutations:** each coefficient doubled through the entrypoint; the order and the sign assertion disabled for Δi only, for ΔΩ only, and for both. All six removals are detected because the designated mutant is no longer rejected.
+- **Review 09's counterexample** (order assertion disabled, doubled coefficients) is now detected.
+
+### M3P9-F3 (NOTE): further limits of the finite verification
+- **E3 and E4 (I-9 §5):** a 1 % oracle inclination error must be rejected by E3 and by E4. Removing either assertion is a file-level mutation, and both are detected. E3 and E4 themselves are unchanged.
+- **Step-size selection:** documented in amendment 6 as an intentional property of the asymptotic order test, and not changed, as I-9 §5 directs.
+
+### Further changes under I-9 §6 (harness integrity)
+- **Detection only for the declared reason.** The mutation check now accepts a detection only when the copy writes a FAIL verdict and the declared expected rejection holds. Five negative controls (syntax error, import failure, missing script, neutral edit, wrong reason) are each classified as not detected. There are 109 mutations in all: the 33 earlier ones, 16 new ones, and the 60 injection cases of review 09.
+- **Built-in mutants that raise** are recorded as not rejected, so a crash never counts as a designated rejection.
+- **Assertion-removal sweep (measurement).** Of the script's 35 assertions, 17 are detected when removed individually, including every assertion named by these findings. The other 18 survive alone: E1's deviation bound, five in E2, three in E5b/E5d, two in E6, six finite and one non-finite wrap assertion. Protecting them is outside I-9 §3–§5, so they are **recorded, not corrected**, for the Tech Lead's decision.
+
+### Evidence
+- Two runs each of the verification script, the mutation check and the sweep are byte-identical.
+- Every pre-existing output value is identical to `faba9d6`; only keys were added. Coverage is unchanged: 506/532 order samples and 560/504 sign checks.
+
+### Status
+- **Residual uncertainty:** the 18 assertions that are not individually load-bearing (above).
+- **Changes an acceptance decision?** No decision changed. The 18 survivors are an open scope question for the Tech Lead.

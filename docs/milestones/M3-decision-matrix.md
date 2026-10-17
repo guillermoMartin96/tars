@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -21,6 +21,7 @@ No OPEN or DEFERRED item has a default.
 - **I-6:** "Continue M3 planning on `milestone-3-planning` from commit `dcabcb2`" (Tech Lead, 2026-10-16), sections 1–6.
 - **I-7:** "Continue the TARS spacecraft simulator M3 planning work from branch `milestone-3-planning`, currently at commit `0dac6d3`" (Tech Lead, 2026-10-16), sections 1–6.
 - **I-8:** "Continue TARS M3 planning from `milestone-3-planning` at `0ac630b`" (Tech Lead, 2026-10-16), sections 1–8.
+- **I-9:** "I-9 — M3 Planning Verification Hardening and Codex Review 10" (Tech Lead, 2026-10-17), sections 1–10.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -153,9 +154,9 @@ Review-08 finding M3P8-F1: **RESOLVED** (reviewer's disposition).
 
 | ID | Severity | Disposition | Owner decision | Record |
 |---|---|---|---|---|
-| M3P9-F1 | MINOR | ACCEPTED; **not applied** (I-8 §7 stop) | Pending | `docs/reviews/M3-planning-review-09.md`. Verification defect: weakening the oracle finite check to `isnan()` still passes, because no mutant injects oracle ±∞. Not a mathematical error: the committed guard is correct |
-| M3P9-F2 | MINOR | ACCEPTED; **not applied** (I-8 §7 stop) | Pending | `docs/reviews/M3-planning-review-09.md`. Verification defect: disabling the order or the sign assertion (whole or for one component) still passes; with the order assertion off, doubled first-order coefficients pass. Not a mathematical error: the committed formulas pass both assertions |
-| M3P9-F3 | NOTE | ACCEPTED as a NOTE; no change proposed | Pending (whether to add E3/E4 assertion-removal mutations) | `docs/reviews/M3-planning-review-09.md`. Optional improvement: limits of the asymptotic order test; E3/E4 assertion removals are not mutation-protected |
+| M3P9-F1 | MINOR | ACCEPTED; was not applied (I-8 §7 stop) → **corrected** | I-9 §3 | DR-0028 "Resolution amendment 6" (oracle ±∞ mutants for each formula, whole grid and single sample; oracle check weakened to `isnan`/`isinf` detected; finite results unchanged); `docs/reviews/M3-planning-review-09.md`, "Resolution of findings". Original record: weakening the oracle finite check to `isnan()` still passed, because no mutant injected oracle ±∞ |
+| M3P9-F2 | MINOR | ACCEPTED; was not applied (I-8 §7 stop) → **corrected** | I-9 §4 | DR-0028 "Resolution amendment 6" (per formula: doubled coefficient designated to the order check, reversed sign to the sign check, 560/504 failures each; order and sign assertion removal for Δi, ΔΩ and both detected); `docs/reviews/M3-planning-review-09.md`, "Resolution of findings". Original record: disabling the order or sign assertion still passed |
+| M3P9-F3 | NOTE | ACCEPTED as a NOTE → **E3/E4 mutation coverage added** | I-9 §5 | DR-0028 "Resolution amendment 6" (1 % oracle inclination error designated to E3 and E4; both assertion removals detected; step-size selection documented as intentional, unchanged). The assertion-removal sweep leaves 18 of 35 assertions not individually load-bearing (outside I-9 scope): **open for the Tech Lead** |
 
 ## Gates
 | Gate | State |

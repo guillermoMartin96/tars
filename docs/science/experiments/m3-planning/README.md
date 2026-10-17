@@ -190,3 +190,29 @@ python -I dr0028_node_signed_mutation_check.py dr0028_node_signed_mutation_check
 ```
 
 Results: both scripts PASS; 33 of 33 mutations detected. Every finite result is unchanged; only new keys were added. Interpretation: DR-0028 "Resolution amendment 5".
+
+## Assertion-specific mutants and reason-checked mutation (2026-10-17, reviews M3P9-F1..F3)
+Review 09 showed that two assertions could be weakened or removed without any failure: the oracle's ±∞ rejection, and the order and sign checks of each formula. For E3 and E4 it noted the same gap.
+
+What changed:
+- **New built-in mutants** in `dr0028_node_signed_verification.py`, each rejected by its own designated check:
+  - oracle ±∞ for each formula, over the whole grid and at a single sample;
+  - per formula, a doubled first-order coefficient (order check) and a reversed sign (sign check);
+  - a 1 % oracle inclination error (E3 and E4).
+- **A built-in mutant that raises** is recorded as not rejected, so a crash never counts as a rejection.
+- **`dr0028_node_signed_mutation_check.py`** now accepts a detection only for each mutation's declared reason, checked against the script's output. Five negative controls must be classified as not detected. It runs 109 mutations: the 33 earlier ones, 16 new ones, and review 09's 60 injection cases.
+- **`dr0028_node_signed_assertion_sweep.py`** (new, measurement only) removes each of the 35 assertions in turn. 17 are detected individually, including every assertion named by the review 09 findings. The 18 that survive alone are recorded for a decision and not corrected.
+
+```
+python -I dr0028_node_signed_verification.py dr0028_node_signed_verification_results.json
+python -I dr0028_node_signed_mutation_check.py dr0028_node_signed_mutation_check_results.json
+python -I dr0028_node_signed_assertion_sweep.py dr0028_node_signed_assertion_sweep_results.json
+```
+
+Results:
+- Both checks PASS: 109 of 109 mutations detected for their declared reason, and all 5 controls classified as not detected.
+- The sweep reports 17 assertions detected and 18 surviving.
+- Each output is byte-identical on a rerun.
+- Every finite result is unchanged; only keys were added.
+
+Interpretation: DR-0028 "Resolution amendment 6".

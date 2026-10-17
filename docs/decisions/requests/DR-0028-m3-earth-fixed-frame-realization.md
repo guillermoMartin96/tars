@@ -6,6 +6,7 @@
 **Resolution amendment 3 (2026-10-16, append-only):** under review 06 (M3P6-F1, F2, F3), the line-of-nodes exact result is given its domain and the full identity, the 180° node discontinuity is asserted, and the verification script's angle wrapping is made to match the documented (−π, π]. The signed formulas, the convention and the decision are unchanged. See "Resolution amendment 3" at the end.  
 **Resolution amendment 4 (2026-10-16, append-only):** under review 07 (M3P7-F1), the wrapping guarantee is restricted to finite angles, and non-finite inputs raise ValueError. Finite-input behaviour, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 4" at the end.  
 **Resolution amendment 5 (2026-10-16, append-only):** under review 08 (M3P8-F1), the verification script rejects non-finite values before every comparison and requires a minimum number of valid samples for each formula's order and sign checks; a bounded audit applies the same rule to the exact properties. All finite results, the signed formulas, the convention and the decision are unchanged. See "Resolution amendment 5" at the end.  
+**Resolution amendment 6 (2026-10-17, append-only):** under review 09 (M3P9-F1, F2, F3), new mutants make the oracle ±∞ rejection and each formula's order and sign assertions load-bearing for their own reason, and E3 and E4 each gain a mutant; the file-level mutation check now accepts a detection only for its declared reason. No check, formula, tolerance, finite result or decision is changed. See "Resolution amendment 6" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -581,7 +582,110 @@ No separate mathematical issue, contract change or out-of-scope work was found.
 | Earlier findings | Δi sign reversed; ΔΩ sign reversed; unrestricted line-of-nodes claim; E5a, E5b, E5c removed; previous wrap; wrap guard removed; guard test weakened to type-only; non-finite wrap tests disabled | 10/10 (FAIL verdict) |
 
 - **E2 and E5b detection.** With those checks removed, the oracle-ΔΩ-NaN mutant passes a NaN to `circ`, and the wrap guard ends the process with ValueError before a verdict is written. The harness records this as "exception: ValueError", not as a FAIL verdict.
+- **Superseded by Resolution amendment 6 (review M3P9-F1..F3).** A built-in mutant that raises is now recorded as not rejected, so these two mutations end with a FAIL verdict whose designated mutant is shown as unrejected; the mutation check now requires each mutation's declared reason and covers 109 mutations.
 
 ### Results
 - **Verdict PASS, exit 0.** Two consecutive runs produce byte-identical output.
 - **Finite results unchanged.** Comparing the output with `0ac630b`, every pre-existing value is identical (grid, tolerances, exact properties, wrapping, first-order statistics, every existing mutant count), except `cos_sin_swapped` as explained above. Only new keys were added, including zero entries for E1, E3, E4 and E6 in the failure counts of each existing exact mutant.
+
+## Resolution amendment 6 (2026-10-17; reviews M3P9-F1, M3P9-F2, M3P9-F3)
+**Authority:** Tech Lead, instruction "I-9 — M3 Planning Verification Hardening and Codex Review 10" (I-9), sections 3–7.
+- **Unchanged:**
+  - the decision (J-ax-1), the identity transformation of M3, atmospheric co-rotation as air motion, the constants, the thresholds and the scope;
+  - the signed first-order formulas Δi ≈ −δ cos(Ω − φ) and ΔΩ ≈ +δ cot i sin(Ω − φ), the passive convention R = Rot(e, −δ), the interval (−π, π] and the finite-only `wrap()` contract;
+  - the oracle, the grid, the step sizes, the noise bound, the significance factor (10³), the order threshold (1.5), the four coverage minima (506, 532, 560, 504), and every check and assertion, including the definitions of E3 and E4.
+- **History is preserved.** Amendment 5 is kept, with a pointer under its "File-level mutation through the entrypoint".
+- **Nature of the findings.** Both MINOR findings were regression-protection gaps in the verification harness, not mathematical defects. The committed guard rejected oracle ±∞, and the committed formulas passed both assertions genuinely; what was missing was a mutant that only the guarded assertion could reject.
+
+### M3P9-F1: oracle ±∞
+New built-in mutants in `formula_defect_mutants`. Each must be rejected by every designated check, with at least the given number of failures.
+
+| Mutant | Designated checks (minimum failures) | Observed |
+|---|---|---|
+| Oracle Δi = +∞, −∞ (two mutants) | nonfinite Δi (600), coverage Δi (2) | 600, 2 each |
+| Oracle ΔΩ = +∞, −∞ (two mutants) | nonfinite ΔΩ (600), coverage ΔΩ (2) | 600, 2 each |
+| Oracle Δi = +∞, −∞ at a single sample (two mutants) | nonfinite Δi (1), coverage Δi (2) | 1, 2 each |
+| Oracle ΔΩ = +∞, −∞ at a single sample (two mutants) | nonfinite ΔΩ (1), coverage ΔΩ (2) | 1, 2 each |
+
+- **The single sample** is the smallest step of the series i = 30°, Ω = 37°, φ = 0°, positive tilt. Only one oracle value of one formula is non-finite; every other value is exact.
+- **Why 2 coverage failures for one sample.** At the committed formulas that series is a valid order sample and a valid sign sample of both formulas. The minima equal the observed counts, so losing it must fail both minima of the corrupted formula. This shows directly that one invalid sample cannot be counted towards coverage.
+- **Weakened checks.** With the oracle check weakened to `math.isnan`, all eight ±∞ mutants are no longer rejected. With it weakened to `math.isinf`, the two NaN oracle mutants of amendment 5 are no longer rejected. Both weakenings are file-level mutations (below).
+
+### M3P9-F2: order and sign assertions, each formula separately
+`by_formula_test` now also counts order and sign failures per formula (the totals are kept). New built-in mutants; the other formula is exact in each:
+
+| Mutant | Designated check (minimum failures) | Observed |
+|---|---|---|
+| Δi first-order coefficient doubled | order Δi (560) | order Δi 560; no sign failure |
+| ΔΩ first-order coefficient doubled | order ΔΩ (504) | order ΔΩ 504; no sign failure |
+| Δi sign reversed | sign Δi (560) | sign Δi 560 (and order Δi 560) |
+| ΔΩ sign reversed | sign ΔΩ (504) | sign ΔΩ 504 (and order ΔΩ 504) |
+
+- **Derivation of the minima.** Doubling a coefficient keeps every sign but leaves an error equal to the whole first-order term, so the observed order drops to about 1 in every series where that term is nonzero. Reversing the sign makes the first-order term disagree in sign with the finite result in the same series. Those series are counted by `sign_check_minimum`: 560 for Δi and 504 for ΔΩ. The observed counts equal the minima exactly.
+- **Why each mutant is specific.** The doubled coefficient produces no sign failure, so only the order assertion of its formula can reject it. The reversed sign is rejected by the sign assertion of its formula; requiring 560 or 504 sign failures means a disabled sign assertion is detected even though the order check would still fail.
+- **Review 09's counterexample.** With the order assertion disabled, doubled coefficients previously passed. Each per-formula and whole-check removal of the order or the sign assertion is now a file-level mutation that must be detected (below).
+
+### M3P9-F3: E3 and E4 assertions
+- **New built-in mutant** `M3P9-F3_oracle_delta_i_scaled_1pct` (in `exact_and_wrap_mutants`): the oracle's Δi multiplied by 1.01, ΔΩ exact. Designated tests: E3 and E4. Observed: E3 1, E4 1 (and E2 288).
+- A finite oracle records no non-finite failure in E3 or E4, so each designated count comes only from the closed-form deviation assertion (E3) or the inclination-bound assertion (E4). Removing either assertion leaves the mutant unrejected by that test.
+- E3 and E4 themselves are unchanged.
+- **Step-size limitation, kept by design (I-9 §5).** The order check uses only the errors at the two smallest steps, and the sign check only the smallest step. A formula that is wrong only at the three larger steps therefore passes, as review 09 showed with (100, 100) returned at those steps. This is an intentional property of an asymptotic order test: the claim verified is the behaviour as δ → 0 on the fixed grid of five halvings, which is what the first-order formulas assert. No approved requirement concerns the larger steps, so the step selection is not changed.
+
+### Built-in mutants that raise
+- `main` now evaluates each built-in defect mutant through `mutant_failures`. An exception raised while a mutant is evaluated is recorded under `exception`, and the mutant counts as **not rejected**, so the verdict is FAIL and the exit status 1. A crash is never counted as a designated rejection. The formulas under test and the exact properties are not wrapped: an exception there still ends the process.
+- **Why this was needed.** With the oracle check weakened, the new single-sample ±∞ mutants make the order estimate evaluate log2(finite/∞) = log2(0), which raises "math domain error". Before this change, that crash would have ended the process before any verdict, so the file-level mutation would have been "detected" only by a crash.
+- **At the committed script no mutant raises**, so no `exception` key appears in the output.
+
+### File-level mutation check (I-9 §6)
+`dr0028_node_signed_mutation_check.py` (output `dr0028_node_signed_mutation_check_results.json`) is revised so that each mutation is detected only for its intended reason.
+- **Declared expected rejection.** Each mutation names its target property and its expected rejection as predicates on the script's output. Examples: "built-in mutant M3P9-F2_delta_i_coefficient_doubled not rejected" (an assertion was removed), or "exactly 600 failures starting `nonfinite delta_i formula=nan`" (a defect was injected).
+- **Detection rule.** A mutation is detected only when the copy exits 1 with nothing on stderr, writes a FAIL verdict, and every predicate holds. Exit 0, a FAIL verdict for another reason, any exception that ends the process, or a fragment that does not occur exactly once is NOT detected, and the check fails.
+- **No vacuous expectation.** No expectation may already be met by the unmutated script's output; none is.
+- **Negative controls.** Five deliberately invalid runs must each be classified as not detected: a syntax error, an import failure, a missing script, a neutral edit (exit 0), and a real defect (Δi sign reversed) declared with the wrong reason (a ΔΩ sign failure). All five are classified as not detected.
+- **Report.** For each mutation: group, target property, expected rejection, observed outcome and PASS/FAIL. Machine-specific paths are replaced, so reruns are byte-identical.
+
+| Group | Mutations | Detected for the declared reason |
+|---|---|---|
+| M3P8-F1 injection (formula NaN, ±∞; each formula) | 6 | 6 |
+| M3P8-F1 coverage | 6 | 6 |
+| M3P8-F1 validation | 4 | 4 |
+| M3P8-F1 audit (finite checks of E1, E2, E2 endpoints, E3, E4, E5b, E6) | 7 | 7 |
+| M3P9-F1 oracle (±∞ at one sample, each formula; check weakened to `isnan` and to `isinf`) | 6 | 6 |
+| M3P9-F2 order and sign (each coefficient doubled; order or sign assertion disabled for Δi, for ΔΩ and for both) | 8 | 8 |
+| M3P9-F3 exact properties (E3, E4 assertion removed) | 2 | 2 |
+| Earlier findings (reviews 05–07) | 10 | 10 |
+| Review-09 injection matrix | 60 | 60 |
+| **Total** | **109** | **109** |
+
+- **The 33 mutations of amendment 5 are kept.** Each now has a declared reason. The E2 and E5b finite-check removals are detected by a FAIL verdict in which `M3P8-F1_audit_oracle_delta_node_nan` is unrejected and recorded as raising the wrap guard's ValueError.
+- **Review-09 injection matrix.** Review 09 ran 60 independent NaN/±∞ injection cases. They are preserved as file-level mutations with the same structure:
+  - formula path: each formula × NaN, +∞, −∞ × {all, first step, last step, one series, positive tilt, near-equatorial, near-polar} = 42;
+  - oracle path: each formula × NaN, +∞, −∞ × {all, first step, negative tilt near-polar} = 18.
+
+  Each requires the exact number of `nonfinite` failures: one per affected series (600, 600, 600, 1, 300, 240 and 180 for the formula subsets; 600, 600 and 90 for the oracle subsets).
+
+### Assertion-removal sweep (measurement; not corrected)
+`dr0028_node_signed_assertion_sweep.py` (output `dr0028_node_signed_assertion_sweep_results.json`) removes each of the 35 `failures.append(...)` statements of the verification script in turn and runs the copy. It is a measurement with no verdict.
+
+| Test | Assertions | Detected individually | Survive individually |
+|---|---|---|---|
+| First-order checks (nonfinite, order, sign, coverage) | 4 | 4 | 0 |
+| E3, E4 | 4 | 4 | 0 |
+| E5a, E5c | 2 | 2 | 0 |
+| E1 | 2 | 1 | 1 (the deviation bound) |
+| E2 | 7 | 2 | 5 |
+| E5b, E5d | 4 | 1 | 3 |
+| E6 | 3 | 1 | 2 |
+| Finite wrap tests | 6 | 0 | 6 |
+| Non-finite wrap tests | 3 | 2 | 1 |
+| **Total** | **35** | **17** | **18** |
+
+- **What a survivor means.** No built-in mutant depends on that assertion alone. Either another assertion of the same test rejects every designated mutant, as for the previous-wrap mutant, which fails several finite wrap assertions at once; or no mutant exercises it.
+- **Every assertion named by M3P9-F1, F2 and F3 is detected individually:** the non-finite, order and sign assertions of the first-order checks, and the E3 and E4 assertions. The oracle finite check is a condition inside `nonfinite_reason`, not a separate statement; its removal and both weakenings are file-level mutations above.
+- **The 18 survivors are not corrected.** Protecting them needs new defect mutants for assertions that no review finding named, which is outside I-9 §3–§5. They are recorded for the Tech Lead's decision. None of them is a defect in a check: each assertion is present, and the sweep shows only that no mutant makes it individually load-bearing.
+
+### Results
+- **Verdict PASS, exit 0.** Two consecutive runs of the verification script, of the mutation check and of the sweep each produce byte-identical output.
+- **Finite results unchanged.** Comparing the output with `faba9d6`, every pre-existing value is identical. The 53 differences are all added keys: the per-formula order and sign counts of the existing first-order mutants, and the 13 new mutants.
+- **Coverage unchanged:** order 506 (Δi) and 532 (ΔΩ), sign 560 (Δi) and 504 (ΔΩ), each equal to its minimum.
+- **Unchanged definitions.** An AST comparison with `faba9d6` shows that only `EXACT_MUTANTS`, `by_formula_test` and `main` changed among the existing top-level definitions, plus the new mutant helpers. The oracle, formulas, wrap, tolerances, grid, checks and minima are unchanged.
