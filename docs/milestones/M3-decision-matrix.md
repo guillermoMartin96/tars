@@ -148,6 +148,15 @@ Review-07 finding M3P7-F1: **RESOLVED** (reviewer's disposition).
 |---|---|---|---|---|
 | M3P8-F1 | MINOR | ACCEPTED; was not applied (I-7 §5 stop) → **corrected** | I-8 §2–§5 | DR-0028 "Resolution amendment 5" (finite validation before every comparison; per-formula minimum valid samples: order 506/532, sign 560/504; bounded audit of E1–E6; 33 entrypoint mutations detected; finite results unchanged); `docs/reviews/M3-planning-review-08.md`, "Resolution of findings". Original record: a non-finite (NaN) first-order prediction skipped the order and sign checks and still passed; there was no per-component coverage requirement. Not a mathematical error |
 
+## Review findings (M3 Planning Review 09)
+Review-08 finding M3P8-F1: **RESOLVED** (reviewer's disposition).
+
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P9-F1 | MINOR | ACCEPTED; **not applied** (I-8 §7 stop) | Pending | `docs/reviews/M3-planning-review-09.md`. Verification defect: weakening the oracle finite check to `isnan()` still passes, because no mutant injects oracle ±∞. Not a mathematical error: the committed guard is correct |
+| M3P9-F2 | MINOR | ACCEPTED; **not applied** (I-8 §7 stop) | Pending | `docs/reviews/M3-planning-review-09.md`. Verification defect: disabling the order or the sign assertion (whole or for one component) still passes; with the order assertion off, doubled first-order coefficients pass. Not a mathematical error: the committed formulas pass both assertions |
+| M3P9-F3 | NOTE | ACCEPTED as a NOTE; no change proposed | Pending (whether to add E3/E4 assertion-removal mutations) | `docs/reviews/M3-planning-review-09.md`. Optional improvement: limits of the asymptotic order test; E3/E4 assertion removals are not mutation-protected |
+
 ## Gates
 | Gate | State |
 |---|---|
