@@ -140,6 +140,13 @@ Review-06 findings M3P6-F1, F2 and F3: **RESOLVED** (reviewer's dispositions).
 |---|---|---|---|---|
 | M3P7-F1 | MINOR | ACCEPTED; was not applied (I-6 §5 stop) → **corrected** | I-7 §2 | DR-0028 "Resolution amendment 4" (`wrap()` domain = finite floats; NaN and ±∞ raise ValueError; finite behaviour unchanged); `docs/reviews/M3-planning-review-07.md`, "Resolution of findings" |
 
+## Review findings (M3 Planning Review 08)
+Review-07 finding M3P7-F1: **RESOLVED** (reviewer's disposition).
+
+| ID | Severity | Disposition | Owner decision | Record |
+|---|---|---|---|---|
+| M3P8-F1 | MINOR | ACCEPTED; **not applied** (I-7 §5 stop) | Pending | `docs/reviews/M3-planning-review-08.md`. Signed verification script: a non-finite (NaN) first-order prediction skips the order and sign checks and still passes; there is no per-component coverage requirement. Not a mathematical error: the committed formulas are finite and verified |
+
 ## Gates
 | Gate | State |
 |---|---|
