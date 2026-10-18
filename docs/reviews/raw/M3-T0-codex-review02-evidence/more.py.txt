@@ -1,0 +1,17 @@
+import subprocess,pathlib,json,hashlib,sys,tarfile,io
+S=pathlib.Path('review_scratch'); P=sys.executable
+jobs=[([P,'toolbox/validators/m1_proof.py','--out',str(S/'m1.json')],'m1'),([P,'toolbox/validators/m2_proof.py','--out',str(S/'m2.json')],'m2'),([P,'toolbox/scripts/gmat_m1.py','compare'],'m1compare'),([P,'toolbox/scripts/gmat_m2.py','compare'],'m2compare')]
+ledger=[]
+for cmd,n in jobs:
+ p=subprocess.run(cmd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT); (S/(n+'.log')).write_text(p.stdout);ledger.append([cmd,p.returncode]); print(n,p.returncode,p.stdout[-350:],flush=True)
+(S/'more_commands.json').write_text(json.dumps(ledger,indent=2))
+a=subprocess.check_output(['git','archive','bdcaacf']); old=S/'before';old.mkdir(exist_ok=True)
+with tarfile.open(fileobj=io.BytesIO(a)) as t:t.extractall(old,filter='data')
+d=pathlib.Path('docs/science/experiments/m3-t0/check_review01.py'); (old/d).write_bytes(d.read_bytes())
+p=subprocess.run([P,'-m','pytest','-q','-p','no:cacheprovider',str(old/d)],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT); (S/'before_checks.log').write_text(p.stdout); print('before checks',p.returncode,p.stdout[-2000:])
+from tars.validation import approved_digests as ad
+pairs=[('proof/thresholds/m1.json',ad.APPROVED_THRESHOLD_SHA256['m1']),('proof/thresholds/m2.json',ad.APPROVED_THRESHOLD_SHA256['m2']),('toolbox/references/gmat/m2/APPROVED_DIGESTS.json',ad.APPROVED_GMAT_M2_MANIFEST_SHA256),('toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz',ad.APPROVED_REFERENCE_SNAPSHOT_SHA256),('proof/references/m2_final_states.json',ad.APPROVED_M2_GOLDEN_SHA256)]
+for path,expected in pairs:
+ actual=hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest(); print(path,actual,actual==expected)
+for path in [pathlib.Path('../GMAT R2026a/bin/GmatConsole'),pathlib.Path('../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt')]:
+ print(path,hashlib.sha256(path.read_bytes()).hexdigest())

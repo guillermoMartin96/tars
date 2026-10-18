@@ -1,0 +1,215 @@
+{
+ "cases": {
+  "kepler_250x800_i51.6_perigee_midstep": {
+   "dip_m": 4.98764459323138,
+   "sup_hddot_upper_over_step_mps2": 0.42261415057364893,
+   "step_bound_m": 5.282676882170612,
+   "two_body_domain_bound_m": 5.283316482977662,
+   "bound_m": 5.283316482977662,
+   "bound_kind": "two-body domain bound over the whole orbit",
+   "bound_holds": true
+  },
+  "j2drag_250x800_i51.6_perigee_midstep": {
+   "dip_m": 4.817096536979079,
+   "sup_hddot_upper_over_step_mps2": 0.408970573595024,
+   "step_bound_m": 5.1121321699378,
+   "bound_m": 5.1121321699378,
+   "bound_kind": "pointwise bound U maximised over the step (perturbed motion)",
+   "bound_holds": true
+  },
+  "kepler_circular250_i51.6_equator_midstep": {
+   "dip_m": 0.4516185065731406,
+   "sup_hddot_upper_over_step_mps2": 0.05882667119122864,
+   "step_bound_m": 0.735333389890358,
+   "two_body_domain_bound_m": 0.7359729906974088,
+   "bound_m": 0.7359729906974088,
+   "bound_kind": "two-body domain bound over the whole orbit",
+   "bound_holds": true
+  },
+  "j2drag_circular250_i51.6_equator_midstep": {
+   "dip_m": 0.28107060864567757,
+   "sup_hddot_upper_over_step_mps2": 0.04518387694145076,
+   "step_bound_m": 0.5647984617681345,
+   "bound_m": 0.5647984617681345,
+   "bound_kind": "pointwise bound U maximised over the step (perturbed motion)",
+   "bound_holds": true
+  }
+ },
+ "all_bounds_hold": true
+}
+kepler     250 x    250 i   0.0: dip 0.00000 m (phase 9.25 s) <= bound 0.73597 m
+j2drag     250 x    250 i   0.0: dip 0.16727 m (phase 2.50 s) <= bound 0.91492 m
+kepler     250 x    250 i  51.6: dip 0.44341 m (phase 5.25 s) <= bound 0.73597 m
+j2drag     250 x    250 i  51.6: dip 0.48249 m (phase 9.75 s) <= bound 0.77109 m
+kepler     250 x    250 i  97.0: dip 0.71124 m (phase 5.25 s) <= bound 0.73597 m
+j2drag     250 x    250 i  97.0: dip 0.64848 m (phase 7.25 s) <= bound 0.68416 m
+kepler     180 x    180 i  51.6: dip 0.46132 m (phase 7.75 s) <= bound 0.75984 m
+j2drag     180 x    180 i  51.6: dip 0.46952 m (phase 9.00 s) <= bound 0.78917 m
+kepler     250 x    400 i  51.6: dip 1.69372 m (phase 6.75 s) <= bound 2.01316 m
+j2drag     250 x    400 i  51.6: dip 1.49714 m (phase 7.25 s) <= bound 1.84198 m
+kepler     250 x    800 i  51.6: dip 4.90292 m (phase 3.00 s) <= bound 5.28332 m
+j2drag     250 x    800 i  51.6: dip 4.64126 m (phase 3.75 s) <= bound 5.11213 m
+kepler     250 x    800 i  97.0: dip 5.18175 m (phase 3.00 s) <= bound 5.28332 m
+j2drag     250 x    800 i  97.0: dip 5.00357 m (phase 3.50 s) <= bound 5.11213 m
+kepler     180 x    800 i  51.6: dip 5.61169 m (phase 4.25 s) <= bound 6.02300 m
+j2drag     180 x    800 i  51.6: dip 5.50339 m (phase 9.75 s) <= bound 5.84440 m
+kepler     250 x   2000 i  51.6: dip 13.30150 m (phase 3.00 s) <= bound 14.04777 m
+j2drag     250 x   2000 i  51.6: dip 13.32783 m (phase 8.75 s) <= bound 13.87659 m
+{
+ "stiffness_thresholds": {
+  "circular_speed": {
+   "B25.8": {
+    "2.785293563405282": {
+     "threshold_m": 51244.545260572435,
+     "lambda_dt_at_threshold": 2.7852935634052804,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 59825.0849189536,
+     "lambda_dt_at_threshold": 1.0000000000000215,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 76445.47737908902,
+     "lambda_dt_at_threshold": 0.09999999999999741,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 90185.09165917509,
+     "lambda_dt_at_threshold": 0.010000000000000002,
+     "sign_changes_on_10m_grid": 1
+    }
+   },
+   "B100": {
+    "2.785293563405282": {
+     "threshold_m": 40881.38962378401,
+     "lambda_dt_at_threshold": 2.785293563405281,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 48614.80661172269,
+     "lambda_dt_at_threshold": 1.0000000000000002,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 67133.48614929448,
+     "lambda_dt_at_threshold": 0.1000000000000001,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 82337.14381719701,
+     "lambda_dt_at_threshold": 0.009999999999999686,
+     "sign_changes_on_10m_grid": 1
+    }
+   }
+  },
+  "bound_speed": {
+   "B25.8": {
+    "2.785293563405282": {
+     "threshold_m": 54506.73727267767,
+     "lambda_dt_at_threshold": 2.785293563405328,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 62842.26145531463,
+     "lambda_dt_at_threshold": 1.0000000000000002,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 78996.122325464,
+     "lambda_dt_at_threshold": 0.09999999999999706,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 92282.0718994342,
+     "lambda_dt_at_threshold": 0.010000000000000009,
+     "sign_changes_on_10m_grid": 1
+    }
+   },
+   "B100": {
+    "2.785293563405282": {
+     "threshold_m": 43820.779476079435,
+     "lambda_dt_at_threshold": 2.785293563405282,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 51724.77386192621,
+     "lambda_dt_at_threshold": 0.9999999999999997,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 70116.7597914731,
+     "lambda_dt_at_threshold": 0.09999999999999597,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 84596.11573594392,
+     "lambda_dt_at_threshold": 0.009999999999999908,
+     "sign_changes_on_10m_grid": 1
+    }
+   }
+  },
+  "lambda_dt_circular_at_90km_B25.8": 0.010350038817203828,
+  "lambda_dt_circular_at_80km_B100": 0.014966155077666268
+ },
+ "admissibility_counterexamples": {
+  "stress_input": {
+   "h_f_m": 21500.0,
+   "initial_h_m": 22000.0,
+   "a_minus_b_m": 21384.685754820704,
+   "lambda_dt_circular": 4.9801435971955024e-06,
+   "lambda_dt_bound": 7.349265929085124e-06,
+   "two_body_energy_J_per_kg": -12279985.85030289,
+   "fail_closed": "OutsideDomainError: h = -28000.0 m below the table's lower edge",
+   "diagnostic_stage_heights_m": [
+    -28000.0,
+    -28243.59463945497,
+    -78347.73289555125
+   ],
+   "diagnostic_committed_h_m": -78392.69368719496,
+   "diagnostic_committed_spherical_alt_m": -78392.69368719496,
+   "reentry_and_impact_same_tick": true,
+   "lipschitz_lower_bound_holds": true
+  },
+  "eccentric_retrograde": {
+   "h_m": 90185.09165917509,
+   "vrel_mps": 11292.240774733824,
+   "lambda_dt_actual": 0.014384907069861974,
+   "lambda_dt_circular_proxy": 0.010000000000000002,
+   "vrel_bound_mps": 11591.738210967576,
+   "covered_by_bound_speed": true
+  }
+ },
+ "sufficient_stage_condition": {
+  "dt_s": 10.0,
+  "rows": [
+   {
+    "vehicle": "B25.8",
+    "h_f_sufficient_at_least_m": 124456.68544493792
+   },
+   {
+    "vehicle": "B100",
+    "h_f_sufficient_at_least_m": 118633.50894609134
+   },
+   {
+    "vehicle": "drag-free limit",
+    "h_f_sufficient_at_least_m": 111511.96182423369
+   }
+  ],
+  "note": "Sufficient, not necessary. A sharper condition needs a restriction of the admissible initial states (for example the inward velocity), which is an owner decision and is not proposed here."
+ },
+ "stage_order": {
+  "state": "circular 180 km, i 51.6 deg, J2 + drag, dt 10 s",
+  "recorded_order": [
+   "k2 input y + dt/2 k1",
+   "k3 input y + dt/2 k2",
+   "k4 input y + dt k3"
+  ],
+  "height_minus_initial_m": {
+   "k2_input": 116.3127734689042,
+   "k3_input": -115.73415292799473,
+   "k4_input": 1.1612665504217148
+  }
+ },
+ "vectorised_height_check_max_abs_m": 1.862645149230957e-09
+}

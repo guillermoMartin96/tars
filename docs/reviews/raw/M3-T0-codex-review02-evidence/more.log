@@ -1,0 +1,66 @@
+m1 0 rgence (dt s -> position error m, |dE/E|):
+       60 -> 1.1612e+03, 2.978e-06
+       30 -> 4.3522e+01, 9.300e-08
+       20 -> 6.6851e+00, 1.225e-08
+       10 -> 2.9833e-01, 3.826e-10
+        5 -> 1.4905e-02, 1.194e-11
+      2.5 -> 8.2243e-04, 3.974e-13
+        1 -> 1.5233e-05, 1.028e-14
+thresholds: approved; overall: PASS -> review_scratch/m1.json
+
+m2 0 er=3.88294, position_order_deviation_from_4_max=0.195091
+[PASS] reference_snapshot: violations=0
+[PASS] reference_snapshot_margins: violations=0
+[PASS] thresholds_all_consumed: violations=0
+[PASS] thresholds_cover_all_metrics: violations=0
+[PASS] report_only_metrics_finite: violations=0
+thresholds: approved; overall: PASS -> review_scratch/m2.json
+
+m1compare 0 ax_m": 0.0001,
+    "gmat_vs_kepler_velocity_error_max_mps": 1e-07,
+    "initial_sma_difference_m": 1e-06,
+    "initial_state_difference_m": 1e-06,
+    "period_difference_s": 1e-08,
+    "script_initial_position_difference_m": 1e-06,
+    "script_initial_velocity_difference_mps": 1e-09
+  },
+  "threshold_status": "approved",
+  "notes": "GMAT R2026a"
+}
+
+m2compare 0 s_vs_gmat_burn_boundary_velocity_error_max_mps": 2e-05,
+    "ours_vs_gmat_final_position_error_m": 0.6,
+    "ours_vs_gmat_final_velocity_error_mps": 0.0007,
+    "ours_vs_gmat_mass_error_max_kg": 1.3e-09,
+    "ours_vs_gmat_node_crossing_error_max_s": 8e-05
+  },
+  "threshold_status": "approved",
+  "notes": "GMAT R2026a, aligned stepping (DR-0016)"
+}
+
+before checks 1  8 cm (along-track) against 0.076 mm at 0. It must be pinned explicitly....
+E             
+E             ...Full output truncated (135 lines hidden), use '-vv' to show
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:216: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[j2drag_250x800_i51.6_perigee_midstep]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[kepler_250x800_i51.6_perigee_midstep]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[kepler_circular250_i51.6_equator_midstep]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_measured_sweep_never_exceeds_the_derived_bound
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_curvature_bound_is_an_upper_bound_on_hddot
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_records_do_not_present_the_fixed_phase_formula_as_a_bound
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f2_kappa_001_threshold_is_exact_and_recorded
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f2_records_do_not_claim_p1_is_sufficient
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f2_bound_speed_covers_the_eccentric_retrograde_counterexample
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f3_inward_stage_is_the_input_of_k3
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f4_quoted_m3_form_residual_matches_the_committed_result
+11 failed, 1 passed in 0.70s
+
+proof/thresholds/m1.json 446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d True
+proof/thresholds/m2.json 9d4eab47133a4f9eb1125cf7242ada0c720fbe9e4b8dd12b0f698cc79e5f0ce9 True
+toolbox/references/gmat/m2/APPROVED_DIGESTS.json f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585 True
+toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b True
+proof/references/m2_final_states.json dc3baf7abb209a11ca463b9ca5001ce886c62b92b191ac76249d32924aa951dc True
+../GMAT R2026a/bin/GmatConsole 1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2
+../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt 75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e

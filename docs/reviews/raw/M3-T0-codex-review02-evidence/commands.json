@@ -1,0 +1,89 @@
+[
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_atmosphere.py",
+      "docs/science/experiments/m3-t0/t0_atmosphere_results.json"
+    ],
+    "exit": 0,
+    "seconds": 24.904947996139526,
+    "log": "atmosphere.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_decay.py",
+      "docs/science/experiments/m3-t0/t0_decay_results.json"
+    ],
+    "exit": 0,
+    "seconds": 2.4321048259735107,
+    "log": "decay.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_geodetic.py",
+      "docs/science/experiments/m3-t0/t0_geodetic_results.json"
+    ],
+    "exit": 0,
+    "seconds": 0.570112943649292,
+    "log": "geodetic.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_frames.py",
+      "docs/science/experiments/m3-t0/t0_frames_results.json"
+    ],
+    "exit": 0,
+    "seconds": 0.5952069759368896,
+    "log": "frames.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_regression.py",
+      "docs/science/experiments/m3-t0/t0_regression_results.json"
+    ],
+    "exit": 0,
+    "seconds": 0.8696088790893555,
+    "log": "regression.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_termination.py",
+      "docs/science/experiments/m3-t0/t0_termination_results.json"
+    ],
+    "exit": 0,
+    "seconds": 27.733766794204712,
+    "log": "termination.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_gmat.py",
+      "--gmat-console",
+      "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-nickel-page-8a63927f/44d91783-62dd-45fd-b87a-0c6161213418/scratchpad/t0review02/GMAT R2026a/bin/GMAT-R2026a_Beta.app/Contents/MacOS/GmatConsole-R2026a",
+      "--out",
+      "docs/science/experiments/m3-t0/t0_gmat_results.json"
+    ],
+    "exit": 1,
+    "seconds": 0.7414400577545166,
+    "log": "gmat.log"
+  },
+  {
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "docs/science/experiments/m3-t0/check_review01.py"
+    ],
+    "exit": 0,
+    "seconds": 1.3594181537628174,
+    "log": "checks.log"
+  }
+]

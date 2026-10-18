@@ -1,0 +1,10 @@
+import sys,math,json,numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0');import t0_model as m,t0_termination as tt
+c=m.A_WGS84-tt.R_CURV_MIN;C=math.cos(math.asin((m.A_WGS84**2-m.B_WGS84**2)/(m.A_WGS84**2+m.B_WGS84**2)));worst=0
+rng=np.random.default_rng(222)
+for i in range(1000):
+ rp=m.A_WGS84+rng.uniform(1,2e6);e=rng.uniform(0,.999);s=rp/(1-e);ra=s*(1+e)
+ roots=np.roots([1/s,-4+2*C,(2-4*C)*c,2*C*c*c]);rr=[rp,ra]+[float(x.real) for x in roots if abs(x.imag)<1e-6 and rp<=x.real<=ra]
+ def g(r):return m.MU*(2/r-1/s)/(r-c)-m.MU*C/r**2
+ exact=max(g(r) for r in rr);got=tt.two_body_domain_bound(s,e)['sup_hddot_mps2'];worst=max(worst,abs(exact-got))
+print('1000 domains; maximum discrepancy against endpoints plus all cubic stationary roots (m/s2)',worst)

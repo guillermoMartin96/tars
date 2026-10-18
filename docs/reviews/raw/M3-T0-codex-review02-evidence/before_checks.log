@@ -1,0 +1,170 @@
+FFFFFFF.FFFF                                                             [100%]
+=================================== FAILURES ===================================
+_ test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[j2drag_250x800_i51.6_perigee_midstep] _
+
+case = 'j2drag_250x800_i51.6_perigee_midstep'
+
+    @pytest.mark.parametrize("case", sorted(DIP_CASES))
+    def test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase(case):
+        cfg, (r0, v0) = DIP_CASES[case]
+        dip = midpoint_dip(cfg, r0, v0)
+        bounds = claimed_bounds(case)
+        assert bounds, f"no missed-crossing bound recorded for {case} (dip {dip:.5f} m)"
+        for b in bounds:
+>           assert b >= dip, f"{case}: claimed bound {b:.5f} m < dip {dip:.5f} m"
+E           AssertionError: j2drag_250x800_i51.6_perigee_midstep: claimed bound 4.16525 m < dip 4.81710 m
+E           assert 4.165249347801579 >= 4.817096536979079
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:109: AssertionError
+_ test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[kepler_250x800_i51.6_perigee_midstep] _
+
+case = 'kepler_250x800_i51.6_perigee_midstep'
+
+    @pytest.mark.parametrize("case", sorted(DIP_CASES))
+    def test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase(case):
+        cfg, (r0, v0) = DIP_CASES[case]
+        dip = midpoint_dip(cfg, r0, v0)
+        bounds = claimed_bounds(case)
+        assert bounds, f"no missed-crossing bound recorded for {case} (dip {dip:.5f} m)"
+        for b in bounds:
+>           assert b >= dip, f"{case}: claimed bound {b:.5f} m < dip {dip:.5f} m"
+E           AssertionError: kepler_250x800_i51.6_perigee_midstep: claimed bound 4.16525 m < dip 4.98764 m
+E           assert 4.165249347801579 >= 4.98764459323138
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:109: AssertionError
+_ test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[kepler_circular250_i51.6_equator_midstep] _
+
+case = 'kepler_circular250_i51.6_equator_midstep'
+
+    @pytest.mark.parametrize("case", sorted(DIP_CASES))
+    def test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase(case):
+        cfg, (r0, v0) = DIP_CASES[case]
+        dip = midpoint_dip(cfg, r0, v0)
+        bounds = claimed_bounds(case)
+>       assert bounds, f"no missed-crossing bound recorded for {case} (dip {dip:.5f} m)"
+E       AssertionError: no missed-crossing bound recorded for kepler_circular250_i51.6_equator_midstep (dip 0.45162 m)
+E       assert []
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:107: AssertionError
+____________ test_f1_measured_sweep_never_exceeds_the_derived_bound ____________
+
+    def test_f1_measured_sweep_never_exceeds_the_derived_bound():
+        sweep = results("termination").get("missed_crossing", {}).get("sweep")
+>       assert sweep, "no sampling-phase / eccentricity sweep recorded"
+E       AssertionError: no sampling-phase / eccentricity sweep recorded
+E       assert None
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:114: AssertionError
+______________ test_f1_curvature_bound_is_an_upper_bound_on_hddot ______________
+
+    def test_f1_curvature_bound_is_an_upper_bound_on_hddot():
+        """The pointwise bound U(r, v, a) >= d2h/dt2 along real trajectories (second
+        difference of h on DOP853 states), including the worst cases above."""
+>       import t0_termination as tt
+E       ModuleNotFoundError: No module named 't0_termination'
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:122: ModuleNotFoundError
+______ test_f1_records_do_not_present_the_fixed_phase_formula_as_a_bound _______
+
+    def test_f1_records_do_not_present_the_fixed_phase_formula_as_a_bound():
+        pat = re.compile(r"a\s*e\s*n²\s*dt²\s*/\s*8")
+        for name in RECORDS:
+>           assert not pat.search(record(name)), name
+E           AssertionError: DR-0029
+E           assert not <re.Match object; span=(8176, 8188), match='a e n² dt²/8'>
+E            +  where <re.Match object; span=(8176, 8188), match='a e n² dt²/8'> = <built-in method search of re.Pattern object at 0x108906f80>("# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...side DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n")
+E            +    where <built-in method search of re.Pattern object at 0x108906f80> = re.compile('a\\s*e\\s*n²\\s*dt²\\s*/\\s*8').search
+E            +    and   "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...side DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n" = record('DR-0029')
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:139: AssertionError
+______________ test_f2_kappa_001_threshold_is_exact_and_recorded _______________
+
+    def test_f2_kappa_001_threshold_is_exact_and_recorded():
+        h_star = brentq(lambda h: lam_dt_circular(h) - 0.01, 85e3, 95e3, xtol=1e-9)
+        assert lam_dt_circular(90e3) > 0.01  # the rounded "90 km" fails the rule itself
+        assert f"{h_star:,.2f}".replace(",", " ") == "90 185.09"
+        rec = results("termination").get("stiffness_thresholds", {})
+        got = rec.get("circular_speed", {}).get("B25.8", {}).get("0.01")
+>       assert got is not None and abs(got["threshold_m"] - h_star) < 1e-3
+E       assert (None is not None)
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:154: AssertionError
+________________ test_f2_records_do_not_claim_p1_is_sufficient _________________
+
+    def test_f2_records_do_not_claim_p1_is_sufficient():
+        claims = (
+            r"leaves every valid run unchanged",
+            r"termination always precedes `impact`",
+            r"`reentry` and `impact` cannot both hold at one tick",
+            r"it can never fire first for a committed state",
+        )
+        for name in RECORDS:
+            for c in claims:
+>               assert not re.search(c, record(name)), (name, c)
+E               AssertionError: ('DR-0029', 'leaves every valid run unchanged')
+E               assert not <re.Match object; span=(12182, 12214), match='leaves every valid run unchanged'>
+E                +  where <re.Match object; span=(12182, 12214), match='leaves every valid run unchanged'> = <function search at 0x10565c400>('leaves every valid run unchanged', "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...side DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n")
+E                +    where <function search at 0x10565c400> = re.search
+E                +    and   "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...side DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n" = record('DR-0029')
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:182: AssertionError
+______ test_f2_bound_speed_covers_the_eccentric_retrograde_counterexample ______
+
+    def test_f2_bound_speed_covers_the_eccentric_retrograde_counterexample():
+>       import t0_termination as tt
+E       ModuleNotFoundError: No module named 't0_termination'
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:187: ModuleNotFoundError
+___________________ test_f3_inward_stage_is_the_input_of_k3 ____________________
+
+    def test_f3_inward_stage_is_the_input_of_k3():
+        r, v = m.circular_state(180e3, 51.6)
+        stages: list = []
+        m.rk4_step(m.rhs(J2_DRAG), 0.0, np.r_[r, v, 850.0], DT, stages)
+        dh = [m.geodetic_iterative(s.r)[1] - 180e3 for s in stages]  # inputs of k2, k3, k4
+        assert dh[0] > 100.0 and dh[1] < -100.0 and abs(dh[2]) < 2.0
+        for name in RECORDS:
+>           assert not re.search(r"second (RK4 )?stage", record(name), re.IGNORECASE), name
+E           AssertionError: DR-0029
+E           assert not <re.Match object; span=(11104, 11116), match='second stage'>
+E            +  where <re.Match object; span=(11104, 11116), match='second stage'> = <function search at 0x10565c400>('second (RK4 )?stage', "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...side DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n", re.IGNORECASE)
+E            +    where <function search at 0x10565c400> = re.search
+E            +    and   "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...side DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n" = record('DR-0029')
+E            +    and   re.IGNORECASE = re.IGNORECASE
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:204: AssertionError
+_________ test_f4_quoted_m3_form_residual_matches_the_committed_result _________
+
+    def test_f4_quoted_m3_form_residual_matches_the_committed_result():
+        value = results("gmat")["regression_m3_form"]["metrics"]["gmat_vs_kepler_position_error_max_m"]
+        quoted = f"{value:.2e}".replace("e-06", "e-6")
+        assert quoted == "6.95e-6"
+        for name in ("DR-0029", "VAL-0019"):
+            text = record(name)
+>           assert "4.86e-6" not in text, name
+E           AssertionError: DR-0029
+E           assert '4.86e-6' not in '# Decision ... (pending)\n'
+E             
+E             '4.86e-6' is contained here:
+E               vs Kepler 4.86e-6 m against the 1e-4 m limit) | — | — |
+E             ?           +++++++
+E               
+E               **Configuration findings (each one changes the reference by more than its own residual)**
+E               1. **`Earth.NutationUpdateInterval`:** the default of 60 s moves the J2 reference by 8 cm (along-track) against 0.076 mm at 0. It must be pinned explicitly....
+E             
+E             ...Full output truncated (135 lines hidden), use '-vv' to show
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review01.py:216: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[j2drag_250x800_i51.6_perigee_midstep]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[kepler_250x800_i51.6_perigee_midstep]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[kepler_circular250_i51.6_equator_midstep]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_measured_sweep_never_exceeds_the_derived_bound
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_curvature_bound_is_an_upper_bound_on_hddot
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f1_records_do_not_present_the_fixed_phase_formula_as_a_bound
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f2_kappa_001_threshold_is_exact_and_recorded
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f2_records_do_not_claim_p1_is_sufficient
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f2_bound_speed_covers_the_eccentric_retrograde_counterexample
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f3_inward_stage_is_the_input_of_k3
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review01.py::test_f4_quoted_m3_form_residual_matches_the_committed_result
+11 failed, 1 passed in 0.70s

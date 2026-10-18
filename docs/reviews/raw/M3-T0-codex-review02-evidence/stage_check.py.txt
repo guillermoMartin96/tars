@@ -1,0 +1,16 @@
+import sys,math,json
+import numpy as np
+from scipy.optimize import brentq
+sys.path.insert(0,'docs/science/experiments/m3-t0');import t0_model as m,t0_termination as tt
+L=79999.9;h=80000.;s=11000.;B=tt.B_V1
+f=lambda h:tt.rho_sup(h)*(s+m.OMEGA_E*(m.A_WGS84+h))**2/(2*B)
+r=np.array([m.A_WGS84+h,0.,0.]);v=np.array([0.,-s,0.]);actual=.5*m.density(h)*np.linalg.norm(v-m.air_velocity(r,m.OMEGA_E))**2/B
+print(json.dumps({'L':L,'h':h,'s':s,'B':B,'asserted_upper_drag':f(L),'actual_drag_at_h':actual,'underestimate':actual-f(L),'energy':.5*s*s-m.MU/np.linalg.norm(r)},indent=2))
+# Valid exterior stage states sampled immediately above the advertised thresholds.
+rng=np.random.default_rng(2202);worst=1e99
+for B,hfloor in [(tt.B_V1,124456.68544493792),(100.,118633.50894609134)]:
+ cfg=m.Config(j2=m.J2_FROM_C20,drag=m.Drag(cd=1,area_m2=1))
+ for _ in range(2000):
+  lat=rng.uniform(-math.pi/2,math.pi/2);h0=hfloor+rng.exponential(2e4);r=m.geodetic_to_cartesian(lat,0,h0);v=rng.normal(size=3);v*=math.sqrt(2*m.MU/np.linalg.norm(r))*.999999/np.linalg.norm(v);st=[]
+  m.rk4_step(m.rhs(cfg),0,np.r_[r,v,B],10,st);worst=min(worst,min(m.geodetic_iterative(s.r)[1] for s in st))
+print('4000 random near-escape state stage minimum height',worst)

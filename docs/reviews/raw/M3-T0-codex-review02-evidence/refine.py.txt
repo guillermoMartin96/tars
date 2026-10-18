@@ -1,0 +1,8 @@
+exec(open('review_scratch/independent.py').read().split('out={};')[0])
+for hp,ha,inc in tt.SWEEP_ORBITS:
+ sma,ecc=tt.orbit_elements(hp*1000,ha*1000);period=2*math.pi*math.sqrt(sma**3/m.MU);end=2*period+20
+ r,v=m.perigee_state(hp*1000,ha*1000,inc); sol=tt.dense(tt.J2_DRAG,np.r_[r,v,850],end)
+ def U(t):
+  y=sol(t);return tt.hddot_upper(y[:3],y[3:6],m.acceleration(tt.J2_DRAG,t,y[:3],y[3:6],y[6]))
+ ts=np.arange(0,end+1e-9,.25);us=np.array([U(t) for t in ts]);k=int(us.argmax());opt=minimize_scalar(lambda t:-U(t),bounds=(max(0,ts[k]-.25),min(end,ts[k]+.25)),method='bounded',options={'xatol':1e-9})
+ print(hp,ha,inc,'sample',ts[k],us[k],'refined',opt.x,-opt.fun,'excess',-opt.fun-us[k],flush=True)

@@ -1,0 +1,42 @@
+import sys,math,json,pathlib
+import numpy as np
+from scipy.optimize import minimize_scalar,brentq
+D=pathlib.Path('docs/science/experiments/m3-t0'); sys.path.insert(0,str(D.resolve()))
+import t0_model as m, t0_termination as tt
+out={}; rng=np.random.default_rng(1202)
+# Analytic principal curvatures, independently assembled in local north/east basis.
+ratios=[]; speedslack=[]; jrat=[]; normalmax=math.asin((m.A_WGS84**2-m.B_WGS84**2)/(m.A_WGS84**2+m.B_WGS84**2))
+for i in range(2000):
+ lat=rng.uniform(-math.pi/2,math.pi/2);lon=rng.uniform(-math.pi,math.pi);h=rng.uniform(0,2e6)
+ r=m.geodetic_to_cartesian(lat,lon,h); n=np.array([math.cos(lat)*math.cos(lon),math.cos(lat)*math.sin(lon),math.sin(lat)])
+ north=np.array([-math.sin(lat)*math.cos(lon),-math.sin(lat)*math.sin(lon),math.cos(lat)]);east=np.array([-math.sin(lon),math.cos(lon),0])
+ N=m.A_WGS84/math.sqrt(1-m.E2_WGS84*math.sin(lat)**2);M=m.A_WGS84*(1-m.E2_WGS84)/(1-m.E2_WGS84*math.sin(lat)**2)**1.5
+ H=np.outer(north,north)/(M+h)+np.outer(east,east)/(N+h)
+ v=rng.normal(size=3);v*=math.sqrt(2*m.MU/np.linalg.norm(r))*rng.uniform(0,1)/np.linalg.norm(v)
+ acc=m.acceleration(tt.J2_DRAG,0,r,v,850)
+ exact=n@acc+v@H@v; U=tt.hddot_upper(r,v,acc);ratios.append(U-exact)
+ speedslack.append(tt.vrel_bound(h)-np.linalg.norm(v-m.air_velocity(r,m.OMEGA_E)))
+ jrat.append(np.linalg.norm(m.j2_accel(r,m.J2_FROM_C20,m.MU,m.A_WGS84))/(m.MU/np.linalg.norm(r)**2)/(3*m.J2_FROM_C20*(m.A_WGS84/np.linalg.norm(r))**2))
+out.update(analytic_normal_angle=normalmax,code_normal_angle=tt.DELTA_MAX,min_U_minus_exact_hddot=min(ratios),min_speed_slack=min(speedslack),max_J2_bound_ratio=max(jrat))
+# Independently refine the U maximum that the sweep labels a supremum.
+hp,ha,inc=250e3,800e3,97.;sma,ecc=tt.orbit_elements(hp,ha);period=2*math.pi*math.sqrt(sma**3/m.MU)
+r,v=m.perigee_state(hp,ha,inc); sol=tt.dense(tt.J2_DRAG,np.r_[r,v,850],2*period+20)
+def U(t):
+ y=sol(t); return tt.hddot_upper(y[:3],y[3:6],m.acceleration(tt.J2_DRAG,t,y[:3],y[3:6],y[6]))
+ts=np.arange(0,2*period+20+1e-9,.25);us=np.array([U(t) for t in ts]);k=int(us.argmax());opt=minimize_scalar(lambda t:-U(t),bounds=(ts[k]-.25,ts[k]+.25),method='bounded',options={'xatol':1e-9})
+out['sampled_sup_counterexample']={'sample_t':ts[k],'sample_U':us[k],'refined_t':opt.x,'refined_U':-opt.fun,'difference':-opt.fun-us[k]}
+# Confirm every stiffness threshold via independent per-band closed-form bracketing.
+res=json.loads((D/'t0_termination_results.json').read_text()); errors=[]
+for sn,fn in [('circular_speed',tt.vrel_circular),('bound_speed',tt.vrel_bound)]:
+ for bn,B in [('B25.8',850/33),('B100',100)]:
+  for ks,row in res['stiffness_thresholds'][sn][bn].items():
+   h=row['threshold_m'];errors.append(abs(m.density(h)*fn(h)*10/B-float(ks)))
+out['max_threshold_residual']=max(errors)
+# Show density-envelope acceleration expression is not an upper bound for h>=L.
+L=24999.9;s=11000.;base=25000.
+f=lambda h:tt.rho_sup(h)*(s+m.OMEGA_E*(m.A_WGS84+h))**2
+out['drag_envelope_counterexample']={'L':L,'h':base,'f_L':f(L),'f_h':f(base),'difference':f(base)-f(L),'rho_sup_L':tt.rho_sup(L),'rho_at_h':m.density(base)}
+# Preserve old Review 01 record prefix.
+import subprocess
+old=subprocess.check_output(['git','show','bdcaacf:docs/reviews/M3-T0-review-01.md'],text=True);now=pathlib.Path('docs/reviews/M3-T0-review-01.md').read_text();out['review01_record_preserved_as_prefix']=now.startswith(old)
+print(json.dumps(out,indent=2))

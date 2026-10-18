@@ -1,0 +1,115 @@
+atmosphere 0    "apparent_order_smooth_control_m": 3.9973652854245945
+    },
+    {
+      "dt": 1.25,
+      "pos_err_m": 2.7710741049506712e-05,
+      "pos_err_smooth_control_m": 9.718151144308475e-06,
+      "pos_ratio_m": 7.162398720860245,
+      "apparent_order_m": 2.840442833737504,
+      "pos_ratio_smooth_control_m": 15.355598739620248,
+      "apparent_order_smooth_control_m": 3.940692861309925
+    }
+  ]
+}
+
+decay 0 },
+   "100.0": {
+    "t_s": 20680.0,
+    "h_dop853_m": 71803.49874648359,
+    "h_rk4_m": 71699.5311906701,
+    "speed_dop853_mps": 5952.48274929278,
+    "speed_rk4_mps": 5935.434044317025
+   },
+   "10000.0": {
+    "t_s": 21070.0,
+    "h_dop853_m": 10769.210723781958,
+    "h_rk4_m": 1043341993.4773768,
+    "speed_dop853_mps": 450.4253059220846,
+    "speed_rk4_mps": 208663111.11287072
+   }
+  }
+ }
+}
+
+geodetic 0 s -10000.0 {'iterative': 0.0, 'vermeille': -2.7466739993542433e-10, 'gmat_replica': -6389593.625758493}
+axis 0.0 {'iterative': 0.0, 'vermeille': 0.0, 'gmat_replica': -6399593.625758493}
+axis 250000.0 {'iterative': 0.0, 'vermeille': -2.6193447411060333e-10, 'gmat_replica': -6649593.625758493}
+axis 250000.0 {'iterative': 0.0, 'vermeille': -2.6193447411060333e-10, 'gmat_replica': -6649593.625758493}
+
+frames 0 363426827855
+  },
+  {
+   "arg_latitude_deg": 45.0,
+   "angle_v_vrel_deg": 2.0577198495456135,
+   "cross_track_component_mps": 267.84047639358596
+  },
+  {
+   "arg_latitude_deg": 90.0,
+   "angle_v_vrel_deg": 0.0,
+   "cross_track_component_mps": 2.319380826380253e-14
+  }
+ ],
+ "fc8_not_parallel_away_from_vertex": true,
+ "fc8_parallel_at_vertex": true,
+ "omega_r_over_v_at_250km": 0.06232637033984757
+}
+
+regression 0 : "x86_64",
+  "cpu_brand_not_checked": true,
+  "python": "3.12.15",
+  "numpy": "2.5.3"
+ },
+ "ticks": 5371,
+ "final_position_difference_m": 0.0,
+ "final_velocity_difference_mps": 0.0,
+ "bitwise_equal_to_golden": true,
+ "m1_cross_platform_bound_m_mps": [
+  0.0001,
+  1e-07
+ ],
+ "within_m1_cross_platform_bound": true,
+ "perturbations_off_acceleration_bitwise_point_mass": [
+  true,
+  true,
+  true
+ ]
+}
+
+termination 0 here."
+ },
+ "stage_order": {
+  "state": "circular 180 km, i 51.6 deg, J2 + drag, dt 10 s",
+  "recorded_order": [
+   "k2 input y + dt/2 k1",
+   "k3 input y + dt/2 k2",
+   "k4 input y + dt k3"
+  ],
+  "height_minus_initial_m": {
+   "k2_input": 116.3127734689042,
+   "k3_input": -115.73415292799473,
+   "k4_input": 1.1612665504217148
+  }
+ },
+ "vectorised_height_check_max_abs_m": 1.862645149230957e-09
+}
+
+gmat 1  errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-nickel-page-8a63927f/44d91783-62dd-45fd-b87a-0c6161213418/scratchpad/t0review02/GMAT R2026a/bin/GMAT-R2026a_Beta.app/Contents/data/atmosphere/earth/EarthExponentialAtmosphereData.txt'
+
+checks 0 ............                                                             [100%]
+12 passed in 0.76s
+
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-nickel-page-8a63927f/44d91783-62dd-45fd-b87a-0c6161213418/scratchpad/t0review02/snap/review_scratch/run.py", line 10, in <module>
+    run(['.venv/bin/python','-m','pytest','-q','-p','no:cacheprovider'],'pytest')
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-nickel-page-8a63927f/44d91783-62dd-45fd-b87a-0c6161213418/scratchpad/t0review02/snap/review_scratch/run.py", line 4, in run
+    t=time.time(); p=subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True); (S/(name+'.log')).write_text(p.stdout); ledger.append({'command':args,'exit':p.returncode,'seconds':time.time()-t,'log':name+'.log'}); (S/'commands.json').write_text(json.dumps(ledger,indent=2)); print(name,p.returncode,p.stdout[-400:],flush=True)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/subprocess.py", line 1196, in communicate
+    stdout = self.stdout.read()
+             ^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

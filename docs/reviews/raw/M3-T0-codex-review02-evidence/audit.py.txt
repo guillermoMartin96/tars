@@ -1,0 +1,14 @@
+import pathlib,sys,json,hashlib,subprocess,math
+import numpy as np
+D=pathlib.Path('docs/science/experiments/m3-t0');sys.path.insert(0,str(D.resolve()));import t0_gmat as g
+p=D/'gmat_runs/axis_probe__m1_two_body_report.txt';rows=g.parse_rows(p.read_text());t=np.r_[rows[:,0],rows[:,0]];r=np.vstack([rows[:,1:4],rows[:,5:8]]);z=np.r_[rows[:,4],rows[:,8]];s=t/t.max();A=np.hstack([r*s[:,None]**k for k in range(3)]);c=np.linalg.lstsq(A,z,rcond=None)[0];print('quadratic two-orbit RMS m',np.sqrt(np.mean((z-A@c)**2))*1000)
+from tars.validation import approved_digests as ad
+paths=['proof/thresholds/m1.json','proof/thresholds/m2.json','toolbox/references/gmat/m2/APPROVED_DIGESTS.json','toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz','proof/references/m2_final_states.json']
+ex=[*ad.APPROVED_THRESHOLD_SHA256.values(),ad.APPROVED_GMAT_M2_MANIFEST_SHA256,ad.APPROVED_REFERENCE_SNAPSHOT_SHA256,ad.APPROVED_M2_GOLDEN_SHA256]
+for p,e in zip(paths,ex):
+ h=hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest();print(p,h,'MATCH',h==e)
+for p in ['../GMAT R2026a/bin/GmatConsole','../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt']: print(p,hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest())
+res=json.loads((D/'t0_termination_results.json').read_text());s=res['missed_crossing']['sweep']; print('sweep min margin',min(x['bound_m']-x['max_dip_m'] for x in s));print('max perturbed-bound excess',max(s[i+1]['bound_m']-s[i]['bound_m'] for i in range(0,len(s),2)))
+for n in ['atmosphere','decay','frames','geodetic','regression','termination','gmat']:
+ data=json.loads((D/f't0_{n}_results.json').read_text()); print('inspected',n, 'top-level keys',list(data))
+for f in D.glob('*.py'): print('script hash',f.name,hashlib.sha256(f.read_bytes()).hexdigest())

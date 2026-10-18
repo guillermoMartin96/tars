@@ -1,0 +1,8 @@
+import pathlib,shutil,subprocess,json,sys
+S=pathlib.Path('review_scratch');root=S/'mutant';D=pathlib.Path('docs/science/experiments/m3-t0')
+for p in [D,pathlib.Path('docs/decisions/requests/DR-0029-m3-t0-proposals.md'),pathlib.Path('docs/milestones/M3-T0-report.md'),pathlib.Path('docs/milestones/M3-T0-decision-matrix.md'),pathlib.Path('docs/science/validation.md')]:
+ dest=root/p;dest.parent.mkdir(parents=True,exist_ok=True)
+ if p.is_dir():shutil.copytree(p,dest,dirs_exist_ok=True)
+ else:shutil.copyfile(p,dest)
+p=root/D/'t0_termination_results.json';data=json.loads(p.read_text());data['missed_crossing']['sweep']=[{'max_dip_m':0,'bound_m':0}];data['sufficient_stage_condition']['rows']=[{'vehicle':'all','h_f_sufficient_at_least_m':0}];p.write_text(json.dumps(data))
+cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(root/D/'check_review01.py')];res=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);print(cmd);print(res.stdout);print('exit',res.returncode)

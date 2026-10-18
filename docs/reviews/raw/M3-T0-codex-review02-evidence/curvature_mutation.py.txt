@@ -1,0 +1,3 @@
+exec(open('review_scratch/mutation.py').read().split("p=root/D/'t0_termination_results.json'")[0])
+p=root/D/'t0_termination.py';p.write_text(p.read_text().replace('R_CURV_MIN = m.B_WGS84**2 / m.A_WGS84','R_CURV_MIN = m.A_WGS84'))
+cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(root/D/'check_review01.py')];res=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);print(cmd);print(res.stdout);print('exit',res.returncode)

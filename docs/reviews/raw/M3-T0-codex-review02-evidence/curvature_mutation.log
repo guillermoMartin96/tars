@@ -1,0 +1,31 @@
+['/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-nickel-page-8a63927f/44d91783-62dd-45fd-b87a-0c6161213418/scratchpad/t0review02/snap/.venv/bin/python', '-m', 'pytest', '-q', '-p', 'no:cacheprovider', 'review_scratch/mutant/docs/science/experiments/m3-t0/check_review01.py']
+....F.......                                                             [100%]
+=================================== FAILURES ===================================
+______________ test_f1_curvature_bound_is_an_upper_bound_on_hddot ______________
+
+    def test_f1_curvature_bound_is_an_upper_bound_on_hddot():
+        """The pointwise bound U(r, v, a) >= d2h/dt2 along real trajectories (second
+        difference of h on DOP853 states), including the worst cases above."""
+        import t0_termination as tt
+    
+        for cfg, (r0, v0) in DIP_CASES.values():
+            y0 = np.concatenate([r0, v0, [850.0]])
+            for t in (0.0, 700.0, 1500.0, 2900.0):
+                tau = 0.5
+                ys = [y0 if s == t == 0.0 else propagate(cfg, y0, t + s) for s in (-tau, 0.0, tau)]
+                h = [m.geodetic_iterative(y[:3])[1] for y in ys]
+                hdd = (h[0] - 2 * h[1] + h[2]) / tau**2
+                y = ys[1]
+                acc = m.acceleration(cfg, t, y[:3], y[3:6], y[6])
+>               assert tt.hddot_upper(y[:3], y[3:6], acc) >= hdd - 1e-6, (t, hdd)
+E               AssertionError: (0.0, 0.3990131914615631)
+E               assert 0.36144400357169815 >= (0.3990131914615631 - 1e-06)
+E                +  where 0.36144400357169815 = <function hddot_upper at 0x10f2372e0>(array([6628137.,       0.,       0.]), array([   0.        , 4911.91352527, 6197.29252028]), array([-9.07308173, -0.        , -0.        ]))
+E                +    where <function hddot_upper at 0x10f2372e0> = <module 't0_termination' from '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-nickel-page-8a6...d-b87a-0c6161213418/scratchpad/t0review02/snap/review_scratch/mutant/docs/science/experiments/m3-t0/t0_termination.py'>.hddot_upper
+
+docs/science/experiments/m3-t0/check_review01.py:133: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/mutant/docs/science/experiments/m3-t0/check_review01.py::test_f1_curvature_bound_is_an_upper_bound_on_hddot
+1 failed, 11 passed in 0.66s
+
+exit 1
