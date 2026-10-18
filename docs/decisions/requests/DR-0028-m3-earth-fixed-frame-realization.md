@@ -1115,3 +1115,15 @@ Every control now also declares the reason its observed outcome must show (`CONT
   - The doubled coefficients and reversed signs are still rejected by the order and sign checks of their own formula.
   - Non-finite values are still rejected in every series.
 - **Unchanged definitions.** An AST comparison with `5b12eec` shows that only these existing top-level definitions of the verification script changed: `exact_properties` (the `formula` parameter, its docstring, and the split sign assertion), `defect_scaled` (an optional `where`), `EXACT_MUTANTS`, the `DEFECTS.update` call and the docstring. The added definitions are `E6_TILT`, `first_order_tilt_gap`, `E6_TILT_GAP`, `in_e6_tilt_gap` and the mutant. `finite`, `formulas_amendment2`, `wrap`, `wrap_tests`, `check_formulas`, `nonfinite_reason`, `noise`, `step_scale`, the grid, `SIGNIFICANT`, `P_MIN` and `MIN_VALID_SAMPLES` are unchanged.
+
+## T0 note (2026-10-18, append-only; no decision changed)
+- **J-ax-1 limitation, quantified at T0 (VAL-0019).** Against GMAT R2026a's real Earth orientation at the 2026 epoch, J-ax-1 differs over 53 700 s by:
+  - 0.19 m (J2; 1.03 m maximum);
+  - 0.20–0.58 m (J2 + drag; up to 1.08 m maximum);
+  - up to 4.0 cm in geodetic height.
+
+  The cause is polar motion: GMAT's Earth-fixed +Z circles the celestial pole daily with radius 0.349″ in true-of-epoch axes. This adds to the precession/nutation figures in "Approximation and limitations" above.
+- **Scope ruling requested.** DR-0029 P6 asks the owner whether driving a *validator* reference with GMAT's reported Earth-fixed axis (DR-0025 Q-G2-1 option (b)) falls inside "No additional Earth-orientation implementation is authorized".
+  - The T0 spike did this only as a labelled diagnostic.
+  - No production or validator code does it.
+  - Choosing option (b) for T5 is blocked on the ruling.

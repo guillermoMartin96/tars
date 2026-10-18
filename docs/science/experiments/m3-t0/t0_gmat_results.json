@@ -1016,6 +1016,10 @@
   },
   "trajectories": {
     "drag1_sph": {
+      "band_index_changes_at_60s_samples": 0,
+      "bases_spanned_km": [
+        200.0
+      ],
       "description": "drag only, one-band (250 km row) table, spherical height (smooth configuration)",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.0020507902894179265,
@@ -1051,6 +1055,11 @@
       }
     },
     "drag_geod": {
+      "band_index_changes_at_60s_samples": 39,
+      "bases_spanned_km": [
+        200.0,
+        250.0
+      ],
       "description": "drag only, full table, geodetic height (WGS 84)",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.32673368814768333,
@@ -1102,6 +1111,10 @@
       }
     },
     "drag_sph": {
+      "band_index_changes_at_60s_samples": 0,
+      "bases_spanned_km": [
+        200.0
+      ],
       "description": "drag only, full table, spherical height",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.0019754148582523797,
@@ -1137,6 +1150,10 @@
       }
     },
     "j2": {
+      "band_index_changes_at_60s_samples": 0,
+      "bases_spanned_km": [
+        200.0
+      ],
       "description": "J2 only, M1 orbit",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.19151285982867433,
@@ -1172,6 +1189,10 @@
       }
     },
     "j2_default_nutation_interval": {
+      "band_index_changes_at_60s_samples": 0,
+      "bases_spanned_km": [
+        200.0
+      ],
       "description": "J2 only, M1 orbit, GMAT's default Earth.NutationUpdateInterval (60 s): evidence only",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.27260975043981517,
@@ -1207,6 +1228,11 @@
       }
     },
     "j2_drag_geod": {
+      "band_index_changes_at_60s_samples": 29,
+      "bases_spanned_km": [
+        200.0,
+        250.0
+      ],
       "description": "J2 + drag, geodetic: the approved M3 physics on the M1 orbit",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.1986164980500005,
@@ -1258,7 +1284,19 @@
       }
     },
     "j2_drag_geod_ecc": {
-      "description": "J2 + drag, geodetic, 250 x 800 km, i = 51.6 deg (crosses 12 band boundaries)",
+      "band_index_changes_at_60s_samples": 151,
+      "bases_spanned_km": [
+        200.0,
+        250.0,
+        300.0,
+        350.0,
+        400.0,
+        450.0,
+        500.0,
+        600.0,
+        700.0
+      ],
+      "description": "J2 + drag, geodetic, perigee 250 km, apogee 800 km (spherical), i = 51.6 deg",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.23706527035057554,
         "final_spike_state_m": [
@@ -1309,6 +1347,11 @@
       }
     },
     "j2_drag_geod_i97": {
+      "band_index_changes_at_60s_samples": 39,
+      "bases_spanned_km": [
+        200.0,
+        250.0
+      ],
       "description": "J2 + drag, geodetic, circular 250 km, i = 97 deg (retrograde: node advances)",
       "vs_spike_J_ax_1": {
         "final_pos_diff_m": 0.5829754450736122,

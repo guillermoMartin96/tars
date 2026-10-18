@@ -131,3 +131,4 @@ The last row shows why B-4 matters: above 1000 km the pinned table and the compa
 - T0 (once the Tech Lead approves this checkpoint): A-4, A-5, A-6, A-s and B-4 proposals, with evidence.
 - Before T2: owner decisions on those proposals.
 - Any check of a printed edition: recorded as a new finding; a difference creates a new dataset identity (B-3).
+- *(T0 note, 2026-10-18, append-only.)* The T0 proposals for A-4, A-5, A-6, A-s and B-4 are in **DR-0029** (P1–P5), status OPEN. Evidence: VAL-0019. Every item above keeps its status (T0 → owner, OPEN, CONDITION); no termination altitude or domain behaviour is decided.

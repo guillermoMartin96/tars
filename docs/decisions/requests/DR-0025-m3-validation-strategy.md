@@ -245,3 +245,4 @@ Answers to Q-G2-1 to Q-G2-8, or `discuss`.
 **Follow-up:**
 - T0 checkpoint: Q-G2-1 method, Q-G2-5 reference missions, Q-G2-7 geodetic source, and candidate C_d/A (DR-0024 Q9).
 - T4: Q-G2-6. Later: the threshold DR (G4).
+- *(T0 note, 2026-10-18, append-only.)* The T0 proposals for Q-G2-1, Q-G2-5 and Q-G2-7 are in **DR-0029** (P6, P7, P8), status OPEN. Evidence: VAL-0019. Every closure above is unchanged: Q-G2-1, Q-G2-5 and Q-G2-7 stay DEFERRED to the T0 checkpoint until the owner decides.

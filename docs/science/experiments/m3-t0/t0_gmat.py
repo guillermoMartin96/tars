@@ -532,7 +532,7 @@ TRAJECTORY_CASES = {
         M3(j2=True, drag=True, flattening=m.F_WGS84),
         m.Config(j2=m.J2_FROM_C20, drag=m.Drag(2.2, 15.0)),
         m.perigee_state(250_000.0, 800_000.0, 51.6),
-        "J2 + drag, geodetic, 250 x 800 km, i = 51.6 deg (crosses 12 band boundaries)",
+        "J2 + drag, geodetic, perigee 250 km, apogee 800 km (spherical), i = 51.6 deg",
     ),
 }
 
@@ -551,6 +551,11 @@ def case_trajectories(g: Gmat, axis: dict) -> dict:
         rows = parse_rows(res["reports"]["m1_two_body_report.txt"])
         y0 = np.concatenate(state) if state is not None else np.concatenate([r0, v0])
         rec = {"description": desc, "vs_spike_J_ax_1": compare_m1_form(rows, cfg, y0, 850.0)}
+        bands = [m.band_index(h) for h in rows[:, 15]]
+        rec["band_index_changes_at_60s_samples"] = sum(
+            1 for x, y in itertools.pairwise(bands) if x != y
+        )
+        rec["bases_spanned_km"] = sorted({m.TABLE[b].base_km for b in bands})
         diag = replace(cfg, axis_fn=u)
         rec["vs_spike_with_gmat_axis_DIAGNOSTIC"] = compare_m1_form(rows, diag, y0, 850.0)
         if cfg.drag is not None and cfg.drag.height == "geodetic":

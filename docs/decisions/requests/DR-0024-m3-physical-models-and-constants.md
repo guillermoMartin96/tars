@@ -458,3 +458,11 @@ Under DR-0028 A1 the first two equal their direct inertial evaluations identical
 | FC-8 | An inclined or polar orbit gives a cross-track component of ω × r, so v_rel is not parallel to v | Unchanged |
 | FC-9 | **Future-gated (outside M3 scope).** Any later Earth-orientation model (pole of date, rotating terrestrial frame) must: replace FC-1 by an independent check of R(t) against a reference implementation; replace FC-3/FC-4 by checks against that reference; and satisfy FC-10. It must be a new versioned model with its own decision; it is not authorized | Extended to the velocity tests (M3P3-F1) |
 | FC-10 | **Future-gated derivative-term check (specification only; no time-dependent rotation is implemented in M3).** For any time-dependent R(t): (a) v_B from the general formula agrees with a finite-difference derivative of r_B(t) = R(t) r_A(t) to the stated order; (b) **known-answer case:** a point fixed in A (v_A = 0) off the rotation axis must have v_B = Ṙ r_A ≠ 0, so an implementation that omits the derivative term returns 0 and fails; (c) for an orientation whose angular velocity is not ω_E Ẑ (for example a test rotation with a tilted or time-varying axis), the result must differ from the fixed-axis shortcut R(v_A − ω_E Ẑ × r_A), which detects substituting the M3 shortcut for the general relation | New (M3P3-F1) |
+
+### T0 note (2026-10-18, append-only)
+- **Q9 values:** proposed in **DR-0029 P9**, status OPEN. Evidence: VAL-0019. The row's status, "values DEFERRED to the T0 checkpoint", is unchanged.
+- **New:** DR-0029 P10 asks which of the two Q1 representations is the pinned identity.
+  - The decimal 1.0826261739e-3 and −√5 C̄20 = 1.0826261738522227e-3 differ by −4.4e-11 relative.
+  - The trajectory effect is about 3e-5 m.
+  - The Q1 decision itself is unchanged.
+- **FC-8 (revision 2):** the T0 spike measured v_rel parallel to v at an inclined orbit's highest-latitude point (VAL-0019). A T2 test of FC-8 must therefore sample away from that point. The specification text is unchanged.
