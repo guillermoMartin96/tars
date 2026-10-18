@@ -1,5 +1,5 @@
-"""DR-0028 amendments 7 and 8 / reviews M3P10-F1 and M3P11-F1: the harness controls run against
-the original (defective) mutation checks and against the corrected one.
+"""DR-0028 amendments 7-9 / reviews M3P10-F1, M3P11-F1 and M3P12-F1: the harness controls run
+against the original (defective) mutation checks and against the corrected one.
 
 Planning research artifact (not production code, not a Proof gate).
 
@@ -10,14 +10,18 @@ Each original harness and its verification script are read from git into a tempo
 - 896d52d, the commit reviewed by review 10, where M3P10-F1 was found (an unrelated exception
   inside a built-in mutant counted as detection);
 - c16b3b5, the commit reviewed by review 11, where M3P11-F1 was found (any difference from the
-  reference counted as an exercised defect).
+  reference counted as an exercised defect);
+- 5b12eec, the commit reviewed by review 12, where M3P12-F1 was found (an oracle value injected
+  inside check_formulas was observed only where the finite validation ran, so steps skipped after
+  an invalid value were never observed). This harness has the independent exercise probe, and it
+  is run with it (its own execute and classify, and its own probe process).
 Every control of the corrected harness (dr0028_node_signed_mutation_check.CONTROLS) is applied to
 each version: the same edits, and the same claimed expectation, taken by name from that version's
 own MUTATIONS (a control whose fragment or expectation does not exist in a version is not run
 there, which counts as not detected). An original harness is judged only on detection: a control
 is met there when it is classified as detected exactly if its declared category is "expected
-rejection". The corrected harness must give every control its declared category and exercise
-result.
+rejection". The corrected harness must give every control its declared category, exercise
+result and reason.
 
 The regression controls of each finding (REGRESSION_CONTROLS) must each fail against the harness
 in which the finding was made, which shows that they reproduce the defect, and pass against the
@@ -50,6 +54,13 @@ REGRESSION_CONTROLS = {
         "incidental_rounding_only",
         "partially_exercised_defect",
     ),
+    "5b12eec": (  # M3P12-F1 (amendment 9)
+        "first_step_only_claimed_all_steps_delta_i",
+        "first_step_only_claimed_all_steps_delta_node",
+        "partial_steps_claimed_all_steps",
+        "intermediate_observations_missing",
+        "observation_count_incorrect",
+    ),
 }
 
 
@@ -79,7 +90,8 @@ def git_show(commit, path):
 def original_result(old, control, source, workdir, label):
     """(detected, observed) for one control under an original harness.
 
-    896d52d's classify returns (observed, detected); c16b3b5's returns (category, observed)."""
+    896d52d's classify returns (observed, detected); c16b3b5's and 5b12eec's return (category,
+    observed). 5b12eec's classify also takes the exercise observation of its own probe."""
     _, _, edits, claimed = control[:4]
     by_name = {m[0]: m for m in old.MUTATIONS}
     if claimed not in by_name or (isinstance(edits, str) and edits not in by_name):
@@ -92,7 +104,13 @@ def original_result(old, control, source, workdir, label):
             if source.count(fragment) != 1:
                 return False, f"not run: fragment occurs {source.count(fragment)} times"
             source = source.replace(fragment, replacement)
-    result = old.classify(*old.run(None if edits is None else source, workdir, label), expected)
+    source = None if edits is None else source
+    if hasattr(old, "execute"):  # 5b12eec: the probe decides exercise
+        spec = old.exercise_spec(expected, by_name[claimed][6])
+        code, output, last, exercise = old.execute(source, workdir, label, spec)
+        result = old.classify(code, output, last, expected, exercise)
+    else:
+        result = old.classify(*old.run(source, workdir, label), expected)
     if isinstance(result[1], bool):
         return result[1], result[0]
     return result[0] == EXPECTED, f"{result[0]}: {result[1]}"
@@ -137,6 +155,7 @@ def main(out_path):
             entry["corrected_harness"] = {
                 "actual_classification": corrected["actual_classification"],
                 "exercise_established": corrected["exercise_established"],
+                "reason_shown": corrected["reason_shown"],
                 "observed_outcome": corrected["observed_outcome"],
                 "result": corrected["result"],
             }

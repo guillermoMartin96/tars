@@ -1,13 +1,15 @@
 {
  "verdict": "PASS",
  "script": "dr0028_node_signed_verification.py",
- "exercise_criterion": "amendment 8 (M3P11-F1): a detection requires the intended defect established as exercised by the independent probe (intended >= 1, missing = 0, unintended = 0) and the expected rejection shown",
+ "exercise_criterion": "amendments 8 and 9 (M3P11-F1, M3P12-F1): a detection requires the intended defect established as exercised by the independent probe (intended >= 1, missing = 0, unintended = 0; for oracle values also every scheduled sample observed exactly once, none unobserved, duplicate or unscheduled, and no exception) and the expected rejection shown",
  "baseline": {
   "exit_code": 0,
   "outcome": "PASS verdict",
   "expectations_already_true_at_baseline": [],
   "direct_exercise_predicates_checked_at_baseline": 77,
-  "direct_exercise_already_met_at_baseline": []
+  "direct_exercise_already_met_at_baseline": [],
+  "oracle_schedules_checked_at_baseline": 22,
+  "oracle_schedule_not_fully_observed_at_baseline": []
  },
  "mutations": 109,
  "detected": 109,
@@ -25,8 +27,8 @@
    "rejected for another reason": 0,
    "expected rejection": 109
   },
-  "controls": 23,
-  "controls_with_declared_outcome": 23
+  "controls": 30,
+  "controls_with_declared_outcome": 30
  },
  "groups": {
   "M3P8-F1 injection": {
@@ -74,6 +76,8 @@
    "actual_classification": "process failure",
    "expected_exercise": null,
    "exercise_established": null,
+   "required_reason": "SyntaxError",
+   "reason_shown": true,
    "observed_outcome": "exit 1, no output: SyntaxError: '(' was never closed",
    "result": "PASS"
   },
@@ -84,6 +88,8 @@
    "actual_classification": "process failure",
    "expected_exercise": null,
    "exercise_established": null,
+   "required_reason": "No module named 'm3p9_control_missing_module'",
+   "reason_shown": true,
    "observed_outcome": "exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
    "result": "PASS"
   },
@@ -94,6 +100,8 @@
    "actual_classification": "process failure",
    "expected_exercise": null,
    "exercise_established": null,
+   "required_reason": "No such file or directory",
+   "reason_shown": true,
    "observed_outcome": "exit 2, no output: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
    "result": "PASS"
   },
@@ -104,6 +112,8 @@
    "actual_classification": "normal execution",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "exit 0, PASS verdict",
+   "reason_shown": true,
    "observed_outcome": "exit 0, PASS verdict",
    "result": "PASS"
   },
@@ -114,6 +124,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": null,
    "exercise_established": null,
+   "required_reason": "fragment occurs 0 times",
+   "reason_shown": true,
    "observed_outcome": "not run: fragment occurs 0 times",
    "result": "PASS"
   },
@@ -124,6 +136,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
    "result": "PASS"
   },
@@ -134,6 +148,8 @@
    "actual_classification": "unexpected exception",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "raised ModuleNotFoundError: No module named 'm3p10_control_missing_module'",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
    "result": "PASS"
   },
@@ -144,6 +160,8 @@
    "actual_classification": "unexpected exception",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "raised ZeroDivisionError",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
    "result": "PASS"
   },
@@ -154,6 +172,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
    "result": "PASS"
   },
@@ -164,6 +184,8 @@
    "actual_classification": "unexpected exception",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i):",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
    "result": "PASS"
   },
@@ -174,6 +196,8 @@
    "actual_classification": "unexpected exception",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "raised TypeError: wrap: non-finite angle",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
    "result": "PASS"
   },
@@ -184,6 +208,8 @@
    "actual_classification": "expected rejection",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
    "result": "PASS"
   },
@@ -194,6 +220,8 @@
    "actual_classification": "expected rejection",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0, unintended 0",
    "result": "PASS"
   },
@@ -204,6 +232,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "intended 0, missing 2060, unintended 940",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 2060, unintended 940; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 1860, unintended 940",
    "result": "PASS"
   },
@@ -214,6 +244,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 3000",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 200, unintended 2800; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 3000",
    "result": "PASS"
   },
@@ -224,6 +256,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 0, unintended 3000",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 0, unintended 3000; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 2800",
    "result": "PASS"
   },
@@ -234,6 +268,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "intended 10, missing 2990, unintended 0",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 10, missing 2990, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 10, missing 2790, unintended 0",
    "result": "PASS"
   },
@@ -244,6 +280,8 @@
    "actual_classification": "rejected for another reason",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "not shown: formulas under test: exactly 504 failure(s) starting 'order delta_node '",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect exercised: formula formula: intended 2800, missing 0, unintended 0; not shown: formulas under test: exactly 504 failure(s) starting 'order delta_node '",
    "result": "PASS"
   },
@@ -254,6 +292,8 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
    "result": "PASS"
   },
@@ -264,6 +304,8 @@
    "actual_classification": "expected rejection",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_node_nan oracle: intended 7838, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
    "result": "PASS"
   },
@@ -274,6 +316,8 @@
    "actual_classification": "expected rejection",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "raised ValueError as allowed",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F1_oracle_delta_i_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
    "result": "PASS"
   },
@@ -284,6 +328,8 @@
    "actual_classification": "expected rejection",
    "expected_exercise": true,
    "exercise_established": true,
+   "required_reason": "intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
    "result": "PASS"
   },
@@ -294,7 +340,93 @@
    "actual_classification": "invalid mutation setup",
    "expected_exercise": false,
    "exercise_established": false,
+   "required_reason": "intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
+   "reason_shown": true,
    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
+   "result": "PASS"
+  },
+  "first_step_only_claimed_all_steps_delta_i": {
+   "shows": "review 12's counterexample: a Delta i oracle NaN at the first step only, claimed as the NaN at every step, is not exercised: the defect is missing at the later steps, which the validation skips but the probe observes (M3P12-F1)",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "required_reason": "oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, ",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+   "result": "PASS"
+  },
+  "first_step_only_claimed_all_steps_delta_node": {
+   "shows": "the same for Delta Omega (M3P12-F1)",
+   "claimed_expectation": "review09_oracle_delta_node_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "required_reason": "oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, ",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+   "result": "PASS"
+  },
+  "partial_steps_claimed_all_steps": {
+   "shows": "a NaN at steps 0, 2 and 4 only, claimed at every step, is not exercised: missing at steps 1 and 3",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "required_reason": "oracle values oracle values: intended 1800, missing 1200, unintended 0, unobserved 0, ",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 1800, missing 1200, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+   "result": "PASS"
+  },
+  "intermediate_observations_missing": {
+   "shows": "a copy that skips the intermediate steps 1-3 of every series (no formula call there) and injects the NaN at every step it reaches is not exercised: 1800 scheduled samples are never observed",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "required_reason": "oracle values oracle values: intended 1200, missing 0, unintended 0, unobserved 1800, ",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 1200, missing 0, unintended 0, unobserved 1800, duplicate 0, unscheduled 0 of 3000 samples",
+   "result": "PASS"
+  },
+  "observation_count_incorrect": {
+   "shows": "a copy that evaluates the last step of every series twice and injects the NaN at every step is not exercised: 600 samples are observed twice",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "required_reason": "oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 600, ",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 600, unscheduled 0 of 3000 samples",
+   "result": "PASS"
+  },
+  "last_step_only_claimed_all_steps": {
+   "shows": "a NaN at the last step only, claimed at every step, is not exercised: missing at steps 0-3 (not a regression: the validation reaches those steps first)",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "actual_classification": "invalid mutation setup",
+   "expected_exercise": false,
+   "exercise_established": false,
+   "required_reason": "oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, ",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+   "result": "PASS"
+  },
+  "all_steps_correctly_injected": {
+   "shows": "the NaN genuinely injected at every step is exercised at all 3000 samples and detected",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "expected rejection",
+   "actual_classification": "expected rejection",
+   "expected_exercise": true,
+   "exercise_established": true,
+   "required_reason": "expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+   "reason_shown": true,
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "result": "PASS"
   }
  },
@@ -1829,7 +1961,7 @@
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -1843,7 +1975,13 @@
         "intended": 1,
         "unchanged": 5999,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -1867,7 +2005,7 @@
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_i '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -1881,7 +2019,13 @@
         "intended": 1,
         "unchanged": 5999,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -1905,7 +2049,7 @@
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -1919,7 +2063,13 @@
         "intended": 1,
         "unchanged": 5999,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -1943,7 +2093,7 @@
     "formulas under test: exactly 2 failure(s) starting 'coverage delta_node '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 1, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -1957,7 +2107,13 @@
         "intended": 1,
         "unchanged": 5999,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -4839,7 +4995,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -4847,13 +5003,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_i oracle value nan where True",
         "changes": true,
-        "intended": 600,
+        "intended": 3000,
         "unchanged": 3000,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -4876,7 +5038,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -4884,13 +5046,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_i oracle value nan where d == deltas[0]",
         "changes": true,
         "intended": 600,
-        "unchanged": 3000,
+        "unchanged": 5400,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -4913,7 +5081,7 @@
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 450, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -4921,13 +5089,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 5640,
+        "calls": 6000,
         "defect": "delta_i oracle value nan where sign < 0.0 and inc_deg in NEAR_POLAR",
         "changes": true,
-        "intended": 90,
+        "intended": 450,
         "unchanged": 5550,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -4950,7 +5124,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -4958,13 +5132,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_i oracle value inf where True",
         "changes": true,
-        "intended": 600,
+        "intended": 3000,
         "unchanged": 3000,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -4987,7 +5167,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -4995,13 +5175,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_i oracle value inf where d == deltas[0]",
         "changes": true,
         "intended": 600,
-        "unchanged": 3000,
+        "unchanged": 5400,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5024,7 +5210,7 @@
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 450, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5032,13 +5218,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 5640,
+        "calls": 6000,
         "defect": "delta_i oracle value inf where sign < 0.0 and inc_deg in NEAR_POLAR",
         "changes": true,
-        "intended": 90,
+        "intended": 450,
         "unchanged": 5550,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5061,7 +5253,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5069,13 +5261,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_i oracle value -inf where True",
         "changes": true,
-        "intended": 600,
+        "intended": 3000,
         "unchanged": 3000,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5098,7 +5296,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5106,13 +5304,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_i oracle value -inf where d == deltas[0]",
         "changes": true,
         "intended": 600,
-        "unchanged": 3000,
+        "unchanged": 5400,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5135,7 +5339,7 @@
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_i oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 450, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5143,13 +5347,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 5640,
+        "calls": 6000,
         "defect": "delta_i oracle value -inf where sign < 0.0 and inc_deg in NEAR_POLAR",
         "changes": true,
-        "intended": 90,
+        "intended": 450,
         "unchanged": 5550,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5172,7 +5382,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5180,13 +5390,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_node oracle value nan where True",
         "changes": true,
-        "intended": 600,
+        "intended": 3000,
         "unchanged": 3000,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5209,7 +5425,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5217,13 +5433,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_node oracle value nan where d == deltas[0]",
         "changes": true,
         "intended": 600,
-        "unchanged": 3000,
+        "unchanged": 5400,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5246,7 +5468,7 @@
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=nan '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 450, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5254,13 +5476,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 5640,
+        "calls": 6000,
         "defect": "delta_node oracle value nan where sign < 0.0 and inc_deg in NEAR_POLAR",
         "changes": true,
-        "intended": 90,
+        "intended": 450,
         "unchanged": 5550,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5283,7 +5511,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5291,13 +5519,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_node oracle value inf where True",
         "changes": true,
-        "intended": 600,
+        "intended": 3000,
         "unchanged": 3000,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5320,7 +5554,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5328,13 +5562,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_node oracle value inf where d == deltas[0]",
         "changes": true,
         "intended": 600,
-        "unchanged": 3000,
+        "unchanged": 5400,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5357,7 +5597,7 @@
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 450, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5365,13 +5605,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 5640,
+        "calls": 6000,
         "defect": "delta_node oracle value inf where sign < 0.0 and inc_deg in NEAR_POLAR",
         "changes": true,
-        "intended": 90,
+        "intended": 450,
         "unchanged": 5550,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5394,7 +5640,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5402,13 +5648,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_node oracle value -inf where True",
         "changes": true,
-        "intended": 600,
+        "intended": 3000,
         "unchanged": 3000,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5431,7 +5683,7 @@
     "formulas under test: exactly 600 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5439,13 +5691,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 3600,
+        "calls": 6000,
         "defect": "delta_node oracle value -inf where d == deltas[0]",
         "changes": true,
         "intended": 600,
-        "unchanged": 3000,
+        "unchanged": 5400,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,
@@ -5468,7 +5726,7 @@
     "formulas under test: exactly 90 failure(s) starting 'nonfinite delta_node oracle=-inf '"
    ],
    "classification": "expected rejection",
-   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 90, missing 0, unintended 0",
+   "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 450, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
    "exercise_established": true,
    "exercise_observation": {
     "exercised": true,
@@ -5476,13 +5734,19 @@
      "oracle values": {
       "defect_calls": {
        "oracle values": {
-        "calls": 5640,
+        "calls": 6000,
         "defect": "delta_node oracle value -inf where sign < 0.0 and inc_deg in NEAR_POLAR",
         "changes": true,
-        "intended": 90,
+        "intended": 450,
         "unchanged": 5550,
         "missing": 0,
-        "unintended": 0
+        "unintended": 0,
+        "expected_samples": 3000,
+        "observed_samples": 3000,
+        "unobserved": 0,
+        "duplicate": 0,
+        "unscheduled": 0,
+        "observation_complete": true
        }
       },
       "defect_exercised": true,

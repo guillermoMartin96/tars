@@ -2,7 +2,8 @@
  "verdict": "PASS",
  "originals": [
   "896d52d",
-  "c16b3b5"
+  "c16b3b5",
+  "5b12eec"
  ],
  "regression_controls": {
   "896d52d": [
@@ -17,11 +18,19 @@
    "defect_in_wrong_component",
    "incidental_rounding_only",
    "partially_exercised_defect"
+  ],
+  "5b12eec": [
+   "first_step_only_claimed_all_steps_delta_i",
+   "first_step_only_claimed_all_steps_delta_node",
+   "partial_steps_claimed_all_steps",
+   "intermediate_observations_missing",
+   "observation_count_incorrect"
   ]
  },
  "regression_controls_fail_against_original": {
   "896d52d": true,
-  "c16b3b5": true
+  "c16b3b5": true,
+  "5b12eec": true
  },
  "all_controls_pass_against_corrected": true,
  "results": {
@@ -40,9 +49,15 @@
     "observed_outcome": "process failure: exit 1, no output: SyntaxError: '(' was never closed",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "process failure: exit 1, no output: SyntaxError: '(' was never closed",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "process failure",
     "exercise_established": null,
+    "reason_shown": true,
     "observed_outcome": "exit 1, no output: SyntaxError: '(' was never closed",
     "result": "PASS"
    }
@@ -62,9 +77,15 @@
     "observed_outcome": "process failure: exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "process failure: exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "process failure",
     "exercise_established": null,
+    "reason_shown": true,
     "observed_outcome": "exit 1, no output: ModuleNotFoundError: No module named 'm3p9_control_missing_module'",
     "result": "PASS"
    }
@@ -84,9 +105,15 @@
     "observed_outcome": "process failure: exit 2, no output: <python>: can't open file '<tmp>/old_c16b3b5_missing_script.py': [Errno 2] No such file or directory",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "process failure: exit 2, no output: <python>: can't open file '<tmp>/old_5b12eec_missing_script.py': [Errno 2] No such file or directory",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "process failure",
     "exercise_established": null,
+    "reason_shown": true,
     "observed_outcome": "exit 2, no output: <python>: can't open file '<tmp>/control_missing_script.py': [Errno 2] No such file or directory",
     "result": "PASS"
    }
@@ -106,9 +133,15 @@
     "observed_outcome": "normal execution: exit 0, PASS verdict",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "normal execution: exit 0, PASS verdict",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "normal execution",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 0, PASS verdict",
     "result": "PASS"
    }
@@ -128,9 +161,15 @@
     "observed_outcome": "not run: fragment occurs 0 times",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "not run: fragment occurs 0 times",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": null,
+    "reason_shown": true,
     "observed_outcome": "not run: fragment occurs 0 times",
     "result": "PASS"
    }
@@ -150,9 +189,15 @@
     "observed_outcome": "rejected for another reason: exit 1, FAIL verdict; not shown: formulas under test: exactly 504 failure(s) starting 'sign delta_node '",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
     "result": "PASS"
    }
@@ -174,9 +219,15 @@
     "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "unexpected exception",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401; M3P9-F2_delta_node_coefficient_doubled raised ModuleNotFoundError: No module named 'm3p10_control_missing_module' at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: import m3p10_control_missing_module  # noqa: F401",
     "result": "PASS"
    }
@@ -198,9 +249,15 @@
     "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "unexpected exception",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; M3P9-F2_delta_i_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0; M3P9-F2_delta_node_sign_reversed raised ZeroDivisionError: float division by zero at check_formulas: lin = dict(zip(COMPONENTS, formula(inc, node, phi, d), strict=True)) > recorder: result = _impl(*args, **kw) > mutant: _ = factor / 0.0",
     "result": "PASS"
    }
@@ -222,9 +279,15 @@
     "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; defect not exercised: M3P9-F2_delta_i_coefficient_doubled, M3P9-F2_delta_node_coefficient_doubled",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
     "result": "PASS"
    }
@@ -246,9 +309,15 @@
     "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "unexpected exception",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised ValueError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: if circ(d_node, PI, wrap) > pair_noise(inc, inc + d_i): > circ: return abs(wrap_fn(a - b)) > wrap: raise ValueError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
     "result": "PASS"
    }
@@ -270,9 +339,15 @@
     "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "unexpected exception: exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "unexpected exception",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; M3P8-F1_audit_oracle_delta_node_nan raised TypeError: wrap: non-finite angle: nan at run_exact: failures, report = exact_properties(**kwargs) > exact_properties: dev = max(abs(d_i - exp_i), circ(d_node, exp_node, wrap)) / tol > circ: return abs(wrap_fn(a - b)) > wrap: raise TypeError(f\"{NONFINITE_MESSAGE}: {a!r}\")",
     "result": "PASS"
    }
@@ -292,9 +367,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "expected rejection",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 3000, missing 0, unintended 0",
     "result": "PASS"
    }
@@ -314,9 +395,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0, unintended 0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "expected rejection",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0, unintended 0",
     "result": "PASS"
    }
@@ -338,9 +425,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "FAIL"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 2060, unintended 940; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 1860, unintended 940",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 2060, unintended 940; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 1860, unintended 940",
     "result": "PASS"
    }
@@ -362,9 +455,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "FAIL"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 200, unintended 2800; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 3000",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 200, unintended 2800; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 3000",
     "result": "PASS"
    }
@@ -386,9 +485,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "FAIL"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 0, unintended 3000; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 2800",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 0, unintended 3000; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 0, unintended 2800",
     "result": "PASS"
    }
@@ -410,9 +515,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "FAIL"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 10, missing 2990, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 10, missing 2790, unintended 0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 10, missing 2990, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 10, missing 2790, unintended 0",
     "result": "PASS"
    }
@@ -432,9 +543,15 @@
     "observed_outcome": "rejected for another reason: exit 1, FAIL verdict; not shown: formulas under test: exactly 504 failure(s) starting 'order delta_node '",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "rejected for another reason: exit 1, FAIL verdict; intended defect exercised: formula formula: intended 2800, missing 0, unintended 0; not shown: formulas under test: exactly 504 failure(s) starting 'order delta_node '",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "rejected for another reason",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect exercised: formula formula: intended 2800, missing 0, unintended 0; not shown: formulas under test: exactly 504 failure(s) starting 'order delta_node '",
     "result": "PASS"
    }
@@ -454,9 +571,15 @@
     "observed_outcome": "not run: fragment occurs 0 times",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0; M3P9-F2_delta_node_coefficient_doubled formula: intended 0, missing 2800, unintended 0",
     "result": "PASS"
    }
@@ -476,9 +599,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_node_nan oracle: intended 7838, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "expected rejection",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P8-F1_audit_oracle_delta_node_nan oracle: intended 7838, missing 0, unintended 0; M3P8-F1_audit_oracle_delta_node_nan raised ValueError as allowed",
     "result": "PASS"
    }
@@ -498,9 +627,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F1_oracle_delta_i_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "expected rejection",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: M3P9-F1_oracle_delta_i_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf oracle: intended 3000, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_i_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_plus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample formula: intended 0, missing 0, unintended 0; M3P9-F1_oracle_delta_node_minus_inf_single_sample oracle: intended 1, missing 0, unintended 0; M3P9-F1_oracle_delta_i_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_i_minus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_plus_inf_single_sample raised ValueError as allowed; M3P9-F1_oracle_delta_node_minus_inf_single_sample raised ValueError as allowed",
     "result": "PASS"
    }
@@ -520,9 +655,15 @@
     "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "expected rejection",
     "exercise_established": true,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: formula formula: intended 5, missing 0, unintended 0",
     "result": "PASS"
    }
@@ -542,10 +683,222 @@
     "observed_outcome": "rejected for another reason: exit 1, FAIL verdict; not shown: formulas under test: exactly 600 failure(s) starting 'nonfinite delta_i formula=nan '",
     "result": "PASS"
    },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
+    "result": "PASS"
+   },
    "corrected_harness": {
     "actual_classification": "invalid mutation setup",
     "exercise_established": false,
+    "reason_shown": true,
     "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: formula formula: intended 0, missing 0, unintended 3000",
+    "result": "PASS"
+   }
+  },
+  "first_step_only_claimed_all_steps_delta_i": {
+   "shows": "review 12's counterexample: a Delta i oracle NaN at the first step only, claimed as the NaN at every step, is not exercised: the defect is missing at the later steps, which the validation skips but the probe observes (M3P12-F1)",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "regression_control_of": [
+    "5b12eec"
+   ],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "exercise_established": false,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+    "result": "PASS"
+   }
+  },
+  "first_step_only_claimed_all_steps_delta_node": {
+   "shows": "the same for Delta Omega (M3P12-F1)",
+   "claimed_expectation": "review09_oracle_delta_node_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "regression_control_of": [
+    "5b12eec"
+   ],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "exercise_established": false,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+    "result": "PASS"
+   }
+  },
+  "partial_steps_claimed_all_steps": {
+   "shows": "a NaN at steps 0, 2 and 4 only, claimed at every step, is not exercised: missing at steps 1 and 3",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "regression_control_of": [
+    "5b12eec"
+   ],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "exercise_established": false,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 1800, missing 1200, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+    "result": "PASS"
+   }
+  },
+  "intermediate_observations_missing": {
+   "shows": "a copy that skips the intermediate steps 1-3 of every series (no formula call there) and injects the NaN at every step it reaches is not exercised: 1800 scheduled samples are never observed",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "regression_control_of": [
+    "5b12eec"
+   ],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "exercise_established": false,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 1200, missing 0, unintended 0, unobserved 1800, duplicate 0, unscheduled 0 of 3000 samples",
+    "result": "PASS"
+   }
+  },
+  "observation_count_incorrect": {
+   "shows": "a copy that evaluates the last step of every series twice and injects the NaN at every step is not exercised: 600 samples are observed twice",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "regression_control_of": [
+    "5b12eec"
+   ],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+    "result": "FAIL"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "exercise_established": false,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 600, unscheduled 0 of 3000 samples",
+    "result": "PASS"
+   }
+  },
+  "last_step_only_claimed_all_steps": {
+   "shows": "a NaN at the last step only, claimed at every step, is not exercised: missing at steps 0-3 (not a regression: the validation reaches those steps first)",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "invalid mutation setup",
+   "regression_control_of": [],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "FAIL"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": false,
+    "observed_outcome": "invalid mutation setup: exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "invalid mutation setup",
+    "exercise_established": false,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; intended defect not exercised: oracle values oracle values: intended 600, missing 2400, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
+    "result": "PASS"
+   }
+  },
+  "all_steps_correctly_injected": {
+   "shows": "the NaN genuinely injected at every step is exercised at all 3000 samples and detected",
+   "claimed_expectation": "review09_oracle_delta_i_nan_all",
+   "expected_classification": "expected rejection",
+   "regression_control_of": [],
+   "original_harness_896d52d": {
+    "classified_as_detected": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown",
+    "result": "PASS"
+   },
+   "original_harness_c16b3b5": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown",
+    "result": "PASS"
+   },
+   "original_harness_5b12eec": {
+    "classified_as_detected": true,
+    "observed_outcome": "expected rejection: exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 600, missing 0, unintended 0",
+    "result": "PASS"
+   },
+   "corrected_harness": {
+    "actual_classification": "expected rejection",
+    "exercise_established": true,
+    "reason_shown": true,
+    "observed_outcome": "exit 1, FAIL verdict; expected rejection shown; intended defect exercised: oracle values oracle values: intended 3000, missing 0, unintended 0, unobserved 0, duplicate 0, unscheduled 0 of 3000 samples",
     "result": "PASS"
    }
   }

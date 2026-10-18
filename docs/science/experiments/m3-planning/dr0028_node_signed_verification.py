@@ -43,6 +43,14 @@ observe() lets the mutation check make the same observation independently, on th
 script with a mutant taken from a mutated copy. Five new built-in mutants make five further
 assertions load-bearing (W5, E1, E2e, and the two E5b sweep assertions). No check, formula,
 tolerance or finite result is changed.
+Revised for review 12 (DR-0028 amendment 9, M3P12-F2): E6's sign assertion is split into its
+oracle half (Delta Omega > 0) and its first-order half (first-order Delta Omega > 0), each its own
+assertion; together they assert exactly what the single assertion did. E6's call to
+formulas_amendment2 becomes the formula parameter of exact_properties (default
+formulas_amendment2, results identical), and a new built-in mutant reverses the first-order
+Delta Omega sign for tilt magnitudes in the gap of the first-order grid that contains E6's tilt
+(0.15 deg), where no first-order check other than E6 evaluates the formula. No formula, oracle,
+grid, tolerance or finite result is changed.
 
 Conventions (DR-0028 Resolution amendments 1 and 2; DR-0024 "Q4 coordinate conventions,
 revision 2", r_B = R r_A):
@@ -489,8 +497,10 @@ def exact_properties(
     assert_jump=True,
     tilt_fn=tilt_matrix,
     elements_fn=elements,
+    formula=formulas_amendment2,
 ):
-    """Exact (finite-delta) properties, independent of any first-order formula.
+    """Exact (finite-delta) properties, independent of any first-order formula (except E6, which
+    also compares the sign of the first-order formula at the review-04 example).
 
     Every value compared against a tolerance is first checked with math.isfinite (M3P8-F1
     audit): max() silently drops a NaN that is not its first argument, and every comparison
@@ -691,9 +701,7 @@ def exact_properties(
 
     # E6. Review-04 example (preserved): h_A = (sin 30, 0, cos 30), R = Rx(-0.15 deg).
     d_i, d_node = oracle(math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15), wrap_fn)
-    lin_i, lin_node = formulas_amendment2(
-        math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15)
-    )
+    lin_i, lin_node = formula(math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15))
     if d_node is None or not all(math.isfinite(x) for x in (d_i, d_node, lin_i, lin_node)):
         failures.append("E6 review-04 example non-finite")
         return failures, report
@@ -705,8 +713,13 @@ def exact_properties(
     # The committed value 90.2598055437 has 10 decimals: rounding <= 5e-11 deg.
     if abs(report["E6_review04_node_b_deg"] - 90.2598055437) > 5.0e-11:
         failures.append("E6 review-04 example not reproduced")
-    if not (d_node > 0.0 and lin_node > 0.0):
-        failures.append("E6 review-04 example sign disagreement")
+    # The sign assertion, split into its two halves (amendment 9, M3P12-F2): the oracle half is
+    # also covered by E3 at the same call; the first-order half is not covered by the grid (no
+    # grid step has E6's tilt magnitude, see E6_TILT_GAP).
+    if not d_node > 0.0:
+        failures.append("E6 review-04 example sign disagreement: oracle Delta Omega not > 0")
+    if not lin_node > 0.0:
+        failures.append("E6 review-04 example sign disagreement: first-order Delta Omega not > 0")
     return failures, report
 
 
@@ -868,6 +881,35 @@ def oracle_node_nan_at_sweep_azimuth(inc, node, phi, delta, wrap_fn=wrap):
     return d_i, d_node
 
 
+E6_TILT = math.radians(0.15)  # the review-04 example (exact_properties, E6)
+
+
+def first_order_tilt_gap(tilt):
+    """The open interval between consecutive tilt magnitudes of the first-order grid
+    (check_formulas: step_scale(i) 2^-k) that contains `tilt` (M3P12-F2)."""
+    steps = {
+        step_scale(math.radians(inc_deg)) * 2.0**-k
+        for inc_deg in GRID_INCLINATIONS
+        for k in range(HALVINGS)
+    }
+    return max(s for s in steps if s < tilt), min(s for s in steps if s > tilt)
+
+
+E6_TILT_GAP = first_order_tilt_gap(E6_TILT)
+
+
+def in_e6_tilt_gap(delta):
+    return E6_TILT_GAP[0] < abs(delta) < E6_TILT_GAP[1]
+
+
+def formula_node_sign_reversed_in_e6_tilt_gap(inc, node, phi, delta):
+    """Mutant formula (M3P12-F2, E6-sign first order): the first-order Delta Omega with its sign
+    reversed for every tilt magnitude in E6_TILT_GAP, at every inclination, node and azimuth and
+    for both tilt signs; exact everywhere else. The first-order grid has no step in that gap."""
+    d_i, d_node = formulas_amendment2(inc, node, phi, delta)
+    return (d_i, -d_node) if in_e6_tilt_gap(delta) else (d_i, d_node)
+
+
 def oracle_node_undefined_at_sweep_azimuths(inc, node, phi, delta, wrap_fn=wrap):
     """Mutant oracle (M3P11-F2, E5b-defined): no node at two non-crossing azimuths of the E5b
     sweep (phi = 1 and 2 deg), for both tilt signs: 358 defined samples per sweep, while both
@@ -975,6 +1017,11 @@ EXACT_MUTANTS = {
     "M3P11-F2_oracle_node_undefined_at_sweep_azimuths": (
         {"oracle": oracle_node_undefined_at_sweep_azimuths},
         ("E5b",),
+    ),
+    # M3P12-F2 (the first-order half of E6's sign assertion, category A): the same construction.
+    "M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap": (
+        {"formula": formula_node_sign_reversed_in_e6_tilt_gap},
+        ("E6",),
     ),
 }
 
@@ -1158,14 +1205,18 @@ def defect_none():
     return ("none (the reference implementation)", lambda args, kw, ref: None, False)
 
 
-def defect_scaled(factors, description):
-    """Each component of a result pair multiplied by its factor (exact for 2 and -1)."""
+def defect_scaled(factors, description, where=None):
+    """Each component of a result pair multiplied by its factor (exact for 2 and -1), where
+    where(args) holds (everywhere if where is None)."""
 
     def compute(args, ref):
         pair = zip(factors, values(ref), strict=True)
         return "value", tuple(x if f == 1.0 else f * x for f, x in pair)
 
-    return defect_outcome(compute, description, lambda args, ref: values(ref) is not None)
+    def applies(args, ref):
+        return values(ref) is not None and (where is None or where(args))
+
+    return defect_outcome(compute, description, applies)
 
 
 def defect_component(index, value, description, where=None):
@@ -1440,6 +1491,14 @@ DEFECTS.update(
         "M3P11-F2_oracle_node_undefined_at_sweep_azimuths": {
             "oracle": defect_component(
                 1, None, "no node at sweep azimuths 1 and 2 deg", sweep_azimuths(1.0, 2.0)
+            )
+        },
+        "M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap": {
+            "formula": defect_scaled(
+                (1.0, -1.0),
+                "first-order Delta Omega sign reversed for tilt magnitudes in the first-order "
+                "grid's gap that contains 0.15 deg (E6_TILT_GAP)",
+                lambda args: in_e6_tilt_gap(args[3]),
             )
         },
     }

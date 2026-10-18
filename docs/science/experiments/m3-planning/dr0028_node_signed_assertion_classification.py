@@ -1,6 +1,6 @@
-"""DR-0028 amendments 7 and 8 / reviews M3P10-F2 and M3P11-F2 (I-10 section 4, I-11 section 3):
-classification of the 18 assertions that review 10's assertion-removal sweep found not
-individually load-bearing.
+"""DR-0028 amendments 7-9 / reviews M3P10-F2, M3P11-F2 and M3P12-F2 (I-10 section 4, I-11
+section 3, I-12 section 4): classification of the assertions that review 10's assertion-removal
+sweep found not individually load-bearing (18 at 896d52d; 19 since amendment 9 split one of them).
 
 Planning research artifact (not production code, not a Proof gate).
 
@@ -14,28 +14,40 @@ Categories (I-10 section 4):
      against the reference implementations: shown, never missing, nothing else different) and it
      raises no exception; with the assertion present, the designated test rejects it; with only
      this assertion removed, the designated test reports nothing and no exact-property or
-     wrapping check reports anything (the defect escapes every one of them).
+     wrapping check reports anything (the defect escapes every one of them). A mutant of the
+     formula under test must also pass the first-order grid (check_formulas) without failure.
   B  redundant: another, named check rejects every defect this assertion can see. The evidence:
-     a property-wide argument, with its premises executed here (the other check covers the same
-     inputs with an equal or tighter criterion), and a demonstration that, with only this
-     assertion removed, a defect of its kind is still rejected by that check.
+     a property-wide argument, with its premises executed here (the other check evaluates the
+     same inputs, in the same call or the same loop iteration, with an equal or tighter
+     criterion), and a demonstration that, with only this assertion removed, a defect of its kind
+     is still rejected by that check.
   C  diagnostic: it guards test configuration or reporting, not a computed correctness
      property. The rationale is recorded; nothing is executed for it.
   D  uncertain: none.
 Amendment 7 classified W5, E1, E2e, E5b-nonfinite and E5b-defined as B on the evidence of one
 overlapping defect each; review 11 (M3P11-F2) gave a counterexample for each, and amendment 8
 classifies them as A, each with a built-in mutant (M3P11-F2_*).
+Amendment 8 classified E6-sign as B, arguing the first-order half of the assertion from the
+first-order grid's sign check; that grid has no step of E6's tilt magnitude (0.15 deg), so the
+premise held at a different input (review 12, M3P12-F2). Amendment 9 splits the assertion into
+its oracle half (E6-sign-oracle, B: E3 makes the same call) and its first-order half
+(E6-sign-first-order, A, with a built-in mutant), and re-examines W1, W4 and E6-value for the
+same mistake: each B premise is now checked at the same input as the assertion (W1: the same
+result in the same loop iteration; W4: the same inputs; E6-value and E6-sign-oracle: the same
+oracle call, all five arguments).
 
-The 18 assertions are identified in the script's actual inventory: each identifying text must
-select exactly one `failures.append(...)` statement, the 18 must be distinct, and they must be
-exactly the 18 statements that the assertion-removal sweep committed at 896d52d (review 10)
-found surviving.
+The assertions are identified in the script's actual inventory: each identifying text must
+select exactly one `failures.append(...)` statement, and they must be distinct. Mapped back to
+the statements they descend from (the two halves of E6-sign to the single statement they
+replace, which must no longer exist), they must be exactly the 18 statements that the
+assertion-removal sweep committed at 896d52d (review 10) found surviving.
 
 Each executed demonstration loads a copy of the verification script with exactly one
 `failures.append(...)` statement replaced by `pass` (located with ast), imports it, and calls its
-exact-property tests with the defect. Exit status 0 only if every demonstration holds. Nothing in
-the verification script is changed. Requires git (to read the 896d52d sweep); otherwise standard
-library only.
+exact-property tests with the defect. Review 12's counterexample (M3P12-F2) is also run through
+the entrypoint, before (the script at 5b12eec) and after (review12_counterexample). Exit status 0
+only if every demonstration holds. Nothing in the verification script is changed. Requires git
+(to read the 896d52d sweep and the 5b12eec script); otherwise standard library only.
 """
 
 import ast
@@ -94,20 +106,63 @@ def wrap_inputs(m):
     return seen
 
 
+def same_iteration(m, first, second, name):
+    """Both assertions (identified by text) are in the body of the same innermost `for` loop, the
+    conditions guarding them read `name`, and that loop body assigns `name` exactly once."""
+    text = pathlib.Path(m.__file__).read_text(encoding="utf-8")
+    tree = ast.parse(text)
+    parents = {child: node for node in ast.walk(tree) for child in ast.iter_child_nodes(node)}
+
+    def enclosing(node, kind):
+        while node in parents:
+            node = parents[node]
+            if isinstance(node, kind):
+                return node
+        return None
+
+    found = [find_assertion(text, ident) for ident in (first, second)]
+    by_text = {ast.dump(n): n for n in ast.walk(tree) if isinstance(n, ast.Expr)}
+    nodes = [by_text[ast.dump(n)] for n in found]
+    loops = [enclosing(n, ast.For) for n in nodes]
+    guards = [enclosing(n, ast.If) for n in nodes]
+    reads = all(
+        g is not None and any(isinstance(x, ast.Name) and x.id == name for x in ast.walk(g.test))
+        for g in guards
+    )
+    assigned = (
+        0
+        if loops[0] is None
+        else sum(
+            1
+            for s in loops[0].body
+            if isinstance(s, ast.Assign)
+            and any(isinstance(x, ast.Name) and x.id == name for x in s.targets)
+        )
+    )
+    return loops[0] is not None and loops[0] is loops[1] and reads and assigned == 1
+
+
 def premises_w1(m):
     """W1 (result in (-pi, pi]) fails at input a only if got is outside (-pi, pi]. W2 compares the
-    same got, at the same input in the same loop iteration, with the exact reduction; if that
-    reduction lies in (-pi, pi] for every input, W1 failing implies W2 failing there."""
+    same got, at the same input in the same loop iteration, with the exact reduction (executed:
+    both assertions in the same loop, guarded by conditions on got, which the loop assigns once);
+    if that reduction lies in (-pi, pi] for every input, W1 failing implies W2 failing there."""
     inputs = wrap_inputs(m)
     pi = Fraction(m.PI)
     inside = all(-pi < m.wrap_reference(a) <= pi for a in inputs)
-    return inside, {"inputs": len(inputs), "every_exact_reduction_in_interval": inside}
+    same = same_iteration(m, "outside (-pi, pi]", "exact reduction", "got")
+    return inside and same, {
+        "inputs": len(inputs),
+        "every_exact_reduction_in_interval": inside,
+        "W1_and_W2_test_the_same_result_in_the_same_iteration": same,
+    }
 
 
 def premises_w4(m):
     """W4 (wrap(+pi) = wrap(-pi) = +pi) fails only if wrap_fn(pi) or wrap_fn(-pi) is not +pi. W2
-    checks both inputs against their exact reduction, which is +pi for both; so W4 failing implies
-    W2 failing, provided wrap_fn returns the same result for the same input (W3, category C)."""
+    checks both inputs (the same inputs, in separate calls) against their exact reduction, which
+    is +pi for both; so W4 failing implies W2 failing, provided wrap_fn returns the same result
+    for the same input (W3, category C: wrap is a pure function of its argument)."""
     inputs = wrap_inputs(m)
     both = m.PI in inputs and -m.PI in inputs
     reduce_to_pi = all(m.wrap_reference(a) == Fraction(m.PI) for a in (m.PI, -m.PI))
@@ -116,14 +171,15 @@ def premises_w4(m):
 
 
 def e6_call(m):
-    return (math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15))
+    """E6's oracle call: all five arguments, including the wrapping function."""
+    return (math.radians(30.0), math.radians(90.0), 0.0, math.radians(0.15), m.wrap)
 
 
 def oracle_calls(m):
     calls = []
 
     def recording(inc, node, phi, delta, wrap_fn=m.wrap):
-        calls.append((inc, node, phi, delta))
+        calls.append((inc, node, phi, delta, wrap_fn))
         return m.finite(inc, node, phi, delta, wrap_fn)
 
     m.exact_properties(oracle=recording)
@@ -132,13 +188,14 @@ def oracle_calls(m):
 
 def premises_e6_value(m):
     """E6 calls the oracle once, at (i, Omega, phi, delta) = (30, 90, 0, 0.15) deg. E3 calls it at
-    the same arguments (phi = Omega - 90 deg is exactly 0.0) and compares Delta Omega with the
-    closed form within noise(30 deg). If the closed form is within `margin` of E6's committed value
+    the same arguments (phi = Omega - 90 deg is exactly 0.0; the same wrapping function; the
+    oracle is a pure function of its arguments) and compares Delta Omega with the closed form
+    within noise(30 deg). If the closed form is within `margin` of E6's committed value
     inside E6's tolerance, and noise(30 deg) is smaller than that margin, any Delta Omega that E6
     rejects deviates from the closed form by more than E3's tolerance, so E3 rejects it too."""
     args = e6_call(m)
     same_call = oracle_calls(m).count(args) >= 2  # E3 and E6
-    inc, _, _, delta = args
+    inc, _, _, delta, _ = args
     closed = math.atan(math.sin(delta) / math.tan(inc))
     margin_deg = E6_TOLERANCE_DEG - abs(90.0 + math.degrees(closed) - E6_COMMITTED_NODE_DEG)
     e3_tol_deg = math.degrees(m.noise(inc))
@@ -150,14 +207,15 @@ def premises_e6_value(m):
     }
 
 
-def premises_e6_sign(m):
-    """E6-sign requires Delta Omega > 0 (and the committed formula's value > 0) at E6's call. The
-    closed form there is positive and larger than E3's tolerance, so a Delta Omega <= 0 deviates
-    from it by more than the tolerance and E3 rejects it at the same call. The formula's sign at
-    this (i, Omega - phi) is covered on the first-order grid by the sign check (amendment 6)."""
+def premises_e6_sign_oracle(m):
+    """E6-sign-oracle requires the oracle's Delta Omega > 0 at E6's call. E3 makes the same call
+    (all five arguments) and the closed form there is positive and larger than E3's tolerance,
+    so a Delta Omega <= 0 deviates from it by more than the tolerance and E3 rejects it at the
+    same call. (Amendment 8 also argued the first-order half from the first-order grid, which
+    never evaluates E6's tilt magnitude: that half is now E6-sign-first-order, category A.)"""
     args = e6_call(m)
     same_call = oracle_calls(m).count(args) >= 2
-    inc, _, _, delta = args
+    inc, _, _, delta, _ = args
     closed = math.atan(math.sin(delta) / math.tan(inc))
     ok = same_call and closed > m.noise(inc)
     return ok, {
@@ -333,19 +391,36 @@ ASSERTIONS = [
         (premises_e6_value, oracle_node_scaled, "Delta Omega 0.01 % too large", "E3 closed form"),
     ),
     (
-        "E6-sign",
+        "E6-sign-oracle",
         "E6",
-        "E6 review-04 example sign disagreement",
+        "sign disagreement: oracle",
         "B",
-        "the review-04 example's node change and first-order term agree in sign",
+        "the review-04 example's node change (oracle) is positive",
         (
-            premises_e6_sign,
+            premises_e6_sign_oracle,
             oracle_node_negated,
             "Delta Omega with the wrong sign",
             "E3 closed form",
         ),
     ),
+    (
+        "E6-sign-first-order",
+        "E6",
+        "sign disagreement: first-order",
+        "A",
+        "the first-order Delta Omega is positive at the review-04 example, a tilt magnitude "
+        "(0.15 deg) that no step of the first-order grid has",
+        ("M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap", "E6"),
+    ),
 ]
+# The statement each assertion descends from at 896d52d, where it differs (amendment 9 split it).
+E6_SIGN_AT_896D52D = 'failures.append("E6 review-04 example sign disagreement")'
+SPLIT_BY_AMENDMENT_9 = {
+    "E6-sign-oracle": E6_SIGN_AT_896D52D,
+    "E6-sign-first-order": E6_SIGN_AT_896D52D,
+}
+ASSERTION_COUNT = 19
+HISTORICAL_SURVIVORS = 18
 
 
 def assertion_nodes(text):
@@ -378,35 +453,56 @@ def remove_assertion(text, identifying):
     return "".join([*lines[: node.lineno - 1], removed, *lines[node.end_lineno :]]), node.lineno
 
 
-def inventory(text):
-    """The 18 identities checked against the script's assertion statements and against the
-    statements that the 896d52d sweep (review 10) found surviving, by their first source line."""
-    lines = text.splitlines()
-    first = [lines[find_assertion(text, a[2]).lineno - 1].strip() for a in ASSERTIONS]
+def git_show(commit, path):
+    """A file's contents at `commit`, read with git."""
     root = subprocess.run(
-        ["git", "-C", str(SWEEP.parent), "rev-parse", "--show-toplevel"],
+        ["git", "-C", str(path.parent), "rev-parse", "--show-toplevel"],
         capture_output=True,
         text=True,
         check=True,
     ).stdout.strip()
-    relative = SWEEP.resolve().relative_to(root).as_posix()
-    sweep = json.loads(
-        subprocess.run(
-            ["git", "-C", root, "show", f"{SWEEP_AT_REVIEW_10}:{relative}"],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout
+    relative = path.resolve().relative_to(root).as_posix()
+    return subprocess.run(
+        ["git", "-C", root, "show", f"{commit}:{relative}"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout
+
+
+def inventory(text):
+    """The identities checked against the script's assertion statements and, mapped back to the
+    statements they descend from, against the statements that the 896d52d sweep (review 10)
+    found surviving, by their first source line."""
+    lines = text.splitlines()
+    first = [lines[find_assertion(text, a[2]).lineno - 1].strip() for a in ASSERTIONS]
+    historical = sorted(
+        {SPLIT_BY_AMENDMENT_9.get(a[0], line) for a, line in zip(ASSERTIONS, first, strict=True)}
     )
+    halves = [
+        line for a, line in zip(ASSERTIONS, first, strict=True) if a[0] in SPLIT_BY_AMENDMENT_9
+    ]
+    split_ok = E6_SIGN_AT_896D52D not in first and all(
+        line.startswith(E6_SIGN_AT_896D52D[:-2]) for line in halves
+    )
+    sweep = json.loads(git_show(SWEEP_AT_REVIEW_10, SWEEP))
     survivors = sorted(r["assertion"] for r in sweep["results"] if r["outcome"] == "survives")
     report = {
         "assertion_statements_in_script": len(assertion_nodes(text)),
         "identified": len(first),
         "distinct": len(set(first)),
+        "historical_statements": len(historical),
         "sweep_at_896d52d_survivors": len(survivors),
-        "identical_to_sweep_at_896d52d_survivors": sorted(first) == survivors,
+        "identical_to_sweep_at_896d52d_survivors": historical == survivors,
+        "split_by_amendment_9": {k: v for k, v in SPLIT_BY_AMENDMENT_9.items()},
+        "split_statement_replaced_by_its_halves": split_ok,
     }
-    ok = len(set(first)) == len(first) == 18 and report["identical_to_sweep_at_896d52d_survivors"]
+    ok = (
+        len(set(first)) == len(first) == ASSERTION_COUNT
+        and len(survivors) == HISTORICAL_SURVIVORS
+        and report["identical_to_sweep_at_896d52d_survivors"]
+        and split_ok
+    )
     return ok, report
 
 
@@ -436,14 +532,23 @@ def category_a(entry, intact, removed, mutant, designated):
     entry["designated_test"] = designated
     entry["designated_failures_with_assertion"] = intact.by_test(before)[designated]
     entry["designated_failures_without_assertion"] = removed.by_test(after)[designated]
+    entry["designated_failure_messages_with_assertion"] = [
+        f for f in before if f.split()[0] == designated
+    ]
     entry["all_failures_with_assertion"] = len(before)
     entry["all_failures_without_assertion"] = len(after)
+    grid_ok = True
+    if "formula" in kwargs:  # a formula defect must also escape the first-order grid
+        grid = intact.check_formulas(kwargs["formula"])[0]
+        entry["first_order_grid_failures"] = len(grid)
+        grid_ok = not grid
     return (
         observed["defect_exercised"]
         and observed["exception"] is None
         and entry["designated_failures_with_assertion"] >= minimum
         and entry["designated_failures_without_assertion"] < minimum
         and not after
+        and grid_ok
     )
 
 
@@ -464,6 +569,78 @@ def category_b(entry, intact, removed, evidence):
         and entry["independent_failures_without_assertion"] > 0
         and entry["independent_failures_with_assertion"] > 0
     )
+
+
+# Review 12's counterexample (M3P12-F2): the first-order Delta Omega sign reversed for
+# 0.0026 < |delta| < 0.0027 rad, an interval that contains E6's tilt and no first-order grid step.
+REVIEW_12_COMMIT = "5b12eec"
+FORMULA_RETURN = (
+    "    return -delta * math.cos(node - phi), delta / math.tan(inc) * math.sin(node - phi)\n"
+)
+REVIEW_12_FORMULA_RETURN = (
+    "    return -delta * math.cos(node - phi), (1.0 if not (0.0026 < abs(delta) < 0.0027) "
+    "else -1.0) * delta / math.tan(inc) * math.sin(node - phi)\n"
+)
+E6_FIRST_ORDER_MUTANT = "M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap"
+
+
+def entrypoint(text, workdir, label):
+    """Run a copy of the script through its entrypoint; return the parts of its output used."""
+    copy, out = workdir / f"{label}.py", workdir / f"{label}.json"
+    copy.write_text(text, encoding="utf-8")
+    proc = subprocess.run(
+        [sys.executable, "-I", str(copy), str(out)],
+        capture_output=True,
+        text=True,
+        timeout=600,
+        check=False,
+    )
+    output = json.loads(out.read_text(encoding="ascii"))
+    mutant = output["exact_and_wrap_mutants"].get(E6_FIRST_ORDER_MUTANT)
+    return {
+        "exit_code": proc.returncode,
+        "verdict": output["verdict"],
+        "exact_property_failures": output["exact_property_failures"],
+        "formula_failures": output["formulas_under_test"]["failures"],
+        "e6_first_order_mutant_rejected": None
+        if mutant is None
+        else mutant["rejected_by_designated_test"],
+    }
+
+
+def review12_counterexample(text, workdir):
+    """Before (5b12eec): with review 12's formula defect and only E6-sign removed, the script
+    passes. After: with the defect and every assertion present, it fails through the first-order
+    half of E6 alone; and removing that half alone makes the script fail (its built-in mutant is
+    no longer rejected), so the removal itself is detected."""
+    old = git_show(REVIEW_12_COMMIT, SCRIPT)
+    if old.count(FORMULA_RETURN) != 1 or text.count(FORMULA_RETURN) != 1:
+        return False, {"error": "formula fragment not unique"}
+    before_text, _ = remove_assertion(old, "E6 review-04 example sign disagreement")
+    before = entrypoint(
+        before_text.replace(FORMULA_RETURN, REVIEW_12_FORMULA_RETURN), workdir, "review12_before"
+    )
+    after = entrypoint(
+        text.replace(FORMULA_RETURN, REVIEW_12_FORMULA_RETURN), workdir, "review12_after"
+    )
+    removed_text, _ = remove_assertion(text, "sign disagreement: first-order")
+    removed = entrypoint(removed_text, workdir, "review12_assertion_removed")
+    message = "E6 review-04 example sign disagreement: first-order Delta Omega not > 0"
+    ok = (
+        (before["exit_code"], before["verdict"]) == (0, "PASS")
+        and (after["exit_code"], after["verdict"]) == (1, "FAIL")
+        and after["exact_property_failures"] == [message]
+        and not after["formula_failures"]
+        and (removed["exit_code"], removed["verdict"]) == (1, "FAIL")
+        and removed["e6_first_order_mutant_rejected"] is False
+        and not removed["exact_property_failures"]
+    )
+    return ok, {
+        "defect": "first-order Delta Omega sign reversed for 0.0026 < |delta| < 0.0027 rad",
+        f"before_{REVIEW_12_COMMIT}_E6_sign_removed": before,
+        "after_all_assertions_present": after,
+        "after_E6_sign_first_order_removed_without_defect": removed,
+    }
 
 
 def main(out_path):
@@ -496,8 +673,14 @@ def main(out_path):
                 ok = category_b(entry, intact, removed, evidence)
             entry["result"] = "PASS" if ok else "FAIL"
             results.append(entry)
+        counterexample_ok, counterexample = review12_counterexample(text, workdir)
     counts = {c: sum(1 for r in results if r["category"] == c) for c in "ABCD"}
-    ok = inventory_ok and len(results) == 18 and all(r["result"] == "PASS" for r in results)
+    ok = (
+        inventory_ok
+        and counterexample_ok
+        and len(results) == ASSERTION_COUNT
+        and all(r["result"] == "PASS" for r in results)
+    )
     report = {
         "verdict": "PASS" if ok else "FAIL",
         "script": SCRIPT.name,
@@ -505,6 +688,8 @@ def main(out_path):
         "assertions": len(results),
         "categories": counts,
         "reclassified_by_amendment_8": ["W5", "E1", "E2e", "E5b-nonfinite", "E5b-defined"],
+        "split_by_amendment_9": {"E6-sign": ["E6-sign-oracle (B)", "E6-sign-first-order (A)"]},
+        "review_12_counterexample_m3p12_f2": counterexample,
         "results": results,
     }
     with open(out_path, "w", encoding="ascii") as fh:

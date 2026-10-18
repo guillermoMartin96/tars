@@ -1,5 +1,5 @@
-"""DR-0028 amendments 5-8 / reviews M3P8-F1, M3P9-F1..F3, M3P10-F1, M3P11-F1: file-level
-mutation check of dr0028_node_signed_verification.py through its real entrypoint.
+"""DR-0028 amendments 5-9 / reviews M3P8-F1, M3P9-F1..F3, M3P10-F1, M3P11-F1, M3P12-F1:
+file-level mutation check of dr0028_node_signed_verification.py through its real entrypoint.
 
 Planning research artifact (not production code, not a Proof gate).
 
@@ -40,8 +40,15 @@ reassociated fallback, another component) is never evidence. Predicate families:
   test of the unmutated script, with the mutant taken from the copy; the copy's own record must
   agree (exercised, or not exercised for an "unexercised" predicate);
 - formula: the formula under test is edited; it is observed against formulas_amendment2;
-- oracle values: an oracle value is replaced inside check_formulas; the value reaching the
-  finite validation is observed against the unmutated oracle;
+- oracle values: an oracle value is replaced inside check_formulas. Amendment 9 (M3P12-F1): the
+  samples that check_formulas evaluates are fixed first from the unmutated script's grid
+  (oracle_schedule); the copy's check_formulas then runs with an observing formula, which it
+  calls at every step after the oracle value and before any validation, so steps that the
+  validation skips after an invalid value are observed too. Every scheduled sample must be
+  observed exactly once (none unobserved, duplicate or unscheduled), and the defect must be shown
+  at every sample where it is claimed. (Amendment 8 observed the value reaching the finite
+  validation, which misses the steps skipped after the first invalid value.) The unmutated
+  script must observe the whole schedule;
 - injected: wrap() or line_of_nodes_exact() is edited; it is observed in the exact properties.
 A direct (non built-in) predicate must not be met by the unmutated script.
 
@@ -57,9 +64,12 @@ output. Controls (I-10 section 3, I-11 section 2) each declare the category they
 whether the claimed defect is exercised: process-level failures, a neutral edit, invalid setup,
 wrong reasons, exceptions raised or suppressed inside built-in mutants, an allowed exception at
 the wrong location or of the wrong type, defects that are absent, partial, in another component or
-rounding only, a tampered in-script record, expected exceptions, and valid mutations. Exit status
+rounding only, a tampered in-script record, expected exceptions, and valid mutations; and (I-12
+section 3) oracle values injected at the first, the last or some steps only but claimed at every
+step, missing intermediate observations, an incorrect observation count, and a correct injection
+at every step. Each control also declares the reason it must show (CONTROL_REASONS). Exit status
 0 only if the baseline passes, every mutation is detected and every control receives its
-declared category and exercise result. Standard library only.
+declared category, exercise result and reason. Standard library only.
 """
 
 import importlib.util
@@ -1039,6 +1049,153 @@ REGRESSION_CONTROLS_M3P11 = (
     "partially_exercised_defect",
 )
 
+# M3P12-F1 controls (I-12 section 3): an oracle value injected inside check_formulas, claimed as
+# the injection at every step. Each must be invalid setup for its own reason (CONTROL_REASONS).
+STEP_LOOP = "                    for d in deltas:\n"
+SKIP_INTERMEDIATE = (
+    "                        if d in deltas[1:-1]:\n                            continue\n"
+)
+ALL_STEPS_DELTA_I = "review09_oracle_delta_i_nan_all"
+
+
+def oracle_nan_delta_i(condition):
+    return [(ORACLE_CALL, oracle_injection("delta_i", math.nan, condition))]
+
+
+CONTROLS += [
+    (
+        "first_step_only_claimed_all_steps_delta_i",
+        "review 12's counterexample: a Delta i oracle NaN at the first step only, claimed as the "
+        "NaN at every step, is not exercised: the defect is missing at the later steps, which "
+        "the validation skips but the probe observes (M3P12-F1)",
+        "review09_oracle_delta_i_nan_first_step",
+        ALL_STEPS_DELTA_I,
+        INVALID,
+        False,
+    ),
+    (
+        "first_step_only_claimed_all_steps_delta_node",
+        "the same for Delta Omega (M3P12-F1)",
+        "review09_oracle_delta_node_nan_first_step",
+        "review09_oracle_delta_node_nan_all",
+        INVALID,
+        False,
+    ),
+    (
+        "partial_steps_claimed_all_steps",
+        "a NaN at steps 0, 2 and 4 only, claimed at every step, is not exercised: missing at "
+        "steps 1 and 3",
+        oracle_nan_delta_i("d in deltas[::2]"),
+        ALL_STEPS_DELTA_I,
+        INVALID,
+        False,
+    ),
+    (
+        "intermediate_observations_missing",
+        "a copy that skips the intermediate steps 1-3 of every series (no formula call there) "
+        "and injects the NaN at every step it reaches is not exercised: 1800 scheduled samples "
+        "are never observed",
+        [
+            (
+                ORACLE_CALL,
+                ORACLE_CALL
+                + SKIP_INTERMEDIATE
+                + oracle_nan_delta_i("True")[0][1][len(ORACLE_CALL) :],
+            )
+        ],
+        ALL_STEPS_DELTA_I,
+        INVALID,
+        False,
+    ),
+    (
+        "observation_count_incorrect",
+        "a copy that evaluates the last step of every series twice and injects the NaN at every "
+        "step is not exercised: 600 samples are observed twice",
+        [
+            (STEP_LOOP, "                    for d in deltas + deltas[-1:]:\n"),
+            *oracle_nan_delta_i("True"),
+        ],
+        ALL_STEPS_DELTA_I,
+        INVALID,
+        False,
+    ),
+    (
+        "last_step_only_claimed_all_steps",
+        "a NaN at the last step only, claimed at every step, is not exercised: missing at steps "
+        "0-3 (not a regression: the validation reaches those steps first)",
+        oracle_nan_delta_i("d == deltas[-1]"),
+        ALL_STEPS_DELTA_I,
+        INVALID,
+        False,
+    ),
+    (
+        "all_steps_correctly_injected",
+        "the NaN genuinely injected at every step is exercised at all 3000 samples and detected",
+        ALL_STEPS_DELTA_I,
+        ALL_STEPS_DELTA_I,
+        EXPECTED,
+        True,
+    ),
+]
+REGRESSION_CONTROLS_M3P12 = (
+    "first_step_only_claimed_all_steps_delta_i",
+    "first_step_only_claimed_all_steps_delta_node",
+    "partial_steps_claimed_all_steps",
+    "intermediate_observations_missing",
+    "observation_count_incorrect",
+)
+ORACLE_COUNTS = (
+    "oracle values oracle values: intended {}, missing {}, unintended 0, unobserved {}, "
+)
+# The reason each control must show (I-12 section 3): a fragment of its observed outcome.
+CONTROL_REASONS = {
+    "syntax_error": "SyntaxError",
+    "import_failure": "No module named 'm3p9_control_missing_module'",
+    "missing_script": "No such file or directory",
+    "neutral_edit": "exit 0, PASS verdict",
+    "fragment_absent": "fragment occurs 0 times",
+    "wrong_reason": "intended defect not exercised: formula formula: intended 0, missing 0, "
+    "unintended 3000",
+    "import_failure_inside_mutant": "raised ModuleNotFoundError: No module named "
+    "'m3p10_control_missing_module'",
+    "runtime_exception_inside_mutant": "raised ZeroDivisionError",
+    "exception_suppressed_inside_mutant": "intended defect not exercised: "
+    "M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000, unintended 0",
+    "allowed_exception_wrong_location": "exact_properties: if circ(d_node, PI, wrap) > "
+    "pair_noise(inc, inc + d_i):",
+    "allowed_exception_wrong_type": "raised TypeError: wrap: non-finite angle",
+    "valid_mutant_rejected_by_targeted_check": "expected rejection shown; intended defect "
+    "exercised: formula formula: intended 3000, missing 0, unintended 0",
+    "valid_mutant_completes_without_rejection": "expected rejection shown; intended defect "
+    "exercised: M3P9-F2_delta_i_coefficient_doubled formula: intended 3000, missing 0",
+    "suppressed_import_reassociated_fallback": "intended 0, missing 2060, unintended 940",
+    "defect_in_wrong_component": "M3P9-F2_delta_node_coefficient_doubled formula: intended 0, "
+    "missing 0, unintended 3000",
+    "incidental_rounding_only": "M3P9-F2_delta_i_coefficient_doubled formula: intended 0, "
+    "missing 0, unintended 3000",
+    "partially_exercised_defect": "intended 10, missing 2990, unintended 0",
+    "exercised_rejected_for_another_reason": "not shown: formulas under test: exactly 504 "
+    "failure(s) starting 'order delta_node '",
+    "script_record_claims_exercise": "intended defect not exercised: "
+    "M3P9-F2_delta_i_coefficient_doubled formula: intended 0, missing 3000",
+    "expected_exception_wrap_guard": "M3P8-F1_audit_oracle_delta_node_nan raised ValueError as "
+    "allowed",
+    "expected_exception_order_estimate": "raised ValueError as allowed",
+    "direct_injection_exercised": "intended defect exercised: formula formula: intended 5, "
+    "missing 0, unintended 0",
+    "direct_injection_wrong_component": "intended defect not exercised: formula formula: "
+    "intended 0, missing 0, unintended 3000",
+    "first_step_only_claimed_all_steps_delta_i": ORACLE_COUNTS.format(600, 2400, 0),
+    "first_step_only_claimed_all_steps_delta_node": ORACLE_COUNTS.format(600, 2400, 0),
+    "partial_steps_claimed_all_steps": ORACLE_COUNTS.format(1800, 1200, 0),
+    "intermediate_observations_missing": ORACLE_COUNTS.format(1200, 0, 1800),
+    "observation_count_incorrect": ORACLE_COUNTS.format(3000, 0, 0) + "duplicate 600, ",
+    "last_step_only_claimed_all_steps": ORACLE_COUNTS.format(600, 2400, 0),
+    "all_steps_correctly_injected": "expected rejection shown; intended defect exercised: "
+    + ORACLE_COUNTS.format(3000, 0, 0)
+    + "duplicate 0, unscheduled 0 of 3000 samples",
+}
+
 
 def run(source, workdir, label):
     """Run one copy of the script; return (exit code, output or None, last stderr line).
@@ -1111,46 +1268,109 @@ def formula_defect(orig, spec):
     return orig.defect_component(index, float(value_repr), description, where)
 
 
+def oracle_schedule(orig):
+    """Every sample at which check_formulas evaluates the oracle (M3P12-F1): {(inc, node, phi,
+    delta): names}, built from the unmutated script's grid constants before any copy runs. The
+    names are those a condition may use. There must be SERIES_PER_COMPONENT x HALVINGS samples."""
+    schedule = {}
+    for inc_deg in orig.GRID_INCLINATIONS:
+        inc = math.radians(inc_deg)
+        for node_deg in orig.NODES:
+            for phi_deg in orig.TILT_AZIMUTHS:
+                node, phi = math.radians(node_deg), math.radians(phi_deg)
+                for sign in (1.0, -1.0):
+                    deltas = [sign * orig.step_scale(inc) * 2.0**-k for k in range(orig.HALVINGS)]
+                    for k, d in enumerate(deltas):
+                        schedule[inc, node, phi, d] = {
+                            "inc_deg": inc_deg,
+                            "node_deg": node_deg,
+                            "phi_deg": phi_deg,
+                            "sign": sign,
+                            "inc": inc,
+                            "node": node,
+                            "phi": phi,
+                            "deltas": deltas,
+                            "d": d,
+                            "k": k,
+                        }
+    expected = orig.SERIES_PER_COMPONENT * orig.HALVINGS
+    if len(schedule) != expected or orig.SERIES_PER_COMPONENT != SERIES:
+        raise ValueError(f"oracle schedule has {len(schedule)} samples, expected {expected}")
+    return schedule
+
+
 def observe_oracle_values(orig, mut, index, value_repr, condition):
-    """Observe an oracle value injected inside check_formulas: every value handed to the finite
-    validation (nonfinite_reason) is compared with the unmutated oracle at the same sample, before
-    any check uses it. The condition is evaluated on that sample."""
+    """Observe an oracle value injected inside check_formulas (M3P11-F1; M3P12-F1).
+
+    The expected samples are fixed first (oracle_schedule, from the unmutated script). The copy's
+    check_formulas is then run with an observing formula: check_formulas calls the formula at
+    every step, right after the oracle value (and any injection) and before any validation, so a
+    step that the validation would skip after an earlier invalid value is still observed. Each
+    call is identified by the formula's own arguments, which must be a scheduled sample seen once;
+    the oracle values then held by check_formulas (its `num`) are compared, per component, with
+    the unmutated oracle at that sample. The condition is evaluated on the scheduled sample, with
+    the unmutated script's names, not on the copy's state. Counts: intended, unchanged, missing,
+    unintended (per component, call_kind), and per sample unobserved (scheduled, never seen),
+    duplicate (seen again) and unscheduled (not a scheduled sample). The defect is exercised only
+    if it is shown, never missing, nothing else differs, every scheduled sample is observed
+    exactly once, nothing unscheduled is observed and check_formulas raises nothing."""
     target, value = orig.COMPONENTS[index], float(value_repr)
+    schedule = oracle_schedule(orig)
+    names = dict(vars(orig))
     counts = {"calls": 0, "defect": f"{target} oracle value {value_repr} where {condition}"}
     counts.update(changes=True, **dict.fromkeys(orig.CALL_KINDS, 0))
-    validate = mut.nonfinite_reason
+    counts.update(
+        expected_samples=len(schedule), observed_samples=0, unobserved=0, duplicate=0, unscheduled=0
+    )
+    seen = dict.fromkeys(schedule, 0)
+    code = mut.check_formulas.__code__
 
-    def observer(num_value, lin_value):
+    def formula(inc, node, phi, delta):
         frame = sys._getframe(1)
-        local = frame.f_locals
-        if frame.f_code.co_name == "check_formulas":
-            k = orig.COMPONENTS.index(local["name"])
-            ref = orig.finite(local["inc"], local["node"], local["phi"], local["d"])[k]
-            applies = k == index and bool(eval(condition, dict(frame.f_globals), dict(local)))
-            counts["calls"] += 1
-            if applies and not orig.same_value(ref, value):
-                kind = (
-                    "intended"
-                    if orig.same_value(num_value, value)
-                    else "missing"
-                    if orig.same_value(num_value, ref)
-                    else "unintended"
-                )
-            else:
-                kind = "unchanged" if orig.same_value(num_value, ref) else "unintended"
-            counts[kind] += 1
-        return validate(num_value, lin_value)
+        sample = (inc, node, phi, delta)
+        if frame.f_code is not code or sample not in schedule:
+            counts["unscheduled"] += 1
+        elif seen[sample]:
+            seen[sample] += 1
+            counts["duplicate"] += 1
+        else:
+            seen[sample] += 1
+            num = frame.f_locals["num"]
+            ref = orig.finite(inc, node, phi, delta)
+            applies = bool(eval(condition, names, dict(schedule[sample])))
+            for k, name in enumerate(orig.COMPONENTS):
+                counts["calls"] += 1
+                got = num[name]
+                if k == index and applies and not orig.same_value(ref[k], value):
+                    kind = (
+                        "intended"
+                        if orig.same_value(got, value)
+                        else "missing"
+                        if orig.same_value(got, ref[k])
+                        else "unintended"
+                    )
+                else:
+                    kind = "unchanged" if orig.same_value(got, ref[k]) else "unintended"
+                counts[kind] += 1
+        return orig.formulas_amendment2(inc, node, phi, delta)
 
-    mut.nonfinite_reason = observer
     exception = None
     try:
-        mut.check_formulas(mut.formulas_amendment2)
+        mut.check_formulas(formula)
     except Exception as exc:
         exception = {"type": type(exc).__name__, "message": str(exc)}
+    counts["observed_samples"] = sum(1 for n in seen.values() if n)
+    counts["unobserved"] = sum(1 for n in seen.values() if not n)
+    complete = (
+        counts["observed_samples"] == counts["expected_samples"]
+        and counts["unobserved"] == counts["duplicate"] == counts["unscheduled"] == 0
+        and counts["calls"] == len(schedule) * len(orig.COMPONENTS)
+    )
+    counts["observation_complete"] = complete
     record = {"oracle values": counts}
     return {
         "defect_calls": record,
-        "defect_exercised": orig.exercised(record),
+        "defect_exercised": orig.exercised(record) and complete and exception is None,
         "exception": exception,
     }
 
@@ -1227,7 +1447,12 @@ def exercise_summary(result):
             if "setting" in r:
                 parts.append(f"{label} {key} = {r['setting']!r}")
             else:
-                counts = ", ".join(f"{k} {r[k]}" for k in ("intended", "missing", "unintended"))
+                kinds = ("intended", "missing", "unintended")
+                if "expected_samples" in r:  # oracle values (M3P12-F1)
+                    kinds += ("unobserved", "duplicate", "unscheduled")
+                counts = ", ".join(f"{k} {r[k]}" for k in kinds)
+                if "expected_samples" in r:
+                    counts += f" of {r['expected_samples']} samples"
                 parts.append(f"{label} {key}: {counts}")
         if o.get("exception"):
             parts.append(f"{label} raised {o['exception']['type']}")
@@ -1319,6 +1544,8 @@ def run_control(control, original, workdir):
             actual, observed = classify(code, output, last, expected, exercise)
             if exercise is not None:
                 established = exercise_established(exercise, output)[0]
+    reason = CONTROL_REASONS[name]
+    shown = reason in observed
     return {
         "shows": shows,
         "claimed_expectation": claimed,
@@ -1326,8 +1553,10 @@ def run_control(control, original, workdir):
         "actual_classification": actual,
         "expected_exercise": exercised,
         "exercise_established": established,
+        "required_reason": reason,
+        "reason_shown": shown,
         "observed_outcome": observed,
-        "result": "PASS" if actual == category and established == exercised else "FAIL",
+        "result": "PASS" if actual == category and established == exercised and shown else "FAIL",
     }
 
 
@@ -1350,19 +1579,29 @@ def main(out_path):
                     vacuous.append(m[0])
         baseline["expectations_already_true_at_baseline"] = vacuous
         # A direct exercise predicate must not be met by the unmutated script (M3P11-F1).
-        observed_unmutated = [
-            m[0]
-            for m in MUTATIONS
-            if m[6] != BUILT_IN
-            and probe_run(workdir / "baseline.py", list(m[6]), workdir, f"baseline_{m[0]}")[
-                "exercised"
-            ]
-        ]
+        # The oracle-value schedule must be observed completely on the unmutated script, so that
+        # the schedule is the one check_formulas actually runs (M3P12-F1).
+        observed_unmutated, incomplete = [], []
+        for m in MUTATIONS:
+            if m[6] == BUILT_IN:
+                continue
+            result = probe_run(workdir / "baseline.py", list(m[6]), workdir, f"baseline_{m[0]}")
+            if result["exercised"]:
+                observed_unmutated.append(m[0])
+            if m[6][0] == "oracle values":
+                o = result.get("observations", {}).get("oracle values", {})
+                counts = o.get("defect_calls", {}).get("oracle values", {})
+                if not counts.get("observation_complete") or o.get("exception") is not None:
+                    incomplete.append(m[0])
         baseline["direct_exercise_predicates_checked_at_baseline"] = sum(
             1 for m in MUTATIONS if m[6] != BUILT_IN
         )
         baseline["direct_exercise_already_met_at_baseline"] = observed_unmutated
-        baseline_ok = baseline_ok and not vacuous and not observed_unmutated
+        baseline["oracle_schedules_checked_at_baseline"] = sum(
+            1 for m in MUTATIONS if m[6] != BUILT_IN and m[6][0] == "oracle values"
+        )
+        baseline["oracle_schedule_not_fully_observed_at_baseline"] = incomplete
+        baseline_ok = baseline_ok and not vacuous and not observed_unmutated and not incomplete
         for name, group, target, old, new, expected, declared in MUTATIONS:
             spec = exercise_spec(expected, declared)
             entry = {
@@ -1414,9 +1653,11 @@ def main(out_path):
         "verdict": "PASS" if ok else "FAIL",
         "script": SCRIPT.name,
         "exercise_criterion": (
-            "amendment 8 (M3P11-F1): a detection requires the intended defect established as "
-            "exercised by the independent probe (intended >= 1, missing = 0, unintended = 0) "
-            "and the expected rejection shown"
+            "amendments 8 and 9 (M3P11-F1, M3P12-F1): a detection requires the intended defect "
+            "established as exercised by the independent probe (intended >= 1, missing = 0, "
+            "unintended = 0; for oracle values also every scheduled sample observed exactly once, "
+            "none unobserved, duplicate or unscheduled, and no exception) and the expected "
+            "rejection shown"
         ),
         "baseline": baseline,
         "mutations": len(MUTATIONS),

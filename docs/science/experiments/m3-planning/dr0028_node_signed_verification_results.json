@@ -1709,6 +1709,39 @@
     }
    },
    "defect_exercised": true
+  },
+  "M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap": {
+   "designated_tests": [
+    "E6"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 1
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 1,
+     "differing": 1,
+     "defect": "first-order Delta Omega sign reversed for tilt magnitudes in the first-order grid's gap that contains 0.15 deg (E6_TILT_GAP)",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
   }
  },
  "mutants_with_defect_not_exercised": [],
