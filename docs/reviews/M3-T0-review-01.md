@@ -112,3 +112,16 @@
 - No approved physics assumption, constant, frame, threshold or M1/M2 contract.
 - No file outside `docs/`.
 - No option identifier or owner decision in DR-0029, which stays OPEN.
+
+### Validation of the correction commit `03e8f63` (appended 2026-10-18)
+Evidence is in `docs/reviews/raw/M3-T0-review02-correction-evidence/`. Scratch paths in the logs are redacted.
+
+| Check | Result |
+|---|---|
+| Targeted T0 checks (`check_review01.py`) | 12/12 pass at `03e8f63`. At `bdcaacf`, 11 fail and 1 passes (`checks_before_bdcaacf.log`, `checks_after.log`) |
+| M1 Proof (`run_m1_proof.sh`, fresh clone) | PASS, 9/9 steps; pytest 1185 passed; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; pytest 1185 passed; m2_proof 228/228, 0 failed; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`). Separate clones remove the earlier "clean: no" artefact |
+| Five pinned digests | All match `approved_digests.py` (`pinned_digests.log`) |
+| Production and protected files | `git diff --name-only 86df2c3 03e8f63 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | Fresh clone, all seven experiments (including the GMAT harness) run twice. `git status` is empty after each run, so all 85 tracked experiment files are byte-identical (`reproducibility_twice.log`) |
+| CI on `03e8f63` | Run 39168509344 (https://github.com/guillermoMartin96/tars/actions/runs/39168509344): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion |
