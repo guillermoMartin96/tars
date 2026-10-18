@@ -1,0 +1,19 @@
+import sys,json,math,hashlib,subprocess
+from pathlib import Path
+import numpy as np
+D=Path('docs/science/experiments/m3-t0').resolve(); sys.path.insert(0,str(D)); import t0_gmat as g; import t0_model as m
+S=Path('review_scratch').resolve(); g.RUNS=S/'extra_gmat_runs'; G=g.Gmat((Path.cwd()/'../GMAT R2026a/bin/GmatConsole'))
+results=json.loads((D/'t0_gmat_results.json').read_text()); out={}
+rows=g.parse_rows((D/'gmat_runs/axis_probe__m1_two_body_report.txt').read_text()); t=np.r_[rows[:,0],rows[:,0]]; r=np.vstack([rows[:,1:4],rows[:,5:8]]); z=np.r_[rows[:,4],rows[:,8]]; b=g._axis_basis(t,t.max())[:,:3]; mat=np.hstack([r*b[:,[k]] for k in range(3)]); c=np.linalg.lstsq(mat,z,rcond=None)[0].reshape(3,3); c=np.vstack([c,np.zeros((2,3))]); u=g.axis_function(c,t.max())
+r0,v0=m.circular_state(250000,51.6); jrows=g.parse_rows((D/'gmat_runs/traj_j2__m1_two_body_report.txt').read_text()); out['quadratic_axis_j2']=g.compare_m1_form(jrows,m.Config(j2=m.J2_FROM_C20,axis_fn=u),np.r_[r0,v0],850)
+p=g.M3(drag=True,flattening=m.F_WGS84,nutation_update_interval_s=None); script,aux=g.splice(g.m1_base('<RUN>/m1_two_body_report.txt'),p); res=G.run('review_drag_geod_default',script,aux); rr=g.parse_rows(res['reports']['m1_two_body_report.txt']); u=g.axis_function(results['axis']['coefficients'],53700)
+for name,cfg in [('Jax1',m.Config(drag=m.Drag(2.2,15))),('axis',m.Config(drag=m.Drag(2.2,15),axis_fn=u)),('axis_height',m.Config(drag=m.Drag(2.2,15,height='geodetic_gmat_replica'),axis_fn=u))]:
+ out['default_geod_'+name]=g.compare_m1_form(rr,cfg,np.r_[r0,v0],850)
+# All tracked experimental artifacts compare to exact git bytes, including reports and metadata.
+paths=subprocess.check_output(['git','ls-files','docs/science/experiments/m3-t0'],text=True).splitlines(); changed=[]
+for p in paths:
+ if Path(p).read_bytes()!=subprocess.check_output(['git','show','HEAD:'+p]):changed.append(p)
+out['archived_artifact_count']=len(paths);out['changed_paths']=changed
+out['all_result_files_inspected']=[str(p.relative_to(Path.cwd())) for p in D.glob('*results.json')]
+for p in D.glob('*results.json'): json.loads(p.read_text())
+print(json.dumps(out,indent=2))

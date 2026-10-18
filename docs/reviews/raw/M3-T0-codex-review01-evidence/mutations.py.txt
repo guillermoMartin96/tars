@@ -1,0 +1,21 @@
+import sys,runpy,json,contextlib,io,math
+from pathlib import Path
+import numpy as np
+D=Path('docs/science/experiments/m3-t0').resolve();sys.path.insert(0,str(D));import t0_model as m
+orig=m.j2_accel;air=m.air_velocity;out={}
+for name in ['j2_sign','j2_axis_x','no_corotation']:
+ if name=='j2_sign':m.j2_accel=lambda *a:-orig(*a)
+ if name=='j2_axis_x':
+  P=np.array([[0,0,1],[0,1,0],[1,0,0]])
+  m.j2_accel=lambda r,*a:P@orig(P@r,*a)
+ if name=='no_corotation':m.air_velocity=lambda r,w:np.zeros(3)
+ target=Path('review_scratch')/(name+'_frames.json');sys.argv=['t0_frames.py',str(target)]
+ with contextlib.redirect_stdout(io.StringIO()):runpy.run_path(str(D/'t0_frames.py'),run_name='__main__')
+ d=json.loads(target.read_text());out[name]={k:v for k,v in d.items() if (isinstance(v,bool) and not v) or k=='fc3_j2_axisymmetry_max_rel_diff'}
+ m.j2_accel=orig;m.air_velocity=air
+# Wrong at-base band rule: lower band produces a changed density at every base.
+errors=[]
+for k,b in enumerate(m.TABLE[1:],1):
+ lo=m.TABLE[k-1];wrong=lo.rho0*math.exp(-(b.base_km-lo.base_km)/lo.scale_km);errors.append(abs(wrong/b.rho0-1))
+out['wrong_base_rule_max_relative_density_difference']=max(errors)
+print(json.dumps(out,indent=2))

@@ -1,0 +1,11 @@
+import subprocess,pathlib,hashlib,json,time
+R=pathlib.Path.cwd(); S=R/'review_scratch'; D=R/'docs/science/experiments/m3-t0'
+def run(cmd,name):
+ p=subprocess.run(cmd,shell=True,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT);(S/(name+'.log')).write_text('$ '+cmd+'\n'+p.stdout+'\nEXIT '+str(p.returncode)+'\n');print(name,p.returncode,p.stdout[-1000:],flush=True)
+run("shasum -a 256 '../GMAT R2026a/bin/GmatConsole' '../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt' proof/thresholds/m1.json proof/thresholds/m2.json toolbox/references/gmat/m2/APPROVED_DIGESTS.json toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz proof/references/m2_final_states.json",'digests')
+for x in ['atmosphere','decay','geodetic','frames','regression']:
+ run(f'.venv/bin/python {D}/t0_{x}.py {S}/t0_{x}_results.json',x)
+ print(x,'BYTE_EQUAL', (S/f't0_{x}_results.json').read_bytes()==(D/f't0_{x}_results.json').read_bytes(),flush=True)
+run(".venv/bin/python docs/science/experiments/m3-t0/t0_gmat.py --gmat-console '../GMAT R2026a/bin/GmatConsole' --out docs/science/experiments/m3-t0/t0_gmat_results.json",'gmat')
+run('git status --porcelain; git diff --stat','after_rerun')
+run('.venv/bin/python -m pytest -q','pytest')

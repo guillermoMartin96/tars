@@ -1,0 +1,38 @@
+import sys, math,json
+from pathlib import Path
+import numpy as np
+sys.path.insert(0,str(Path('docs/science/experiments/m3-t0').resolve()))
+import t0_model as m
+from scipy.optimize import brentq
+out={}
+# Independent J2 via central differences of positive gravitational potential.
+r=np.array([4.1e6,-2.7e6,5.0e6]); J=m.J2_FROM_C20
+U=lambda q: -m.MU*J*m.A_WGS84**2/(2*np.linalg.norm(q)**3)*(3*q[2]**2/np.dot(q,q)-1)
+grad=np.array([(U(r+np.eye(3)[k]*10)-U(r-np.eye(3)[k]*10))/20 for k in range(3)])
+out['j2_gradient_max_abs_error']=float(max(abs(grad-m.j2_accel(r,J,m.MU,m.A_WGS84))))
+# Independent nearest-point on meridian ellipse minimization, normal construction.
+from scipy.optimize import minimize_scalar
+r=np.array([4e6,2e6,5e6]); p=math.hypot(*r[:2]); z=r[2]
+s=minimize_scalar(lambda t:(p-m.A_WGS84*math.cos(t))**2+(z-m.B_WGS84*math.sin(t))**2,bounds=(0,math.pi/2),method='bounded',options={'xatol':1e-15})
+out['nearest_ellipse_height_error_m']=m.geodetic_iterative(r)[1]-math.sqrt(s.fun)
+# Analytic Kepler trajectory with perigee at midpoint of a 10-s sample.
+for e in [0,550000/(2*m.A_WGS84+1050000)]:
+ a=(m.A_WGS84+250000)/(1-e); n=math.sqrt(m.MU/a**3); inc=math.radians(51.6)
+ def pos(t):
+  M=n*t; E=brentq(lambda E:E-e*math.sin(E)-M,M-1,M+1)
+  return a*np.array([math.cos(E)-e, math.sqrt(1-e*e)*math.sin(E)*math.cos(inc), math.sqrt(1-e*e)*math.sin(E)*math.sin(inc)])
+ hs=[m.geodetic_iterative(pos(t))[1] for t in [-5,0,5]]
+ out['dip_e_'+str(e)]={'h':hs,'dip_m':min(hs[0],hs[2])-hs[1],'claimed_bound_m':a*e*n*n*100/8,'spherical_exact_curvature_bound_m':m.MU*e/(a*(1-e))**2*100/8}
+# Admissible P1 rule is not conservative for eccentric perigee.
+h=90000; vc=math.sqrt(m.MU/(m.A_WGS84+h)); B=850/33
+out['stiffness_e09']={'circular_lambda_dt':m.density(h)*vc*10/B,'perigee_lambda_dt':m.density(h)*vc*math.sqrt(1.9)*10/B}
+# Independent density oracle and mutation differences.
+table=np.loadtxt(m.TABLE_COPY,delimiter=','); errs=[]
+for h in np.r_[table[:,0]*1000,table[1:,0]*1000-1,table[:,0]*1000+1,2e6]:
+ k=np.searchsorted(table[:,0]*1000,h,side='right')-1; base,rho,H=table[k]; expected=rho*math.exp(-(h/1000-base)/H); errs.append(abs(m.density(h)/expected-1))
+out['density_max_rel_error']=max(errs)
+r,v=m.circular_state(250000,51.6); cfg=m.Config(drag=m.Drag(2.2,15)); pm=m.acceleration(m.Config(),0,r,v,850); drag=m.acceleration(cfg,0,r,v,850)-pm; wrong=m.acceleration(m.Config(drag=m.Drag(2.2,15,corotate=False)),0,r,v,850)-pm
+out['v_instead_vrel_drag_relative_difference']=float(np.linalg.norm(wrong-drag)/np.linalg.norm(drag))
+r=m.geodetic_to_cartesian(math.pi/4,0,250000); out['spherical_height_error_m']=m.spherical_altitude(r)-250000
+out['probe_bias_prediction']=-.001/7000
+print(json.dumps(out,indent=2))

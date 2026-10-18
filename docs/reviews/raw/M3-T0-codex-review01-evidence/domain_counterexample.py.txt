@@ -1,0 +1,11 @@
+import sys,math,json
+from pathlib import Path
+import numpy as np
+sys.path.insert(0,str(Path('docs/science/experiments/m3-t0').resolve())); import t0_model as m
+hf=21500.; B=1e9; dt=10.; r=np.array([m.A_WGS84+22000,0,0]); v=np.array([-10000.,0,0]); mass=B*2.2*15; cfg=m.Config(j2=m.J2_FROM_C20,drag=m.Drag(2.2,15))
+out={'hf_m':hf,'initial_h_m':m.geodetic_iterative(r)[1], 'a_minus_b_m':m.A_WGS84-m.B_WGS84,'P1_lambda_dt':m.density(hf)*math.sqrt(m.MU/(m.A_WGS84+hf))*dt/B,'kappa':.01,'initial_two_body_energy_J_kg':float(v@v)/2-m.MU/np.linalg.norm(r)}
+try:m.rk4_step(m.rhs(cfg),0,np.r_[r,v,mass],dt)
+except Exception as e:out['P4_fail_closed_result']=str(type(e).__name__)+': '+str(e)
+st=[]; yy=m.rk4_step(m.rhs(m.Config(j2=m.J2_FROM_C20,drag=m.Drag(2.2,15,below='extrapolate'))),0,np.r_[r,v,mass],dt,st)
+out['diagnostic_stage_heights_m']=[m.geodetic_iterative(x.r)[1] for x in st];out['diagnostic_committed_height_m']=m.geodetic_iterative(yy[:3])[1]
+print(json.dumps(out,indent=2))

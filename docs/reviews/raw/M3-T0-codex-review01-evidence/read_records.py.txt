@@ -1,0 +1,5 @@
+from pathlib import Path
+for f in ['docs/decisions/0009-m3-force-context-and-physics-identity.md','docs/decisions/requests/DR-0025-m3-validation-strategy.md','docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md','docs/milestones/M3-baseline-and-impact.md','docs/milestones/M3-proposal.md','docs/milestones/M3-decision-matrix.md','docs/reviews/raw/M3-planning-codex-review13-prompt.md']:
+ s=Path(f).read_text(); print(f,len(s),'chars'); print(s[-7000:] if 'requests' in f else s[:4500])
+for f,tag in [('docs/science/assumptions.md','## SCI-0013'),('docs/science/validation.md','## VAL-0018')]:
+ s=Path(f).read_text(); i=s.find(tag); print(f,s[i:] if i>=0 else s[-15000:])

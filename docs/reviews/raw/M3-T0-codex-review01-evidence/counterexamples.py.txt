@@ -1,0 +1,20 @@
+exec(open('review_scratch/independent.py').read().split('print(json.dumps(out')[0])
+from scipy.integrate import solve_ivp
+r,v=m.perigee_state(250000,800000,51.6); y=np.r_[r,v,850.]; f=m.rhs(m.Config(j2=m.J2_FROM_C20,drag=m.Drag(2.2,15)))
+heights=[m.geodetic_iterative(solve_ivp(f,(0,t),y,method='DOP853',rtol=1e-13,atol=1e-9).y[:3,-1])[1] for t in [-5,5]]
+out['same_J2_drag_midpoint_dip_m']=min(heights)-250000
+r,v=m.circular_state(180000,51.6); stages=[]; yy=m.rk4_step(m.rhs(m.Config(j2=m.J2_FROM_C20,drag=m.Drag(2.2,15))),0,np.r_[r,v,850],10,stages)
+out['rk4_stages_initial_height_difference_m']=[m.geodetic_iterative(s.r)[1]-180000 for s in stages]
+# Solve for the exact proposed κ boundary, not the 5-km grid.
+B=850/33; fun=lambda h:m.density(h)*math.sqrt(m.MU/(m.A_WGS84+h))*10/B
+hf=brentq(lambda h:fun(h)-.01,90000,100000)
+out['P1_kappa001_min_floor_m']=hf
+# At e=.9 equatorial retrograde perigee just above floor, |vrel| exceeds vc.
+rn=m.A_WGS84+hf; vc=math.sqrt(m.MU/rn); rel=vc*math.sqrt(1.9)+m.OMEGA_E*rn
+out['P1_accepted_e09_actual_lambda_dt']=m.density(hf)*rel*10/B
+out['P1_floor90_lambda_dt']=fun(90000)
+# Finite-difference linearized drag eigenvalues (parallel and transverse).
+v=np.array([7000.,0,0]); c=.5
+jac=np.column_stack([(-c*np.linalg.norm(v+np.eye(3)[k]*.01)*(v+np.eye(3)[k]*.01)+c*np.linalg.norm(v-np.eye(3)[k]*.01)*(v-np.eye(3)[k]*.01))/.02 for k in range(3)])
+out['drag_jac_eigenvalues']=np.linalg.eigvalsh(jac).tolist()
+print(json.dumps(out,indent=2))

@@ -1,6 +1,7 @@
 # M3 T0 checkpoint report (reference-configuration spike)
 
 **Status:** T0 experimental work and validation complete at `294e1f5`. **The independent Codex review has not started:** the copy of I-15 received by the implementer ends at the start of §8, so §8 has not been read. **No decision is taken here; T1 and later are not authorized.**  
+**Status update (2026-10-18, append-only):** independent **Review 01 (Codex, at `ca84986`): REQUEST_CHANGES**: M3T0-F1 and F2 (MAJOR), F3 and F4 (MINOR), F5 (NOTE), all ACCEPTED and verified, **not applied**; plus implementer item IM-1. Record: `docs/reviews/M3-T0-review-01.md`. Owner decision matrix: `M3-T0-decision-matrix.md`. T0 is not accepted. Corrections and any further review round await authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 
