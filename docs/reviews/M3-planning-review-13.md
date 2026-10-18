@@ -53,3 +53,6 @@
 ## Status after this review
 - Review 13 returned an unconditional PASS, so the I-12 §8 PASS branch applies: an acceptance recommendation has been prepared for the Tech Lead's decision.
 - **Planning is not accepted.** Acceptance, the planning merge, T0, T1, T2 and any review 14 each need the Tech Lead's separate authorization.
+
+## Owner decision (appended 2026-10-17; the sections above are unchanged)
+The project owner accepted the M3 planning checkpoint at `865210c` (I-13, "I-13 — M3 Planning Acceptance and Merge Readiness"). The record is in `docs/milestones/M3-decision-matrix.md`, "Owner decision: M3 planning acceptance (I-13, 2026-10-17)". The planning merge, T0, T1, T2 and any review 14 are not authorized by it.

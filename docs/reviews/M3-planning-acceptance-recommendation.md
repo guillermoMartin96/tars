@@ -78,3 +78,16 @@ Nothing below has a default. Accepting the planning checkpoint does not decide a
 1. Accept, or decline, the M3 planning checkpoint as documented.
 2. Separately, if accepted: authorize, or not, the planning merge into `main`.
 3. Separately, after a merge: authorize, or not, T0.
+
+## Owner decision (appended 2026-10-17; the sections above are unchanged)
+**I-13 — M3 Planning Acceptance and Merge Readiness:** the M3 planning checkpoint at `865210c` is **ACCEPTED** by the project owner, subject to preserving the reported evidence and outstanding decisions. The "Status: NOT ACCEPTED" line above records the state when this recommendation was prepared.
+- **Accepted commit:** `865210cc6836def91d0e56a536d92694c79974db` (`865210c`), branch `milestone-3-planning`.
+- **Independent review:** Codex Review 13, unconditional PASS, no new findings (`docs/reviews/M3-planning-review-13.md`).
+- **Review findings:** every tracked finding of rounds 01–12 resolved.
+- **Mutation check:** 109/109 mutations detected for the intended reason, each with its intended defect established as exercised.
+- **Controls:** 30/30 harness controls (including the regression controls of M3P10-F1, M3P11-F1 and M3P12-F1) with their declared category, exercise result and reason.
+- **Proof:** full M1 Proof (9 steps) and M2 Proof (20 steps) PASS at `24c2d98` (pytest 1185 passed; m2_proof 228/228); CI success on all four jobs for `24c2d98` and `602ede0`.
+- **Outstanding decisions remain unresolved:** every OPEN, DEFERRED, T0 → owner and NOT AUTHORIZED item in this matrix is unchanged; acceptance decides none of them.
+- **Codex's independent verification limitations:** Codex ran complete standalone validators, not the Proof wrappers or the full pytest suite; it could not access CI; it ran no fresh GMAT executable, external-source retrieval or three-platform execution. The exercise probe does not defend against a copy written to detect it (documented scope, amendment 9).
+
+Decision 1 above is taken (accepted). Decisions 2 (the planning merge) and 3 (T0) remain open and need separate authorization (I-13 §4).

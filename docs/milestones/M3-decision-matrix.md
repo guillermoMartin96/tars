@@ -1,6 +1,6 @@
 # M3 planning decision matrix
 
-**As of:** 2026-10-17, twelfth planning checkpoint (review 12 corrections M3P12-F1 and M3P12-F2; no decision changed). Earlier: 2026-10-17, eleventh planning checkpoint (review 11 corrections M3P11-F1 and M3P11-F2; no decision changed). Earlier: 2026-10-17, tenth planning checkpoint (review 10 correction M3P10-F1 and classification of the 18 assertions for M3P10-F2; no decision changed). Earlier: 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
+**As of:** 2026-10-17, **M3 planning checkpoint ACCEPTED by the owner at `865210c` (I-13)**; no other decision changed. Earlier: 2026-10-17, twelfth planning checkpoint (review 12 corrections M3P12-F1 and M3P12-F2; no decision changed). Earlier: 2026-10-17, eleventh planning checkpoint (review 11 corrections M3P11-F1 and M3P11-F2; no decision changed). Earlier: 2026-10-17, tenth planning checkpoint (review 10 correction M3P10-F1 and classification of the 18 assertions for M3P10-F2; no decision changed). Earlier: 2026-10-17, ninth planning checkpoint (review 09 corrections M3P9-F1/F2 and E3/E4 coverage for M3P9-F3; no decision changed). Earlier: 2026-10-16, eighth planning checkpoint (review 08 correction M3P8-F1; no decision changed). Earlier: 2026-10-16, seventh planning checkpoint (review 07 correction M3P7-F1; no decision changed). Earlier: 2026-10-16, sixth planning checkpoint (review 06 corrections M3P6-F1..F3; no decision changed). Earlier: 2026-10-16, fifth planning checkpoint (review 05 correction M3P5-F1; no decision changed). Earlier: 2026-10-16, fourth planning checkpoint (review 04 corrections M3P4-F1/F2; no decision changed). Earlier: 2026-10-15, third planning checkpoint (after review 03 and the DR-0028 decision). Earlier statuses that changed are shown as "was → now". This is an index: each Decision Request's Resolution is authoritative, and this file only points to it. Nothing here is implemented.
 
 **Status labels:**
 - **APPROVED:** owner decision.
@@ -25,6 +25,7 @@ No OPEN or DEFERRED item has a default.
 - **I-10:** "I-10 — Resolve M3P10-F1 and authorize Review 11" (Tech Lead, 2026-10-17), sections 1–10.
 - **I-11:** "I-11 — Resolve Review 11 Findings and Authorize Review 12" (Tech Lead, 2026-10-17), sections 1–10.
 - **I-12:** "I-12 — M3 Planning: Review 12 Corrections and Review 13 Authorization" (Tech Lead, 2026-10-17), sections 1–9.
+- **I-13:** "I-13 — M3 Planning Acceptance and Merge Readiness" (project owner, 2026-10-17), sections 1–4.
 
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
@@ -188,9 +189,22 @@ Review-11 findings M3P11-F1 and M3P11-F2, and review-10 findings M3P10-F1 and M3
 ## Review findings (M3 Planning Review 13)
 Review 13 (Codex, at `59c9f9e`): **PASS, unconditional; no new findings.** The reviewer reports every tracked finding RESOLVED: M3P12-F1, M3P12-F2, M3P11-F1, M3P11-F2, M3P10-F1, M3P10-F2 and all findings of rounds 01–09. Record: `docs/reviews/M3-planning-review-13.md`. Acceptance recommendation (I-12 §8), for the Tech Lead's decision: `docs/reviews/M3-planning-acceptance-recommendation.md`. Planning is **not accepted**; no decision in this matrix changed.
 
+## Owner decision: M3 planning acceptance (I-13, 2026-10-17)
+The M3 planning checkpoint at `865210c` is **ACCEPTED** by the project owner, "subject to preserving the reported evidence and outstanding decisions" (I-13).
+- **Accepted commit:** `865210cc6836def91d0e56a536d92694c79974db` (`865210c`), branch `milestone-3-planning`.
+- **Independent review:** Codex Review 13, unconditional PASS, no new findings (`docs/reviews/M3-planning-review-13.md`).
+- **Review findings:** every tracked finding of rounds 01–12 resolved.
+- **Mutation check:** 109/109 mutations detected for the intended reason, each with its intended defect established as exercised.
+- **Controls:** 30/30 harness controls (including the regression controls of M3P10-F1, M3P11-F1 and M3P12-F1) with their declared category, exercise result and reason.
+- **Proof:** full M1 Proof (9 steps) and M2 Proof (20 steps) PASS at `24c2d98` (pytest 1185 passed; m2_proof 228/228); CI success on all four jobs for `24c2d98` and `602ede0`.
+- **Outstanding decisions remain unresolved:** every OPEN, DEFERRED, T0 → owner and NOT AUTHORIZED item in this matrix is unchanged; acceptance decides none of them.
+- **Codex's independent verification limitations:** Codex ran complete standalone validators, not the Proof wrappers or the full pytest suite; it could not access CI; it ran no fresh GMAT executable, external-source retrieval or three-platform execution. The exercise probe does not defend against a copy written to detect it (documented scope, amendment 9).
+
+I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred decision, a review 14 or any expansion of the planning scope (I-13 §4). The merge needs separate authorization.
+
 ## Gates
 | Gate | State |
 |---|---|
-| Planning merge | Needs the Tech Lead's explicit checkpoint approval (I-2 §7). Section 7 of I-1 alone no longer suffices |
-| T0 | Needs the explicit checkpoint approval and the planning merge (I-1 §8, narrowed by I-2 §7) |
+| Planning merge | Needs the Tech Lead's explicit checkpoint approval (I-2 §7). Section 7 of I-1 alone no longer suffices. Update 2026-10-17: checkpoint **ACCEPTED** (I-13, `865210c`); the merge itself still needs separate authorization (I-13 §4) |
+| T0 | Needs the explicit checkpoint approval and the planning merge (I-1 §8, narrowed by I-2 §7). Update 2026-10-17: checkpoint approval given (I-13); still needs the planning merge and explicit T0 authorization; not started (I-13 §4) |
 | T1 and later | NOT AUTHORIZED. Was also blocked on DR-0028; that block is lifted by the J-ax-1 decision. T2 still depends on the DR-0027 T0 proposals (A-4, A-5, A-6, A-s, B-4) and the T0-checkpoint deferrals |
