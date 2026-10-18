@@ -203,11 +203,14 @@ def stage_statistics(steps) -> dict:
     }
 
 
-def missed_crossing_bound() -> dict:
-    """Can a crossing between committed states be missed (dip below and back within a step)?
+def missed_crossing_fixed_phase() -> dict:
+    """How far does the trajectory dip below the lower committed height inside a step?
 
-    Eccentric 250 x 800 km orbit, J2 + drag: the largest depth by which the dense DOP853
-    trajectory goes below the lower committed height of a DT step, over two orbits.
+    Eccentric 250 x 800 km orbit, J2 + drag, over two orbits, with the committed states at
+    one fixed sampling phase (t = 0, 10, 20 ... s from perigee) and the inside of each step
+    sampled every 0.5 s. This is a single-phase MEASUREMENT, not a bound (Review 01
+    M3T0-F1): the derived bound and the sampling-phase, eccentricity and inclination sweeps
+    are in t0_termination.py (`missed_crossing`).
     """
     r0, v0 = m.perigee_state(250_000.0, 800_000.0, 51.6)
     y0 = np.concatenate([r0, v0, [MASS]])
@@ -221,14 +224,12 @@ def missed_crossing_bound() -> dict:
     for k in range(0, len(h) - per, per):
         seg = h[k : k + per + 1]
         dips.append(min(seg[0], seg[-1]) - seg.min())
-    a = 0.5 * (2 * m.A_WGS84 + 1_050_000.0)
-    e = 550_000.0 / (2 * a)
-    n = math.sqrt(m.MU / a**3)
     return {
         "configuration": "perigee 250 km, apogee 800 km (spherical), i 51.6, J2 + drag, 2 orbits",
+        "sampling": "one fixed phase (committed states at t = 0, 10, 20 ... s from perigee); "
+        "0.5 s inside each step. A measurement at that phase, not a bound: see "
+        "t0_termination_results.json -> missed_crossing",
         "max_dip_below_committed_states_m": float(max(dips)),
-        "analytic_estimate_m": a * e * n * n * DT * DT / 8.0,
-        "analytic_estimate_formula": "a e n^2 dt^2 / 8 (curvature of h at perigee)",
     }
 
 
@@ -257,7 +258,7 @@ def main() -> None:
         else None,
         "floors": {},
         "stages": stage_statistics(steps),
-        "missed_crossing": missed_crossing_bound(),
+        "missed_crossing": missed_crossing_fixed_phase(),
         "rk4_divergence": divergence(steps, truth),
         "sphere_minus_ellipsoid_max_m": m.A_WGS84 - m.B_WGS84,
     }
@@ -273,7 +274,8 @@ def main() -> None:
             rec["scalar_minus_vector_hermite_s"] = (
                 rec["t_scalar_hermite_s"] - rec["t_vector_hermite_s"]
             )
-            # lambda dt at the floor (stiffness, t0_atmosphere.stiffness)
+            # lambda dt at the floor with the circular-speed proxy of DR-0029 P1 (as in
+            # t0_atmosphere.stiffness); not a bound on lambda (Review 01 M3T0-F2)
             v = math.sqrt(m.MU / (m.A_WGS84 + floor * 1000.0))
             rec["lambda_dt_at_floor"] = m.density(floor * 1000.0) * v / (MASS / (2.2 * 15.0)) * DT
         out["floors"][str(floor)] = rec

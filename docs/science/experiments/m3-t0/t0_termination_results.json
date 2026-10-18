@@ -1,0 +1,688 @@
+{
+  "admissibility_counterexamples": {
+    "eccentric_retrograde": {
+      "covered_by_bound_speed": true,
+      "h_m": 90185.09165917509,
+      "lambda_dt_actual": 0.014384907069861974,
+      "lambda_dt_circular_proxy": 0.010000000000000002,
+      "vrel_bound_mps": 11591.738210967576,
+      "vrel_mps": 11292.240774733824
+    },
+    "stress_input": {
+      "a_minus_b_m": 21384.685754820704,
+      "diagnostic_committed_h_m": -78392.69368719496,
+      "diagnostic_committed_spherical_alt_m": -78392.69368719496,
+      "diagnostic_stage_heights_m": [
+        -28000.0,
+        -28243.59463945497,
+        -78347.73289555125
+      ],
+      "fail_closed": "OutsideDomainError: h = -28000.0 m below the table's lower edge",
+      "h_f_m": 21500.0,
+      "initial_h_m": 22000.0,
+      "lambda_dt_bound": 7.349265929085124e-06,
+      "lambda_dt_circular": 4.9801435971955024e-06,
+      "lipschitz_lower_bound_holds": true,
+      "reentry_and_impact_same_tick": true,
+      "two_body_energy_J_per_kg": -12279985.85030289
+    }
+  },
+  "missed_crossing": {
+    "all_bounds_hold": true,
+    "b2_over_a_m": 6335439.32729282,
+    "cases": {
+      "j2drag_250x800_i51.6_perigee_midstep": {
+        "bound_holds": true,
+        "bound_kind": "pointwise bound U maximised over the step (perturbed motion)",
+        "bound_m": 5.1121321699378,
+        "dip_m": 4.817096536979079,
+        "step_bound_m": 5.1121321699378,
+        "sup_hddot_upper_over_step_mps2": 0.408970573595024
+      },
+      "j2drag_circular250_i51.6_equator_midstep": {
+        "bound_holds": true,
+        "bound_kind": "pointwise bound U maximised over the step (perturbed motion)",
+        "bound_m": 0.5647984617681345,
+        "dip_m": 0.28107060864567757,
+        "step_bound_m": 0.5647984617681345,
+        "sup_hddot_upper_over_step_mps2": 0.04518387694145076
+      },
+      "kepler_250x800_i51.6_perigee_midstep": {
+        "bound_holds": true,
+        "bound_kind": "two-body domain bound over the whole orbit",
+        "bound_m": 5.283316482977662,
+        "dip_m": 4.98764459323138,
+        "step_bound_m": 5.282676882170612,
+        "sup_hddot_upper_over_step_mps2": 0.42261415057364893,
+        "two_body_domain_bound_m": 5.283316482977662
+      },
+      "kepler_circular250_i51.6_equator_midstep": {
+        "bound_holds": true,
+        "bound_kind": "two-body domain bound over the whole orbit",
+        "bound_m": 0.7359729906974088,
+        "dip_m": 0.4516185065731406,
+        "step_bound_m": 0.735333389890358,
+        "sup_hddot_upper_over_step_mps2": 0.05882667119122864,
+        "two_body_domain_bound_m": 0.7359729906974088
+      }
+    },
+    "dt_s": 10.0,
+    "max_normal_angle_rad": 0.003358437616083565,
+    "sweep": [
+      {
+        "apogee_km": 250.0,
+        "bound_holds": true,
+        "bound_m": 0.735972990697431,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          249999.99999957066,
+          250000.0000010524
+        ],
+        "inclination_deg": 0.0,
+        "max_dip_m": 5.681067705154419e-08,
+        "perigee_km": 250.0,
+        "phase_s": 9.25,
+        "physics": "kepler",
+        "step_start_s": 2749.25,
+        "sup_hddot_upper_mps2": 0.058826671192196756,
+        "trajectory_bound_m": 0.7353333899024594,
+        "two_body_domain_bound_m": 0.735972990697431
+      },
+      {
+        "apogee_km": 250.0,
+        "bound_holds": true,
+        "bound_m": 0.9149206678645383,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          228858.05161114316,
+          250000.0
+        ],
+        "inclination_deg": 0.0,
+        "max_dip_m": 0.16726903710514307,
+        "perigee_km": 250.0,
+        "phase_s": 2.5,
+        "physics": "j2drag",
+        "step_start_s": 8062.5,
+        "sup_hddot_upper_mps2": 0.07319365342916306,
+        "trajectory_bound_m": 0.9149206678645383
+      },
+      {
+        "apogee_km": 250.0,
+        "bound_holds": true,
+        "bound_m": 0.735972990697431,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          250000.0,
+          263158.1113097463
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 0.44341025967150927,
+        "perigee_km": 250.0,
+        "phase_s": 5.25,
+        "physics": "kepler",
+        "step_start_s": 5365.25,
+        "sup_hddot_upper_mps2": 0.05882667119122864,
+        "trajectory_bound_m": 0.735333389890358,
+        "two_body_domain_bound_m": 0.735972990697431
+      },
+      {
+        "apogee_km": 250.0,
+        "bound_holds": true,
+        "bound_m": 0.7710944175866263,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          237202.03716461733,
+          255967.09859073255
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 0.48249299079179764,
+        "perigee_km": 250.0,
+        "phase_s": 9.75,
+        "physics": "j2drag",
+        "step_start_s": 8039.75,
+        "sup_hddot_upper_mps2": 0.06168755340693011,
+        "trajectory_bound_m": 0.7710944175866263
+      },
+      {
+        "apogee_km": 250.0,
+        "bound_holds": true,
+        "bound_m": 0.735972990697431,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          250000.0,
+          271068.5641589407
+        ],
+        "inclination_deg": 97.0,
+        "max_dip_m": 0.7112376876175404,
+        "perigee_km": 250.0,
+        "phase_s": 5.25,
+        "physics": "kepler",
+        "step_start_s": 5365.25,
+        "sup_hddot_upper_mps2": 0.05882667119123042,
+        "trajectory_bound_m": 0.7353333898903802,
+        "two_body_domain_bound_m": 0.735972990697431
+      },
+      {
+        "apogee_km": 250.0,
+        "bound_holds": true,
+        "bound_m": 0.684157552545317,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          242157.1180904014,
+          264482.8913559485
+        ],
+        "inclination_deg": 97.0,
+        "max_dip_m": 0.6484797755256295,
+        "perigee_km": 250.0,
+        "phase_s": 7.25,
+        "physics": "j2drag",
+        "step_start_s": 8047.25,
+        "sup_hddot_upper_mps2": 0.05473260420362536,
+        "trajectory_bound_m": 0.684157552545317
+      },
+      {
+        "apogee_km": 180.0,
+        "bound_holds": true,
+        "bound_m": 0.7598378018109253,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          180000.0,
+          193158.45955669042
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 0.4613213026896119,
+        "perigee_km": 180.0,
+        "phase_s": 7.75,
+        "physics": "kepler",
+        "step_start_s": 2637.75,
+        "sup_hddot_upper_mps2": 0.060734757939187034,
+        "trajectory_bound_m": 0.7591844742398379,
+        "two_body_domain_bound_m": 0.7598378018109253
+      },
+      {
+        "apogee_km": 180.0,
+        "bound_holds": true,
+        "bound_m": 0.7891744275845047,
+        "eccentricity": 0.0,
+        "height_range_m": [
+          159135.33923171274,
+          185674.09573447518
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 0.46951961051672697,
+        "perigee_km": 180.0,
+        "phase_s": 9.0,
+        "physics": "j2drag",
+        "step_start_s": 7959.0,
+        "sup_hddot_upper_mps2": 0.06313395420676038,
+        "trajectory_bound_m": 0.7891744275845047
+      },
+      {
+        "apogee_km": 400.0,
+        "bound_holds": true,
+        "bound_m": 2.0131606898001975,
+        "eccentricity": 0.011188791158527717,
+        "height_range_m": [
+          250000.0,
+          400000.0000005737
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 1.6937164152041078,
+        "perigee_km": 250.0,
+        "phase_s": 6.75,
+        "physics": "kepler",
+        "step_start_s": 5456.75,
+        "sup_hddot_upper_mps2": 0.16100168711945173,
+        "trajectory_bound_m": 2.0125210889931466,
+        "two_body_domain_bound_m": 2.0131606898001975
+      },
+      {
+        "apogee_km": 400.0,
+        "bound_holds": true,
+        "bound_m": 1.8419759476225428,
+        "eccentricity": 0.011188791158527717,
+        "height_range_m": [
+          249795.3250876721,
+          387709.57495916635
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 1.4971412820741534,
+        "perigee_km": 250.0,
+        "phase_s": 7.25,
+        "physics": "j2drag",
+        "step_start_s": 5447.25,
+        "sup_hddot_upper_mps2": 0.14735807580980342,
+        "trajectory_bound_m": 1.8419759476225428
+      },
+      {
+        "apogee_km": 800.0,
+        "bound_holds": true,
+        "bound_m": 5.283316482977662,
+        "eccentricity": 0.0398369610801582,
+        "height_range_m": [
+          250000.0,
+          799999.9999727905
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 4.902915013022721,
+        "perigee_km": 250.0,
+        "phase_s": 3.0,
+        "physics": "kepler",
+        "step_start_s": 5703.0,
+        "sup_hddot_upper_mps2": 0.42261415057364893,
+        "trajectory_bound_m": 5.282676882170612,
+        "two_body_domain_bound_m": 5.283316482977662
+      },
+      {
+        "apogee_km": 800.0,
+        "bound_holds": true,
+        "bound_m": 5.112131740800008,
+        "eccentricity": 0.0398369610801582,
+        "height_range_m": [
+          249976.34597014822,
+          786918.0288895536
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 4.641260206699371,
+        "perigee_km": 250.0,
+        "phase_s": 3.75,
+        "physics": "j2drag",
+        "step_start_s": 5693.75,
+        "sup_hddot_upper_mps2": 0.4089705392640006,
+        "trajectory_bound_m": 5.112131740800008
+      },
+      {
+        "apogee_km": 800.0,
+        "bound_holds": true,
+        "bound_m": 5.283316482977662,
+        "eccentricity": 0.0398369610801582,
+        "height_range_m": [
+          250000.0,
+          799999.99997437
+        ],
+        "inclination_deg": 97.0,
+        "max_dip_m": 5.181748093105853,
+        "perigee_km": 250.0,
+        "phase_s": 3.0,
+        "physics": "kepler",
+        "step_start_s": 5703.0,
+        "sup_hddot_upper_mps2": 0.4226141505736507,
+        "trajectory_bound_m": 5.282676882170634,
+        "two_body_domain_bound_m": 5.283316482977662
+      },
+      {
+        "apogee_km": 800.0,
+        "bound_holds": true,
+        "bound_m": 5.11213174080003,
+        "eccentricity": 0.0398369610801582,
+        "height_range_m": [
+          249976.12847133446,
+          791669.8065576609
+        ],
+        "inclination_deg": 97.0,
+        "max_dip_m": 5.003572199493647,
+        "perigee_km": 250.0,
+        "phase_s": 3.5,
+        "physics": "j2drag",
+        "step_start_s": 11393.5,
+        "sup_hddot_upper_mps2": 0.4089705392640024,
+        "trajectory_bound_m": 5.11213174080003
+      },
+      {
+        "apogee_km": 800.0,
+        "bound_holds": true,
+        "bound_m": 6.02299502023016,
+        "eccentricity": 0.045135966274406,
+        "height_range_m": [
+          180000.0,
+          800000.0000004163
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 5.611694106832147,
+        "perigee_km": 180.0,
+        "phase_s": 4.25,
+        "physics": "kepler",
+        "step_start_s": 11324.25,
+        "sup_hddot_upper_mps2": 0.4817873354127258,
+        "trajectory_bound_m": 6.022341692659072,
+        "two_body_domain_bound_m": 6.02299502023016
+      },
+      {
+        "apogee_km": 800.0,
+        "bound_holds": true,
+        "bound_m": 5.844397705387938,
+        "eccentricity": 0.045135966274406,
+        "height_range_m": [
+          179906.44065118022,
+          785945.8386649061
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 5.503389070741832,
+        "perigee_km": 180.0,
+        "phase_s": 9.75,
+        "physics": "j2drag",
+        "step_start_s": 5649.75,
+        "sup_hddot_upper_mps2": 0.46755181643103505,
+        "trajectory_bound_m": 5.844397705387938
+      },
+      {
+        "apogee_km": 2000.0,
+        "bound_holds": true,
+        "bound_m": 14.047771520788753,
+        "eccentricity": 0.11661788929083929,
+        "height_range_m": [
+          250000.0,
+          1999999.9999643657
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 13.301496651023626,
+        "perigee_km": 250.0,
+        "phase_s": 3.0,
+        "physics": "kepler",
+        "step_start_s": 6463.0,
+        "sup_hddot_upper_mps2": 1.1237705535985327,
+        "trajectory_bound_m": 14.047131919981659,
+        "two_body_domain_bound_m": 14.047771520788753
+      },
+      {
+        "apogee_km": 2000.0,
+        "bound_holds": true,
+        "bound_m": 13.876586778611056,
+        "eccentricity": 0.11661788929083929,
+        "height_range_m": [
+          249995.7123013949,
+          1984235.9108654372
+        ],
+        "inclination_deg": 51.6,
+        "max_dip_m": 13.327829887159169,
+        "perigee_km": 250.0,
+        "phase_s": 8.75,
+        "physics": "j2drag",
+        "step_start_s": 12908.75,
+        "sup_hddot_upper_mps2": 1.1101269422888844,
+        "trajectory_bound_m": 13.876586778611056
+      }
+    ],
+    "sweep_phases_s": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0,
+      2.25,
+      2.5,
+      2.75,
+      3.0,
+      3.25,
+      3.5,
+      3.75,
+      4.0,
+      4.25,
+      4.5,
+      4.75,
+      5.0,
+      5.25,
+      5.5,
+      5.75,
+      6.0,
+      6.25,
+      6.5,
+      6.75,
+      7.0,
+      7.25,
+      7.5,
+      7.75,
+      8.0,
+      8.25,
+      8.5,
+      8.75,
+      9.0,
+      9.25,
+      9.5,
+      9.75
+    ],
+    "theorem": "dip <= dt^2/8 * sup max(h'', 0); h'' <= n.a + |v_t|^2 / (h + b^2/a)",
+    "two_body_domain_bound_table": [
+      {
+        "bound_m": 0.7957541820545311,
+        "eccentricity": 0.0,
+        "perigee_km": 80.0,
+        "sup_hddot_mps2": 0.06366033456436249
+      },
+      {
+        "bound_m": 1.3970443981672354,
+        "eccentricity": 0.005,
+        "perigee_km": 80.0,
+        "sup_hddot_mps2": 0.11176355185337883
+      },
+      {
+        "bound_m": 1.998334614279984,
+        "eccentricity": 0.01,
+        "perigee_km": 80.0,
+        "sup_hddot_mps2": 0.15986676914239872
+      },
+      {
+        "bound_m": 3.200915046505415,
+        "eccentricity": 0.02,
+        "perigee_km": 80.0,
+        "sup_hddot_mps2": 0.2560732037204332
+      },
+      {
+        "bound_m": 5.6060759109562985,
+        "eccentricity": 0.04,
+        "perigee_km": 80.0,
+        "sup_hddot_mps2": 0.4484860728765039
+      },
+      {
+        "bound_m": 12.821558504308882,
+        "eccentricity": 0.1,
+        "perigee_km": 80.0,
+        "sup_hddot_mps2": 1.0257246803447106
+      },
+      {
+        "bound_m": 0.770381651384966,
+        "eccentricity": 0.0,
+        "perigee_km": 150.0,
+        "sup_hddot_mps2": 0.061630532110797276
+      },
+      {
+        "bound_m": 1.3588039636937221,
+        "eccentricity": 0.005,
+        "perigee_km": 150.0,
+        "sup_hddot_mps2": 0.10870431709549777
+      },
+      {
+        "bound_m": 1.9472262760024561,
+        "eccentricity": 0.01,
+        "perigee_km": 150.0,
+        "sup_hddot_mps2": 0.1557781020801965
+      },
+      {
+        "bound_m": 3.1240709006199685,
+        "eccentricity": 0.02,
+        "perigee_km": 150.0,
+        "sup_hddot_mps2": 0.24992567204959748
+      },
+      {
+        "bound_m": 5.477760149854971,
+        "eccentricity": 0.04,
+        "perigee_km": 150.0,
+        "sup_hddot_mps2": 0.4382208119883977
+      },
+      {
+        "bound_m": 12.53882789755998,
+        "eccentricity": 0.1,
+        "perigee_km": 150.0,
+        "sup_hddot_mps2": 1.0031062318047983
+      },
+      {
+        "bound_m": 0.735972990697431,
+        "eccentricity": 0.0,
+        "perigee_km": 250.0,
+        "sup_hddot_mps2": 0.058877839255794484
+      },
+      {
+        "bound_m": 1.3067172654841475,
+        "eccentricity": 0.005,
+        "perigee_km": 250.0,
+        "sup_hddot_mps2": 0.1045373812387318
+      },
+      {
+        "bound_m": 1.8774615402708417,
+        "eccentricity": 0.01,
+        "perigee_km": 250.0,
+        "sup_hddot_mps2": 0.15019692322166733
+      },
+      {
+        "bound_m": 3.0189500898442745,
+        "eccentricity": 0.02,
+        "perigee_km": 250.0,
+        "sup_hddot_mps2": 0.24151600718754196
+      },
+      {
+        "bound_m": 5.3019271889910735,
+        "eccentricity": 0.04,
+        "perigee_km": 250.0,
+        "sup_hddot_mps2": 0.4241541751192859
+      },
+      {
+        "bound_m": 12.15085848643156,
+        "eccentricity": 0.1,
+        "perigee_km": 250.0,
+        "sup_hddot_mps2": 0.9720686789145248
+      }
+    ]
+  },
+  "stage_order": {
+    "height_minus_initial_m": {
+      "k2_input": 116.3127734689042,
+      "k3_input": -115.73415292799473,
+      "k4_input": 1.1612665504217148
+    },
+    "recorded_order": [
+      "k2 input y + dt/2 k1",
+      "k3 input y + dt/2 k2",
+      "k4 input y + dt k3"
+    ],
+    "state": "circular 180 km, i 51.6 deg, J2 + drag, dt 10 s"
+  },
+  "stiffness_thresholds": {
+    "bound_speed": {
+      "B100": {
+        "0.01": {
+          "lambda_dt_at_threshold": 0.009999999999999908,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 84596.11573594392
+        },
+        "0.1": {
+          "lambda_dt_at_threshold": 0.09999999999999597,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 70116.7597914731
+        },
+        "1.0": {
+          "lambda_dt_at_threshold": 0.9999999999999997,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 51724.77386192621
+        },
+        "2.785293563405282": {
+          "lambda_dt_at_threshold": 2.785293563405282,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 43820.779476079435
+        }
+      },
+      "B25.8": {
+        "0.01": {
+          "lambda_dt_at_threshold": 0.010000000000000009,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 92282.0718994342
+        },
+        "0.1": {
+          "lambda_dt_at_threshold": 0.09999999999999706,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 78996.122325464
+        },
+        "1.0": {
+          "lambda_dt_at_threshold": 1.0000000000000002,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 62842.26145531463
+        },
+        "2.785293563405282": {
+          "lambda_dt_at_threshold": 2.785293563405328,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 54506.73727267767
+        }
+      }
+    },
+    "circular_speed": {
+      "B100": {
+        "0.01": {
+          "lambda_dt_at_threshold": 0.009999999999999686,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 82337.14381719701
+        },
+        "0.1": {
+          "lambda_dt_at_threshold": 0.1000000000000001,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 67133.48614929448
+        },
+        "1.0": {
+          "lambda_dt_at_threshold": 1.0000000000000002,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 48614.80661172269
+        },
+        "2.785293563405282": {
+          "lambda_dt_at_threshold": 2.785293563405281,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 40881.38962378401
+        }
+      },
+      "B25.8": {
+        "0.01": {
+          "lambda_dt_at_threshold": 0.010000000000000002,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 90185.09165917509
+        },
+        "0.1": {
+          "lambda_dt_at_threshold": 0.09999999999999741,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 76445.47737908902
+        },
+        "1.0": {
+          "lambda_dt_at_threshold": 1.0000000000000215,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 59825.0849189536
+        },
+        "2.785293563405282": {
+          "lambda_dt_at_threshold": 2.7852935634052804,
+          "sign_changes_on_10m_grid": 1,
+          "threshold_m": 51244.545260572435
+        }
+      }
+    },
+    "lambda_dt_circular_at_80km_B100": 0.014966155077666268,
+    "lambda_dt_circular_at_90km_B25.8": 0.010350038817203828
+  },
+  "sufficient_stage_condition": {
+    "dt_s": 10.0,
+    "note": "Sufficient, not necessary. A sharper condition needs a restriction of the admissible initial states (for example the inward velocity), which is an owner decision and is not proposed here.",
+    "rows": [
+      {
+        "h_f_sufficient_at_least_m": 124456.68544493792,
+        "vehicle": "B25.8"
+      },
+      {
+        "h_f_sufficient_at_least_m": 118633.50894609134,
+        "vehicle": "B100"
+      },
+      {
+        "h_f_sufficient_at_least_m": 111511.96182423369,
+        "vehicle": "drag-free limit"
+      }
+    ]
+  },
+  "vectorised_height_check_max_abs_m": 1.862645149230957e-09
+}

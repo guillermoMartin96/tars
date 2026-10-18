@@ -273,10 +273,9 @@
     }
   },
   "missed_crossing": {
-    "analytic_estimate_formula": "a e n^2 dt^2 / 8 (curvature of h at perigee)",
-    "analytic_estimate_m": 4.165249347801579,
     "configuration": "perigee 250 km, apogee 800 km (spherical), i 51.6, J2 + drag, 2 orbits",
-    "max_dip_below_committed_states_m": 1.5643401648849249
+    "max_dip_below_committed_states_m": 1.5643401648849249,
+    "sampling": "one fixed phase (committed states at t = 0, 10, 20 ... s from perigee); 0.5 s inside each step. A measurement at that phase, not a bound: see t0_termination_results.json -> missed_crossing"
   },
   "rk4_divergence": {
     "first_step_with_height_error_above_m": {

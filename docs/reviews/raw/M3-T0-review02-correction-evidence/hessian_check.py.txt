@@ -1,0 +1,25 @@
+"""Independent check of the two geometric facts behind the F1 bound (scratch evidence)."""
+import math, sys, json
+import numpy as np
+sys.path.insert(0, ".")
+import t0_model as m, t0_termination as tt
+rng = np.random.default_rng(7)
+worst_ratio, worst_grad = -1.0, 0.0
+for _ in range(400):
+    lat, lon = rng.uniform(-math.pi/2, math.pi/2), rng.uniform(-math.pi, math.pi)
+    h0 = rng.choice([1e3, 2e4, 8e4, 2.5e5, 1e6])
+    r = m.geodetic_to_cartesian(lat, lon, h0)
+    f = lambda x: m.geodetic_iterative(x)[1]
+    e = 200.0
+    H = np.zeros((3, 3)); g = np.zeros(3)
+    for i in range(3):
+        ei = np.eye(3)[i]*e
+        g[i] = (f(r+ei)-f(r-ei))/(2*e)
+        for j in range(3):
+            ej = np.eye(3)[j]*e
+            H[i, j] = (f(r+ei+ej)-f(r+ei-ej)-f(r-ei+ej)+f(r-ei-ej))/(4*e*e)
+    lam = np.linalg.eigvalsh(0.5*(H+H.T)).max()
+    worst_ratio = max(worst_ratio, lam*(h0+tt.R_CURV_MIN))
+    worst_grad = max(worst_grad, np.linalg.norm(g-tt.normal(lat, lon)))
+out = {"max_eig_hessian_times_(h+b2/a)": worst_ratio, "max_|grad h - n|": worst_grad, "points": 400}
+print(json.dumps(out, indent=1))

@@ -29,9 +29,11 @@
 |---|---|
 | `t0_model.py` | The spike reference: constants, pinned table loader (digest-checked), GMAT's band rule, three geodetic algorithms (iterated to convergence; Vermeille 2002 closed form; a replica of GMAT's 1e-7 rad stopping rule, diagnostic), J2 and drag accelerations, RK4 with stage recording, DOP853 (rtol 1e-13) |
 | `t0_atmosphere.py` → `t0_atmosphere_results.json` | Every band boundary: value jump, slope change, band selected at the base and one ulp either side (km and m routes). Lower edge and above-top behaviour. Linearised drag stiffness against RK4's stability limit at dt = 10 s. One boundary crossing under RK4 (dt 20 … 1.25 s) against a reference restarted at the crossing, with a one-band smooth control |
-| `t0_decay.py` → `t0_decay_results.json` | 180 km decay with J2 and drag to the ground. RK4 stage heights against the committed states. Termination crossings at ten spike floors, located three ways (first committed state; scalar cubic Hermite on h with dh/dt = n̂·v; vector Hermite of r), against DOP853 event times. Spherical (impact) altitude at the crossing. Missed-crossing bound on an eccentric orbit. RK4 divergence near the ground |
+| `t0_decay.py` → `t0_decay_results.json` | 180 km decay with J2 and drag to the ground. RK4 stage heights against the committed states. Termination crossings at ten spike floors, located three ways (first committed state; scalar cubic Hermite on h with dh/dt = n̂·v; vector Hermite of r), against DOP853 event times. Spherical (impact) altitude at the crossing. Missed-crossing dip on an eccentric orbit at one fixed sampling phase (a measurement; the bound is in `t0_termination`). RK4 divergence near the ground |
 | `t0_geodetic.py` → `t0_geodetic_results.json` | Q-G2-7 candidate test points: exact answers (equator, axis), 640 forward-constructed points, the GeographicLib CartConvert(1) published examples, FC-4 axisymmetry |
 | `t0_frames.py` → `t0_frames_results.json` | FC-2, FC-3, FC-5, FC-6, FC-8 at spike level (signs, axisymmetry, v_rel direction) |
+| `t0_termination.py` → `t0_termination_results.json` | Added after Review 01 (M3T0-F1, F2, F3). Missed-crossing curvature bound (dip ≤ dt²/8 · sup ḧ⁺, ḧ ≤ n̂·a + \|v_t\|²/(h + b²/a)) against worst-case constructions and a sampling-phase × eccentricity × inclination sweep; exact drag-stiffness thresholds with the circular-speed proxy and with a bound on \|v_rel\| for every bound state; the reviewer's P1 counterexamples; a derived sufficient stage-domain condition; the RK4 stage order |
+| `check_review01.py` | Regression checks for M3T0-F1 … F4 (pytest, run explicitly; not collected by the project suite). Each recomputes a reviewer counterexample and tests the records and result files against it. All but one failed at `bdcaacf`; the one that passed there reproduces the stress input |
 | `t0_regression.py` → `t0_regression_results.json` | Perturbations disabled: the spike's RK4 against the committed M1 golden final state (5371 ticks); the J2 = 0 / no-drag acceleration against point mass, bitwise |
 | `t0_gmat.py` → `t0_gmat_results.json`, `gmat_runs/` | GMAT R2026a. Identity regression of the splice against the committed M1/M2 GMAT scripts and reports; the M3 exact-configuration form with perturbations off under the approved M1 GMAT gates; eight trajectory configurations and the M2-burn configuration against the spike; GMAT's Earth-fixed axis in TOE axes (two-orbit probe); density probes around every boundary; GMAT's behaviour below geodetic 0; GMAT's geodetic conversion; a decay stop at 80 km |
 
@@ -41,11 +43,12 @@
 From the repository root, with the locked environment (`uv sync --locked`):
 ```sh
 D=docs/science/experiments/m3-t0
-for x in atmosphere decay geodetic frames regression; do
+for x in atmosphere decay geodetic frames regression termination; do
   uv run --no-sync python $D/t0_$x.py $D/t0_${x}_results.json
 done
 uv run --no-sync python $D/t0_gmat.py --gmat-console "$HOME/Applications/GMAT R2026a/bin/GmatConsole" \
     --out $D/t0_gmat_results.json
+uv run --no-sync pytest -q -p no:cacheprovider $D/check_review01.py
 ```
 - **Reproducibility:** each command was run twice from a clean state. Every output, including all `gmat_runs/` files, was byte-identical between the runs (2026-10-18).
 - **Run times:** the Python scripts take seconds each; `t0_gmat.py` takes about 40 s.

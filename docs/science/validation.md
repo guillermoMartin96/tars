@@ -725,7 +725,7 @@ All 10 approved rejection codes are exercised.
 - **Observation on earlier records (not edited):** the VAL-0007 informational GMAT runs used the JGM-3 coefficient-file GM (3.986004415e14) and R (6378136.3 m), not their `Earth.Mu` override. The effect (~0.6 m) is negligible against those runs' 741–1 325 km results (DR-0025 §13).
 
 ## VAL-0019 — M3 T0: reference-configuration spike (J2, drag, atmosphere boundaries, geodetic height, frames; not a gate)
-- **Date:** 2026-10-18
+- **Date:** 2026-10-18. **Corrected after Review 01** (M3T0-F1 … F4; log at the end of this record).
 - **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15), T0 only.
 - **Revision:** branch `milestone-3-t0-reference-spike`, from `main` = `86df2c3` (PR #4 merge commit). No production file is changed: `src/`, `proof/`, `toolbox/`, `scenarios/` and `.github/` are identical to `86df2c3`.
 - **Code:** `docs/science/experiments/m3-t0/` (README there lists commands, versions and digests).
@@ -739,7 +739,7 @@ All 10 approved rejection codes are exercised.
 - **Results (spike inputs: C_d 2.2, A 15 m², m 850 kg unless noted; 53 700 s):**
   - **Regression, perturbations off:**
     - the T0 splice reproduces the committed M1 and all three M2 GMAT scripts byte for byte, and GMAT re-running them reproduces the committed reports byte for byte;
-    - the M3 exact-configuration form passes every approved M1 GMAT gate (GMAT vs Kepler 4.86e-6 m, limit 1e-4 m);
+    - the M3 exact-configuration form passes every approved M1 GMAT gate (GMAT vs Kepler 6.95e-6 m, limit 1e-4 m);
     - the spike's RK4 equals the M1 golden final state bitwise on the reference host.
   - **GMAT exact configurations against the J-ax-1 spike (final / maximum position difference):**
 
@@ -774,14 +774,22 @@ All 10 approved rejection codes are exercised.
     - converting km ↔ m never moves a boundary;
     - the M1 orbit's 250 km altitude is exactly a band base (GMAT computes 249.9999999999982 km), so geodetic-height missions on it change band 29–39 times in 10 orbits.
   - **RK4 (dt = 10 s):**
-    - linearised drag stiffness reaches RK4's stability limit at 50 km (B 25.8) and 40 km (B 100);
+    - linearised drag stiffness (circular-speed proxy) reaches RK4's stability limit below 51 244.55 m (B 25.8) and 40 881.39 m (B 100); exact thresholds for κ = 2.785, 1, 0.1 and 0.01, with the proxy and with a bound on |v_rel| valid for every bound state, are in `t0_termination_results.json` → `stiffness_thresholds` (the 5 km grid in `t0_atmosphere_results.json` understates them by up to 5 km);
     - in a 180 km decay the height error exceeds 100 m below 72 km, and RK4 diverges near 12 km;
     - one boundary crossing contributes an error visible only for dt ≤ 2.5 s (apparent order 4.0 from dt 20 to 5 s; 2.8 from 2.5 to 1.25 s; smooth control 3.9–4.0 throughout);
-    - the second RK4 stage sits about 117 m below the committed path in LEO.
+    - the third RK4 stage (the input of k3) sits about 117 m below the committed path in LEO; at the 180 km state the k2, k3 and k4 inputs sit at +116.31, −115.73 and +1.16 m from the initial height.
   - **Termination crossings:**
     - a cubic Hermite on h with dh/dt = n̂·v locates crossings to within the RK4 trajectory's own timing error (−0.07 … −0.41 s against DOP853); scalar and vector Hermite agree to 1.9e-4 s;
     - stopping at the first committed state is up to 9.3 s late and up to 3 km low;
-    - missed dips are ≤ 1.56 m measured, ≤ a e n² dt²/8 = 4.2 m derived, for 250 × 800 km.
+    - missed dips (a trajectory dipping below the lower committed height inside a step):
+      - 1.56 m at one fixed sampling phase (250 × 800 km), a measurement, not a bound;
+      - with the lowest point at mid-step, 4.99 m (Kepler) and 4.82 m (J2 + drag) for 250 × 800 km, and 0.45 m for a circular 250 km, 51.6° orbit;
+      - derived bound: dip ≤ (dt²/8) sup max(ḧ, 0), with ḧ ≤ n̂·a + |v_t|²/(h + b²/a). This gives 5.28 m, 5.11 m and 0.74 m in those three cases. Across 9 orbits, two-body and J2 + drag, and 40 sampling phases, it is never exceeded (smallest margin 0.025 m);
+      - two-body bound at dt = 10 s: 0.74–0.80 m for circular orbits (perigee 80–250 km), 5.30–5.61 m for e = 0.04 (`t0_termination_results.json` → `missed_crossing`).
+    - DR-0029 P1 (A4-b) admissibility is necessary, not sufficient:
+      - a P1-admissible stress input puts an RK4 stage at −28 km, and its committed state satisfies `reentry` and `impact` on the same tick;
+      - the circular-speed proxy underestimates λ for an e = 0.9 retrograde perigee (λ dt 0.0144 at κ 0.01);
+      - a derived sufficient condition for every stage to stay above 0 km at dt = 10 s is h_f ≥ 111.5 km drag-free, 118.6 km at B 100 and 124.5 km at B 25.8, for unrestricted bound states (`t0_termination_results.json`).
   - **Geodetic height:**
     - iterative and Vermeille (2002) inverses reproduce 640 forward-constructed points to ≤ 3e-9 m;
     - the GeographicLib examples agree within their 1 cm print rounding;
@@ -792,12 +800,14 @@ All 10 approved rejection codes are exercised.
     - FC-8: v_rel departs from v by up to 2.9° at 51.6° and is parallel to v at the highest-latitude point, so a FC-8 test must not sample only there.
 - **Spike digests (sha256, as committed with this record):**
   - `t0_atmosphere.py` `cccb0efe7f74810004cc2ca6ee80815c979698fa4cee2e107318e6dac0e53cad`
-  - `t0_decay.py` `9d206145687b3a11b8182f31cc9696a8e919c786054203701370eec89c777260`
+  - `t0_decay.py` `0b0512f9b349e35bf20d3352c36d083f642fc073033278f3993321d9e2a43415` (corrected after Review 01; was `9d206145…7260`)
   - `t0_frames.py` `aa6a0997da255b7fb24a192c1d35be52fed48b483b49be3ca19981815633b2ec`
   - `t0_geodetic.py` `0e7a4044027ee3bf07f10c9176543959022ad2cfb2c7b157d880e3f40ee18d30`
   - `t0_gmat.py` `204d47c12fd4b7311fc056f894001f6c84bc827818456c23c461664d1a533e23`
   - `t0_model.py` `1d70e86c25546a91365a5ed101ad0d390bc9e507862ca4eacbfa78fe2160b09d`
   - `t0_regression.py` `06ac4c0bdf82aa442a111fc380cf94457322e37a2aae72384afda3cfe93f413c`
+  - `t0_termination.py` `2cb1a0383e917c1a0fd341f7f55dcf0331d02c61a658572c4a2ba29dbc47aa0a` (added after Review 01)
+  - `check_review01.py` `6e40cd618d915be4f33c661b88af22dda880d23d1753e35998c996e54d323b1b` (Review 01 regression checks; added after Review 01)
   - `data/EarthExponentialAtmosphereData.txt` `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`
 - **Classification:** spike evidence for the T0 proposals (DR-0029). Model and frame agreement are exact where attributed. One configuration sensitivity is unresolved and escalated.
 - **J-ax-1 limitation, quantified against GMAT's real Earth over 53 700 s:**
@@ -806,3 +816,11 @@ All 10 approved rejection codes are exercised.
 
   These add to the precession/nutation limitation already recorded in DR-0028 (117 m against a 2026 mean-pole model; 123.5 m against GMAT in EarthMJ2000Eq axes).
 - **Status:** informational. No gate, no threshold, no reference created. Nothing in `toolbox/references` was regenerated.
+<!-- review01-correction-log -->
+- **Correction log (Review 01, 2026-10-18; "TARS M3 T0 — Review 01 Correction Authorization").** The superseded wording is preserved at `bdcaacf`.
+  - F4: the M3-form residual, quoted from a superseded run, is replaced by the committed 6.95e-6 m.
+  - F2: the grid stiffness heights are replaced by exact thresholds, and the P1 properties are added.
+  - F3: the inward stage is the third, not the second.
+  - F1: the fixed-phase formula, which had been presented as a bound, is replaced by the derived bound and its sweeps.
+  - `t0_decay.py` now labels its missed-crossing output as a single-phase measurement. Its other outputs are unchanged.
+<!-- /review01-correction-log -->

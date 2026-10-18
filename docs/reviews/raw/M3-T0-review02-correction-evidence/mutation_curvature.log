@@ -1,0 +1,8 @@
+Mutation of t0_termination.py (scratch only, reverted; file digest after revert 2cb1a0383e917c1a0fd341f7f55dcf0331d02c61a658572c4a2ba29dbc47aa0a):
+  R_CURV_MIN = m.B_WGS84**2 / m.A_WGS84   ->   R_CURV_MIN = m.A_WGS84   (sphere curvature; drops the ellipsoid term)
+Result: missed_crossing.all_bounds_hold = False
+  case: (dip_m, mutant bound_m)
+  kepler_250x800_i51.6_perigee_midstep      (4.9876, 4.5187)
+  j2drag_250x800_i51.6_perigee_midstep      (4.8171, 4.3475)
+  kepler_circular250_i51.6_equator_midstep  (0.4516, 0.0006)
+  j2drag_circular250_i51.6_equator_midstep  (0.2811, 0.0)

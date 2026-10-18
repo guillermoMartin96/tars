@@ -2,6 +2,7 @@
 
 **Status:** T0 experimental work and validation complete at `294e1f5`. **The independent Codex review has not started:** the copy of I-15 received by the implementer ends at the start of §8, so §8 has not been read. **No decision is taken here; T1 and later are not authorized.**  
 **Status update (2026-10-18, append-only):** independent **Review 01 (Codex, at `ca84986`): REQUEST_CHANGES**: M3T0-F1 and F2 (MAJOR), F3 and F4 (MINOR), F5 (NOTE), all ACCEPTED and verified, **not applied**; plus implementer item IM-1. Record: `docs/reviews/M3-T0-review-01.md`. Owner decision matrix: `M3-T0-decision-matrix.md`. T0 is not accepted. Corrections and any further review round await authorization.  
+**Status update (2026-10-18, append-only):** under "TARS M3 T0 — Review 01 Correction Authorization", F1–F4 are corrected in the T0 records and experiments, with regression checks (`docs/science/experiments/m3-t0/check_review01.py`); dispositions in `docs/reviews/M3-T0-review-01.md`. IM-1 is outside that scope and unchanged. Review 02 follows. T0 is not accepted.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 
@@ -72,8 +73,8 @@ Full record: VAL-0019. Code and data: `docs/science/experiments/m3-t0/`. Highlig
   - Every boundary has been exercised, and GMAT's band rule and densities are confirmed around all 27 boundaries.
   - GMAT fails closed below 0 km.
   - The M1 250 km altitude is exactly a band base.
-  - RK4 stiffness: unstable at 50 km for B 25.8 at dt = 10 s.
-  - The second RK4 stage sits 117 m below the committed path.
+  - RK4 stiffness: unstable below 51.2 km for B 25.8 at dt = 10 s (exact threshold 51 244.55 m; corrected after Review 01 F2 from the 5 km grid value).
+  - The third RK4 stage (the input of k3) sits 117 m below the committed path (corrected after Review 01 F3).
   - A Hermite crossing location is accurate to the RK4 error.
   - Geodetic height has been validated against exact, published and GMAT points.
   - v_rel conventions are verified (FC-2, FC-5, FC-8).

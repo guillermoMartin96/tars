@@ -89,3 +89,26 @@
 - A bound must be derived over the whole stated domain and tested at its worst case (here, the sampling phase), not inferred from one sampled run.
 - Before recording a number, re-read it from the final committed artifact. Never quote a value from a superseded run.
 - When a rule admits a set of inputs, state whether it is necessary or sufficient for each claimed property, and try to construct an admissible counterexample before claiming sufficiency.
+
+## Dispositions after the correction pass (appended 2026-10-18)
+**Authority:** "TARS M3 T0 — Review 01 Correction Authorization" (Tech Lead, 2026-10-18), which authorizes correcting the two MAJOR and two MINOR findings, then Review 02. The findings and the verification above are unchanged.
+
+**Regression checks:** `docs/science/experiments/m3-t0/check_review01.py` (12 checks).
+- Each check recomputes the reviewer's counterexample independently, then tests the records and result files against it.
+- At `bdcaacf`, 11 of the 12 fail, each for the finding's own reason. The one that passes there reproduces the stress input itself.
+- After the corrections all 12 pass.
+- Evidence: `docs/reviews/raw/M3-T0-review02-correction-evidence/`.
+
+| ID | Root cause | Correction | Regression evidence | Disposition |
+|---|---|---|---|---|
+| M3T0-F1 | A sample maximum at one fixed phase was presented with an estimate (a e n² dt²/8) that drops the (1 − e)⁻² factor and the ellipsoid's curvature, and was called a bound | **Derived bound:** dip ≤ (dt²/8) sup max(ḧ, 0), with ḧ ≤ n̂·a + \|v_t\|²/(h + b²/a) (distance to a convex surface; b²/a is the smallest radius of curvature), plus a two-body bound over a whole orbit (new `t0_termination.py`). **Measurements:** worst-case mid-step constructions, and a sweep of 9 orbits × {two-body, J2 + drag} × 40 sampling phases. `t0_decay.py` relabels 1.56 m as a single-phase measurement. DR-0029 P2, VAL-0019, matrix and README corrected | Bound 5.28 / 5.11 / 0.74 m against dips 4.99 / 4.82 / 0.45 m. Never exceeded in the sweep (smallest margin 0.025 m). The finite-difference Hessian of h is ≤ 1/(h + b²/a) at 400 random points (ratio ≤ 0.9999993). **Mutation:** replacing b²/a by a, i.e. dropping the ellipsoid curvature, breaks the bound in all four worst cases | ACCEPTED; **corrected by the implementer**; resolution to be assessed by Review 02 |
+| M3T0-F2 | Necessary conditions were presented as sufficient; one decay case was generalised; a grid value was quoted as a threshold; a speed proxy was used as if it were a bound | **Exact thresholds** for κ = 2.785, 1, 0.1 and 0.01 at B 25.8 and 100. **Speed term made explicit:** v_c (proxy) or V_b = √(2μ/(b + h)) + ω_E(a + h), a bound for every bound state. The implementer's recommendation is now V_b; the owner chooses. A4-b is stated as necessary, not sufficient, with the reviewer's counterexamples reproduced and a derived sufficient stage-domain condition (111.5 / 118.6 / 124.5 km at dt 10 s for unrestricted bound states); a sharper condition needs an owner-chosen initial-state restriction, which is not proposed. P3 items 1–2, P4's analysis and P5's 0–25 km row corrected; decay-case statements limited to that case | κ 0.01 threshold 90 185.09 m reproduced (λdt(90 km) = 0.01035). The stress input stage at −28 000 m fails closed, and its committed state satisfies `reentry` and `impact` together. The e 0.9 retrograde λdt 0.01438 is covered by V_b | ACCEPTED; **corrected by the implementer**; resolution to be assessed by Review 02 |
+| M3T0-F3 | Stage misnamed: the stage list is recorded in the order of the k2, k3 and k4 inputs, and the inward one is k3's | "Third stage (the input of k3)" in DR-0029 P4, VAL-0019 and the T0 report. Stage offsets recorded (`termination` → `stage_order`) | +116.31 / −115.73 / +1.16 m at the 180 km state | ACCEPTED; **corrected by the implementer**; resolution to be assessed by Review 02 |
+| M3T0-F4 | A value from a superseded run (GMAT's default `NutationUpdateInterval`) was not re-read from the final artifact | 6.95e-6 m quoted in DR-0029 P6 and VAL-0019, with its JSON path | The check compares the quoted text with the committed JSON | ACCEPTED; **corrected by the implementer**; resolution to be assessed by Review 02 |
+| M3T0-F5 | — | Handled in the decision matrix (unchanged) | — | ACCEPTED (no change) |
+| IM-1 | — | **Not corrected:** outside the authorized scope (the two MAJOR and two MINOR reviewer findings). The "0.99 m" figure in DR-0029 P6 remains unsupported by a committed artifact | — | OPEN; awaits authorization |
+
+**Not changed:**
+- No approved physics assumption, constant, frame, threshold or M1/M2 contract.
+- No file outside `docs/`.
+- No option identifier or owner decision in DR-0029, which stays OPEN.
