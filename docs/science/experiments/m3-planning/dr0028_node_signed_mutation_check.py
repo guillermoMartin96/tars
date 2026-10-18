@@ -51,6 +51,10 @@ reassociated fallback, another component) is never evidence. Predicate families:
   script must observe the whole schedule;
 - injected: wrap() or line_of_nodes_exact() is edited; it is observed in the exact properties.
 A direct (non built-in) predicate must not be met by the unmutated script.
+Scope: the probe establishes that each declared mutation, as written, produces its intended
+defect; it does not defend against a copy written to detect the probe (for example by testing the
+identity of the formula it is passed). The mutations are a fixed list declared here, and none
+inspects its caller.
 
 A built-in mutant counts as "not rejected" (the evidence that an assertion was removed) only if
 it completed without an exception, its designated checks stayed silent, and its intended defect
