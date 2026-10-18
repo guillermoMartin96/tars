@@ -1,0 +1,1363 @@
+{
+  "axis": {
+    "axis_motion_over_run_arcsec": 0.6899359996404745,
+    "basis": "1, t/t_end, (t/t_end)^2, cos(omega_E t), sin(omega_E t)",
+    "coefficients": [
+      [
+        8.323405651673437e-10,
+        -4.240396661557108e-09,
+        1.0000000000248204
+      ],
+      [
+        4.1032868349810607e-07,
+        -1.156920403409323e-07,
+        -3.107230576165721e-10
+      ],
+      [
+        1.01353991436315e-09,
+        2.6906360781635954e-08,
+        3.16573275762519e-10
+      ],
+      [
+        -1.4837895532777222e-06,
+        -8.119683150567194e-07,
+        -1.7086606181562866e-11
+      ],
+      [
+        8.108571767881475e-07,
+        -1.483909971242112e-06,
+        4.7966085323315774e-11
+      ]
+    ],
+    "fit_rms_residual_m": 7.798189467053526e-05,
+    "norm_minus_1_at_start": 2.4820367983124925e-11,
+    "polar_motion_circle_radius_arcsec": 0.34883769837750866,
+    "rows": 896,
+    "t_end_s": 53700.0,
+    "tilt_from_z_at_end_arcsec": 0.3658728396019529,
+    "tilt_from_z_at_start_arcsec": 0.3491462831501514,
+    "u_end": [
+      9.060308757824078e-07,
+      1.5250187744701716e-06,
+      0.9999999999984268
+    ],
+    "u_start": [
+      -1.4829572126989615e-06,
+      -8.162087117107947e-07,
+      0.9999999999985674
+    ]
+  },
+  "burn": {
+    "burn_window_s": [
+      600.0,
+      677.3
+    ],
+    "description": "M2 prograde burn (490 N, 312 s, 77.3 s at t = 600 s; 1000 + 300 kg) with J2 + drag geodetic, A 15 m^2 (spike test value), Cd 2.2",
+    "final_mass_gmat_kg": 1287.6205798080466,
+    "final_pos_diff_m": 0.23966581699361514,
+    "max_mass_diff_kg": 2.8790054784622043e-09,
+    "max_pos_diff_m": 0.9351562460581636,
+    "rows": 1095
+  },
+  "decay": {
+    "final_pos_diff_m": 179.68820369048322,
+    "gmat_altitude_at_stop_m": 80000.0000340624,
+    "gmat_minus_spike_s": -0.023397243152430747,
+    "gmat_stop_elapsed_s": 20640.94144060509,
+    "spike_crossing_s": 20640.96483784824
+  },
+  "density_probes": {
+    "below_zero_probe": {
+      "errors": [
+        "Atmosphere model exception: Exponential atmosphere: Position vector is inside central body",
+        "Console Application Execution Failed: Moderator::RunMission failed"
+      ],
+      "failed": true
+    },
+    "max_abs_rel_diff_vs_spike_band_rule": 0.0013598509623429234,
+    "method": "drag/no-drag pair, equatorial Earth-fixed state, |v_rel| = 7 km/s eastward",
+    "probes": [
+      {
+        "gmat_altitude_km": 0.4999999994670361,
+        "gmat_rho": 1.1433535664824832,
+        "h_km": 0.5,
+        "rel_diff_vs_lower_band_formula": null,
+        "rel_diff_vs_spike_band_rule": -1.439728511964944e-07
+      },
+      {
+        "gmat_altitude_km": 23.999999999490683,
+        "gmat_rho": 0.044696468316858286,
+        "h_km": 24.0,
+        "rel_diff_vs_lower_band_formula": null,
+        "rel_diff_vs_spike_band_rule": -1.43191367873996e-07
+      },
+      {
+        "gmat_altitude_km": 24.999999999491592,
+        "gmat_rho": 0.03893697941097825,
+        "h_km": 25.0,
+        "rel_diff_vs_lower_band_formula": -1.444448410881094e-07,
+        "rel_diff_vs_spike_band_rule": -0.0013598509623429234
+      },
+      {
+        "gmat_altitude_km": 25.999999999492502,
+        "gmat_rho": 0.03330807772572766,
+        "h_km": 26.0,
+        "rel_diff_vs_lower_band_formula": -0.01803004522406848,
+        "rel_diff_vs_spike_band_rule": -1.4216195665106568e-07
+      },
+      {
+        "gmat_altitude_km": 28.99999999949432,
+        "gmat_rho": 0.020765326157146487,
+        "h_km": 29.0,
+        "rel_diff_vs_lower_band_formula": -0.07398027077922897,
+        "rel_diff_vs_spike_band_rule": -1.4330747888369189e-07
+      },
+      {
+        "gmat_altitude_km": 29.99999999949796,
+        "gmat_rho": 0.01773924586007984,
+        "h_km": 30.0,
+        "rel_diff_vs_lower_band_formula": -1.431406025931281e-07,
+        "rel_diff_vs_spike_band_rule": -4.251070575855831e-05
+      },
+      {
+        "gmat_altitude_km": 30.99999999949796,
+        "gmat_rho": 0.015274213934955965,
+        "h_km": 31.0,
+        "rel_diff_vs_lower_band_formula": 0.007922773729372112,
+        "rel_diff_vs_spike_band_rule": -1.4235546297314272e-07
+      },
+      {
+        "gmat_altitude_km": 38.999999999503416,
+        "gmat_rho": 0.00461319053733269,
+        "h_km": 39.0,
+        "rel_diff_vs_lower_band_formula": 0.07324435672050167,
+        "rel_diff_vs_spike_band_rule": -1.4361713107646779e-07
+      },
+      {
+        "gmat_altitude_km": 39.999999999506144,
+        "gmat_rho": 0.00397197777926177,
+        "h_km": 40.0,
+        "rel_diff_vs_lower_band_formula": 9.173225623548831e-08,
+        "rel_diff_vs_spike_band_rule": -5.594344972159604e-06
+      },
+      {
+        "gmat_altitude_km": 40.999999999505235,
+        "gmat_rho": 0.0034795027939469947,
+        "h_km": 41.0,
+        "rel_diff_vs_lower_band_formula": 0.017431322625238943,
+        "rel_diff_vs_spike_band_rule": -1.419840791605509e-07
+      },
+      {
+        "gmat_altitude_km": 48.99999999951251,
+        "gmat_rho": 0.0012066498981910731,
+        "h_km": 49.0,
+        "rel_diff_vs_lower_band_formula": 0.16822547047730496,
+        "rel_diff_vs_spike_band_rule": -1.4233242895400622e-07
+      },
+      {
+        "gmat_altitude_km": 49.99999999951433,
+        "gmat_rho": 0.0010570348156698213,
+        "h_km": 50.0,
+        "rel_diff_vs_lower_band_formula": -1.4241753609756103e-07,
+        "rel_diff_vs_spike_band_rule": 3.293819282990107e-05
+      },
+      {
+        "gmat_altitude_km": 50.99999999951524,
+        "gmat_rho": 0.0009381281634795059,
+        "h_km": 51.0,
+        "rel_diff_vs_lower_band_formula": 0.013129144691522487,
+        "rel_diff_vs_spike_band_rule": -1.4244856572087627e-07
+      },
+      {
+        "gmat_altitude_km": 58.999999999521606,
+        "gmat_rho": 0.00036121033100924334,
+        "h_km": 59.0,
+        "rel_diff_vs_lower_band_formula": 0.1248606039824538,
+        "rel_diff_vs_spike_band_rule": -1.4264210668191168e-07
+      },
+      {
+        "gmat_altitude_km": 59.999999999522515,
+        "gmat_rho": 0.0003205881106728584,
+        "h_km": 60.0,
+        "rel_diff_vs_lower_band_formula": -1.4190041186523672e-07,
+        "rel_diff_vs_spike_band_rule": -3.70846136668046e-05
+      },
+      {
+        "gmat_altitude_km": 60.999999999524334,
+        "gmat_rho": 0.0002816202880577243,
+        "h_km": 61.0,
+        "rel_diff_vs_lower_band_formula": -0.010241554942718056,
+        "rel_diff_vs_spike_band_rule": -1.4192233832588386e-07
+      },
+      {
+        "gmat_altitude_km": 68.99999999953161,
+        "gmat_rho": 9.983154543702416e-05,
+        "h_km": 69.0,
+        "rel_diff_vs_lower_band_formula": -0.08875515858372707,
+        "rel_diff_vs_spike_band_rule": -1.4211588805768116e-07
+      },
+      {
+        "gmat_altitude_km": 69.99999999953343,
+        "gmat_rho": 8.76936760162366e-05,
+        "h_km": 70.0,
+        "rel_diff_vs_lower_band_formula": -1.4362776479259765e-07,
+        "rel_diff_vs_spike_band_rule": -7.210927894418795e-05
+      },
+      {
+        "gmat_altitude_km": 70.99999999953252,
+        "gmat_rho": 7.528091796095655e-05,
+        "h_km": 71.0,
+        "rel_diff_vs_lower_band_formula": -0.022726581638184973,
+        "rel_diff_vs_spike_band_rule": -1.4227072275829755e-07
+      },
+      {
+        "gmat_altitude_km": 78.9999999995407,
+        "gmat_rho": 2.2190541608450687e-05,
+        "h_km": 79.0,
+        "rel_diff_vs_lower_band_formula": -0.18736555570484326,
+        "rel_diff_vs_spike_band_rule": -1.434161926994193e-07
+      },
+      {
+        "gmat_altitude_km": 79.9999999995398,
+        "gmat_rho": 1.9048170824706815e-05,
+        "h_km": 80.0,
+        "rel_diff_vs_lower_band_formula": -1.4262298131395568e-07,
+        "rel_diff_vs_spike_band_rule": -9.601970042960595e-05
+      },
+      {
+        "gmat_altitude_km": 80.9999999995407,
+        "gmat_rho": 1.603258853438891e-05,
+        "h_km": 81.0,
+        "rel_diff_vs_lower_band_formula": -0.019460861955482023,
+        "rel_diff_vs_spike_band_rule": -1.426190463504895e-07
+      },
+      {
+        "gmat_altitude_km": 88.99999999954889,
+        "gmat_rho": 4.0352781594420455e-06,
+        "h_km": 89.0,
+        "rel_diff_vs_lower_band_formula": -0.16275653472994644,
+        "rel_diff_vs_spike_band_rule": -1.4285130289781733e-07
+      },
+      {
+        "gmat_altitude_km": 89.99999999955071,
+        "gmat_rho": 3.396113577448903e-06,
+        "h_km": 90.0,
+        "rel_diff_vs_lower_band_formula": -1.4174791962417999e-07,
+        "rel_diff_vs_spike_band_rule": 3.344447847553056e-05
+      },
+      {
+        "gmat_altitude_km": 90.99999999955162,
+        "gmat_rho": 2.8201599206798896e-06,
+        "h_km": 91.0,
+        "rel_diff_vs_lower_band_formula": -0.013305426290948552,
+        "rel_diff_vs_spike_band_rule": -1.4201541498337633e-07
+      },
+      {
+        "gmat_altitude_km": 98.99999999955708,
+        "gmat_rho": 6.37856032405332e-07,
+        "h_km": 99.0,
+        "rel_diff_vs_lower_band_formula": -0.11333035516502088,
+        "rel_diff_vs_spike_band_rule": -1.4141176585269477e-07
+      },
+      {
+        "gmat_altitude_km": 99.99999999956071,
+        "gmat_rho": 5.296985481345982e-07,
+        "h_km": 100.0,
+        "rel_diff_vs_lower_band_formula": -1.4349844379424326e-07,
+        "rel_diff_vs_spike_band_rule": -2.74092014684868e-06
+      },
+      {
+        "gmat_altitude_km": 100.9999999995598,
+        "gmat_rho": 4.46819998716742e-07,
+        "h_km": 101.0,
+        "rel_diff_vs_lower_band_formula": 0.01577528507322601,
+        "rel_diff_vs_spike_band_rule": -1.4156661776176804e-07
+      },
+      {
+        "gmat_altitude_km": 108.99999999956708,
+        "gmat_rho": 1.1453919696461418e-07,
+        "h_km": 109.0,
+        "rel_diff_vs_lower_band_formula": 0.15125158751045364,
+        "rel_diff_vs_spike_band_rule": -1.4442256168756273e-07
+      },
+      {
+        "gmat_altitude_km": 109.99999999956708,
+        "gmat_rho": 9.66177292457441e-08,
+        "h_km": 110.0,
+        "rel_diff_vs_lower_band_formula": -1.4255516267436263e-07,
+        "rel_diff_vs_spike_band_rule": 8.000461385049285e-05
+      },
+      {
+        "gmat_altitude_km": 110.99999999956799,
+        "gmat_rho": 8.418341729077147e-08,
+        "h_km": 111.0,
+        "rel_diff_vs_lower_band_formula": 0.03292067776866525,
+        "rel_diff_vs_spike_band_rule": -1.4541328419159782e-07
+      },
+      {
+        "gmat_altitude_km": 118.99999999957618,
+        "gmat_rho": 2.7980972868235914e-08,
+        "h_km": 119.0,
+        "rel_diff_vs_lower_band_formula": 0.33931181000033583,
+        "rel_diff_vs_spike_band_rule": -1.4378022372696364e-07
+      },
+      {
+        "gmat_altitude_km": 119.999999999578,
+        "gmat_rho": 2.438188864451466e-08,
+        "h_km": 120.0,
+        "rel_diff_vs_lower_band_formula": -1.419750577102974e-07,
+        "rel_diff_vs_spike_band_rule": 7.746696122468144e-05
+      },
+      {
+        "gmat_altitude_km": 120.999999999578,
+        "gmat_rho": 2.1937550477412796e-08,
+        "h_km": 121.0,
+        "rel_diff_vs_lower_band_formula": 0.03256213658399587,
+        "rel_diff_vs_spike_band_rule": -1.4230202360909772e-07
+      },
+      {
+        "gmat_altitude_km": 128.99999999958254,
+        "gmat_rho": 9.42809787422977e-09,
+        "h_km": 129.0,
+        "rel_diff_vs_lower_band_formula": 0.33510642696356263,
+        "rel_diff_vs_spike_band_rule": -1.4173710705112086e-07
+      },
+      {
+        "gmat_altitude_km": 129.99999999958436,
+        "gmat_rho": 8.483568596955674e-09,
+        "h_km": 130.0,
+        "rel_diff_vs_lower_band_formula": -1.42028975580466e-07,
+        "rel_diff_vs_spike_band_rule": -5.084901512564244e-05
+      },
+      {
+        "gmat_altitude_km": 130.99999999958527,
+        "gmat_rho": 7.838464221910403e-09,
+        "h_km": 131.0,
+        "rel_diff_vs_lower_band_formula": 0.026828346473964038,
+        "rel_diff_vs_spike_band_rule": -1.435636654001371e-07
+      },
+      {
+        "gmat_altitude_km": 138.99999999959437,
+        "gmat_rho": 4.161731355462822e-09,
+        "h_km": 139.0,
+        "rel_diff_vs_lower_band_formula": 0.26854232610216044,
+        "rel_diff_vs_spike_band_rule": -1.4554505844976973e-07
+      },
+      {
+        "gmat_altitude_km": 139.99999999959527,
+        "gmat_rho": 3.845071557143219e-09,
+        "h_km": 140.0,
+        "rel_diff_vs_lower_band_formula": -1.4319905228266094e-07,
+        "rel_diff_vs_spike_band_rule": 1.8610440368993508e-05
+      },
+      {
+        "gmat_altitude_km": 140.99999999959527,
+        "gmat_rho": 3.6141262413673312e-09,
+        "h_km": 141.0,
+        "rel_diff_vs_lower_band_formula": 0.017345449451529937,
+        "rel_diff_vs_spike_band_rule": -1.412882929541226e-07
+      },
+      {
+        "gmat_altitude_km": 148.99999999960164,
+        "gmat_rho": 2.202214421801252e-09,
+        "h_km": 149.0,
+        "rel_diff_vs_lower_band_formula": 0.16756661332935252,
+        "rel_diff_vs_spike_band_rule": -1.4330839215315194e-07
+      },
+      {
+        "gmat_altitude_km": 149.99999999960164,
+        "gmat_rho": 2.069982329943164e-09,
+        "h_km": 150.0,
+        "rel_diff_vs_lower_band_formula": -1.429117562068427e-07,
+        "rel_diff_vs_spike_band_rule": -8.536259341052066e-06
+      },
+      {
+        "gmat_altitude_km": 150.99999999960164,
+        "gmat_rho": 1.980104074148002e-09,
+        "h_km": 151.0,
+        "rel_diff_vs_lower_band_formula": 0.0176871280321802,
+        "rel_diff_vs_spike_band_rule": -1.4251122826269835e-07
+      },
+      {
+        "gmat_altitude_km": 178.9999999996253,
+        "gmat_rho": 5.711952181471681e-10,
+        "h_km": 179.0,
+        "rel_diff_vs_lower_band_formula": 0.6623169376784597,
+        "rel_diff_vs_spike_band_rule": -1.434014773593617e-07
+      },
+      {
+        "gmat_altitude_km": 179.99999999962893,
+        "gmat_rho": 5.463894401719711e-10,
+        "h_km": 180.0,
+        "rel_diff_vs_lower_band_formula": -1.4217693355966787e-07,
+        "rel_diff_vs_spike_band_rule": -1.9326185997314838e-05
+      },
+      {
+        "gmat_altitude_km": 180.99999999962893,
+        "gmat_rho": 5.283328156697308e-10,
+        "h_km": 181.0,
+        "rel_diff_vs_lower_band_formula": 0.01085181087758147,
+        "rel_diff_vs_spike_band_rule": -1.4260431335788581e-07
+      },
+      {
+        "gmat_altitude_km": 198.9999999996444,
+        "gmat_rho": 2.8843823052607427e-10,
+        "h_km": 199.0,
+        "rel_diff_vs_lower_band_formula": 0.22719484302549686,
+        "rel_diff_vs_spike_band_rule": -1.423877203921009e-07
+      },
+      {
+        "gmat_altitude_km": 199.99999999964348,
+        "gmat_rho": 2.7890081285601687e-10,
+        "h_km": 200.0,
+        "rel_diff_vs_lower_band_formula": -1.4283249405444565e-07,
+        "rel_diff_vs_spike_band_rule": 2.9145070523650674e-06
+      },
+      {
+        "gmat_altitude_km": 200.9999999996462,
+        "gmat_rho": 2.714838370571004e-10,
+        "h_km": 201.0,
+        "rel_diff_vs_lower_band_formula": 0.00669330212125363,
+        "rel_diff_vs_spike_band_rule": -1.4330103859094834e-07
+      },
+      {
+        "gmat_altitude_km": 248.99999999968531,
+        "gmat_rho": 7.446106799638727e-11,
+        "h_km": 249.0,
+        "rel_diff_vs_lower_band_formula": 0.3868468297987997,
+        "rel_diff_vs_spike_band_rule": -1.4138967019405868e-07
+      },
+      {
+        "gmat_altitude_km": 249.99999999968713,
+        "gmat_rho": 7.248110186669186e-11,
+        "h_km": 250.0,
+        "rel_diff_vs_lower_band_formula": -1.4323167307761508e-07,
+        "rel_diff_vs_spike_band_rule": 1.5202355020171865e-05
+      },
+      {
+        "gmat_altitude_km": 250.99999999968622,
+        "gmat_rho": 7.090597435479965e-11,
+        "h_km": 251.0,
+        "rel_diff_vs_lower_band_formula": 0.004991650036753059,
+        "rel_diff_vs_spike_band_rule": -1.4234166922921787e-07
+      },
+      {
+        "gmat_altitude_km": 298.99999999972715,
+        "gmat_rho": 2.4716600458217316e-11,
+        "h_km": 299.0,
+        "rel_diff_vs_lower_band_formula": 0.27727108305014636,
+        "rel_diff_vs_spike_band_rule": -1.4138230808313779e-07
+      },
+      {
+        "gmat_altitude_km": 299.99999999972715,
+        "gmat_rho": 2.4179841100710932e-11,
+        "h_km": 300.0,
+        "rel_diff_vs_lower_band_formula": -1.4406995307858494e-07,
+        "rel_diff_vs_spike_band_rule": -6.571517331188659e-06
+      },
+      {
+        "gmat_altitude_km": 300.99999999972715,
+        "gmat_rho": 2.3733290538487885e-11,
+        "h_km": 301.0,
+        "rel_diff_vs_lower_band_formula": 0.0033206348904808447,
+        "rel_diff_vs_spike_band_rule": -1.4313146179389946e-07
+      },
+      {
+        "gmat_altitude_km": 348.99999999976535,
+        "gmat_rho": 9.697071218661592e-12,
+        "h_km": 349.0,
+        "rel_diff_vs_lower_band_formula": 0.1760247616927848,
+        "rel_diff_vs_spike_band_rule": -1.4392123726114647e-07
+      },
+      {
+        "gmat_altitude_km": 349.99999999976535,
+        "gmat_rho": 9.51792563896416e-12,
+        "h_km": 350.0,
+        "rel_diff_vs_lower_band_formula": -1.4216371702069353e-07,
+        "rel_diff_vs_spike_band_rule": -7.812674494678262e-06
+      },
+      {
+        "gmat_altitude_km": 350.99999999976535,
+        "gmat_rho": 9.341082714371494e-12,
+        "h_km": 351.0,
+        "rel_diff_vs_lower_band_formula": -0.0001079230410798715,
+        "rel_diff_vs_spike_band_rule": -1.447570991963687e-07
+      },
+      {
+        "gmat_altitude_km": 398.99999999980173,
+        "gmat_rho": 3.795535567433908e-12,
+        "h_km": 399.0,
+        "rel_diff_vs_lower_band_formula": -0.005633819391092532,
+        "rel_diff_vs_spike_band_rule": -1.4193248187854834e-07
+      },
+      {
+        "gmat_altitude_km": 399.99999999980446,
+        "gmat_rho": 3.724986004626175e-12,
+        "h_km": 400.0,
+        "rel_diff_vs_lower_band_formula": -1.4252438740314233e-07,
+        "rel_diff_vs_spike_band_rule": -3.757147335581301e-06
+      },
+      {
+        "gmat_altitude_km": 400.99999999980355,
+        "gmat_rho": 3.6618814541795705e-12,
+        "h_km": 401.0,
+        "rel_diff_vs_lower_band_formula": 0.001677672478353598,
+        "rel_diff_vs_spike_band_rule": -1.4284575666767552e-07
+      },
+      {
+        "gmat_altitude_km": 448.99999999984175,
+        "gmat_rho": 1.6123207272293636e-12,
+        "h_km": 449.0,
+        "rel_diff_vs_lower_band_formula": 0.08542370771105512,
+        "rel_diff_vs_spike_band_rule": -1.4355815358690904e-07
+      },
+      {
+        "gmat_altitude_km": 449.99999999984175,
+        "gmat_rho": 1.5850008647176297e-12,
+        "h_km": 450.0,
+        "rel_diff_vs_lower_band_formula": -1.4212475241137668e-07,
+        "rel_diff_vs_spike_band_rule": 5.45563173304231e-07
+      },
+      {
+        "gmat_altitude_km": 450.99999999984175,
+        "gmat_rho": 1.5591557133400974e-12,
+        "h_km": 451.0,
+        "rel_diff_vs_lower_band_formula": 0.0006492161262849905,
+        "rel_diff_vs_spike_band_rule": -1.4451013485849984e-07
+      },
+      {
+        "gmat_altitude_km": 498.9999999998763,
+        "gmat_rho": 7.082445662016887e-13,
+        "h_km": 499.0,
+        "rel_diff_vs_lower_band_formula": 0.03235356921609922,
+        "rel_diff_vs_spike_band_rule": -1.4415438776005374e-07
+      },
+      {
+        "gmat_altitude_km": 499.9999999998754,
+        "gmat_rho": 6.966963558430962e-13,
+        "h_km": 500.0,
+        "rel_diff_vs_lower_band_formula": -1.4180117635653744e-07,
+        "rel_diff_vs_spike_band_rule": -5.230596962668699e-06
+      },
+      {
+        "gmat_altitude_km": 500.9999999998763,
+        "gmat_rho": 6.858686809628303e-13,
+        "h_km": 501.0,
+        "rel_diff_vs_lower_band_formula": 0.0007764677636983297,
+        "rel_diff_vs_spike_band_rule": -1.4156937166998063e-07
+      },
+      {
+        "gmat_altitude_km": 598.9999999999463,
+        "gmat_rho": 1.4769738939086912e-13,
+        "h_km": 599.0,
+        "rel_diff_vs_lower_band_formula": 0.07934637520862564,
+        "rel_diff_vs_spike_band_rule": -1.426457812980786e-07
+      },
+      {
+        "gmat_altitude_km": 599.9999999999454,
+        "gmat_rho": 1.4540121715216187e-13,
+        "h_km": 600.0,
+        "rel_diff_vs_lower_band_formula": -1.425903092266978e-07,
+        "rel_diff_vs_spike_band_rule": 8.371060260525809e-06
+      },
+      {
+        "gmat_altitude_km": 600.9999999999454,
+        "gmat_rho": 1.4338991983760703e-13,
+        "h_km": 601.0,
+        "rel_diff_vs_lower_band_formula": 0.0017406443592773435,
+        "rel_diff_vs_spike_band_rule": -1.4272319404096123e-07
+      },
+      {
+        "gmat_altitude_km": 699.00000000001,
+        "gmat_rho": 3.664694767828482e-14,
+        "h_km": 699.0,
+        "rel_diff_vs_lower_band_formula": 0.1888926268947595,
+        "rel_diff_vs_spike_band_rule": -1.4383829249897673e-07
+      },
+      {
+        "gmat_altitude_km": 700.0000000000091,
+        "gmat_rho": 3.6134823760287936e-14,
+        "h_km": 700.0,
+        "rel_diff_vs_lower_band_formula": -0.00015243592349123425,
+        "rel_diff_vs_spike_band_rule": -0.00014322744084283023
+      },
+      {
+        "gmat_altitude_km": 701.0000000000127,
+        "gmat_rho": 3.573469226718335e-14,
+        "h_km": 701.0,
+        "rel_diff_vs_lower_band_formula": 0.0026367549430694748,
+        "rel_diff_vs_spike_band_rule": -1.4296374151179236e-07
+      },
+      {
+        "gmat_altitude_km": 799.0000000000737,
+        "gmat_rho": 1.1832653875938873e-14,
+        "h_km": 799.0,
+        "rel_diff_vs_lower_band_formula": 0.2990221272551563,
+        "rel_diff_vs_spike_band_rule": -1.420587312228605e-07
+      },
+      {
+        "gmat_altitude_km": 800.0000000000728,
+        "gmat_rho": 1.1699996458087341e-14,
+        "h_km": 800.0,
+        "rel_diff_vs_lower_band_formula": 3.5628833554568473e-06,
+        "rel_diff_vs_spike_band_rule": -3.0272757767235703e-07
+      },
+      {
+        "gmat_altitude_km": 801.0000000000737,
+        "gmat_rho": 1.1606503543334639e-14,
+        "h_km": 801.0,
+        "rel_diff_vs_lower_band_formula": 0.0032640837422341917,
+        "rel_diff_vs_spike_band_rule": -1.439627115296105e-07
+      },
+      {
+        "gmat_altitude_km": 899.000000000131,
+        "gmat_rho": 5.287265283244413e-15,
+        "h_km": 899.0,
+        "rel_diff_vs_lower_band_formula": 0.380234389468493,
+        "rel_diff_vs_spike_band_rule": -1.4115373003775744e-07
+      },
+      {
+        "gmat_altitude_km": 900.0000000001301,
+        "gmat_rho": 5.2449998980022e-15,
+        "h_km": 900.0,
+        "rel_diff_vs_lower_band_formula": -2.9647122341547316e-06,
+        "rel_diff_vs_spike_band_rule": -1.9446672938627785e-08
+      },
+      {
+        "gmat_altitude_km": 901.0000000001328,
+        "gmat_rho": 5.216109214324571e-15,
+        "h_km": 901.0,
+        "rel_diff_vs_lower_band_formula": 0.0024998014692272363,
+        "rel_diff_vs_spike_band_rule": -1.430190035289769e-07
+      },
+      {
+        "gmat_altitude_km": 999.0000000001864,
+        "gmat_rho": 3.035769169899666e-15,
+        "h_km": 999.0,
+        "rel_diff_vs_lower_band_formula": 0.2807863005956024,
+        "rel_diff_vs_spike_band_rule": -1.4279507265513303e-07
+      },
+      {
+        "gmat_altitude_km": 1000.0000000001874,
+        "gmat_rho": 3.0191232799233813e-15,
+        "h_km": 1000.0,
+        "rel_diff_vs_lower_band_formula": 2.485253978812274e-05,
+        "rel_diff_vs_spike_band_rule": 4.08346881024535e-05
+      },
+      {
+        "gmat_altitude_km": 1001.000000000191,
+        "gmat_rho": 3.0077556406984036e-15,
+        "h_km": 1001.0,
+        "rel_diff_vs_lower_band_formula": 0.0017774478557548434,
+        "rel_diff_vs_spike_band_rule": -1.411233226944475e-07
+      },
+      {
+        "gmat_altitude_km": 1100.0000000002437,
+        "gmat_rho": 2.0788007789082327e-15,
+        "h_km": 1100.0,
+        "rel_diff_vs_lower_band_formula": 0.19623982259992268,
+        "rel_diff_vs_spike_band_rule": -1.4352312294185765e-07
+      },
+      {
+        "gmat_altitude_km": 1500.0000000004275,
+        "gmat_rho": 4.673176150399607e-16,
+        "h_km": 1500.0,
+        "rel_diff_vs_lower_band_formula": 1.4497360413367981,
+        "rel_diff_vs_spike_band_rule": -1.4356363708944997e-07
+      },
+      {
+        "gmat_altitude_km": 2000.0000000006194,
+        "gmat_rho": 7.233712659286283e-17,
+        "h_km": 2000.0,
+        "rel_diff_vs_lower_band_formula": 5.00130345746134,
+        "rel_diff_vs_spike_band_rule": -1.4125140634924094e-07
+      }
+    ],
+    "tau_s": 0.001
+  },
+  "geodetic_points": {
+    "max_abs_h_err_m": 1523949.8793310004,
+    "points": [
+      {
+        "ef_echo_m": 9.377759731656573e-10,
+        "gmat_h_minus_exact_m": 0.003557784111762885,
+        "gmat_lat_minus_exact_deg": -1.4210854715202004e-14,
+        "h_m": 0.0,
+        "lat_deg": -89.999999
+      },
+      {
+        "ef_echo_m": 3.2730227086923083e-10,
+        "gmat_h_minus_exact_m": 0.01156886265380308,
+        "gmat_lat_minus_exact_deg": -1.4210854715202004e-14,
+        "h_m": 100000.0,
+        "lat_deg": -89.999999
+      },
+      {
+        "ef_echo_m": 9.893395135092475e-10,
+        "gmat_h_minus_exact_m": 0.012144773791078478,
+        "gmat_lat_minus_exact_deg": -1.4210854715202004e-14,
+        "h_m": 250000.0,
+        "lat_deg": -89.999999
+      },
+      {
+        "ef_echo_m": 3.5202962931312734e-10,
+        "gmat_h_minus_exact_m": 0.012515396578237414,
+        "gmat_lat_minus_exact_deg": -1.4210854715202004e-14,
+        "h_m": 1000000.0,
+        "lat_deg": -89.999999
+      },
+      {
+        "ef_echo_m": 1.9199706733309015e-09,
+        "gmat_h_minus_exact_m": -0.00046006152842892334,
+        "gmat_lat_minus_exact_deg": 3.2773570524113893e-09,
+        "h_m": 0.0,
+        "lat_deg": -51.6
+      },
+      {
+        "ef_echo_m": 1.862645149230957e-09,
+        "gmat_h_minus_exact_m": -0.00043910040403716266,
+        "gmat_lat_minus_exact_deg": 3.0797409067417902e-09,
+        "h_m": 100000.0,
+        "lat_deg": -51.6
+      },
+      {
+        "ef_echo_m": 2.3283064365386963e-09,
+        "gmat_h_minus_exact_m": -0.00040998292388394475,
+        "gmat_lat_minus_exact_deg": 2.8103741556151363e-09,
+        "h_m": 250000.0,
+        "lat_deg": -51.6
+      },
+      {
+        "ef_echo_m": 3.123750878730495e-09,
+        "gmat_h_minus_exact_m": -0.00029731111135333776,
+        "gmat_lat_minus_exact_deg": 1.8307559912500437e-09,
+        "h_m": 1000000.0,
+        "lat_deg": -51.6
+      },
+      {
+        "ef_echo_m": 2.7946994644913607e-09,
+        "gmat_h_minus_exact_m": -2.7284841053187847e-09,
+        "gmat_lat_minus_exact_deg": -5.783079282538018e-16,
+        "h_m": 0.0,
+        "lat_deg": 0.0
+      },
+      {
+        "ef_echo_m": 2.6349541473885072e-09,
+        "gmat_h_minus_exact_m": -2.735760062932968e-09,
+        "gmat_lat_minus_exact_deg": -5.693224092210312e-16,
+        "h_m": 100000.0,
+        "lat_deg": 0.0
+      },
+      {
+        "ef_echo_m": 4.165492073537139e-09,
+        "gmat_h_minus_exact_m": -3.637978807091713e-09,
+        "gmat_lat_minus_exact_deg": -5.563557361815575e-16,
+        "h_m": 250000.0,
+        "lat_deg": 0.0
+      },
+      {
+        "ef_echo_m": 2.794963657088026e-09,
+        "gmat_h_minus_exact_m": -1.862645149230957e-09,
+        "gmat_lat_minus_exact_deg": -5.827220623980289e-16,
+        "h_m": 1000000.0,
+        "lat_deg": 0.0
+      },
+      {
+        "ef_echo_m": 3.2927225399135964e-09,
+        "gmat_h_minus_exact_m": -0.0013234230209491216,
+        "gmat_lat_minus_exact_deg": -1.816532346765598e-08,
+        "h_m": 0.0,
+        "lat_deg": 33.3
+      },
+      {
+        "ef_echo_m": 4.16500117164066e-09,
+        "gmat_h_minus_exact_m": -0.0012631708232220262,
+        "gmat_lat_minus_exact_deg": -1.706965235825919e-08,
+        "h_m": 100000.0,
+        "lat_deg": 33.3
+      },
+      {
+        "ef_echo_m": 3.123750878730495e-09,
+        "gmat_h_minus_exact_m": -0.0011794590973295271,
+        "gmat_lat_minus_exact_deg": -1.5576468115341413e-08,
+        "h_m": 250000.0,
+        "lat_deg": 33.3
+      },
+      {
+        "ef_echo_m": 2.1339280972982942e-09,
+        "gmat_h_minus_exact_m": -0.0008554944070056081,
+        "gmat_lat_minus_exact_deg": -1.0145903672764689e-08,
+        "h_m": 1000000.0,
+        "lat_deg": 33.3
+      },
+      {
+        "ef_echo_m": 1.7423449953896652e-09,
+        "gmat_h_minus_exact_m": -0.0008113966032397002,
+        "gmat_lat_minus_exact_deg": -7.30121030301234e-09,
+        "h_m": 0.0,
+        "lat_deg": 45.0
+      },
+      {
+        "ef_echo_m": 2.1339280972982942e-09,
+        "gmat_h_minus_exact_m": -0.0007744383765384555,
+        "gmat_lat_minus_exact_deg": -6.8609082859438786e-09,
+        "h_m": 100000.0,
+        "lat_deg": 45.0
+      },
+      {
+        "ef_echo_m": 1.9199706733309015e-09,
+        "gmat_h_minus_exact_m": -0.000723094679415226,
+        "gmat_lat_minus_exact_deg": -6.2608265238850436e-09,
+        "h_m": 250000.0,
+        "lat_deg": 45.0
+      },
+      {
+        "ef_echo_m": 2.08250058582033e-09,
+        "gmat_h_minus_exact_m": -0.0005244109779596329,
+        "gmat_lat_minus_exact_deg": -4.078309245869605e-09,
+        "h_m": 1000000.0,
+        "lat_deg": 45.0
+      },
+      {
+        "ef_echo_m": 1.6789656483866224e-09,
+        "gmat_h_minus_exact_m": -0.000153680048242677,
+        "gmat_lat_minus_exact_deg": -7.963762982399203e-10,
+        "h_m": 0.0,
+        "lat_deg": 60.0
+      },
+      {
+        "ef_echo_m": 1.6789656483866224e-09,
+        "gmat_h_minus_exact_m": -0.00014667784853372723,
+        "gmat_lat_minus_exact_deg": -7.483649255846103e-10,
+        "h_m": 100000.0,
+        "lat_deg": 60.0
+      },
+      {
+        "ef_echo_m": 2.3744159907068985e-09,
+        "gmat_h_minus_exact_m": -0.00013694626977667212,
+        "gmat_lat_minus_exact_deg": -6.829097287663899e-10,
+        "h_m": 250000.0,
+        "lat_deg": 60.0
+      },
+      {
+        "ef_echo_m": 2.634178031930877e-09,
+        "gmat_h_minus_exact_m": -9.930320084095001e-05,
+        "gmat_lat_minus_exact_deg": -4.4488501771411393e-10,
+        "h_m": 1000000.0,
+        "lat_deg": 60.0
+      },
+      {
+        "ef_echo_m": 8.231806349783991e-10,
+        "gmat_h_minus_exact_m": -3.5015546018257737e-07,
+        "gmat_lat_minus_exact_deg": -5.542233338928781e-13,
+        "h_m": 0.0,
+        "lat_deg": 80.0
+      },
+      {
+        "ef_echo_m": 1.3222238854040097e-09,
+        "gmat_h_minus_exact_m": -3.383320290595293e-07,
+        "gmat_lat_minus_exact_deg": -5.258016244624741e-13,
+        "h_m": 100000.0,
+        "lat_deg": 80.0
+      },
+      {
+        "ef_echo_m": 1.1872079953534493e-09,
+        "gmat_h_minus_exact_m": -3.1376839615404606e-07,
+        "gmat_lat_minus_exact_deg": -4.689582056016661e-13,
+        "h_m": 250000.0,
+        "lat_deg": 80.0
+      },
+      {
+        "ef_echo_m": 1.3626064069941204e-09,
+        "gmat_h_minus_exact_m": -2.2829044610261917e-07,
+        "gmat_lat_minus_exact_deg": -3.126388037344441e-13,
+        "h_m": 1000000.0,
+        "lat_deg": 80.0
+      },
+      {
+        "ef_echo_m": 4.168786862359665e-10,
+        "gmat_h_minus_exact_m": -0.015186362361419015,
+        "gmat_lat_minus_exact_deg": 1.4210854715202004e-14,
+        "h_m": 0.0,
+        "lat_deg": 89.999999
+      },
+      {
+        "ef_echo_m": 9.875431822797472e-10,
+        "gmat_h_minus_exact_m": -0.01146702651749365,
+        "gmat_lat_minus_exact_deg": 1.4210854715202004e-14,
+        "h_m": 100000.0,
+        "lat_deg": 89.999999
+      },
+      {
+        "ef_echo_m": 3.343011868316887e-10,
+        "gmat_h_minus_exact_m": -0.011721336690243334,
+        "gmat_lat_minus_exact_deg": 1.4210854715202004e-14,
+        "h_m": 250000.0,
+        "lat_deg": 89.999999
+      },
+      {
+        "ef_echo_m": 3.517949149513006e-10,
+        "gmat_h_minus_exact_m": -0.012180843390524387,
+        "gmat_lat_minus_exact_deg": 1.4210854715202004e-14,
+        "h_m": 1000000.0,
+        "lat_deg": 89.999999
+      },
+      {
+        "ef_echo_m": 3.5970081280731095e-10,
+        "gmat_h_minus_exact_m": -1029152.3408617986,
+        "gmat_lat_minus_exact_deg": 0.0,
+        "h_m": 0.0,
+        "lat_deg": 90.0
+      },
+      {
+        "ef_echo_m": 3.2784285050572474e-10,
+        "gmat_h_minus_exact_m": -1178664.9714829354,
+        "gmat_lat_minus_exact_deg": 0.0,
+        "h_m": 100000.0,
+        "lat_deg": 90.0
+      },
+      {
+        "ef_echo_m": 3.3264978663734644e-10,
+        "gmat_h_minus_exact_m": -1273714.418528445,
+        "gmat_lat_minus_exact_deg": 0.0,
+        "h_m": 250000.0,
+        "lat_deg": 90.0
+      },
+      {
+        "ef_echo_m": 3.5241385425050104e-10,
+        "gmat_h_minus_exact_m": -1523949.8793310004,
+        "gmat_lat_minus_exact_deg": 0.0,
+        "h_m": 1000000.0,
+        "lat_deg": 90.0
+      }
+    ]
+  },
+  "provenance": {
+    "atmosphere_table_sha256": "75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e",
+    "eop_file_sha256": "52c95d6871066e892463328424ca34f5e9cedde92c747465a40f7cd0ecd86ed3",
+    "gmat_console_sha256": "1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2",
+    "gmat_version_output": [
+      "Build Date: Mar 26 2026  19:40:08"
+    ],
+    "host": "macOS-26.2-x86_64-i386-64bit",
+    "leap_seconds_sha256": "3524e1ae34d67e858873a89e59983bbc5bd100221da898e796c1b36036a310c3",
+    "nutation_file_sha256": "633423d201aaed4cf4bf49427f85c5c3ed0e6c6f394f68d5c369dac673e31566"
+  },
+  "regression_identity": {
+    "m1": {
+      "committed_script_sha256": "f6bc397e4c72367d35885d58637fb52f3b56e0643dfc44a6d32e16491b321d1a",
+      "report_identical_to_committed": true,
+      "script_identical_to_committed": true,
+      "script_sha256": "f6bc397e4c72367d35885d58637fb52f3b56e0643dfc44a6d32e16491b321d1a"
+    },
+    "m2_invalid_commands": {
+      "report_identical_to_committed": true,
+      "script_identical_to_committed": true
+    },
+    "m2_prograde_burn": {
+      "report_identical_to_committed": true,
+      "script_identical_to_committed": true
+    },
+    "m2_retrograde_burn": {
+      "report_identical_to_committed": true,
+      "script_identical_to_committed": true
+    }
+  },
+  "regression_m3_form": {
+    "all_applicable_gates_pass": true,
+    "gates_m1_json": {
+      "gmat_vs_kepler_position_error_max_m": {
+        "limit": 0.0001,
+        "pass": true,
+        "value": 6.95223445873689e-06
+      },
+      "gmat_vs_kepler_velocity_error_max_mps": {
+        "limit": 1e-07,
+        "pass": true,
+        "value": 8.105405057479292e-09
+      },
+      "initial_sma_difference_m": {
+        "limit": 1e-06,
+        "pass": true,
+        "value": 2.7939677238464355e-09
+      },
+      "initial_state_difference_m": {
+        "limit": 1e-06,
+        "pass": true,
+        "value": 1.8626487022123036e-09
+      },
+      "period_difference_s": {
+        "limit": 1e-08,
+        "pass": true,
+        "value": 3.637978807091713e-12
+      },
+      "position_error_max_m": {
+        "limit": 0.6,
+        "pass": true,
+        "value": 0.29832469517180304
+      },
+      "velocity_error_max_mps": {
+        "limit": 0.0007,
+        "pass": true,
+        "value": 0.00034901924623590314
+      }
+    },
+    "metrics": {
+      "gmat_vs_kepler_position_error_max_m": 6.95223445873689e-06,
+      "gmat_vs_kepler_velocity_error_max_mps": 8.105405057479292e-09,
+      "initial_sma_difference_m": 2.7939677238464355e-09,
+      "initial_state_difference_m": 1.8626487022123036e-09,
+      "ours_vs_kepler_position_error_max_m": 0.29833164577041166,
+      "period_difference_s": 3.637978807091713e-12,
+      "position_error_max_m": 0.29832469517180304,
+      "rows_compared": 896.0,
+      "velocity_error_max_mps": 0.00034901924623590314
+    }
+  },
+  "trajectories": {
+    "drag1_sph": {
+      "description": "drag only, one-band (250 km row) table, spherical height (smooth configuration)",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.0020507902894179265,
+        "final_spike_state_m": [
+          6611873.275793477,
+          207772.33050521408,
+          262135.162041261,
+          -392.0790611162453,
+          4813.677002741751,
+          6073.161894284664
+        ],
+        "final_vel_diff_mps": 2.404602571673647e-06,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.0020507902894179265,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.0020489285252070118,
+        "final_spike_state_m": [
+          6611873.275793608,
+          207772.33050405435,
+          262135.16203981006,
+          -392.0790611140557,
+          4813.677002741821,
+          6073.161894284726
+        ],
+        "final_vel_diff_mps": 2.4024111049255263e-06,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.0020489285252070118,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "drag_geod": {
+      "description": "drag only, full table, geodetic height (WGS 84)",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.32673368814768333,
+        "final_spike_state_m": [
+          6615183.587024289,
+          178015.21119348903,
+          224592.68968228874,
+          -335.8404177073563,
+          4814.925009204512,
+          6074.74957507399
+        ],
+        "final_vel_diff_mps": 0.0003827908187116845,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.32673368814768333,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.17536853163511534,
+        "final_spike_state_m": [
+          6615183.571804115,
+          178015.30493100616,
+          224592.8078903514,
+          -335.8405972502785,
+          4814.925009092199,
+          6074.749574818473
+        ],
+        "final_vel_diff_mps": 0.00020346364830660908,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.1863499424635354,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.13686377401812602,
+        "final_spike_state_m": [
+          6615183.575771736,
+          178015.32895476773,
+          224592.83819690906,
+          -335.8406407815994,
+          4814.925004556426,
+          6074.749569134879
+        ],
+        "final_vel_diff_mps": 0.0001595923319754984,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.1377774426424172,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "drag_sph": {
+      "description": "drag only, full table, spherical height",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.0019754148582523797,
+        "final_spike_state_m": [
+          6611459.17492889,
+          210790.98009305348,
+          265943.3975032028,
+          -397.79935596270434,
+          4813.558430904307,
+          6073.00831725279
+        ],
+        "final_vel_diff_mps": 2.3163336852827395e-06,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.0019754148582523797,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.002007231365578,
+        "final_spike_state_m": [
+          6611459.174927092,
+          210790.98011280014,
+          265943.39752810274,
+          -397.79935599991353,
+          4813.558430903091,
+          6073.008317251266
+        ],
+        "final_vel_diff_mps": 2.3535885188307317e-06,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.002007231365578,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "j2": {
+      "description": "J2 only, M1 orbit",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.19151285982867433,
+        "final_spike_state_m": [
+          6588984.496168472,
+          167039.01343109214,
+          699120.4340609619,
+          -762.5676769233652,
+          4826.195624949332,
+          6021.881426408033
+        ],
+        "final_vel_diff_mps": 0.0004533823842093518,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 1.0282457358050772,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 7.5599935101616e-05,
+        "final_spike_state_m": [
+          6588984.513504385,
+          167039.10986937146,
+          699120.5985246284,
+          -762.5678857104434,
+          4826.195903435706,
+          6021.8811359456395
+        ],
+        "final_vel_diff_mps": 8.840525303307028e-08,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 7.5599935101616e-05,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "j2_default_nutation_interval": {
+      "description": "J2 only, M1 orbit, GMAT's default Earth.NutationUpdateInterval (60 s): evidence only",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.27260975043981517,
+        "final_spike_state_m": [
+          6588984.496168472,
+          167039.01343109214,
+          699120.4340609619,
+          -762.5676769233652,
+          4826.195624949332,
+          6021.881426408033
+        ],
+        "final_vel_diff_mps": 0.0005097034683458148,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 1.0542103331872958,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.08280872350500143,
+        "final_spike_state_m": [
+          6588984.513504385,
+          167039.10986937146,
+          699120.5985246284,
+          -762.5678857104434,
+          4826.195903435706,
+          6021.8811359456395
+        ],
+        "final_vel_diff_mps": 9.703228863789195e-05,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.08280872350500143,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "j2_drag_geod": {
+      "description": "J2 + drag, geodetic: the approved M3 physics on the M1 orbit",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.1986164980500005,
+        "final_spike_state_m": [
+          6533098.547436399,
+          398221.4764461239,
+          986685.3050925883,
+          -1196.784980027529,
+          4811.1100315773,
+          5970.17743421995
+        ],
+        "final_vel_diff_mps": 0.00046198019362490075,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 1.080048423705772,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.18385064748079766,
+        "final_spike_state_m": [
+          6533098.583305713,
+          398221.4805472018,
+          986685.3239445665,
+          -1196.7849808017932,
+          4811.1103168913505,
+          5970.177163368666
+        ],
+        "final_vel_diff_mps": 0.00021940677258713091,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.18385064748079766,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.36596445339098854,
+        "final_spike_state_m": [
+          6533098.614771177,
+          398221.36797880527,
+          986685.1842887383,
+          -1196.7847730720566,
+          4811.110328048049,
+          5970.177193001696
+        ],
+        "final_vel_diff_mps": 0.000429535501747442,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.36596445339098854,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "j2_drag_geod_ecc": {
+      "description": "J2 + drag, geodetic, 250 x 800 km, i = 51.6 deg (crosses 12 band boundaries)",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.23706527035057554,
+        "final_spike_state_m": [
+          -6459228.16047743,
+          2081692.9632518755,
+          2201523.109050681,
+          -3220.771752280819,
+          -4001.9376929228406,
+          -5250.760074917697
+        ],
+        "final_vel_diff_mps": 0.0002940167447715354,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.858164267915592,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.09535567458036305,
+        "final_spike_state_m": [
+          -6459228.282666385,
+          2081692.9740717737,
+          2201522.826918008,
+          -3220.7715370142587,
+          -4001.9379616767897,
+          -5250.759985981278
+        ],
+        "final_vel_diff_mps": 0.000103126952456345,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.14014515118588314,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.18164775860885793,
+        "final_spike_state_m": [
+          -6459228.322920367,
+          2081692.9278848153,
+          2201522.7660969747,
+          -3220.7714558550324,
+          -4001.937986468449,
+          -5250.760012087516
+        ],
+        "final_vel_diff_mps": 0.00019189480524851564,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.23744731108738262,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    },
+    "j2_drag_geod_i97": {
+      "description": "J2 + drag, geodetic, circular 250 km, i = 97 deg (retrograde: node advances)",
+      "vs_spike_J_ax_1": {
+        "final_pos_diff_m": 0.5829754450736122,
+        "final_spike_state_m": [
+          6586917.284543526,
+          -4835.575209183399,
+          660440.2500242859,
+          -770.3408646156304,
+          -949.712050852709,
+          7662.808597006617
+        ],
+        "final_vel_diff_mps": 0.0005203853937938823,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.6953138153933951,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.23183886148150074,
+        "final_spike_state_m": [
+          6586917.352740418,
+          -4835.838261441466,
+          660439.5182708667,
+          -770.3400853384461,
+          -949.7120725297066,
+          7662.808680348133
+        ],
+        "final_vel_diff_mps": 0.0002639500794565129,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.23183886148150074,
+        "rows": 896,
+        "t_end_s": 53700.0
+      },
+      "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": {
+        "final_pos_diff_m": 0.5413891122833325,
+        "final_spike_state_m": [
+          6586917.401649751,
+          -4835.800446454159,
+          660439.214906319,
+          -770.3397151038408,
+          -949.7120712731792,
+          7662.808703528552
+        ],
+        "final_vel_diff_mps": 0.0006348892889420283,
+        "initial_state_echo_m": 1.8626487022123036e-09,
+        "max_pos_diff_m": 0.5413891122833325,
+        "rows": 896,
+        "t_end_s": 53700.0
+      }
+    }
+  }
+}
