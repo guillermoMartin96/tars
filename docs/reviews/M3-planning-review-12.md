@@ -84,3 +84,45 @@
 - This is not an unconditional PASS, so the I-11 §9 stop condition applies.
 - **No acceptance report has been prepared, and no review 13 has been started.** The branch is not merged, and T0, T1 and T2 have not started.
 - **Returned to the Tech Lead:** decisions on M3P12-F1 and M3P12-F2, and on any further review.
+
+## Resolution of findings (appended 2026-10-17; the sections above are unchanged)
+**Authority:** the Tech Lead's instruction "I-12 — M3 Planning: Review 12 Corrections and Review 13 Authorization" (2026-10-17), referred to as **I-12**.
+- **It authorizes:**
+  - the correction of exactly M3P12-F1 and M3P12-F2;
+  - exactly one further independent review (review 13), after the corrections and local verification succeed.
+- **It does not authorize:** planning acceptance, a merge, T0/T1/T2, changes to approved physics, resolution of outstanding decisions, or a review 14.
+
+### M3P12-F1 (MINOR): the oracle-value probe could not see a defect missing after the first invalid step
+- **Reproduced before the fix.** In the reviewer's clone at `5b12eec`: for both components, classification "expected rejection", probe counts intended 600 / missing 0 / unintended 0, while the traced oracle values were 600 non-finite and 2 400 finite. `dr0028_node_signed_harness_regression.py` reproduces it against the reviewed harness at `5b12eec`, run with that harness's own probe.
+- **Root cause.** The observation point (the finite validation) was downstream of the discard logic in `check_formulas`, so the probe saw only the values the tested code chose to validate.
+- **Correction.** DR-0028 "Resolution amendment 9" (appended), with a pointer under amendment 8.
+  - The expected samples (3 000: every grid series × five steps) are built from the unmutated script before the copy runs.
+  - The copy's `check_formulas` is run with an observing formula, which it calls at every step, after the oracle value and before any validation.
+  - Each observation is identified by the formula's own arguments; the condition is evaluated on the scheduled sample, not on the copy's state.
+  - Exercise requires every scheduled sample observed exactly once (none unobserved, duplicate or unscheduled), the defect confirmed wherever claimed (missing 0), nothing unintended and no exception.
+  - On the unmutated script, all 22 oracle-value schedules are observed completely.
+- **Controls.** Seven new ones (I-12 §3), each with its required reason; every one of the 30 controls now declares the reason it must show:
+  - regression controls, failing against `5b12eec` and passing now: first-step-only corruption (Δi and ΔΩ), partial-step corruption (steps 0, 2, 4), missing intermediate observations (steps 1–3 skipped: unobserved 1 800), an incorrect observation count (last step twice: duplicate 600);
+  - last-step-only corruption: invalid setup (missing 2 400); already rejected at `5b12eec`, so not a regression;
+  - correctly injected all-step corruption: exercised at all 3 000 samples and detected.
+
+### M3P12-F2 (MINOR): E6-sign alone protected the formula's sign at the preserved example
+- **Reproduced before the fix.** The reviewer's two entrypoints at `5b12eec` give exit 1 / FAIL with E6-sign present and exit 0 / PASS with it removed. The classification now runs this counterexample before (`5b12eec`) and after.
+- **Root cause.** The premise for the formula half was argued at the same (i, Ω − φ) but a different δ: the first-order grid never evaluates the formula at E6's tilt magnitude.
+- **Correction.** DR-0028 "Resolution amendment 9", with a pointer under amendment 8's E6-sign argument.
+  - E6's sign assertion is split into E6-sign-oracle and E6-sign-first-order, each its own assertion; together they reject exactly what the single one did.
+  - E6-sign-oracle is category B (E3 at the same call, all five arguments). E6-sign-first-order is category A, with a new built-in mutant that reverses the first-order ΔΩ sign throughout the grid gap containing 0.15° ((0.1432°, 0.2245°)). E6 rejects it with exactly the first-order message, nothing rejects it without that assertion, and the first-order grid reports 0 failures for it.
+  - W1, W4 and E6-value were re-examined for the same mismatch. Their premises are now checked at the same input as the assertion (W1: the same result in the same loop iteration, from the syntax tree; W4: the same inputs, relying on `wrap()`'s purity, stated; E6-value: the same call, all five arguments). All three stay B.
+- **Classification:** 19 assertions, 12 A, 4 B, 3 C, 0 D; identities checked against the inventory and, mapped back, against the 18 survivors at `896d52d`.
+- **Sweep:** 36 sites, 29 detected, 7 surviving (the 4 B and the 3 C).
+
+### Evidence
+- **Mutation check (corrected harness):** 109 attempted, 109 exercised, 109 detected for the intended reason. Not exercised, rejected for another reason, unexpected exception, process failure, invalid setup and normal execution: 0 each. 30/30 controls with category, exercise result and reason; 0 of 77 direct predicates met by the unmutated script; 22 of 22 oracle schedules fully observed there.
+- **Regression demonstration:** the five M3P12-F1 controls fail at `5b12eec`, the four M3P11-F1 controls at `c16b3b5` and the five M3P10-F1 controls at `896d52d`; all 30 controls pass against the corrected harness.
+- **Repeatability:** each of the five tools runs twice with byte-identical output.
+- **Preservation:** against `5b12eec`, no pre-existing verification output value changed or was removed (23 keys added, all the new mutant's entry). Coverage is unchanged: 506/532 and 560/504.
+
+### Status
+- **Residual uncertainty:** none known.
+- **Historical results** of amendment 8 (the oracle-value observations; 11/4/3 over 18 assertions) are kept as they were and are not relabelled.
+- **Changes an acceptance decision?** No decision changed.

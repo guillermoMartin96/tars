@@ -269,3 +269,23 @@ Results:
 - **Preservation:** every finite result is unchanged; only keys were added.
 
 Interpretation: DR-0028 "Resolution amendment 8".
+
+## Oracle values observed at every step; E6's sign assertion split (2026-10-17, reviews M3P12-F1, F2)
+Review 12 showed two problems:
+- for an oracle value replaced inside `check_formulas`, the probe observed only the values reaching the finite validation, which skips a component's later steps after its first invalid value; so a first-step-only defect was certified as an all-steps defect;
+- E6's sign assertion was classified as redundant, but its first-order half is checked nowhere else: the first-order grid has no step of E6's tilt magnitude (0.15°).
+
+What changed:
+- **`dr0028_node_signed_mutation_check.py`** builds the expected oracle samples from the unmutated script (`oracle_schedule`, 3 000), observes the copy's `check_formulas` through an observing formula called at every step before any validation, and requires every scheduled sample observed exactly once (none unobserved, duplicate or unscheduled), the defect confirmed wherever claimed and no exception. The unmutated script must observe every schedule completely. Every control declares the reason it must show; 7 new controls cover first-step, last-step and partial corruption, missing intermediate observations, an incorrect observation count and a correct all-step injection (30 controls).
+- **`dr0028_node_signed_harness_regression.py`** also runs every control against the harness reviewed in review 12 (`5b12eec`), with its own probe. The five M3P12-F1 regression controls fail there and pass now.
+- **`dr0028_node_signed_verification.py`** splits E6's sign assertion into its oracle half and its first-order half, makes E6's formula injectable (`formula` parameter, default unchanged) and adds a built-in mutant that reverses the first-order ΔΩ sign in the grid's tilt gap containing 0.15°.
+- **`dr0028_node_signed_assertion_classification.py`** classifies 19 assertions as 12 A, 4 B and 3 C, checks each B premise at the same input as its assertion, and runs review 12's E6 counterexample before (`5b12eec`) and after.
+
+Results:
+- **Mutation check:** 109 attempted, 109 exercised, and 109 detected for the intended reason; every other category is 0.
+- **Controls and predicates:** 30 of 30 controls pass (category, exercise result and reason); none of the 77 direct exercise predicates is met by the unmutated script; all 22 oracle schedules are fully observed there.
+- **Sweep:** 36 assertion sites, 29 detected and 7 surviving; the 7 are the B and C assertions.
+- **Repeatability:** each output is byte-identical on a rerun.
+- **Preservation:** every finite result is unchanged; only keys were added.
+
+Interpretation: DR-0028 "Resolution amendment 9".

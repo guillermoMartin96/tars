@@ -9,6 +9,7 @@
 **Resolution amendment 6 (2026-10-17, append-only):** under review 09 (M3P9-F1, F2, F3), new mutants make the oracle ±∞ rejection and each formula's order and sign assertions load-bearing for their own reason, and E3 and E4 each gain a mutant; the file-level mutation check now accepts a detection only for its declared reason. No check, formula, tolerance, finite result or decision is changed. See "Resolution amendment 6" at the end.  
 **Resolution amendment 7 (2026-10-17, append-only):** under review 10 (M3P10-F1, F2), the mutation check no longer accepts an exception raised inside a built-in mutant as evidence of a removed assertion, except where an explicit allowance names the mutant, type, message and call stack; the 18 assertions that were not individually load-bearing are classified, and the six of category A gain mutants. No check, formula, tolerance, finite result or decision is changed. See "Resolution amendment 7" at the end.  
 **Resolution amendment 8 (2026-10-17, append-only):** under review 11 (M3P11-F1, F2), a built-in mutant's defect counts as exercised only when exactly its declared intended defect occurs (not any difference), and the mutation check establishes that by an independent probe before accepting a detection; five assertions wrongly classified as redundant in amendment 7 are reclassified as independently important and gain mutants (11 A, 4 B, 3 C). No check, formula, tolerance, finite result or decision is changed. See "Resolution amendment 8" at the end.  
+**Resolution amendment 9 (2026-10-17, append-only):** under review 12 (M3P12-F1, F2), the mutation check observes an oracle value injected inside `check_formulas` at every scheduled step, upstream of the validation that skips steps after an invalid value, and requires every scheduled sample observed exactly once; E6's sign assertion is split into its oracle half (B) and its first-order half (A, with a new built-in mutant), and the remaining B premises are checked at the same input as their assertions. No formula, oracle, grid, tolerance, finite result or decision is changed. See "Resolution amendment 9" at the end.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -855,6 +856,8 @@ Each control declares the category it must receive.
 | oracle values | 22 (an oracle value replaced inside `check_formulas`) | every value handed to the finite validation, against the unmutated oracle at the same sample |
 | injected | 3 (`line_of_nodes_exact` or `wrap` edited) | the copy's function in the exact properties, against the declared defect |
 
+- **Superseded for the oracle-values family by Resolution amendment 9 (review M3P12-F1).** The value handed to the finite validation is not every value: `check_formulas` skips a component's later steps after its first invalid value, so a defect missing there was never observed. Amendment 9 observes every scheduled step upstream of the validation and requires every scheduled sample observed exactly once.
+
 - **The observation is independent.** A separate process (`dr0028_node_signed_mutation_check.py --probe`) loads the unmutated script and the mutated copy. It uses the unmutated script's references, declared defects and tests, and takes only the injected function from the copy. Neither the copy's own recorder nor any check decides whether the defect occurred.
 - **A detection requires both** the defect established as exercised and the expected rejection shown. Classification order:
   - process failure, normal execution, inconsistent exit;
@@ -922,6 +925,7 @@ Each control declares the category it must receive, and whether the claimed defe
   - **W4** (wrap(±π) = +π): ±π are among W2's inputs, and both reduce exactly to +π. So W4 failing implies W2 failing, given that `wrap` returns the same result for the same input. W3 is the diagnostic for that; scope as for W3.
   - **E6-value** (90.2598055437°): E3 makes the identical oracle call (φ = Ω − 90° = 0.0 exactly) and compares ΔΩ with the closed form within noise(30°) = 1.63e-12°. The closed form is 3.79e-11° inside E6's 5e-11° tolerance, so any ΔΩ that E6 rejects deviates from it by more than E3's tolerance.
   - **E6-sign:** at the same call the closed form is +4.53e-3 rad, far above E3's 2.84e-14 rad. So a ΔΩ ≤ 0 is rejected by E3. The committed formula's sign at this (i, Ω − φ) is covered on the first-order grid by the sign check (amendment 6).
+    - **Corrected by Resolution amendment 9 (review M3P12-F2).** The last sentence is wrong: the first-order grid never evaluates the formula at E6's tilt magnitude (0.15°), so the first-order half of E6-sign is protected by E6 alone. Amendment 9 splits E6-sign into E6-sign-oracle (B, by the E3 argument above) and E6-sign-first-order (A, with a built-in mutant): 12 A, 4 B, 3 C.
 - **The three category C assertions** keep their rationale: W3 (determinism of a stateless `wrap`), W6 (guards W5's fixed input list), and E2a (guards the E2 case list).
 - **Amendment 7's dependency statements are corrected.**
   - "E1 and E2e protect each other": wrong. Each protects a different part of the transform: E1 its exact convention, E2e equatorial endpoints at azimuths E1 does not sample.
@@ -982,3 +986,131 @@ Each control declares the category it must receive, and whether the claimed defe
 | Mutation check run time | about 6 min | about 8 min (one probe process per run) |
 
 - **Unchanged definitions.** An AST comparison with `c16b3b5` shows that only these existing top-level definitions changed: `instrumented`, `exercised`, `mutant_failures`, `EXACT_MUTANTS` and `main`, plus the docstring and one added module-level loop (building `DEFECTS`). `exact_properties`, `check_formulas`, `wrap`, `finite`, the formulas, the grid, the tolerances and the minima are unchanged.
+
+## Resolution amendment 9 (2026-10-17; reviews M3P12-F1, M3P12-F2)
+**Authority:** Tech Lead, instruction "I-12 — M3 Planning: Review 12 Corrections and Review 13 Authorization" (I-12), sections 3–5.
+- **Unchanged:**
+  - the decision (J-ax-1), the identity transformation of M3, atmospheric co-rotation as air motion, the constants, the thresholds and the scope;
+  - the signed first-order formulas, the passive convention R = Rot(e, −δ), the interval (−π, π] and the finite-only `wrap()` contract;
+  - the oracle, the grid, the step sizes, the noise bound, the significance factor (10³), the order threshold (1.5) and the four coverage minima (506, 532, 560, 504).
+- **History is preserved.** Amendment 8 is kept unchanged, with pointers under its oracle-values exercise predicate and its E6-sign argument. Its results were produced by the amendment-8 harness and classification, and are not relabelled as valid under the corrections below.
+- **Nature of the findings.** Both are unsound verification claims, not mathematical errors. Neither produced a false PASS of the verification script as committed, and no mathematical result changes.
+
+### M3P12-F1: the defect and its root cause
+- **Defect.** For a mutation that replaces an oracle value inside `check_formulas`, amendment 8's probe observed each value where it was handed to the finite validation (`nonfinite_reason`). After a component's first invalid value, `check_formulas` skips that component for the rest of the series. So the later values of the series were never observed, and a defect missing there could not be counted as "missing".
+- **Review 12's counterexample.** The Δi oracle NaN at the first step only, declared as the NaN at every step, was classified "expected rejection". The probe reported intended 600, missing 0, unintended 0; an independent trace found 600 NaN and 2 400 correct values of Δi. The same held for ΔΩ.
+- **Reproduced before the fix.** The implementer reproduced it in the reviewer's clone at `5b12eec`. The regression demonstration reproduces it against the reviewed harness at `5b12eec`, run with that harness's own probe.
+- **Root cause.** The observation point sat downstream of the tested code's discard logic, so the probe saw only the values the tested code chose to validate. Amendment 8 assumed that the values reaching the validation are all the values; for the oracle-values family they are not.
+
+### The correction (mutation check)
+- **The expected samples are fixed first.** `oracle_schedule` builds every sample at which `check_formulas` evaluates the oracle from the unmutated script's grid constants (inclinations, nodes, azimuths, both tilt signs, five steps): 3 000 samples, which must equal `SERIES_PER_COMPONENT` × `HALVINGS`. It is built before the copy runs, and no part of it comes from the copy.
+- **The observation point is upstream of every check.** The probe runs the copy's `check_formulas` with an observing formula. `check_formulas` calls the formula at every step, immediately after the oracle value (and any injection) and before any validation. So a step that the validation skips after an earlier invalid value is still observed.
+- **What is read.** Each call is identified by the formula's own arguments (i, Ω, φ, δ), which must be a scheduled sample not seen before. The oracle values that `check_formulas` then holds are compared, per component, with the unmutated oracle at that sample. Whether the defect applies there is decided by its condition evaluated on the scheduled sample, with the unmutated script's names, not on the copy's state.
+- **Counts.**
+
+| Count | Meaning |
+|---|---|
+| intended | the defect applies at this sample, and the copy's value is the injected value |
+| unchanged | the defect does not apply, and the copy's value equals the unmutated oracle |
+| missing | the defect applies, but the copy's value equals the unmutated oracle |
+| unintended | any other value: another difference, or a difference where none is intended (including an unexpected non-finite value) |
+| unobserved | a scheduled sample never observed |
+| duplicate | a scheduled sample observed again |
+| unscheduled | an observation that is not a scheduled sample, or not made by `check_formulas` |
+
+- **Exercised** (fails closed) now also requires, for this family: every scheduled sample observed exactly once (3 000 of 3 000), unobserved = duplicate = unscheduled = 0, and no exception from `check_formulas`. With "missing = 0", this means the defect is confirmed at every sample where the mutation claims it.
+- **The unmutated script must observe the whole schedule.** For each of the 22 oracle-values predicates, the probe is run on the unmutated script; each must observe all 3 000 samples, with none unobserved, duplicate or unscheduled, and no exception (22 of 22). This checks the schedule against the loop that `check_formulas` actually runs, so the probe cannot rely on an assumed schedule.
+- **The other families were re-examined for the same pattern.** The formula, injected and built-in families wrap the injected function itself, which records every call, including calls whose results a check later discards. Only the oracle-values family observed a value through a check; it is the only one changed.
+- **Effect on the 22 oracle-values mutations.** Each is still exercised and detected. Their observations now cover all steps. For example, `review09_oracle_delta_i_nan_all`: amendment 8 observed 3 600 component values with 600 intended; amendment 9 observes 6 000 with 3 000 intended (every step). The first-step mutations stay at 600 intended, with the 2 400 later values of their component observed as unchanged.
+
+### Controls (I-12 §3)
+Every control now also declares the reason its observed outcome must show (`CONTROL_REASONS`), in addition to its category and exercise result. There are 30 controls: the 23 of amendment 8, each with a reason, and 7 new ones.
+
+| Control (claimed: the NaN at every step) | Category | Exercised | Required reason | `5b12eec` (detection) | Corrected |
+|---|---|---|---|---|---|
+| **Δi NaN at the first step only** (review 12's counterexample) | invalid mutation setup | no | intended 600, missing 2 400 | **not met (counted as detection)** | met |
+| **ΔΩ NaN at the first step only** | invalid mutation setup | no | intended 600, missing 2 400 | **not met** | met |
+| **NaN at steps 0, 2 and 4 only** (partial) | invalid mutation setup | no | intended 1 800, missing 1 200 | **not met** | met |
+| **copy skips steps 1–3 of every series** (missing intermediate observations) | invalid mutation setup | no | unobserved 1 800 | **not met** | met |
+| **copy evaluates the last step twice** (incorrect observation count) | invalid mutation setup | no | duplicate 600 | **not met** | met |
+| NaN at the last step only | invalid mutation setup | no | intended 600, missing 2 400 | met (the validation reaches steps 0–3 first) | met |
+| NaN genuinely injected at every step | expected rejection | yes | intended 3 000, missing 0, unobserved 0, duplicate 0, unscheduled 0 | met | met |
+
+- **The five M3P12-F1 regression controls** (in bold) fail against `5b12eec` and pass against the corrected harness. The four M3P11-F1 regression controls still fail against `c16b3b5`, and the five M3P10-F1 regression controls against `896d52d`; all pass now.
+- **The last-step control is not a regression control.** At `5b12eec` it is already "invalid mutation setup", because the validation reaches steps 0–3 before the invalid value. It is kept as a control of the corrected harness.
+- `dr0028_node_signed_harness_regression.py` now runs every control against `896d52d`, `c16b3b5` and `5b12eec` (each read from git; `5b12eec` with its own probe), and against the corrected harness.
+
+### M3P12-F2: E6-sign split, and the B premises re-examined (I-12 §4)
+- **Defect.** Amendment 8 classified E6-sign (`d_node > 0 and lin_node > 0` at the review-04 example) as category B. Its oracle half was argued from E3 at the same call, which is valid. Its first-order half was argued from the first-order grid's sign check "at this (i, Ω − φ)". But the formula is also a function of δ, and the grid never evaluates it at E6's tilt magnitude (0.15°). The premise was established at a different input from the assertion's.
+- **Review 12's counterexample.** The ΔΩ formula's sign reversed only for 0.0026 < |δ| < 0.0027 rad. With E6-sign removed, the verification script passes, with order 506/532 and sign 560/504 unchanged.
+- **Reproduced before the fix.** The implementer reran the reviewer's two entrypoints at `5b12eec`, with the same results. The classification now runs the counterexample through the entrypoint, before (at `5b12eec`) and after.
+- **The correction (verification script).**
+  - The sign assertion is split into its two halves, each its own `failures.append`: "E6 review-04 example sign disagreement: oracle Delta Omega not > 0" and "…: first-order Delta Omega not > 0". Together they reject exactly what the single assertion rejected. No existing output value changes, because no existing mutant fails either half.
+  - E6's call to `formulas_amendment2` becomes the `formula` parameter of `exact_properties` (default `formulas_amendment2`; results identical), so that a built-in mutant can inject a formula there.
+  - New built-in mutant `M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap`. It reverses the first-order ΔΩ sign for every tilt magnitude in `E6_TILT_GAP`, at every inclination, node and azimuth and for both tilt signs, and is exact elsewhere.
+    - `E6_TILT_GAP` is computed from the grid: the open interval between consecutive first-order grid tilt magnitudes that contains 0.15°. It is (0.0025, 0.0039185) rad, i.e. (0.1432°, 0.2245°).
+    - Declared defect: ΔΩ exactly −1 × the reference, Δi unchanged, wherever |δ| is in the gap.
+- **Classification (I-12 §4.2–4.3).** E6-sign is split into independently identified assertions:
+
+| Assertion | Category | Evidence |
+|---|---|---|
+| E6-sign-oracle (`d_node > 0`) | B | E3 makes the same oracle call, now checked with all five arguments (including the wrapping function); the closed form there is +4.53e-3 rad, far above E3's tolerance of 2.84e-14 rad, so a ΔΩ ≤ 0 fails E3 at the same call. Demonstration: a negated oracle ΔΩ, with the assertion removed, is still rejected by E3 |
+| E6-sign-first-order (`lin_node > 0`) | A | the new mutant: exercised (1 intended call, 0 missing, 0 unintended), no exception; with the assertion present, E6 rejects it with exactly the message "…first-order Delta Omega not > 0" and no other failure; with only this assertion removed, nothing reports anything; and the first-order grid (`check_formulas`) reports 0 failures for it |
+
+  - **Not an upgrade by test count (I-12 §4).** The A classification follows demonstrated coverage: no other check evaluates the formula at a tilt in the gap, as the grid's 0 failures show.
+  - **Before and after, through the entrypoint** (`review_12_counterexample_m3p12_f2` in the classification output):
+    - at `5b12eec`, with review 12's defect and E6-sign removed: exit 0, PASS;
+    - now, with the defect and every assertion present: exit 1, FAIL, the only failure being the first-order E6 message (the formula checks report nothing);
+    - now, with only E6-sign-first-order removed and no defect: exit 1, FAIL, because the new built-in mutant is no longer rejected. The removal itself is detected.
+    - In the second run, the built-in mutant also shows as not rejected. That is because review 12's edit changes the reference formula itself, so the mutant reverses the sign a second time and is positive at E6. It does not affect the result: the defect is rejected by the first-order half.
+- **The other B premises re-examined for the same mismatch (I-12 §4.7).** Each premise is now checked at the same input as its assertion:
+  - **W1** (result in (−π, π]): the premise now also checks, from the script's syntax tree, that W1 and W2 sit in the same loop iteration, guarded by conditions on the same `got`, which the loop assigns once. W2 therefore compares the very result W1 tests. The check returns false for assertions in different loops, such as W1 and W4. W1 stays B.
+  - **W4** (wrap(±π) = +π): W2 evaluates the same inputs (±π), in separate calls. Equality of the two calls' results is the purity of `wrap()`, which W3 (C) covers diagnostically; this dependence is stated in the premise. W4 stays B.
+  - **E6-value** (90.2598055437°): E3's call is now matched on all five arguments, including the wrapping function, not only (i, Ω, φ, δ). The premise holds (margin 3.79e-11° against E3's 1.63e-12°). E6-value stays B.
+  - No other B premise argued from a different input.
+- **Totals:**
+
+| Category | Amendment 8 (18 assertions) | Amendment 9 (19 assertions) |
+|---|---|---|
+| A, independently important | 11 | **12** (+ E6-sign-first-order) |
+| B, redundant | 4 (including E6-sign) | **4** (W1, W4, E6-value, E6-sign-oracle) |
+| C, diagnostic | 3 | 3 |
+| D, uncertain | 0 | 0 |
+
+- **Identities checked against the inventory.** The 19 identities each select exactly one of the 36 `failures.append` statements, and are distinct. Mapped back to the statements they descend from (both halves of E6-sign to the single statement they replace, which no longer exists), they are exactly the 18 statements that the sweep committed at `896d52d` found surviving.
+- **Sweep:** 36 assertion sites, 29 detected, 7 surviving, 0 exceptions. The 7 survivors are exactly the 4 of B and the 3 of C. Before and after: amendment 8, 35 sites, 28 and 7 (E6-sign survived); amendment 9, 36 sites, 29 and 7 (E6-sign-first-order is detected, E6-sign-oracle survives).
+
+### Results
+- **Verdict PASS, exit 0**, for:
+  - the verification script;
+  - the mutation check;
+  - the classification (19/19: 12 A, 4 B, 3 C, 0 D; review 12's counterexample before and after as stated);
+  - the regression demonstration.
+  The sweep is a measurement. Each of the five outputs is byte-identical on a rerun.
+- **Mutation check, reported separately (I-12 §5).** These results come from the corrected harness. Amendment 8's 109/109 was measured with the amendment-8 oracle-values observation, and is not relabelled.
+
+| Count | Value |
+|---|---|
+| Mutations attempted | 109 |
+| Intended defect established as exercised | 109 |
+| Detected for the intended reason (expected rejection) | 109 |
+| Not exercised | 0 |
+| Rejected for another reason | 0 |
+| Unexpected exception | 0 |
+| Process failure | 0 |
+| Invalid mutation setup | 0 |
+| Normal execution (survived) | 0 |
+| Controls with their declared category, exercise result and reason | 30 of 30 |
+| Direct exercise predicates met by the unmutated script | 0 of 77 |
+| Oracle-value schedules fully observed on the unmutated script | 22 of 22 |
+
+- **Built-in mutants:** 48 (47 + 1). Each declares its defect, each is exercised (0 missing, 0 unintended calls), and each is rejected by its designated checks.
+- **Finite results unchanged.** Compared with `5b12eec`, no pre-existing verification output value changed and none was removed. The 23 differences are added keys, all in the new mutant's own entry.
+  - In the mutation check output, the changed values are the 22 oracle-values observations (and their outcome texts), the exercise criterion and the control counts.
+  - In the sweep, assertion line numbers shift and the split E6 statement replaces the old one.
+  - In the classification, the new totals, the split, line numbers and the revised premise texts.
+- **Coverage unchanged:** order 506 (Δi) and 532 (ΔΩ), sign 560 (Δi) and 504 (ΔΩ), each enforced separately.
+  - The 1 % Δi oracle error is still rejected by E3 and by E4.
+  - The doubled coefficients and reversed signs are still rejected by the order and sign checks of their own formula.
+  - Non-finite values are still rejected in every series.
+- **Unchanged definitions.** An AST comparison with `5b12eec` shows that only these existing top-level definitions of the verification script changed: `exact_properties` (the `formula` parameter, its docstring, and the split sign assertion), `defect_scaled` (an optional `where`), `EXACT_MUTANTS`, the `DEFECTS.update` call and the docstring. The added definitions are `E6_TILT`, `first_order_tilt_gap`, `E6_TILT_GAP`, `in_e6_tilt_gap` and the mutant. `finite`, `formulas_amendment2`, `wrap`, `wrap_tests`, `check_formulas`, `nonfinite_reason`, `noise`, `step_scale`, the grid, `SIGNIFICANT`, `P_MIN` and `MIN_VALID_SAMPLES` are unchanged.
