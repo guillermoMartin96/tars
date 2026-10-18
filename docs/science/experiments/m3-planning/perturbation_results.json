@@ -1,0 +1,386 @@
+{
+  "inputs": {
+    "r0": [
+      6628137.0,
+      0.0,
+      0.0
+    ],
+    "v0": [
+      0.0,
+      4816.9050670943,
+      6077.421678863729
+    ],
+    "t_end_s": 53700.0,
+    "J2_sets": {
+      "EGM2008_tide_free(NGA.STND.0036 T5.1)": 0.0010826261738522227,
+      "IERS2010_zero_tide(T1.1)": 0.0010826359,
+      "IERS_conv_C20_zero_tide_2000(T6.2)": 0.0010826358699107248,
+      "IERS_conv_C20_tide_free_2000(\u00a76.2.2)": 0.0010826265455072587,
+      "JGM3(GMAT JGM3.cof)": 0.0010826266905978165,
+      "EGM96(GMAT EGM96.cof)": 0.0010826266835531513,
+      "WGS84_normal_field(geometric; NOT dynamic)": 0.001082629821313307
+    },
+    "ballistic_kg_m2": {
+      "B25.8": 25.757575757575758,
+      "B100": 100.0
+    }
+  },
+  "magnitudes": {
+    "point_mass_mps2": 9.073081725396076,
+    "j2_mps2_at_r0": 0.013643611309648307,
+    "j2_max_mps2_equator": 0.013643611309647592,
+    "j2_max_mps2_pole": 0.027287222619295184,
+    "drag_B25.8_mps2_at_250km": 7.838891931996446e-05,
+    "drag_B100_mps2_at_250km": 2.0191085279384784e-05,
+    "density_at_250km_spherical": 7.248e-11
+  },
+  "band_boundary_jumps": [
+    {
+      "boundary_km": 25.0,
+      "left_limit": 0.038936985035224865,
+      "table": 0.03899,
+      "rel_jump": 0.0013615580335040178
+    },
+    {
+      "boundary_km": 30.0,
+      "left_limit": 0.017739248399286547,
+      "table": 0.01774,
+      "rel_jump": 4.2369366307637435e-05
+    },
+    {
+      "boundary_km": 40.0,
+      "left_limit": 0.003971977414903321,
+      "table": 0.003972,
+      "rel_jump": 5.686109038283149e-06
+    },
+    {
+      "boundary_km": 50.0,
+      "left_limit": 0.0010570349662101367,
+      "table": 0.001057,
+      "rel_jump": -3.3079520786460925e-05
+    },
+    {
+      "boundary_km": 60.0,
+      "left_limit": 0.0003205881561644498,
+      "table": 0.0003206,
+      "rel_jump": 3.6944083311896136e-05
+    },
+    {
+      "boundary_km": 70.0,
+      "left_limit": 8.769368861148508e-05,
+      "table": 8.77e-05,
+      "rel_jump": 7.197084094490158e-05
+    },
+    {
+      "boundary_km": 80.0,
+      "left_limit": 1.9048173541414113e-05,
+      "table": 1.905e-05,
+      "rel_jump": 9.588628442069869e-05
+    },
+    {
+      "boundary_km": 90.0,
+      "left_limit": 3.3961140588410054e-06,
+      "table": 3.396e-06,
+      "rel_jump": -3.358510315876195e-05
+    },
+    {
+      "boundary_km": 100.0,
+      "left_limit": 5.296986241455265e-07,
+      "table": 5.297e-07,
+      "rel_jump": 2.5974288222485598e-06
+    },
+    {
+      "boundary_km": 110.0,
+      "left_limit": 9.661774301910217e-08,
+      "table": 9.661e-08,
+      "rel_jump": -8.014075738282944e-05
+    },
+    {
+      "boundary_km": 120.0,
+      "left_limit": 2.43818921061352e-08,
+      "table": 2.438e-08,
+      "rel_jump": -7.760292461966856e-05
+    },
+    {
+      "boundary_km": 130.0,
+      "left_limit": 8.483569801868403e-09,
+      "table": 8.484e-09,
+      "rel_jump": 5.070956468133936e-05
+    },
+    {
+      "boundary_km": 140.0,
+      "left_limit": 3.8450721077539006e-09,
+      "table": 3.845e-09,
+      "rel_jump": -1.8753290414341706e-05
+    },
+    {
+      "boundary_km": 150.0,
+      "left_limit": 2.0699826257680164e-09,
+      "table": 2.07e-09,
+      "rel_jump": 8.39341923319914e-06
+    },
+    {
+      "boundary_km": 180.0,
+      "left_limit": 5.463895178559572e-10,
+      "table": 5.464e-10,
+      "rel_jump": 1.9184379824732645e-05
+    },
+    {
+      "boundary_km": 200.0,
+      "left_limit": 2.7890085269212124e-10,
+      "table": 2.789e-10,
+      "rel_jump": -3.057330635658495e-06
+    },
+    {
+      "boundary_km": 250.0,
+      "left_limit": 7.248111224828284e-11,
+      "table": 7.248e-11,
+      "rel_jump": -1.534535340763643e-05
+    },
+    {
+      "boundary_km": 300.0,
+      "left_limit": 2.4179844584300007e-11,
+      "table": 2.418e-11,
+      "rel_jump": 6.427489616545046e-06
+    },
+    {
+      "boundary_km": 350.0,
+      "left_limit": 9.51792699206804e-12,
+      "table": 9.518e-12,
+      "rel_jump": 7.670570705275992e-06
+    },
+    {
+      "boundary_km": 400.0,
+      "left_limit": 3.7249865355275994e-12,
+      "table": 3.725e-12,
+      "rel_jump": 3.6146365289813076e-06
+    },
+    {
+      "boundary_km": 450.0,
+      "left_limit": 1.5850010899855172e-12,
+      "table": 1.585e-12,
+      "rel_jump": -6.876875505712476e-07
+    },
+    {
+      "boundary_km": 500.0,
+      "left_limit": 6.96696454635473e-13,
+      "table": 6.967e-13,
+      "rel_jump": 5.088822403909177e-06
+    },
+    {
+      "boundary_km": 600.0,
+      "left_limit": 1.4540123788496935e-13,
+      "table": 1.454e-13,
+      "rel_jump": -8.513579302094065e-06
+    },
+    {
+      "boundary_km": 700.0,
+      "left_limit": 3.614033284530049e-14,
+      "table": 3.614e-14,
+      "rel_jump": -9.209801744680668e-06
+    },
+    {
+      "boundary_km": 800.0,
+      "left_limit": 1.1699954772513223e-14,
+      "table": 1.17e-14,
+      "rel_jump": 3.865612103304272e-06
+    },
+    {
+      "boundary_km": 900.0,
+      "left_limit": 5.245015447963667e-15,
+      "table": 5.245e-15,
+      "rel_jump": -2.945265618503612e-06
+    },
+    {
+      "boundary_km": 1000.0,
+      "left_limit": 3.0190482489066533e-15,
+      "table": 3.019e-15,
+      "rel_jump": -1.598149571502283e-05
+    }
+  ],
+  "rk4_vs_dop853": {
+    "point_mass": [
+      {
+        "dt": 20.0,
+        "pos_err_m": 6.685122768816014,
+        "vel_err_mps": 0.007820960335648872
+      },
+      {
+        "dt": 10.0,
+        "pos_err_m": 0.2983360684927007,
+        "vel_err_mps": 0.00034903253266432805,
+        "ratio_vs_prev": 22.40802730488344
+      },
+      {
+        "dt": 5.0,
+        "pos_err_m": 0.014909794088221634,
+        "vel_err_mps": 1.7443628453590954e-05,
+        "ratio_vs_prev": 20.009402324903924
+      },
+      {
+        "dt": 2.5,
+        "pos_err_m": 0.0008268543405337705,
+        "vel_err_mps": 9.673733801072738e-07,
+        "ratio_vs_prev": 18.031947535761514
+      }
+    ],
+    "j2": [
+      {
+        "dt": 20.0,
+        "pos_err_m": 6.759133786645677,
+        "vel_err_mps": 0.00791453732063306
+      },
+      {
+        "dt": 10.0,
+        "pos_err_m": 0.30174213049558113,
+        "vel_err_mps": 0.0003532464075174685,
+        "ratio_vs_prev": 22.400364760282162
+      },
+      {
+        "dt": 5.0,
+        "pos_err_m": 0.015089916420953186,
+        "vel_err_mps": 1.7662128654427062e-05,
+        "ratio_vs_prev": 19.996275796239367
+      },
+      {
+        "dt": 2.5,
+        "pos_err_m": 0.0008223662860099518,
+        "vel_err_mps": 9.625756329382368e-07,
+        "ratio_vs_prev": 18.349386006773358
+      }
+    ],
+    "drag_B25.8": [
+      {
+        "dt": 20.0,
+        "pos_err_m": 47.629559169289976,
+        "vel_err_mps": 0.05568935697955867
+      },
+      {
+        "dt": 10.0,
+        "pos_err_m": 4.570307704996397,
+        "vel_err_mps": 0.005339496299884586,
+        "ratio_vs_prev": 10.42152131621683
+      },
+      {
+        "dt": 5.0,
+        "pos_err_m": 0.5081919334956351,
+        "vel_err_mps": 0.0005941304769956001,
+        "ratio_vs_prev": 8.99327085646402
+      },
+      {
+        "dt": 2.5,
+        "pos_err_m": 0.03747218686538283,
+        "vel_err_mps": 4.3878170970287504e-05,
+        "ratio_vs_prev": 13.56184348998077
+      }
+    ],
+    "j2_drag_B25.8": [
+      {
+        "dt": 20.0,
+        "pos_err_m": 33.26440238299387,
+        "vel_err_mps": 0.03906087365370775
+      },
+      {
+        "dt": 10.0,
+        "pos_err_m": 2.055566299695762,
+        "vel_err_mps": 0.002413942640542315,
+        "ratio_vs_prev": 16.18259765589523
+      },
+      {
+        "dt": 5.0,
+        "pos_err_m": 0.13468286665419238,
+        "vel_err_mps": 0.00015818251220236864,
+        "ratio_vs_prev": 15.262270181504018
+      },
+      {
+        "dt": 2.5,
+        "pos_err_m": 0.007944877439185797,
+        "vel_err_mps": 9.331080306634465e-06,
+        "ratio_vs_prev": 16.9521641693185
+      }
+    ],
+    "j2_drag_B100": [
+      {
+        "dt": 20.0,
+        "pos_err_m": 12.988022743430841,
+        "vel_err_mps": 0.015220673405539854
+      },
+      {
+        "dt": 10.0,
+        "pos_err_m": 0.6984628584364916,
+        "vel_err_mps": 0.0008185103014610075,
+        "ratio_vs_prev": 18.595151605490543
+      },
+      {
+        "dt": 5.0,
+        "pos_err_m": 0.042205384500938685,
+        "vel_err_mps": 4.9462832533439854e-05,
+        "ratio_vs_prev": 16.549140985102436
+      },
+      {
+        "dt": 2.5,
+        "pos_err_m": 0.00244298505060356,
+        "vel_err_mps": 2.8630757640191878e-06,
+        "ratio_vs_prev": 17.276153405241466
+      }
+    ]
+  },
+  "final_displacement_vs_point_mass_m": {
+    "j2": 740680.4648767837,
+    "drag_B25.8": 362659.1854652319,
+    "j2_drag_B25.8": 1161033.9410278902,
+    "j2_drag_B100": 839945.8909485609
+  },
+  "j2_node_rate": {
+    "fit_deg_per_day": -5.438454217211572,
+    "analytic_first_order_deg_per_day": -5.409878372652266,
+    "rel_diff": 0.005282160261451008,
+    "note": "osculating a0 used in the analytic rate; mean-element theory differs at O(J2)"
+  },
+  "drag_decay": {
+    "B25.8": {
+      "fit_m_per_s": -0.1483765830911795,
+      "fit_km_per_day": -12.819736779077909,
+      "first_order_no_rotation_m_per_s": -0.1446364736864751,
+      "first_order_with_rotation_factor_m_per_s": -0.13365436969513073,
+      "rotation_factor": 0.9240709918360565,
+      "rel_diff_vs_rotation_estimate": 0.11015138098088784,
+      "total_sma_change_m": -7980.056291529909
+    },
+    "B100": {
+      "fit_m_per_s": -0.035332174546240484,
+      "fit_km_per_day": -3.052699880795178,
+      "first_order_no_rotation_m_per_s": -0.03725484928287995,
+      "first_order_with_rotation_factor_m_per_s": -0.03442612552753367,
+      "rotation_factor": 0.9240709918360565,
+      "rel_diff_vs_rotation_estimate": 0.02631864622645863,
+      "total_sma_change_m": -1897.5035954471678
+    }
+  },
+  "sensitivity_final_position_diff_m": {
+    "J2 = IERS2010_zero_tide(T1.1)": 7.440197462944284,
+    "J2 = IERS_conv_C20_zero_tide_2000(T6.2)": 7.417180179571823,
+    "J2 = IERS_conv_C20_tide_free_2000(\u00a76.2.2)": 0.28430398806644286,
+    "J2 = JGM3(GMAT JGM3.cof)": 0.3952966913122742,
+    "J2 = EGM96(GMAT EGM96.cof)": 0.3899055027125692,
+    "J2 = WGS84_normal_field(geometric; NOT dynamic)": 2.7901915027815907,
+    "GM TT-compatible (3.986004415e14)": 0.6956401563462854,
+    "J2 reference radius 6378136.3 m (EGM2008); altitude datum unchanged": 0.18178268536095246,
+    "altitude datum 0.7 m lower (6378136.3 m)": 9.219816814297733,
+    "J2 only: J2 = IERS2010_zero_tide(T1.1)": 6.653246840882868,
+    "J2 only: J2 = IERS_conv_C20_zero_tide_2000(T6.2)": 6.6326635424077,
+    "J2 only: J2 = IERS_conv_C20_tide_free_2000(\u00a76.2.2)": 0.25423134177160384,
+    "J2 only: J2 = JGM3(GMAT JGM3.cof)": 0.3534832257099907,
+    "J2 only: J2 = EGM96(GMAT EGM96.cof)": 0.34866396739531785,
+    "J2 only: J2 = WGS84_normal_field(geometric; NOT dynamic)": 2.4950741044483786,
+    "J2 only: reference radius 6378136.3 m": 0.16255792833603896,
+    "J2 only: GM TT-compatible": 0.6255434150880473,
+    "J2+atmosphere axis tilted 0.145 deg (approx. precession J2000->2026)": 2400.6464251012007,
+    "J2+atmosphere axis tilted 10 arcsec (nutation-scale)": 46.09385240781864,
+    "geodetic (WGS 84 ellipsoid) instead of spherical altitude": 74012.60752664036,
+    "non-rotating atmosphere": 40032.67362860601,
+    "ballistic coefficient +1%": 4833.441840716362,
+    "J2 only: axis tilted theta_A(2026) = 521 arcsec about y": 117.18140009097012
+  },
+  "runtime_s": 43.312561988830566
+}

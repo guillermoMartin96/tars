@@ -17,6 +17,11 @@ This registry distinguishes deliberate model simplifications from bugs and unkno
 | SCI-0010 | Variable-mass equation of motion a = F/m (no ṁ·v term) | Active (DR-0011) | M2 dynamics |
 | SCI-0011 | Instantaneous ideal pointing through the centre of mass; no attitude dynamics | Active (DR-0011, DR-0012) | M2 thrust direction |
 | SCI-0012 | Single tank, all propellant usable, instantaneous flame-out at depletion | Active (DR-0011, DR-0014) | M2 propellant |
+| SCI-0013 | Earth J2 zonal field about the frame z axis (fixed pole), EGM2008 tide-free J2 with WGS 84 GM and a | Approved (DR-0024); not implemented. Axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028); APPROVED J-ax-1 2026-10-15 (DR-0028) | M3 configurations |
+| SCI-0014 | Atmosphere rigidly co-rotating with Earth about the frame z axis; no winds | Approved (DR-0024); not implemented. Axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028); APPROVED J-ax-1 2026-10-15 (DR-0028) | M3 configurations |
+| SCI-0015 | Static piecewise-exponential atmosphere (Vallado/GMAT table), preserved as published | Approved (DR-0024); not implemented; table conditionally approved and termination input approved with conditions (DR-0027); domain behaviour OPEN | M3 configurations |
+| SCI-0016 | Cannonball drag: constant C_d and A from the scenario, current total mass, no lift | Approved (DR-0024); not implemented | M3 configurations |
+| SCI-0017 | Density height = geodetic height above the WGS 84 ellipsoid | Approved (DR-0024); not implemented. Ellipsoid axis: Earth-fixed +Z (DR-0024 Q4); realization OPEN (DR-0028); APPROVED J-ax-1 2026-10-15 (DR-0028) | M3 configurations (density only; also the termination-altitude convention, DR-0027 A-2) |
 
 ## Sources used throughout
 - **[NGA]** NGA.STND.0036_1.0.0_WGS84, *Department of Defense World Geodetic System 1984*, National Geospatial-Intelligence Agency, 2014. https://earth-info.nga.mil/GandG/wgs84/index.html
@@ -242,6 +247,14 @@ Zero: constants must match exactly in reference comparisons.
 ## Related
 - DR: DR-0003
 - ADR: ADR-0003
+
+## Historical correction note (2026-10-15; DR-0024 Q3, approved by the Tech Lead)
+The text above is the accepted M1 record and is left as written. This note corrects one statement in it.
+- **Historical result (unchanged):** M1 and M2 use GM = 3.986004418×10¹⁴ m³/s² in the simulator and in every gating GMAT reference. The gate scripts set `Earth.Mu = 398600.4418` and use a point-mass force (`PointMasses = {Earth}`, no gravity file), so GMAT applies `Earth.Mu` (`toolbox/references/gmat/m1_two_body.script`, lines 6–9 and 25–26; the M2 scripts likewise).
+- **Incorrect historical description:** "Its GM equals the IERS Conventions (2010) value 3.986004418×10¹⁴ m³/s² (**TT-compatible**) [IERS Table 1.1]".
+- **Corrected interpretation:** IERS Conventions (2010) Table 1.1 labels 3.986004418×10¹⁴ m³/s² as **TCG-compatible**. §1.2 gives the **TT-compatible** value as 3.986004415×10¹⁴ m³/s² and says it "shall be used to compute orbits in a TT-compatible reference frame" (verified against TN36 ch. 1, working version 2017-11-16; DR-0024 §3.1). The numerical equality with the WGS 84 defining value is correct; only the time-scale label was wrong. Using the TCG-compatible value with TT-labelled time (SCI-0007) is a relative GM difference of 7.5×10⁻¹⁰, about 0.63–0.70 m along-track over 10 orbits at the reference orbit (VAL-0018).
+- **Effect on prior acceptance decisions: none.** Every M1/M2 acceptance check compares the simulator against references using the identical GM. The label enters no computation, no threshold and no reference. The "Known limitations" paragraph above (GMAT default μ = 398600.4415) remains correct.
+- **"Revisit when" above** ("adopting a gravity-field model with its own GM and reference radius"): evaluated for M3 in DR-0024 §3.5. M3 adopts one coefficient (EGM2008 C̄2,0), not a gravity-field model, and the Tech Lead decided to keep the WGS 84 GM and a (DR-0024 Q2, Q3). See SCI-0013.
 
 ---
 
@@ -515,3 +528,208 @@ Per the approved M2 threshold DR.
 
 ## Related
 - DR-0011, DR-0014
+
+---
+
+# SCI-0013: Earth J2 zonal field about the frame z axis (fixed pole)
+
+**Status:** Approved (DR-0024, Tech Lead 2026-10-15); not implemented. Axis choice approved via DR-0026 D3, flagged for confirmation (DR-0024 Q4)  
+**Status update (2026-10-15, append-only):** the "approved via DR-0026 D3" attribution above is withdrawn (review M3P2-F1). The owner decided DR-0024 Q4 explicitly: **the Earth-fixed +Z axis** is the common symmetry axis, with Earth-fixed and inertial representations kept distinct (DR-0024 Resolution, "Q4 coordinate conventions"). Whether that axis coincides with the frame z axis, as written below (DR-0028 A1, recommended), or follows the pole of date is **OPEN in DR-0028**.  
+**Status update 2 (2026-10-15, append-only):** **DR-0028 APPROVED J-ax-1.** M3 uses a **non-rotating Earth-axis-aligned reference model**:
+- its +Z axis coincides with Earth's symmetry/spin axis by assumption and is fixed in the inertial frame, so the "frame z axis" wording below holds;
+- there is no Earth rotation angle, precession, nutation, polar motion or time-dependent orientation;
+- it is **not** a physically accurate rotating terrestrial frame.
+
+Limitations (DR-0028 Resolution):
+- 117–123 m over 10 orbits against a pole-of-date Earth in 2026 (25 m at J2000), growing with time and epoch distance from J2000;
+- no longitude, ground track, site visibility or local solar time;
+- Earth-fixed navigation measurements, tesserals and MSIS-class atmospheres each need a separately authorized Earth-orientation model.
+
+Conventions and tests: DR-0024 "Q4 coordinate conventions, revision 2" (FC-1…FC-10). Extension point: ADR-0009 item 17 (not implemented).  
+**Status update 3 (2026-10-16, append-only; reviews M3P4-F1, M3P4-F2; DR-0028 Resolution amendment 1).** Two limitation statements in status update 2 are corrected. The approval and the model are unchanged.
+- **Pole tilt (M3P4-F1).** With δ ≈ 0.15° the angle between the model axis and the real pole:
+  - the inclination difference is bounded geometrically by δ;
+  - the ascending-node difference is not. To first order (δ ≪ i), the node point moves along the orbit by up to δ/sin i, and the node longitude by up to δ|cot i|;
+  - near-equatorial nodes are poorly conditioned or undefined;
+  - the 117–123 m and 25 m figures are measurements for the VAL-0018 configuration only. No general growth law is claimed (the phrase "growing with time and epoch distance from J2000" in status update 2 is withdrawn).
+- **Local solar time (M3P4-F2).** Local solar time does not need an Earth rotation angle: the angle cancels in the solar hour angle α_sc − α_Sun.
+  - M3 lacks a solar ephemeris and a time convention for it, so it stays outside M3 scope.
+  - Longitude, ground tracks and site visibility still need an Earth rotation angle, as stated.
+  - No solar ephemeris, Earth-orientation provider or local-solar-time implementation is authorized.
+**Introduced:** 2026-10-15  
+**Applies to:** M3 physics configurations only. SCI-0001 and SCI-0004 remain Active for M1/M2 configurations.
+
+## Assumption
+- Gravity = point mass + the degree-2 zonal term: U = (μ/r)[1 − J2 (a/r)² P₂(z/r)], with the symmetry axis = the frame z axis (SCI-0003).
+- μ = 3.986004418×10¹⁴ m³/s² and a = 6 378 137.0 m (WGS 84, SCI-0005, unchanged); **J2 = 1.0826261739×10⁻³** = −√5 C̄2,0 with the EGM2008 tide-free C̄2,0 = −0.484165143790815×10⁻³ [NGA Table 5.1].
+- J2 is constant in time. No J3+, tesserals, tides, precession, nutation or polar motion.
+
+## Why we are making it
+- J2 is the dominant LEO perturbation (VAL-0007, VAL-0018: 741 km over 10 orbits).
+- A fixed axis keeps the system autonomous (exact energy and h_z invariants) and the epoch metadata-only (SCI-0007).
+
+## Sources
+- [NGA] Table 3.1, Table 5.1; [IERS] TN36 ch. 1 and ch. 6 (tide systems); [CUR] §10.7; DR-0024 §3–§4.
+
+## Known limitations / expected error
+- The pole of date differs from frame z by about 0.15° in 2026: 117–123 m over 10 orbits against a pole-of-date model (25 m at J2000) [VAL-0018].
+- Tide-free J2 omits the permanent tidal deformation (ΔJ2 ≈ 9.3×10⁻⁹; 6.7 m over 10 orbits against the zero-tide value).
+- Mixing the EGM2008 C̄2,0 with the WGS 84 a and GM changes the J2 coefficient by 2.2×10⁻⁷ relative (DR-0024 §3.5; 0.16–0.18 m over 10 orbits).
+
+## Validation approach
+- DR-0025: invariants, secular rates, DOP853 (partially independent), GMAT exact configuration with a generated `.cof` carrying these constants (method decided after T0).
+
+## Accepted discrepancy / tolerance
+Not set. Thresholds come from a later threshold DR.
+
+## Revisit when
+- Ground tracks, node timing or navigation accuracy need the pole of date; higher harmonics are added.
+
+## Related
+- DR-0024, DR-0025, DR-0026; ADR-0009; VAL-0018.
+
+---
+
+# SCI-0014: Atmosphere rigidly co-rotating with Earth; no winds
+
+**Status:** Approved (DR-0024 Q7, Tech Lead 2026-10-15); not implemented  
+**Status update (2026-10-15, append-only):** the rotation axis is **the Earth-fixed +Z axis**, shared with J2 and the ellipsoid (DR-0024 Q4, owner decision). v_rel is evaluated with the frame transformations in DR-0024 "Q4 coordinate conventions" (FC-1…FC-9). Whether +Z coincides with the frame z axis, as written below, is **OPEN in DR-0028**.  
+**Status update 2 (2026-10-15, append-only):** DR-0028 APPROVED J-ax-1, so +Z is the frame z axis, as written below.
+- The co-rotation is a velocity field of the air in the inertial frame, v_air = ω_E Ẑ × r. It is not a rotating frame and needs no Earth rotation angle.
+- The identity transformation between the inertial frame and the Earth-axis-aligned model has zero derivative. That never removes the ω_E Ẑ × r term (DR-0024 revision 2, FC-2(b)).  
+**Introduced:** 2026-10-15  
+**Applies to:** M3 drag
+
+## Assumption
+- v_rel = v − ω_E × r, with ω_E = 7.292115×10⁻⁵ rad/s about the frame z axis [NGA Table 3.1]. No winds.
+
+## Why we are making it
+- Ignoring rotation changes the 10-orbit trajectory by 40 km and is physically wrong (VAL-0018).
+
+## Sources
+- [NGA] Table 3.1; GMAT Mathematical Specification Eq. 4.73–4.74 (same form).
+
+## Known limitations / expected error
+- Real thermospheric winds are not modelled. The IERS ERA rate differs from the nominal ω_E by 2×10⁻⁸ relative (negligible).
+
+## Validation approach
+- Unit checks of v_rel; GMAT exact configuration (DR-0025).
+
+## Accepted discrepancy / tolerance
+Not set.
+
+## Revisit when
+- Winds or a pole-of-date Earth are modelled.
+
+## Related
+- DR-0024, SCI-0013, SCI-0016.
+
+---
+
+# SCI-0015: Static piecewise-exponential atmosphere, preserved as published
+
+**Status:** Approved (DR-0024 Q5, Q5a, Q8, Q10, Tech Lead 2026-10-15); not implemented. Termination value and Q10 residual cells OPEN (DR-0027)  
+**Status update (2026-10-15, append-only; DR-0027 resolved with conditions):**
+- The GMAT R2026a table (sha256 `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`) is **pinned verbatim as the initial reference**, with the three disputed cells and the printed-edition uncertainty documented (DR-0027 B-1, B-2). No value is repaired or substituted (B-3). It is not claimed to agree with the printed textbook (B-5).
+- The termination altitude is an **explicit per-scenario input, metres, geodetic, with no default**; no universal value (DR-0027 A-1…A-3). Ranges, crossing behaviour and boundary interactions are proposed at T0.
+- **Domain behaviour is OPEN** (DR-0027 B-4). The sentence below, "Above the top band, the top band applies as the source defines", was an implementer statement, not an owner decision, and is withdrawn.
+- **Correction (M3P2-F3):** the 0 km base-altitude discrepancy changes density by 0.13785 % throughout 0.010–25 km, not only below 10 m. The 25–800 km rows are the ones confirmed in all fields.  
+**Introduced:** 2026-10-15  
+**Applies to:** M3 drag
+
+## Assumption
+- ρ(h) = ρ₀,i exp(−(h − h₀,i)/H_i) in band i, with the tabulated values of the Vallado/GMAT exponential table (28 bands, 0–1000 km) **exactly as published**. Values are never altered to force continuity.
+- Static: no diurnal, seasonal, solar-cycle or geomagnetic variation.
+- A one-band subset (one row of the same table) is retained for analytic and unit tests.
+- **No indefinite extrapolation below the modelled domain.** A run ends at an explicit validity boundary or termination event; its numerical value is OPEN (DR-0027 item A). Above the top band, the top band applies as the source defines.
+
+## Why we are making it
+- Deterministic, matchable exactly in GMAT, realistic profile shape (DR-0024 §4.3).
+
+## Sources
+- GMAT R2026a `EarthExponentialAtmosphereData.txt` (sha256 `75762f67…a85e`), citing Vallado 5th ed. §8.6.
+- Verified against the author's published data file `ATMOSEXP.DAT` (CelesTrak/fundamentals-of-astrodynamics @ `49df047`) and the author's errata (DR-0024 §3.4): 25 of 28 rows identical; the 0 km base altitude, the 900 km scale height and the 1000 km row are residuals (DR-0027 item B).
+
+## Known limitations / expected error
+- **Discontinuous as published:** value jumps at every band boundary (largest +1.36×10⁻³ relative at 25 km; ≤ 9.6×10⁻⁵ from 30 km up) and a slope change at every boundary (DR-0024 §3.4).
+- Real density at 250 km varies by a factor of about 3.5 with solar activity (VAL-0007). Lifetime predictions are indicative only.
+
+## Validation approach
+- Tests at and immediately around every band boundary; GMAT with the identical table file; boundary-appropriate convergence evidence (DR-0025 principles 4–5).
+
+## Accepted discrepancy / tolerance
+Not set.
+
+## Revisit when
+- Solar-activity dependence is needed (A4, NRLMSIS-class), or the printed table shows a difference.
+
+## Related
+- DR-0024, DR-0025, DR-0027.
+
+---
+
+# SCI-0016: Cannonball drag with current total mass
+
+**Status:** Approved (DR-0024 Q9 principle, Tech Lead 2026-10-15); not implemented. Reference-scenario values DEFERRED to the T0 checkpoint  
+**Introduced:** 2026-10-15  
+**Applies to:** M3 drag
+
+## Assumption
+- a_d = −½ ρ (C_d A / m) |v_rel| v_rel. C_d and the reference area A are constant, attitude-independent **scenario inputs**. No lift.
+- m is the spacecraft's current total mass (dry + propellant, the M2 rule) at every derivative evaluation.
+
+## Why we are making it
+- The simplest free-molecular drag model; matches GMAT `DragModel = Spherical`.
+
+## Sources
+- GMAT Mathematical Specification Eq. 4.73–4.74; [MG] §3.5 (secondary).
+
+## Known limitations / expected error
+- Real C_d and area depend on attitude, composition and altitude. B ± 1 % moves the 10-orbit trajectory by 4.8 km (VAL-0018).
+- The free-molecular assumption fails at low altitude; the validity floor is OPEN (DR-0027 item A).
+
+## Validation approach
+- Direction and energy-decrease checks; decay-rate estimates; DOP853; GMAT (DR-0025).
+
+## Accepted discrepancy / tolerance
+Not set.
+
+## Revisit when
+- Attitude-dependent area, lift, or a body model is needed.
+
+## Related
+- DR-0024, DR-0026, SCI-0010, SCI-0014, SCI-0015.
+
+---
+
+# SCI-0017: Density height is geodetic height above the WGS 84 ellipsoid
+
+**Status:** Approved (DR-0024 Q6, Tech Lead 2026-10-15); not implemented  
+**Status update (2026-10-15, append-only):** the ellipsoid axis is **the Earth-fixed +Z axis** (DR-0024 Q4, owner decision); geodetic height is evaluated from the Earth-fixed position (DR-0024 "Q4 coordinate conventions", FC-4). Whether +Z coincides with the frame z axis, as written below, is **OPEN in DR-0028**. Geodetic height is also the convention of the per-scenario termination altitude (DR-0027 A-2).  
+**Status update 2 (2026-10-15, append-only):** DR-0028 APPROVED J-ax-1. The ellipsoid is evaluated about the frame z axis of the non-rotating Earth-axis-aligned model, as written below. The transformation is the identity, so the "Earth-fixed position" of the previous update is the inertial position itself. Geodetic height is axisymmetric about +Z (FC-4), and no longitude or rotation angle is involved.  
+**Introduced:** 2026-10-15  
+**Applies to:** M3 atmosphere density only. SCI-0006 (reported altitude, impact) is unchanged for v1/v2.
+
+## Assumption
+- The density model is evaluated at the geodetic height above the WGS 84 ellipsoid (a = 6 378 137.0 m, 1/f = 298.257223563 [NGA]), with the ellipsoid axis = the frame z axis.
+
+## Why we are making it
+- Physically meaningful input; the author's own reference code uses geodetic height for this table (DR-0024 §3.4). Spherical height would move the 10-orbit trajectory by 74 km (VAL-0018).
+
+## Sources
+- [NGA] Table 3.1; DR-0024 §4.5.
+
+## Known limitations / expected error
+- The cartesian-to-geodetic conversion is a numerical algorithm with its own error; its verification source is chosen at T0 (DR-0025 Q-G2-7).
+
+## Validation approach
+- Published geodetic test points (source at T0); GMAT with WGS 84 flattening (DR-0025).
+
+## Accepted discrepancy / tolerance
+Not set.
+
+## Revisit when
+- A pole-of-date Earth is modelled.
+
+## Related
+- DR-0024, SCI-0006, SCI-0013.

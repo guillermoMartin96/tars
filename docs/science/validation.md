@@ -152,6 +152,11 @@ Initially GMAT is the primary orbital reference. Add independent authoritative v
 - This confirms SCI-0001 and SCI-0004 as stated and quantifies them. J2 and drag must precede any mission that depends on real ground tracks, node timing, or orbit lifetime.
 
 - **Status:** informational; no gate. GMAT epoch-column drift REV-012 is deferred (see the GMAT README).
+- **Historical correction note (2026-10-15; DR-0025 Q-G2-8, approved by the Tech Lead).** The entry above is left as written; this note corrects its implied constants.
+  - **Historical result (unchanged):** the measured divergences, node drifts, SMA changes and altitude ranges in the table, from the committed scripts and reports in `toolbox/references/gmat/informational/`.
+  - **Incorrect historical description:** the generated scripts set `Earth.Mu = 398600.4418` and `Earth.EquatorialRadius = 6378.137` (WGS 84), which presents the runs as using the project's constants. Nothing in the record says otherwise.
+  - **Corrected interpretation:** these runs use a gravity field (`GravityField.Earth.PotentialFile = 'JGM3.cof'`), and GMAT's gravity field applies the GM and reference radius from the `.cof` file header, not `Earth.Mu`. The JGM-3 file header gives GM = 3.98600441500000e+14 m³/s² and R = 6.37813630000000e+06 m, and its C̄2,0 = −4.84165374886470e-04 (so J2 ≈ 1.0826267e-3). Established by the M3 planning GMAT probe (VAL-0018: a GMAT run with a generated `.cof` matches the Kepler solution with GM 3.986004415e14 to 1.4e-5 m and differs from WGS 84 by 0.627 m). So the J2-only, 4×4 and drag cases used the JGM-3 GM, R and J2.
+  - **Effect on prior acceptance decisions: none.** VAL-0007 is informational and gates nothing (DR-0005). The GM difference is about 0.6 m over 10 orbits, negligible against the 741–1 325 km results and the conclusions drawn from them. The gating M1/M2 GMAT references use a point-mass force with `Earth.Mu` and are unaffected (SCI-0005 correction note).
 
 ## VAL-0008 — PLANNING: finite-burn numerics with RK4 (M2; not a gate)
 - **Date / revision:** 2026-10-09 / `63bec8d` (research scripts; no project propulsion code exists)
@@ -680,3 +685,41 @@ All 10 approved rejection codes are exercised.
 - **What it does not detect.** The record digest detects corruption and accidental edits. It does not authenticate a deliberately forged record (DR-0019 B; DR-0022 B condition 1). CI records are produced and consumed within one run, and the golden is pinned by a reviewed digest.
 - **Status:** gate implemented under DR-0023 decision 4. No existing threshold, reference, tolerance or check was changed.
 
+
+## VAL-0018 — PLANNING: candidate J2 and drag physics; GMAT feasibility (M3; not a gate)
+- **Date:** 2026-10-15
+- **Revision:** branch `milestone-3-planning`. The production code is identical to the M3 planning baseline `main` = `d92ab89`.
+- **Purpose:** measure what the M3 Decision Requests (DR-0024 G1, DR-0025 G2, DR-0026 G3) need before any model, threshold or design is chosen.
+- **Code:** candidate physics written independently in `docs/science/experiments/m3-planning/`. It is not project code, and no production force model exists for M3.
+- **Configuration:**
+  - M1 initial state, 53 700 s;
+  - WGS 84 GM and a;
+  - J2 = 1.0826261739e-3 (EGM2008 tide-free C̄2,0 from NGA.STND.0036 Table 5.1), about the frame z axis;
+  - GMAT R2026a's piecewise-exponential atmosphere table, spherical or geodetic height;
+  - atmosphere co-rotating at ω_E = 7.292115e-5 rad/s;
+  - illustrative B = m/(C_d A) = 25.8 and 100 kg/m².
+- **References:**
+  - SciPy DOP853 (rtol 1e-13);
+  - first-order J2 secular theory;
+  - first-order drag decay estimate;
+  - GMAT R2026a (build Mar 26 2026), with a generated `.cof`, the `Exponential` atmosphere, and states in EarthMJ2000Eq or in true-of-epoch (TOEEq) axes fixed at the epoch.
+- **Results (full tables in the experiment README and JSON):**
+  - **RK4 dt = 10 s vs DOP853:** J2 0.30 m; drag (B 25.8) 4.6 m; J2 + drag 2.1 m (B 25.8) / 0.70 m (B 100).
+  - **Convergence:** J2 error ratios 22.4 / 20.0 / 18.3. Drag-only ratios 10.4 / 9.0 / 13.6: the literal density table has finite value jumps (≤ 1.4e-3 relative, from rounding) and scale-height changes at band edges.
+  - **Displacement from point mass after 10 orbits:** J2 741 km (matching GMAT's 741 km in VAL-0007); drag 363 km; both 1 161 km.
+  - **J2 node rate:** fitted −5.4385 °/day against first-order −5.4099 °/day (+0.53%, osculating a₀).
+  - **Drag decay:** −12.8 km/day (B 25.8), −3.05 km/day (B 100). The first-order fixed-density estimate is off by 11% / 2.6%.
+  - **GMAT:**
+    - its gravity field uses the `.cof` GM, not `Earth.Mu`, and its default flattening is not WGS 84;
+    - fixed-pole models against GMAT in EarthMJ2000Eq axes: 123.5 m (J2), 1.38 m (drag, spherical), 4.33 m (drag, geodetic);
+    - **in TOEEq axes: 0.19 m (J2), 0.0020 m (drag, spherical), 0.38 m (drag, geodetic, WGS 84 flattening).**
+  - **Sensitivities (Δ final position):**
+    - J2 tide-free vs zero-tide 6.7 m;
+    - GM TT vs TCG value 0.63 m;
+    - J2 axis tilted by the 2026 precession angle 117 m;
+    - geodetic vs spherical height 74 km;
+    - non-rotating atmosphere 40 km;
+    - B +1% 4.8 km.
+- **Classification:** planning measurements of candidate physics. They show which choices are physically material and that GMAT can serve as an exact-configuration reference for a fixed-pole model in TOEEq axes. They do not validate any implementation.
+- **Status:** informational; no gate; no threshold derived.
+- **Observation on earlier records (not edited):** the VAL-0007 informational GMAT runs used the JGM-3 coefficient-file GM (3.986004415e14) and R (6378136.3 m), not their `Earth.Mu` override. The effect (~0.6 m) is negligible against those runs' 741–1 325 km results (DR-0025 §13).

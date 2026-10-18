@@ -1,0 +1,1750 @@
+{
+ "verdict": "PASS",
+ "grid": {
+  "inclinations_deg": {
+   "inclined": [
+    30.0,
+    51.6,
+    120.0
+   ],
+   "near_polar": [
+    89.0,
+    90.0,
+    91.0
+   ],
+   "near_equatorial": [
+    2.0,
+    5.0,
+    175.0,
+    178.0
+   ]
+  },
+  "node_longitudes_deg": [
+   0.0,
+   37.0,
+   90.0,
+   145.0,
+   200.0,
+   300.0
+  ],
+  "tilt_azimuths_deg": [
+   0.0,
+   60.0,
+   135.0,
+   210.0,
+   300.0
+  ],
+  "tilt_signs": [
+   1,
+   -1
+  ],
+  "steps": "delta_k = sign * 1e-2 sin(i) * 2^-k rad, k = 0..4"
+ },
+ "tolerances": {
+  "noise_rad": "64 eps / sin i",
+  "significance_factor": 1000.0,
+  "order_threshold": 1.5
+ },
+ "exact_properties": {
+  "E1_rotation_convention_max_deviation": 2.22044604925e-16,
+  "E2_case_counts": {
+   "interior": 168,
+   "crossing_positive_tilt": 72,
+   "crossing_negative_tilt": 72
+  },
+  "E2_counterexample_i2_delta5_delta_i_deg": 1.0,
+  "E2_counterexample_i2_delta5_delta_node_deg": 180.0,
+  "E2_counterexample_i2_delta5_expected_deg": [
+   1.0,
+   180.0
+  ],
+  "E2_max_dev_noise_units": 0.0293653943996,
+  "E2_endpoint_cases": 48,
+  "E2_endpoint_max_hypot_in_eps": 0.812198756946,
+  "E3_closed_form_max_dev_in_noise_units": 0.0246964028402,
+  "E4_max_excess_of_abs_delta_i_over_abs_delta_in_64eps_units": 0.0198059082031,
+  "E5_equatorial_node_undefined": true,
+  "E5_sweep_positive_tilt_defined_samples": 360,
+  "E5_sweep_positive_tilt_max_abs_delta_node_deg": 180.0,
+  "E5_sweep_negative_tilt_defined_samples": 360,
+  "E5_sweep_negative_tilt_max_abs_delta_node_deg": 180.0,
+  "E5_jump_assertions": {
+   "positive": 73,
+   "negative": 73
+  },
+  "E6_review04_node_b_deg": 90.2598055437,
+  "E6_review04_delta_node_deg": 0.259805543688,
+  "E6_review04_first_order_delta_node_deg": 0.259807621135,
+  "E6_review04_delta_i_deg": 0.000340085438377,
+  "E6_review04_first_order_delta_i_deg": -9.18485099361e-18
+ },
+ "wrap_convention": {
+  "inputs_checked": 22,
+  "exact_equivalent_pairs": 30,
+  "wrap_pi": 3.14159265359,
+  "wrap_minus_pi": 3.14159265359
+ },
+ "wrap_nonfinite": {
+  "nan": "ValueError (guard)",
+  "negative_nan": "ValueError (guard)",
+  "plus_inf": "ValueError (guard)",
+  "minus_inf": "ValueError (guard)",
+  "cases_checked": 4
+ },
+ "exact_property_failures": [],
+ "formulas_under_test": {
+  "delta_i": "-delta cos(Omega - phi)",
+  "delta_node": "+delta cot(i) sin(Omega - phi)",
+  "stats": {
+   "order_samples_delta_i": 506,
+   "order_samples_delta_node": 532,
+   "observed_order_delta_i_min_max": [
+    1.98258814278,
+    3.00000347893
+   ],
+   "observed_order_delta_node_min_max": [
+    1.99664497841,
+    3.00000367363
+   ],
+   "sign_checks": 1064,
+   "sign_checks_delta_i": 560,
+   "sign_checks_delta_node": 504,
+   "minimum_valid_samples": {
+    "delta_i": {
+     "order": 506,
+     "sign": 560
+    },
+    "delta_node": {
+     "order": 532,
+     "sign": 504
+    }
+   },
+   "gate_ratio_nearest": {
+    "delta_i_order": {
+     "lowest_counted": 1.01233287048,
+     "highest_not_counted": 0.993962703705
+    },
+    "delta_i_sign": {
+     "lowest_counted": 4652.07715352,
+     "highest_not_counted": 2.69220653158e-09
+    },
+    "delta_node_order": {
+     "lowest_counted": 1.54981036931,
+     "highest_not_counted": 0.495320426916
+    },
+    "delta_node_sign": {
+     "lowest_counted": 91865.6917164,
+     "highest_not_counted": 2.68277901117e-09
+    }
+   }
+  },
+  "failures": []
+ },
+ "mutants": {
+  "amendment1_original_both_signs_reversed": {
+   "failing_checks": 2128,
+   "rejected": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "both first-order signs reversed",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "delta_i_sign_reversed": {
+   "failing_checks": 1120,
+   "rejected": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "Delta i sign reversed",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "delta_node_sign_reversed": {
+   "failing_checks": 1008,
+   "rejected": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 2800,
+     "defect": "Delta Omega sign reversed",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "cos_sin_swapped": {
+   "failing_checks": 1578,
+   "rejected": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "cos and sin swapped",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  }
+ },
+ "formula_defect_mutants": {
+  "M3P8-F1_delta_i_nan": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 600,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 600,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i formula returns nan",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_i_plus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 600,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 600,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i formula returns inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_i_minus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 600,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 600,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i formula returns -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_i_zero": {
+   "designated_minimum_failures": {
+    "coverage_delta_i": 1
+   },
+   "failures_by_check": {
+    "order": 560,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 1,
+    "coverage_delta_node": 0,
+    "order_delta_i": 560,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i formula returns 0",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_audit_oracle_delta_i_nan": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 600,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 600,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i oracle value NaN everywhere",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_node_nan": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 600,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 600,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_node formula returns nan",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_node_plus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 600,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 600,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_node formula returns inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_node_minus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 600,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 600,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_node formula returns -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_delta_node_zero": {
+   "designated_minimum_failures": {
+    "coverage_delta_node": 1
+   },
+   "failures_by_check": {
+    "order": 504,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 1,
+    "order_delta_i": 0,
+    "order_delta_node": 504,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 2800,
+     "defect": "delta_node formula returns 0",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_audit_oracle_delta_node_nan": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 600,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 600,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_node oracle value NaN everywhere",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_i_plus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 600,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 600,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i oracle value inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_i_plus_inf_single_sample": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 1,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 1,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 1,
+     "defect": "delta_i oracle value inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_i_minus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 600,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 600,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i oracle value -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_i_minus_inf_single_sample": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_i": 1,
+    "coverage_delta_i": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 1,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 2,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 1,
+     "defect": "delta_i oracle value -inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_node_plus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 600,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 600,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_node oracle value inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_node_plus_inf_single_sample": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 1,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 1,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 1,
+     "defect": "delta_node oracle value inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_node_minus_inf": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 600,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 600,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_node oracle value -inf",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F1_oracle_delta_node_minus_inf_single_sample": {
+   "designated_minimum_failures": {
+    "nonfinite_delta_node": 1,
+    "coverage_delta_node": 2
+   },
+   "failures_by_check": {
+    "order": 0,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 1,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 2,
+    "order_delta_i": 0,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 0,
+     "defect": "none (the reference implementation)",
+     "changes": false,
+     "intended": 0,
+     "unchanged": 3000,
+     "missing": 0,
+     "unintended": 0
+    },
+    "oracle": {
+     "calls": 3000,
+     "differing": 1,
+     "defect": "delta_node oracle value -inf at one sample only",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 2999,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F2_delta_i_coefficient_doubled": {
+   "designated_minimum_failures": {
+    "order_delta_i": 560
+   },
+   "failures_by_check": {
+    "order": 560,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 0,
+    "order_delta_i": 560,
+    "order_delta_node": 0,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i first-order coefficient doubled",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F2_delta_i_sign_reversed": {
+   "designated_minimum_failures": {
+    "sign_delta_i": 560
+   },
+   "failures_by_check": {
+    "order": 560,
+    "sign": 560,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 0,
+    "order_delta_i": 560,
+    "order_delta_node": 0,
+    "sign_delta_i": 560,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 3000,
+     "defect": "delta_i first-order sign reversed",
+     "changes": true,
+     "intended": 3000,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F2_delta_node_coefficient_doubled": {
+   "designated_minimum_failures": {
+    "order_delta_node": 504
+   },
+   "failures_by_check": {
+    "order": 504,
+    "sign": 0,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 504,
+    "sign_delta_i": 0,
+    "sign_delta_node": 0
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 2800,
+     "defect": "delta_node first-order coefficient doubled",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F2_delta_node_sign_reversed": {
+   "designated_minimum_failures": {
+    "sign_delta_node": 504
+   },
+   "failures_by_check": {
+    "order": 504,
+    "sign": 504,
+    "nonfinite_delta_i": 0,
+    "nonfinite_delta_node": 0,
+    "coverage_delta_i": 0,
+    "coverage_delta_node": 0,
+    "order_delta_i": 0,
+    "order_delta_node": 504,
+    "sign_delta_i": 0,
+    "sign_delta_node": 504
+   },
+   "rejected_by_designated_checks": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 3000,
+     "differing": 2800,
+     "defect": "delta_node first-order sign reversed",
+     "changes": true,
+     "intended": 2800,
+     "unchanged": 200,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  }
+ },
+ "exact_and_wrap_mutants": {
+  "M3P6-F1_unrestricted_line_of_nodes_claim": {
+   "designated_tests": [
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 192,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "line_of_nodes": {
+     "calls": 360,
+     "differing": 192,
+     "defect": "Delta i = -delta, Delta Omega = 0 in every regime (no domain 0 < i - delta < pi)",
+     "changes": true,
+     "intended": 192,
+     "unchanged": 168,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P6-F2_oracle_jump_suppressed": {
+   "designated_tests": [
+    "E5a",
+    "E5b"
+   ],
+   "failures_by_test": {
+    "E2": 144,
+    "E5a": 144,
+    "E5b": 2,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 612,
+     "defect": "node difference of more than pi/2 replaced by 0 (jump suppressed)",
+     "changes": true,
+     "intended": 612,
+     "unchanged": 7226,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P6-F2_oracle_jump_suppressed_at_i_0p1_deg_only": {
+   "designated_tests": [
+    "E5a",
+    "E5b"
+   ],
+   "failures_by_test": {
+    "E2": 18,
+    "E5a": 18,
+    "E5b": 2,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 212,
+     "defect": "node difference of more than pi/2 replaced by 0 (jump suppressed) at i = 0.1 deg only",
+     "changes": true,
+     "intended": 212,
+     "unchanged": 7626,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P6-F2_jump_assertion_disabled": {
+   "designated_tests": [
+    "E5c"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 2,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "assert_jump": {
+     "defect": "the jump assertions switched off (assert_jump = False)",
+     "setting": false,
+     "default": true,
+     "intended": true
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P6-F3_previous_wrap_minus_pi_to_pi": {
+   "designated_tests": [
+    "wrap"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 28,
+    "other": 0,
+    "wrap_nonfinite": 4,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "wrap_fn": {
+     "calls": 7767,
+     "differing": 195,
+     "defect": "the bcb7f9b reduction a - 2 pi floor((a + pi) / 2 pi): [-pi, pi), no non-finite guard",
+     "changes": true,
+     "intended": 195,
+     "unchanged": 7572,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P7-F1_nonfinite_guard_removed": {
+   "designated_tests": [
+    "wrap_nonfinite"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 4,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "wrap_fn": {
+     "calls": 7765,
+     "differing": 4,
+     "defect": "the non-finite guard removed: a non-finite input does not raise the guard's ValueError",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7761,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_audit_rotation_matrix_nan": {
+   "designated_tests": [
+    "E1",
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 48,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 20,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "tilt_fn": {
+     "calls": 68,
+     "differing": 68,
+     "defect": "rotation matrix entry [1][1] = NaN",
+     "changes": true,
+     "intended": 68,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_audit_oracle_delta_i_nan": {
+   "designated_tests": [
+    "E2",
+    "E3",
+    "E4",
+    "E6"
+   ],
+   "failures_by_test": {
+    "E2": 312,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 2,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 144,
+    "E4": 6660,
+    "E6": 1
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 7838,
+     "defect": "delta_i oracle value NaN everywhere",
+     "changes": true,
+     "intended": 7838,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P8-F1_audit_oracle_delta_node_nan": {
+   "designated_tests": [
+    "E2",
+    "E3",
+    "E5b",
+    "E6"
+   ],
+   "failures_by_test": {
+    "E2": 312,
+    "E5a": 0,
+    "E5b": 722,
+    "E5c": 2,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 144,
+    "E4": 0,
+    "E6": 1
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 7838,
+     "defect": "delta_node oracle value NaN everywhere",
+     "changes": true,
+     "intended": 7838,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P9-F3_oracle_delta_i_scaled_1pct": {
+   "designated_tests": [
+    "E3",
+    "E4"
+   ],
+   "failures_by_test": {
+    "E2": 288,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 1,
+    "E4": 1,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 7825,
+     "defect": "delta_i oracle value 1 % too large",
+     "changes": true,
+     "intended": 7825,
+     "unchanged": 13,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P10-F2_wrap_inexact_reduction": {
+   "designated_tests": [
+    "wrap"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 2,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "wrap_fn": {
+     "calls": 7765,
+     "differing": 4,
+     "defect": "the inexact reduction a - 2 pi round(a / 2 pi) for finite input",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7761,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P10-F2_wrap_nonfinite_raises_typeerror": {
+   "designated_tests": [
+    "wrap_nonfinite"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 4,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "wrap_fn": {
+     "calls": 7765,
+     "differing": 4,
+     "defect": "a non-finite input raises TypeError instead of ValueError (same message)",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7761,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P10-F2_line_of_nodes_interior_undefined": {
+   "designated_tests": [
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 168,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "line_of_nodes": {
+     "calls": 360,
+     "differing": 168,
+     "defect": "node reported undefined in the interior regime 0 < i - delta < pi",
+     "changes": true,
+     "intended": 168,
+     "unchanged": 192,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P10-F2_line_of_nodes_crossing_node_unchanged": {
+   "designated_tests": [
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 144,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "line_of_nodes": {
+     "calls": 360,
+     "differing": 144,
+     "defect": "Delta Omega = 0 instead of +pi in the equator-crossing regimes",
+     "changes": true,
+     "intended": 144,
+     "unchanged": 216,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P10-F2_line_of_nodes_endpoints_defined": {
+   "designated_tests": [
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 48,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "line_of_nodes": {
+     "calls": 360,
+     "differing": 48,
+     "defect": "a defined node (Delta i = -delta, Delta Omega = 0) at the endpoints j = 0 and j = pi",
+     "changes": true,
+     "intended": 48,
+     "unchanged": 312,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P10-F2_equatorial_node_defined": {
+   "designated_tests": [
+    "E5d"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 1,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "elements_fn": {
+     "calls": 1,
+     "differing": 1,
+     "defect": "a node reported for an equatorial orbit",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_wrap_not_periodic": {
+   "designated_tests": [
+    "wrap"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 6,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "wrap_fn": {
+     "calls": 7765,
+     "differing": 6,
+     "defect": "an input one or more turns from 1.0 rad reduced to 1.01 instead of 1.0",
+     "changes": true,
+     "intended": 6,
+     "unchanged": 7759,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_node_origin_offset": {
+   "designated_tests": [
+    "E1"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 1,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "tilt_fn": {
+     "calls": 68,
+     "differing": 68,
+     "defect": "an extra rotation of 0.01 rad about the pole (node-longitude origin offset)",
+     "changes": true,
+     "intended": 68,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_tilt_axis_quantized": {
+   "designated_tests": [
+    "E2"
+   ],
+   "failures_by_test": {
+    "E2": 24,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "tilt_fn": {
+     "calls": 68,
+     "differing": 24,
+     "defect": "tilt-axis azimuth rounded to the nearest multiple of 15 deg",
+     "changes": true,
+     "intended": 24,
+     "unchanged": 44,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_oracle_node_nan_at_sweep_azimuth": {
+   "designated_tests": [
+    "E5b"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 2,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 2,
+     "defect": "NaN node difference at sweep azimuth 1 deg",
+     "changes": true,
+     "intended": 2,
+     "unchanged": 7836,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P11-F2_oracle_node_undefined_at_sweep_azimuths": {
+   "designated_tests": [
+    "E5b"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 2,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 0
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "oracle": {
+     "calls": 7838,
+     "differing": 4,
+     "defect": "no node at sweep azimuths 1 and 2 deg",
+     "changes": true,
+     "intended": 4,
+     "unchanged": 7834,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  },
+  "M3P12-F2_first_order_node_sign_reversed_in_e6_tilt_gap": {
+   "designated_tests": [
+    "E6"
+   ],
+   "failures_by_test": {
+    "E2": 0,
+    "E5a": 0,
+    "E5b": 0,
+    "E5c": 0,
+    "E5d": 0,
+    "wrap": 0,
+    "other": 0,
+    "wrap_nonfinite": 0,
+    "E1": 0,
+    "E3": 0,
+    "E4": 0,
+    "E6": 1
+   },
+   "rejected_by_designated_test": true,
+   "defect_calls": {
+    "formula": {
+     "calls": 1,
+     "differing": 1,
+     "defect": "first-order Delta Omega sign reversed for tilt magnitudes in the first-order grid's gap that contains 0.15 deg (E6_TILT_GAP)",
+     "changes": true,
+     "intended": 1,
+     "unchanged": 0,
+     "missing": 0,
+     "unintended": 0
+    }
+   },
+   "defect_exercised": true
+  }
+ },
+ "mutants_with_defect_not_exercised": [],
+ "exercise_criterion": "amendment 8 (M3P11-F1): each injected function shows exactly its declared intended defect (intended >= 1, missing = 0, unintended = 0); 'differing' is reported only",
+ "mutants_without_declared_defect": []
+}
