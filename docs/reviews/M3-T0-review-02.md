@@ -109,3 +109,17 @@ The reviewer also confirmed:
 - no file outside `docs/`;
 - DR-0029 P1–P10 and DR-0028 P6 (b) stay OPEN;
 - the geodetic-drag discrepancy stays ESCALATED_FOR_INVESTIGATION.
+
+### Validation of the correction commit `14d98f0` (appended 2026-10-18)
+Evidence is in `docs/reviews/raw/M3-T0-review03-correction-evidence/`; scratch and temporary paths are redacted.
+
+| Check | Result |
+|---|---|
+| Focused regression checks | `check_review01.py` + `check_review02.py`: 50/50 pass (`checks_after.log`). Red before: 11 of 50 fail at `5548d11`; amended `check_review01.py` at `bdcaacf`: 11 failed, 1 passed |
+| Mutation tests | `mutation_check_review02.py`: control passes 50/50; 15/15 corruptions detected by a declared check; 1 declared equivalent (`mutation_check_review02.json`) |
+| M1 Proof (`run_m1_proof.sh`, fresh clone at `14d98f0`) | PASS, 9/9 steps; pytest 1185 passed; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; pytest 1185 passed; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`) |
+| Five pinned digests | All match (`pinned_digests.log`) |
+| Production and protected files | `git diff --name-only 86df2c3 14d98f0 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness and `t0_axis_ablation.py`. `git status` is empty after each run, so all 89 tracked experiment files are byte-identical; the checks then pass 50/50 (`reproducibility_twice.log`) |
+| CI on `14d98f0` | Run 39201618112 (https://github.com/guillermoMartin96/tars/actions/runs/39201618112): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion |
