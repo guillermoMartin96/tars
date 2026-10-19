@@ -56,7 +56,7 @@ uv run --no-sync python $D/t0_gmat.py --gmat-console "$HOME/Applications/GMAT R2
     --out $D/t0_gmat_results.json
 uv run --no-sync python $D/t0_axis_ablation.py $D/t0_axis_ablation_results.json
 uv run --no-sync pytest -q -p no:cacheprovider $D/check_review01.py $D/check_review02.py $D/check_review03.py
-uv run --no-sync python $D/mutation_check_review02.py   # about 60 min
+uv run --no-sync python $D/mutation_check_review02.py   # about 15-20 min
 ```
 - **Reproducibility:** each command was run twice from a clean state. Every output, including all `gmat_runs/` files, was byte-identical between the runs (2026-10-18).
 - **Run times:** the Python scripts take seconds each; `t0_gmat.py` takes about 40 s.

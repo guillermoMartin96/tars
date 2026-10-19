@@ -118,5 +118,16 @@
 
 **Effect on P1:** the three bounds are 124 456.69 m (B 25.8), 118 633.51 m (B 100) and 111 511.96 m (drag-free), unchanged at the quoted precision. The P1 recommendation is unchanged.
 
-### Validation
-Recorded in the validation commit that follows this correction commit (§4 of the authorization).
+### Validation of the correction commit `489d4e7` (appended 2026-10-19)
+Evidence is in `docs/reviews/raw/M3-T0-review04-correction-evidence/`; scratch, home and temporary paths are redacted.
+
+| Check | Result |
+|---|---|
+| Focused, boundary and Review 01–03 regression checks | `check_review01.py` + `check_review02.py` + `check_review03.py`: 92/92 pass (`checks_after.log`). Red before, at `c6c0fff` with the alias shim: `check_review03.py` 37 of 42 fail (`checks03_before_c6c0fff.log`) |
+| Mutation tests | `mutation_check_review02.py`: the control passes; 24/24 corruptions detected by a declared check; 1 declared equivalent (`mutation_check_review03.json`) |
+| M1 Proof (`run_m1_proof.sh`, fresh clone at `489d4e7`) | PASS, 9/9 steps; pytest exit 0 (a separate full run in the same clone after the Proof: 1185 passed, 3 warnings); `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`) |
+| Five pinned digests | All match (`pinned_digests.log`) |
+| Production and protected files | `git diff --name-only 86df2c3 489d4e7 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness and `t0_height_error.py`. `git status` is empty after each run, so all 93 tracked experiment files are byte-identical; the checks then pass 92/92 (`reproducibility_twice.log`) |
+| CI on `489d4e7` | Run 39285314078 (https://github.com/guillermoMartin96/tars/actions/runs/39285314078): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion |

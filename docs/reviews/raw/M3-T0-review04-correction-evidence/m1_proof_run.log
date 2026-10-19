@@ -1,0 +1,24 @@
+revision: 489d4e72bfc177f2b0f0c1d9389448f422e9c2d7
+branch: HEAD
+date_utc: 2026-10-19T16:25:44Z
+working_tree_clean_excluding_evidence: yes
+== uv sync --locked: <home>/Library/Python/3.9/bin/uv sync --locked
+   exit=0
+== ruff check: <home>/Library/Python/3.9/bin/uv run ruff check .
+   exit=0
+== ruff format --check: <home>/Library/Python/3.9/bin/uv run ruff format --check .
+   exit=0
+== pytest: <home>/Library/Python/3.9/bin/uv run pytest -q
+   exit=0
+== determinism (cross-process): <home>/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py
+   exit=0
+== cross-platform: sh -c "<home>/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "<tmp>/cross_platform.json"
+   exit=0
+== m1_proof (non-GMAT): <home>/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out <tmp>/m1_non_gmat.json
+   exit=0
+== gmat compare: sh -c "<home>/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "<tmp>/gmat_reference.json"
+   exit=0
+== run_mission: <home>/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m1_leo_250km.json --out <tmp>/mission
+   exit=0
+overall: PASS
+exit=0
