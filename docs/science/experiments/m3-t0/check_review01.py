@@ -12,6 +12,11 @@ does not match `test_*.py`), so the M1/M2 Proof is unaffected. Run explicitly:
 Correction logs inside the records are fenced by `<!-- review01-correction-log -->` and
 `<!-- /review01-correction-log -->`. They describe the superseded wording on purpose and are
 excluded from the wording checks.
+
+Amended for Review 02 M3T0-R2-F1: perturbed-motion (J2 + drag) values are sampled estimates,
+not bounds, so the two F1 checks below test certified bounds where one is claimed and require
+the perturbed values to be labelled as estimates. The checks of the new claims are in
+`check_review02.py`.
 """
 
 from __future__ import annotations
@@ -94,7 +99,7 @@ def claimed_bounds(case: str) -> list[float]:
     if "analytic_estimate_m" in old and "250x800" in case:
         out.append(old["analytic_estimate_m"])  # presented as "the analytic bound"
     new = results("termination").get("missed_crossing", {}).get("cases", {})
-    if case in new:
+    if case in new and "bound_m" in new[case]:
         out.append(new[case]["bound_m"])
     return out
 
@@ -104,16 +109,23 @@ def test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase(case):
     cfg, (r0, v0) = DIP_CASES[case]
     dip = midpoint_dip(cfg, r0, v0)
     bounds = claimed_bounds(case)
-    assert bounds, f"no missed-crossing bound recorded for {case} (dip {dip:.5f} m)"
+    assert bounds or cfg.drag is not None, f"no bound recorded for {case} (dip {dip:.5f} m)"
     for b in bounds:
         assert b >= dip, f"{case}: claimed bound {b:.5f} m < dip {dip:.5f} m"
+    if cfg.drag is not None:  # perturbed: an estimate, labelled as one (M3T0-R2-F1)
+        rec = results("termination")["missed_crossing"]["cases"][case]
+        assert "not a bound" in rec["estimate_kind"]
+        assert rec["sampled_estimate_m"] >= dip
 
 
 def test_f1_measured_sweep_never_exceeds_the_derived_bound():
     sweep = results("termination").get("missed_crossing", {}).get("sweep")
     assert sweep, "no sampling-phase / eccentricity sweep recorded"
     for row in sweep:
-        assert row["max_dip_m"] <= row["bound_m"], row
+        if "bound_m" in row:
+            assert row["max_dip_m"] <= row["bound_m"], row
+        else:
+            assert "not a bound" in row["estimate_kind"], row
 
 
 def test_f1_curvature_bound_is_an_upper_bound_on_hddot():

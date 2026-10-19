@@ -28,50 +28,51 @@
     }
   },
   "missed_crossing": {
-    "all_bounds_hold": true,
+    "all_certified_bounds_hold": true,
+    "all_dips_within_sampled_estimates": true,
     "b2_over_a_m": 6335439.32729282,
     "cases": {
       "j2drag_250x800_i51.6_perigee_midstep": {
-        "bound_holds": true,
-        "bound_kind": "pointwise bound U maximised over the step (perturbed motion)",
-        "bound_m": 5.1121321699378,
         "dip_m": 4.817096536979079,
-        "step_bound_m": 5.1121321699378,
-        "sup_hddot_upper_over_step_mps2": 0.408970573595024
+        "dip_within_sampled_estimate": true,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
+        "sampled_estimate_m": 5.1121321699378,
+        "sampled_max_hddot_upper_over_step_mps2": 0.408970573595024
       },
       "j2drag_circular250_i51.6_equator_midstep": {
-        "bound_holds": true,
-        "bound_kind": "pointwise bound U maximised over the step (perturbed motion)",
-        "bound_m": 0.5647984617681345,
         "dip_m": 0.28107060864567757,
-        "step_bound_m": 0.5647984617681345,
-        "sup_hddot_upper_over_step_mps2": 0.04518387694145076
+        "dip_within_sampled_estimate": true,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
+        "sampled_estimate_m": 0.5647984617681345,
+        "sampled_max_hddot_upper_over_step_mps2": 0.04518387694145076
       },
       "kepler_250x800_i51.6_perigee_midstep": {
         "bound_holds": true,
-        "bound_kind": "two-body domain bound over the whole orbit",
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 5.283316482977662,
         "dip_m": 4.98764459323138,
-        "step_bound_m": 5.282676882170612,
-        "sup_hddot_upper_over_step_mps2": 0.42261415057364893,
+        "sampled_estimate_m": 5.282676882170612,
+        "sampled_max_hddot_upper_over_step_mps2": 0.42261415057364893,
         "two_body_domain_bound_m": 5.283316482977662
       },
       "kepler_circular250_i51.6_equator_midstep": {
         "bound_holds": true,
-        "bound_kind": "two-body domain bound over the whole orbit",
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 0.7359729906974088,
         "dip_m": 0.4516185065731406,
-        "step_bound_m": 0.735333389890358,
-        "sup_hddot_upper_over_step_mps2": 0.05882667119122864,
+        "sampled_estimate_m": 0.735333389890358,
+        "sampled_max_hddot_upper_over_step_mps2": 0.05882667119122864,
         "two_body_domain_bound_m": 0.7359729906974088
       }
     },
     "dt_s": 10.0,
     "max_normal_angle_rad": 0.003358437616083565,
+    "perturbed_motion": "no certified bound; sampled estimates only (M3T0-R2-F1)",
     "sweep": [
       {
         "apogee_km": 250.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 0.735972990697431,
         "eccentricity": 0.0,
         "height_range_m": [
@@ -83,16 +84,17 @@
         "perigee_km": 250.0,
         "phase_s": 9.25,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.05882667119220031,
+        "sampled_estimate_m": 0.7353333899024594,
+        "sampled_max_hddot_upper_mps2": 0.058826671192196756,
         "step_start_s": 2749.25,
-        "sup_hddot_upper_mps2": 0.058826671192196756,
-        "trajectory_bound_m": 0.7353333899024594,
         "two_body_domain_bound_m": 0.735972990697431
       },
       {
         "apogee_km": 250.0,
-        "bound_holds": true,
-        "bound_m": 0.9149206678645383,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.0,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           228858.05161114316,
           250000.0
@@ -102,13 +104,16 @@
         "perigee_km": 250.0,
         "phase_s": 2.5,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.07319365347240847,
+        "sampled_estimate_m": 0.9149206678645383,
+        "sampled_max_hddot_upper_mps2": 0.07319365342916306,
         "step_start_s": 8062.5,
-        "sup_hddot_upper_mps2": 0.07319365342916306,
-        "trajectory_bound_m": 0.9149206678645383
+        "two_body_domain_bound_m": 0.735972990697431
       },
       {
         "apogee_km": 250.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 0.735972990697431,
         "eccentricity": 0.0,
         "height_range_m": [
@@ -120,16 +125,17 @@
         "perigee_km": 250.0,
         "phase_s": 5.25,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.05882667119188234,
+        "sampled_estimate_m": 0.735333389890358,
+        "sampled_max_hddot_upper_mps2": 0.05882667119122864,
         "step_start_s": 5365.25,
-        "sup_hddot_upper_mps2": 0.05882667119122864,
-        "trajectory_bound_m": 0.735333389890358,
         "two_body_domain_bound_m": 0.735972990697431
       },
       {
         "apogee_km": 250.0,
-        "bound_holds": true,
-        "bound_m": 0.7710944175866263,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.0,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           237202.03716461733,
           255967.09859073255
@@ -139,13 +145,16 @@
         "perigee_km": 250.0,
         "phase_s": 9.75,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.06168755341813359,
+        "sampled_estimate_m": 0.7710944175866263,
+        "sampled_max_hddot_upper_mps2": 0.06168755340693011,
         "step_start_s": 8039.75,
-        "sup_hddot_upper_mps2": 0.06168755340693011,
-        "trajectory_bound_m": 0.7710944175866263
+        "two_body_domain_bound_m": 0.735972990697431
       },
       {
         "apogee_km": 250.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 0.735972990697431,
         "eccentricity": 0.0,
         "height_range_m": [
@@ -157,16 +166,17 @@
         "perigee_km": 250.0,
         "phase_s": 5.25,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.05882667119141871,
+        "sampled_estimate_m": 0.7353333898903802,
+        "sampled_max_hddot_upper_mps2": 0.05882667119123042,
         "step_start_s": 5365.25,
-        "sup_hddot_upper_mps2": 0.05882667119123042,
-        "trajectory_bound_m": 0.7353333898903802,
         "two_body_domain_bound_m": 0.735972990697431
       },
       {
         "apogee_km": 250.0,
-        "bound_holds": true,
-        "bound_m": 0.684157552545317,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.0,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           242157.1180904014,
           264482.8913559485
@@ -176,13 +186,16 @@
         "perigee_km": 250.0,
         "phase_s": 7.25,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.05473260420390247,
+        "sampled_estimate_m": 0.684157552545317,
+        "sampled_max_hddot_upper_mps2": 0.05473260420362536,
         "step_start_s": 8047.25,
-        "sup_hddot_upper_mps2": 0.05473260420362536,
-        "trajectory_bound_m": 0.684157552545317
+        "two_body_domain_bound_m": 0.735972990697431
       },
       {
         "apogee_km": 180.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 0.7598378018109253,
         "eccentricity": 0.0,
         "height_range_m": [
@@ -194,16 +207,17 @@
         "perigee_km": 180.0,
         "phase_s": 7.75,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.060734757939338024,
+        "sampled_estimate_m": 0.7591844742398379,
+        "sampled_max_hddot_upper_mps2": 0.060734757939187034,
         "step_start_s": 2637.75,
-        "sup_hddot_upper_mps2": 0.060734757939187034,
-        "trajectory_bound_m": 0.7591844742398379,
         "two_body_domain_bound_m": 0.7598378018109253
       },
       {
         "apogee_km": 180.0,
-        "bound_holds": true,
-        "bound_m": 0.7891744275845047,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.0,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           159135.33923171274,
           185674.09573447518
@@ -213,13 +227,16 @@
         "perigee_km": 180.0,
         "phase_s": 9.0,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.0631339542758873,
+        "sampled_estimate_m": 0.7891744275845047,
+        "sampled_max_hddot_upper_mps2": 0.06313395420676038,
         "step_start_s": 7959.0,
-        "sup_hddot_upper_mps2": 0.06313395420676038,
-        "trajectory_bound_m": 0.7891744275845047
+        "two_body_domain_bound_m": 0.7598378018109253
       },
       {
         "apogee_km": 400.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 2.0131606898001975,
         "eccentricity": 0.011188791158527717,
         "height_range_m": [
@@ -231,16 +248,17 @@
         "perigee_km": 250.0,
         "phase_s": 6.75,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.16100168712006635,
+        "sampled_estimate_m": 2.0125210889931466,
+        "sampled_max_hddot_upper_mps2": 0.16100168711945173,
         "step_start_s": 5456.75,
-        "sup_hddot_upper_mps2": 0.16100168711945173,
-        "trajectory_bound_m": 2.0125210889931466,
         "two_body_domain_bound_m": 2.0131606898001975
       },
       {
         "apogee_km": 400.0,
-        "bound_holds": true,
-        "bound_m": 1.8419759476225428,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.011188791158527717,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           249795.3250876721,
           387709.57495916635
@@ -250,13 +268,16 @@
         "perigee_km": 250.0,
         "phase_s": 7.25,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.14735807580980342,
+        "sampled_estimate_m": 1.8419759476225428,
+        "sampled_max_hddot_upper_mps2": 0.14735807580980342,
         "step_start_s": 5447.25,
-        "sup_hddot_upper_mps2": 0.14735807580980342,
-        "trajectory_bound_m": 1.8419759476225428
+        "two_body_domain_bound_m": 2.0131606898001975
       },
       {
         "apogee_km": 800.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 5.283316482977662,
         "eccentricity": 0.0398369610801582,
         "height_range_m": [
@@ -268,16 +289,17 @@
         "perigee_km": 250.0,
         "phase_s": 3.0,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.42261415057379814,
+        "sampled_estimate_m": 5.282676882170612,
+        "sampled_max_hddot_upper_mps2": 0.42261415057364893,
         "step_start_s": 5703.0,
-        "sup_hddot_upper_mps2": 0.42261415057364893,
-        "trajectory_bound_m": 5.282676882170612,
         "two_body_domain_bound_m": 5.283316482977662
       },
       {
         "apogee_km": 800.0,
-        "bound_holds": true,
-        "bound_m": 5.112131740800008,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.0398369610801582,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           249976.34597014822,
           786918.0288895536
@@ -287,13 +309,16 @@
         "perigee_km": 250.0,
         "phase_s": 3.75,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.4089705392640006,
+        "sampled_estimate_m": 5.112131740800008,
+        "sampled_max_hddot_upper_mps2": 0.4089705392640006,
         "step_start_s": 5693.75,
-        "sup_hddot_upper_mps2": 0.4089705392640006,
-        "trajectory_bound_m": 5.112131740800008
+        "two_body_domain_bound_m": 5.283316482977662
       },
       {
         "apogee_km": 800.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 5.283316482977662,
         "eccentricity": 0.0398369610801582,
         "height_range_m": [
@@ -305,16 +330,17 @@
         "perigee_km": 250.0,
         "phase_s": 3.0,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.4226141505736756,
+        "sampled_estimate_m": 5.282676882170634,
+        "sampled_max_hddot_upper_mps2": 0.4226141505736507,
         "step_start_s": 5703.0,
-        "sup_hddot_upper_mps2": 0.4226141505736507,
-        "trajectory_bound_m": 5.282676882170634,
         "two_body_domain_bound_m": 5.283316482977662
       },
       {
         "apogee_km": 800.0,
-        "bound_holds": true,
-        "bound_m": 5.11213174080003,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.0398369610801582,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           249976.12847133446,
           791669.8065576609
@@ -324,13 +350,16 @@
         "perigee_km": 250.0,
         "phase_s": 3.5,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.4089705392640024,
+        "sampled_estimate_m": 5.11213174080003,
+        "sampled_max_hddot_upper_mps2": 0.4089705392640024,
         "step_start_s": 11393.5,
-        "sup_hddot_upper_mps2": 0.4089705392640024,
-        "trajectory_bound_m": 5.11213174080003
+        "two_body_domain_bound_m": 5.283316482977662
       },
       {
         "apogee_km": 800.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 6.02299502023016,
         "eccentricity": 0.045135966274406,
         "height_range_m": [
@@ -342,16 +371,17 @@
         "perigee_km": 180.0,
         "phase_s": 4.25,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 0.4817873354127329,
+        "sampled_estimate_m": 6.022341692659072,
+        "sampled_max_hddot_upper_mps2": 0.4817873354127258,
         "step_start_s": 11324.25,
-        "sup_hddot_upper_mps2": 0.4817873354127258,
-        "trajectory_bound_m": 6.022341692659072,
         "two_body_domain_bound_m": 6.02299502023016
       },
       {
         "apogee_km": 800.0,
-        "bound_holds": true,
-        "bound_m": 5.844397705387938,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.045135966274406,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           179906.44065118022,
           785945.8386649061
@@ -361,13 +391,16 @@
         "perigee_km": 180.0,
         "phase_s": 9.75,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 0.46755181643103505,
+        "sampled_estimate_m": 5.844397705387938,
+        "sampled_max_hddot_upper_mps2": 0.46755181643103505,
         "step_start_s": 5649.75,
-        "sup_hddot_upper_mps2": 0.46755181643103505,
-        "trajectory_bound_m": 5.844397705387938
+        "two_body_domain_bound_m": 6.02299502023016
       },
       {
         "apogee_km": 2000.0,
         "bound_holds": true,
+        "bound_kind": "certified: two-body orbit bound, maximised in closed form",
         "bound_m": 14.047771520788753,
         "eccentricity": 0.11661788929083929,
         "height_range_m": [
@@ -379,16 +412,17 @@
         "perigee_km": 250.0,
         "phase_s": 3.0,
         "physics": "kepler",
+        "refined_max_hddot_upper_mps2": 1.1237705535985345,
+        "sampled_estimate_m": 14.047131919981659,
+        "sampled_max_hddot_upper_mps2": 1.1237705535985327,
         "step_start_s": 6463.0,
-        "sup_hddot_upper_mps2": 1.1237705535985327,
-        "trajectory_bound_m": 14.047131919981659,
         "two_body_domain_bound_m": 14.047771520788753
       },
       {
         "apogee_km": 2000.0,
-        "bound_holds": true,
-        "bound_m": 13.876586778611056,
+        "dip_within_sampled_estimate": true,
         "eccentricity": 0.11661788929083929,
+        "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
         "height_range_m": [
           249995.7123013949,
           1984235.9108654372
@@ -398,10 +432,59 @@
         "perigee_km": 250.0,
         "phase_s": 8.75,
         "physics": "j2drag",
+        "refined_max_hddot_upper_mps2": 1.1101269422888844,
+        "sampled_estimate_m": 13.876586778611056,
+        "sampled_max_hddot_upper_mps2": 1.1101269422888844,
         "step_start_s": 12908.75,
-        "sup_hddot_upper_mps2": 1.1101269422888844,
-        "trajectory_bound_m": 13.876586778611056
+        "two_body_domain_bound_m": 14.047771520788753
       }
+    ],
+    "sweep_orbits": [
+      [
+        250.0,
+        250.0,
+        0.0
+      ],
+      [
+        250.0,
+        250.0,
+        51.6
+      ],
+      [
+        250.0,
+        250.0,
+        97.0
+      ],
+      [
+        180.0,
+        180.0,
+        51.6
+      ],
+      [
+        250.0,
+        400.0,
+        51.6
+      ],
+      [
+        250.0,
+        800.0,
+        51.6
+      ],
+      [
+        250.0,
+        800.0,
+        97.0
+      ],
+      [
+        180.0,
+        800.0,
+        51.6
+      ],
+      [
+        250.0,
+        2000.0,
+        51.6
+      ]
     ],
     "sweep_phases_s": [
       0.0,
@@ -445,6 +528,11 @@
       9.5,
       9.75
     ],
+    "sweep_physics": [
+      "kepler",
+      "j2drag"
+    ],
+    "sweep_sample_s": 0.05,
     "theorem": "dip <= dt^2/8 * sup max(h'', 0); h'' <= n.a + |v_t|^2 / (h + b^2/a)",
     "two_body_domain_bound_table": [
       {
@@ -668,18 +756,110 @@
   },
   "sufficient_stage_condition": {
     "dt_s": 10.0,
+    "gravity_bound_mps2": 9.89657502931496,
+    "lower_edge_m": 0.0,
     "note": "Sufficient, not necessary. A sharper condition needs a restriction of the admissible initial states (for example the inward velocity), which is an owner decision and is not proposed here.",
+    "review02_counterexample": {
+      "actual_drag_mps2": 48.65837703993666,
+      "actual_height_m": 80000.0,
+      "corrected_covers": true,
+      "corrected_envelope_mps2": 48.65837703993666,
+      "lower_height_m": 79999.9,
+      "speed_mps": 11000.0,
+      "superseded_covers": false,
+      "superseded_envelope_mps2": 48.658376978072056
+    },
     "rows": [
       {
-        "h_f_sufficient_at_least_m": 124456.68544493792,
+        "B_kg_per_m2": 25.757575757575758,
+        "at_floor": {
+          "A0": 9.936116772206741,
+          "A2": 271.0094674682257,
+          "L2": 69003.57940911832,
+          "L3": 68755.17648981315,
+          "L4": 4.3655745685100555e-11,
+          "V": 11090.621207141401,
+          "s2": 11140.301791002435
+        },
+        "h_f_sufficient_at_least_m": 124456.68544482533,
         "vehicle": "B25.8"
       },
       {
+        "B_kg_per_m2": 100.0,
+        "at_floor": {
+          "A0": 9.916270481874712,
+          "A2": 153.54880568382066,
+          "L2": 63155.47461514118,
+          "L3": 62907.56785309432,
+          "L4": 0.0,
+          "V": 11095.606866190032,
+          "s2": 11145.188218599405
+        },
         "h_f_sufficient_at_least_m": 118633.50894609134,
         "vehicle": "B100"
       },
       {
+        "B_kg_per_m2": null,
+        "at_floor": {
+          "A0": 9.89657502931496,
+          "A2": 9.89657502931496,
+          "L2": 56003.39528784972,
+          "L3": 55755.98091211684,
+          "L4": -1.4551915228366852e-11,
+          "V": 11101.713307276794,
+          "s2": 11151.19618242337
+        },
         "h_f_sufficient_at_least_m": 111511.96182423369,
+        "vehicle": "drag-free limit"
+      }
+    ],
+    "stress": [
+      {
+        "all_within_bounds": true,
+        "kinds": {
+          "random": 667,
+          "retrograde_equator": 667,
+          "straight_down": 666
+        },
+        "lowest_stage_height_m": 23760.82779703196,
+        "min_margins": {
+          "a0_margin_mps2": 0.4482992574720335,
+          "a2_margin_mps2": 10.891702841496011,
+          "stage_margin_m": 0.10270215483615175
+        },
+        "states": 2000,
+        "vehicle": "B25.8"
+      },
+      {
+        "all_within_bounds": true,
+        "kinds": {
+          "random": 667,
+          "retrograde_equator": 667,
+          "straight_down": 666
+        },
+        "lowest_stage_height_m": 13807.590228465386,
+        "min_margins": {
+          "a0_margin_mps2": 0.4272845885011556,
+          "a2_margin_mps2": 7.830533083542406,
+          "stage_margin_m": 0.10278533137170598
+        },
+        "states": 2000,
+        "vehicle": "B100"
+      },
+      {
+        "all_within_bounds": true,
+        "kinds": {
+          "random": 667,
+          "retrograde_equator": 667,
+          "straight_down": 666
+        },
+        "lowest_stage_height_m": 14.881822938099504,
+        "min_margins": {
+          "a0_margin_mps2": 0.3995288365365255,
+          "a2_margin_mps2": 0.2350265175650108,
+          "stage_margin_m": 0.1028872769093141
+        },
+        "states": 2000,
         "vehicle": "drag-free limit"
       }
     ]

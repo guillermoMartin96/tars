@@ -1,6 +1,6 @@
 # Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic test points, validation-scenario parameters
 
-**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
+**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-18  
 **Related milestone/issue:**
@@ -9,7 +9,7 @@
   - DR-0027 (A-4, A-5, A-6, A-s, B-4);
   - DR-0025 (Q-G2-1, Q-G2-5, Q-G2-7);
   - DR-0024 (Q9 values).
-- **Evidence:** VAL-0019 and `docs/science/experiments/m3-t0/` (result files cited as `atmosphere`, `decay`, `geodetic`, `frames`, `regression`, `gmat` and `termination`, meaning `t0_<name>_results.json`).
+- **Evidence:** VAL-0019 and `docs/science/experiments/m3-t0/` (result files cited as `atmosphere`, `decay`, `geodetic`, `frames`, `regression`, `gmat`, `termination` and `axis_ablation`, meaning `t0_<name>_results.json`).
 
 Every number below was measured by the T0 spike unless it is marked **[derived]** or **[source]**. Values such as "80 km" in the evidence are **spike test values** used to exercise a mechanism. They are not proposed scenario values; DR-0027 A-3 prohibits a universal altitude.
 
@@ -78,8 +78,13 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - **Speed proxy.** At the v_c threshold for κ = 0.01 (B 25.8), an equatorial retrograde perigee with e = 0.9 has |v_rel| = 11 292 m/s and λ dt = 0.01438 > κ. V_b (11 592 m/s there) covers it, and covers every bound state by construction.
 - **A sufficient stage-domain condition [derived].**
   - Geodetic height is 1-Lipschitz (it is the signed distance to a convex surface), and the RK4 stage positions are r0 + (dt/2)v0, r0 + (dt/2)(v0 + (dt/2)a(y0)) and r0 + dt(v0 + (dt/2)a(y2)).
-  - So every stage of a step from a committed state at h0 > h_f stays above the lower edge if h_f exceeds the bound computed in `termination` → `sufficient_stage_condition`. That computation uses speed V = √(2μ/(b + h0)), gravity with J2 bounded at the surface, and drag at each stage's lower height bound.
-  - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8.
+  - So every stage of a step from a committed state at h0 > h_f stays above the lower edge if h_f exceeds the bound computed in `termination` → `sufficient_stage_condition`. Domain: every committed state with negative two-body energy, any velocity direction, no thrust. The bounds used (corrected after Review 02 R2-F2):
+    - speed |v0| ≤ V = √(2μ/(b + h0));
+    - gravity with J2 ≤ (1 + 3J2(a/b)²)μ/b² anywhere outside the ellipsoid;
+    - drag ≤ sup over h ≥ L of ρ(h)(s + ω_E(a + h))²/(2B), where L is the stage's lower height bound and s its speed bound. Both factors are taken at the same h, because |v_rel| ≤ s + ω_E|r| ≤ s + ω_E(a + h). Inside every band that product decreases (a > 2H for every scale height H), so the supremum is attained at L or at a band base above L. The superseded derivation bounded the rotation term at L, which a stage above L can exceed (Review 02 counterexample: 48.658376978 m/s² claimed, 48.658377040 m/s² actual; the corrected envelope gives the actual value).
+  - **Monotonicity [derived].** V decreases with h0, and the drag envelope decreases with L and increases with s. So every stage's lower height bound increases with h0, and the condition has a single root: every h0 above it satisfies the condition.
+  - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8 (B 25.8 moves by 1.1e-7 m; the others are unchanged). The bound for a B also covers every larger B.
+  - **Checked independently** (`check_review02.py`): a second implementation reproduces the three bounds to 1 mm; RK4 steps from 300 bound states per vehicle at 0–5 km above each bound (near-escape, retrograde equatorial and straight-down velocities) stay in the fail-closed domain. In `termination` → `sufficient_stage_condition` → `stress`, 2000 states per vehicle stay above every stage's lower bound (smallest margin 0.10 m). These are tests of the derivation, not part of it.
   - It is sufficient, not necessary.
   - A sharper guarantee needs a restriction of the admissible initial states (for example of the inward velocity). That restriction is an owner decision and is not proposed here.
 - **Consequence.** An A4-b-admissible run that violates these properties still has a defined outcome: a stage below the lower edge ends the run under P4, and a same-tick `reentry`/`impact` is resolved by the P3 precedence.
@@ -119,9 +124,12 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
     | 150 km | 0.77 m | 1.36 m | 1.95 m | 3.12 m | 5.48 m | 12.54 m |
     | 250 km | 0.74 m | 1.31 m | 1.88 m | 3.02 m | 5.30 m | 12.15 m |
 
-    It scales with dt². For perturbed motion the same inequality holds with ḧ's bound evaluated along the trajectory. Across the J2 + drag sweep that exceeded the two-body value for the same orbit by at most 0.18 m.
-  - **Measured.** With the lowest point at mid-step, a 250 × 800 km orbit (e = 0.0398, i = 51.6°) dips **4.99 m** (Kepler; bound 5.28 m) and **4.82 m** (J2 + drag; bound 5.11 m). A circular 250 km, 51.6° orbit dips **0.45 m** at the equator crossing (bound 0.74 m), from the ellipsoid's curvature alone.
-  - A sweep covers 9 orbits (circular to 250 × 2000 km; i = 0, 51.6 and 97°), two-body and J2 + drag, and 40 sampling phases. It never exceeds the bound; the smallest margin is 0.025 m and the largest dip is 13.33 m at 250 × 2000 km.
+    It scales with dt². The two-body maximisation over [r_p, r_a] is in closed form (the endpoints and the real roots of a cubic), so these values are certified up to floating-point rounding; a second maximisation method agrees to 1e-12 relative.
+  - **Perturbed motion (corrected after Review 02 R2-F1): no certified bound is derived in T0.** The chord inequality still holds, but evaluating sup ḧ over a J2 + drag orbit needs an enclosure of a numerical trajectory, which T0 does not construct. The values below for J2 + drag are each a **sampled estimate**: dt²/8 × the maximum of the pointwise bound over samples of a numerical trajectory. Such an estimate is not a bound. Refining between the 0.25 s samples raises it by up to 8.6e-10 m (180 km circular, 51.6°; the reviewer's case).
+  - **Measured.** With the lowest point at mid-step, a 250 × 800 km orbit (e = 0.0398, i = 51.6°) dips **4.99 m** (Kepler; certified bound 5.28 m) and **4.82 m** (J2 + drag; sampled estimate 5.11 m, not a bound). A circular 250 km, 51.6° orbit dips **0.45 m** at the equator crossing (certified bound 0.74 m), from the ellipsoid's curvature alone.
+  - A sweep covers 9 orbits (circular to 250 × 2000 km; i = 0, 51.6 and 97°), two-body and J2 + drag, and 40 sampling phases.
+    - **Two-body rows:** no measured dip exceeds the certified bound; the smallest margin is 0.025 m and the largest dip is 13.30 m at 250 × 2000 km.
+    - **J2 + drag rows (empirical):** the largest dip is 13.33 m at 250 × 2000 km. Every measured dip is below the sampled estimate for its row (smallest gap 0.036 m) and below the certified two-body bound of its initial osculating orbit (smallest gap 0.087 m). These are observations on 9 orbits, not a guarantee for perturbed motion.
   - The earlier figure of 1.56 m (`decay` → `missed_crossing`) is the maximum at one fixed sampling phase. It is a measurement, not a bound.
 
 **Options**
@@ -140,10 +148,10 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - a method identifier (for example `hermite_h_v1`) so the definition is versioned with the physics identity.
 
 **Risks**
-- Missed dips are not detected. At dt = 10 s the bound is 0.74–0.80 m for circular orbits (perigee 80–250 km) and about 5.3–5.6 m for e = 0.04 (two-body). It grows with e and with dt².
+- Missed dips are not detected. At dt = 10 s the certified two-body bound is 0.74–0.80 m for circular orbits (perigee 80–250 km) and about 5.3–5.6 m for e = 0.04. It grows with e and with dt². For J2 + drag no bound is established; the sweep's observations are empirical (above).
 - A5-b reports a time that does not belong to a committed state, so consumers must not read it as a state.
 
-**Recommendation.** A5-b, with missed dips documented as a known limitation and not detected. In a decaying orbit the next pass crosses lower.
+**Recommendation.** A5-b, with missed dips documented as a known limitation and not detected. In a decaying orbit the next pass crosses lower. The recommendation does not rely on a perturbed-motion bound. Any use that needs a guaranteed missed-dip magnitude for J2 + drag (for example a contract field or a gate) has no supporting bound in T0 and stays blocked until one is derived.
 
 ## P3 — DR-0027 A-6: interaction with domain edges and `impact`
 **Evidence**
@@ -240,7 +248,15 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - **(b) Drive the validator reference with GMAT's reported Earth-fixed axis.**
   - Feasible and exact for J2: 0.076 mm.
   - Recovering the axis needs two non-coplanar orbits, because one orbit plane leaves the out-of-plane component undetermined.
-  - It also needs the diurnal polar-motion term (a quadratic-only fit leaves a 0.99 m residual).
+  - It also needs the diurnal polar-motion term. Fitting the axis without it leaves a **0.986 m RMS** residual, against 7.8e-5 m with it (reproduced after Review 02 IM-1; `axis_ablation`, from `t0_axis_ablation.py`):
+    - *Quantity:* the least-squares residual of GMAT's Earth-fixed Z coordinate of a spacecraft, modelled as u(t)·r_TOE, where u(t) is GMAT's Earth-fixed +Z axis in TOE axes. It is a fit residual of an axis model, in metres at orbital radius, not a trajectory error.
+    - *Data:* GMAT's axis-probe report `gmat_runs/axis_probe__m1_two_body_report.txt` (sha256 `ee1cab2b…3bb5`, equal to GMAT's run metadata). The two point-mass spacecraft are the M1 orbit and a polar orbit with its node on +Y. Both are reported in GMAT TOE (TOEEq at 2026-01-01 TT) and GMAT EarthFixed, in km converted to m.
+    - *Sampling:* every 60 s from 0 to 53 700 s, 896 epochs × 2 spacecraft = 1792 equations.
+    - *Models:* the full model u(t) = Σ c_k φ_k with φ = [1, t/t_end, (t/t_end)², cos ω_E t, sin ω_E t] (15 unknowns, as in `t0_gmat.py`). The quadratic-only model drops the diurnal pair (9 unknowns).
+    - *RMS:* √(mean of e_i²) over all 1792 equations. The quadratic-only model's largest residual is 4.03 m.
+    - *Command:* `uv run --no-sync python t0_axis_ablation.py t0_axis_ablation_results.json` in `docs/science/experiments/m3-t0/` (no GMAT run).
+    - *Expected result and tolerance:* 0.9856650955520649 m within 1e-6 m. Reruns on one platform agree bit for bit. 1e-6 m exceeds the worst-case rounding scale of the fit (cond × eps × max|z| = 5.7e-7 m for the full model) and is 78 times smaller than the full-fit residual. The full model reproduces `gmat` → `axis` → `fit_rms_residual_m`, which ties the data file to the committed GMAT result.
+    - The number is evidence for option (b)'s feasibility only. It is not a proposed threshold, and the DR-0028 scope ruling on (b) stays open.
   - **Scope question:** the validator would contain a J2 and an ellipsoid evaluated about a time-dependent, data-derived pole. DR-0028 says "No additional Earth-orientation implementation is authorized". The axis is GMAT output consumed as data, not an Earth-orientation model, but whether that falls inside the prohibition is the owner's ruling, not the implementer's. **Dependent work (choosing (b) for T5) is blocked on that ruling; nothing else is.**
 - **(c) GMAT informational only** for configurations that cannot be matched exactly.
 - **(d) [new] Decomposed exact configuration.** Each link is checked where GMAT can be exact; the geodetic trajectory comparison stays informational until the escalated item is resolved.
@@ -340,10 +356,11 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 - **T2/T3** (drag, end conditions, contract): P1–P5, P8, P9.
 - **T1:** P10.
 - **T4/T5:** P6 and P7. Choosing P6 (b) additionally needs the DR-0028 scope ruling. The escalated geodetic-drag investigation blocks only geodetic GMAT gates.
+- **Any use that needs a guaranteed missed-dip magnitude for J2 + drag** (P2): no perturbed-motion bound exists in T0 (Review 02 R2-F1). A5-b as recommended does not need one.
 
 ## Work continuing independently
 - None of the implementation. T1 and later are not authorized.
-- The independent review of T0: Review 01 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-01.md`); F1–F4 are corrected here; Review 02 follows under the correction authorization.
+- The independent review of T0: Review 01 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-01.md`); F1–F4 are corrected here. Review 02 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-02.md`); R2-F1 … F3 and IM-1 are corrected here. Review 03 follows under the Review 02 correction authorization.
 
 ## Requested response
 For each of P1–P10: accept, choose an option, or `discuss`. P1 needs κ. P6 needs a ruling on whether option (b) falls inside DR-0028's prohibition on additional Earth-orientation implementation.
@@ -367,3 +384,12 @@ Authority: "TARS M3 T0 — Review 01 Correction Authorization" (Tech Lead). The 
 - **M3T0-F4 (P6 table):** the M3-form GMAT vs Kepler residual is 6.95e-6 m (committed result), not 4.86e-6 m (a superseded run at GMAT's default `NutationUpdateInterval`).
 - **Not changed:** IM-1 (the P6 "0.99 m" figure) is outside the authorized correction scope and stays as recorded, flagged in `docs/reviews/M3-T0-review-01.md`.
 <!-- /review01-correction-log -->
+
+<!-- review02-correction-log -->
+## Correction log (Review 02, 2026-10-18)
+Authority: "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03" (Tech Lead). The superseded wording is preserved at commit `5548d11`. No option, identifier, recommendation status or owner decision changed; DR-0029 stays OPEN, and DR-0028's scope ruling for P6 (b) stays open.
+- **M3T0-R2-F1 (P2):** J2 + drag values that had been called bounds are relabelled as sampled estimates. The statement that the sweep never exceeds the bound is restricted to the certified two-body rows. The two-body maximisation is made closed-form. The recommendation is now stated to need no perturbed bound, and uses that would need one are recorded as blocked.
+- **M3T0-R2-F2 (P1):** the drag factor of the sufficient stage-domain condition is maximised over every height above each stage's lower bound, instead of being evaluated at that lower bound. The monotonicity in h0 is derived. The three bounds are recomputed: B 25.8 moves by 1.1e-7 m and the others are unchanged.
+- **M3T0-R2-F3:** the regression checks recompute what they protect (`check_review02.py`); mutation evidence is in VAL-0019.
+- **IM-1 (P6):** "0.99 m" is replaced by the reproduced 0.986 m RMS, with its quantity, data, sampling, RMS definition, command and tolerance.
+<!-- /review02-correction-log -->

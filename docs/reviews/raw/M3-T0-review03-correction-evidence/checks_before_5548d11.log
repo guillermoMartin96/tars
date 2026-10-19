@@ -1,0 +1,187 @@
+F...........F....................FFFF.F......F.FFF                       [100%]
+=================================== FAILURES ===================================
+_ test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[j2drag_250x800_i51.6_perigee_midstep] _
+
+case = 'j2drag_250x800_i51.6_perigee_midstep'
+
+    @pytest.mark.parametrize("case", sorted(DIP_CASES))
+    def test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase(case):
+        cfg, (r0, v0) = DIP_CASES[case]
+        dip = midpoint_dip(cfg, r0, v0)
+        bounds = claimed_bounds(case)
+        assert bounds or cfg.drag is not None, f"no bound recorded for {case} (dip {dip:.5f} m)"
+        for b in bounds:
+            assert b >= dip, f"{case}: claimed bound {b:.5f} m < dip {dip:.5f} m"
+        if cfg.drag is not None:  # perturbed: an estimate, labelled as one (M3T0-R2-F1)
+            rec = results("termination")["missed_crossing"]["cases"][case]
+>           assert "not a bound" in rec["estimate_kind"]
+                                    ^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'estimate_kind'
+
+docs/science/experiments/m3-t0/check_review01.py:117: KeyError
+__________________ test_r2f1_sweep_covers_the_declared_matrix __________________
+
+    def test_r2f1_sweep_covers_the_declared_matrix():
+        mc = results("termination").get("missed_crossing", {})
+        got = sorted(
+            (r["physics"], r["perigee_km"], r["apogee_km"], r["inclination_deg"]) for r in sweep_rows()
+        )
+        want = sorted((p, *o) for o in ORBITS for p in PHYSICS)
+        assert got == want
+        assert mc["sweep_phases_s"] == [k * 0.25 for k in range(40)]
+>       assert mc["sweep_sample_s"] == 0.05 and mc["dt_s"] == DT
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'sweep_sample_s'
+
+docs/science/experiments/m3-t0/check_review02.py:257: KeyError
+________ test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum _________
+
+    def test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum():
+        """The reviewer's case: 180 km circular, 51.6 deg, J2 + drag. U refined between the
+        0.25 s samples exceeds their maximum, so dt^2/8 x (sampled max) is not a bound."""
+        import t0_termination as tt
+    
+        row = next(
+            r
+            for r in sweep_rows()
+            if r["physics"] == "j2drag" and r["perigee_km"] == r["apogee_km"] == 180.0
+        )
+        sol, t_end = orbit_solution(row)
+    
+        def u(t: float) -> float:
+            y = sol(t)
+            return tt.hddot_upper(y[:3], y[3:6], m.acceleration(J2_DRAG, t, y[:3], y[3:6], y[6]))
+    
+        ts = np.arange(0.0, t_end + 1e-9, 0.25)
+        us = np.array([u(float(t)) for t in ts])
+>       assert float(us.max()) == pytest.approx(row["sampled_max_hddot_upper_mps2"], rel=1e-9)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'sampled_max_hddot_upper_mps2'
+
+docs/science/experiments/m3-t0/check_review02.py:340: KeyError
+_________ test_r2f1_perturbed_values_are_labelled_estimates_not_bounds _________
+
+    def test_r2f1_perturbed_values_are_labelled_estimates_not_bounds():
+        mc = results("termination")["missed_crossing"]
+        perturbed = [r for r in sweep_rows() if r["physics"] == "j2drag"]
+        perturbed += [c for k, c in mc["cases"].items() if k.startswith("j2drag")]
+        assert len(perturbed) == len(ORBITS) + 2
+        for r in perturbed:
+>           assert "bound_m" not in r and "bound_holds" not in r, r
+E           AssertionError: {'apogee_km': 250.0, 'bound_holds': True, 'bound_m': 0.9149206678645383, 'eccentricity': 0.0, ...}
+E           assert ('bound_m' not in {'apogee_km': 250.0, 'bound_holds': True, 'bound_m': 0.9149206678645383, 'eccentricity': 0.0, ...})
+
+docs/science/experiments/m3-t0/check_review02.py:352: AssertionError
+________ test_r2f1_records_distinguish_certified_bounds_from_estimates _________
+
+    def test_r2f1_records_distinguish_certified_bounds_from_estimates():
+        for name in RECORDS:
+            text = record(name)
+>           assert not re.search(r"It never exceeds the bound", text), name
+E           AssertionError: DR-0029
+E           assert not <re.Match object; span=(13759, 13785), match='It never exceeds the bound'>
+E            +  where <re.Match object; span=(13759, 13785), match='It never exceeds the bound'> = <function search at 0x110e14860>('It never exceeds the bound', "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes... DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n\n\n")
+E            +    where <function search at 0x110e14860> = re.search
+
+docs/science/experiments/m3-t0/check_review02.py:363: AssertionError
+_________________ test_r2f2_review02_counterexample_is_covered _________________
+
+    def test_r2f2_review02_counterexample_is_covered():
+        import t0_termination as tt
+    
+        low, s, h = 79_999.9, 11_000.0, 80_000.0
+        r = np.array([m.A_WGS84 + h, 0.0, 0.0])
+        v = np.array([0.0, -s, 0.0])
+        nodrag = m.Config(j2=m.J2_FROM_C20)
+        actual = float(
+            np.linalg.norm(
+                m.acceleration(J2_DRAG, 0, r, v, MASS) - m.acceleration(nodrag, 0, r, v, MASS)
+            )
+        )
+        assert actual == pytest.approx(48.65837703993666, rel=1e-12)
+>       for env in (envelope(low, s, B_V1), tt.drag_envelope(low, s, B_V1)):
+                                            ^^^^^^^^^^^^^^^^
+E       AttributeError: module 't0_termination' has no attribute 'drag_envelope'
+
+docs/science/experiments/m3-t0/check_review02.py:384: AttributeError
+______________ test_r2f2_envelope_bounds_adversarial_drag_points _______________
+
+    def test_r2f2_envelope_bounds_adversarial_drag_points():
+        """Points above the lower bound, at band bases, just below upward jumps, at the equator
+        against the rotation (the largest |v_rel|), and above h0."""
+        import t0_termination as tt
+    
+        rng = np.random.default_rng(7)
+        bases = [band.base_km * 1e3 for band in m.TABLE]
+        lows = [x - d for x in bases[1:12] for d in (1e-6, 0.1, 50.0)] + list(
+            rng.uniform(0.0, 300e3, 60)
+        )
+        for low in lows:
+            for s in (100.0, 7_800.0, 11_100.0):
+>               env = tt.drag_envelope(low, s, B_V1)
+                      ^^^^^^^^^^^^^^^^
+E               AttributeError: module 't0_termination' has no attribute 'drag_envelope'
+
+docs/science/experiments/m3-t0/check_review02.py:417: AttributeError
+__ test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation __
+
+    def test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation():
+        text = record("DR-0029")
+        for vehicle in VEHICLES:
+            quoted = f"{floors()[vehicle]:,.2f}".replace(",", " ")
+            assert quoted + " m" in text, (vehicle, quoted)
+        for name in RECORDS:
+>           assert "drag at each stage's lower height bound" not in record(name), name
+E           AssertionError: DR-0029
+E           assert 'drag at eac...height bound' not in '# Decision ...nding)\n\n\n'
+E             
+E             "drag at each stage's lower height bound" is contained here:
+E               face, and drag at each stage's lower height bound.
+E                 - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8.
+E                 - It is sufficient, not necessary.
+E                 - A sharper guarantee needs a restriction of the admissible initial states (for example of the inward velocity). That restriction is an owner decision and is not proposed here.
+E               - **Consequence.** An A4-b-admissible run that violates these properties still has a defined outcome: a stage...
+E             
+E             ...Full output truncated (270 lines hidden), use '-vv' to show
+
+docs/science/experiments/m3-t0/check_review02.py:494: AssertionError
+______________________ test_units_and_declared_constants _______________________
+
+    def test_units_and_declared_constants():
+        d = results("termination")
+        sc = d["sufficient_stage_condition"]
+>       assert sc["dt_s"] == DT and sc["lower_edge_m"] == 0.0
+                                    ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'lower_edge_m'
+
+docs/science/experiments/m3-t0/check_review02.py:512: KeyError
+___ test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report ____
+
+    def test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report():
+        res = results("axis_ablation")
+>       tol = res["tolerance_m"]
+              ^^^^^^^^^^^^^^^^^^
+E       KeyError: 'tolerance_m'
+
+docs/science/experiments/m3-t0/check_review02.py:545: KeyError
+_____________ test_im1_records_name_the_quantity_and_the_procedure _____________
+
+    def test_im1_records_name_the_quantity_and_the_procedure():
+        text = record("DR-0029")
+>       assert "t0_axis_ablation.py" in text
+E       assert 't0_axis_ablation.py' in "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes... DR-0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n\n\n"
+
+docs/science/experiments/m3-t0/check_review02.py:561: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review01.py::test_f1_every_claimed_missed_crossing_bound_holds_at_the_worst_phase[j2drag_250x800_i51.6_perigee_midstep]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_sweep_covers_the_declared_matrix
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_perturbed_values_are_labelled_estimates_not_bounds
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_records_distinguish_certified_bounds_from_estimates
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_review02_counterexample_is_covered
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_envelope_bounds_adversarial_drag_points
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_units_and_declared_constants
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_im1_records_name_the_quantity_and_the_procedure
+11 failed, 39 passed in 113.66s (0:01:53)

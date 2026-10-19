@@ -725,7 +725,7 @@ All 10 approved rejection codes are exercised.
 - **Observation on earlier records (not edited):** the VAL-0007 informational GMAT runs used the JGM-3 coefficient-file GM (3.986004415e14) and R (6378136.3 m), not their `Earth.Mu` override. The effect (~0.6 m) is negligible against those runs' 741–1 325 km results (DR-0025 §13).
 
 ## VAL-0019 — M3 T0: reference-configuration spike (J2, drag, atmosphere boundaries, geodetic height, frames; not a gate)
-- **Date:** 2026-10-18. **Corrected after Review 01** (M3T0-F1 … F4; log at the end of this record).
+- **Date:** 2026-10-18. **Corrected after Review 01** (M3T0-F1 … F4) **and after Review 02** (M3T0-R2-F1 … F3, IM-1); logs at the end of this record.
 - **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15), T0 only.
 - **Revision:** branch `milestone-3-t0-reference-spike`, from `main` = `86df2c3` (PR #4 merge commit). No production file is changed: `src/`, `proof/`, `toolbox/`, `scenarios/` and `.github/` are identical to `86df2c3`.
 - **Code:** `docs/science/experiments/m3-t0/` (README there lists commands, versions and digests).
@@ -756,7 +756,7 @@ All 10 approved rejection codes are exercised.
     | Decay stop at geodetic 80 km (spike test value) | GMAT 0.023 s earlier than the spike |
 
   - **J-ax-1 residual attributed:**
-    - GMAT's Earth-fixed +Z, recovered in TOE axes from two non-coplanar orbits, circles the celestial pole once per sidereal day with radius 0.349″ (polar motion from GMAT's EOP data; fit residual 0.08 mm).
+    - GMAT's Earth-fixed +Z, recovered in TOE axes from two non-coplanar orbits, circles the celestial pole once per sidereal day with radius 0.349″ (polar motion from GMAT's EOP data; fit residual 0.08 mm). Without the diurnal term the fit leaves 0.986 m RMS. That figure is reproduced from the committed GMAT report by `t0_axis_ablation.py` (1792 equations, 60 s sampling, tolerance 1e-6 m; DR-0029 P6).
     - Driving the spike with that axis (a diagnostic, not the M3 model) reduces the J2 difference to **0.076 mm**, provided `Earth.NutationUpdateInterval` = 0. GMAT's default of 60 s leaves 8 cm along-track.
   - **Geodetic drag, not attributed:**
     - With the default interval, the axis and GMAT's 1e-7 rad height rule explain the difference to 4.2 mm.
@@ -784,12 +784,13 @@ All 10 approved rejection codes are exercised.
     - missed dips (a trajectory dipping below the lower committed height inside a step):
       - 1.56 m at one fixed sampling phase (250 × 800 km), a measurement, not a bound;
       - with the lowest point at mid-step, 4.99 m (Kepler) and 4.82 m (J2 + drag) for 250 × 800 km, and 0.45 m for a circular 250 km, 51.6° orbit;
-      - derived bound: dip ≤ (dt²/8) sup max(ḧ, 0), with ḧ ≤ n̂·a + |v_t|²/(h + b²/a). This gives 5.28 m, 5.11 m and 0.74 m in those three cases. Across 9 orbits, two-body and J2 + drag, and 40 sampling phases, it is never exceeded (smallest margin 0.025 m);
-      - two-body bound at dt = 10 s: 0.74–0.80 m for circular orbits (perigee 80–250 km), 5.30–5.61 m for e = 0.04 (`t0_termination_results.json` → `missed_crossing`).
+      - derived inequality: dip ≤ (dt²/8) sup max(ḧ, 0), with ḧ ≤ n̂·a + |v_t|²/(h + b²/a);
+      - certified two-body bound (maximised over [r_p, r_a] in closed form): 5.28 m and 0.74 m for the two Kepler cases. Across the 9 two-body sweep orbits and 40 sampling phases no measured dip exceeds it (smallest margin 0.025 m). At dt = 10 s it is 0.74–0.80 m for circular orbits (perigee 80–250 km) and 5.30–5.61 m for e = 0.04 (`t0_termination_results.json` → `missed_crossing`);
+      - J2 + drag: no certified bound is derived (corrected after Review 02 R2-F1). The 5.11 m for the 250 × 800 km case is a sampled estimate: dt²/8 × the maximum of the pointwise bound over samples of a numerical trajectory. Refinement between samples exceeds that maximum by up to 8.6e-10 m. In the 9 J2 + drag sweep rows every measured dip is below its sampled estimate and below the two-body bound of the initial orbit. That is an empirical observation;
     - DR-0029 P1 (A4-b) admissibility is necessary, not sufficient:
       - a P1-admissible stress input puts an RK4 stage at −28 km, and its committed state satisfies `reentry` and `impact` on the same tick;
       - the circular-speed proxy underestimates λ for an e = 0.9 retrograde perigee (λ dt 0.0144 at κ 0.01);
-      - a derived sufficient condition for every stage to stay above 0 km at dt = 10 s is h_f ≥ 111.5 km drag-free, 118.6 km at B 100 and 124.5 km at B 25.8, for unrestricted bound states (`t0_termination_results.json`).
+      - a derived sufficient condition for every stage to stay above 0 km at dt = 10 s is h_f ≥ 111.5 km drag-free, 118.6 km at B 100 and 124.5 km at B 25.8, for unrestricted bound states (`t0_termination_results.json`). Corrected after Review 02 R2-F2: the drag factor is maximised over every height above each stage's lower bound, and the condition is shown to be monotone in h0. The bounds are unchanged to 1.1e-7 m. A second implementation and RK4 steps from adversarial bound states at the bounds confirm them (`check_review02.py`).
   - **Geodetic height:**
     - iterative and Vermeille (2002) inverses reproduce 640 forward-constructed points to ≤ 3e-9 m;
     - the GeographicLib examples agree within their 1 cm print rounding;
@@ -806,8 +807,11 @@ All 10 approved rejection codes are exercised.
   - `t0_gmat.py` `204d47c12fd4b7311fc056f894001f6c84bc827818456c23c461664d1a533e23`
   - `t0_model.py` `1d70e86c25546a91365a5ed101ad0d390bc9e507862ca4eacbfa78fe2160b09d`
   - `t0_regression.py` `06ac4c0bdf82aa442a111fc380cf94457322e37a2aae72384afda3cfe93f413c`
-  - `t0_termination.py` `2cb1a0383e917c1a0fd341f7f55dcf0331d02c61a658572c4a2ba29dbc47aa0a` (added after Review 01)
-  - `check_review01.py` `6e40cd618d915be4f33c661b88af22dda880d23d1753e35998c996e54d323b1b` (Review 01 regression checks; added after Review 01)
+  - `t0_termination.py` `f4135bc36f7d5d320f6d04b6e61f158299097794d9f77375b7bcbf06d2bedf80` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`)
+  - `t0_axis_ablation.py` `c6683775974f594975f6f1e71c2dfa967f8158127c5c4570d311132ac688afd5` (added after Review 02, IM-1)
+  - `check_review01.py` `e6e0ad64ba553d5ca6fb1a057669dab76b197fb4cf70dbff13478251107c2ce3` (Review 01 regression checks; two F1 checks amended after Review 02, was `6e40cd61…1b1b`)
+  - `check_review02.py` `89b90dd0fc2854a2e08d73c8f3386855ceaf493557c34b78ce7ae76a9b806456` (Review 02 regression checks)
+  - `mutation_check_review02.py` `d2541a7e2e3b1be2f062e7ace97495b12b34e1334f2a43ef05abe889dbabe3f5` (Review 02 mutation harness)
   - `data/EarthExponentialAtmosphereData.txt` `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`
 - **Classification:** spike evidence for the T0 proposals (DR-0029). Model and frame agreement are exact where attributed. One configuration sensitivity is unresolved and escalated.
 - **J-ax-1 limitation, quantified against GMAT's real Earth over 53 700 s:**
@@ -824,3 +828,13 @@ All 10 approved rejection codes are exercised.
   - F1: the fixed-phase formula, which had been presented as a bound, is replaced by the derived bound and its sweeps.
   - `t0_decay.py` now labels its missed-crossing output as a single-phase measurement. Its other outputs are unchanged.
 <!-- /review01-correction-log -->
+<!-- review02-correction-log -->
+- **Correction log (Review 02, 2026-10-18; "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03").** The superseded wording is preserved at `5548d11`.
+  - R2-F1: J2 + drag missed-dip values are sampled estimates, not bounds. The two-body bound is maximised in closed form, and its values are unchanged bit for bit.
+  - R2-F2: the stage-domain drag envelope is maximised over every height above each stage's lower bound, and the condition is shown to be monotone in h0. The bounds are unchanged to 1.1e-7 m.
+  - R2-F3: the new checks (`check_review02.py`, 38 checks) recompute what they protect. In addition, two F1 checks in `check_review01.py` are amended for the relabelling. Evidence is in `docs/reviews/raw/M3-T0-review03-correction-evidence/`:
+    - red before: 11 of 50 fail at `5548d11`, and the amended `check_review01.py` still gives 11 failed and 1 passed at `bdcaacf`;
+    - green after: 50 of 50 pass;
+    - mutation (`mutation_check_review02.py`): 15 corruptions of the result files and scripts are each detected by a declared check, including the exact Review 02 mutant, zeroed, halved and dropped sweep rows, and zeroed, shifted and km-scaled floors. The unmodified control passes. One mutant, which drops the stationary points from the two-body maximisation, is declared equivalent: no interior maximum beats the endpoints on a domain scan, and a check establishes this.
+  - IM-1: `t0_axis_ablation.py` reproduces the quadratic-only axis-fit residual, 0.986 m RMS, from the committed GMAT report.
+<!-- /review02-correction-log -->

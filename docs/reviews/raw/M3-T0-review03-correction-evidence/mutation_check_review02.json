@@ -1,0 +1,230 @@
+{
+  "control_passes_and_every_mutant_detected_or_equivalent": true,
+  "mutants": {
+    "control_unmodified": {
+      "expected_checks": [],
+      "failed_checks": [],
+      "outcome": "not detected",
+      "pytest_exit": 0,
+      "pytest_summary": "50 passed in 121.24s (0:02:01)"
+    },
+    "json_floors_in_km": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "8 failed, 42 passed in 117.70s (0:01:57)"
+    },
+    "json_floors_minus_10km": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "6 failed, 44 passed in 117.09s (0:01:57)"
+    },
+    "json_floors_plus_10km": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "5 failed, 45 passed in 119.21s (0:01:59)"
+    },
+    "json_floors_zeroed": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "8 failed, 42 passed in 117.95s (0:01:57)"
+    },
+    "json_im1_quadratic_rms_shifted": {
+      "expected_checks": [
+        "test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report"
+      ],
+      "failed_checks": [
+        "test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 49 passed in 117.03s (0:01:57)"
+    },
+    "json_kepler_bound_inflated": {
+      "expected_checks": [
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "10 failed, 40 passed in 119.48s (0:01:59)"
+    },
+    "json_perturbed_relabelled_as_bound": {
+      "expected_checks": [
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "2 failed, 48 passed in 118.39s (0:01:58)"
+    },
+    "json_reviewer_R2F3_mutant": {
+      "expected_checks": [
+        "test_r2f1_sweep_covers_the_declared_matrix",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f2_floors_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum",
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f1_sweep_covers_the_declared_matrix",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_units_and_declared_constants"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "30 failed, 20 passed in 34.92s"
+    },
+    "json_sweep_dips_halved": {
+      "expected_checks": [
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "18 failed, 32 passed in 43.56s"
+    },
+    "json_sweep_dips_zeroed": {
+      "expected_checks": [
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "18 failed, 32 passed in 44.27s"
+    },
+    "json_sweep_row_dropped": {
+      "expected_checks": [
+        "test_r2f1_sweep_covers_the_declared_matrix",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f1_sweep_covers_the_declared_matrix"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "21 failed, 29 passed in 39.07s"
+    },
+    "script_envelope_rotation_at_lower_end": {
+      "expected_checks": [
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered",
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "3 failed, 47 passed in 116.73s (0:01:56)"
+    },
+    "script_envelope_without_band_bases": {
+      "expected_checks": [
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered",
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "3 failed, 47 passed in 117.53s (0:01:57)"
+    },
+    "script_sampled_label_says_certified": {
+      "expected_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 49 passed in 116.34s (0:01:56)"
+    },
+    "script_stage_speed_circular": {
+      "expected_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 49 passed in 111.33s (0:01:51)"
+    },
+    "script_two_body_without_stationary_points": {
+      "expected_checks": [
+        "equivalent",
+        "test_r2f1_two_body_maximum_is_at_an_endpoint_on_a_domain_scan"
+      ],
+      "failed_checks": [],
+      "outcome": "equivalent",
+      "pytest_exit": 0,
+      "pytest_summary": "50 passed in 118.92s (0:01:58)"
+    }
+  }
+}

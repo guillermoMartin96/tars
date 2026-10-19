@@ -12,8 +12,12 @@ Evidence for DR-0029 P1-P4 that replaces three generalisations the review dispro
    and b^2/a the smallest radius of curvature of the WGS 84 ellipsoid (meridian, equator):
    the eigenvalues of the distance Hessian are k_i / (1 + k_i h) <= 1 / (h + 1/k_max).
    `hddot_upper` is this pointwise bound U(r, v, a). For two-body motion on a bound orbit it
-   is bounded over the whole orbit by a function of |r| alone (`two_body_domain_bound`).
-   The bound is checked against sampling-phase, eccentricity and inclination sweeps.
+   is bounded over the whole orbit by a function of |r| alone, maximised in closed form
+   over [r_p, r_a] (endpoints and the real roots of a cubic; `two_body_domain_bound`).
+   That is the only certified orbit bound here. For perturbed motion (J2 + drag) no orbit
+   bound is derived: the maximum of U over samples of a numerical trajectory is reported as
+   a sampled estimate (Review 02 M3T0-R2-F1), and refinement between samples can exceed it.
+   Dips are measured over sampling-phase, eccentricity and inclination sweeps.
 
 2. Stiffness thresholds and admissibility (F2). Exact heights (not a 5 km grid) at which
    rho(h) |v| dt / B reaches kappa, for the circular-speed proxy used in DR-0029 P1 and for
@@ -23,7 +27,9 @@ Evidence for DR-0029 P1-P4 that replaces three generalisations the review dispro
    ellipsoid). The reviewer's P1-admissible counterexamples are reproduced, and a derived
    sufficient condition for RK4 stages to stay above the lower edge is evaluated: geodetic
    height is 1-Lipschitz (signed distance to a convex body), so every stage of a step from
-   y0 has h >= h(r0) - dt (|v0| + dt A / 2) with A >= |a| over the stages.
+   y0 has h >= h(r0) - dt (|v0| + dt A / 2) with A >= |a| over the stages. The drag part
+   of A is maximised over every height above the stage's lower bound (corrected after
+   Review 02 M3T0-R2-F2; see `drag_envelope`).
 
 3. RK4 stage order (F3): which stage input lies inside the arc.
 
@@ -52,6 +58,8 @@ J2_DRAG = m.Config(j2=m.J2_FROM_C20, drag=m.Drag(cd=2.2, area_m2=15.0))
 KEPLER = m.Config()
 SAMPLE = 0.05  # s, dense-output sampling of h(t) in the sweeps
 PHASES = tuple(k * 0.25 for k in range(40))  # step-grid offsets 0 ... 9.75 s
+CERTIFIED = "certified: two-body orbit bound, maximised in closed form"
+SAMPLED = "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound"
 
 
 # ---------------------------------------------------------------- geometry helpers
@@ -87,23 +95,24 @@ DELTA_MAX = max_normal_angle()
 def two_body_domain_bound(sma: float, ecc: float) -> dict:
     """sup U over a two-body bound orbit (perigee radius > a): with |v|^2 = mu (2/r - 1/sma),
     h >= r - a and n.r_hat >= cos(DELTA_MAX),
-        U <= g(r) = mu (2/r - 1/sma) / (r - a + b^2/a) - mu cos(DELTA_MAX) / r^2."""
+        U <= g(r) = mu (2/r - 1/sma) / (r - a + b^2/a) - mu cos(DELTA_MAX) / r^2.
+    g is smooth on [r_p, r_a], so its maximum is at an endpoint or a stationary point. With
+    c = a - b^2/a, K = cos(DELTA_MAX) and s = sma, g'(r) = 0 is the cubic
+        r^3 + (2 K s - 4 s) r^2 + (2 s c - 4 K s c) r + 2 K s c^2 = 0,
+    so the maximum is exact up to floating-point rounding (no sampling)."""
     rp, ra = sma * (1.0 - ecc), sma * (1.0 + ecc)
+    c, k = m.A_WGS84 - R_CURV_MIN, math.cos(DELTA_MAX)
 
     def g(r: float) -> float:
-        return m.MU * (2.0 / r - 1.0 / sma) / (r - m.A_WGS84 + R_CURV_MIN) - m.MU * math.cos(
-            DELTA_MAX
-        ) / (r * r)
+        return m.MU * (2.0 / r - 1.0 / sma) / (r - c) - m.MU * k / (r * r)
 
-    grid = np.linspace(rp, ra, 2001) if ra > rp else np.array([rp])
-    vals = np.array([g(float(r)) for r in grid])
-    k = int(vals.argmax())
-    best_r, best = float(grid[k]), float(vals[k])
+    cands = [rp, ra]
     if ra > rp:
-        lo, hi = float(grid[max(k - 1, 0)]), float(grid[min(k + 1, len(grid) - 1)])
-        res = minimize_scalar(lambda r: -g(r), bounds=(lo, hi), method="bounded")
-        if -res.fun > best:
-            best_r, best = float(res.x), float(-res.fun)
+        coeffs = [1.0, 2 * k * sma - 4 * sma, 2 * sma * c - 4 * k * sma * c, 2 * k * sma * c * c]
+        cands += [float(z.real) for z in np.roots(coeffs) if abs(z.imag) < 1e-9 * abs(z)]
+        cands = [r for r in cands if rp <= r <= ra]
+    best_r = max(cands, key=g)
+    best = g(best_r)
     return {"sup_hddot_mps2": best, "at_radius_m": best_r, "bound_m": max(best, 0.0) * DT**2 / 8}
 
 
@@ -163,22 +172,40 @@ def phase_sweep(cfg: m.Config, y0: np.ndarray, t_end: float) -> dict:
         dip = min(h_at(ta), h_at(tb)) - min(float(res.fun), h_at(lo), h_at(hi))
         if dip > best["max_dip_m"]:
             best = {"max_dip_m": dip, "phase_s": phase, "step_start_s": float(ta)}
-    # sup of the pointwise bound along the trajectory (0.25 s samples)
+    # Maximum of the pointwise bound U over 0.25 s samples of the numerical trajectory, then
+    # refined between samples around the leading samples. Both are estimates of sup U, not
+    # bounds (M3T0-R2-F1): the refinement exists to show that the sampled value can be
+    # exceeded between samples.
     ts = np.arange(0.0, t_end + 1e-9, 0.25)
     ys = sol(ts)
-    sup_u = -math.inf
-    for j in range(len(ts)):
-        r, v = ys[:3, j], ys[3:6, j]
-        sup_u = max(sup_u, hddot_upper(r, v, m.acceleration(cfg, ts[j], r, v, ys[6, j])))
-    best["sup_hddot_upper_mps2"] = sup_u
-    best["trajectory_bound_m"] = max(sup_u, 0.0) * DT**2 / 8
+
+    def u_at(tt: float) -> float:
+        y = sol(tt)
+        return hddot_upper(y[:3], y[3:6], m.acceleration(cfg, tt, y[:3], y[3:6], y[6]))
+
+    us = np.array(
+        [
+            hddot_upper(
+                ys[:3, j], ys[3:6, j], m.acceleration(cfg, ts[j], ys[:3, j], ys[3:6, j], ys[6, j])
+            )
+            for j in range(len(ts))
+        ]
+    )
+    refined = float(us.max())
+    for j in np.argsort(us)[-5:]:
+        lo, hi = float(ts[max(j - 1, 0)]), float(ts[min(j + 1, len(ts) - 1)])
+        res = minimize_scalar(lambda tt: -u_at(tt), bounds=(lo, hi), method="bounded")
+        refined = max(refined, float(-res.fun))
+    best["sampled_max_hddot_upper_mps2"] = float(us.max())
+    best["refined_max_hddot_upper_mps2"] = refined
+    best["sampled_estimate_m"] = max(float(us.max()), 0.0) * DT**2 / 8
     best["height_range_m"] = [float(h.min()), float(h.max())]
     return best
 
 
 def midpoint_dip(cfg: m.Config, r0: np.ndarray, v0: np.ndarray) -> dict:
     """Review 01 construction: the lowest point at the middle of a step (committed states at
-    -dt/2 and +dt/2), plus the trajectory bound over that step."""
+    -dt/2 and +dt/2), plus the maximum of U over 101 samples of that step (an estimate)."""
     y0 = np.concatenate([r0, v0, [MASS]])
     sol_b = dense(cfg, y0, -DT / 2)
     sol_f = dense(cfg, y0, DT / 2)
@@ -192,8 +219,8 @@ def midpoint_dip(cfg: m.Config, r0: np.ndarray, v0: np.ndarray) -> dict:
             sup_u = max(sup_u, hddot_upper(y[:3], y[3:6], acc))
     return {
         "dip_m": min(h_ends) - h_mid,
-        "sup_hddot_upper_over_step_mps2": sup_u,
-        "step_bound_m": max(sup_u, 0.0) * DT**2 / 8,
+        "sampled_max_hddot_upper_over_step_mps2": sup_u,
+        "sampled_estimate_m": max(sup_u, 0.0) * DT**2 / 8,
     }
 
 
@@ -233,11 +260,11 @@ def missed_crossing() -> dict:
             dom = two_body_domain_bound(sma, ecc)
             rec["two_body_domain_bound_m"] = dom["bound_m"]
             rec["bound_m"] = dom["bound_m"]
-            rec["bound_kind"] = "two-body domain bound over the whole orbit"
+            rec["bound_kind"] = CERTIFIED
+            rec["bound_holds"] = rec["bound_m"] >= rec["dip_m"]
         else:
-            rec["bound_m"] = rec["step_bound_m"]
-            rec["bound_kind"] = "pointwise bound U maximised over the step (perturbed motion)"
-        rec["bound_holds"] = rec["bound_m"] >= rec["dip_m"]
+            rec["estimate_kind"] = SAMPLED
+            rec["dip_within_sampled_estimate"] = rec["sampled_estimate_m"] >= rec["dip_m"]
         cases[name] = rec
     sweep = []
     for hp, ha, inc in SWEEP_ORBITS:
@@ -254,12 +281,16 @@ def missed_crossing() -> dict:
                 "eccentricity": ecc,
                 **phase_sweep(cfg, y0, 2 * period + 2 * DT),
             }
+            # The two-body bound of the initial osculating orbit is certified only for the
+            # two-body rows; for J2 + drag it is a reference value, not a bound.
+            row["two_body_domain_bound_m"] = two_body_domain_bound(sma, ecc)["bound_m"]
             if label == "kepler":
-                row["two_body_domain_bound_m"] = two_body_domain_bound(sma, ecc)["bound_m"]
                 row["bound_m"] = row["two_body_domain_bound_m"]
+                row["bound_kind"] = CERTIFIED
+                row["bound_holds"] = row["max_dip_m"] <= row["bound_m"]
             else:
-                row["bound_m"] = row["trajectory_bound_m"]
-            row["bound_holds"] = row["max_dip_m"] <= row["bound_m"]
+                row["estimate_kind"] = SAMPLED
+                row["dip_within_sampled_estimate"] = row["max_dip_m"] <= row["sampled_estimate_m"]
             sweep.append(row)
     table = []
     for hp in (80.0, 150.0, 250.0):
@@ -274,6 +305,8 @@ def missed_crossing() -> dict:
                     "sup_hddot_mps2": two_body_domain_bound(sma, ecc)["sup_hddot_mps2"],
                 }
             )
+    certified = [r for r in (*cases.values(), *sweep) if "bound_holds" in r]
+    sampled = [r for r in (*cases.values(), *sweep) if "estimate_kind" in r]
     return {
         "theorem": "dip <= dt^2/8 * sup max(h'', 0); h'' <= n.a + |v_t|^2 / (h + b^2/a)",
         "dt_s": DT,
@@ -281,10 +314,14 @@ def missed_crossing() -> dict:
         "max_normal_angle_rad": DELTA_MAX,
         "cases": cases,
         "sweep": sweep,
+        "sweep_orbits": [list(o) for o in SWEEP_ORBITS],
+        "sweep_physics": ["kepler", "j2drag"],
         "sweep_phases_s": list(PHASES),
+        "sweep_sample_s": SAMPLE,
         "two_body_domain_bound_table": table,
-        "all_bounds_hold": all(c["bound_holds"] for c in cases.values())
-        and all(r["bound_holds"] for r in sweep),
+        "all_certified_bounds_hold": all(r["bound_holds"] for r in certified),
+        "all_dips_within_sampled_estimates": all(r["dip_within_sampled_estimate"] for r in sampled),
+        "perturbed_motion": "no certified bound; sampled estimates only (M3T0-R2-F1)",
     }
 
 
@@ -395,50 +432,186 @@ def stage_lipschitz_check(f, y0: np.ndarray) -> dict:
     return {"min_margin_m": worst, "holds": worst >= -1e-6}
 
 
-def rho_sup(h: float) -> float:
-    """sup of the density over heights >= h (the table has upward jumps at some bases)."""
-    vals = [m.density(h, below="extrapolate")]
-    vals += [m.density(bb.base_km * 1e3) for bb in m.TABLE if bb.base_km * 1e3 > h]
-    return max(vals)
+G_BOUND = (1.0 + 3.0 * m.J2_FROM_C20 * (m.A_WGS84 / m.B_WGS84) ** 2) * m.MU / m.B_WGS84**2
+BASES_M = tuple(bb.base_km * 1e3 for bb in m.TABLE)
+
+
+def drag_envelope(low: float, s: float, b: float) -> float:
+    """sup of the drag acceleration rho(h) |v_rel|^2 / (2 B) over every point at geodetic
+    height h >= low (>= 0) with inertial speed |v| <= s.
+
+    |v_rel| = |v - omega_E Z x r| <= s + omega_E |r| <= s + omega_E (a + h), since the point
+    is r_s + h n with |r_s| <= a. Both factors are evaluated at the same h, so the bound is
+    sup_{h >= low} f(h) with f(h) = rho(h) (s + omega_E (a + h))^2 / (2 B) (Review 02
+    M3T0-R2-F2: the rotation term grows with h and is not bounded at the lower end).
+    On each band rho = rho_i exp(-(h - base_i) / H_i), so
+        f'(h) / f(h) = 2 omega_E / (s + omega_E (a + h)) - 1 / H_i < 0   whenever a > 2 H_i,
+    and f decreases inside every band, including the unbounded top band. The supremum over
+    [low, inf) is therefore attained at low or at a band base above it (the bases where the
+    table jumps upward)."""
+    if math.isinf(b):
+        return 0.0
+    if not low >= 0.0:
+        raise ValueError("the envelope is defined above the lower edge only")
+    if not all(2.0 * bb.scale_km * 1e3 < m.A_WGS84 for bb in m.TABLE):
+        raise ValueError("a band violates a > 2 H; f need not decrease inside it")
+
+    def f(h: float) -> float:
+        vr = s + m.OMEGA_E * (m.A_WGS84 + h)
+        return 0.5 * m.density(h) * vr * vr / b
+
+    return max([f(low)] + [f(base) for base in BASES_M if base > low])
+
+
+def drag_only(cfg: m.Config, r: np.ndarray, v: np.ndarray, mass: float) -> float:
+    """|drag acceleration| of the model at a state (total minus the drag-free total)."""
+    nodrag = m.Config(j2=cfg.j2)
+    return float(
+        np.linalg.norm(
+            m.acceleration(cfg, 0.0, r, v, mass) - m.acceleration(nodrag, 0.0, r, v, mass)
+        )
+    )
+
+
+def envelope_counterexample() -> dict:
+    """Review 02 M3T0-R2-F2: lower bound L = 79 999.9 m, actual height 80 000 m, s = 11 000 m/s
+    retrograde at the equator, B 25.76 kg/m^2."""
+    low, s, h = 79_999.9, 11_000.0, 80_000.0
+    r = np.array([m.A_WGS84 + h, 0.0, 0.0])
+    v = np.array([0.0, -s, 0.0])
+    actual = drag_only(J2_DRAG, r, v, MASS)
+    old_rho = max([m.density(low)] + [m.density(x) for x in BASES_M if x > low])
+    old = 0.5 * old_rho * (s + m.OMEGA_E * (m.A_WGS84 + low)) ** 2 / B_V1
+    new = drag_envelope(low, s, B_V1)
+    return {
+        "lower_height_m": low,
+        "actual_height_m": m.geodetic_iterative(r)[1],
+        "speed_mps": s,
+        "actual_drag_mps2": actual,
+        "superseded_envelope_mps2": old,
+        "corrected_envelope_mps2": new,
+        "superseded_covers": old >= actual,
+        "corrected_covers": new >= actual,
+    }
+
+
+def stage_stress(vehicle: str, b: float | None, floor: float, n: int = 2000) -> dict:
+    """Empirical check of the derived condition (not part of the proof): bound states at
+    floor <= h0 <= floor + 20 km with near-escape, retrograde equatorial and straight-down
+    velocities; each RK4 step must stay in the fail-closed domain, with every stage at or
+    above its lower bound and the stage accelerations within A0 and A2."""
+    rng = np.random.default_rng(20261018)
+    cfg = m.Config(j2=m.J2_FROM_C20) if b is None else J2_DRAG
+    mass = MASS if b is None else b * 2.2 * 15.0
+    bb = math.inf if b is None else b
+    worst = {"stage_margin_m": math.inf, "a0_margin_mps2": math.inf, "a2_margin_mps2": math.inf}
+    lowest = math.inf
+    kinds = {"random": 0, "retrograde_equator": 0, "straight_down": 0}
+    for i in range(n):
+        h0 = floor + (0.0 if i < 50 else rng.uniform(0.0, 20_000.0))
+        kind = ("random", "retrograde_equator", "straight_down")[i % 3]
+        kinds[kind] += 1
+        lat = 0.0 if kind == "retrograde_equator" else rng.uniform(-math.pi / 2, math.pi / 2)
+        lon = rng.uniform(-math.pi, math.pi)
+        r0 = m.geodetic_to_cartesian(lat, lon, h0)
+        vesc = math.sqrt(2.0 * m.MU / float(np.linalg.norm(r0)))
+        speed = vesc * (1.0 - 10.0 ** rng.uniform(-6.0, -1.0))
+        if kind == "random":
+            d = rng.normal(size=3)
+        elif kind == "retrograde_equator":
+            d = np.array([math.sin(lon), -math.cos(lon), 0.0])  # against the rotation
+        else:
+            d = -normal(lat, lon)
+        v0 = speed * d / np.linalg.norm(d)
+        y0 = np.concatenate([r0, v0, [mass]])
+        stages: list = []
+        m.rk4_step(m.rhs(cfg), 0.0, y0, DT, stages)  # raises OutsideDomainError if it fails
+        lim = stage_lower_heights(m.geodetic_iterative(r0)[1], bb)
+        hs = [m.geodetic_iterative(st.r)[1] for st in stages]
+        lowest = min(lowest, *hs)
+        margin = min(hs[0] - lim["L2"], hs[1] - lim["L3"], hs[2] - lim["L4"])
+        worst["stage_margin_m"] = min(worst["stage_margin_m"], margin)
+        a0 = float(np.linalg.norm(m.acceleration(cfg, 0.0, r0, v0, mass)))
+        y2 = y0 + 0.5 * DT * m.rhs(cfg)(0.0, y0)
+        a2 = float(np.linalg.norm(m.acceleration(cfg, 0.0, y2[:3], y2[3:6], mass)))
+        worst["a0_margin_mps2"] = min(worst["a0_margin_mps2"], lim["A0"] - a0)
+        worst["a2_margin_mps2"] = min(worst["a2_margin_mps2"], lim["A2"] - a2)
+    return {
+        "vehicle": vehicle,
+        "states": n,
+        "kinds": kinds,
+        "lowest_stage_height_m": lowest,
+        "min_margins": worst,
+        "all_within_bounds": min(worst.values()) >= 0.0,
+    }
+
+
+def stage_lower_heights(h0: float, b: float) -> dict:
+    """Lower bounds L2, L3, L4 on the heights of the k2, k3 and k4 inputs of an RK4 step from
+    any bound committed state at geodetic height h0, with the speed and acceleration bounds
+    they use. L_k > 0 implies the stage is outside the ellipsoid (the segment from r0 would
+    otherwise cross the surface, at distance >= h0 from r0)."""
+    v = math.sqrt(2.0 * m.MU / (m.B_WGS84 + h0))  # |v0|^2 < 2 mu / |r0|, |r0| >= b + h0
+    a0 = G_BOUND + drag_envelope(h0, v, b)
+    l2 = h0 - 0.5 * DT * v
+    l3 = h0 - 0.5 * DT * (v + 0.5 * DT * a0)
+    out = {"V": v, "A0": a0, "L2": l2, "L3": l3, "s2": v + 0.5 * DT * a0}
+    if l2 <= 0.0:  # the k2 input may already be below the edge; a(y2) is not bounded
+        out.update(A2=None, L4=None)
+        return out
+    a2 = G_BOUND + drag_envelope(l2, out["s2"], b)
+    out.update(A2=a2, L4=h0 - DT * (v + 0.5 * DT * a2))
+    return out
 
 
 def sufficient_stage_condition() -> dict:
     """Derived sufficient condition for every RK4 stage of a step to stay above the lower
-    edge, from the 1-Lipschitz height and the stage positions
+    edge (0 m, the table's lowest base), from the 1-Lipschitz height and the stage positions
         r2 = r0 + dt/2 v0,  r3 = r0 + dt/2 (v0 + dt/2 a(y0)),  r4 = r0 + dt (v0 + dt/2 a(y2)):
-    h2 >= h0 - dt/2 V,  h3 >= h0 - dt/2 (V + dt/2 A0),  h4 >= h0 - dt (V + dt/2 A2),
-    with V = sqrt(2 mu / (b + h0)) (every bound state), gravity plus J2 bounded at the
-    surface by (1 + 3 J2 (a/b)^2) mu / b^2 (the J2 factor peaks at 3 J2 (a/r)^2 on the
-    axis), and drag rho(h) (s + omega_E (a + h))^2 / (2 B) at each stage's lower height
-    bound h (density: its supremum above h) and speed bound s. Every bound is monotone in
-    h0, so the committed state just above h_f is the worst case."""
-    g_b = (1.0 + 3.0 * m.J2_FROM_C20 * (m.A_WGS84 / m.B_WGS84) ** 2) * m.MU / m.B_WGS84**2
+    h2 >= h0 - dt/2 V,  h3 >= h0 - dt/2 (V + dt/2 A0),  h4 >= h0 - dt (V + dt/2 A2).
+    Domain: every committed state at geodetic height h0 with negative two-body energy, any
+    velocity direction, no thrust. Bounds used:
+    - V = sqrt(2 mu / (b + h0)) >= |v0|;
+    - gravity plus J2 <= (1 + 3 J2 (a/b)^2) mu / b^2 at any point outside the ellipsoid
+      (|r| >= b; |a_J2| = 1.5 J2 mu a^2 / r^4 sqrt(1 - 2u + 5u^2), u = (z/r)^2, <= 2);
+    - drag <= `drag_envelope` at each stage's lower height bound and speed bound
+      (|v(y0)| <= V, |v(y2)| <= V + dt/2 A0).
+    Monotonicity: V decreases in h0, and the envelope decreases in its lower height and
+    increases in its speed, so A0 decreases, L2, L3 and then A2 and L4 increase with h0.
+    need(h0) = -min(L2, L3, L4) is therefore strictly decreasing and has one root, the floor:
+    every h0 above it satisfies the condition. The floor for a ballistic coefficient B also
+    covers every larger B (less drag)."""
     rows = []
     for bname, b in (("B25.8", B_V1), ("B100", 100.0), ("drag-free limit", math.inf)):
 
-        def drag(h: float, s: float, b: float = b) -> float:
-            if math.isinf(b):
-                return 0.0
-            vr = s + m.OMEGA_E * (m.A_WGS84 + h)
-            return 0.5 * rho_sup(h) * vr * vr / b
+        def need(h0: float, b: float = b) -> float:
+            s = stage_lower_heights(h0, b)
+            if s["L4"] is None:
+                return -s["L2"]  # > 0 already: the k2 input may be below the edge
+            return -min(s["L2"], s["L3"], s["L4"])  # > 0: a stage may leave the domain
 
-        def need(h0: float) -> float:
-            v = math.sqrt(2.0 * m.MU / (m.B_WGS84 + h0))
-            a0 = g_b + drag(h0, v)
-            h2 = h0 - 0.5 * DT * v
-            a2 = g_b + drag(h2, v + 0.5 * DT * a0)
-            h3 = h0 - 0.5 * DT * (v + 0.5 * DT * a0)
-            h4 = h0 - DT * (v + 0.5 * DT * a2)
-            return -min(h2, h3, h4)  # > 0: a stage may leave the domain
-
-        # The largest root: scan down from 2000 km for the first height that fails.
-        hs = np.arange(2_000_000.0, 0.0, -100.0)
-        k = next(i for i, h in enumerate(hs) if need(float(h)) > 0.0)
-        h_req = brentq(need, float(hs[k]), float(hs[k - 1]), xtol=1e-6)
-        rows.append({"vehicle": bname, "h_f_sufficient_at_least_m": h_req})
+        lo, hi = 1.0, 2_000_000.0
+        if not (need(lo) > 0.0 > need(hi)):
+            raise RuntimeError("the floor is not bracketed")
+        h_req = brentq(need, lo, hi, xtol=1e-6)
+        rows.append(
+            {
+                "vehicle": bname,
+                "B_kg_per_m2": None if math.isinf(b) else b,
+                "h_f_sufficient_at_least_m": h_req,
+                "at_floor": stage_lower_heights(h_req, b),
+            }
+        )
     return {
         "dt_s": DT,
+        "lower_edge_m": BASES_M[0],
+        "gravity_bound_mps2": G_BOUND,
         "rows": rows,
+        "review02_counterexample": envelope_counterexample(),
+        "stress": [
+            stage_stress(r["vehicle"], r["B_kg_per_m2"], r["h_f_sufficient_at_least_m"])
+            for r in rows
+        ],
         "note": "Sufficient, not necessary. A sharper condition needs a restriction of the "
         "admissible initial states (for example the inward velocity), which is an owner "
         "decision and is not proposed here.",
@@ -473,12 +646,18 @@ def main() -> None:
         json.dump(out, fh, indent=2, sort_keys=True)
         fh.write("\n")
     mc = out["missed_crossing"]
-    print(json.dumps({"cases": mc["cases"], "all_bounds_hold": mc["all_bounds_hold"]}, indent=1))
+    flags = ("all_certified_bounds_hold", "all_dips_within_sampled_estimates")
+    print(json.dumps({"cases": mc["cases"], **{k: mc[k] for k in flags}}, indent=1))
     for row in mc["sweep"]:
+        ref = (
+            f"certified bound {row['bound_m']:.5f} m"
+            if "bound_m" in row
+            else f"sampled estimate {row['sampled_estimate_m']:.5f} m (not a bound)"
+        )
         print(
             f"{row['physics']:7s} {row['perigee_km']:6.0f} x {row['apogee_km']:6.0f} "
             f"i {row['inclination_deg']:5.1f}: dip {row['max_dip_m']:.5f} m "
-            f"(phase {row['phase_s']:.2f} s) <= bound {row['bound_m']:.5f} m"
+            f"(phase {row['phase_s']:.2f} s); {ref}"
         )
     print(json.dumps({k: v for k, v in out.items() if k != "missed_crossing"}, indent=1))
 
