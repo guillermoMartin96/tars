@@ -1,0 +1,14 @@
+import sys,pathlib,shutil,subprocess,tempfile,json
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import mutation_check_review02 as h
+out={}
+for name in ['r3_envelope_lower_limit_unwidened','r3_oracle_returns_the_model_height','json_reviewer_R2F3_mutant']:
+ with tempfile.TemporaryDirectory(dir='review_scratch') as tmp:
+  root=pathlib.Path(tmp); shutil.copytree('docs',root/'docs',ignore=shutil.ignore_patterns('__pycache__','.pytest_cache'))
+  d=root/h.REL; edit,checks=h.MUTANTS[name];edit(d)
+  cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider','-rf',str(d/'check_review02.py'),str(d/'check_review03.py'),'-k',' or '.join(checks)]
+  p=subprocess.run(cmd,text=True,capture_output=True)
+  (pathlib.Path('review_scratch')/(name+'.log')).write_text(p.stdout+p.stderr)
+  out[name]={'command':cmd,'exit':p.returncode,'summary':p.stdout.splitlines()[-1]}
+pathlib.Path('review_scratch/focused_mutations.json').write_text(json.dumps(out,indent=2))
+print(json.dumps(out,indent=2))

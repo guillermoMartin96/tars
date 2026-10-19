@@ -1,0 +1,18 @@
+import sys
+from pathlib import Path
+from decimal import Decimal
+import numpy as np
+sys.path.insert(0,str(Path('docs/science/experiments/m3-t0').absolute()))
+import t0_model as m
+import t0_termination as t
+
+def test_envelope_at_exterior_equatorial_bound_state():
+ r=np.array([197059137.0,0.0,0.0]); v=np.zeros(3)
+ h=190681000.0
+ assert Decimal(float(r[0]))-Decimal(m.A_WGS84)==Decimal(h)
+ assert m.geodetic_iterative(r)[1]==h
+ assert -m.MU/float(r[0])<0
+ # Gravity and J2 have zero y component at this point, so y isolates drag without subtraction.
+ actual=abs(Decimal(float(m.acceleration(t.J2_DRAG,0.,r,v,850.)[1])))
+ bound=Decimal(t.drag_envelope(h,0.,t.B_V1))
+ assert actual<=bound, (float(actual),float(bound))

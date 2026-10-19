@@ -1,0 +1,40 @@
+import sys,math,json,subprocess,pathlib,re,hashlib
+from decimal import Decimal as D,localcontext
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m,t0_termination as t
+import check_review03 as ck
+with localcontext() as c:
+ c.prec=80
+ rows=[tuple(D(x.strip()) for x in l.split(',')) for l in m.TABLE_COPY.read_text().splitlines() if l.strip()]
+ count=0
+ for base,_,_ in rows:
+  x0=m.A_WGS84+float(base*1000)
+  for x in [math.nextafter(x0,math.inf),x0,math.nextafter(x0,-math.inf)]:
+   h=D(x)-D(m.A_WGS84)
+   if h<0:continue
+   i=max(i for i,row in enumerate(rows) if row[0]*1000<=h)
+   bb,rho,sc=rows[i]; ref=rho*(-(h/1000-bb)/sc).exp()
+   assert abs(D(m.density(float(h)))/ref-1)<D('1e-13')
+   for speed in (0.,11000.):
+    r=np.array([x,0.,0.]); v=np.array([0.,-speed,0.])
+    actual=abs(D(float(m.acceleration(t.J2_DRAG,0.,r,v,850.)[1])))
+    assert actual<=D(t.drag_envelope(float(h),speed,t.B_V1))
+    count+=1
+ print('all_bases_adjacent_equatorial_checks',count)
+ constants=ck.recomputed_constants()
+ old=json.loads(subprocess.check_output(['git','show','c6c0fff:docs/science/experiments/m3-t0/t0_termination_results.json']))
+ new=json.loads(pathlib.Path('docs/science/experiments/m3-t0/t0_termination_results.json').read_text())
+ for a,b in zip(old['sufficient_stage_condition']['rows'],new['sufficient_stage_condition']['rows']):
+  h=b['h_f_sufficient_at_least_m']; bc=b['B_kg_per_m2'] or math.inf
+  lo,hi=h-1e-5,h
+  for _ in range(24):
+   mid=(lo+hi)/2
+   if ck.need_second(mid,bc,constants)<0:hi=mid
+   else:lo=mid
+  print('floor',b['vehicle'],'old',a['h_f_sufficient_at_least_m'],'new',h,'delta',h-a['h_f_sufficient_at_least_m'],'root_bracket',lo,hi,'need_at_published',float(ck.need_second(h,bc,constants)))
+ val=pathlib.Path('docs/science/validation.md').read_text().split('## VAL-0019')[1]
+ for name,digest in re.findall(r'`([^`]+\.(?:py|txt))` `([0-9a-f]{64})`',val):
+  p=pathlib.Path('docs/science/experiments/m3-t0')/name
+  assert hashlib.sha256(p.read_bytes()).hexdigest()==digest,name
+ print('VAL0019_script_table_hashes_match')

@@ -16,6 +16,11 @@
 - The P1 bounds are unchanged at the quoted precision, and the P1 recommendation is unchanged.
 - The new checks (`check_review03.py`) use an independent high-precision height oracle (`t0_oracle.py`), with mutation evidence. The empirical side is `t0_height_error.py`.
 - Dispositions are in `docs/reviews/M3-T0-review-03.md`. Review 04 follows. T0 is not accepted.  
+**Status update (2026-10-19, append-only):** **Review 04 (Codex, at `44260ef`): REQUEST_CHANGES.**
+- R2-F1, R2-F3, IM-1, F1, F3, F4 and F5 are RESOLVED.
+- R3-F1, R2-F2 and F2 are PARTIALLY RESOLVED: the density-jump cases are covered, but the global drag envelope omits underflow.
+- New finding M3T0-R4-F1 (MINOR): above about 181 890 km the density is subnormal, and the model's drag exceeds the envelope (2.01× at 190 681 km). No stage below 0 m is shown at the published floors. It is verified and ACCEPTED, **not applied**.
+- Record: `docs/reviews/M3-T0-review-04.md`. T0 is not accepted. A correction pass and any Review 05 await authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

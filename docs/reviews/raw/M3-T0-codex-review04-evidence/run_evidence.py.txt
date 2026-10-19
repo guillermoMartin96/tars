@@ -1,0 +1,21 @@
+import subprocess,json,hashlib,pathlib,time
+S=pathlib.Path('review_scratch'); D=pathlib.Path('docs/science/experiments/m3-t0'); P=str(pathlib.Path('.venv/bin/python').absolute())
+ledger=[]
+def run(args,name):
+ start=time.time()
+ with (S/(name+'.log')).open('w') as f: r=subprocess.run(args,stdout=f,stderr=subprocess.STDOUT)
+ ledger.append({'command':args,'exit':r.returncode,'seconds':time.time()-start,'log':name+'.log'})
+ (S/'execution.json').write_text(json.dumps(ledger,indent=2))
+initial={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in D.rglob('*') if p.is_file() and '__pycache__' not in str(p)}
+(S/'initial_hashes.json').write_text(json.dumps(initial,indent=2))
+for x in ('atmosphere','decay','geodetic','frames','regression','termination','height_error','axis_ablation'):
+ out=S/f't0_{x}_results.json'; run([P,str(D/f't0_{x}.py'),str(out)],x)
+ ledger[-1]['byte_identical']=out.exists() and out.read_bytes()==(D/out.name).read_bytes()
+run([P,str(D/'t0_gmat.py'),'--gmat-console',str(pathlib.Path('../GMAT R2026a/bin/GmatConsole').absolute()),'--out',str((S/'t0_gmat_results.json').absolute())],'gmat')
+ledger[-1]['byte_identical']=(S/'t0_gmat_results.json').exists() and (S/'t0_gmat_results.json').read_bytes()==(D/'t0_gmat_results.json').read_bytes()
+for x in ('m1','m2'):
+ run([P,f'toolbox/validators/{x}_proof.py','--out',str(S/f'{x}.json')],x)
+ run([P,f'toolbox/scripts/gmat_{x}.py','compare'],x+'compare')
+(S/'execution.json').write_text(json.dumps(ledger,indent=2))
+changed={p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p,h in initial.items() if pathlib.Path(p).exists() and hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()!=h}
+(S/'changed_experiments.json').write_text(json.dumps(changed,indent=2))

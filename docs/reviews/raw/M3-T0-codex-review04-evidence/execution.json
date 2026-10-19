@@ -1,0 +1,146 @@
+[
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_atmosphere.py",
+      "review_scratch/t0_atmosphere_results.json"
+    ],
+    "exit": 0,
+    "seconds": 1.3064968585968018,
+    "log": "atmosphere.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_decay.py",
+      "review_scratch/t0_decay_results.json"
+    ],
+    "exit": 0,
+    "seconds": 2.410256862640381,
+    "log": "decay.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_geodetic.py",
+      "review_scratch/t0_geodetic_results.json"
+    ],
+    "exit": 0,
+    "seconds": 0.5971629619598389,
+    "log": "geodetic.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_frames.py",
+      "review_scratch/t0_frames_results.json"
+    ],
+    "exit": 0,
+    "seconds": 0.5738930702209473,
+    "log": "frames.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_regression.py",
+      "review_scratch/t0_regression_results.json"
+    ],
+    "exit": 0,
+    "seconds": 1.4346847534179688,
+    "log": "regression.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_termination.py",
+      "review_scratch/t0_termination_results.json"
+    ],
+    "exit": 0,
+    "seconds": 34.63628315925598,
+    "log": "termination.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_height_error.py",
+      "review_scratch/t0_height_error_results.json"
+    ],
+    "exit": 0,
+    "seconds": 8.225653886795044,
+    "log": "height_error.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_axis_ablation.py",
+      "review_scratch/t0_axis_ablation_results.json"
+    ],
+    "exit": 0,
+    "seconds": 0.8280858993530273,
+    "log": "axis_ablation.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "docs/science/experiments/m3-t0/t0_gmat.py",
+      "--gmat-console",
+      "<snap>/../GMAT R2026a/bin/GmatConsole",
+      "--out",
+      "<snap>/review_scratch/t0_gmat_results.json"
+    ],
+    "exit": 0,
+    "seconds": 57.19945979118347,
+    "log": "gmat.log",
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "toolbox/validators/m1_proof.py",
+      "--out",
+      "review_scratch/m1.json"
+    ],
+    "exit": 0,
+    "seconds": 10.594615697860718,
+    "log": "m1.log"
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "toolbox/scripts/gmat_m1.py",
+      "compare"
+    ],
+    "exit": 0,
+    "seconds": 1.1060340404510498,
+    "log": "m1compare.log"
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "toolbox/validators/m2_proof.py",
+      "--out",
+      "review_scratch/m2.json"
+    ],
+    "exit": 0,
+    "seconds": 144.60517501831055,
+    "log": "m2.log"
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "toolbox/scripts/gmat_m2.py",
+      "compare"
+    ],
+    "exit": 0,
+    "seconds": 33.93406796455383,
+    "log": "m2compare.log"
+  }
+]

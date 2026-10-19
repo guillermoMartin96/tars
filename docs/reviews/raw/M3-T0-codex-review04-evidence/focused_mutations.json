@@ -1,0 +1,53 @@
+{
+  "r3_envelope_lower_limit_unwidened": {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "-rf",
+      "<snap>/review_scratch/tmpw_4nnyjo/docs/science/experiments/m3-t0/check_review02.py",
+      "<snap>/review_scratch/tmpw_4nnyjo/docs/science/experiments/m3-t0/check_review03.py",
+      "-k",
+      "test_r3f1_reviewer_counterexample_is_reproduced_and_covered or test_r3f1_counterexamples_at_every_downward_jump_are_covered or test_r3f1_boundary_points"
+    ],
+    "exit": 1,
+    "summary": "25 failed, 55 deselected in 2.41s"
+  },
+  "r3_oracle_returns_the_model_height": {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "-rf",
+      "<snap>/review_scratch/tmpd9e47h_3/docs/science/experiments/m3-t0/check_review02.py",
+      "<snap>/review_scratch/tmpd9e47h_3/docs/science/experiments/m3-t0/check_review03.py",
+      "-k",
+      "test_oracle_detects_the_r3f1_defect or test_oracle_does_not_use_the_model_height_or_band_code or test_oracles_agree"
+    ],
+    "exit": 1,
+    "summary": "3 failed, 77 deselected in 1.10s"
+  },
+  "json_reviewer_R2F3_mutant": {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "-rf",
+      "<snap>/review_scratch/tmpz9ak_bb9/docs/science/experiments/m3-t0/check_review02.py",
+      "<snap>/review_scratch/tmpz9ak_bb9/docs/science/experiments/m3-t0/check_review03.py",
+      "-k",
+      "test_r2f1_sweep_covers_the_declared_matrix or test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases or test_r2f2_floors_recomputed_by_a_second_implementation"
+    ],
+    "exit": 1,
+    "summary": "22 failed, 58 deselected in 1.37s"
+  }
+}

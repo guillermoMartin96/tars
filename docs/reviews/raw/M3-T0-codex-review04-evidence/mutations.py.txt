@@ -1,0 +1,9 @@
+import sys,json
+from concurrent.futures import ThreadPoolExecutor
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import mutation_check_review02 as h
+names=['r3_height_allowance_below_observed_error','r3_height_allowance_slightly_below_bound','r3_model_exact_base_in_band_below','r3_allowance_removed_and_review02_oracle_reverted']
+with ThreadPoolExecutor(max_workers=4) as pool:
+ out=dict(zip(names,pool.map(h.run,names)))
+open('review_scratch/mutations.json','w').write(json.dumps(out,indent=2))
+print(json.dumps(out,indent=2))

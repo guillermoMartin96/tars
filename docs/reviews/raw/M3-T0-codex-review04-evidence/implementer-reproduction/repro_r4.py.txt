@@ -1,0 +1,26 @@
+"""Implementer's independent reproduction of M3T0-R4-F1 (Review 04), at 44260ef.
+
+Run from docs/science/experiments/m3-t0 with `uv run --no-sync python repro_r4.py`.
+Equatorial points r = (a + h, 0, 0), v = 0, vehicle V1 (850 kg, Cd 2.2, 15 m^2), full
+J2-plus-drag configuration. Gravity and J2 have no y component there, so |a_y| is the
+model's drag magnitude. It is compared with t0_oracle.drag (60-digit decimal, true
+height) and with the corrected envelope drag_envelope(h_true, 0, B_V1).
+"""
+import numpy as np
+from decimal import Decimal as D, getcontext
+getcontext().prec = 60
+import t0_model as m, t0_oracle as o, t0_termination as tt
+
+print("top band", o.TABLE[-1])
+for h in (1.5e7, 1.0e8, 1.8332e8, 1.90681e8):
+    r = np.array([float(D(m.A_WGS84) + D(h)), 0.0, 0.0])
+    ht = o.true_height(r); hc = m.geodetic_iterative(r)[1]
+    acc = m.acceleration(tt.J2_DRAG, 0., r, np.zeros(3), tt.MASS)
+    act = abs(D(float(acc[1])))
+    env = D(tt.drag_envelope(float(ht), 0., tt.B_V1))
+    ref = o.drag(r, np.zeros(3), tt.MASS, 2.2, 15.0)
+    print(f"h={h:.6g} hc-ht={float(D(hc)-ht):.2e} model_y={float(act):.6e} oracle={float(ref):.6e} "
+          f"env={float(env):.6e} model/env={float(act/env)} subnormal={0 < float(act) < 2.2250738585072014e-308}")
+base, rho0, H = o.TABLE[-1]
+x = (D(rho0) / D("2.2250738585072014e-308")).ln()
+print("density subnormal above h =", float(base + H * x), "m")

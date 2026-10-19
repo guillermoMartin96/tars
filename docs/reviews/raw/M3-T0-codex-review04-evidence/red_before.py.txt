@@ -1,0 +1,10 @@
+import pathlib,subprocess,tarfile,io,shutil
+S=pathlib.Path('review_scratch/before'); S.mkdir(exist_ok=True)
+data=subprocess.check_output(['git','archive','c6c0fff','docs'])
+with tarfile.open(fileobj=io.BytesIO(data)) as ar:ar.extractall(S,filter='data')
+D=pathlib.Path('docs/science/experiments/m3-t0'); target=S/D
+for name in ['check_review03.py','t0_oracle.py','t0_height_error.py','t0_height_error_results.json']:shutil.copy2(D/name,target/name)
+p=target/'t0_termination.py';p.write_text(p.read_text()+'\ndrag_envelope_exact_height = drag_envelope\n')
+args=[str(pathlib.Path('.venv/bin/python').absolute()),'-m','pytest','-q','-p','no:cacheprovider',str(target/'check_review03.py'),'-k','reviewer_counterexample or counterexamples_at_every_downward_jump']
+print('command',args,flush=True)
+r=subprocess.run(args);print('pytest_exit',r.returncode)

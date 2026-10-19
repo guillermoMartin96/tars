@@ -1,0 +1,47 @@
+import sys,math,json,hashlib,pathlib
+from decimal import Decimal as D,localcontext
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m,t0_termination as t
+with localcontext() as c:
+ c.prec=90
+ # Equatorial height is exactly x-a, independent of both committed oracles.
+ best=None
+ for i in range(183000,192001):
+  h=float(i*1000); r=np.array([m.A_WGS84+h,0.,0.]); v=np.zeros(3)
+  actual=abs(D(float(m.acceleration(m.Config(mu=0.,drag=t.J2_DRAG.drag),0.,r,v,t.MASS)[1])))
+  env=D(t.drag_envelope(h,0.,t.B_V1))
+  if env and actual>env:
+   ratio=actual/env
+   if best is None or ratio>best[0]: best=(ratio,h,actual,env,m.density(h))
+ print('worst_underflow',tuple(str(q) for q in best))
+ ratio,h,actual,env,rho=best
+ r=np.array([m.A_WGS84+h,0.,0.]); v=np.zeros(3)
+ band=m.TABLE[-1]; hs=D(h); exactrho=D('3.019e-15') if False else None
+ rows=[tuple(D(x.strip()) for x in l.split(',')) for l in m.TABLE_COPY.read_text().splitlines() if l.strip()]
+ base,rho0,scale=rows[-1]
+ ref=rho0*(-(hs/1000-base)/scale).exp()
+ exp_arg=-(h/1000-band.base_km)/band.scale_km
+ print('r',r.tolist(),'v',v.tolist(),'mass',t.MASS,'B',repr(t.B_V1),'true_height',D(float(r[0]))-D(m.A_WGS84),'computed_height',m.geodetic_iterative(r)[1])
+ print('density',repr(rho),'exactrho',ref,'exp_arg',exp_arg,'exp_result',math.exp(exp_arg),'exp_relative_error',abs(D(math.exp(exp_arg))/D(exp_arg).exp()-1),'energy',-m.MU/float(r[0]))
+ print('actual',float(actual),'envelope',float(env),'ratio',ratio,'finite',all(math.isfinite(x) for x in (h,float(actual),float(env),float(r[0])**3)))
+ # Independent latitude iteration, high precision Decimal sin/cos from supplied evidence helper only as primitive.
+ import t0_height_error as he
+ def height(r):
+  x,y,z=map(lambda q:D(float(q)),r); p=(x*x+y*y).sqrt(); e=D(m.E2_WGS84); a=D(m.A_WGS84)
+  lat=he.d_atan2(z,p*(1-e))
+  for _ in range(40):
+   s=he.d_sin(lat); n=a/(1-e*s*s).sqrt(); new=he.d_atan2(z+e*n*s,p)
+   if abs(new-lat)<D('1e-48'): lat=new;break
+   lat=new
+  s=he.d_sin(lat); co=he.d_cos(lat)
+  return p*co+z*s-a*(1-e*s*s).sqrt()
+ rng=np.random.default_rng(441); worst=D(0)
+ for k in range(1200):
+  hh=10.**rng.uniform(-5,9); lat=rng.uniform(-math.pi/2,math.pi/2); lon=rng.uniform(-math.pi,math.pi)
+  r=m.geodetic_to_cartesian(lat,lon,hh); ht=height(r); err=abs(D(m.geodetic_iterative(r)[1])-ht); bound=D(t.height_error_bound(float(ht)))
+  worst=max(worst,err/bound)
+ print('independent_height_samples',1200,'worst_error_over_bound',worst)
+paths=['proof/thresholds/m1.json','proof/thresholds/m2.json','toolbox/references/gmat/m2/APPROVED_DIGESTS.json','toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz','proof/references/m2_final_states.json','../GMAT R2026a/bin/GmatConsole']
+paths+=list(map(str,pathlib.Path('../GMAT R2026a').rglob('EarthExponentialAtmosphereData.txt')))
+for p in paths: print('SHA256',p,hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest())

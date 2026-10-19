@@ -1,0 +1,16 @@
+import sys, math
+from decimal import Decimal, localcontext
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m, t0_termination as t
+with localcontext() as c:
+ c.prec=80
+ for i in range(170000,205000):
+  h=float(i*1000); r=np.array([m.A_WGS84+h,0.,0.]); v=np.zeros(3)
+  a=m.acceleration(m.Config(mu=0.,drag=t.J2_DRAG.drag),0.,r,v,t.MASS)
+  actual=abs(Decimal(float(a[1])))
+  bound=Decimal(t.drag_envelope(h,0.,t.B_V1))
+  if actual>bound:
+   print('VIOLATION',repr(h),'density',repr(m.density(h)),'vector',a.tolist(),'bound',str(bound),'actual',str(actual),'ratio',actual/bound)
+   break
+ else: print('none')

@@ -1,0 +1,264 @@
+command ['<snap>/.venv/bin/python', '-m', 'pytest', '-q', '-p', 'no:cacheprovider', 'review_scratch/before/docs/science/experiments/m3-t0/check_review03.py', '-k', 'reviewer_counterexample or counterexamples_at_every_downward_jump']
+FFFFFFFFFFFFF                                                            [100%]
+=================================== FAILURES ===================================
+_________ test_r3f1_reviewer_counterexample_is_reproduced_and_covered __________
+
+    def test_r3f1_reviewer_counterexample_is_reproduced_and_covered():
+        ht = o.true_height(REVIEWER_R)
+        assert abs(ht - D("120000.0000000000233")) < D("1e-13")
+        assert model_height(REVIEWER_R) == 119999.99999999907 < 120_000.0
+        a = model_drag_norm(REVIEWER_R, REVIEWER_V)
+        assert a > D(tt.drag_envelope_exact_height(120_000.0, 11_000.0, B_V1))  # the defect
+        assert a > defective_envelope(D(120_000), 11_000.0, B_V1)
+>       assert a <= D(tt.drag_envelope(120_000.0, 11_000.0, B_V1))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0.0623090145041428100451613705533837007436770394774023308671922') <= Decimal('0.062304179142380448908067336333260755054652690887451171875')
+E        +  where Decimal('0.062304179142380448908067336333260755054652690887451171875') = D(0.06230417914238045)
+E        +    where 0.06230417914238045 = <function drag_envelope at 0x10e1f2520>(120000.0, 11000.0, 25.757575757575758)
+E        +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:176: AssertionError
+_______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[50] _______
+
+base_km = 50
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('2698.88680020645335452302273013997022699436211101096019413815') <= Decimal('2698.80782847522596057388000190258026123046875')
+E            +  where Decimal('2698.80782847522596057388000190258026123046875') = D(2698.807828475226)
+E            +    where 2698.807828475226 = <function drag_envelope at 0x10e1f2520>(50000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+_______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[90] _______
+
+base_km = 90
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('8.67559525626633879391715980399276982992452581418083518035672') <= Decimal('8.675320646646557776193731115199625492095947265625')
+E            +  where Decimal('8.675320646646557776193731115199625492095947265625') = D(8.675320646646558)
+E            +    where 8.675320646646558 = <function drag_envelope at 0x10e1f2520>(90000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[110] _______
+
+base_km = 110
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.246879322907822871490416056361059888934633565852970223931685') <= Decimal('0.2468597899703767473145177291371510364115238189697265625')
+E            +  where Decimal('0.2468597899703767473145177291371510364115238189697265625') = D(0.24685978997037675)
+E            +    where 0.24685978997037675 = <function drag_envelope at 0x10e1f2520>(110000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[120] _______
+
+base_km = 120
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.0623088850387085855862687849465611542643131628029113160496473') <= Decimal('0.062304179142380448908067336333260755054652690887451171875')
+E            +  where Decimal('0.062304179142380448908067336333260755054652690887451171875') = D(0.06230417914238045)
+E            +    where 0.06230417914238045 = <function drag_envelope at 0x10e1f2520>(120000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[140] _______
+
+base_km = 140
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.00982872431282354291563606145914270661452248090205980455159489') <= Decimal('0.00982856738076995188613249609943522955290973186492919921875')
+E            +  where Decimal('0.00982856738076995188613249609943522955290973186492919921875') = D(0.009828567380769952)
+E            +    where 0.009828567380769952 = <function drag_envelope at 0x10e1f2520>(140000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[200] _______
+
+base_km = 200
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.000713466473434204116630260014445346148605847092503822464206593') <= Decimal('0.0007134663571145426382014154143007544917054474353790283203125')
+E            +  where Decimal('0.0007134663571145426382014154143007544917054474353790283203125') = D(0.0007134663571145426)
+E            +    where 0.0007134663571145426 = <function drag_envelope at 0x10e1f2520>(200000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[250] _______
+
+base_km = 250
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.000185534755227729150789624947096372331154582213481815649897092') <= Decimal('0.0001855320733416022938033762557097361423075199127197265625')
+E            +  where Decimal('0.0001855320733416022938033762557097361423075199127197265625') = D(0.0001855320733416023)
+E            +    where 0.0001855320733416023 = <function drag_envelope at 0x10e1f2520>(250000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[450] _______
+
+base_km = 450
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.00000406754726708058816715046720688957777019498225406022583283429') <= Decimal('0.0000040675464209814831824624063727480205443498562090098857879638671875')
+E            +  where Decimal('0.0000040675464209814831824624063727480205443498562090098857879638671875') = D(4.067546420981483e-06)
+E            +    where 4.067546420981483e-06 = <function drag_envelope at 0x10e1f2520>(450000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[600] _______
+
+base_km = 600
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('3.73849738535038336122573644660726531050908587300720656279737E-7') <= Decimal('3.738467154882892659874759309912573002065983018837869167327880859375E-7')
+E            +  where Decimal('3.738467154882892659874759309912573002065983018837869167327880859375E-7') = D(3.7384671548828927e-07)
+E            +    where 3.7384671548828927e-07 = <function drag_envelope at 0x10e1f2520>(600000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[700] _______
+
+base_km = 700
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('9.30399713035596032685916571674097513226878195786116553465077E-8') <= Decimal('9.3039524624496148481208831516886537116306499228812754154205322265625E-8')
+E            +  where Decimal('9.3039524624496148481208831516886537116306499228812754154205322265625E-8') = D(9.303952462449615e-08)
+E            +    where 9.303952462449615e-08 = <function drag_envelope at 0x10e1f2520>(700000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[900] _______
+
+base_km = 900
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('1.35370692398489645017636766206580732203948624797354115027825E-8') <= Decimal('1.3537052897407171969509223695242450258291455611470155417919158935546875E-8')
+E            +  where Decimal('1.3537052897407171969509223695242450258291455611470155417919158935546875E-8') = D(1.3537052897407172e-08)
+E            +    where 1.3537052897407172e-08 = <function drag_envelope at 0x10e1f2520>(900000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[1000] ______
+
+base_km = 1000
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('7.80184769220666045331937023185961184170011521132838298320414E-9') <= Decimal('7.80172925135490516722821543148247425136787569499574601650238037109375E-9')
+E            +  where Decimal('7.80172925135490516722821543148247425136787569499574601650238037109375E-9') = D(7.801729251354905e-09)
+E            +    where 7.801729251354905e-09 = <function drag_envelope at 0x10e1f2520>(1000000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10e1f2520> = tt.drag_envelope
+
+review_scratch/before/docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_reviewer_counterexample_is_reproduced_and_covered
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[50]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[90]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[110]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[120]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[140]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[200]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[250]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[450]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[600]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[700]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[900]
+FAILED review_scratch/before/docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[1000]
+13 failed, 29 deselected in 1.25s
+pytest_exit 1

@@ -1,0 +1,26 @@
+from pathlib import Path
+import json,subprocess,hashlib,re
+D=Path('docs/science/experiments/m3-t0'); S=Path('review_scratch')
+# Read complete records and correction diff; list every inspected result path.
+paths=[Path(f'docs/reviews/raw/M3-T0-codex-review0{i}{suffix}.md') for i in (1,2,3) for suffix in ('','-prompt')]
+paths += [Path(f'docs/reviews/M3-T0-review-0{i}.md') for i in (1,2,3)]
+paths += list(Path('docs/decisions/requests').glob('DR-002[4-9]*'))
+paths += [Path('docs/science/assumptions.md'),Path('docs/science/validation.md'),Path('docs/milestones/M3-T0-report.md'),Path('docs/milestones/M3-T0-decision-matrix.md'),D/'README.md']
+paths += sorted(D.glob('*results.json'))+ sorted(S.glob('*results.json'))
+paths += list(Path('docs/reviews/raw/M3-T0-review04-correction-evidence').glob('*'))
+for p in paths:
+ text=p.read_text()
+ print(str(p),len(text),'chars',hashlib.sha256(p.read_bytes()).hexdigest())
+for p in sorted(D.glob('*results.json')):
+ data=json.loads(p.read_text()); print('RESULT_KEYS',p.name,list(data))
+for i in (1,2,3):
+ for suffix in ('','-prompt'):
+  p=f'docs/reviews/raw/M3-T0-codex-review0{i}{suffix}.md'
+  assert subprocess.check_output(['git','show',f'c6c0fff:{p}'])==Path(p).read_bytes()
+print('prior_raw_reviews_and_prompts_preserved')
+for p in (S/'correction.diff',S/'full-t0.diff'):
+ text=p.read_text(); print('DIFF',p,len(text),'chars')
+mut=json.loads(Path('docs/reviews/raw/M3-T0-review04-correction-evidence/mutation_check_review03.json').read_text())
+print('supplied_mutant_counts', {v:sum(r['outcome']==v for r in mut['mutants'].values()) for v in ('detected','equivalent','not detected','error')})
+for p in (Path('docs/reviews/raw/M3-T0-codex-review03-evidence'),Path('docs/reviews/raw/M3-T0-codex-review02-evidence')):
+ print('prior_evidence_inventory',str(p),sorted(q.name for q in p.iterdir()))

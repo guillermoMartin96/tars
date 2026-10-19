@@ -1,0 +1,71 @@
+{
+  "r3_height_allowance_below_observed_error": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+      "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+      "test_r3f1_boundary_points"
+    ],
+    "failed_checks": [
+      "test_provenance_rerun_reproduces_the_committed_height_error_results",
+      "test_provenance_rerun_reproduces_the_committed_termination_results",
+      "test_r3f1_boundary_points",
+      "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "10 failed, 82 passed in 162.15s (0:02:42)"
+  },
+  "r3_height_allowance_slightly_below_bound": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation"
+    ],
+    "failed_checks": [
+      "test_provenance_rerun_reproduces_the_committed_height_error_results",
+      "test_provenance_rerun_reproduces_the_committed_termination_results",
+      "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "3 failed, 89 passed in 161.68s (0:02:41)"
+  },
+  "r3_model_exact_base_in_band_below": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r3f1_boundary_points"
+    ],
+    "failed_checks": [
+      "test_provenance_rerun_reproduces_the_committed_height_error_results",
+      "test_provenance_rerun_reproduces_the_committed_termination_results",
+      "test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum",
+      "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+      "test_r2f2_drag_factor_decreases_inside_every_band",
+      "test_r2f2_envelope_bounds_adversarial_drag_points",
+      "test_r2f2_review02_counterexample_is_covered",
+      "test_r3f1_boundary_points",
+      "test_r3f1_counterexamples_at_every_downward_jump_are_covered"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "34 failed, 58 passed in 135.44s (0:02:15)"
+  },
+  "r3_allowance_removed_and_review02_oracle_reverted": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+      "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+      "test_r3f1_boundary_points"
+    ],
+    "failed_checks": [
+      "test_provenance_rerun_reproduces_the_committed_height_error_results",
+      "test_provenance_rerun_reproduces_the_committed_termination_results",
+      "test_r3f1_boundary_points",
+      "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+      "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation",
+      "test_r3f1_height_error_bound_holds_on_global_polar_and_low_points",
+      "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+      "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+      "test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "33 failed, 59 passed in 155.60s (0:02:35)"
+  }
+}
