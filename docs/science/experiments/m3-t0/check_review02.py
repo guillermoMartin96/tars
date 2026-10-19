@@ -44,6 +44,7 @@ from scipy.optimize import brentq, minimize_scalar
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 import t0_model as m  # noqa: E402
+import t0_oracle as o  # noqa: E402
 
 ROOT = HERE.parents[3]
 DT = 10.0
@@ -64,7 +65,8 @@ ORBITS = (
     (250.0, 2000.0, 51.6),
 )
 FENCES = re.compile(
-    r"<!-- (review01|review02)-correction-log -->.*?<!-- /\1-correction-log -->", re.DOTALL
+    r"<!-- (review01|review02|review03)-correction-log -->.*?<!-- /\1-correction-log -->",
+    re.DOTALL,
 )
 
 
@@ -404,7 +406,11 @@ def test_r2f2_drag_factor_decreases_inside_every_band():
 
 def test_r2f2_envelope_bounds_adversarial_drag_points():
     """Points above the lower bound, at band bases, just below upward jumps, at the equator
-    against the rotation (the largest |v_rel|), and above h0."""
+    against the rotation (the largest |v_rel|), and above h0. Corrected after Review 03
+    M3T0-R3-F1: the expected bound is taken at the point's true height from the
+    independent oracle (`t0_oracle`), never at the model's own computed height, and the
+    measured drag is the model's drag vector itself (no difference of accelerations, so
+    no measurement allowance)."""
     import t0_termination as tt
 
     rng = np.random.default_rng(7)
@@ -415,7 +421,10 @@ def test_r2f2_envelope_bounds_adversarial_drag_points():
     for low in lows:
         for s in (100.0, 7_800.0, 11_100.0):
             env = tt.drag_envelope(low, s, B_V1)
-            assert env == pytest.approx(envelope(low, s, B_V1), rel=1e-15)
+            # the corrected envelope includes the exact-height one and widens it only by
+            # the height-error allowance (< 1e-8 m) and the rounding factor F_D
+            assert envelope(low, s, B_V1) <= env
+            assert env <= envelope(max(low - 1e-8, 0.0), s, B_V1) * (1 + 1e-12)
             hs = [low, *[x for x in bases if low < x < low + 60e3], low + rng.uniform(0, 60e3)]
             for h in hs:
                 for lat, sign in ((0.0, -1.0), (rng.uniform(-1.4, 1.4), rng.choice([-1, 1]))):
@@ -423,20 +432,10 @@ def test_r2f2_envelope_bounds_adversarial_drag_points():
                     r = m.geodetic_to_cartesian(lat, lon, h)
                     east = np.array([-math.sin(lon), math.cos(lon), 0.0])
                     v = sign * s * east
-                    nodrag = m.Config(j2=m.J2_FROM_C20)
-                    total = m.acceleration(J2_DRAG, 0, r, v, MASS)
-                    base = m.acceleration(nodrag, 0, r, v, MASS)
-                    a = float(np.linalg.norm(total - base))
-                    # Measurement allowance, not a margin on the bound: drag is isolated as a
-                    # difference of two acceleration vectors, and 8 eps (|total| + |base|)
-                    # covers the round-off of that difference and of the drag itself.
-                    # Density is evaluated at the model's own recovered height, which can
-                    # differ from h by ~1e-9 m, so the envelope is taken from that height.
-                    eps = np.finfo(float).eps
-                    slack = 8 * eps * float(np.linalg.norm(total) + np.linalg.norm(base))
-                    h_model = height(r)
-                    bound = tt.drag_envelope(min(low, h_model), s, B_V1)
-                    assert a <= bound + slack, (low, s, h, h_model, lat)
+                    a = tt.model_drag(r, v, MASS)
+                    true_h = tt._dn(o.true_height(r))
+                    bound = tt.drag_envelope(min(low, true_h), s, B_V1)
+                    assert a <= bound, (low, s, h, true_h, lat)
 
 
 @pytest.mark.parametrize("vehicle", sorted(VEHICLES))

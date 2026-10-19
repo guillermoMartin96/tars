@@ -1,8 +1,10 @@
-"""Mutation evidence for M3T0-R2-F3 (research only).
+"""Mutation evidence for M3T0-R2-F3 and M3T0-R3-F1 (research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
-`check_review01.py`. This harness corrupts copies of the T0 result files and scripts, runs
-`check_review01.py` and `check_review02.py` on each copy, and classifies the outcome:
+`check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
+density discontinuities, and the Review 02 adversarial check hid it. This harness corrupts
+copies of the T0 result files, scripts, model and oracle, runs `check_review01.py`,
+`check_review02.py` and `check_review03.py` on each copy, and classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
                  checks declared for that mutant is among the failures (a failure elsewhere
@@ -43,6 +45,14 @@ def edit_json(name: str, fn: Callable[[dict], None]) -> Callable[[Path], None]:
         data = json.loads(p.read_text())
         fn(data)
         p.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n")
+
+    return apply
+
+
+def both(*edits: Callable[[Path], None]) -> Callable[[Path], None]:
+    def apply(d: Path) -> None:
+        for edit in edits:
+            edit(d)
 
     return apply
 
@@ -114,7 +124,28 @@ CEX = "test_r2f2_review02_counterexample_is_covered"
 TWOBODY = "test_r2f1_certified_bound_function_matches_a_second_maximisation"
 IM1 = "test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report"
 ENDPOINT = "test_r2f1_two_body_maximum_is_at_an_endpoint_on_a_domain_scan"
+REVIEWER = "test_r3f1_reviewer_counterexample_is_reproduced_and_covered"
+JUMPS = "test_r3f1_counterexamples_at_every_downward_jump_are_covered"
+BOUNDARY = "test_r3f1_boundary_points"
+DERIV = "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation"
+SELFTEST = "test_oracle_detects_the_r3f1_defect"
+AGREE = "test_oracles_agree"
+STATIC = "test_oracle_does_not_use_the_model_height_or_band_code"
+GUARD = "test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height"
+FLOOR3 = "test_r3f1_floors_recomputed_by_a_second_implementation"
 EQUIVALENT = "equivalent"
+ALLOWANCE = "    alpha_sel = alpha * (1 + U) + U\n    beta_sel = beta * (1 + U)\n"
+ORACLE_DOC = (
+    '    """Exact-arithmetic geodetic height of the binary64 point r (outside the ellipsoid)."""\n'
+)
+NO_ALLOWANCE = (
+    "    alpha, beta = 0 * alpha, 0 * beta\n    alpha_sel, beta_sel = 0 * alpha, 0 * beta\n"
+)
+REVERT02 = (
+    "check_review02.py",
+    "                    true_h = tt._dn(o.true_height(r))",
+    "                    true_h = height(r)  # reverted: the model's own height",
+)
 
 # name -> (corruption, checks expected to detect it)
 MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
@@ -145,17 +176,21 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
     "script_envelope_rotation_at_lower_end": (
         edit_text(
             "t0_termination.py",
-            "vr = s + m.OMEGA_E * (m.A_WGS84 + h)",
-            "vr = s + m.OMEGA_E * (m.A_WGS84 + low)",
+            "vr = Decimal(s) + w * (a + (h + be) / (1 - al))",
+            "vr = Decimal(s) + w * (a + (Decimal(low) + be) / (1 - al))",
         ),
         (ENV, CEX, PROV),
     ),
     "script_envelope_without_band_bases": (
-        edit_text("t0_termination.py", "+ [f(base) for base in BASES_M if base > low]", "+ []"),
+        edit_text(
+            "t0_termination.py",
+            "for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:",
+            "for h in [ell]:",
+        ),
         (ENV, CEX, PROV),
     ),
-    # Equivalent: g never has an interior maximum above both endpoints on the scanned
-    # domain, so dropping the stationary points changes no output there.
+    # Equivalent: every stationary point of g is a minimum (Review 03's proof: g' = 0 is
+    # F(r) = 0 with F' > 0 for r > 85 396 m), so dropping them changes no output.
     "script_two_body_without_stationary_points": (
         edit_text(
             "t0_termination.py",
@@ -175,10 +210,74 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
     "script_stage_speed_circular": (
         edit_text(
             "t0_termination.py",
-            "v = math.sqrt(2.0 * m.MU / (m.B_WGS84 + h0))  # |v0|^2",
-            "v = math.sqrt(1.0 * m.MU / (m.B_WGS84 + h0))  # |v0|^2",
+            'v = (2 * mu / (Decimal(FP["b_lower_m"]) + big_h0)).sqrt()',
+            'v = (1 * mu / (Decimal(FP["b_lower_m"]) + big_h0)).sqrt()',
         ),
-        (PROV,),
+        (PROV, FLOOR3),
+    ),
+    # ---- Review 03 M3T0-R3-F1
+    "r3_height_allowance_removed": (
+        edit_text(
+            "t0_termination.py",
+            ALLOWANCE,
+            NO_ALLOWANCE,
+        ),
+        (REVIEWER, JUMPS, BOUNDARY, DERIV),
+    ),
+    # below the observed error (beta_sel / 10 ~ 9e-10 m < 9.3e-10 m at the reviewer's point):
+    # behavioural checks only are declared
+    "r3_height_allowance_below_observed_error": (
+        edit_text("t0_termination.py", ALLOWANCE, ALLOWANCE.replace("(1 + U)\n", "(1 + U) / 10\n")),
+        (REVIEWER, JUMPS, BOUNDARY),
+    ),
+    # below the justified bound but above every observed error: no sampled point can
+    # violate it, so only the recomputation of the derivation is declared
+    "r3_height_allowance_slightly_below_bound": (
+        edit_text(
+            "t0_termination.py", ALLOWANCE, ALLOWANCE.replace("(1 + U)\n", "(1 + U) * 9 / 10\n")
+        ),
+        (DERIV,),
+    ),
+    "r3_model_exact_base_in_band_below": (
+        edit_text(
+            "t0_model.py", "if h_km < table[i + 1].base_km:", "if h_km <= table[i + 1].base_km:"
+        ),
+        (BOUNDARY,),
+    ),
+    "r3_envelope_band_of_unwidened_limit": (
+        edit_text(
+            "t0_termination.py",
+            "DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]",
+            "DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= max(h, Decimal(low)))]",
+        ),
+        (REVIEWER, JUMPS, BOUNDARY),
+    ),
+    "r3_envelope_lower_limit_unwidened": (
+        edit_text(
+            "t0_termination.py",
+            "ell = max((1 - al) * Decimal(low) - be, Decimal(0))",
+            "ell = max(Decimal(low), Decimal(0))",
+        ),
+        (REVIEWER, JUMPS, BOUNDARY),
+    ),
+    "r3_oracle_returns_the_model_height": (
+        edit_text(
+            "t0_oracle.py", ORACLE_DOC, ORACLE_DOC + "    return D(m.geodetic_iterative(r)[1])\n"
+        ),
+        (SELFTEST, STATIC, AGREE),
+    ),
+    "r3_review02_oracle_reverted_to_model_height": (edit_text(*REVERT02), (GUARD,)),
+    # the reverted Review 02 check alone is blind to the defect; check_review03 is not
+    "r3_allowance_removed_and_review02_oracle_reverted": (
+        both(
+            edit_text(
+                "t0_termination.py",
+                ALLOWANCE,
+                NO_ALLOWANCE,
+            ),
+            edit_text(*REVERT02),
+        ),
+        (REVIEWER, JUMPS, BOUNDARY),
     ),
 }
 
@@ -206,6 +305,7 @@ def run(name: str) -> dict:
                 "-rf",
                 str(d / "check_review01.py"),
                 str(d / "check_review02.py"),
+                str(d / "check_review03.py"),
             ],
             capture_output=True,
             text=True,

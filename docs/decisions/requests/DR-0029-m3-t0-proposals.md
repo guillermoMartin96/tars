@@ -1,6 +1,6 @@
 # Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic test points, validation-scenario parameters
 
-**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
+**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-18  
 **Related milestone/issue:**
@@ -78,13 +78,38 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - **Speed proxy.** At the v_c threshold for κ = 0.01 (B 25.8), an equatorial retrograde perigee with e = 0.9 has |v_rel| = 11 292 m/s and λ dt = 0.01438 > κ. V_b (11 592 m/s there) covers it, and covers every bound state by construction.
 - **A sufficient stage-domain condition [derived].**
   - Geodetic height is 1-Lipschitz (it is the signed distance to a convex surface), and the RK4 stage positions are r0 + (dt/2)v0, r0 + (dt/2)(v0 + (dt/2)a(y0)) and r0 + dt(v0 + (dt/2)a(y2)).
-  - So every stage of a step from a committed state at h0 > h_f stays above the lower edge if h_f exceeds the bound computed in `termination` → `sufficient_stage_condition`. Domain: every committed state with negative two-body energy, any velocity direction, no thrust. The bounds used (corrected after Review 02 R2-F2):
-    - speed |v0| ≤ V = √(2μ/(b + h0));
-    - gravity with J2 ≤ (1 + 3J2(a/b)²)μ/b² anywhere outside the ellipsoid;
-    - drag ≤ sup over h ≥ L of ρ(h)(s + ω_E(a + h))²/(2B), where L is the stage's lower height bound and s its speed bound. Both factors are taken at the same h, because |v_rel| ≤ s + ω_E|r| ≤ s + ω_E(a + h). Inside every band that product decreases (a > 2H for every scale height H), so the supremum is attained at L or at a band base above L. The superseded derivation bounded the rotation term at L, which a stage above L can exceed (Review 02 counterexample: 48.658376978 m/s² claimed, 48.658377040 m/s² actual; the corrected envelope gives the actual value).
-  - **Monotonicity [derived].** V decreases with h0, and the drag envelope decreases with L and increases with s. So every stage's lower height bound increases with h0, and the condition has a single root: every h0 above it satisfies the condition.
-  - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8 (B 25.8 moves by 1.1e-7 m; the others are unchanged). The bound for a B also covers every larger B.
-  - **Checked independently** (`check_review02.py`): a second implementation reproduces the three bounds to 1 mm; RK4 steps from 300 bound states per vehicle at 0–5 km above each bound (near-escape, retrograde equatorial and straight-down velocities) stay in the fail-closed domain. In `termination` → `sufficient_stage_condition` → `stress`, 2000 states per vehicle stay above every stage's lower bound (smallest margin 0.10 m). These are tests of the derivation, not part of it.
+  - So every stage of a step from a committed state at h0 > h_f stays above the lower edge if h_f exceeds the bound computed in `termination` → `sufficient_stage_condition`. Domain: every committed state with negative two-body energy, any velocity direction, no thrust. h0 is the model's **computed** geodetic height of the committed state, the only height the simulator knows (corrected after Review 03 R3-F1). The bounds used (corrected after Review 02 R2-F2 and Review 03 R3-F1):
+    - speed |v0| ≤ V = √(2μ/(b + H0)), where H0 = (h0 − β)/(1 + α) is a lower bound on the true height (ε_h below);
+    - computed gravity with J2 ≤ (1 + u)·max(F_g, F_J)·(1 + 3J2(a/b)²)μ/b² anywhere outside the ellipsoid (F_g, F_J ≤ 1 + 3.8e-15 enclose the rounding of the model's gravity and J2 code);
+    - computed drag ≤ the corrected envelope below, at each stage's lower true-height bound L and speed bound s;
+    - the stage positions as computed in binary64: |fl(r0 + fl(c·k)) − r0| ≤ (1 + u)²c|k| + u|r0| (u = 2^-53, c = dt/2 or dt), so the lower true-height bounds L_k include u|r0|. A stage's computed height is ≥ M_k = (1 − α)L_k − β, and the condition requires M_k > 0 for every stage, so that no stage raises at the 0 m edge.
+  - **Drag envelope over computed heights [derived under A-FP-1 … A-FP-3] (corrected after Review 03 R3-F1).** The model evaluates density at its computed height, not at the exact geodetic height. The table density is discontinuous and drops going up at 12 bases (50, 90, 110, 120, 140, 200, 250, 450, 600, 700, 900 and 1000 km). The Review 02 envelope bounded drag at exact heights only. A point whose computed height is 9.3e-10 m below 120 km, at a true height 2.3e-11 m above it, exceeded it by 7.8e-5 (relative); constructed points exceed it at all 12 bases (`check_review03.py`). The correction:
+    - **Height-error bound ε_h [derived].** |h_computed − h_true| ≤ ε_h(h) = αh + β for every point outside the ellipsoid, with α = 1.22e-15 and β = 8.88e-9 m (ε_h = 9.02e-9 m at 120 km). Derivation (`t0_termination.rounding_allowances`, E1):
+      - evaluated exactly at the returned latitude, the model's final height formula is the distance from r to the supporting plane of the ellipsoid with that normal. So it never exceeds the true height and is stationary at the geodetic latitude, and a latitude error δφ costs at most ½(|r| + a + a/√(1 − e²))δφ²;
+      - δφ ≤ 1.43e-15 rad: the latitude iteration is a contraction with rate ≤ 0.00683 for every |r| ≥ b, and each step's rounding is bounded;
+      - the rounding of the final formula, which subtracts two terms of size |r|, is bounded operation by operation: about 13u·a, which is β;
+      - the kilometre conversion of the band selection adds u·h (E2), giving ε_sel.
+    - **Envelope [derived].** For a true height h ≥ L, the band is selected at a height h_s ≥ L − ε_sel(L), and |r| ≤ a + (h_s + β_sel)/(1 − α_sel). The bound is the supremum over every selection height ≥ L − ε_sel(L) of F_D·ρ(h)·e^{θ_x X}·(s + ω_E(a + (h + β_sel)/(1 − α_sel)))²/(2B). Here ρ is the table formula with the file's decimal values, X is the exponent (h − base)/H of the band, and F_D = 1 + 2.4e-15 and θ_x = 3.3e-16 enclose the rounding of the density and of the drag force (E3, E4).
+      - Every band that the computed height can select is therefore included.
+      - Inside each band the function still decreases, because (1 − α)(1 − θ_x)a > 2H for every scale height H. So the supremum is at L − ε_sel(L) or at a band base above it, where GMAT's rule assigns the band above.
+      - It is evaluated in 60-digit decimal arithmetic with outward pads and rounded up.
+    - **Assumptions (unresolved; the guarantee holds only under them).**
+      - A-FP-1: IEEE 754 binary64 with round-to-nearest.
+      - A-FP-2: libm sin, cos, atan2, hypot, exp and pow have a relative error ≤ 2 × 2^-52. This is an assumption about the platform library, not proved. It is measured on macOS x86_64 (the M1/M2 reference host) only (`t0_height_error.py`). There, cos reaches 0.94 × 2^-52 relative (1.41 ulp), so the common "within 1 ulp" does not hold.
+      - A-FP-3: numpy evaluates the 3-element products elementwise and the 3-term dot product within γ₃.
+    - **Observed, not proved:** the largest height error over 13 050 sampled points is 2.06e-9 m, 0.22 of ε_h (`t0_height_error.py`).
+  - **Monotonicity [derived].** H0 and every L_k increase with h0 (the coefficient of h0 is 1/(1 + α) − u/(1 − α) > 0), V decreases, and the envelope is non-increasing in its lower height and non-decreasing in its speed. So every M_k increases with h0, and the condition has a single root: every computed h0 above it satisfies the condition. The published bound is the upper end of a bisection bracket at which the outward-rounded condition holds.
+  - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8. The bound for a B also covers every larger B. **Effect of the R3-F1 correction:**
+    - the exact roots move up by 1.9e-8 m;
+    - the published values (bracket upper ends, ≤ 1e-6 m above the root) move up by 2.8e-7, 5.3e-7 and 8.5e-7 m against Review 02;
+    - all three are unchanged at the quoted precision, and **the P1 recommendation is unchanged**.
+  - **Checked independently** (`check_review02.py`, `check_review03.py`, with heights from an independent high-precision oracle, `t0_oracle.py`):
+    - a second implementation reproduces the three bounds of the corrected derivation to 3e-6 m;
+    - at all 12 downward jumps, exact-base and adjacent binary64 points, true heights just below and above the base, and points whose computed and true heights select different bands stay within the corrected envelope;
+    - RK4 steps from near-escape, retrograde and straight-down bound states at the bounds and near the jumps keep every stage's oracle height above its lower bound;
+    - in `termination` → `sufficient_stage_condition` → `stress`, 2000 states per vehicle stay above every stage's guaranteed computed-height bound (smallest margin 0.10 m).
+
+    These are tests of the derivation, not part of it.
   - It is sufficient, not necessary.
   - A sharper guarantee needs a restriction of the admissible initial states (for example of the inward velocity). That restriction is an owner decision and is not proposed here.
 - **Consequence.** An A4-b-admissible run that violates these properties still has a defined outcome: a stage below the lower edge ends the run under P4, and a same-tick `reentry`/`impact` is resolved by the P3 precedence.
@@ -185,7 +210,7 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - **Where the options differ (corrected after Review 01 F2).**
   - In the measured decay case no stage came near the lower edge: for floors 90–150 km, stages stayed at least 89.4 km above it.
   - P1 alone does not guarantee this. A P1-admissible stress input puts the k2 input at −28 km (P1, "What A4-b guarantees"). For such a run, option (i) evaluates the lowest band below its domain and continues to the committed-state checks (there, a state at −78.4 km where `reentry` and `impact` both hold). Option (ii) ends the run with a defined failure.
-  - The two options give identical runs whenever no stage goes below the lower edge, which is guaranteed for h_f above the derived sufficient condition (≈ 111.5–124.5 km at dt = 10 s for unrestricted bound states, P1).
+  - The two options give identical runs whenever no stage goes below the lower edge, which is guaranteed for h_f above the derived sufficient condition (≈ 111.5–124.5 km at dt = 10 s for unrestricted bound states, P1), under the floating-point assumptions A-FP-1 … A-FP-3 stated there (corrected after Review 03 R3-F1).
 - Option (i) would silently extend the model below its domain, against DR-0024 Q8, "no indefinite extrapolation below the modelled domain", and against GMAT's behaviour.
 - Option (ii) makes a misconfiguration (or a defect that produces such a state) visible.
 
@@ -360,7 +385,7 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 
 ## Work continuing independently
 - None of the implementation. T1 and later are not authorized.
-- The independent review of T0: Review 01 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-01.md`); F1–F4 are corrected here. Review 02 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-02.md`); R2-F1 … F3 and IM-1 are corrected here. Review 03 follows under the Review 02 correction authorization.
+- The independent review of T0: Review 01 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-01.md`); F1–F4 are corrected here. Review 02 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-02.md`); R2-F1 … F3 and IM-1 are corrected here. Review 03 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-03.md`); R3-F1 is corrected here. Review 04 follows under Authorization I-4.
 
 ## Requested response
 For each of P1–P10: accept, choose an option, or `discuss`. P1 needs κ. P6 needs a ruling on whether option (b) falls inside DR-0028's prohibition on additional Earth-orientation implementation.
@@ -393,3 +418,9 @@ Authority: "Authorization: M3 T0 — Review 02 Corrections and Independent Revie
 - **M3T0-R2-F3:** the regression checks recompute what they protect (`check_review02.py`); mutation evidence is in VAL-0019.
 - **IM-1 (P6):** "0.99 m" is replaced by the reproduced 0.986 m RMS, with its quantity, data, sampling, RMS definition, command and tolerance.
 <!-- /review02-correction-log -->
+
+<!-- review03-correction-log -->
+## Correction log (Review 03, 2026-10-19)
+Authority: "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04" (Tech Lead). The superseded wording is preserved at commit `c6c0fff`. No option, identifier, recommendation status or owner decision changed; DR-0029 P1–P10 stay OPEN, and DR-0028's scope ruling for P6 (b) stays open.
+- **M3T0-R3-F1 (P1, P4):** the stage-domain drag envelope bounded drag at exact heights. It now bounds the model's computed drag over every band that the computed height can select, using a derived height-error bound ε_h and the rounding of the density, drag, gravity and RK4 stage arithmetic, under the stated floating-point assumptions A-FP-1 … A-FP-3. The bound is stated for the computed committed height. The three bounds are unchanged at the quoted precision (exact roots +1.9e-8 m). The superseded sentence "the supremum is attained at L or at a band base above L" was true for exact heights only. P4's guarantee now names the assumptions. The P1 recommendation is unchanged.
+<!-- /review03-correction-log -->

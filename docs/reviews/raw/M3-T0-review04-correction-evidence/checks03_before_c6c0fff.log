@@ -1,0 +1,215 @@
+# check_review03.py (as committed in the correction) run on the c6c0fff tree (git archive c6c0fff docs),
+# with t0_oracle.py, t0_height_error.py and its results copied in, and one shim line appended to
+# t0_termination.py: 'drag_envelope_exact_height = drag_envelope' (the superseded name; no logic).
+FFFFFFFFFFFFF.FFFFFFFFFFFFFFF...FFFF.FFFFF                               [100%]
+=================================== FAILURES ===================================
+E   AssertionError: assert Decimal('0.0623090145041428100451613705533837007436770394774023308671922') <= Decimal('0.062304179142380448908067336333260755054652690887451171875')
+     +  where Decimal('0.062304179142380448908067336333260755054652690887451171875') = D(0.06230417914238045)
+     +    where 0.06230417914238045 = <function drag_envelope at 0x1073e59e0>(120000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:178: AssertionError: assert Decimal('0.0623090145041428100451613705533837007436770394774023308671922') <= Decimal('0.062304179142380448908067336333260755054652690887451171875')
+E   AssertionError: assert Decimal('2698.88680020645335452302273013997022699436211101096019413815') <= Decimal('2698.80782847522596057388000190258026123046875')
+     +  where Decimal('2698.80782847522596057388000190258026123046875') = D(2698.807828475226)
+     +    where 2698.807828475226 = <function drag_envelope at 0x1073e59e0>(50000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('2698.88680020645335452302273013997022699436211101096019413815') <= Decimal('2698.80782847522596057388000190258026123046875')
+E   AssertionError: assert Decimal('8.67559525626633879391715980399276982992452581418083518035672') <= Decimal('8.675320646646557776193731115199625492095947265625')
+     +  where Decimal('8.675320646646557776193731115199625492095947265625') = D(8.675320646646558)
+     +    where 8.675320646646558 = <function drag_envelope at 0x1073e59e0>(90000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('8.67559525626633879391715980399276982992452581418083518035672') <= Decimal('8.675320646646557776193731115199625492095947265625')
+E   AssertionError: assert Decimal('0.246879322907822871490416056361059888934633565852970223931685') <= Decimal('0.2468597899703767473145177291371510364115238189697265625')
+     +  where Decimal('0.2468597899703767473145177291371510364115238189697265625') = D(0.24685978997037675)
+     +    where 0.24685978997037675 = <function drag_envelope at 0x1073e59e0>(110000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('0.246879322907822871490416056361059888934633565852970223931685') <= Decimal('0.2468597899703767473145177291371510364115238189697265625')
+E   AssertionError: assert Decimal('0.0623088850387085855862687849465611542643131628029113160496473') <= Decimal('0.062304179142380448908067336333260755054652690887451171875')
+     +  where Decimal('0.062304179142380448908067336333260755054652690887451171875') = D(0.06230417914238045)
+     +    where 0.06230417914238045 = <function drag_envelope at 0x1073e59e0>(120000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('0.0623088850387085855862687849465611542643131628029113160496473') <= Decimal('0.062304179142380448908067336333260755054652690887451171875')
+E   AssertionError: assert Decimal('0.00982872431282354291563606145914270661452248090205980455159489') <= Decimal('0.00982856738076995188613249609943522955290973186492919921875')
+     +  where Decimal('0.00982856738076995188613249609943522955290973186492919921875') = D(0.009828567380769952)
+     +    where 0.009828567380769952 = <function drag_envelope at 0x1073e59e0>(140000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('0.00982872431282354291563606145914270661452248090205980455159489') <= Decimal('0.00982856738076995188613249609943522955290973186492919921875')
+E   AssertionError: assert Decimal('0.000713466473434204116630260014445346148605847092503822464206593') <= Decimal('0.0007134663571145426382014154143007544917054474353790283203125')
+     +  where Decimal('0.0007134663571145426382014154143007544917054474353790283203125') = D(0.0007134663571145426)
+     +    where 0.0007134663571145426 = <function drag_envelope at 0x1073e59e0>(200000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('0.000713466473434204116630260014445346148605847092503822464206593') <= Decimal('0.0007134663571145426382014154143007544917054474353790283203125')
+E   AssertionError: assert Decimal('0.000185534755227729150789624947096372331154582213481815649897092') <= Decimal('0.0001855320733416022938033762557097361423075199127197265625')
+     +  where Decimal('0.0001855320733416022938033762557097361423075199127197265625') = D(0.0001855320733416023)
+     +    where 0.0001855320733416023 = <function drag_envelope at 0x1073e59e0>(250000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('0.000185534755227729150789624947096372331154582213481815649897092') <= Decimal('0.0001855320733416022938033762557097361423075199127197265625')
+E   AssertionError: assert Decimal('0.00000406754726708058816715046720688957777019498225406022583283429') <= Decimal('0.0000040675464209814831824624063727480205443498562090098857879638671875')
+     +  where Decimal('0.0000040675464209814831824624063727480205443498562090098857879638671875') = D(4.067546420981483e-06)
+     +    where 4.067546420981483e-06 = <function drag_envelope at 0x1073e59e0>(450000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('0.00000406754726708058816715046720688957777019498225406022583283429') <= Decimal('0.0000040675464209814831824624063727480205443498562090098857879638671875')
+E   AssertionError: assert Decimal('3.73849738535038336122573644660726531050908587300720656279737E-7') <= Decimal('3.738467154882892659874759309912573002065983018837869167327880859375E-7')
+     +  where Decimal('3.738467154882892659874759309912573002065983018837869167327880859375E-7') = D(3.7384671548828927e-07)
+     +    where 3.7384671548828927e-07 = <function drag_envelope at 0x1073e59e0>(600000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('3.73849738535038336122573644660726531050908587300720656279737E-7') <= Decimal('3.738467154882892659874759309912573002065983018837869167327880859375E-7')
+E   AssertionError: assert Decimal('9.30399713035596032685916571674097513226878195786116553465077E-8') <= Decimal('9.3039524624496148481208831516886537116306499228812754154205322265625E-8')
+     +  where Decimal('9.3039524624496148481208831516886537116306499228812754154205322265625E-8') = D(9.303952462449615e-08)
+     +    where 9.303952462449615e-08 = <function drag_envelope at 0x1073e59e0>(700000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('9.30399713035596032685916571674097513226878195786116553465077E-8') <= Decimal('9.3039524624496148481208831516886537116306499228812754154205322265625E-8')
+E   AssertionError: assert Decimal('1.35370692398489645017636766206580732203948624797354115027825E-8') <= Decimal('1.3537052897407171969509223695242450258291455611470155417919158935546875E-8')
+     +  where Decimal('1.3537052897407171969509223695242450258291455611470155417919158935546875E-8') = D(1.3537052897407172e-08)
+     +    where 1.3537052897407172e-08 = <function drag_envelope at 0x1073e59e0>(900000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('1.35370692398489645017636766206580732203948624797354115027825E-8') <= Decimal('1.3537052897407171969509223695242450258291455611470155417919158935546875E-8')
+E   AssertionError: assert Decimal('7.80184769220666045331937023185961184170011521132838298320414E-9') <= Decimal('7.80172925135490516722821543148247425136787569499574601650238037109375E-9')
+     +  where Decimal('7.80172925135490516722821543148247425136787569499574601650238037109375E-9') = D(7.801729251354905e-09)
+     +    where 7.801729251354905e-09 = <function drag_envelope at 0x1073e59e0>(1000000.0, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:191: AssertionError: assert Decimal('7.80184769220666045331937023185961184170011521132838298320414E-9') <= Decimal('7.80172925135490516722821543148247425136787569499574601650238037109375E-9')
+E   AssertionError: (6428136.999999998, 7800.0, 49999.99999999814)
+    assert Decimal('1402.92287056630084407515823841094970703125000000000000000000') <= Decimal('1402.922870566300616701482795178890228271484375')
+     +  where Decimal('1402.922870566300616701482795178890228271484375') = D(1402.9228705663006)
+     +    where 1402.9228705663006 = <function drag_envelope at 0x1073e59e0>(49999.99999999814, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6428136.999999998, 7800.0, 49999.99999999814)
+E   AssertionError: (6468136.999999997, 11000.0, 89999.9999999972)
+    assert Decimal('8.67561201797533598778500163462013006210327148437500000000000') <= Decimal('8.6756120179753342114281622343696653842926025390625')
+     +  where Decimal('8.6756120179753342114281622343696653842926025390625') = D(8.675612017975334)
+     +    where 8.675612017975334 = <function drag_envelope at 0x1073e59e0>(89999.9999999972, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6468136.999999997, 11000.0, 89999.9999999972)
+E   AssertionError: (6488136.999999997, 7800.0, 109999.9999999972)
+    assert Decimal('0.128369191914659813713583957905939314514398574829101562500000') <= Decimal('0.12836919191465978595800834227702580392360687255859375')
+     +  where Decimal('0.12836919191465978595800834227702580392360687255859375') = D(0.12836919191465979)
+     +    where 0.12836919191465979 = <function drag_envelope at 0x1073e59e0>(109999.9999999972, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6488136.999999997, 7800.0, 109999.9999999972)
+E   AssertionError: (6498136.999999997, 7800.0, 119999.9999999972)
+    assert Decimal('0.0324002141161252726897501474923046771436929702758789062500000') <= Decimal('0.032400214116125265750856243585076299495995044708251953125')
+     +  where Decimal('0.032400214116125265750856243585076299495995044708251953125') = D(0.032400214116125266)
+     +    where 0.032400214116125266 = <function drag_envelope at 0x1073e59e0>(119999.9999999972, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6498136.999999997, 7800.0, 119999.9999999972)
+E   AssertionError: (6518136.999999997, 11000.0, 139999.9999999972)
+    assert Decimal('0.00982875170220720052738361260935562313534319400787353515625000') <= Decimal('0.009828751702207198792660136632548528723418712615966796875')
+     +  where Decimal('0.009828751702207198792660136632548528723418712615966796875') = D(0.009828751702207199)
+     +    where 0.009828751702207199 = <function drag_envelope at 0x1073e59e0>(139999.9999999972, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6518136.999999997, 11000.0, 139999.9999999972)
+E   AssertionError: (6578136.999999997, 7800.0, 199999.9999999972)
+    assert Decimal('0.000371144066948571533289674695410553795227315276861190795898437') <= Decimal('0.000371144066948571479079566071135332094854675233364105224609375')
+     +  where Decimal('0.000371144066948571479079566071135332094854675233364105224609375') = D(0.0003711440669485715)
+     +    where 0.0003711440669485715 = <function drag_envelope at 0x1073e59e0>(199999.9999999972, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6578136.999999997, 7800.0, 199999.9999999972)
+E   AssertionError: (6628136.999999997, 7800.0, 249999.9999999972)
+    assert Decimal('0.0000965383648849159049743981486635391320305643603205680847167969') <= Decimal('0.000096538364884915904974398148663539132030564360320568084716796875')
+     +  where Decimal('0.000096538364884915904974398148663539132030564360320568084716796875') = D(9.65383648849159e-05)
+     +    where 9.65383648849159e-05 = <function drag_envelope at 0x1073e59e0>(249999.9999999972, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6628136.999999997, 7800.0, 249999.9999999972)
+E   AssertionError: (6828136.999999997, 11000.0, 449999.9999999972)
+    assert Decimal('0.00000406754921818463544035734263948356215223611798137426376342773') <= Decimal('0.0000040675492181846345933243953851832230839136173017323017120361328125')
+     +  where Decimal('0.0000040675492181846345933243953851832230839136173017323017120361328125') = D(4.067549218184635e-06)
+     +    where 4.067549218184635e-06 = <function drag_envelope at 0x1073e59e0>(449999.9999999972, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6828136.999999997, 11000.0, 449999.9999999972)
+E   AssertionError: (6978136.999999997, 7800.0, 599999.9999999972)
+    assert Decimal('1.94856705022563949563572634551822382320551696466282010078430E-7') <= Decimal('1.94856705022563923093793032854936786435473550227470695972442626953125E-7')
+     +  where Decimal('1.94856705022563923093793032854936786435473550227470695972442626953125E-7') = D(1.9485670502256392e-07)
+     +    where 1.9485670502256392e-07 = <function drag_envelope at 0x1073e59e0>(599999.9999999972, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (6978136.999999997, 7800.0, 599999.9999999972)
+E   AssertionError: (7078136.999999997, 7800.0, 699999.9999999972)
+    assert Decimal('4.85178296807131309888985650630166546193322574254125356674194E-8') <= Decimal('4.851782968071312437145366463879525564806272086570970714092254638671875E-8')
+     +  where Decimal('4.851782968071312437145366463879525564806272086570970714092254638671875E-8') = D(4.8517829680713124e-08)
+     +    where 4.8517829680713124e-08 = <function drag_envelope at 0x1073e59e0>(699999.9999999972, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (7078136.999999997, 7800.0, 699999.9999999972)
+E   AssertionError: (7278136.999999998, 7800.0, 899999.9999999981)
+    assert Decimal('7.06606976419149864514450867900192954085270002906327135860920E-9') <= Decimal('7.066069764191497817963896125974254669444007959100417792797088623046875E-9')
+     +  where Decimal('7.066069764191497817963896125974254669444007959100417792797088623046875E-9') = D(7.066069764191498e-09)
+     +    where 7.066069764191498e-09 = <function drag_envelope at 0x1073e59e0>(899999.9999999981, 7800.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (7278136.999999998, 7800.0, 899999.9999999981)
+E   AssertionError: (7378136.999999997, 11000.0, 999999.9999999972)
+    assert Decimal('7.80185393665028751754908416813152904900618977990234270691872E-9') <= Decimal('7.80185393665028586318785906207617930618880563997663557529449462890625E-9')
+     +  where Decimal('7.80185393665028586318785906207617930618880563997663557529449462890625E-9') = D(7.801853936650286e-09)
+     +    where 7.801853936650286e-09 = <function drag_envelope at 0x1073e59e0>(999999.9999999972, 11000.0, 25.757575757575758)
+     +      where <function drag_envelope at 0x1073e59e0> = tt.drag_envelope
+<before>/docs/science/experiments/m3-t0/check_review03.py:226: AssertionError: (7378136.999999997, 11000.0, 999999.9999999972)
+E   AttributeError: module 't0_termination' has no attribute 'height_error_bound'
+<before>/docs/science/experiments/m3-t0/check_review03.py:273: AttributeError: module 't0_termination' has no attribute 'height_error_bound'
+E   AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+<before>/docs/science/experiments/m3-t0/check_review03.py:286: AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+E   AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+<before>/docs/science/experiments/m3-t0/check_review03.py:306: AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+E   assert ('h_model' not in 'def test_r2...d(VEHICLES))'
+      
+      'h_model' is contained here:
+                  h_model = height(r)
+      ?           +++++++
+                            bound = tt.drag_envelope(min(low, h_model), s, B_V1)
+                            assert a <= bound + slack, (low, s, h, h_model, lat)
+        
+        
+        @pytest.mark.parametrize("vehicle", sorted(VEHICLES)))
+<before>/docs/science/experiments/m3-t0/check_review03.py:405: assert ('h_model' not in 'def test_r2...d(VEHICLES))'
+E   AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+<before>/docs/science/experiments/m3-t0/check_review03.py:306: AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+E   AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+<before>/docs/science/experiments/m3-t0/check_review03.py:306: AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+E   AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+<before>/docs/science/experiments/m3-t0/check_review03.py:306: AttributeError: module 't0_termination' has no attribute 'LIBM_ULP'
+E   KeyError: 'H0'
+<before>/docs/science/experiments/m3-t0/check_review03.py:517: KeyError: 'H0'
+E   KeyError: 'H0'
+<before>/docs/science/experiments/m3-t0/check_review03.py:517: KeyError: 'H0'
+E   KeyError: 'H0'
+<before>/docs/science/experiments/m3-t0/check_review03.py:517: KeyError: 'H0'
+E   subprocess.CalledProcessError: Command '['/Users/guillermomartin/.superset/worktrees/tars/nickel-page-8a63927f/.venv/bin/python', '<before>/docs/science/experiments/m3-t0/t0_height_error.py', '/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-72/test_provenance_rerun_reproduc0/t0_height_error_results.json']' returned non-zero exit status 1.
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/subprocess.py:571: subprocess.CalledProcessError: Command '['/Users/guillermomartin/.superset/worktrees/tars/nickel-page-8a63927f/.venv/bin/python', '<before>/docs/science/experiments/m3-t0/t0_height_error.py', '/private/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/pytest-of-guillermomartin/pytest-72/test_provenance_rerun_reproduc0/t0_height_error_results.json']' returned non-zero exit status 1.
+E   AssertionError: DR-0029
+    assert 'R3-F1' in "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...0028's prohibition on additional Earth-orientation implementation.\n\n## Resolution\n**Decision:** (pending)\n\n\n\n\n"
+<before>/docs/science/experiments/m3-t0/check_review03.py:545: AssertionError: DR-0029
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_reviewer_counterexample_is_reproduced_and_covered
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[50]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[90]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[110]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[120]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[140]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[200]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[250]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[450]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[600]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[700]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[900]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[1000]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[50]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[90]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[110]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[120]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[140]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[200]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[250]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[450]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[600]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[700]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[900]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[1000]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_height_error_bound_holds_on_global_polar_and_low_points
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_committed_height_error_evidence
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_floors_recomputed_by_a_second_implementation[B100]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_floors_recomputed_by_a_second_implementation[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_floors_recomputed_by_a_second_implementation[drag-free limit]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights[B100]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights[drag-free limit]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_provenance_rerun_reproduces_the_committed_height_error_results
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_records_state_the_correction_and_its_assumptions
+37 failed, 5 passed in 5.67s

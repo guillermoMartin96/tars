@@ -27,6 +27,44 @@
       "two_body_energy_J_per_kg": -12279985.85030289
     }
   },
+  "floating_point_enclosure": {
+    "assumptions": {
+      "A-FP-1": "IEEE 754 binary64, round to nearest even; + - * / sqrt correctly rounded",
+      "A-FP-2": "libm sin, cos, atan2, hypot, exp, pow relative error <= 2 x 2^-52 (assumption; measured in t0_height_error.py, not proved)",
+      "A-FP-3": "numpy 3-element products elementwise; 3-term dot within gamma_3",
+      "domain": "true geodetic height >= 0 (outside the ellipsoid), no overflow"
+    },
+    "constants": {
+      "F_D": 1.0000000000000024,
+      "F_J": 1.0000000000000038,
+      "F_g": 1.0000000000000016,
+      "alpha": 1.2212453270876738e-15,
+      "alpha_sel": 1.3322676295501896e-15,
+      "b_lower_m": 6356752.314245179,
+      "beta_m": 8.877691069434738e-09,
+      "beta_sel_m": 8.87769106943474e-09,
+      "contraction_k": 0.006830954755939884,
+      "gravity_hat_mps2": 9.896575029314999,
+      "lat_error_rad": 1.427749762648761e-15,
+      "lat_step_rounding_rad": 1.4111659138613635e-15,
+      "libm_ulp": 2.0,
+      "theta_x": 3.3306690738754706e-16,
+      "u": 1.1102230246251565e-16
+    },
+    "eps_h_definition": "|computed - true| geodetic height <= alpha h + beta (true h)",
+    "eps_h_m": {
+      "0": 8.877691069434738e-09,
+      "1000000": 1.0098936396522411e-08,
+      "120000": 9.024240508685258e-09,
+      "2000000": 1.1320181723610085e-08
+    },
+    "eps_sel_m": {
+      "0": 8.87769106943474e-09,
+      "1000000": 1.0209958698984929e-08,
+      "120000": 9.037563184980762e-09,
+      "2000000": 1.1542226328535118e-08
+    }
+  },
   "missed_crossing": {
     "all_certified_bounds_hold": true,
     "all_dips_within_sampled_estimates": true,
@@ -756,6 +794,8 @@
   },
   "sufficient_stage_condition": {
     "dt_s": 10.0,
+    "floor_height_kind": "computed committed geodetic height (Review 03 M3T0-R3-F1)",
+    "gravity_bound_computed_mps2": 9.896575029314999,
     "gravity_bound_mps2": 9.89657502931496,
     "lower_edge_m": 0.0,
     "note": "Sufficient, not necessary. A sharper condition needs a restriction of the admissible initial states (for example the inward velocity), which is an owner decision and is not proposed here.",
@@ -763,53 +803,86 @@
       "actual_drag_mps2": 48.65837703993666,
       "actual_height_m": 80000.0,
       "corrected_covers": true,
-      "corrected_envelope_mps2": 48.65837703993666,
+      "corrected_envelope_mps2": 48.658377039936795,
       "lower_height_m": 79999.9,
       "speed_mps": 11000.0,
       "superseded_covers": false,
       "superseded_envelope_mps2": 48.658376978072056
     },
+    "review03_counterexample": {
+      "computed_height_m": 119999.99999999907,
+      "corrected_covers": true,
+      "corrected_envelope_mps2": 0.06230901450421387,
+      "height_error_bound_m": 9.024240508685258e-09,
+      "lower_height_m": 120000.0,
+      "model_drag_mps2": 0.062309014504142814,
+      "speed_mps": 11000.0,
+      "superseded_covers": false,
+      "superseded_envelope_mps2": 0.06230417914238045,
+      "true_height_m": "120000.0000000000233 (high-precision reference, Review 03)"
+    },
     "rows": [
       {
         "B_kg_per_m2": 25.757575757575758,
         "at_floor": {
-          "A0": 9.936116772206741,
-          "A2": 271.0094674682257,
-          "L2": 69003.57940911832,
-          "L3": 68755.17648981315,
-          "L4": 4.3655745685100555e-11,
-          "V": 11090.621207141401,
-          "s2": 11140.301791002435
+          "A0": 9.936116772205674,
+          "A2": 271.00946745922334,
+          "H0": 124456.68544509953,
+          "L2": 69003.57940939297,
+          "L3": 68755.17649008782,
+          "L4": 7.25949756346624e-07,
+          "M2": 69003.57940938401,
+          "M3": 68755.17649007885,
+          "M4": 7.170720652771883e-07,
+          "V": 11090.621207141166,
+          "s2": 11140.301791002195,
+          "s3": 12445.668544437285
         },
-        "h_f_sufficient_at_least_m": 124456.68544482533,
+        "h_f_sufficient_at_least_m": 124456.68544510857,
+        "need_at_floor_m": -7.170720652771883e-07,
+        "need_below_bracket_m": 1.74773507118729e-06,
         "vehicle": "B25.8"
       },
       {
         "B_kg_per_m2": 100.0,
         "at_floor": {
-          "A0": 9.916270481874712,
-          "A2": 153.54880568382066,
-          "L2": 63155.47461514118,
-          "L3": 62907.56785309432,
-          "L4": 0.0,
-          "V": 11095.606866190032,
-          "s2": 11145.188218599405
+          "A0": 9.91627048187335,
+          "A2": 153.54880567415688,
+          "H0": 118633.50894661718,
+          "L2": 63155.47461566855,
+          "L3": 62907.56785362171,
+          "L4": 1.0127770262377983e-06,
+          "M2": 63155.474615659594,
+          "M3": 62907.56785361275,
+          "M4": 1.0038993351683625e-06,
+          "V": 11095.606866189582,
+          "s2": 11145.18821859895,
+          "s3": 11863.350894560368
         },
-        "h_f_sufficient_at_least_m": 118633.50894609134,
+        "h_f_sufficient_at_least_m": 118633.50894662621,
+        "need_at_floor_m": -1.0038993351683625e-06,
+        "need_below_bracket_m": 7.647569496350357e-07,
         "vehicle": "B100"
       },
       {
         "B_kg_per_m2": null,
         "at_floor": {
-          "A0": 9.89657502931496,
-          "A2": 9.89657502931496,
-          "L2": 56003.39528784972,
-          "L3": 55755.98091211684,
-          "L4": -1.4551915228366852e-11,
-          "V": 11101.713307276794,
-          "s2": 11151.19618242337
+          "A0": 9.896575029315,
+          "A2": 9.896575029315,
+          "H0": 111511.96182507885,
+          "L2": 56003.39528869778,
+          "L3": 55755.9809129649,
+          "L4": 8.516715139074864e-07,
+          "M2": 56003.39528868884,
+          "M3": 55755.98091295595,
+          "M4": 8.427938228380506e-07,
+          "V": 11101.713307276068,
+          "s2": 11151.196182422646,
+          "s3": 11151.196182422646
         },
-        "h_f_sufficient_at_least_m": 111511.96182423369,
+        "h_f_sufficient_at_least_m": 111511.96182508787,
+        "need_at_floor_m": -8.427938228380506e-07,
+        "need_below_bracket_m": 7.45058703534579e-08,
         "vehicle": "drag-free limit"
       }
     ],
@@ -821,11 +894,11 @@
           "retrograde_equator": 667,
           "straight_down": 666
         },
-        "lowest_stage_height_m": 23760.82779703196,
+        "lowest_stage_height_m": 23760.82779702358,
         "min_margins": {
-          "a0_margin_mps2": 0.4482992574720335,
-          "a2_margin_mps2": 10.891702841496011,
-          "stage_margin_m": 0.10270215483615175
+          "a0_margin_mps2": 0.4482992574747797,
+          "a2_margin_mps2": 10.891702841021383,
+          "stage_margin_m": 0.10270217224024236
         },
         "states": 2000,
         "vehicle": "B25.8"
@@ -837,11 +910,11 @@
           "retrograde_equator": 667,
           "straight_down": 666
         },
-        "lowest_stage_height_m": 13807.590228465386,
+        "lowest_stage_height_m": 13807.590228691697,
         "min_margins": {
-          "a0_margin_mps2": 0.4272845885011556,
-          "a2_margin_mps2": 7.830533083542406,
-          "stage_margin_m": 0.10278533137170598
+          "a0_margin_mps2": 0.42728458850486284,
+          "a2_margin_mps2": 7.830533082888362,
+          "stage_margin_m": 0.10278535047837067
         },
         "states": 2000,
         "vehicle": "B100"
@@ -853,11 +926,11 @@
           "retrograde_equator": 667,
           "straight_down": 666
         },
-        "lowest_stage_height_m": 14.881822938099504,
+        "lowest_stage_height_m": 14.881824808195233,
         "min_margins": {
-          "a0_margin_mps2": 0.3995288365365255,
-          "a2_margin_mps2": 0.2350265175650108,
-          "stage_margin_m": 0.1028872769093141
+          "a0_margin_mps2": 0.39952883654199667,
+          "a2_margin_mps2": 0.2350265175706454,
+          "stage_margin_m": 0.10288729552848963
         },
         "states": 2000,
         "vehicle": "drag-free limit"

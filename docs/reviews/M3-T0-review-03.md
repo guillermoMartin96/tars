@@ -67,3 +67,56 @@
 - When a model input is discontinuous (here density in height), a bound proved for exact arguments does not bound the implemented function. The error in the computed argument must be enclosed and crossed explicitly.
 - A test that adapts its expected bound to the implementation's internal value (`min(low, h_model)`) tests the implementation against itself. Expected values must come from the stated assumptions.
 - An equivalence classification should rest on a proof where one is available; a domain scan is supporting evidence only.
+
+## Correction pass (Authorization I-4, 2026-10-19)
+**Authority:** "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04" (Tech Lead), §2–§4. The scope is R3-F1 only. T0 remains BLOCKED. DR-0029 P1–P10 and DR-0028 P6(b) stay OPEN, and the GMAT geodetic-drag discrepancy stays ESCALATED_FOR_INVESTIGATION. The finding above and the reviewer's language are preserved unchanged. The superseded state is `c6c0fff`.
+
+| ID | Disposition | Correction |
+|---|---|---|
+| M3T0-R3-F1 | **ACCEPTED; CORRECTED** (for Review 04 to assess) | The drag envelope bounds the model's computed drag over every band that the computed height can select, using a derived height-error bound and derived rounding factors (below). The stage condition is stated for the computed committed height. `min(low, h_model)` is removed from the Review 02 adversarial check, whose expected bound now comes from an independent oracle. New checks (`check_review03.py`), oracle (`t0_oracle.py`), evidence script (`t0_height_error.py`) and mutants |
+| M3T0-R2-F2, M3T0-F2 | Corrected through R3-F1 | The remaining gap the reviewer named (numerical height at discontinuities) is the R3-F1 correction. No other change |
+
+### Mathematical justification (`t0_termination.rounding_allowances`, E1–E6)
+- **E1, height-error bound ε_h(h) = αh + β:** α = 1.22e-15 and β = 8.88e-9 m, so ε_h = 9.02e-9 m at 120 km, for every point outside the ellipsoid.
+  - **The computation:** `geodetic_iterative` returns a latitude λ from a fixed-point iteration (stop at |Δλ| ≤ 1e-15 or after 60 iterations) and h = fl(fl(fl(p·c) + fl(z·s)) − fl(a·√fl(1 − fl(fl(e²s)s)))), with s, c = fl(sin, cos)(λ) and p = fl(hypot(x, y)).
+  - **Geometry [proved]:**
+    - H(λ) = p cos λ + z sin λ − a√(1 − e² sin²λ) is the signed distance from r to the supporting plane of the ellipsoid with normal n(λ), because a√(1 − e² sin²λ) is the ellipsoid's support function. For an exterior point, H(λ) ≤ h for every λ, with equality and H′ = 0 at the geodetic latitude φ.
+    - H″ = −H − M, with M the meridian radius of curvature, so 0 ≤ h − H(λ) ≤ ½(|r| + a + a/√(1 − e²))(λ − φ)².
+  - **Latitude [proved]:**
+    - The iteration map is the direction from the axis point (0, −e²N sin λ) to r. That point moves by at most e²a/(1 − e²)^{3/2} per radian and stays within e²a/√(1 − e²) of the centre. So |T′| ≤ k = 0.00683 for every λ and every |r| ≥ b: a contraction whose fixed point is φ.
+    - One computed step is within η = 1.41e-15 rad of T. This uses the angle between two vectors v and v + dv, which is at most (π/2)|dv|/|v|.
+    - Hence |λ − φ| ≤ η/(1 − k) + max(k·1e-15/(1 − k), k⁶⁰π) = 1.43e-15 rad, and the latitude term is about 1e-23 m.
+  - **Rounding of the final formula [proved under A-FP-1, A-FP-2]:**
+    - |ĥ − H(λ)| ≤ (1 + u)(Θ₁₂|r| + θ₄a) + u|H|;
+    - p|c| + |z s| ≤ |r| (Cauchy–Schwarz) bounds the cancelling sum;
+    - θ₄ bounds the relative error of a√(·);
+    - and |r| ≤ a + h.
+  - This bound is not fitted to the counterexamples. It covers them with room: the reviewer's point has an error of 9.3e-10 m, and the largest observed error is 2.06e-9 m.
+- **E2, band selection:** `density` selects the band at fl(h/1000) km. Since the bases are integers in km, the selection height is within u·h of the computed height: ε_sel = ε_h(1 + u) + u·h.
+- **E3, E4, density and drag:** with the table's decimal values as the reference, ρ̂ ≤ ρ(h_s)·e^{θ_x X}·(1 + UF)(1 + u)². The drag is ≤ F_D·ρ(h_s)e^{θ_x X}(|v| + ω_E|r|)²/(2B), with F_D = 1 + 2.4e-15. This is for a vehicle with mass/(cd·area) ≥ B·(1 − u)²/(1 + u), which both of T0's constructions of the vehicle mass satisfy.
+- **Envelope:** for a true height ≥ L, the supremum over selection heights ≥ L − ε_sel(L) of F_D ρ(h) e^{θ_x X}(s + ω_E(a + (h + β_sel)/(1 − α_sel)))²/(2B).
+  - It decreases inside every band ((1 − α)(1 − θ_x)a > 2H), so the candidates are L − ε_sel(L) and the bases above it, which take the band above (GMAT's rule).
+  - It is evaluated in 60-digit decimal arithmetic with outward pads and rounded up.
+- **E5, gravity:** |â_grav + â_J2| ≤ (1 + u)·max(F_g, F_J)·(1 + 3J2(a/b)²)μ/b², from the operation counts of the model's code: F_g = 1 + 1.6e-15, F_J = 1 + 3.8e-15, giving 9.896575029314999 m/s².
+- **E6, RK4 stages:** |fl(r0 + fl(c·k)) − r0| ≤ (1 + u)²c|k| + u|r0|, and |fl(v0 + fl(5a))| ≤ (1 + u)|v0| + 5(1 + u)²|a|.
+- **Stage condition:**
+  - **Bounds:**
+    - H0 = (h0 − β)/(1 + α) bounds the true height of a committed state with computed height h0;
+    - L_k are the stages' lower true-height bounds;
+    - M_k = (1 − α)L_k − β bounds their computed heights, and M_k > 0 rules out OutsideDomainError.
+  - **Monotone in h0 [proved]:** the coefficient of h0 in H0 and L_k is 1/(1 + α) − u/(1 − α) > 0. The published floor is the upper end of a bisection bracket at which the outward-rounded condition holds.
+
+### Evidence classification
+| Class | Items |
+|---|---|
+| **Proved (exact arithmetic)** | The chord/curvature theorem; the two-body orbit bound; the support-function and stationarity properties of H(λ); the contraction of the latitude iteration; the in-band monotonicity of the widened envelope and the candidate set; the monotonicity of the stage condition in h0 |
+| **Derived under A-FP-1 … A-FP-3** (a proof conditional on the assumptions) | ε_h and ε_sel; F_D, θ_x, F_g, F_J; the stage-arithmetic bounds; the corrected envelope; the three floors (exact roots +1.9e-8 m against Review 02; published values unchanged at the quoted precision) |
+| **Numerically verified** (high-precision reference, not a proof) | The reviewer's point and constructed points at all 12 downward jumps are covered by the corrected envelope and exceed the superseded one. Exact-base and adjacent binary64 points follow GMAT's band rule. All sampled height errors are within ε_h. Two oracles agree to < 1e-25 m. A second implementation reproduces the derivation's constants and the floors (`check_review03.py`) |
+| **Empirical observations** | The largest observed height error is 2.06e-9 m over 13 050 points (0.22 of ε_h). The libm maxima on this host are cos 0.94, sin 0.74 and the others ≤ 0.50, in units of 2^-52 relative (cos 1.41 ulp). In the stress test, 2000 states per vehicle have a smallest stage margin of 0.10 m. The superseded envelope's violations at the jumps reach a relative excess of up to 1.5e-5 (`t0_height_error.py`) |
+| **Unresolved assumptions** | **A-FP-2** (libm relative error ≤ 2 × 2^-52) is measured on macOS x86_64 only, not on the CI platforms (ubuntu x86_64, macOS arm64, macOS 15 Intel) and not proved. The usual "within 1 ulp" fails here for cos (1.41 ulp), which is why the assumption is 2 × 2^-52, not 1. **A-FP-1** (binary64, round to nearest) and **A-FP-3** (numpy elementwise products; dot within γ₃) are standard but not verified separately |
+| **Owner decisions still required** | DR-0029 P1–P10, including κ and v̂ for P1 and whether a sufficient condition that rests on A-FP-2 is acceptable. DR-0028 P6(b). The escalated GMAT geodetic-drag discrepancy |
+
+**Effect on P1:** the three bounds are 124 456.69 m (B 25.8), 118 633.51 m (B 100) and 111 511.96 m (drag-free), unchanged at the quoted precision. The P1 recommendation is unchanged.
+
+### Validation
+Recorded in the validation commit that follows this correction commit (§4 of the authorization).

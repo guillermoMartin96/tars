@@ -10,6 +10,12 @@
 - R2-F2 and F2 are PARTIALLY RESOLVED.
 - New finding M3T0-R3-F1 (MINOR): the stage-domain drag envelope does not cover numerical height error at downward density jumps. It is verified and ACCEPTED, **not applied**.
 - Record: `docs/reviews/M3-T0-review-03.md`. T0 is not accepted. A correction pass and any Review 04 await authorization.  
+**Status update (2026-10-19, append-only):** under "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", M3T0-R3-F1 is corrected in the T0 records and experiments:
+- The stage-domain drag envelope now bounds the model's drag at its computed height. It uses a derived height-error bound (ε_h = 9.02e-9 m at 120 km) and derived rounding factors for the density, drag, gravity and RK4 stage arithmetic.
+- This holds under the floating-point assumptions A-FP-1 … A-FP-3. A-FP-2, the libm accuracy, is unresolved and measured on macOS x86_64 (the M1/M2 reference host) only.
+- The P1 bounds are unchanged at the quoted precision, and the P1 recommendation is unchanged.
+- The new checks (`check_review03.py`) use an independent high-precision height oracle (`t0_oracle.py`), with mutation evidence. The empirical side is `t0_height_error.py`.
+- Dispositions are in `docs/reviews/M3-T0-review-03.md`. Review 04 follows. T0 is not accepted.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

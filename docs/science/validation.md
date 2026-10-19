@@ -790,7 +790,13 @@ All 10 approved rejection codes are exercised.
     - DR-0029 P1 (A4-b) admissibility is necessary, not sufficient:
       - a P1-admissible stress input puts an RK4 stage at −28 km, and its committed state satisfies `reentry` and `impact` on the same tick;
       - the circular-speed proxy underestimates λ for an e = 0.9 retrograde perigee (λ dt 0.0144 at κ 0.01);
-      - a derived sufficient condition for every stage to stay above 0 km at dt = 10 s is h_f ≥ 111.5 km drag-free, 118.6 km at B 100 and 124.5 km at B 25.8, for unrestricted bound states (`t0_termination_results.json`). Corrected after Review 02 R2-F2: the drag factor is maximised over every height above each stage's lower bound, and the condition is shown to be monotone in h0. The bounds are unchanged to 1.1e-7 m. A second implementation and RK4 steps from adversarial bound states at the bounds confirm them (`check_review02.py`).
+      - a derived sufficient condition for every stage to stay above 0 km at dt = 10 s is h_f ≥ 111.5 km drag-free, 118.6 km at B 100 and 124.5 km at B 25.8, for unrestricted bound states (`t0_termination_results.json`). Corrected after Review 02 R2-F2: the drag factor is maximised over every height above each stage's lower bound, and the condition is shown to be monotone in h0. Corrected after Review 03 R3-F1:
+        - the envelope bounds the model's drag at its **computed** height, over every density band that the computed height can select. A derived height-error bound is used: ε_h = αh + β, 9.02e-9 m at 120 km. The density, drag, gravity and RK4 stage arithmetic are enclosed by derived rounding factors;
+        - the bound is stated for the computed committed height;
+        - the guarantee holds under the floating-point assumptions A-FP-1 (IEEE binary64, round to nearest), A-FP-2 (libm relative error ≤ 2 × 2^-52; an unresolved assumption, measured on macOS x86_64 (the M1/M2 reference host) only) and A-FP-3 (numpy elementwise products, 3-term dot within γ₃).
+
+        The bounds are unchanged at the quoted precision: the exact roots move by +1.9e-8 m, and the published bracket ends by +2.8e-7 … +8.5e-7 m. Second implementations, boundary tests at all 12 downward density jumps against an independent high-precision height oracle, and RK4 steps from adversarial bound states at the bounds confirm them (`check_review02.py`, `check_review03.py`).
+      - Height error (`t0_height_error.py`, empirical): the largest |computed − true| over 13 050 sampled points is 2.06e-9 m, 0.22 of the derived bound. The libm maxima measured on this platform are, in units of 2^-52 relative, cos 0.94, sin 0.74 and atan2, hypot, exp and pow ≤ 0.50; in ulps, cos reaches 1.41. A measurement, not a proof of A-FP-2.
   - **Geodetic height:**
     - iterative and Vermeille (2002) inverses reproduce 640 forward-constructed points to ≤ 3e-9 m;
     - the GeographicLib examples agree within their 1 cm print rounding;
@@ -807,11 +813,14 @@ All 10 approved rejection codes are exercised.
   - `t0_gmat.py` `204d47c12fd4b7311fc056f894001f6c84bc827818456c23c461664d1a533e23`
   - `t0_model.py` `1d70e86c25546a91365a5ed101ad0d390bc9e507862ca4eacbfa78fe2160b09d`
   - `t0_regression.py` `06ac4c0bdf82aa442a111fc380cf94457322e37a2aae72384afda3cfe93f413c`
-  - `t0_termination.py` `f4135bc36f7d5d320f6d04b6e61f158299097794d9f77375b7bcbf06d2bedf80` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`)
+  - `t0_termination.py` `05e7463a4a714ac2ec0259465853b449c73c179facd3205f5463010ccc199554` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`)
   - `t0_axis_ablation.py` `c6683775974f594975f6f1e71c2dfa967f8158127c5c4570d311132ac688afd5` (added after Review 02, IM-1)
   - `check_review01.py` `e6e0ad64ba553d5ca6fb1a057669dab76b197fb4cf70dbff13478251107c2ce3` (Review 01 regression checks; two F1 checks amended after Review 02, was `6e40cd61…1b1b`)
-  - `check_review02.py` `89b90dd0fc2854a2e08d73c8f3386855ceaf493557c34b78ce7ae76a9b806456` (Review 02 regression checks)
-  - `mutation_check_review02.py` `d2541a7e2e3b1be2f062e7ace97495b12b34e1334f2a43ef05abe889dbabe3f5` (Review 02 mutation harness)
+  - `check_review02.py` `cdb9c6eefc9fe1dbe64a85ba75d2ca0cc5f0036047161bb0f33097c021eba398` (Review 02 regression checks; adversarial oracle corrected after Review 03, was `89b90dd0…6456`)
+  - `mutation_check_review02.py` `2fdb49f3fcc84ea21f287c8a342f2532769aeb2ddd1aea81ccf54e3942910213` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`)
+  - `t0_oracle.py` `f70ab96ddb9b4249f247969910fb42bcbcc08290cc77e6b9ea042e11f9f99e93` (added after Review 03, R3-F1: independent high-precision height and density reference)
+  - `t0_height_error.py` `b8e59c9afb26ba54015c4d7cfa42b8586d14ffc86ededace319257e541c42ac7` (added after Review 03, R3-F1: empirical height error, libm measurement, band crossings)
+  - `check_review03.py` `9072614100447bca8bc4d6fb494f21d0c03fffd9988345a044841fce81ca59e5` (Review 03 regression checks)
   - `data/EarthExponentialAtmosphereData.txt` `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`
 - **Classification:** spike evidence for the T0 proposals (DR-0029). Model and frame agreement are exact where attributed. One configuration sensitivity is unresolved and escalated.
 - **J-ax-1 limitation, quantified against GMAT's real Earth over 53 700 s:**
@@ -838,3 +847,20 @@ All 10 approved rejection codes are exercised.
     - mutation (`mutation_check_review02.py`): 15 corruptions of the result files and scripts are each detected by a declared check, including the exact Review 02 mutant, zeroed, halved and dropped sweep rows, and zeroed, shifted and km-scaled floors. The unmodified control passes. One mutant, which drops the stationary points from the two-body maximisation, is declared equivalent: no interior maximum beats the endpoints on a domain scan, and a check establishes this.
   - IM-1: `t0_axis_ablation.py` reproduces the quadratic-only axis-fit residual, 0.986 m RMS, from the committed GMAT report.
 <!-- /review02-correction-log -->
+<!-- review03-correction-log -->
+- **Correction log (Review 03, 2026-10-19; "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04").** The superseded wording is preserved at `c6c0fff`.
+  - R3-F1: the stage-domain drag envelope bounded drag at exact heights. It now bounds the model's computed drag over every band that the computed height can select (derived height-error bound and rounding factors, under A-FP-1 … A-FP-3), and the condition is stated for the computed committed height. The bounds are unchanged at the quoted precision. In the Review 02 adversarial check, the `min(low, h_model)` substitution is replaced by the true height from the independent oracle `t0_oracle.py`.
+  - Evidence is in `docs/reviews/raw/M3-T0-review04-correction-evidence/`:
+    - red before: with the new `check_review03.py` on the `c6c0fff` tree (one alias shim line, documented in the log), 37 of 42 fail. 25 of the failures are behavioural: the reviewer's point, all 12 downward jumps and the 12 boundary-point sets exceed the superseded envelope, partly through the unenclosed rounding of the force. 9 fail for missing derived constants or stage bounds, one is the static oracle guard, one the evidence file and one the record wording;
+    - green after: all 92 checks of Reviews 01–03 pass;
+    - mutation (`mutation_check_review02.py`, 25 mutants plus a control, run against all three check files): every mutant is detected by a declared check, except the two-body stationary-point mutant, which is equivalent (now proved by Review 03). The 9 R3-F1 mutants cover:
+      - the height allowance removed;
+      - the allowance cut to a tenth, detected by the boundary tests;
+      - the allowance cut to 0.9 of the bound, detected only by the derivation's recomputation, since no sampled point can violate it;
+      - the exact base assigned to the band below in the model;
+      - the envelope's band taken at the unwidened limit;
+      - the unwidened lower limit;
+      - the oracle returning the model height;
+      - the Review 02 oracle reverted;
+      - the allowance removed with the Review 02 oracle reverted. In this last case the reverted Review 02 check passes, while `check_review03.py` detects the defect.
+<!-- /review03-correction-log -->
