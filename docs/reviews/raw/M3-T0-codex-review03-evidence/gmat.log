@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "<snap>/docs/science/experiments/m3-t0/t0_gmat.py", line 905, in <module>
+    main()
+  File "<snap>/docs/science/experiments/m3-t0/t0_gmat.py", line 882, in main
+    if sha(table) != m.TABLE_SHA256:
+       ^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_gmat.py", line 71, in sha
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                          ^^^^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '<scratch>/GMAT R2026a/bin/GMAT-R2026a_Beta.app/Contents/data/atmosphere/earth/EarthExponentialAtmosphereData.txt'

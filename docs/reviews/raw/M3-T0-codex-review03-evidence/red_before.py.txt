@@ -1,0 +1,12 @@
+import pathlib,subprocess,sys,shutil
+root=pathlib.Path.cwd();base=root/'review_scratch/red_before';base.mkdir(exist_ok=True)
+for revision,checks in [('5548d11',['check_review01.py','check_review02.py']),('bdcaacf',['check_review01.py'])]:
+ target=base/revision;target.mkdir(exist_ok=True)
+ data=subprocess.check_output(['git','archive',revision,'docs'])
+ subprocess.run(['tar','-x','-C',str(target)],input=data,check=True)
+ rel=pathlib.Path('docs/science/experiments/m3-t0')
+ for f in checks:shutil.copy2(root/rel/f,target/rel/f)
+ command=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider',*[str(target/rel/f) for f in checks]]
+ res=subprocess.run(command,cwd=target,capture_output=True,text=True)
+ (base/(revision+'.log')).write_text(res.stdout+res.stderr)
+ print(revision,res.returncode,(res.stdout+res.stderr).splitlines()[-1],flush=True)

@@ -1,0 +1,23 @@
+import pathlib,json,hashlib,subprocess
+root=pathlib.Path.cwd();D=root/'docs/science/experiments/m3-t0';S=root/'review_scratch'
+a=json.loads((D/'t0_gmat_results.json').read_text());b=json.loads((S/'t0_gmat_results.json').read_text())
+print('GMAT JSON byte identical:',(D/'t0_gmat_results.json').read_bytes()==(S/'t0_gmat_results.json').read_bytes())
+for k in a:
+ if a[k]!=b.get(k):print('different GMAT top-level key:',k)
+print('protected diff:',subprocess.check_output(['git','diff','--name-only','86df2c3..51e110b','--','src','proof','toolbox','scenarios','tests','.github','uv.lock','pyproject.toml']).decode())
+print('status:',subprocess.check_output(['git','status','--porcelain']).decode())
+print('diffstat:',subprocess.check_output(['git','diff','--stat']).decode())
+for name in ['m1compare','m2compare']:
+ p=S/(name+'.json');data=[]; text=p.read_text(); decoder=json.JSONDecoder()
+ while text.strip():
+  obj, idx=decoder.raw_decode(text.lstrip()); data.append(obj); text=text.lstrip()[idx:]
+
+ print(name,'false paths:',end=' ')
+ def walk(d,p=''):
+  if isinstance(d,dict):
+   for k,v in d.items():
+    if v is False: print(p+'/'+k,end=' ')
+    walk(v,p+'/'+k)
+  elif isinstance(d,list):
+   for i,v in enumerate(d):walk(v,p+'/'+str(i))
+ walk(data);print()

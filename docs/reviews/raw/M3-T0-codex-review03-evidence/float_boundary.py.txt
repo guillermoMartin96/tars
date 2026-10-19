@@ -1,0 +1,17 @@
+exec(open('review_scratch/independent.py').read().split("out={}")[0])
+rng=np.random.default_rng(99)
+for low in [50000.,90000.,110000.,120000.,140000.,200000.,250000.]:
+ env=t.drag_envelope(low,11000.,t.B_V1)
+ for i in range(30000):
+  lat=rng.uniform(-3e-7,3e-7);lon=rng.uniform(-math.pi,math.pi)
+  r=m.geodetic_to_cartesian(lat,lon,low)
+  hm=m.geodetic_iterative(r)[1]
+  if hm>=low: continue
+  x,y,z=map(lambda a:D(float(a)),r);a=D(m.A_WGS84);e2=D(m.E2_WGS84);p=(x*x+y*y).sqrt()
+  # closest-distance formula at small latitude; neglected O(lat^4) < 1e-18 m
+  h=p-a+z*z/(2*(a*(1-e2)+D(low)))
+  if h<D(low): continue
+  v=11000.*np.array([r[1],-r[0],0.])/math.hypot(r[0],r[1])
+  actual=t.drag_only(t.J2_DRAG,r,v,t.MASS)
+  if actual>env*1.000000001:
+   print(json.dumps(dict(low=low,r=r.tolist(),v=v.tolist(),true_height_approx=str(h),model_h=hm,envelope=env,actual=actual,relative=actual/env-1)),flush=True);break

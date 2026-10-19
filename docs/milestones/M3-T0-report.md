@@ -5,6 +5,11 @@
 **Status update (2026-10-18, append-only):** under "TARS M3 T0 — Review 01 Correction Authorization", F1–F4 are corrected in the T0 records and experiments, with regression checks (`docs/science/experiments/m3-t0/check_review01.py`); dispositions in `docs/reviews/M3-T0-review-01.md`. IM-1 is outside that scope and unchanged. Review 02 follows. T0 is not accepted.  
 **Status update (2026-10-18, append-only):** **Review 02 (Codex, at `ead2a84`): REQUEST_CHANGES.** F3, F4 and F5 are RESOLVED; F1 and F2 are PARTIALLY RESOLVED. New findings: M3T0-R2-F1 and R2-F2 (MINOR) and R2-F3 (NOTE), all verified and ACCEPTED, **not applied**. Record: `docs/reviews/M3-T0-review-02.md`. T0 is not accepted. Corrections and Review 03 await authorization.  
 **Status update (2026-10-18, append-only):** under "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", R2-F1, R2-F2, R2-F3 and IM-1 are corrected in the T0 records and experiments: perturbed-motion values are labelled sampled estimates; the stage-domain drag envelope is corrected; the new checks recompute what they protect (`check_review02.py`, with mutation evidence); and the P6 axis-fit residual is reproduced (`t0_axis_ablation.py`). Dispositions are in `docs/reviews/M3-T0-review-02.md`. Review 03 follows. T0 is not accepted.  
+**Status update (2026-10-18, append-only):** **Review 03 (Codex, at `51e110b`): REQUEST_CHANGES.**
+- R2-F1, R2-F3, IM-1, F1, F3, F4 and F5 are RESOLVED.
+- R2-F2 and F2 are PARTIALLY RESOLVED.
+- New finding M3T0-R3-F1 (MINOR): the stage-domain drag envelope does not cover numerical height error at downward density jumps. It is verified and ACCEPTED, **not applied**.
+- Record: `docs/reviews/M3-T0-review-03.md`. T0 is not accepted. A correction pass and any Review 04 await authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

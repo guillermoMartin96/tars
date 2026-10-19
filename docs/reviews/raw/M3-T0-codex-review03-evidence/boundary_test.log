@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_declared_envelope_covers_the_model_at_a_downward_jump __________
+
+    def test_declared_envelope_covers_the_model_at_a_downward_jump():
+        # True height independently verified to 80 digits by counterexample.py; speed < 11000.
+        r=np.array([5420209.728043159,3584286.6758661848,1.8499824933775928])
+        v=np.array([6067.454938935459,-9175.29239664793,0.])
+        actual=t.drag_only(t.J2_DRAG,r,v,t.MASS)
+        bound=t.drag_envelope(120000.,11000.,t.B_V1)
+>       assert actual <= bound + 1e-12, (actual,bound,m.geodetic_iterative(r)[1])
+E       AssertionError: (0.06230901450414247, 0.06230417914238045, 119999.99999999907)
+E       assert 0.06230901450414247 <= (0.06230417914238045 + 1e-12)
+
+review_scratch/test_boundary_guarantee.py:14: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/test_boundary_guarantee.py::test_declared_envelope_covers_the_model_at_a_downward_jump
+1 failed in 0.75s

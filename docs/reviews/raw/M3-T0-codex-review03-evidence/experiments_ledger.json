@@ -1,0 +1,77 @@
+[
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_atmosphere.py",
+      "<snap>/review_scratch/t0_atmosphere_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_decay.py",
+      "<snap>/review_scratch/t0_decay_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_geodetic.py",
+      "<snap>/review_scratch/t0_geodetic_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_frames.py",
+      "<snap>/review_scratch/t0_frames_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_regression.py",
+      "<snap>/review_scratch/t0_regression_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_termination.py",
+      "<snap>/review_scratch/t0_termination_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_axis_ablation.py",
+      "<snap>/review_scratch/t0_axis_ablation_results.json"
+    ],
+    "exit": 0,
+    "byte_identical": true
+  },
+  {
+    "command": [
+      "<snap>/.venv/bin/python",
+      "<snap>/docs/science/experiments/m3-t0/t0_gmat.py",
+      "--gmat-console",
+      "<scratch>/GMAT R2026a/bin/GMAT-R2026a_Beta.app/Contents/MacOS/GmatConsole-R2026a",
+      "--out",
+      "<snap>/review_scratch/t0_gmat_results.json"
+    ],
+    "exit": 1,
+    "byte_identical": false
+  }
+]

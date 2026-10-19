@@ -1,0 +1,18 @@
+import sys,math,json
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m,t0_termination as t
+rows=json.load(open('docs/science/experiments/m3-t0/t0_termination_results.json'))['sufficient_stage_condition']['rows']
+out=[]
+for row in rows:
+ b=row['B_kg_per_m2'];cfg=m.Config(j2=m.J2_FROM_C20) if b is None else t.J2_DRAG;mass=850 if b is None else b*33
+ best=math.inf;n=0;worst_margin=math.inf
+ for h in [row['h_f_sufficient_at_least_m'],math.nextafter(row['h_f_sufficient_at_least_m'],math.inf),row['h_f_sufficient_at_least_m']+1e-6]:
+  for lat in [-math.pi/2,0,math.pi/2]:
+   r=m.geodetic_to_cartesian(lat,0,h);vmax=math.sqrt(2*m.MU/np.linalg.norm(r))*(1-1e-12)
+   for direction in [np.array([-math.cos(lat),0,-math.sin(lat)]),np.array([0.,-1,0]),np.array([0.,1,0]),np.array([math.cos(lat),0,math.sin(lat)])]:
+    v=vmax*direction;y=np.r_[r,v,mass];stages=[];m.rk4_step(m.rhs(cfg),0,y,10,stages)
+    hs=[m.geodetic_iterative(st.r)[1] for st in stages];lim=t.stage_lower_heights(m.geodetic_iterative(r)[1],math.inf if b is None else b)
+    best=min(best,*hs);worst_margin=min(worst_margin,*[hh-lim[k] for hh,k in zip(hs,['L2','L3','L4'])]);n+=1
+ out.append(dict(vehicle=row['vehicle'],states=n,min_stage_height_m=best,min_lower_bound_margin_m=worst_margin))
+print(json.dumps(out,indent=2))

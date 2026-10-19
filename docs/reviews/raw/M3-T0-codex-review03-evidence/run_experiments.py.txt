@@ -1,0 +1,13 @@
+import subprocess,pathlib,hashlib,json,sys
+root=pathlib.Path.cwd(); d=root/'docs/science/experiments/m3-t0'; out=root/'review_scratch'; ledger=[]
+for x in ('atmosphere','decay','geodetic','frames','regression','termination','axis_ablation','gmat'):
+ p=out/f't0_{x}_results.json'
+ cmd=[sys.executable,str(d/f't0_{x}.py')]
+ if x=='gmat': cmd+=['--gmat-console',str((root/'../GMAT R2026a/bin/GmatConsole').resolve()),'--out',str(p)]
+ else: cmd+=[str(p)]
+ res=subprocess.run(cmd,capture_output=True,text=True)
+ (out/f'{x}.log').write_text(res.stdout+res.stderr)
+ equal=p.exists() and p.read_bytes()==(d/p.name).read_bytes()
+ ledger.append(dict(command=cmd,exit=res.returncode,byte_identical=equal))
+ (out/'experiments_ledger.json').write_text(json.dumps(ledger,indent=2))
+ print(x,res.returncode,equal,flush=True)

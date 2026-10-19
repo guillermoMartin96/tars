@@ -1,0 +1,20 @@
+import sys, math, json, decimal
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m, t0_termination as t
+D=decimal.Decimal;decimal.getcontext().prec=80
+r=np.array([5420209.728043159,3584286.6758661848,1.8499824933775928])
+v=np.array([6067.45493893552,-9175.292396648021,0.])*(1-1e-14)
+x,y,z=map(lambda a:D(float(a)),r);p=(x*x+y*y).sqrt();a=D(m.A_WGS84);e2=D(m.E2_WGS84)
+q=z/(p*(1-e2))
+for _ in range(40):
+ sn=q/(1+q*q).sqrt();n=a/(1-e2*sn*sn).sqrt();q=(z+e2*n*sn)/p
+sn=q/(1+q*q).sqrt();cs=1/(1+q*q).sqrt()
+h=p*cs+z*sn-a*(1-e2*sn*sn).sqrt()
+speed=sum(D(float(c))**2 for c in v).sqrt();radius=(x*x+y*y+z*z).sqrt()
+actual=t.drag_only(t.J2_DRAG,r,v,t.MASS);bound=t.drag_envelope(120000.,11000.,t.B_V1)
+eps=np.finfo(float).eps;total=m.acceleration(t.J2_DRAG,0,r,v,t.MASS);base=m.acceleration(m.Config(j2=m.J2_FROM_C20),0,r,v,t.MASS)
+slack=8*eps*float(np.linalg.norm(total)+np.linalg.norm(base))
+print(json.dumps(dict(r_m=r.tolist(),v_mps=v.tolist(),height_decimal_m=str(h),speed_decimal_mps=str(speed),energy_decimal=str(speed*speed/2-D(m.MU)/radius),height_model_m=m.geodetic_iterative(r)[1],L_m=120000.,s_mps=11000.,envelope=bound,actual=actual,excess=actual-bound,roundoff_slack=slack,original_test_bound=t.drag_envelope(min(120000.,m.geodetic_iterative(r)[1]),11000.,t.B_V1)),indent=2))
+assert h>=D(120000) and speed<=D(11000)
+assert actual>bound+slack

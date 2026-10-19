@@ -1,0 +1,81 @@
+"""Implementer's independent reproduction of Review 03 M3T0-R3-F1.
+
+True geodetic height of a binary64 position by 60-digit decimal arithmetic (foot point
+on the WGS 84 ellipsoid via Newton on the Lagrange parameter t; only sqrt is needed),
+compared with the model's recovered height, the model drag and the committed envelope.
+Then a search of its own: points constructed at each downward-jump base.
+"""
+import math
+import sys
+from decimal import Decimal as D, getcontext
+
+import numpy as np
+
+sys.path.insert(0, sys.argv[1])
+import t0_model as m  # noqa: E402
+import t0_termination as tt  # noqa: E402
+
+getcontext().prec = 60
+A, B = D(m.A_WGS84), D(m.B_WGS84)
+
+
+def true_height(r):
+    x, y, z = (D(float(c)) for c in r)
+    p = (x * x + y * y).sqrt()
+    t = D(0)
+    for _ in range(200):
+        u, w = p * A / (A * A + t), z * B / (B * B + t)
+        f = u * u + w * w - 1
+        df = -2 * u * u / (A * A + t) - 2 * w * w / (B * B + t)
+        t2 = t - f / df
+        if abs(t2 - t) < D("1e-40"):
+            t = t2
+            break
+        t = t2
+    fp, fz = p * A * A / (A * A + t), z * B * B / (B * B + t)
+    return ((p - fp) ** 2 + (z - fz) ** 2).sqrt() * (1 if t > 0 else -1)
+
+
+def drag(r, v, b):
+    cfg = m.Config(j2=m.J2_FROM_C20, drag=m.Drag(cd=2.2, area_m2=15.0))
+    mass = b * 33.0
+    nd = m.Config(j2=m.J2_FROM_C20)
+    return float(np.linalg.norm(m.acceleration(cfg, 0, r, v, mass) - m.acceleration(nd, 0, r, v, mass)))
+
+
+B_V1 = 850.0 / 33.0
+print("== reviewer's input")
+r = np.array([5420209.728043159, 3584286.6758661848, 1.8499824933775928])
+v = np.array([6067.454938935459, -9175.29239664793, 0.0])
+ht = true_height(r)
+print("true height (60 digits):", ht)
+print("model height:", repr(m.geodetic_iterative(r)[1]))
+print("speed:", float(np.linalg.norm(v)))
+print("energy:", 0.5 * float(v @ v) - m.MU / float(np.linalg.norm(r)))
+env = tt.drag_envelope(120000.0, 11000.0, B_V1)
+act = drag(r, v, B_V1)
+print("envelope:", repr(env), "model drag:", repr(act), "excess:", act - env, "rel:", act / env - 1)
+
+print("== own search: points with true height >= base whose model height < base")
+rng = np.random.default_rng(31)
+downs = [bb.base_km * 1e3 for i, bb in enumerate(m.TABLE[1:], 1)
+         if m.density(bb.base_km * 1e3 - 1e-6) > m.density(bb.base_km * 1e3)]
+for base in downs:
+    found = 0
+    worst = 0.0
+    for _ in range(400):
+        lat, lon = rng.uniform(-1.5, 1.5), rng.uniform(-math.pi, math.pi)
+        rr = m.geodetic_to_cartesian(lat, lon, base)
+        if m.geodetic_iterative(rr)[1] >= base:
+            continue
+        if true_height(rr) < D(base):
+            continue  # truly below: outside the envelope's domain
+        east = np.array([-math.sin(lon), math.cos(lon), 0.0])
+        s = 7800.0
+        vv = -s * east
+        e = tt.drag_envelope(base, s, B_V1)
+        a = drag(rr, vv, B_V1)
+        if a > e:
+            found += 1
+            worst = max(worst, a / e - 1)
+    print(f"base {base / 1e3:6.0f} km: {found} violating points of 400 tried, worst relative excess {worst:.3e}")

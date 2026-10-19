@@ -1,0 +1,41 @@
+import sys,math,json,hashlib,pathlib,decimal
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m, t0_termination as t
+D=decimal.Decimal; decimal.getcontext().prec=65
+out={}
+paths=['proof/thresholds/m1.json','proof/thresholds/m2.json','toolbox/references/gmat/m2/APPROVED_DIGESTS.json','toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz','proof/references/m2_final_states.json','../GMAT R2026a/bin/GmatConsole','../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt']
+out['digests']={p:hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest() for p in paths if pathlib.Path(p).exists()}
+out['band_jumps']=[]; out['float_counterexamples']=[]
+rng=np.random.default_rng(310)
+for b in m.TABLE[1:]:
+ low=b.base_km*1000.; left=m.density(math.nextafter(low,0)); right=m.density(low)
+ out['band_jumps'].append([low,left/right-1])
+ if left<=right: continue
+ env=t.drag_envelope(low,11000.,t.B_V1)
+ for i in range(10000):
+  lon=rng.uniform(-math.pi,math.pi); radius=m.A_WGS84+low
+  r=np.array([radius*math.cos(lon),radius*math.sin(lon),0.])
+  exact_h=(D(float(r[0]))**2+D(float(r[1]))**2).sqrt()-D(m.A_WGS84)
+  model_h=m.geodetic_iterative(r)[1]
+  if exact_h>=D(low) and model_h<low:
+   v=11000.*np.array([r[1],-r[0],0.])/np.linalg.norm(r)
+   actual=t.drag_only(t.J2_DRAG,r,v,t.MASS)
+   if actual>env*1.000000001:
+    out['float_counterexamples'].append(dict(low=low,r=r.tolist(),v=v.tolist(),true_h=str(exact_h),model_h=model_h,envelope=env,actual=actual,ratio=actual/env));break
+out['floors']=[(b,t.stage_lower_heights(h,b)) for b,h in [(t.B_V1,124456.69),(100.,118633.51),(math.inf,111511.96)]]
+# Differentiated rational expression: multiply g'/mu by s*r^3*(r-c)^2 to recover cubic.
+c=m.A_WGS84-t.R_CURV_MIN;k=math.cos(t.DELTA_MAX); errs=[]
+for _ in range(10000):
+ rp=m.A_WGS84+rng.uniform(1,5e6);e=rng.uniform(0,.999);s=rp/(1-e);r=rng.uniform(rp,s*(1+e));
+ dg=-2/r**2/(r-c)-(2/r-1/s)/(r-c)**2+2*k/r**3
+ polynomial=r**3+(2*k*s-4*s)*r**2+(2*s*c-4*k*s*c)*r+2*k*s*c*c
+ errs.append(abs(dg*s*r**3*(r-c)**2-polynomial)/max(abs(polynomial),1))
+out['cubic_identity_max_relative']=max(errs)
+# Independent QR fit, in metres, avoiding the submitted least-squares call.
+d=np.array([[float(x) for x in line.split()] for line in pathlib.Path('docs/science/experiments/m3-t0/gmat_runs/axis_probe__m1_two_body_report.txt').read_text().splitlines() if line.strip() and not line.startswith('ElapsedS')])
+times=np.tile(d[:,0],2);r=np.vstack([d[:,1:4],d[:,5:8]])*1000;z=np.r_[d[:,4],d[:,8]]*1000
+A=np.hstack([r*(times/times.max())[:,None]**i for i in range(3)])
+q,R=np.linalg.qr(A,mode='reduced');coef=np.linalg.solve(R,q.T@z);res=z-A@coef
+out['independent_qr_axis_rms_m']=float(np.sqrt(np.mean(res**2)))
+print(json.dumps(out,indent=2))

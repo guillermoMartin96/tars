@@ -1,0 +1,17 @@
+import sys,math,json,subprocess
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m,t0_termination as t
+rng=np.random.default_rng(101)
+k=2*m.A_WGS84*m.B_WGS84/(m.A_WGS84**2+m.B_WGS84**2)
+c=m.A_WGS84-m.B_WGS84**2/m.A_WGS84
+maxerr=0
+for i in range(10000):
+ rp=m.A_WGS84+10**rng.uniform(-3,10);e=rng.uniform(0,.999999);s=rp/(1-e);rp=s*(1-e);ra=s*(1+e)
+ def g(r):return m.MU*((2/r-1/s)/(r-c)-k/r**2)
+ want=max(0,g(rp),g(ra))*12.5
+ got=t.two_body_domain_bound(s,e)['bound_m']
+ maxerr=max(maxerr,abs(want-got))
+old=json.loads(subprocess.check_output(['git','show','5548d11:docs/science/experiments/m3-t0/t0_termination_results.json']))
+new=json.load(open('docs/science/experiments/m3-t0/t0_termination_results.json'))
+print(json.dumps(dict(normal_cos_analytic=k,normal_cos_code=math.cos(t.DELTA_MAX),stationary_F_derivative_positive_for_r_above=4*k*c/(4*k-2),exterior_r_at_least=m.A_WGS84,random_two_body_domains=10000,max_abs_two_body_difference_m=maxerr,old_floors=[r['h_f_sufficient_at_least_m'] for r in old['sufficient_stage_condition']['rows']],new_floors=[r['h_f_sufficient_at_least_m'] for r in new['sufficient_stage_condition']['rows']],all_two_body_table_bounds_unchanged=[r['bound_m'] for r in old['missed_crossing']['two_body_domain_bound_table']]==[r['bound_m'] for r in new['missed_crossing']['two_body_domain_bound_table']]),indent=2))

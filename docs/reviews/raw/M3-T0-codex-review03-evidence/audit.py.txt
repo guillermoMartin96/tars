@@ -1,0 +1,13 @@
+import pathlib,json,re,hashlib,subprocess
+D=pathlib.Path('docs/science/experiments/m3-t0');files=sorted(D.glob('*_results.json'))
+results={p.name:json.loads(p.read_text()) for p in files}
+out={'inspected_result_files':[str(p) for p in files]}
+mc=results['t0_termination_results.json']['missed_crossing'];sc=results['t0_termination_results.json']['sufficient_stage_condition']
+out['max_refinement_m']=max((r['refined_max_hddot_upper_mps2']-r['sampled_max_hddot_upper_mps2'])*12.5 for r in mc['sweep'])
+out['floors']=sc['rows'];out['stress']=sc['stress'];out['midpoint']=mc['cases']
+out['kepler_min_margin']=min(r['bound_m']-r['max_dip_m'] for r in mc['sweep'] if r['physics']=='kepler')
+out['perturbed_min_gap']=min(r['sampled_estimate_m']-r['max_dip_m'] for r in mc['sweep'] if r['physics']=='j2drag')
+out['perturbed_initial_two_body_min_gap']=min(r['two_body_domain_bound_m']-r['max_dip_m'] for r in mc['sweep'] if r['physics']=='j2drag')
+val=pathlib.Path('review_scratch/val0019.txt').read_text();out['spike_digest_checks']={name:hashlib.sha256((D/name).read_bytes()).hexdigest()==digest for name,digest in re.findall(r'`([^`]+\.(?:py|txt))` `([0-9a-f]{64})`',val)}
+out['historical_reviews_preserved']={p:subprocess.check_output(['git','show','5548d11:'+p])==pathlib.Path(p).read_bytes() for p in ['docs/reviews/raw/M3-T0-codex-review01.md','docs/reviews/raw/M3-T0-codex-review02.md','docs/reviews/raw/M3-T0-codex-review01-prompt.md','docs/reviews/raw/M3-T0-codex-review02-prompt.md']}
+print(json.dumps(out,indent=2))
