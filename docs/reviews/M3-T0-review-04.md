@@ -142,5 +142,17 @@
 | **Unresolved assumptions** | **A-FP-2** (now ≤ 2 ulps relative plus 2 × 2^-1074 absolute; sufficient up to 2^5 ulps for the published bracket ends), measured on macOS x86_64 only. **A-FP-1's gradual underflow** and **A-FP-3**: standard, probed at run time on the host only |
 | **Owner decisions still required** | DR-0029 P1–P10, including κ and v̂ for P1; whether a guarantee conditional on A-FP-2 is acceptable; how bounds are quoted (IM-2). DR-0028 P6(b). The escalated GMAT geodetic-drag discrepancy |
 
-### Validation
-Recorded in the validation commit that follows this correction commit (I-5 §6).
+### Validation of the correction commit `a1feb79` (appended 2026-10-19)
+Evidence is in `docs/reviews/raw/M3-T0-review05-correction-evidence/`; scratch, home and temporary paths are redacted. Environment: macOS 26.2 x86_64 (the M1/M2 reference host), Python 3.12.15, the locked `uv` environment.
+
+| Check | Result |
+|---|---|
+| Full existing T0 regression suite and new R4-F1 checks | `check_review01.py` … `check_review04.py`: 140/140 pass (`checks_after.log`). Red before, at `c15fbd4` with the documented shim: `check_review04.py` 17 of 48 fail (`checks04_before_c15fbd4.log`) |
+| Independent high-precision comparisons | All expected values in `check_review04.py` come from `t0_oracle.py` (60-digit decimals) and a second implementation in exact rationals; part of the 140 above |
+| Mutation tests | `mutation_check_review02.py`: the control passes 140/140; 34/34 corruptions detected by a declared check; 1 declared equivalent; about 24 min (`mutation_check_review04.json`). Run on the tree before the last record edits; no script changed after it |
+| M1 Proof (`run_m1_proof.sh`, fresh clone at `a1feb79`) | PASS, 9/9 steps; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`). A separate full pytest run in the same clone after the Proof: 1185 passed, 3 warnings (`pytest_full.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`) |
+| Five pinned digests | All match (`pinned_digests.log`) |
+| Production and protected files | `git diff --name-only 86df2c3 a1feb79 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 94 tracked experiment files are byte-identical; the checks then pass 140/140 (`reproducibility_twice.log`) |
+| CI on `a1feb79` | Run 39325494494 (https://github.com/guillermoMartin96/tars/actions/runs/39325494494): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion. CI does not collect the T0 checks (`testpaths = ["tests"]`) |
