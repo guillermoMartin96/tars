@@ -15,6 +15,9 @@ An oracle independent of the model's altitude and band-selection code (`t0_model
   exact base belongs to the band above), in decimal arithmetic.
 - `drag(r, v, mass, cd, area)`: rho(true height) |v - omega Z x r|^2 / (2 B), B = mass /
   (cd area), in decimal arithmetic.
+- `top_band_height(rho)`: the exact height in the unbounded top band at which the table
+  density equals rho (Review 04 M3T0-R4-F1: used to place points at the smallest normal
+  density 2^-1022 and at the rounding-to-zero threshold 2^-1075 of binary64).
 
 Precision: 60 significant digits; the Newton loop stops when the correction is below
 1e-45 of a^2, so the height carries far more correct digits than the 1e-9 m effects tested.
@@ -113,3 +116,11 @@ def downward_jumps() -> tuple[D, ...]:
             if r0 * (-(b1 - b0) / s0).exp() > r1:
                 out.append(b1)
     return tuple(out)
+
+
+def top_band_height(rho: D) -> D:
+    """Exact height [m] in the top band at which rho0 exp(-(h - base) / H) = rho."""
+    with localcontext() as c:
+        c.prec = PREC
+        base, rho0, scale = TABLE[-1]
+        return base + scale * (rho0 / rho).ln()

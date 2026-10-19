@@ -154,13 +154,60 @@ def libm_accuracy(n: int = 20000) -> dict:
         errs = [errors(g, r) for g, r in pairs]
         ulp_max[name] = max(e[0] for e in errs)
         rel_max[name] = max(e[1] for e in errs)
+    sub = subnormal_results()
     return {
         "max_error_ulp": ulp_max,
         "max_relative_error_in_2^-52": rel_max,
         "samples_per_function": {k: len(v) for k, v in cases.items()},
         "assumed_relative_bound_in_2^-52": tt.LIBM_ULP,
         "within_assumption": max(rel_max.values()) <= tt.LIBM_ULP,
+        "subnormal_results": sub,
         "kind": "measurement on this platform (sampled arguments), not a proof of A-FP-2",
+    }
+
+
+def subnormal_results(n: int = 4000) -> dict:
+    """Review 04 M3T0-R4-F1: A-FP-2's absolute term. Functions whose exact value is subnormal
+    (or below half the smallest subnormal, where 0 is the nearest binary64), against
+    decimal references, in units of 2^-1074; plus IEEE gradual-underflow identities (A-FP-1:
+    no flush-to-zero or denormals-are-zero mode)."""
+    rng = np.random.default_rng(20261020)
+    tiny = D(math.ulp(0.0))
+    xs = np.r_[rng.uniform(-745.2, -708.39, n), np.linspace(-745.2, -708.39, 1001)]
+    ys = 10.0 ** rng.uniform(-323.5, -308.0, n)
+    ps = 10.0 ** rng.uniform(6.3, 8.5, n)
+    with localcontext() as c:
+        c.prec = PREC
+        cases = {
+            "exp": [(math.exp(float(x)), D(float(x)).exp()) for x in xs],
+            "sin": [(math.sin(float(y)), d_sin(D(float(y)))) for y in ys],
+            "atan2": [
+                (math.atan2(float(y), float(p)), d_atan2(D(float(y)), D(float(p))))
+                for y, p in zip(ys, ps, strict=True)
+            ],
+            "hypot": [
+                (
+                    math.hypot(float(y), float(y) / 3),
+                    (D(float(y)) ** 2 + (D(float(y) / 3)) ** 2).sqrt(),
+                )
+                for y in ys
+            ],
+        }
+    worst = {k: float(max(abs(D(g) - r) for g, r in v) / tiny) for k, v in cases.items()}
+    probe = {
+        "smallest_subnormal_positive": math.ulp(0.0) > 0.0,
+        "halving_smallest_normal_is_exact": 2.0**-1022 / 2 == 2.0**-1023,
+        "tie_rounds_to_even": (3 * math.ulp(0.0)) * 0.5 == 2 * math.ulp(0.0),
+        "half_smallest_subnormal_rounds_to_zero": math.ulp(0.0) * 0.5 == 0.0,
+        "numpy_subnormal_product": float(np.float64(2.0**-1022) * np.float64(0.5)) == 2.0**-1023,
+    }
+    return {
+        "max_abs_error_in_2^-1074": worst,
+        "samples_per_function": {k: len(v) for k, v in cases.items()},
+        "assumed_abs_bound_in_2^-1074": tt.LIBM_ULP,
+        "within_assumption": max(worst.values()) <= tt.LIBM_ULP,
+        "gradual_underflow_probe": probe,
+        "gradual_underflow": all(probe.values()),
     }
 
 

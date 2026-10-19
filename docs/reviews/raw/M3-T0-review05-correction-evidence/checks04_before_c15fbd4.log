@@ -1,0 +1,474 @@
+# check_review04.py (final, sha256 eeb051c3cbf71caa8d2034a3e2e32f9b821fbe99f426075dca592d7ae824e75f) run on the c15fbd4 docs tree
+# shim appended to the c15fbd4 copies (not part of c15fbd4):
+#   t0_termination.py: drag_envelope_relative_only = drag_envelope   (c15fbd4's envelope is the relative-only one)
+#   t0_oracle.py: top_band_height(rho) copied verbatim from the corrected oracle
+FFFFFF.............................FFFFFFF.F.FFF                         [100%]
+=================================== FAILURES ===================================
+_________ test_r4f1_reviewer_counterexample_is_reproduced_and_covered __________
+
+    def test_r4f1_reviewer_counterexample_is_reproduced_and_covered():
+        """Detects: the envelope's absolute (underflow) part missing or too small."""
+        ht = o.true_height(R4_R)
+        assert ht == D(R4_R[0]) - o.A == D(190_681_000)  # exact: the foot point is (a, 0, 0)
+        assert model_height(R4_R) == 190_681_000.0
+        rho = o.density(ht)
+        assert abs(rho - D("1.26316923236358804936e-322")) < D("1e-342")  # Review 04, decimal
+        assert 0.0 < model_density(R4_R) < 2.0**-1022  # subnormal in binary64
+        v = np.zeros(3)
+        a = model_drag_norm(R4_R, v, MASSES["B25.8"])
+        exact = o.drag(R4_R, v, MASSES["B25.8"], CD, AREA)
+        assert D(2) < a / exact < D("2.015")  # the subnormal coefficient rounding (R4-F1)
+        assert a > relative_only_reference(R4_R, v, MASSES["B25.8"])  # the defect
+        old = D(tt.drag_envelope_relative_only(190_681_000.0, 0.0, VEHICLES["B25.8"]))
+        assert abs(a / old - D("2.0149523474166813")) < D("1e-15")  # the reviewer's ratio
+>       assert a <= D(tt.drag_envelope(190_681_000.0, 0.0, VEHICLES["B25.8"]))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('1.02021454616158465867903659404974879567830513759477053737337E-315') <= Decimal('5.06321922436317430373026051381527482584892393836582266570195898014756114565550674968647292096262369210042330...7299783557111869538287439725892286730080784673302182945250581372941879078342086728525828220881521701812744140625E-316')
+E        +  where Decimal('5.06321922436317430373026051381527482584892393836582266570195898014756114565550674968647292096262369210042330...7299783557111869538287439725892286730080784673302182945250581372941879078342086728525828220881521701812744140625E-316') = D(5.0632192e-316)
+E        +    where 5.0632192e-316 = <function drag_envelope at 0x10c1223e0>(190681000.0, 0.0, 25.757575757575758)
+E        +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review04.py:203: AssertionError
+_____________ test_r4f1_normal_to_subnormal_transition_scan[B25.8] _____________
+
+vehicle = 'B25.8'
+
+    @pytest.mark.parametrize("vehicle", ["B25.8", "B100"])
+    def test_r4f1_normal_to_subnormal_transition_scan(vehicle):
+        """Detects: the absolute part missing, too small, or not maximised over every height
+        with nonzero computed density. Covers normal densities near 2^-1022, subnormal ones,
+        the rounding-up height of the coefficient, values approaching 0 and density 0."""
+        mass, b = MASSES[vehicle], VEHICLES[vehicle]
+        h_n = float(o.top_band_height(D(2) ** -1022))  # exact density = smallest normal
+        h_z = float(o.top_band_height(TINY / 2))  # exact density = 2^-1075
+        h_c = coefficient_rounding_height(mass)
+        rng = np.random.default_rng(4040 + int(b))
+        pts = []
+        for lo, hi, n in (
+            (h_n - 3e5, h_n + 3e5, 60),
+            (h_c - 5e5, h_c + 1e5, 90),
+            (h_z - 3e5, h_z + 3e5, 60),
+            (h_n - 1e6, h_z + 1e6, 90),
+        ):
+            pts += scan_points(rng, lo, hi, n)
+        counts = {"normal": 0, "subnormal": 0, "zero": 0}
+        near_normal = beyond = 0
+        for r, v in pts:
+            rho = model_density(r)
+            counts[classify(rho)] += 1
+            near_normal += 2.0**-1022 <= rho < 2.0**-1020
+            a = model_drag_norm(r, v, mass)
+            if rho == 0.0:
+                assert a == 0
+            low = tt._dn(o.true_height(r))
+>           assert a <= D(tt.drag_envelope(low, up(float(np.linalg.norm(v))), b)), (r, v)
+E           AssertionError: (array([1.03673177e+08, 9.25303394e+07, 1.39583852e+08]), array([ 7324.63182739, -8206.69047748,    -0.        ]))
+E           assert Decimal('2.20653125097372170679099194352765540271506292870669544187335E-315') <= Decimal('2.18549595556317194991403546986515473520051782334943545202271315297710155172174795862741588096483246253824298...9156195154317224250599750903972992707409588722460275925488238442885775315860374945486910291947424411773681640625E-315')
+E            +  where Decimal('2.18549595556317194991403546986515473520051782334943545202271315297710155172174795862741588096483246253824298...9156195154317224250599750903972992707409588722460275925488238442885775315860374945486910291947424411773681640625E-315') = D(2.185495956e-315)
+E            +    where 2.185495956e-315 = <function drag_envelope at 0x10c1223e0>(190593614.5494876, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+E            +      and   11000.0 = up(10999.999999999998)
+E            +        where 10999.999999999998 = float(np.float64(10999.999999999998))
+E            +          where np.float64(10999.999999999998) = <function norm at 0x10910b570>(array([ 7324.63182739, -8206.69047748,    -0.        ]))
+E            +            where <function norm at 0x10910b570> = <module 'numpy.linalg' from '<home>/.superset/worktrees/tars/nickel-page-8a63927f/.venv/lib/python3.12/site-packages/numpy/linalg/__init__.py'>.norm
+E            +              where <module 'numpy.linalg' from '<home>/.superset/worktrees/tars/nickel-page-8a63927f/.venv/lib/python3.12/site-packages/numpy/linalg/__init__.py'> = np.linalg
+
+docs/science/experiments/m3-t0/check_review04.py:236: AssertionError
+_____________ test_r4f1_normal_to_subnormal_transition_scan[B100] ______________
+
+vehicle = 'B100'
+
+    @pytest.mark.parametrize("vehicle", ["B25.8", "B100"])
+    def test_r4f1_normal_to_subnormal_transition_scan(vehicle):
+        """Detects: the absolute part missing, too small, or not maximised over every height
+        with nonzero computed density. Covers normal densities near 2^-1022, subnormal ones,
+        the rounding-up height of the coefficient, values approaching 0 and density 0."""
+        mass, b = MASSES[vehicle], VEHICLES[vehicle]
+        h_n = float(o.top_band_height(D(2) ** -1022))  # exact density = smallest normal
+        h_z = float(o.top_band_height(TINY / 2))  # exact density = 2^-1075
+        h_c = coefficient_rounding_height(mass)
+        rng = np.random.default_rng(4040 + int(b))
+        pts = []
+        for lo, hi, n in (
+            (h_n - 3e5, h_n + 3e5, 60),
+            (h_c - 5e5, h_c + 1e5, 90),
+            (h_z - 3e5, h_z + 3e5, 60),
+            (h_n - 1e6, h_z + 1e6, 90),
+        ):
+            pts += scan_points(rng, lo, hi, n)
+        counts = {"normal": 0, "subnormal": 0, "zero": 0}
+        near_normal = beyond = 0
+        for r, v in pts:
+            rho = model_density(r)
+            counts[classify(rho)] += 1
+            near_normal += 2.0**-1022 <= rho < 2.0**-1020
+            a = model_drag_norm(r, v, mass)
+            if rho == 0.0:
+                assert a == 0
+            low = tt._dn(o.true_height(r))
+>           assert a <= D(tt.drag_envelope(low, up(float(np.linalg.norm(v))), b)), (r, v)
+E           AssertionError: (array([-1.67854528e+08,  1.02512650e+08,  0.00000000e+00]), array([ 1718.17778374, -1049.33098978,    -0.        ]))
+E           assert Decimal('1.03633329560866569095260772053125147633522921722685884155995E-315') <= Decimal('6.88946322095927853851621816045286070958286402529750553760935244793007556303330830152254075879648414725741575...9375741630565462734454064255180221349105932900964555289768776380728899401406639668721254565753042697906494140625E-316')
+E            +  where Decimal('6.88946322095927853851621816045286070958286402529750553760935244793007556303330830152254075879648414725741575...9375741630565462734454064255180221349105932900964555289768776380728899401406639668721254565753042697906494140625E-316') = D(6.8894632e-316)
+E            +    where 6.8894632e-316 = <function drag_envelope at 0x10c1223e0>(190304312.81609967, 2013.2636247311661, 100.0)
+E            +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+E            +      and   2013.2636247311661 = up(2013.263624731166)
+E            +        where 2013.263624731166 = float(np.float64(2013.263624731166))
+E            +          where np.float64(2013.263624731166) = <function norm at 0x10910b570>(array([ 1718.17778374, -1049.33098978,    -0.        ]))
+E            +            where <function norm at 0x10910b570> = <module 'numpy.linalg' from '<home>/.superset/worktrees/tars/nickel-page-8a63927f/.venv/lib/python3.12/site-packages/numpy/linalg/__init__.py'>.norm
+E            +              where <module 'numpy.linalg' from '<home>/.superset/worktrees/tars/nickel-page-8a63927f/.venv/lib/python3.12/site-packages/numpy/linalg/__init__.py'> = np.linalg
+
+docs/science/experiments/m3-t0/check_review04.py:236: AssertionError
+_______ test_r4f1_binary64_neighbours_of_the_critical_boundaries[B25.8] ________
+
+vehicle = 'B25.8'
+
+    @pytest.mark.parametrize("vehicle", ["B25.8", "B100"])
+    def test_r4f1_binary64_neighbours_of_the_critical_boundaries(vehicle):
+        """Detects the same defects at the exact boundaries: equatorial points (true height x - a
+        exactly) at the binary64 neighbours of the heights where the exact density is 2^-1022
+        (computed density normal or subnormal), where the model's coefficient flips between
+        2^-1074 and 0 (the R4-F1 mechanism), and where the exact density is 2^-1075 (computed
+        density 2^-1074 or 0)."""
+        mass, b = MASSES[vehicle], VEHICLES[vehicle]
+        seen = {"normal": 0, "subnormal": 0, "zero": 0}
+        smallest = beyond = 0
+        for x0 in (
+            m.A_WGS84 + float(o.top_band_height(D(2) ** -1022)),
+            coefficient_flip_x(mass),
+            m.A_WGS84 + float(o.top_band_height(TINY / 2)),
+        ):
+            xs = [x0]
+            for _ in range(40):
+                xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+            for x in xs:
+                r = np.array([x, 0.0, 0.0])
+                ht = D(x) - o.A
+                assert o.true_height(r) == ht or abs(o.true_height(r) - ht) < D("1e-40")
+                rho = model_density(r)
+                seen[classify(rho)] += 1
+                smallest += rho == math.ulp(0.0)
+                for s, v in ((0.0, np.zeros(3)), (11_000.0, -11_000.0 * east(0.0))):
+                    a = model_drag_norm(r, v, mass)
+>                   assert a <= D(tt.drag_envelope(tt._dn(ht), s, b)), (x, s)
+E                   AssertionError: (197059838.45030707, 0.0)
+E                   assert Decimal('1.02021817754408159184113629183037637710539202078431975266039E-315') <= Decimal('5.05002026063452540230258347851380029188619136573898097962032945863955559947878312288039143583422258656399703...5282328050697376025309157299279517097468320647154683699538377140240692601824701313262266921810805797576904296875E-316')
+E                    +  where Decimal('5.05002026063452540230258347851380029188619136573898097962032945863955559947878312288039143583422258656399703...5282328050697376025309157299279517097468320647154683699538377140240692601824701313262266921810805797576904296875E-316') = D(5.05002026e-316)
+E                    +    where 5.05002026e-316 = <function drag_envelope at 0x10c1223e0>(190681701.45030707, 0.0, 25.757575757575758)
+E                    +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+E                    +      and   190681701.45030707 = <function _dn at 0x10c1220c0>(Decimal('190681701.450307071208953857421875'))
+E                    +        where <function _dn at 0x10c1220c0> = tt._dn
+
+docs/science/experiments/m3-t0/check_review04.py:270: AssertionError
+________ test_r4f1_binary64_neighbours_of_the_critical_boundaries[B100] ________
+
+vehicle = 'B100'
+
+    @pytest.mark.parametrize("vehicle", ["B25.8", "B100"])
+    def test_r4f1_binary64_neighbours_of_the_critical_boundaries(vehicle):
+        """Detects the same defects at the exact boundaries: equatorial points (true height x - a
+        exactly) at the binary64 neighbours of the heights where the exact density is 2^-1022
+        (computed density normal or subnormal), where the model's coefficient flips between
+        2^-1074 and 0 (the R4-F1 mechanism), and where the exact density is 2^-1075 (computed
+        density 2^-1074 or 0)."""
+        mass, b = MASSES[vehicle], VEHICLES[vehicle]
+        seen = {"normal": 0, "subnormal": 0, "zero": 0}
+        smallest = beyond = 0
+        for x0 in (
+            m.A_WGS84 + float(o.top_band_height(D(2) ** -1022)),
+            coefficient_flip_x(mass),
+            m.A_WGS84 + float(o.top_band_height(TINY / 2)),
+        ):
+            xs = [x0]
+            for _ in range(40):
+                xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+            for x in xs:
+                r = np.array([x, 0.0, 0.0])
+                ht = D(x) - o.A
+                assert o.true_height(r) == ht or abs(o.true_height(r) - ht) < D("1e-40")
+                rho = model_density(r)
+                seen[classify(rho)] += 1
+                smallest += rho == math.ulp(0.0)
+                for s, v in ((0.0, np.zeros(3)), (11_000.0, -11_000.0 * east(0.0))):
+                    a = model_drag_norm(r, v, mass)
+>                   assert a <= D(tt.drag_envelope(tt._dn(ht), s, b)), (x, s)
+E                   AssertionError: (196689628.517494, 0.0)
+E                   assert Decimal('1.01638822512342837434286850643925328316674159004983574237579E-315') <= Decimal('5.15811050984130038162255508696801044589023929068151537003954226005857413500038831000810132466389586023247103...6788805612642393434237704793555678801741855470942634003475023252863001198276204917192444554530084133148193359375E-316')
+E                    +  where Decimal('5.15811050984130038162255508696801044589023929068151537003954226005857413500038831000810132466389586023247103...6788805612642393434237704793555678801741855470942634003475023252863001198276204917192444554530084133148193359375E-316') = D(5.1581105e-316)
+E                    +    where 5.1581105e-316 = <function drag_envelope at 0x10c1223e0>(190311491.517494, 0.0, 100.0)
+E                    +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+E                    +      and   190311491.517494 = <function _dn at 0x10c1220c0>(Decimal('190311491.5174939930438995361328125'))
+E                    +        where <function _dn at 0x10c1220c0> = tt._dn
+
+docs/science/experiments/m3-t0/check_review04.py:270: AssertionError
+________________________ test_r4f1_zero_density_height _________________________
+
+    def test_r4f1_zero_density_height():
+        """Detects: h_zero placed below the true onset of zero density (the absolute part would
+        then omit heights with nonzero force). The derived h_zero must not be below the oracle's
+        exact onset, and every point whose computed selection height is above it must have
+        computed density 0 and drag exactly 0."""
+>       h_zero = tt.FP["h_zero_m"]
+                 ^^^^^^^^^^^^^^^^^
+E       KeyError: 'h_zero_m'
+
+docs/science/experiments/m3-t0/check_review04.py:281: KeyError
+_________________ test_r4f1_rk4_stages_at_high_altitude[B25.8] _________________
+
+vehicle = 'B25.8'
+
+    @pytest.mark.parametrize("vehicle", ["B25.8", "B100"])
+    def test_r4f1_rk4_stages_at_high_altitude(vehicle):
+        """Detects: a stage force above the bound the stage condition uses (A0, A2 and the drag
+        envelopes at the stage's lower height and speed bounds), for retrograde, near-escape and
+        straight-down bound states where the computed density is subnormal."""
+        mass, b = MASSES[vehicle], VEHICLES[vehicle]
+        h_c = coefficient_rounding_height(mass)
+        rng = np.random.default_rng(4444 + int(b))
+        beyond = 0
+        for k in range(60):
+            h0 = rng.uniform(h_c - 4e5, h_c + 4e4) if k % 2 else rng.uniform(1.8e8, 1.95e8)
+            lat = 0.0 if k % 3 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            r0 = m.geodetic_to_cartesian(lat, lon, h0)
+            vesc = math.sqrt(2.0 * m.MU / float(np.linalg.norm(r0)))
+            speed = vesc * (1.0 - 10.0 ** rng.uniform(-7.0, -3.0))
+            d = (-east(lon), -r0 / np.linalg.norm(r0), rng.normal(size=3))[k % 3]
+            v0 = speed * d / np.linalg.norm(d)
+            assert 0.5 * float(v0 @ v0) - m.MU / float(np.linalg.norm(r0)) < 0.0
+            y0 = np.r_[r0, v0, mass]
+            lim = tt.stage_lower_heights(model_height(r0), b)
+            assert o.true_height(r0) >= D(lim["H0"])
+            stages: list = []
+            m.rk4_step(m.rhs(J2_DRAG), 0.0, y0, DT, stages)
+            for st, lk, mk in zip(stages, ("L2", "L3", "L4"), ("M2", "M3", "M4"), strict=True):
+                assert o.true_height(st.r) >= D(lim[lk]), (vehicle, lk)
+                assert model_height(st.r) >= lim[mk], (vehicle, mk)
+            y2 = y0 + 0.5 * DT * m.rhs(J2_DRAG)(0.0, y0)
+            for y, low, s, acc in ((y0, "H0", "V", "A0"), (y2, "L2", "s2", "A2")):
+                drag = model_drag_norm(y[:3], y[3:6], mass)
+>               assert drag <= D(tt.drag_envelope(lim[low], lim[s], b)), (vehicle, low)
+E               AssertionError: ('B25.8', 'H0')
+E               assert Decimal('1.21113217212836075543670329117991469930341070730564861099290E-315') <= Decimal('9.54536186445814386777127393385584079018069542565332634263333708951931956903688301677826913425230731776746007...4116426165880661796551813502315764538455658361906054067149529481371077015150472533377978834323585033416748046875E-316')
+E                +  where Decimal('9.54536186445814386777127393385584079018069542565332634263333708951931956903688301677826913425230731776746007...4116426165880661796551813502315764538455658361906054067149529481371077015150472533377978834323585033416748046875E-316') = D(9.54536186e-316)
+E                +    where 9.54536186e-316 = <function drag_envelope at 0x10c1223e0>(190581072.74766326, 2011.9598832749214, 25.757575757575758)
+E                +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review04.py:407: AssertionError
+_________________ test_r4f1_rk4_stages_at_high_altitude[B100] __________________
+
+vehicle = 'B100'
+
+    @pytest.mark.parametrize("vehicle", ["B25.8", "B100"])
+    def test_r4f1_rk4_stages_at_high_altitude(vehicle):
+        """Detects: a stage force above the bound the stage condition uses (A0, A2 and the drag
+        envelopes at the stage's lower height and speed bounds), for retrograde, near-escape and
+        straight-down bound states where the computed density is subnormal."""
+        mass, b = MASSES[vehicle], VEHICLES[vehicle]
+        h_c = coefficient_rounding_height(mass)
+        rng = np.random.default_rng(4444 + int(b))
+        beyond = 0
+        for k in range(60):
+            h0 = rng.uniform(h_c - 4e5, h_c + 4e4) if k % 2 else rng.uniform(1.8e8, 1.95e8)
+            lat = 0.0 if k % 3 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            r0 = m.geodetic_to_cartesian(lat, lon, h0)
+            vesc = math.sqrt(2.0 * m.MU / float(np.linalg.norm(r0)))
+            speed = vesc * (1.0 - 10.0 ** rng.uniform(-7.0, -3.0))
+            d = (-east(lon), -r0 / np.linalg.norm(r0), rng.normal(size=3))[k % 3]
+            v0 = speed * d / np.linalg.norm(d)
+            assert 0.5 * float(v0 @ v0) - m.MU / float(np.linalg.norm(r0)) < 0.0
+            y0 = np.r_[r0, v0, mass]
+            lim = tt.stage_lower_heights(model_height(r0), b)
+            assert o.true_height(r0) >= D(lim["H0"])
+            stages: list = []
+            m.rk4_step(m.rhs(J2_DRAG), 0.0, y0, DT, stages)
+            for st, lk, mk in zip(stages, ("L2", "L3", "L4"), ("M2", "M3", "M4"), strict=True):
+                assert o.true_height(st.r) >= D(lim[lk]), (vehicle, lk)
+                assert model_height(st.r) >= lim[mk], (vehicle, mk)
+            y2 = y0 + 0.5 * DT * m.rhs(J2_DRAG)(0.0, y0)
+            for y, low, s, acc in ((y0, "H0", "V", "A0"), (y2, "L2", "s2", "A2")):
+                drag = model_drag_norm(y[:3], y[3:6], mass)
+>               assert drag <= D(tt.drag_envelope(lim[low], lim[s], b)), (vehicle, low)
+E               AssertionError: ('B100', 'H0')
+E               assert Decimal('1.03635132916299048653077289921417821337238452258724002295209E-315') <= Decimal('6.79923586577132924387629597904792181247453760101251179761547025430330070040950678479764559902048218672983407...2436280004146107899298562614872769739636059177722308746409678961397063563787401818672151421196758747100830078125E-316')
+E                +  where Decimal('6.79923586577132924387629597904792181247453760101251179761547025430330070040950678479764559902048218672983407...2436280004146107899298562614872769739636059177722308746409678961397063563787401818672151421196758747100830078125E-316') = D(6.79923587e-316)
+E                +    where 6.79923587e-316 = <function drag_envelope at 0x10c1223e0>(190307857.37307835, 2013.3569510800262, 100.0)
+E                +      where <function drag_envelope at 0x10c1223e0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review04.py:407: AssertionError
+_____ test_r4f1_underflow_constants_recomputed_by_a_second_implementation ______
+
+    def test_r4f1_underflow_constants_recomputed_by_a_second_implementation():
+        """Detects: an underflow term of E1-E6 removed or reduced (the density, coefficient,
+        libm, gravity or stage terms, or h_zero)."""
+        c = constants_second(tt.LIBM_ULP)
+        tiny = Fraction(1, 2**1074)
+        pairs = {
+            "alpha": tt.FPA["alpha"],
+            "beta_m": tt.FPA["beta_m"],
+            "alpha_sel": tt.FPA["alpha_sel"],
+            "beta_sel_m": tt.FPA["beta_sel_m"],
+            "F_D": tt.FPA["F_D"],
+>           "F_A": tt.FPA["F_A"],
+                   ^^^^^^^^^^^^^
+            "K_W": tt.FPA["K_W"],
+            "N_rho": tt.FPA["N_rho_in_2^-1074"] * tiny,
+            "gravity_hat_mps2": tt.FPA["gravity_hat_mps2"],
+            "stage_abs": tt.FPA["stage_abs_in_2^-1074"] * tiny,
+        }
+E       KeyError: 'F_A'
+
+docs/science/experiments/m3-t0/check_review04.py:568: KeyError
+___________ test_r4f1_envelope_recomputed_by_a_second_implementation ___________
+
+    def test_r4f1_envelope_recomputed_by_a_second_implementation():
+        """Detects: a term of the corrected envelope removed or reduced in its evaluation (the
+        absolute part, its density, coefficient and product terms, h_zero, or the relative
+        part), including terms too small for any constructed point to expose."""
+        c = constants_second(tt.LIBM_ULP)
+>       h_zero = tt.FP["h_zero_m"]
+                 ^^^^^^^^^^^^^^^^^
+E       KeyError: 'h_zero_m'
+
+docs/science/experiments/m3-t0/check_review04.py:606: KeyError
+_______ test_r4f1_floors_by_a_second_implementation_and_unchanged[B100] ________
+
+vehicle = 'B100'
+
+    @pytest.mark.parametrize("vehicle", sorted(VEHICLES))
+    def test_r4f1_floors_by_a_second_implementation_and_unchanged(vehicle):
+        """Detects: a floor that moved, or that no longer satisfies the corrected condition."""
+        c = constants_second(tt.LIBM_ULP)
+        b = VEHICLES[vehicle]
+        rows = {r["vehicle"]: r for r in results("termination")["sufficient_stage_condition"]["rows"]}
+        got = rows[vehicle]["h_f_sufficient_at_least_m"]
+        assert got == REVIEWED_FLOORS[vehicle]  # the correction does not move the floor
+        assert need_second(got, b, c) < 0
+        lo, hi = got - 1.0, got
+        assert need_second(lo, b, c) > 0
+        while hi - lo > 1e-6:
+            mid = (lo + hi) / 2
+            lo, hi = (lo, mid) if need_second(mid, b, c) < 0 else (mid, hi)
+        assert abs(hi - got) <= 3e-6, (vehicle, hi, got)
+>       cmp = {r["vehicle"]: r for r in results("termination")["floor_comparison"]["rows"]}[vehicle]
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'floor_comparison'
+
+docs/science/experiments/m3-t0/check_review04.py:639: KeyError
+_______ test_r4f1_floors_by_a_second_implementation_and_unchanged[B25.8] _______
+
+vehicle = 'B25.8'
+
+    @pytest.mark.parametrize("vehicle", sorted(VEHICLES))
+    def test_r4f1_floors_by_a_second_implementation_and_unchanged(vehicle):
+        """Detects: a floor that moved, or that no longer satisfies the corrected condition."""
+        c = constants_second(tt.LIBM_ULP)
+        b = VEHICLES[vehicle]
+        rows = {r["vehicle"]: r for r in results("termination")["sufficient_stage_condition"]["rows"]}
+        got = rows[vehicle]["h_f_sufficient_at_least_m"]
+        assert got == REVIEWED_FLOORS[vehicle]  # the correction does not move the floor
+        assert need_second(got, b, c) < 0
+        lo, hi = got - 1.0, got
+        assert need_second(lo, b, c) > 0
+        while hi - lo > 1e-6:
+            mid = (lo + hi) / 2
+            lo, hi = (lo, mid) if need_second(mid, b, c) < 0 else (mid, hi)
+        assert abs(hi - got) <= 3e-6, (vehicle, hi, got)
+>       cmp = {r["vehicle"]: r for r in results("termination")["floor_comparison"]["rows"]}[vehicle]
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'floor_comparison'
+
+docs/science/experiments/m3-t0/check_review04.py:639: KeyError
+__ test_r4f1_floors_by_a_second_implementation_and_unchanged[drag-free limit] __
+
+vehicle = 'drag-free limit'
+
+    @pytest.mark.parametrize("vehicle", sorted(VEHICLES))
+    def test_r4f1_floors_by_a_second_implementation_and_unchanged(vehicle):
+        """Detects: a floor that moved, or that no longer satisfies the corrected condition."""
+        c = constants_second(tt.LIBM_ULP)
+        b = VEHICLES[vehicle]
+        rows = {r["vehicle"]: r for r in results("termination")["sufficient_stage_condition"]["rows"]}
+        got = rows[vehicle]["h_f_sufficient_at_least_m"]
+        assert got == REVIEWED_FLOORS[vehicle]  # the correction does not move the floor
+        assert need_second(got, b, c) < 0
+        lo, hi = got - 1.0, got
+        assert need_second(lo, b, c) > 0
+        while hi - lo > 1e-6:
+            mid = (lo + hi) / 2
+            lo, hi = (lo, mid) if need_second(mid, b, c) < 0 else (mid, hi)
+        assert abs(hi - got) <= 3e-6, (vehicle, hi, got)
+>       cmp = {r["vehicle"]: r for r in results("termination")["floor_comparison"]["rows"]}[vehicle]
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'floor_comparison'
+
+docs/science/experiments/m3-t0/check_review04.py:639: KeyError
+____________ test_r4f1_libm_sensitivity_by_a_second_implementation _____________
+
+    def test_r4f1_libm_sensitivity_by_a_second_implementation():
+        """Detects: a misreported weakening of A-FP-2. At the stored largest LIBM_ULP = 2^j the
+        published floor holds, and at 2^(j + 1) it fails."""
+>       sens = results("termination")["libm_sensitivity"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'libm_sensitivity'
+
+docs/science/experiments/m3-t0/check_review04.py:658: KeyError
+_______________ test_platform_exp_accuracy_for_subnormal_results _______________
+
+    def test_platform_exp_accuracy_for_subnormal_results():
+        """A-FP-2's absolute term on the running platform, sampled (a measurement, not a proof):
+        |exp(x) - exact| <= LIBM_ULP 2^-1074 where the exact value is subnormal or rounds to 0;
+        and the committed measurement of `t0_height_error.py`."""
+        rng = np.random.default_rng(4545)
+        worst = D(0)
+        for x in np.r_[rng.uniform(-745.2, -708.39, 1500), np.linspace(-745.2, -708.39, 301)]:
+            x = float(x)
+            worst = max(worst, abs(D(math.exp(x)) - D(x).exp()) / TINY)
+        assert worst <= tt.LIBM_ULP, worst
+>       sub = results("height_error")["libm"]["subnormal_results"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'subnormal_results'
+
+docs/science/experiments/m3-t0/check_review04.py:732: KeyError
+_______________ test_stage_condition_uses_the_corrected_envelope _______________
+
+    def test_stage_condition_uses_the_corrected_envelope():
+        """Static guard (the superseded envelope gives the same floors to the last bit, since
+        the absolute part is about 1e-315 m/s^2 against G ~ 9.9 m/s^2, so no numerical check can
+        see it): stage_lower_heights defaults to `drag_envelope`, and the floors are computed
+        with that default."""
+        src = inspect.getsource(tt.stage_lower_heights)
+>       assert "drag_envelope(low, s, b, fp=fp)) if envelope is None" in src
+E       assert 'drag_envelope(low, s, b, fp=fp)) if envelope is None' in 'def stage_lower_heights(h0: float, b: float) -> dict:\n    """Bounds for an RK4 step from any bound committed state w...mal("1e-35")\n        out.update(A2=_up(a2), s3=_up(s3), L4=_dn(l4), M4=_dn((1 - al) * l4 - be))\n        return out\n'
+
+docs/science/experiments/m3-t0/check_review04.py:743: AssertionError
+__________ test_records_state_the_r4f1_correction_and_its_assumptions __________
+
+    def test_records_state_the_r4f1_correction_and_its_assumptions():
+        for name in ("DR-0029", "VAL-0019", "report", "README", "review04"):
+>           assert "R4-F1" in record(name), name
+E           AssertionError: DR-0029
+E           assert 'R4-F1' in "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...ly. P4's guarantee now names the assumptions. The P1 recommendation is unchanged.\n<!-- /review03-correction-log -->\n"
+E            +  where "# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...ly. P4's guarantee now names the assumptions. The P1 recommendation is unchanged.\n<!-- /review03-correction-log -->\n" = record('DR-0029')
+
+docs/science/experiments/m3-t0/check_review04.py:752: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_reviewer_counterexample_is_reproduced_and_covered
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_normal_to_subnormal_transition_scan[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_normal_to_subnormal_transition_scan[B100]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_binary64_neighbours_of_the_critical_boundaries[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_binary64_neighbours_of_the_critical_boundaries[B100]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_zero_density_height
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_rk4_stages_at_high_altitude[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_rk4_stages_at_high_altitude[B100]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_underflow_constants_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_envelope_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_floors_by_a_second_implementation_and_unchanged[B100]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_floors_by_a_second_implementation_and_unchanged[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_floors_by_a_second_implementation_and_unchanged[drag-free limit]
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_libm_sensitivity_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_platform_exp_accuracy_for_subnormal_results
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_stage_condition_uses_the_corrected_envelope
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_records_state_the_r4f1_correction_and_its_assumptions
+17 failed, 31 passed in 9.88s

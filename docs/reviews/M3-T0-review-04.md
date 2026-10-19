@@ -77,3 +77,70 @@
 - A relative-error rounding model is a theorem only in the normal range. A derivation that states "IEEE binary64, round to nearest" as its assumption must carry the underflow term or show it cannot occur.
 - A stated domain must be checked at its extremes, not only where the guarantee is used: "exterior points; no overflow" silently included heights where the force underflows.
 - Pin every identifier in a review prompt by its full hash. A mistyped short hash cost the reviewer a failed lookup; the full SHA was available.
+
+## Correction pass (Authorization I-5, 2026-10-19)
+**Authority:** "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05" (Tech Lead), §2–§6. The scope is R4-F1 only. T0 remains BLOCKED. DR-0029 P1–P10 and DR-0028 P6(b) stay OPEN, and the GMAT geodetic-drag discrepancy stays ESCALATED_FOR_INVESTIGATION. The finding above and the reviewer's language are preserved unchanged. The superseded state is `c15fbd4`.
+
+**Approach selected: A (underflow-aware bound).** Approach B (a restricted altitude domain) would still need a bound on the computed force in the subnormal regime: a committed state may lie at any height above the floor, and the envelope is a supremum over all heights above its lower limit. Approach A was therefore both preferable and necessary. It produced a defensible bound without restricting the domain, so Approach C (withdrawal) was not needed.
+
+| ID | Disposition | Correction |
+|---|---|---|
+| M3T0-R4-F1 | **ACCEPTED; CORRECTED** (for Review 05 to assess) | The rounding model is now mixed absolute and relative, with gradual underflow (A-FP-1 to A-FP-3, restated). E1–E6 carry the absolute error of every underflowing operation. The envelope gains an absolute part, bounded over every selection height at which the computed density can be nonzero (up to h_zero, above which it is exactly 0). The three floors are unchanged to the last bit. `drag_envelope_relative_only` keeps the superseded envelope to reproduce the finding |
+| IM-2 (implementer, found in this pass) | **ACCEPTED; recorded, no floor changed** | DR-0029 quotes the floors to the nearest centimetre. The drag-free bound 111 511.96182508787 m therefore appears as 111 511.96 m, which is 1.8 mm below it and does not itself satisfy the condition (`check_review04.py`, 2-decimal test). DR-0029 now states that the governing values are the bracket ends, and that 111 511.97 m is a sufficient 2-decimal value. No reviewer had flagged this. How bounds are quoted in a decision is the owner's choice |
+
+### Mathematical justification
+- **Arithmetic model (A-FP-1, from IEEE 754 with gradual underflow).**
+  - With u = 2^-53 and η₀ = 2^-1075: fl(x × y) and fl(x ÷ y) equal (x op y)(1 + δ) + η, with |δ| ≤ u, |η| ≤ η₀ and δη = 0.
+  - fl(x ± y) = (x ± y)(1 + δ): a sum that underflows is exact.
+  - fl(√x) = √x(1 + δ): a square root is never subnormal.
+  - Multiplying by 0.5 is exact unless the result is subnormal.
+  - Any result of magnitude ≤ η₀ rounds to 0.
+- **Library model (A-FP-2).** |f̂ − f| ≤ UF·|f| + ν, with UF = LIBM_ULP·2^-52 and ν = LIBM_ULP·2^-1074. This is the "within LIBM_ULP ulps" statement written in absolute form for subnormal results. No relative tolerance is assumed for subnormal outputs, including exp rounding to 0.
+- **E1, E2 (height and kilometre conversion).** p, sin and atan2 may be subnormal near the axis or the equator, and p·c, z·s, e2·s·s and e2·N·s may underflow.
+  - Their absolute errors enter the per-step latitude error through the vector (p, z + e2 N s), whose norm is ≥ b − Q, plus ν for atan2.
+  - They enter the final formula as (1 + u)³ν(|r| + 1 + UF) + 2(1 + u)²η₀ + a(1 + u)⁶(3e2(1 + UF)ν + 2η₀)/(2√(1 − e²)(1 − ρ₃)).
+  - The kilometre division may underflow, adding 1000η₀ to β_sel.
+  - α gains about 1e-323 and β about 1e-316 m. ε_h is unchanged in binary64.
+- **E3 (density).**
+  - The exponent's division may underflow, contributing e^{η₀}. The exp result has the absolute term ν, and the product with ρ₀ has η₀.
+  - ρ̂ ≤ F_ρ e^{η₀} ρ(h_s) e^{θ_x X} + N_ρ, with N_ρ = (1 + u)²ρ₀,max·ν + η₀ ≤ 2.95 × 2^-1074.
+  - **Zero-density height.** In the top band, once (1 + u)ρ₀((1 + UF)e^{η₀}e^{−(1−θ_x)X} + ν) < η₀ the product rounds to 0. That holds above the selection height h_zero = 191 735 430.72 m, bounded outward in 60-digit decimals; it is 9.5e-8 m above the oracle's exact onset. There ρ̂ = 0, every later product is 0, and the force is exactly 0.
+- **E4 (drag).** The model computes the coefficient k = fl(fl(fl(fl(0.5ρ̂)·cd)·area)/mass). Each of these may underflow.
+  - k ≤ (1 + u)³(cd·area/mass)·0.5ρ̂ + W, with W ≤ η₀(1 + φ_B/B·((1 + u)³ + (1 + u)²/cd + (1 + u)/(cd·area))) ≈ 1.06η₀ for V1. The leading 1 is the last division: the R4-F1 mechanism, where 0.51 × 2^-1074 rounds up to 2^-1074.
+  - The vector v_rel gains √2(1 + u)η₀, the dot product 3(1 + u)²η₀, and each of the two products with v_rel η₀.
+  - With S = |v| + ω|r| ≥ ωb, the relative factors gain at most (1 + τ), with τ ≈ 1e-327.
+  - Result: |d̂| ≤ F_D′ρ(h_s)e^{θ_x X}S²/(2B) + (F_A N_ρ/(2B) + K_W W)S² + K_1η₀S + 2η₀.
+  - The absolute part is maximised at S_max = s + ω_E(a + (h_zero + β_sel)/(1 − α_sel)), because a nonzero force needs h_s ≤ h_zero. The relative part keeps the in-band monotonicity and the candidate set of Review 03.
+- **E5, E6 (gravity and RK4 stages).**
+  - The three products of the gravity vector and the J2 products 5zz, x(1 − zz) and k(·) underflow by at most (1 + 2.1|k||r|)η₀ ≤ 1.05η₀ per component, giving G^ + 4η₀.
+  - Each stage product c·k and 5a adds (1 + u)√3η₀ ≤ 2η₀ to the stage bounds.
+- **Monotonicity in h0** is unchanged: the new absolute terms do not depend on h0, and the envelope's absolute part is constant in its lower limit and increasing in its speed.
+
+### Effect on P1
+- **Floors.** The three published floors (bracket ends) are unchanged to the last bit: 124 456.68544510857, 118 633.50894662621 and 111 511.96182508787 m. Bracketed to 1e-9 m, the roots coincide before and after the correction (`floor_comparison`). The margins at the floors are 7.2e-7, 1.0e-6 and 8.4e-7 m, and the stage conditions M2, M3, M4 > 0 hold at the floors.
+- **Why they cannot move.** The absolute part is about 1e-315 m/s², against G^ ≈ 9.9 m/s².
+- **Recommendation.** The P1 recommendation is unchanged.
+
+### A-FP-2 status
+- **Required.** No bound on the height, density or force exists without some accuracy statement for sin, cos, atan2, hypot, exp and pow, and no verified library is in the locked environment.
+- **Weakened (`libm_sensitivity`, derived).** Every constant is non-decreasing in LIBM_ULP:
+  - the published bracket ends hold for every libm within 2^5 (B 25.8), 2^6 (B 100) and 2^7 (drag-free) ulps;
+  - the 2-decimal values rounded up hold within 2^19, 2^17 and 2^20 ulps.
+- **Remains conditional.**
+  - It is measured on macOS x86_64 only. For subnormal results the absolute errors are at most 0.74 × 2^-1074 (exp).
+  - [source] The glibc manual (sourceware.org, "Errors in Math Functions", read 2026-10-19) states that the library "does not aim for correctly rounded results" and aims for "a few ulp". Its testsuite flags only errors above 9 ulp. That is documentation of intent, not a bound, but 9 ulp is within the 2^5 = 32 ulp that the published bracket ends tolerate.
+  - No Apple libm accuracy statement was found.
+  - CI does not collect the T0 checks, so neither the libm measurement nor the gradual-underflow probe has run on the CI platforms.
+
+### Evidence classification
+| Class | Items |
+|---|---|
+| **Proved (exact arithmetic)** | Everything in Review 03's row (unchanged). Also: rounding to 0 at or below η₀ makes the force exactly 0 above h_zero; the absolute part is non-decreasing in |r| and attained at S_max; the new terms do not change the monotonicity in h0 |
+| **Derived under A-FP-1 … A-FP-3 (mixed model)** | ε_h and ε_sel with their underflow parts; N_ρ, W, τ, F_A, K_W, K_1; h_zero; the corrected envelope; G^ + 4η₀ and the stage terms; the three floors (unchanged); the libm sensitivity |
+| **Numerically verified** (independent oracle, not a proof) | The R4-F1 point and the transition scan are covered by the corrected envelope and exceed every purely relative enclosure. So are the binary64 neighbours of the smallest-normal, coefficient-rounding and zero boundaries. Above h_zero, density and drag are exactly 0. Every band base and the lower edge are covered. High-altitude RK4 stages stay within their bounds. A second implementation reproduces the constants, the envelope, the floors and the sensitivity (`check_review04.py`) |
+| **Empirical observations** | The largest observed ratio of model drag to envelope in the subnormal regime is 0.983 (B 100, at the coefficient's rounding height). A random search of 5 287 points found no violation of the corrected envelope and 161 of the superseded one. The libm subnormal-result maxima on this host are exp 0.74, hypot 0.59 and atan2 0.50 × 2^-1074 |
+| **Unresolved assumptions** | **A-FP-2** (now ≤ 2 ulps relative plus 2 × 2^-1074 absolute; sufficient up to 2^5 ulps for the published bracket ends), measured on macOS x86_64 only. **A-FP-1's gradual underflow** and **A-FP-3**: standard, probed at run time on the host only |
+| **Owner decisions still required** | DR-0029 P1–P10, including κ and v̂ for P1; whether a guarantee conditional on A-FP-2 is acceptable; how bounds are quoted (IM-2). DR-0028 P6(b). The escalated GMAT geodetic-drag discrepancy |
+
+### Validation
+Recorded in the validation commit that follows this correction commit (I-5 §6).

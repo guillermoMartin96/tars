@@ -203,6 +203,30 @@
       "pow3": 20000,
       "sin": 25000
     },
+    "subnormal_results": {
+      "assumed_abs_bound_in_2^-1074": 2,
+      "gradual_underflow": true,
+      "gradual_underflow_probe": {
+        "half_smallest_subnormal_rounds_to_zero": true,
+        "halving_smallest_normal_is_exact": true,
+        "numpy_subnormal_product": true,
+        "smallest_subnormal_positive": true,
+        "tie_rounds_to_even": true
+      },
+      "max_abs_error_in_2^-1074": {
+        "atan2": 0.4999288376979084,
+        "exp": 0.7414746044791101,
+        "hypot": 0.589803678000067,
+        "sin": 1.010186961319045e-40
+      },
+      "samples_per_function": {
+        "atan2": 4000,
+        "exp": 5001,
+        "hypot": 4000,
+        "sin": 4000
+      },
+      "within_assumption": true
+    },
     "within_assumption": true
   }
 }

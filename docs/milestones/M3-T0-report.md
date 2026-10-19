@@ -21,6 +21,11 @@
 - R3-F1, R2-F2 and F2 are PARTIALLY RESOLVED: the density-jump cases are covered, but the global drag envelope omits underflow.
 - New finding M3T0-R4-F1 (MINOR): above about 181 890 km the density is subnormal, and the model's drag exceeds the envelope (2.01× at 190 681 km). No stage below 0 m is shown at the published floors. It is verified and ACCEPTED, **not applied**.
 - Record: `docs/reviews/M3-T0-review-04.md`. T0 is not accepted. A correction pass and any Review 05 await authorization.  
+**Status update (2026-10-19, append-only):** under "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05", M3T0-R4-F1 is corrected in the T0 records and experiments:
+- The floating-point model now carries the absolute error of subnormal results (IEEE gradual underflow; libm absolute term for subnormal outputs). The drag envelope gains an absolute part, bounded up to the height above which the computed density is exactly 0. No altitude restriction is introduced.
+- The three P1 bounds are unchanged to the last bit, and the P1 recommendation is unchanged. The quotation of the drag-free bound to the nearest centimetre is clarified (IM-2).
+- A-FP-2 remains an assumption, measured on macOS x86_64 only. It is weakened to "within 2^5 ulps" for the published bounds.
+- New checks: `check_review04.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-04.md`. Review 05 follows. T0 is not accepted.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

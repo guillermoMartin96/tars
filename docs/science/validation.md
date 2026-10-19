@@ -796,7 +796,22 @@ All 10 approved rejection codes are exercised.
         - the guarantee holds under the floating-point assumptions A-FP-1 (IEEE binary64, round to nearest), A-FP-2 (libm relative error ≤ 2 × 2^-52; an unresolved assumption, measured on macOS x86_64 (the M1/M2 reference host) only) and A-FP-3 (numpy elementwise products, 3-term dot within γ₃).
 
         The bounds are unchanged at the quoted precision: the exact roots move by +1.9e-8 m, and the published bracket ends by +2.8e-7 … +8.5e-7 m. Second implementations, boundary tests at all 12 downward density jumps against an independent high-precision height oracle, and RK4 steps from adversarial bound states at the bounds confirm them (`check_review02.py`, `check_review03.py`).
-      - Height error (`t0_height_error.py`, empirical): the largest |computed − true| over 13 050 sampled points is 2.06e-9 m, 0.22 of the derived bound. The libm maxima measured on this platform are, in units of 2^-52 relative, cos 0.94, sin 0.74 and atan2, hypot, exp and pow ≤ 0.50; in ulps, cos reaches 1.41. A measurement, not a proof of A-FP-2.
+
+        Corrected after Review 04 R4-F1 (the relative rounding model fails for subnormal results; at 190 681 km the model's drag was 2.01 times the envelope):
+        - A-FP-1 is now IEEE round-to-nearest with gradual underflow: × and ÷ have relative error ≤ 2^-53 plus, when they underflow, absolute error ≤ 2^-1075. A-FP-2 gives libm an absolute error ≤ 2 × 2^-1074 for subnormal results, including exp rounding to 0. A-FP-3 gives the dot product the matching absolute term;
+        - E1–E6 carry these terms. The envelope gains an absolute part, bounded over every selection height at which the computed density can be nonzero; it is exactly 0 above h_zero = 191 735 430.72 m;
+        - the three bounds are unchanged to the last bit, and the roots to 1e-9 m (margins 7.2e-7, 1.0e-6 and 8.4e-7 m). No altitude restriction is introduced;
+        - **A-FP-2 sensitivity [derived]:**
+          - the published bracket ends hold for every libm within 2^5 (B 25.8), 2^6 (B 100) and 2^7 (drag-free) ulps;
+          - the 2-decimal values rounded up (124 456.69, 118 633.51 and 111 511.97 m) hold within 2^19, 2^17 and 2^20 ulps;
+          - the drag-free value rounded to nearest, 111 511.96 m, is 1.8 mm below its bound;
+        - confirmed against the independent oracle (`check_review04.py`):
+          - the transition to subnormal and zero density;
+          - binary64 neighbours of the smallest-normal, coefficient-rounding and zero boundaries;
+          - all 27 bases and the lower edge;
+          - high-altitude RK4 stages;
+          - a second implementation of the constants, the envelope, the bounds and the sensitivity.
+      - Height error (`t0_height_error.py`, empirical): the largest |computed − true| over 13 050 sampled points is 2.06e-9 m, 0.22 of the derived bound. The libm maxima measured on this platform are, in units of 2^-52 relative, cos 0.94, sin 0.74 and atan2, hypot, exp and pow ≤ 0.50; in ulps, cos reaches 1.41. A measurement, not a proof of A-FP-2. For subnormal results (R4-F1), the largest absolute errors are 0.74 (exp), 0.59 (hypot) and 0.50 (atan2) × 2^-1074. The platform does gradual underflow (no flush-to-zero).
   - **Geodetic height:**
     - iterative and Vermeille (2002) inverses reproduce 640 forward-constructed points to ≤ 3e-9 m;
     - the GeographicLib examples agree within their 1 cm print rounding;
@@ -813,14 +828,15 @@ All 10 approved rejection codes are exercised.
   - `t0_gmat.py` `204d47c12fd4b7311fc056f894001f6c84bc827818456c23c461664d1a533e23`
   - `t0_model.py` `1d70e86c25546a91365a5ed101ad0d390bc9e507862ca4eacbfa78fe2160b09d`
   - `t0_regression.py` `06ac4c0bdf82aa442a111fc380cf94457322e37a2aae72384afda3cfe93f413c`
-  - `t0_termination.py` `05e7463a4a714ac2ec0259465853b449c73c179facd3205f5463010ccc199554` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`)
+  - `t0_termination.py` `bc4c834e2908ed18bb49316117e6c78f4ea9bac46add86c5328b076206347807` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`; corrected after Review 04, was `05e7463a…9554`)
   - `t0_axis_ablation.py` `c6683775974f594975f6f1e71c2dfa967f8158127c5c4570d311132ac688afd5` (added after Review 02, IM-1)
   - `check_review01.py` `e6e0ad64ba553d5ca6fb1a057669dab76b197fb4cf70dbff13478251107c2ce3` (Review 01 regression checks; two F1 checks amended after Review 02, was `6e40cd61…1b1b`)
   - `check_review02.py` `cdb9c6eefc9fe1dbe64a85ba75d2ca0cc5f0036047161bb0f33097c021eba398` (Review 02 regression checks; adversarial oracle corrected after Review 03, was `89b90dd0…6456`)
-  - `mutation_check_review02.py` `2fdb49f3fcc84ea21f287c8a342f2532769aeb2ddd1aea81ccf54e3942910213` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`)
-  - `t0_oracle.py` `f70ab96ddb9b4249f247969910fb42bcbcc08290cc77e6b9ea042e11f9f99e93` (added after Review 03, R3-F1: independent high-precision height and density reference)
-  - `t0_height_error.py` `b8e59c9afb26ba54015c4d7cfa42b8586d14ffc86ededace319257e541c42ac7` (added after Review 03, R3-F1: empirical height error, libm measurement, band crossings)
+  - `mutation_check_review02.py` `127357799fa7adc32bd752afbcf39f53373347b1e9a727dcb130b613f767768e` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`; R4-F1 mutants added after Review 04, was `2fdb49f3…2213`)
+  - `t0_oracle.py` `986ea5bbff9e42683cd03bfd4d814ca6299c4cc6753e971588f7da6881a7422a` (added after Review 03, R3-F1: independent high-precision height and density reference; `top_band_height` added after Review 04, was `f70ab96d…9e93`)
+  - `t0_height_error.py` `8d38d6ffe323630ff916b6027fbb7d751a9fdc31831c14f4ea0a4e55d3036a19` (added after Review 03, R3-F1: empirical height error, libm measurement, band crossings; subnormal-result measurement added after Review 04, was `b8e59c9a…2ac7`)
   - `check_review03.py` `9072614100447bca8bc4d6fb494f21d0c03fffd9988345a044841fce81ca59e5` (Review 03 regression checks)
+  - `check_review04.py` `eeb051c3cbf71caa8d2034a3e2e32f9b821fbe99f426075dca592d7ae824e75f` (Review 04 regression checks)
   - `data/EarthExponentialAtmosphereData.txt` `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`
 - **Classification:** spike evidence for the T0 proposals (DR-0029). Model and frame agreement are exact where attributed. One configuration sensitivity is unresolved and escalated.
 - **J-ax-1 limitation, quantified against GMAT's real Earth over 53 700 s:**
@@ -864,3 +880,23 @@ All 10 approved rejection codes are exercised.
       - the Review 02 oracle reverted;
       - the allowance removed with the Review 02 oracle reverted. In this last case the reverted Review 02 check passes, while `check_review03.py` detects the defect.
 <!-- /review03-correction-log -->
+<!-- review04-correction-log -->
+- **Correction log (Review 04, 2026-10-19; "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05").** The superseded wording is preserved at `c15fbd4`.
+  - R4-F1: the envelope's rounding model dropped the absolute errors of subnormal results. A-FP-1 to A-FP-3 now state the mixed absolute and relative model, with gradual underflow (relative error ≤ 2^-53 plus absolute error ≤ 2^-1075 for × and ÷; libm absolute error ≤ 2 × 2^-1074 for subnormal results). E1–E6 carry these terms, and the envelope has an absolute part bounded up to the zero-density height h_zero. The three bounds are unchanged to the last bit. A-FP-2 remains an assumption, weakened to "within 2^5 ulps" for the published bounds. IM-2: the drag-free bound quoted to the nearest centimetre (111 511.96 m) is 1.8 mm below it, and 111 511.97 m suffices.
+  - Evidence in `docs/reviews/raw/M3-T0-review05-correction-evidence/`:
+    - red before: with the new `check_review04.py` on the `c15fbd4` tree (shim documented in the log), 17 of 48 checks fail:
+      - 7 are behavioural: the reviewer's point, both transition scans, both boundary-neighbour sets and both high-altitude RK4 sets exceed the superseded envelope;
+      - 8 fail for missing constants or results;
+      - 1 is the static guard and 1 the record wording;
+    - green after: `check_review01.py` … `check_review04.py` 140/140;
+    - mutation (`mutation_check_review02.py`, 35 mutants plus a control, run against all four check files): the control passes; 34 are detected by a declared check, and the two-body stationary-point mutant is equivalent. The 10 R4-F1 mutants cover:
+      - the absolute part removed (the original defect);
+      - the coefficient term removed;
+      - its last-division term removed (the R4-F1 mechanism);
+      - the density term removed (declared for the second implementation of the envelope only: too small for any constructed point);
+      - h_zero 2000 km too low;
+      - the libm absolute term ignored;
+      - the gravity and stage terms removed and the height terms removed (about 1e-323; declared for the recomputed constants only);
+      - the stage condition using the superseded envelope (numerically identical floors; declared for the static guard);
+      - the oracle density rounded to binary64.
+<!-- /review04-correction-log -->

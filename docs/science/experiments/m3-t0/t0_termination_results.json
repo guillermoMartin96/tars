@@ -29,25 +29,41 @@
   },
   "floating_point_enclosure": {
     "assumptions": {
-      "A-FP-1": "IEEE 754 binary64, round to nearest even; + - * / sqrt correctly rounded",
-      "A-FP-2": "libm sin, cos, atan2, hypot, exp, pow relative error <= 2 x 2^-52 (assumption; measured in t0_height_error.py, not proved)",
-      "A-FP-3": "numpy 3-element products elementwise; 3-term dot within gamma_3",
+      "A-FP-1": "IEEE 754 binary64, round to nearest even, gradual underflow (no flush-to-zero); * and / within relative u = 2^-53 plus, for an underflowing result, absolute 2^-1075; + - and sqrt within relative u",
+      "A-FP-2": "libm sin, cos, atan2, hypot, exp, pow: |error| <= 2 x 2^-52 |exact| + 2 x 2^-1074 (assumption; measured in t0_height_error.py, not proved; see libm_sensitivity)",
+      "A-FP-3": "numpy 3-element products elementwise; 3-term dot x.x within gamma_3 sum x_i^2 + 3 (1 + u)^2 2^-1075",
       "domain": "true geodetic height >= 0 (outside the ellipsoid), no overflow"
     },
     "constants": {
+      "F_A": 1.0000000000000018,
       "F_D": 1.0000000000000024,
       "F_J": 1.0000000000000038,
       "F_g": 1.0000000000000016,
+      "K_1": 1.0000000000000004,
+      "K_W": 1.000000000000001,
+      "N_rho_in_2^-1074": 2.9500000000000006,
       "alpha": 1.2212453270876738e-15,
+      "alpha_relative_part": 1.2212453270876738e-15,
       "alpha_sel": 1.3322676295501896e-15,
+      "alpha_underflow_part": 1.5e-323,
       "b_lower_m": 6356752.314245179,
       "beta_m": 8.877691069434738e-09,
+      "beta_relative_part_m": 8.877691069434738e-09,
       "beta_sel_m": 8.87769106943474e-09,
+      "beta_underflow_part_m": 7.9468473e-317,
       "contraction_k": 0.006830954755939884,
       "gravity_hat_mps2": 9.896575029314999,
+      "gravity_relative_part_mps2": 9.896575029314999,
+      "gravity_underflow_part_mps2": 1e-323,
+      "h_zero_m": 191735430.7198785,
       "lat_error_rad": 1.427749762648761e-15,
       "lat_step_rounding_rad": 1.4111659138613635e-15,
+      "lat_step_underflow_rad": 1.5e-323,
       "libm_ulp": 2.0,
+      "nu_in_2^-1074": 2.0,
+      "phi_B": 1.0000000000000004,
+      "stage_abs_in_2^-1074": 1.0,
+      "tau": 5e-324,
       "theta_x": 3.3306690738754706e-16,
       "u": 1.1102230246251565e-16
     },
@@ -63,7 +79,143 @@
       "1000000": 1.0209958698984929e-08,
       "120000": 9.037563184980762e-09,
       "2000000": 1.1542226328535118e-08
+    },
+    "underflow": {
+      "absolute_part_mps2": {
+        "B100 s=0": 5.38473516e-316,
+        "B100 s=11000": 1.67062253e-315,
+        "B25.8 s=0": 6.0437817e-316,
+        "B25.8 s=11000": 1.8750986e-315
+      },
+      "eta0": "2^-1075",
+      "zero_density_selection_height_m": 191735430.7198785
     }
+  },
+  "floor_comparison": {
+    "note": "root brackets [lo, hi] with need(lo) > 0 > need(hi); 'review03_correction' is the stage condition with the superseded relative-only envelope",
+    "rows": [
+      {
+        "need_at_published_floor_m": -7.170720652771883e-07,
+        "published_now_m": 124456.68544510857,
+        "published_review04_m": 124456.68544510857,
+        "published_unchanged": true,
+        "root_bracket_corrected_m": [
+          124456.68544484391,
+          124456.68544484489
+        ],
+        "root_bracket_review03_correction_m": [
+          124456.68544484391,
+          124456.68544484489
+        ],
+        "stage_bounds_at_published_floor_m": {
+          "M2": 69003.57940938401,
+          "M3": 68755.17649007885,
+          "M4": 7.170720652771883e-07
+        },
+        "two_decimals_nearest_is_sufficient": true,
+        "two_decimals_nearest_m": 124456.69,
+        "two_decimals_rounded_up_m": 124456.69,
+        "vehicle": "B25.8"
+      },
+      {
+        "need_at_published_floor_m": -1.0038993351683625e-06,
+        "published_now_m": 118633.50894662621,
+        "published_review04_m": 118633.50894662621,
+        "published_unchanged": true,
+        "root_bracket_corrected_m": [
+          118633.5089461096,
+          118633.50894611058
+        ],
+        "root_bracket_review03_correction_m": [
+          118633.5089461096,
+          118633.50894611058
+        ],
+        "stage_bounds_at_published_floor_m": {
+          "M2": 63155.474615659594,
+          "M3": 62907.56785361275,
+          "M4": 1.0038993351683625e-06
+        },
+        "two_decimals_nearest_is_sufficient": true,
+        "two_decimals_nearest_m": 118633.51,
+        "two_decimals_rounded_up_m": 118633.51,
+        "vehicle": "B100"
+      },
+      {
+        "need_at_published_floor_m": -8.427938228380506e-07,
+        "published_now_m": 111511.96182508787,
+        "published_review04_m": 111511.96182508787,
+        "published_unchanged": true,
+        "root_bracket_corrected_m": [
+          111511.96182425194,
+          111511.96182425291
+        ],
+        "root_bracket_review03_correction_m": [
+          111511.96182425194,
+          111511.96182425291
+        ],
+        "stage_bounds_at_published_floor_m": {
+          "M2": 56003.39528868884,
+          "M3": 55755.98091295595,
+          "M4": 8.427938228380506e-07
+        },
+        "two_decimals_nearest_is_sufficient": false,
+        "two_decimals_nearest_m": 111511.96,
+        "two_decimals_rounded_up_m": 111511.97,
+        "vehicle": "drag-free limit"
+      }
+    ]
+  },
+  "libm_sensitivity": {
+    "assumed_libm_ulp": 2,
+    "kind": "the derivation evaluated under weaker libm assumptions (not a measurement)",
+    "max_log2_tested": 40,
+    "rows": [
+      {
+        "published_bracket_end": {
+          "height_m": 124456.68544510857,
+          "largest_log2_libm_ulp": 5
+        },
+        "two_decimals_nearest": {
+          "height_m": 124456.69,
+          "largest_log2_libm_ulp": 19
+        },
+        "two_decimals_rounded_up": {
+          "height_m": 124456.69,
+          "largest_log2_libm_ulp": 19
+        },
+        "vehicle": "B25.8"
+      },
+      {
+        "published_bracket_end": {
+          "height_m": 118633.50894662621,
+          "largest_log2_libm_ulp": 6
+        },
+        "two_decimals_nearest": {
+          "height_m": 118633.51,
+          "largest_log2_libm_ulp": 17
+        },
+        "two_decimals_rounded_up": {
+          "height_m": 118633.51,
+          "largest_log2_libm_ulp": 17
+        },
+        "vehicle": "B100"
+      },
+      {
+        "published_bracket_end": {
+          "height_m": 111511.96182508787,
+          "largest_log2_libm_ulp": 7
+        },
+        "two_decimals_nearest": {
+          "height_m": 111511.96,
+          "largest_log2_libm_ulp": null
+        },
+        "two_decimals_rounded_up": {
+          "height_m": 111511.97,
+          "largest_log2_libm_ulp": 20
+        },
+        "vehicle": "drag-free limit"
+      }
+    ]
   },
   "missed_crossing": {
     "all_certified_bounds_hold": true,
@@ -820,6 +972,17 @@
       "superseded_covers": false,
       "superseded_envelope_mps2": 0.06230417914238045,
       "true_height_m": "120000.0000000000233 (high-precision reference, Review 03)"
+    },
+    "review04_counterexample": {
+      "computed_density_kg_m3": 1.3e-322,
+      "computed_height_m": 190681000.0,
+      "corrected_covers": true,
+      "corrected_envelope_mps2": 1.110700085e-315,
+      "model_drag_mps2": 1.02021455e-315,
+      "speed_mps": 0.0,
+      "superseded_covers": false,
+      "superseded_envelope_mps2": 5.0632192e-316,
+      "true_height_m": 190681000.0
     },
     "rows": [
       {

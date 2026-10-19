@@ -442,20 +442,32 @@ BASES_M = tuple(bb.base_km * 1e3 for bb in m.TABLE)
 # The force is a function of the model's *computed* height, and the density is
 # discontinuous in height, so a bound proved for exact heights does not bound the
 # implemented force (R3-F1). Every quantity below encloses the binary64 evaluation of the
-# model (`t0_model`), derived operation by operation. Assumptions (A-FP):
-#   A-FP-1  IEEE 754 binary64, round to nearest even; +, -, *, / and sqrt are correctly
-#           rounded: fl(x op y) = (x op y)(1 + d), |d| <= u = 2^-53. Absolute errors of
-#           subnormal results (< 1e-300 in every quantity here) are negligible against
-#           the relative terms and are not carried.
-#   A-FP-2  libm sin, cos, atan2, hypot, exp and pow return their exact value with a
-#           relative error <= UF = LIBM_ULP 2^-52 (= 2 LIBM_ULP u). Not proved here: an
-#           assumption about the platform library, measured on this platform in
-#           `t0_height_error.py`; every bound below is derived only under it.
+# model (`t0_model`), derived operation by operation. Assumptions (A-FP), corrected after
+# Review 04 M3T0-R4-F1, which showed that a purely relative rounding model fails once
+# results are subnormal (the earlier A-FP-1 dropped their absolute errors):
+#   A-FP-1  IEEE 754 binary64, round to nearest even, gradual underflow (no flush-to-zero
+#           or denormals-are-zero mode). With u = 2^-53 and eta0 = 2^-1075 (half the
+#           smallest subnormal), for * and /: fl(x op y) = (x op y)(1 + d) + e, |d| <= u,
+#           |e| <= eta0, d e = 0; for + and -: fl(x op y) = (x op y)(1 + d) (a sum that
+#           underflows is exact); sqrt: fl(sqrt x) = sqrt(x)(1 + d) (never subnormal);
+#           multiplying by 0.5 is exact unless the result is subnormal; a result of
+#           magnitude <= eta0 rounds to 0.
+#   A-FP-2  libm sin, cos, atan2, hypot, exp and pow: |computed - exact| <= UF |exact| + nu
+#           with UF = LIBM_ULP 2^-52 and nu = LIBM_ULP 2^-1074. The absolute term covers
+#           subnormal results and exp rounding to 0; no relative bound is assumed there.
+#           Not proved: an assumption about the platform library, measured on this
+#           platform in `t0_height_error.py`. Every bound below is derived under it, and
+#           `libm_sensitivity` reports how far LIBM_ULP can grow before a published floor
+#           fails.
 #   A-FP-3  numpy evaluates the 3-element products elementwise in binary64 and a 3-term
-#           dot product within gamma_3 = 3u / (1 - 3u) of the sum of |terms| (any order
-#           or fused multiply-add).
+#           dot product x . x within gamma_3 sum x_i^2 + 3 (1 + u)^2 eta0 (any order, with
+#           or without fused multiply-add: each underflow error passes at most two later
+#           roundings).
 # Supported domain: points outside the ellipsoid (true height >= 0), no overflow.
 U = Fraction(1, 2**53)
+ETA0 = Fraction(1, 2**1075)  # A-FP-1: largest absolute error of an underflowing * or /
+TINY = Fraction(1, 2**1074)  # the smallest subnormal
+TINY_D = Decimal(math.ulp(0.0))  # 2^-1074 exactly
 # 2, not 1: on macOS x86_64 (the M1/M2 reference host) `t0_height_error.py` measured cos
 # at 1.41 ulp (0.94 x 2^-52 relative), so the usual "within 1 ulp" is false there and
 # 1 x 2^-52 has almost no margin. 2 x 2^-52 remains an assumption, not a proof.
@@ -466,6 +478,7 @@ LAT_TOL = Fraction(1e-15)  # geodetic_iterative stops when |dlat| <= 1e-15 (bina
 LAT_ITER = 60
 PREC = 60  # decimal digits of the enclosure arithmetic below
 PAD = Decimal("1e-45")  # covers the decimal rounding of every bound (relative <= 1e-55)
+CD_V1, AREA_V1 = 2.2, 15.0  # the illustrative vehicle's drag coefficient and area [m^2]
 
 
 def _sqrt_bounds(q: Fraction) -> tuple[Fraction, Fraction]:
@@ -484,7 +497,21 @@ def _dn(q) -> float:
     return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
 
 
-def rounding_allowances() -> dict:
+def _decimal_table() -> tuple[tuple[Decimal, Decimal, Decimal], ...]:
+    """(base [m], rho0, scale [m]) as the exact decimals of the pinned file."""
+    m.load_table()  # digest check
+    rows = []
+    for line in m.TABLE_COPY.read_text().splitlines():
+        if line.strip():
+            h, rho, s = (Decimal(x.strip()) for x in line.split(","))
+            rows.append((h * 1000, rho, s * 1000))
+    return tuple(rows)
+
+
+DEC_TABLE = _decimal_table()
+
+
+def rounding_allowances(libm_ulp: int = LIBM_ULP) -> dict:
     """The derived constants, in exact rational arithmetic (see the module notes below).
 
     E1 height. `geodetic_iterative` returns lat ~ phi and
@@ -509,30 +536,60 @@ def rounding_allowances() -> dict:
     (rounding of N, of e2 N s, of z + ., of hypot, and of atan2; the angle between two
     vectors v and v + dv is <= (pi/2) |dv| / |v|). With the stopping rule |dlat| <= 1e-15 or
     60 iterations: |lat - phi| <= eta / (1 - k) + max(k 1e-15 / (1 - k), k^60 pi).
+    Underflow (R4-F1): p, s and atan2 may be subnormal (points near the axis or the
+    equator) and the products p c, z s, e2 s s and e2 N s may underflow. Their absolute
+    errors (nu for libm, eta0 for a product) add to eta through Y = z + e2 N s and p
+    (e2 N nu + eta0 and nu, divided by |v| >= b - Q) plus nu for atan2, and to the final
+    formula (1 + u)^3 nu (|r| + 1 + UF) + 2 (1 + u)^2 eta0 + a (1 + u)^6 (3 e2 (1 + UF) nu
+    + 2 eta0) / (2 sqrt(1 - e2) (1 - rho3)) (z nu, p's nu, the two products, and e2 s s
+    through the square root, whose argument is >= (1 - e2)(1 - rho3)).
     Result: |h^ - h| <= alpha h + beta.
 
     E2 kilometre conversion. `density` selects the band and evaluates the formula at
     h_km = fl(h^ / 1000); the selection height h_s = 1000 h_km satisfies |h_s - h^| <= u
-    |h^| exactly (the bases are integers in km), so |h_s - h| <= alpha_sel h + beta_sel.
+    |h^| + 1000 eta0 (the division may underflow; the bases are integers in km), so
+    |h_s - h| <= alpha_sel h + beta_sel.
 
     E3 density. rho^ = fl(rho0 fl(exp(-fl(fl(h_km - base) / scale)))) with the table's
-    decimal rho0 and scale read to binary64 (relative <= u each): rho^ <= rho(h_s) exp(
-    theta_x X) F_rho with X = (h_s - base) / H >= 0 the exponent of the exact table formula.
+    decimal rho0 and scale read to binary64 (relative <= u each). The exponent's division
+    may underflow (-eta0), so exp(-t) <= exp(-(1 - theta_x) X) e^eta0, and A-FP-2 adds nu:
+        rho^ <= F_rho e^eta0 rho(h_s) exp(theta_x X) + N_rho,
+        N_rho = (1 + u)^2 rho0_max nu + eta0,
+    with X = (h_s - base) / H >= 0 the exponent of the exact table formula. In the top
+    band, once (1 + u) rho0 ((1 + UF) e^eta0 exp(-(1 - theta_x) X) + nu) < eta0 the
+    product rounds to 0: rho^ = 0 for every selection height above h_zero
+    (`zero_density_height`), and the force is then exactly 0.
 
-    E4 drag. |a^_drag| <= F_D rho(h_s) exp(theta_x X) (|v| + omega |r|)^2 / (2 b) for a
-    vehicle with mass / (cd area) >= b / phi_B (the constructions b = fl(mass / fl(cd area))
-    and mass = fl(fl(b cd) area) used here both satisfy it): coefficient (3 operations),
-    the 3-term dot and sqrt, the two products with v_rel, and |fl(v - omega Z x r)| <=
-    (1 + u)^2 (|v| + omega |r|).
+    E4 drag. The model computes k = fl(fl(fl(fl(0.5 rho^) cd) area) / mass), n =
+    fl(sqrt(fl(v_rel . v_rel))), d_i = fl(fl(k n) v_rel_i) with v_rel = fl(v - fl(omega Z x
+    r)). With S = |v| + omega |r| >= omega b, |v_rel^| <= (1 + u)^2 S + sqrt(2) (1 + u)
+    eta0, n |v_rel^| <= (1 + u) sqrt(1 + gamma_3) (|v_rel^|^2 + 2 eta0) <= (1 + u)^5
+    sqrt(1 + gamma_3) S^2 (1 + tau), tau = 3 eta0 / S_min + 2 eta0 / S_min^2 + 2 eta0^2 /
+    S_min^2, S_min = omega b, and k <= (1 + u)^3 (cd area / mass) 0.5 rho^ + W with
+    W = eta0 (1 + (1 + u)^3 cd area / mass + (1 + u)^2 area / mass + (1 + u) / mass).
+    For a vehicle with mass / (cd area) >= b / phi_B (the constructions b = fl(mass /
+    fl(cd area)) and mass = fl(fl(b cd) area) used here both satisfy it):
+        |d^| <= F_D' rho(h_s) exp(theta_x X) S^2 / (2 b)                   (relative)
+              + (F_A N_rho / (2 b) + K_W W) S^2 + K_1 eta0 S + 2 eta0       (absolute)
+    with F_D' = F_D e^eta0 (1 + tau), F_D = F_rho (1 + u)^10 sqrt(1 + gamma_3) phi_B (the
+    coefficient's 3 roundings, the dot and sqrt, the two products with v_rel and |v_rel^|^2),
+    F_A = (1 + u)^10 sqrt(1 + gamma_3) phi_B (1 + tau), K_W = (1 + u)^7 sqrt(1 + gamma_3)
+    (1 + tau), K_1 = (1 + u)^3, and W <= eta0 (1 + phi_B / b ((1 + u)^3 + (1 + u)^2 / cd +
+    (1 + u) / (cd area))).
 
-    E5 gravity with J2. |a^_grav + a^_J2| <= (1 + u) max(F_g, F_J) G with G = (1 + 3 J2
-    (a/b)^2) mu / b^2, from the operation counts of `t0_model.acceleration` and `j2_accel`
-    (|r| >= b; the J2 direction vector has norm <= 2 |r|), and |a^| <= (1 + u)(that +
-    |a^_drag|) for the final vector difference.
+    E5 gravity with J2. |a^_grav + a^_J2| <= (1 + u) max(F_g, F_J) G + 4 eta0 with G = (1 +
+    3 J2 (a/b)^2) mu / b^2, from the operation counts of `t0_model.acceleration` and
+    `j2_accel` (|r| >= b; the J2 direction vector has norm <= 2 |r|). Underflow: mu / |r|^3
+    and the J2 factor are normal without overflow; each of the 3 products with r underflows
+    by <= eta0 (sqrt(3) eta0), and in J2 the products 5 z z, x (1 - zz) and k (.) add <=
+    (1 + 2.1 |k| |r|) eta0 <= 1.05 eta0 per component (|k| |r| <= 1.5 J2 mu a^2 / b^4 <
+    0.017). |a^| <= (1 + u)(that + |a^_drag|) for the final vector difference.
 
     E6 RK4 stages. A stage w = fl(r0 + fl(c k)) (c = 5 or 10, exact) satisfies |w - r0| <=
-    (1 + u)^2 c |k| + u |r0|, and a stage velocity |fl(v0 + fl(5 a))| <= (1 + u) |v0| +
-    5 (1 + u)^2 |a|."""
+    (1 + u)^2 c |k| + u |r0| + 2 eta0, and a stage velocity |fl(v0 + fl(5 a))| <= (1 + u)
+    |v0| + 5 (1 + u)^2 |a| + 2 eta0 (each product may underflow: (1 + u) sqrt(3) eta0)."""
+    uf = 2 * libm_ulp * U
+    nu = libm_ulp * TINY
     e2, a = Fraction(m.E2_WGS84), Fraction(m.A_WGS84)
     s_lo, _ = _sqrt_bounds(1 - e2)
     b_lo = a * s_lo
@@ -541,9 +598,9 @@ def rounding_allowances() -> dict:
     _, sq1_hi = _sqrt_bounds(1 + g3)
 
     # E1 height evaluation at the returned latitude
-    theta1 = (1 + UF) ** 2 * (1 + U) - 1
+    theta1 = (1 + uf) ** 2 * (1 + U) - 1
     big12 = theta1 + U * (1 + theta1)
-    theta3 = (1 + UF) ** 2 * (1 + U) ** 2 - 1
+    theta3 = (1 + uf) ** 2 * (1 + U) ** 2 - 1
     rho3 = (e2 * theta3 + U * (1 + e2 * theta3)) / (1 - e2)
     sq = rho3 / (2 - rho3)  # |sqrt(1 + t) - 1| <= |t| / (1 + sqrt(1 - |t|)) <= |t| / (2 - |t|)
     theta4 = (1 + sq) * (1 + U) ** 2 - 1
@@ -551,36 +608,60 @@ def rounding_allowances() -> dict:
     q = e2 * a / s_lo
     qp = e2 * a / s_lo**3
     k = qp / (b_lo - q)
-    nu = (1 + U) / (1 - ((1 + sq) * (1 + U) - 1)) - 1
-    theta5 = (1 + nu) * (1 + UF) * (1 + U) ** 2 - 1
-    ratio = (UF * b_lo + (theta5 + U * (1 + theta5)) * q) / (b_lo - q)
-    eta = PI_HALF_UP * (ratio + UF)
+    nu1 = (1 + U) / (1 - ((1 + sq) * (1 + U) - 1)) - 1
+    theta5 = (1 + nu1) * (1 + uf) * (1 + U) ** 2 - 1
+    ratio = (uf * b_lo + (theta5 + U * (1 + theta5)) * q) / (b_lo - q)
+    n_hi = a / s_lo * Fraction(1001, 1000)  # >= the computed N
+    y_uf = (1 + U) ** 2 * e2 * n_hi * nu + (1 + U) * ETA0  # underflow in z + e2 N s
+    eta_uf = PI_HALF_UP * (nu + y_uf) / (b_lo - q) + nu
+    eta = PI_HALF_UP * (ratio + uf) + eta_uf
     k60 = Fraction(_up(k)) ** LAT_ITER
     dphi = eta / (1 - k) + max(k * LAT_TOL / (1 - k), k60 * 2 * PI_HALF_UP)
     alpha_lat = dphi**2 / 2
     beta_lat = (2 * a + a / s_lo) * dphi**2 / 2
-    alpha = (1 + U) * big12 + U + (1 + U) * alpha_lat
-    beta = (1 + U) * (big12 + theta4) * a + (1 + U) * beta_lat
+    h_uf_r = (1 + U) ** 3 * nu  # coefficient of |r| <= a + h
+    h_uf_c = (
+        (1 + U) ** 3 * (1 + uf) * nu
+        + 2 * (1 + U) ** 2 * ETA0
+        + a * (1 + U) ** 6 * (3 * e2 * (1 + uf) * nu + 2 * ETA0) / (2 * s_lo * (1 - rho3))
+    )
+    alpha_rel = (1 + U) * big12 + U + (1 + U) * alpha_lat
+    beta_rel = (1 + U) * (big12 + theta4) * a + (1 + U) * beta_lat
+    beta_uf = h_uf_r * a + h_uf_c
+    alpha = alpha_rel + h_uf_r
+    beta = beta_rel + beta_uf
     # E2 km conversion
     alpha_sel = alpha * (1 + U) + U
-    beta_sel = beta * (1 + U)
+    beta_sel = beta * (1 + U) + 1000 * ETA0
     # E3, E4 density and drag
     theta_x = (1 + U) ** 2 / (1 - U) - 1
-    f_rho = (1 + UF) * (1 + U) ** 2
+    f_rho = (1 + uf) * (1 + U) ** 2
     phi_b = (1 + U) / (1 - U) ** 2
-    f_d = f_rho * (1 + U) ** 10 * sq1_hi * phi_b
+    s_min = Fraction(m.OMEGA_E) * b_lo
+    tau = 3 * ETA0 / s_min + 2 * ETA0 / s_min**2 + 2 * ETA0**2 / s_min**2
+    exp_eta = 1 + 2 * ETA0  # >= e^eta0
+    f_d = f_rho * (1 + U) ** 10 * sq1_hi * phi_b * exp_eta * (1 + tau)
+    rho0_max = max(Fraction(row[1]) for row in DEC_TABLE)
+    n_rho = (1 + U) ** 2 * rho0_max * nu + ETA0
+    f_a = (1 + U) ** 10 * sq1_hi * phi_b * (1 + tau)
+    k_w = (1 + U) ** 7 * sq1_hi * (1 + tau)
     # E5 gravity and J2
     rn_lo = sq1_lo * (1 - U)
-    f_g = (1 + U) ** 2 / ((1 - UF) * rn_lo**3)
+    f_g = (1 + U) ** 2 / ((1 - uf) * rn_lo**3)
     f_k = (1 + U) ** 5 / ((1 - g3) ** 2 * (1 - U) ** 3 * sq1_lo)
     zeta = (1 + U) ** 3 / (1 - g3) - 1
     f_j = f_k * (1 + U) ** 3 * (1 + Fraction(5, 2) * zeta)
     j2, mu = Fraction(m.J2_FROM_C20), Fraction(m.MU)
+    kr_j2 = Fraction(3, 2) * j2 * mu * a**2 / b_lo**4  # >= |k| |r| in j2_accel
+    if not (1 + Fraction(21, 10) * kr_j2) * (1 + U) ** 3 <= Fraction(105, 100):
+        raise ValueError("E5: the J2 underflow allowance 1.05 eta0 does not hold")
     g_exact_up = (1 + 3 * j2 * a**2 / b_lo**2) * mu / b_lo**2
-    g_hat = (1 + U) * max(f_g, f_j) * g_exact_up
+    g_rel = (1 + U) * max(f_g, f_j) * g_exact_up
+    g_uf = 4 * ETA0
+    g_hat = g_rel + g_uf
     return {
         "u": U,
-        "libm_ulp": LIBM_ULP,
+        "libm_ulp": libm_ulp,
         "b_lower_m": b_lo,
         "contraction_k": k,
         "lat_step_rounding_rad": eta,
@@ -594,31 +675,60 @@ def rounding_allowances() -> dict:
         "F_g": f_g,
         "F_J": f_j,
         "gravity_hat_mps2": g_hat,
+        "phi_B": phi_b,
+        "F_A": f_a,
+        "K_W": k_w,
+        "K_1": (1 + U) ** 3,
+        "tau": tau,
+        "N_rho_in_2^-1074": n_rho / TINY,
+        "nu_in_2^-1074": nu / TINY,
+        "stage_abs_in_2^-1074": 2 * ETA0 / TINY,
+        # the underflow parts of E1 and E5, kept separate so that they can be audited
+        "alpha_relative_part": alpha_rel,
+        "alpha_underflow_part": h_uf_r,
+        "beta_relative_part_m": beta_rel,
+        "beta_underflow_part_m": beta_uf,
+        "lat_step_underflow_rad": eta_uf,
+        "gravity_relative_part_mps2": g_rel,
+        "gravity_underflow_part_mps2": g_uf,
     }
 
 
-FPA = rounding_allowances()
-FP = {key: _up(val) for key, val in FPA.items() if key not in ("b_lower_m",)}
-FP["b_lower_m"] = _dn(FPA["b_lower_m"])
+def zero_density_height(fpa: dict) -> Fraction:
+    """h_zero (E3): above this selection height the model's density is exactly 0. In the top
+    band (base_T, rho0_T, H_T), X > X0 makes (1 + u) rho0_T ((1 + UF) e^eta0 exp(-(1 -
+    theta_x) X) + nu) < eta0, so fl(rho0 exp^) = 0 (round to nearest). X0 = -ln(E0) / (1 -
+    theta_x) with E0 = (eta0 / ((1 + u) rho0_T) - nu) / ((1 + UF)(1 + 2 eta0)), bounded
+    outward in 60-digit decimals; h_zero = base_T + H_T X0, rounded up."""
+    base, rho0, scale = DEC_TABLE[-1]
+    u, uf = fpa["u"], 2 * fpa["libm_ulp"] * fpa["u"]
+    nu = fpa["nu_in_2^-1074"] * TINY
+    e0 = (ETA0 / ((1 + u) * Fraction(rho0)) - nu) / ((1 + uf) * (1 + 2 * ETA0))
+    if not e0 > 0:
+        raise ValueError("no zero-density height under these assumptions")
+    with localcontext() as ctx:
+        ctx.prec = PREC
+        e0_lo = Decimal(e0.numerator) / Decimal(e0.denominator) * (1 - PAD)
+        th = Decimal(fpa["theta_x"].numerator) / Decimal(fpa["theta_x"].denominator)
+        x0 = -e0_lo.ln() * (1 + PAD) / (1 - th) * (1 + PAD)
+        return Fraction((base + scale * x0) * (1 + PAD))
+
+
+def derived_constants(libm_ulp: int = LIBM_ULP) -> tuple[dict, dict]:
+    """(exact constants, binary64 upper bounds) for a libm accuracy LIBM_ULP (A-FP-2)."""
+    fpa = rounding_allowances(libm_ulp)
+    fpa["h_zero_m"] = zero_density_height(fpa)
+    fp = {key: _up(val) for key, val in fpa.items() if key not in ("b_lower_m",)}
+    fp["b_lower_m"] = _dn(fpa["b_lower_m"])
+    return fpa, fp
+
+
+FPA, FP = derived_constants()
 
 
 def height_error_bound(h: float) -> float:
     """eps_h(h) = alpha h + beta >= |computed - true| geodetic height at true height h."""
     return _up(FPA["alpha"] * Fraction(h) + FPA["beta_m"])
-
-
-def _decimal_table() -> tuple[tuple[Decimal, Decimal, Decimal], ...]:
-    """(base [m], rho0, scale [m]) as the exact decimals of the pinned file."""
-    m.load_table()  # digest check
-    rows = []
-    for line in m.TABLE_COPY.read_text().splitlines():
-        if line.strip():
-            h, rho, s = (Decimal(x.strip()) for x in line.split(","))
-            rows.append((h * 1000, rho, s * 1000))
-    return tuple(rows)
-
-
-DEC_TABLE = _decimal_table()
 
 
 def drag_envelope_exact_height(low: float, s: float, b: float) -> float:
@@ -636,43 +746,90 @@ def drag_envelope_exact_height(low: float, s: float, b: float) -> float:
     return max([f(low)] + [f(base) for base in BASES_M if base > low])
 
 
-def drag_envelope(low: float, s: float, b: float) -> float:
+def _envelope_relative(low: float, s: float, b: float, fp: dict) -> Decimal:
+    """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+    beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+    al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+    a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+    if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+        raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+    ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+    best = Decimal(0)
+    for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+        base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+        rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+        vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+        best = max(best, rho * vr * vr)
+    return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+
+
+def _envelope_absolute(s: float, b: float, cd: float, area: float, fp: dict) -> Decimal:
+    """The absolute (underflow) part of E4: (F_A N_rho / (2 b) + K_W W) S_max^2 + K_1 eta0
+    S_max + 2 eta0, with S_max = s + omega_E (a + (h_zero + beta_sel) / (1 - alpha_sel)),
+    the largest |v| + omega |r| at which the computed density can be nonzero (E3)."""
+    al, be = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"])
+    a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+    one_u, phi = 1 + Decimal(fp["u"]), Decimal(fp["phi_B"])
+    eta0 = TINY_D / 2
+    cd_d, area_d, b_d = Decimal(cd), Decimal(area), Decimal(b)
+    smax = Decimal(s) + w * (a + (Decimal(fp["h_zero_m"]) + be) / (1 - al))
+    w_coef = eta0 * (1 + phi / b_d * (one_u**3 + one_u**2 / cd_d + one_u / (cd_d * area_d)))
+    n_rho = Decimal(fp["N_rho_in_2^-1074"]) * TINY_D
+    return (
+        (Decimal(fp["F_A"]) * n_rho / (2 * b_d) + Decimal(fp["K_W"]) * w_coef) * smax * smax
+        + Decimal(fp["K_1"]) * eta0 * smax
+        + 2 * eta0
+    )
+
+
+def drag_envelope_relative_only(low: float, s: float, b: float) -> float:
+    """SUPERSEDED (Review 04 M3T0-R4-F1): the Review 03 correction, `drag_envelope` without
+    its absolute (underflow) part. It assumed relative rounding for subnormal results and is
+    exceeded where the computed density is subnormal. Kept only to reproduce the finding."""
+    if math.isinf(b):
+        return 0.0
+    with localcontext() as ctx:
+        ctx.prec = PREC
+        return _up(_envelope_relative(low, s, b, FP) * (1 + PAD))
+
+
+def drag_envelope(
+    low: float,
+    s: float,
+    b: float,
+    cd: float = CD_V1,
+    area: float = AREA_V1,
+    fp: dict | None = None,
+) -> float:
     """Upper bound on the model's computed drag acceleration |a^_drag| at every point whose
     true geodetic height is >= low (>= 0), with inertial speed |v| <= s, for a vehicle of
-    ballistic coefficient b (E4).
+    ballistic coefficient b with drag coefficient cd and area [m^2] (E4).
 
     The density is selected and evaluated at h_s, with |h_s - h| <= alpha_sel h + beta_sel
     (E1, E2). For true h >= low, h_s >= low - eps_sel(low) =: ell, and |r| <= a + h <= a +
     (h_s + beta_sel) / (1 - alpha_sel). So
-        |a^_drag| <= sup over h_s >= ell of g(h_s),
-        g(h) = F_D rho(h) exp(theta_x X(h)) (s + omega_E (a + (h + beta_sel) / (1 -
+        |a^_drag| <= sup over h_s >= ell of g(h_s) + A(s, b),
+        g(h) = F_D' rho(h) exp(theta_x X(h)) (s + omega_E (a + (h + beta_sel) / (1 -
         alpha_sel)))^2 / (2 b),
     with rho the exact table formula (decimal values) and X(h) = (h - base_i) / H_i inside
-    band i. On band i, d ln g / dh = -(1 - theta_x) / H_i + 2 omega_E / ((1 - alpha_sel) s
-    + omega_E ((1 - alpha_sel) a + h + beta_sel)) < 0 whenever (1 - alpha_sel)(1 - theta_x)
-    a > 2 H_i (ell >= -beta_sel), so g decreases inside every band, including the unbounded
-    top band, and the supremum is attained at ell or at a band base above ell, where X = 0
-    and the band above applies (GMAT's rule). ell is clamped at the lower edge 0: a
-    computed height below it raises OutsideDomainError and applies no force.
+    band i, and A the absolute (underflow) part of E4 at S_max (Review 04 M3T0-R4-F1: the
+    sup of the absolute part is taken over every selection height with nonzero computed
+    density, h_s <= h_zero). On band i, d ln g / dh = -(1 - theta_x) / H_i + 2 omega_E / ((1 -
+    alpha_sel) s + omega_E ((1 - alpha_sel) a + h + beta_sel)) < 0 whenever (1 - alpha_sel)
+    (1 - theta_x) a > 2 H_i (ell >= -beta_sel), so g decreases inside every band, including
+    the unbounded top band, and the supremum is attained at ell or at a band base above ell,
+    where X = 0 and the band above applies (GMAT's rule). ell is clamped at the lower edge
+    0: a computed height below it raises OutsideDomainError and applies no force.
     Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up."""
+    fp = FP if fp is None else fp
     if math.isinf(b):
         return 0.0
     if not low >= 0.0:
         raise ValueError("the envelope is defined above the lower edge only")
     with localcontext() as ctx:
         ctx.prec = PREC
-        al, be, tx = Decimal(FP["alpha_sel"]), Decimal(FP["beta_sel_m"]), Decimal(FP["theta_x"])
-        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
-        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
-            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
-        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
-        best = Decimal(0)
-        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
-            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
-            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
-            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
-            best = max(best, rho * vr * vr)
-        return _up(best * Decimal(FP["F_D"]) / (2 * Decimal(b)) * (1 + PAD))
+        rel = _envelope_relative(low, s, b, fp)
+        return _up((rel + _envelope_absolute(s, b, cd, area, fp)) * (1 + PAD))
 
 
 def drag_only(cfg: m.Config, r: np.ndarray, v: np.ndarray, mass: float) -> float:
@@ -740,6 +897,120 @@ def r3f1_counterexample() -> dict:
     }
 
 
+def r4f1_counterexample() -> dict:
+    """Review 04 M3T0-R4-F1: r = (197 059 137, 0, 0) m, whose true height is exactly
+    190 681 000 m (the foot point is (a, 0, 0)), v = 0, B 25.76 kg/m^2, L = 190 681 000 m,
+    s = 0. The computed density is subnormal; the coefficient's last division rounds
+    0.51 x 2^-1074 up to 2^-1074, doubling the force."""
+    r = np.array([197_059_137.0, 0.0, 0.0])
+    low = 190_681_000.0
+    if Decimal(r[0]) - Decimal(m.A_WGS84) != Decimal(low):
+        raise RuntimeError("the R4-F1 point does not have the stated true height")
+    actual = model_drag(r, np.zeros(3), MASS)
+    old = drag_envelope_relative_only(low, 0.0, B_V1)
+    new = drag_envelope(low, 0.0, B_V1)
+    return {
+        "true_height_m": low,
+        "computed_height_m": m.geodetic_iterative(r)[1],
+        "computed_density_kg_m3": m.density(m.geodetic_iterative(r)[1]),
+        "speed_mps": 0.0,
+        "model_drag_mps2": actual,
+        "superseded_envelope_mps2": old,
+        "corrected_envelope_mps2": new,
+        "superseded_covers": old >= actual,
+        "corrected_covers": new >= actual,
+    }
+
+
+# The floors published at Review 04 (`44260ef`, the Review 03 correction), for comparison.
+PUBLISHED_REVIEW04 = {
+    "B25.8": 124456.68544510857,
+    "B100": 118633.50894662621,
+    "drag-free limit": 111511.96182508787,
+}
+
+
+def floor_comparison(rows: list[dict]) -> dict:
+    """Review 04 M3T0-R4-F1 (I-5 section 3): the root of need(h0) before the correction (the
+    Review 03 envelope, without the absolute part) and after it, each bracketed to 1e-9 m;
+    the floors published at Review 04 and now; and the margins at the published floor."""
+    out = []
+    for (bname, b), row in zip(VEHICLES, rows, strict=True):
+        floor = row["h_f_sufficient_at_least_m"]
+        brackets = {}
+        for name, env in (
+            ("review03_correction", lambda low, s, b: drag_envelope_relative_only(low, s, b)),
+            ("corrected", None),
+        ):
+            lo, hi = floor - 2e-6, floor
+            if not stage_need(lo, b, envelope=env) > 0.0 > stage_need(hi, b, envelope=env):
+                raise RuntimeError("the root is not bracketed below the published floor")
+            while hi - lo > 1e-9:
+                mid = 0.5 * (lo + hi)
+                lo, hi = (lo, mid) if stage_need(mid, b, envelope=env) < 0.0 else (mid, hi)
+            brackets[name] = [lo, hi]
+        at = stage_lower_heights(floor, b)
+        out.append(
+            {
+                "vehicle": bname,
+                "published_review04_m": PUBLISHED_REVIEW04[bname],
+                "published_now_m": floor,
+                "published_unchanged": floor == PUBLISHED_REVIEW04[bname],
+                "root_bracket_review03_correction_m": brackets["review03_correction"],
+                "root_bracket_corrected_m": brackets["corrected"],
+                "need_at_published_floor_m": stage_need(floor, b),
+                "stage_bounds_at_published_floor_m": {k: at[k] for k in ("M2", "M3", "M4")},
+                "two_decimals_nearest_m": round(floor, 2),
+                "two_decimals_nearest_is_sufficient": stage_need(round(floor, 2), b) < 0.0,
+                "two_decimals_rounded_up_m": math.ceil(floor * 100) / 100,
+            }
+        )
+    return {
+        "rows": out,
+        "note": "root brackets [lo, hi] with need(lo) > 0 > need(hi); 'review03_correction' "
+        "is the stage condition with the superseded relative-only envelope",
+    }
+
+
+def libm_sensitivity(rows: list[dict], max_log2: int = 40) -> dict:
+    """I-5 section 5: how far A-FP-2 can be weakened. Every derived constant is
+    non-decreasing in LIBM_ULP (through UF and nu), so need(h0) is too: if need < 0 at a
+    floor F for LIBM_ULP = 2^j, F holds for every libm within 2^j ulps (relative error <=
+    2^j 2^-52 and, for subnormal results, absolute error <= 2^j 2^-1074). For each floor:
+    the largest such j <= max_log2 (None if j = 0 fails), at the published bracket end and
+    at its 2-decimal quotations rounded up and to nearest."""
+    cache: dict[int, dict] = {}
+
+    def fp_for(j: int) -> dict:
+        if j not in cache:
+            cache[j] = derived_constants(2**j)[1]
+        return cache[j]
+
+    out = []
+    for (bname, b), row in zip(VEHICLES, rows, strict=True):
+        floor = row["h_f_sufficient_at_least_m"]
+        heights = {
+            "published_bracket_end": floor,
+            "two_decimals_rounded_up": math.ceil(floor * 100) / 100,
+            "two_decimals_nearest": round(floor, 2),
+        }
+        res = {}
+        for key, h in heights.items():
+            best = None
+            for j in range(max_log2 + 1):
+                if stage_need(h, b, fp=fp_for(j)) >= 0.0:
+                    break
+                best = j
+            res[key] = {"height_m": h, "largest_log2_libm_ulp": best}
+        out.append({"vehicle": bname, **res})
+    return {
+        "rows": out,
+        "assumed_libm_ulp": LIBM_ULP,
+        "max_log2_tested": max_log2,
+        "kind": "the derivation evaluated under weaker libm assumptions (not a measurement)",
+    }
+
+
 def stage_stress(vehicle: str, b: float | None, floor: float, n: int = 2000) -> dict:
     """Empirical check of the derived condition (not part of the proof): bound states at
     floor <= h0 <= floor + 20 km (computed committed height) with near-escape, retrograde
@@ -795,35 +1066,42 @@ def stage_stress(vehicle: str, b: float | None, floor: float, n: int = 2000) -> 
     }
 
 
-def stage_lower_heights(h0: float, b: float) -> dict:
+def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=None) -> dict:
     """Bounds for an RK4 step from any bound committed state whose *computed* geodetic
     height is h0 (E1-E6; the simulator only knows computed heights):
       true h0 in [H0, (h0 + beta) / (1 - alpha)], H0 = (h0 - beta) / (1 + alpha);
       |r0| <= R0 = a + (h0 + beta) / (1 - alpha);  |v0| <= V = sqrt(2 mu / (b + H0));
       A0 = (1 + u)(G^ + drag_envelope(H0, V, B)) >= |a^(y0)|;
-      true h(r^2) >= L2 = H0 - 5 (1 + u)^2 V - u R0;
-      |v^2| <= s2 = (1 + u) V + 5 (1 + u)^2 A0,  true h(r^3) >= L3 = H0 - 5 (1 + u)^2 s2 - u R0;
+      true h(r^2) >= L2 = H0 - 5 (1 + u)^2 V - u R0 - 2 eta0;
+      |v^2| <= s2 = (1 + u) V + 5 (1 + u)^2 A0 + 2 eta0,
+      true h(r^3) >= L3 = H0 - 5 (1 + u)^2 s2 - u R0 - 2 eta0;
       A2 = (1 + u)(G^ + drag_envelope(L2, s2, B)) >= |a^(y2)|;
-      |v^3| <= s3 = (1 + u) V + 5 (1 + u)^2 A2, true h(r^4) >= L4 = H0 - 10 (1 + u)^2 s3 - u R0;
+      |v^3| <= s3 = (1 + u) V + 5 (1 + u)^2 A2 + 2 eta0,
+      true h(r^4) >= L4 = H0 - 10 (1 + u)^2 s3 - u R0 - 2 eta0;
       computed stage height >= M_k = (1 - alpha) L_k - beta (E1).
     M_k > 0 implies the stage evaluates without OutsideDomainError (computed height >= 0,
     so fl(h / 1000) >= 0). Evaluated in 60-digit decimal arithmetic with outward pads;
-    lower bounds are rounded down and upper bounds up when returned."""
+    lower bounds are rounded down and upper bounds up when returned. fp (the constants for
+    another LIBM_ULP) and envelope (the superseded one) serve `libm_sensitivity` and
+    `floor_comparison` only."""
+    fp = FP if fp is None else fp
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
     with localcontext() as ctx:
         ctx.prec = PREC
-        one_u = 1 + Decimal(FP["u"])
-        al, be = Decimal(FP["alpha"]), Decimal(FP["beta_m"])
+        one_u = 1 + Decimal(fp["u"])
+        al, be = Decimal(fp["alpha"]), Decimal(fp["beta_m"])
         a, mu = Decimal(m.A_WGS84), Decimal(m.MU)
-        g_hat = Decimal(FP["gravity_hat_mps2"])
+        g_hat = Decimal(fp["gravity_hat_mps2"])
+        e6 = Decimal(fp["stage_abs_in_2^-1074"]) * TINY_D
         h0d = Decimal(h0)
         big_h0 = (h0d - be) / (1 + al) - Decimal("1e-35")
         r0 = (a + (h0d + be) / (1 - al)) * (1 + PAD)
-        v = (2 * mu / (Decimal(FP["b_lower_m"]) + big_h0)).sqrt() * (1 + PAD)
-        a0 = one_u * (g_hat + Decimal(drag_envelope(_dn(big_h0), _up(v), b))) * (1 + PAD)
-        uu = Decimal(FP["u"])
-        l2 = big_h0 - 5 * one_u**2 * v - uu * r0 - Decimal("1e-35")
-        s2 = (one_u * v + 5 * one_u**2 * a0) * (1 + PAD)
-        l3 = big_h0 - 5 * one_u**2 * s2 - uu * r0 - Decimal("1e-35")
+        v = (2 * mu / (Decimal(fp["b_lower_m"]) + big_h0)).sqrt() * (1 + PAD)
+        a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+        uu = Decimal(fp["u"])
+        l2 = big_h0 - 5 * one_u**2 * v - uu * r0 - e6 - Decimal("1e-35")
+        s2 = (one_u * v + 5 * one_u**2 * a0 + e6) * (1 + PAD)
+        l3 = big_h0 - 5 * one_u**2 * s2 - uu * r0 - e6 - Decimal("1e-35")
         out = {
             "H0": _dn(big_h0),
             "V": _up(v),
@@ -837,11 +1115,23 @@ def stage_lower_heights(h0: float, b: float) -> dict:
         if out["M2"] <= 0.0:  # the k2 input may already be below the edge; a(y2) not bounded
             out.update(A2=None, s3=None, L4=None, M4=None)
             return out
-        a2 = one_u * (g_hat + Decimal(drag_envelope(_dn(l2), _up(s2), b))) * (1 + PAD)
-        s3 = (one_u * v + 5 * one_u**2 * a2) * (1 + PAD)
-        l4 = big_h0 - 10 * one_u**2 * s3 - uu * r0 - Decimal("1e-35")
+        a2 = one_u * (g_hat + Decimal(env(_dn(l2), _up(s2), b))) * (1 + PAD)
+        s3 = (one_u * v + 5 * one_u**2 * a2 + e6) * (1 + PAD)
+        l4 = big_h0 - 10 * one_u**2 * s3 - uu * r0 - e6 - Decimal("1e-35")
         out.update(A2=_up(a2), s3=_up(s3), L4=_dn(l4), M4=_dn((1 - al) * l4 - be))
         return out
+
+
+def stage_need(h0: float, b: float, fp: dict | None = None, envelope=None) -> float:
+    """need(h0) = -min(M2, M3, M4) (or -M2 when the k2 input may already be below the edge):
+    negative means every stage of a step from computed height h0 stays in the domain."""
+    s = stage_lower_heights(h0, b, fp, envelope)
+    if s["M4"] is None:
+        return -s["M2"]  # >= 0 already: the k2 input may be below the edge
+    return -min(s["M2"], s["M3"], s["M4"])  # >= 0: a stage may leave the domain
+
+
+VEHICLES = (("B25.8", B_V1), ("B100", 100.0), ("drag-free limit", math.inf))
 
 
 def sufficient_stage_condition() -> dict:
@@ -857,7 +1147,8 @@ def sufficient_stage_condition() -> dict:
       5w^2), w = (z/r)^2, <= 2), E5;
     - computed drag <= `drag_envelope` at each stage's lower true-height bound and speed
       bound, E1-E4 (Review 03 M3T0-R3-F1: the envelope includes every band the computed
-      height can select);
+      height can select; Review 04 M3T0-R4-F1: and the absolute error of subnormal
+      results);
     - the stage's computed height is >= M_k = (1 - alpha) L_k - beta, E1.
     Monotonicity: H0 and L_k increase with h0 (the coefficient of h0 is 1 / (1 + alpha) -
     u / (1 - alpha) > 0), V decreases, the envelope is non-increasing in its lower height
@@ -867,13 +1158,10 @@ def sufficient_stage_condition() -> dict:
     outward-rounded need is negative, so the exact need is negative there and at every
     larger h0. The floor for a ballistic coefficient B also covers every larger B."""
     rows = []
-    for bname, b in (("B25.8", B_V1), ("B100", 100.0), ("drag-free limit", math.inf)):
+    for bname, b in VEHICLES:
 
         def need(h0: float, b: float = b) -> float:
-            s = stage_lower_heights(h0, b)
-            if s["M4"] is None:
-                return -s["M2"]  # >= 0 already: the k2 input may be below the edge
-            return -min(s["M2"], s["M3"], s["M4"])  # >= 0: a stage may leave the domain
+            return stage_need(h0, b)
 
         lo, hi = 1.0, 2_000_000.0
         if not (need(lo) > 0.0 > need(hi)):
@@ -903,6 +1191,7 @@ def sufficient_stage_condition() -> dict:
         "rows": rows,
         "review02_counterexample": envelope_counterexample(),
         "review03_counterexample": r3f1_counterexample(),
+        "review04_counterexample": r4f1_counterexample(),
         "stress": [
             stage_stress(r["vehicle"], r["B_kg_per_m2"], r["h_f_sufficient_at_least_m"])
             for r in rows
@@ -917,10 +1206,14 @@ def floating_point_enclosure() -> dict:
     """The derived constants of E1-E6 (as binary64 upper bounds) and eps_h at sample heights."""
     return {
         "assumptions": {
-            "A-FP-1": "IEEE 754 binary64, round to nearest even; + - * / sqrt correctly rounded",
-            "A-FP-2": f"libm sin, cos, atan2, hypot, exp, pow relative error <= {LIBM_ULP} "
-            "x 2^-52 (assumption; measured in t0_height_error.py, not proved)",
-            "A-FP-3": "numpy 3-element products elementwise; 3-term dot within gamma_3",
+            "A-FP-1": "IEEE 754 binary64, round to nearest even, gradual underflow (no "
+            "flush-to-zero); * and / within relative u = 2^-53 plus, for an underflowing "
+            "result, absolute 2^-1075; + - and sqrt within relative u",
+            "A-FP-2": f"libm sin, cos, atan2, hypot, exp, pow: |error| <= {LIBM_ULP} x 2^-52 "
+            f"|exact| + {LIBM_ULP} x 2^-1074 (assumption; measured in t0_height_error.py, "
+            "not proved; see libm_sensitivity)",
+            "A-FP-3": "numpy 3-element products elementwise; 3-term dot x.x within gamma_3 "
+            "sum x_i^2 + 3 (1 + u)^2 2^-1075",
             "domain": "true geodetic height >= 0 (outside the ellipsoid), no overflow",
         },
         "constants": {key: FP[key] for key in sorted(FP)},
@@ -930,6 +1223,15 @@ def floating_point_enclosure() -> dict:
             for h in (0.0, 120e3, 1.0e6, 2.0e6)
         },
         "eps_h_definition": "|computed - true| geodetic height <= alpha h + beta (true h)",
+        "underflow": {
+            "eta0": "2^-1075",
+            "zero_density_selection_height_m": FP["h_zero_m"],
+            "absolute_part_mps2": {
+                f"{name} s={s:.0f}": _up(_envelope_absolute(s, b, CD_V1, AREA_V1, FP))
+                for name, b in VEHICLES[:2]
+                for s in (0.0, 11_000.0)
+            },
+        },
     }
 
 
@@ -949,12 +1251,15 @@ def stage_order() -> dict:
 
 
 def main() -> None:
+    ssc = sufficient_stage_condition()
     out = {
         "missed_crossing": missed_crossing(),
         "stiffness_thresholds": stiffness_thresholds(),
         "admissibility_counterexamples": admissibility_counterexamples(),
         "floating_point_enclosure": floating_point_enclosure(),
-        "sufficient_stage_condition": sufficient_stage_condition(),
+        "sufficient_stage_condition": ssc,
+        "floor_comparison": floor_comparison(ssc["rows"]),
+        "libm_sensitivity": libm_sensitivity(ssc["rows"]),
         "stage_order": stage_order(),
         "vectorised_height_check_max_abs_m": vector_height_check(),
     }

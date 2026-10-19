@@ -1,10 +1,11 @@
-"""Mutation evidence for M3T0-R2-F3 and M3T0-R3-F1 (research only).
+"""Mutation evidence for M3T0-R2-F3, M3T0-R3-F1 and M3T0-R4-F1 (research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
 `check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
-density discontinuities, and the Review 02 adversarial check hid it. This harness corrupts
-copies of the T0 result files, scripts, model and oracle, runs `check_review01.py`,
-`check_review02.py` and `check_review03.py` on each copy, and classifies the outcome:
+density discontinuities, and the Review 02 adversarial check hid it. Review 04 R4-F1: the
+envelope's rounding model dropped the absolute errors of subnormal results. This harness
+corrupts copies of the T0 result files, scripts, model and oracle, runs `check_review01.py`
+to `check_review04.py` on each copy, and classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
                  checks declared for that mutant is among the failures (a failure elsewhere
@@ -133,8 +134,16 @@ AGREE = "test_oracles_agree"
 STATIC = "test_oracle_does_not_use_the_model_height_or_band_code"
 GUARD = "test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height"
 FLOOR3 = "test_r3f1_floors_recomputed_by_a_second_implementation"
+R4REV = "test_r4f1_reviewer_counterexample_is_reproduced_and_covered"
+SCAN = "test_r4f1_normal_to_subnormal_transition_scan"
+NEIGH = "test_r4f1_binary64_neighbours_of_the_critical_boundaries"
+ZERO = "test_r4f1_zero_density_height"
+STAGES4 = "test_r4f1_rk4_stages_at_high_altitude"
+ENV2 = "test_r4f1_envelope_recomputed_by_a_second_implementation"
+UCONST = "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+STATIC4 = "test_stage_condition_uses_the_corrected_envelope"
 EQUIVALENT = "equivalent"
-ALLOWANCE = "    alpha_sel = alpha * (1 + U) + U\n    beta_sel = beta * (1 + U)\n"
+ALLOWANCE = "    alpha_sel = alpha * (1 + U) + U\n    beta_sel = beta * (1 + U) + 1000 * ETA0\n"
 ORACLE_DOC = (
     '    """Exact-arithmetic geodetic height of the binary64 point r (outside the ellipsoid)."""\n'
 )
@@ -210,8 +219,8 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
     "script_stage_speed_circular": (
         edit_text(
             "t0_termination.py",
-            'v = (2 * mu / (Decimal(FP["b_lower_m"]) + big_h0)).sqrt()',
-            'v = (1 * mu / (Decimal(FP["b_lower_m"]) + big_h0)).sqrt()',
+            'v = (2 * mu / (Decimal(fp["b_lower_m"]) + big_h0)).sqrt()',
+            'v = (1 * mu / (Decimal(fp["b_lower_m"]) + big_h0)).sqrt()',
         ),
         (PROV, FLOOR3),
     ),
@@ -227,14 +236,20 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
     # below the observed error (beta_sel / 10 ~ 9e-10 m < 9.3e-10 m at the reviewer's point):
     # behavioural checks only are declared
     "r3_height_allowance_below_observed_error": (
-        edit_text("t0_termination.py", ALLOWANCE, ALLOWANCE.replace("(1 + U)\n", "(1 + U) / 10\n")),
+        edit_text(
+            "t0_termination.py",
+            ALLOWANCE,
+            ALLOWANCE.replace("beta * (1 + U)", "beta * (1 + U) / 10"),
+        ),
         (REVIEWER, JUMPS, BOUNDARY),
     ),
     # below the justified bound but above every observed error: no sampled point can
     # violate it, so only the recomputation of the derivation is declared
     "r3_height_allowance_slightly_below_bound": (
         edit_text(
-            "t0_termination.py", ALLOWANCE, ALLOWANCE.replace("(1 + U)\n", "(1 + U) * 9 / 10\n")
+            "t0_termination.py",
+            ALLOWANCE,
+            ALLOWANCE.replace("beta * (1 + U)", "beta * (1 + U) * 9 / 10"),
         ),
         (DERIV,),
     ),
@@ -279,6 +294,88 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
         ),
         (REVIEWER, JUMPS, BOUNDARY),
     ),
+    # ---- Review 04 M3T0-R4-F1
+    # the original defect: the Review 03 envelope, without the absolute (underflow) part
+    "r4_absolute_part_removed": (
+        edit_text(
+            "t0_termination.py",
+            "return _up((rel + _envelope_absolute(s, b, cd, area, fp)) * (1 + PAD))",
+            "return _up(rel * (1 + PAD))",
+        ),
+        (R4REV, SCAN, NEIGH, STAGES4, ENV2),
+    ),
+    "r4_coefficient_underflow_term_removed": (
+        edit_text(
+            "t0_termination.py",
+            "w_coef = eta0 * (1 + phi / b_d",
+            "w_coef = 0 * eta0 * (1 + phi / b_d",
+        ),
+        (R4REV, SCAN, NEIGH, ENV2),
+    ),
+    # the term of R4-F1's mechanism: the underflow of the coefficient's last division
+    "r4_coefficient_last_division_term_removed": (
+        edit_text("t0_termination.py", "w_coef = eta0 * (1 + phi", "w_coef = eta0 * (0 + phi"),
+        (R4REV, SCAN, NEIGH, ENV2),
+    ),
+    # too small for any constructed point (the coefficient term dominates): declared for
+    # the second implementation of the envelope only
+    "r4_density_underflow_term_removed": (
+        edit_text(
+            "t0_termination.py",
+            'n_rho = Decimal(fp["N_rho_in_2^-1074"]) * TINY_D',
+            "n_rho = 0 * TINY_D",
+        ),
+        (ENV2,),
+    ),
+    "r4_zero_density_height_too_low": (
+        edit_text(
+            "t0_termination.py",
+            'fpa["h_zero_m"] = zero_density_height(fpa)',
+            'fpa["h_zero_m"] = zero_density_height(fpa) - 2_000_000',
+        ),
+        (ZERO, ENV2, UCONST),
+    ),
+    "r4_libm_absolute_term_ignored": (
+        edit_text("t0_termination.py", "    nu = libm_ulp * TINY\n", "    nu = 0 * TINY\n"),
+        (UCONST, ENV2),
+    ),
+    # about 1e-323 m and m/s^2: declared for the recomputed constants only
+    "r4_gravity_and_stage_underflow_terms_removed": (
+        both(
+            edit_text("t0_termination.py", "g_uf = 4 * ETA0", "g_uf = 0 * ETA0"),
+            edit_text(
+                "t0_termination.py",
+                '"stage_abs_in_2^-1074": 2 * ETA0 / TINY',
+                '"stage_abs_in_2^-1074": 0 * ETA0 / TINY',
+            ),
+        ),
+        (UCONST,),
+    ),
+    "r4_height_underflow_terms_removed": (
+        both(
+            edit_text("t0_termination.py", "alpha = alpha_rel + h_uf_r", "alpha = alpha_rel"),
+            edit_text("t0_termination.py", "beta = beta_rel + beta_uf", "beta = beta_rel"),
+        ),
+        (UCONST,),
+    ),
+    # numerically equivalent for the floors (1e-315 m/s^2 against G ~ 9.9 m/s^2): declared
+    # for the static guard
+    "r4_stage_condition_uses_superseded_envelope": (
+        edit_text(
+            "t0_termination.py",
+            "env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None",
+            "env = (lambda low, s, b: drag_envelope_relative_only(low, s, b)) if envelope is None",
+        ),
+        (STATIC4,),
+    ),
+    "r4_oracle_density_in_binary64": (
+        edit_text(
+            "t0_oracle.py",
+            "        return rho0 * (-(h - base) / scale).exp()\n",
+            "        return D(float(rho0 * (-(h - base) / scale).exp()))\n",
+        ),
+        (R4REV,),
+    ),
 }
 
 
@@ -306,6 +403,7 @@ def run(name: str) -> dict:
                 str(d / "check_review01.py"),
                 str(d / "check_review02.py"),
                 str(d / "check_review03.py"),
+                str(d / "check_review04.py"),
             ],
             capture_output=True,
             text=True,

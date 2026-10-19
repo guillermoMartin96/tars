@@ -1,6 +1,6 @@
 # Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic test points, validation-scenario parameters
 
-**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
+**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). **Corrected after Review 04** (M3T0-R4-F1; fourth log at the end; authorized by "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05", 2026-10-19). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-18  
 **Related milestone/issue:**
@@ -93,17 +93,39 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
       - Every band that the computed height can select is therefore included.
       - Inside each band the function still decreases, because (1 − α)(1 − θ_x)a > 2H for every scale height H. So the supremum is at L − ε_sel(L) or at a band base above it, where GMAT's rule assigns the band above.
       - It is evaluated in 60-digit decimal arithmetic with outward pads and rounded up.
-    - **Assumptions (unresolved; the guarantee holds only under them).**
-      - A-FP-1: IEEE 754 binary64 with round-to-nearest.
-      - A-FP-2: libm sin, cos, atan2, hypot, exp and pow have a relative error ≤ 2 × 2^-52. This is an assumption about the platform library, not proved. It is measured on macOS x86_64 (the M1/M2 reference host) only (`t0_height_error.py`). There, cos reaches 0.94 × 2^-52 relative (1.41 ulp), so the common "within 1 ulp" does not hold.
-      - A-FP-3: numpy evaluates the 3-element products elementwise and the 3-term dot product within γ₃.
+    - **Underflow [derived] (corrected after Review 04 R4-F1).** The Review 03 correction used a purely relative rounding model, which fails for subnormal results. Above about 181 890 km the table density is subnormal in binary64. At 190 681 km the model's drag was 2.01 times the envelope, because the coefficient's last division rounds 0.51 × 2^-1074 up to 2^-1074. The correction carries the absolute error of every underflowing operation (≤ 2^-1075 for a product or quotient, ≤ LIBM_ULP × 2^-1074 for a library function, including exp rounding to 0) through E1–E6:
+      - in the height (E1) and the kilometre conversion (E2) these terms add about 1e-316 m to β; ε_h is unchanged in binary64;
+      - the density gains an absolute error N_ρ ≤ 2.95 × 2^-1074 (E3). In the top band the computed density is exactly 0 above the selection height h_zero = 191 735 430.72 m, which is 9.5e-8 m above the oracle's exact onset;
+      - the envelope gains an absolute part (F_A·N_ρ/(2B) + K_W·W)·S_max² + K_1·2^-1075·S_max + 2^-1074 (E4). Here W ≈ 1.06 × 2^-1075 is the coefficient's underflow, dominated by its last division, and S_max = s + ω_E·(a + (h_zero + β_sel)/(1 − α_sel)) is the largest speed term at which the computed density can be nonzero. It is about 6.0e-316 m/s² at B 25.8 and s = 0, and 1.9e-315 m/s² at s = 11 km/s;
+      - gravity with J2 gains 4 × 2^-1075 m/s² (E5), and the RK4 stage positions and velocities 2 × 2^-1075 (E6).
+
+      The reviewer's point now has drag 1.020e-315 against an envelope of 1.111e-315 m/s². The tightest observed case is where the coefficient rounds up from just above 0.5 × 2^-1074. There the largest observed ratio of model drag to envelope is 0.983 (B 100), an empirical figure. No new altitude restriction is introduced: the supported domain is unchanged (outside the ellipsoid, no overflow).
+    - **Assumptions (unresolved; the guarantee holds only under them). Corrected after Review 04 R4-F1:** A-FP-1 and A-FP-3 previously stated a purely relative model, and A-FP-2 a purely relative libm error. Both fail for subnormal results.
+      - A-FP-1: IEEE 754 binary64 with round-to-nearest-even and **gradual underflow** (no flush-to-zero or denormals-are-zero mode). For × and ÷, fl(x op y) = (x op y)(1 + δ) + η with |δ| ≤ 2^-53, |η| ≤ 2^-1075 and δη = 0. A sum that underflows is exact, a square root is never subnormal, and a result of magnitude ≤ 2^-1075 rounds to 0. This follows from IEEE 754 itself. Whether a platform runs in that mode is checked at run time by `check_review04.py`, on the model's own operations at the R4-F1 point. It has been checked on macOS x86_64 only, because CI does not collect the T0 checks.
+      - A-FP-2: libm sin, cos, atan2, hypot, exp and pow satisfy |computed − exact| ≤ LIBM_ULP × 2^-52·|exact| + LIBM_ULP × 2^-1074 with LIBM_ULP = 2. The absolute term covers subnormal results and exp rounding to 0. No relative bound is assumed there. This is an assumption about the platform library, not proved. It is measured on macOS x86_64 (the M1/M2 reference host) only (`t0_height_error.py`):
+        - cos reaches 0.94 × 2^-52 relative (1.41 ulp), so the common "within 1 ulp" does not hold;
+        - for subnormal results, the largest absolute errors are 0.74 (exp), 0.59 (hypot) and 0.50 (atan2) × 2^-1074.
+      - **How far A-FP-2 can be weakened [derived; `termination` → `libm_sensitivity`].** Every derived constant is non-decreasing in LIBM_ULP. A floor that holds for LIBM_ULP = 2^j therefore holds for every libm within 2^j ulps. Results:
+        - the published bounds (the bracket ends below) hold for every libm within 2^5 (B 25.8), 2^6 (B 100) and 2^7 (drag-free) ulps;
+        - the 2-decimal values rounded up (124 456.69, 118 633.51 and 111 511.97 m) hold within 2^19, 2^17 and 2^20 ulps.
+
+        [source] The glibc manual ("Errors in Math Functions", sourceware.org, read 2026-10-19) says the library "does not aim for correctly rounded results". It aims for "a few ulp", and its testsuite flags only errors above 9 ulp. That is a statement of intent, not a bound, but it lies within the 2^5 ulps that the published bounds tolerate. No Apple libm accuracy statement was found.
+
+        The guarantee therefore remains conditional on a libm accuracy assumption. That assumption can be weakened from 2 ulps to the figures above. It is not established for any platform other than the one measured.
+      - A-FP-3: numpy evaluates the 3-element products elementwise. The 3-term dot product x·x is within γ₃·Σx_i² + 3(1 + u)²·2^-1075, in any order, with or without fused multiply-add.
     - **Observed, not proved:** the largest height error over 13 050 sampled points is 2.06e-9 m, 0.22 of ε_h (`t0_height_error.py`).
   - **Monotonicity [derived].** H0 and every L_k increase with h0 (the coefficient of h0 is 1/(1 + α) − u/(1 − α) > 0), V decreases, and the envelope is non-increasing in its lower height and non-decreasing in its speed. So every M_k increases with h0, and the condition has a single root: every computed h0 above it satisfies the condition. The published bound is the upper end of a bisection bracket at which the outward-rounded condition holds.
-  - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8. The bound for a B also covers every larger B. **Effect of the R3-F1 correction:**
+  - For unrestricted bound states at dt = 10 s the bound is 111 511.96 m drag-free, 118 633.51 m at B 100 and 124 456.69 m at B 25.8. The bound for a B also covers every larger B.
+    - **Quoted to the nearest centimetre (clarified after Review 04, I-5 §3).** The governing values are the bracket ends 111 511.96182508787, 118 633.50894662621 and 124 456.68544510857 m. The first rounds down: 111 511.96 m lies 1.8 mm below the drag-free bound and does not itself satisfy the condition. A sufficient 2-decimal value is 111 511.97 m. No bound changed. How bounds are quoted in a decision is for the owner.
+    - **Effect of the R4-F1 correction:** the three published bounds are unchanged to the last bit. The roots are unchanged to 1e-9 m: the corrected and Review 03 brackets coincide, for example [124 456.68544484391, 124 456.68544484489] m. The margins at the published bounds are 7.2e-7, 1.0e-6 and 8.4e-7 m (`termination` → `floor_comparison`). **Effect of the R3-F1 correction:**
     - the exact roots move up by 1.9e-8 m;
     - the published values (bracket upper ends, ≤ 1e-6 m above the root) move up by 2.8e-7, 5.3e-7 and 8.5e-7 m against Review 02;
     - all three are unchanged at the quoted precision, and **the P1 recommendation is unchanged**.
-  - **Checked independently** (`check_review02.py`, `check_review03.py`, with heights from an independent high-precision oracle, `t0_oracle.py`):
+  - **Checked independently** (`check_review02.py`, `check_review03.py`, `check_review04.py`, with heights and densities from an independent high-precision oracle, `t0_oracle.py`):
+    - across the normal-to-subnormal transition of the top band (181 000–193 000 km), at binary64 neighbours of the smallest-normal density, of the model's coefficient rounding and of the rounding-to-zero boundary, the model's drag stays within the corrected envelope. These points cover zero, near-escape, 11 km/s and straight-down velocities, and include the R4-F1 point and constructed points that exceed any purely relative enclosure. Above h_zero the computed density and drag are exactly 0;
+    - every band base (all 27 and the lower edge), with binary64 neighbours and true heights just below and above;
+    - RK4 steps from high-altitude retrograde, near-escape and straight-down bound states keep every stage within its bounds, and every stage force within the bounds the condition uses;
+    - a second implementation reproduces the underflow constants, the envelope, the three bounds and the libm sensitivity;
     - a second implementation reproduces the three bounds of the corrected derivation to 3e-6 m;
     - at all 12 downward jumps, exact-base and adjacent binary64 points, true heights just below and above the base, and points whose computed and true heights select different bands stay within the corrected envelope;
     - RK4 steps from near-escape, retrograde and straight-down bound states at the bounds and near the jumps keep every stage's oracle height above its lower bound;
@@ -210,7 +232,7 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - **Where the options differ (corrected after Review 01 F2).**
   - In the measured decay case no stage came near the lower edge: for floors 90–150 km, stages stayed at least 89.4 km above it.
   - P1 alone does not guarantee this. A P1-admissible stress input puts the k2 input at −28 km (P1, "What A4-b guarantees"). For such a run, option (i) evaluates the lowest band below its domain and continues to the committed-state checks (there, a state at −78.4 km where `reentry` and `impact` both hold). Option (ii) ends the run with a defined failure.
-  - The two options give identical runs whenever no stage goes below the lower edge, which is guaranteed for h_f above the derived sufficient condition (≈ 111.5–124.5 km at dt = 10 s for unrestricted bound states, P1), under the floating-point assumptions A-FP-1 … A-FP-3 stated there (corrected after Review 03 R3-F1).
+  - The two options give identical runs whenever no stage goes below the lower edge, which is guaranteed for h_f above the derived sufficient condition (≈ 111.5–124.5 km at dt = 10 s for unrestricted bound states, P1), under the floating-point assumptions A-FP-1 … A-FP-3 stated there (corrected after Review 03 R3-F1 and Review 04 R4-F1).
 - Option (i) would silently extend the model below its domain, against DR-0024 Q8, "no indefinite extrapolation below the modelled domain", and against GMAT's behaviour.
 - Option (ii) makes a misconfiguration (or a defect that produces such a state) visible.
 
@@ -385,7 +407,7 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 
 ## Work continuing independently
 - None of the implementation. T1 and later are not authorized.
-- The independent review of T0: Review 01 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-01.md`); F1–F4 are corrected here. Review 02 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-02.md`); R2-F1 … F3 and IM-1 are corrected here. Review 03 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-03.md`); R3-F1 is corrected here. Review 04 follows under Authorization I-4.
+- The independent review of T0: Review 01 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-01.md`); F1–F4 are corrected here. Review 02 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-02.md`); R2-F1 … F3 and IM-1 are corrected here. Review 03 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-03.md`); R3-F1 is corrected here. Review 04 returned REQUEST_CHANGES (`docs/reviews/M3-T0-review-04.md`); R4-F1 is corrected here. Review 05 follows under Authorization I-5.
 
 ## Requested response
 For each of P1–P10: accept, choose an option, or `discuss`. P1 needs κ. P6 needs a ruling on whether option (b) falls inside DR-0028's prohibition on additional Earth-orientation implementation.
@@ -424,3 +446,13 @@ Authority: "Authorization: M3 T0 — Review 02 Corrections and Independent Revie
 Authority: "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04" (Tech Lead). The superseded wording is preserved at commit `c6c0fff`. No option, identifier, recommendation status or owner decision changed; DR-0029 P1–P10 stay OPEN, and DR-0028's scope ruling for P6 (b) stays open.
 - **M3T0-R3-F1 (P1, P4):** the stage-domain drag envelope bounded drag at exact heights. It now bounds the model's computed drag over every band that the computed height can select, using a derived height-error bound ε_h and the rounding of the density, drag, gravity and RK4 stage arithmetic, under the stated floating-point assumptions A-FP-1 … A-FP-3. The bound is stated for the computed committed height. The three bounds are unchanged at the quoted precision (exact roots +1.9e-8 m). The superseded sentence "the supremum is attained at L or at a band base above L" was true for exact heights only. P4's guarantee now names the assumptions. The P1 recommendation is unchanged.
 <!-- /review03-correction-log -->
+
+<!-- review04-correction-log -->
+## Correction log (Review 04, 2026-10-19)
+Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05.
+- **M3T0-R4-F1 (P1, P4):** the drag enclosure assumed relative rounding for subnormal results. A-FP-1 to A-FP-3 now state the mixed absolute and relative model, with gradual underflow. E1–E6 carry the absolute error of every underflowing operation, and the envelope gains an absolute part bounded up to the zero-density height h_zero. No domain restriction is introduced.
+  - The three bounds are unchanged to the last bit, and the roots to 1e-9 m.
+  - A-FP-2 remains an assumption. Its weakest sufficient form is quantified (2^5 to 2^7 ulps for the published bracket ends).
+  - The quotation of the drag-free bound to the nearest centimetre is clarified (111 511.96 m is 1.8 mm below it; 111 511.97 m suffices).
+  - The P1 recommendation is unchanged.
+<!-- /review04-correction-log -->
