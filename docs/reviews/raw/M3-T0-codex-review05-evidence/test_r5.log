@@ -1,0 +1,27 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_r5_global_envelope_includes_subnormal_ballistic_coefficient _______
+
+    def test_r5_global_envelope_includes_subnormal_ballistic_coefficient():
+        """The documented b=fl(mass/fl(cd area)) construction must preserve the enclosure."""
+        mass=17*math.ulp(0.0)
+        b=mass/(2.2*15.)
+        r=np.array([186378137.,0.,0.]);v=np.zeros(3)
+        # mu=0 isolates the computed drag without subtraction cancellation.
+        a=m.acceleration(m.Config(mu=0.,drag=m.Drag(2.2,15.)),0.,r,v,mass)
+        assert all(math.isfinite(x) for x in a)
+        assert m.geodetic_iterative(r)[1]==180000000.
+        with localcontext() as c:
+            c.prec=90
+            actual=sum(D(float(x))**2 for x in a).sqrt()
+>           assert actual<=D(t.drag_envelope(180000000.,0.,b)),(actual,b)
+E           AssertionError: (Decimal('932800051663490532794957824'), 5e-324)
+E           assert Decimal('932800051663490532794957824') <= Decimal('480533359948429083080130560')
+E            +  where Decimal('480533359948429083080130560') = D(4.805333599484291e+26)
+E            +    where 4.805333599484291e+26 = <function drag_envelope at 0x1125a5c60>(180000000.0, 0.0, 5e-324)
+E            +      where <function drag_envelope at 0x1125a5c60> = t.drag_envelope
+
+review_scratch/test_r5.py:21: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/test_r5.py::test_r5_global_envelope_includes_subnormal_ballistic_coefficient
+1 failed in 0.67s

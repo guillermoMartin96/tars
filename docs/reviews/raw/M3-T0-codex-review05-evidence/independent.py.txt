@@ -1,0 +1,49 @@
+import sys, pathlib, math, json, hashlib
+from decimal import Decimal as D, localcontext
+import numpy as np
+R=pathlib.Path.cwd(); S=R/'review_scratch'; sys.path.insert(0,str(R/'docs/science/experiments/m3-t0'))
+import t0_model as m, t0_termination as t
+out={}
+with localcontext() as c:
+ c.prec=90
+ rows=[tuple(D(x.strip()) for x in l.split(',')) for l in m.TABLE_COPY.read_text().splitlines() if l.strip()]
+ base,rho,scale=rows[-1]; tiny=D(2)**-1074
+ hz=1000*(base+scale*(rho/(tiny/2)).ln())
+ out['zero_height']={'exact_onset':str(hz),'bound':t.FP['h_zero_m'],'margin_m':str(D(t.FP['h_zero_m'])-hz)}
+ rng=np.random.default_rng(5005); worst=D(0); violations=[]; oldfail=0; cnt=0
+ for mass in [850.,3300.]:
+  b=mass/(2.2*15.)
+  for j in range(1600):
+   h=float(rng.uniform(1.80e8,1.93e8)); lat=float(rng.uniform(-math.pi/2,math.pi/2)); lon=float(rng.uniform(-math.pi,math.pi))
+   r=m.geodetic_to_cartesian(lat,lon,h)
+   # Independent true height via ellipsoid foot point, bisection (not Newton oracle).
+   xyz=[D(float(x)) for x in r]; a=D(m.A_WGS84); e=D(m.E2_WGS84); aa=a*a; bb=aa*(1-e)
+   lo=D(0); hi=sum(x*x for x in xyz)
+   for _ in range(210):
+    z=(lo+hi)/2
+    f=(xyz[0]**2+xyz[1]**2)*aa/(aa+z)**2+xyz[2]**2*bb/(bb+z)**2-1
+    if f>0:lo=z
+    else:hi=z
+   z=(lo+hi)/2
+   ht=sum((xyz[k]-xyz[k]*(aa if k<2 else bb)/((aa if k<2 else bb)+z))**2 for k in range(3)).sqrt()
+   v=rng.normal(size=3); v*=float(rng.uniform(0,12000))/np.linalg.norm(v)
+   if j%3==0:v=np.zeros(3)
+   speed=sum(D(float(x))**2 for x in v).sqrt(); sf=float(speed)
+   if D(sf)<speed:sf=math.nextafter(sf,math.inf)
+   low=float(ht)
+   if D(low)>ht:low=math.nextafter(low,-math.inf)
+   vec=m.acceleration(m.Config(mu=0,drag=m.Drag(2.2,15)),0,r,v,mass)
+   force=sum(D(float(x))**2 for x in vec).sqrt()
+   env=D(t.drag_envelope(low,sf,b)); old=D(t.drag_envelope_relative_only(low,sf,b))
+   ratio=force/env; worst=max(worst,ratio); oldfail+=force>old;cnt+=1
+   if force>env:violations.append([r.tolist(),v.tolist(),mass,str(force),str(env)])
+ out['random']={'points':cnt,'max_ratio':str(worst),'old_violations':oldfail,'violations':violations}
+ r=np.array([197059137.,0,0]); v=np.zeros(3)
+ vec=m.acceleration(m.Config(mu=0,drag=m.Drag(2.2,15)),0,r,v,850)
+ force=sum(D(float(x))**2 for x in vec).sqrt()
+ out['reviewer']={'force':str(force),'old':t.drag_envelope_relative_only(190681000,0,t.B_V1),'new':t.drag_envelope(190681000,0,t.B_V1)}
+ out['floors']=t.floor_comparison(t.sufficient_stage_condition()['rows'])
+ out['sensitivity']=t.libm_sensitivity(t.sufficient_stage_condition()['rows'])
+paths=['proof/thresholds/m1.json','proof/thresholds/m2.json','toolbox/references/gmat/m2/APPROVED_DIGESTS.json','toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz','proof/references/m2_final_states.json','../GMAT R2026a/bin/GmatConsole','../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt']
+out['digests']={p:hashlib.sha256((R/p).read_bytes()).hexdigest() for p in paths}
+(S/'independent.json').write_text(json.dumps(out,indent=2));print(json.dumps(out,indent=2))

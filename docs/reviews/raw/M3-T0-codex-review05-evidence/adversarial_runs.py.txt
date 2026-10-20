@@ -1,0 +1,25 @@
+import pathlib,sys,subprocess,shutil,inspect,json,tarfile,io,concurrent.futures
+R=pathlib.Path.cwd();S=R/'review_scratch';REL=pathlib.Path('docs/science/experiments/m3-t0');sys.path.insert(0,str(R/REL))
+import mutation_check_review02 as mut, t0_oracle as oracle
+P=str(R/'.venv/bin/python')
+def test(root,name):
+ args=[P,'-m','pytest','-q','-p','no:cacheprovider','-rf',str(root/REL/'check_review04.py')]
+ p=subprocess.run(args,cwd=root,capture_output=True,text=True);(S/(name+'.log')).write_text(p.stdout+p.stderr)
+ return {'args':args,'exit':p.returncode,'tail':p.stdout.strip().splitlines()[-1] if p.stdout.strip() else p.stderr}
+root=S/'red_before';root.mkdir(exist_ok=True)
+data=subprocess.check_output(['git','archive','c15fbd4','docs']);tarfile.open(fileobj=io.BytesIO(data)).extractall(root,filter='data')
+d=root/REL;shutil.copyfile(R/REL/'check_review04.py',d/'check_review04.py')
+with (d/'t0_termination.py').open('a') as f:f.write('\ndrag_envelope_relative_only = drag_envelope\n')
+with (d/'t0_oracle.py').open('a') as f:f.write('\n'+inspect.getsource(oracle.top_band_height))
+out={'red_before':test(root,'red_before')}
+def run(name):
+ root=S/('mutant_'+name);shutil.copytree(R/'docs',root/'docs',ignore=shutil.ignore_patterns('__pycache__'),dirs_exist_ok=True)
+ fn,expected=mut.MUTANTS[name]
+ if fn:fn(root/REL)
+ res=test(root,name);res['declared_checks']=expected
+ import re
+ failed=sorted(set(re.findall(r'^FAILED \S+::(\w+)',(S/(name+'.log')).read_text(),re.M)));res['failed_checks']=failed;res['declared_detected']=bool(set(failed)&set(expected));return name,res
+names=['control_unmodified']+[n for n in mut.MUTANTS if n.startswith('r4_')]
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+ out['mutations']=dict(pool.map(run,names))
+(S/'adversarial_runs.json').write_text(json.dumps(out,indent=2));print(json.dumps(out,indent=2))

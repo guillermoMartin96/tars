@@ -1,0 +1,32 @@
+......................................F.........                         [100%]
+=================================== FAILURES ===================================
+___________ test_r4f1_envelope_recomputed_by_a_second_implementation ___________
+
+    def test_r4f1_envelope_recomputed_by_a_second_implementation():
+        """Detects: a term of the corrected envelope removed or reduced in its evaluation (the
+        absolute part, its density, coefficient and product terms, h_zero, or the relative
+        part), including terms too small for any constructed point to expose."""
+        c = constants_second(tt.LIBM_ULP)
+        h_zero = tt.FP["h_zero_m"]
+        cases = [
+            (190_681_000.0, 0.0, "B25.8"),
+            (185_000_000.0, 11_000.0, "B100"),
+            (h_zero - 1e5, 2_000.0, "B25.8"),
+            (h_zero + 1e6, 0.0, "B25.8"),
+            (120_000.0, 11_000.0, "B25.8"),
+            (450_000.0, 7_800.0, "B100"),
+            (0.0, 7_800.0, "B25.8"),
+        ]
+        for low, s, vehicle in cases:
+            b = VEHICLES[vehicle]
+            got = Fraction(tt.drag_envelope(low, s, b))
+            ref = env_second(Fraction(low), Fraction(s), b, c)
+>           assert got >= ref * (1 - Fraction(1, 10**30)), (low, s, vehicle)
+E           AssertionError: (190681000.0, 0.0, 'B25.8')
+E           assert Fraction(106428349, 10120112665365530917624767335945865352477832488207105917845067901371516978399767344598019185071856...6372534281003741712346349309051677824579778170405028256179384776166707307615251266093163754323003131653853870546747392) >= (<[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] Fraction object at 0x10a1dd960> * (1 - Fraction(1, 1000000000000000000000000000000)))
+E            +  where Fraction(1, 1000000000000000000000000000000) = Fraction(1, (10 ** 30))
+
+docs/science/experiments/m3-t0/check_review04.py:620: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_envelope_recomputed_by_a_second_implementation
+1 failed, 47 passed in 17.11s

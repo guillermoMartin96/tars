@@ -1,0 +1,21 @@
+import sys
+from pathlib import Path
+from decimal import Decimal as D,localcontext
+import math
+import numpy as np
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'docs/science/experiments/m3-t0'))
+import t0_model as m,t0_termination as t
+
+def test_r5_global_envelope_includes_subnormal_ballistic_coefficient():
+    """The documented b=fl(mass/fl(cd area)) construction must preserve the enclosure."""
+    mass=17*math.ulp(0.0)
+    b=mass/(2.2*15.)
+    r=np.array([186378137.,0.,0.]);v=np.zeros(3)
+    # mu=0 isolates the computed drag without subtraction cancellation.
+    a=m.acceleration(m.Config(mu=0.,drag=m.Drag(2.2,15.)),0.,r,v,mass)
+    assert all(math.isfinite(x) for x in a)
+    assert m.geodetic_iterative(r)[1]==180000000.
+    with localcontext() as c:
+        c.prec=90
+        actual=sum(D(float(x))**2 for x in a).sqrt()
+        assert actual<=D(t.drag_envelope(180000000.,0.,b)),(actual,b)

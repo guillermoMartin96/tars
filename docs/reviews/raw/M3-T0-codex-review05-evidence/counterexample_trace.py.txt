@@ -1,0 +1,13 @@
+import sys,pathlib,math,json
+from decimal import Decimal as D,localcontext
+import numpy as np
+sys.path.insert(0,str(pathlib.Path('docs/science/experiments/m3-t0').resolve()))
+import t0_model as m,t0_termination as t
+mass=17*math.ulp(0.);cd=2.2;area=15.;b=mass/(cd*area);r=np.array([186378137.,0.,0.]);v=np.zeros(3)
+h=m.geodetic_iterative(r)[1];hk=h/1000.;band=m.TABLE[-1];arg=-(hk-band.base_km)/band.scale_km
+exp=math.exp(arg);rho=band.rho0*exp;c0=.5*rho;c1=c0*cd;c2=c1*area;c3=c2/mass
+vr=v-m.air_velocity(r,m.OMEGA_E);dot=float(vr@vr);n=math.sqrt(dot);kn=c3*n;vec=kn*vr
+full=m.acceleration(m.Config(j2=m.J2_FROM_C20,drag=m.Drag(cd,area)),0,r,v,mass)
+with localcontext() as c:
+ c.prec=90; exactexp=D(arg).exp();scale=D(2)**-52
+ print(json.dumps({'height':h,'mass_exact':str(D(mass)),'B_exact':str(D(mass)/(D(cd)*D(area))),'B_float':b,'B_over_phi':str(D(b)/D(t.FP['phi_B'])),'density':rho,'coefficient_chain':[c0,c1,c2,c3],'vrel':vr.tolist(),'dot':dot,'sqrt':n,'kn':kn,'drag':vec.tolist(),'approved_full_acceleration':full.tolist(),'all_intermediates_finite':all(math.isfinite(x) for x in [hk,arg,exp,rho,c0,c1,c2,c3,dot,n,kn,*full]),'exp_error_in_2^-52_relative':str(abs(D(exp)-exactexp)/(exactexp*scale)),'rn_pow_relative_units':str(abs(D(float(np.linalg.norm(r))**3)-D(float(r[0]))**3)/(D(float(r[0]))**3*scale))},indent=2))

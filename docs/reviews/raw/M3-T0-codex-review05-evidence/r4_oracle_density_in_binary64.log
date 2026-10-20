@@ -1,0 +1,21 @@
+F...............................................                         [100%]
+=================================== FAILURES ===================================
+_________ test_r4f1_reviewer_counterexample_is_reproduced_and_covered __________
+
+    def test_r4f1_reviewer_counterexample_is_reproduced_and_covered():
+        """Detects: the envelope's absolute (underflow) part missing or too small."""
+        ht = o.true_height(R4_R)
+        assert ht == D(R4_R[0]) - o.A == D(190_681_000)  # exact: the foot point is (a, 0, 0)
+        assert model_height(R4_R) == 190_681_000.0
+        rho = o.density(ht)
+>       assert abs(rho - D("1.26316923236358804936e-322")) < D("1e-342")  # Review 04, decimal
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('2.14014468236529654990788614573755681491554867972443875065228E-324') < Decimal('1E-342')
+E        +  where Decimal('2.14014468236529654990788614573755681491554867972443875065228E-324') = abs((Decimal('1.28457067918724101485907886145737556814915548679724438750652277450175631890254275484977957454025358018747106...3772698443119234852485177213307357383528505847026934826856434726031195615869595627600574516691267490386962890625E-322') - Decimal('1.26316923236358804936E-322')))
+E        +    where Decimal('1.26316923236358804936E-322') = D('1.26316923236358804936e-322')
+E        +  and   Decimal('1E-342') = D('1e-342')
+
+docs/science/experiments/m3-t0/check_review04.py:194: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_reviewer_counterexample_is_reproduced_and_covered
+1 failed, 47 passed in 18.14s

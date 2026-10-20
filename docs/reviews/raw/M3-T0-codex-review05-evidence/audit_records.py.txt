@@ -1,0 +1,28 @@
+import pathlib,json,hashlib,re,subprocess
+R=pathlib.Path.cwd();S=R/'review_scratch';D=R/'docs/science/experiments/m3-t0'
+files=list((R/'docs/decisions/requests').glob('DR-002[4-9]*'))+[R/'docs/science/assumptions.md',R/'docs/science/validation.md',R/'docs/milestones/M3-T0-report.md',R/'docs/milestones/M3-T0-decision-matrix.md',D/'README.md']
+files+=list((R/'docs/reviews').glob('M3-T0-review-0[1-4].md'))+list((R/'docs/reviews/raw').glob('M3-T0-codex-review0[1-4]*md'))
+files+=list((R/'docs/reviews/raw/M3-T0-review05-correction-evidence').glob('*'))+list(D.glob('t0_*_results.json'))
+inv=[]
+for f in sorted(set(files)):
+ if not f.is_file():continue
+ text=f.read_text(); inv.append({'path':str(f.relative_to(R)),'bytes':f.stat().st_size,'sha256':hashlib.sha256(f.read_bytes()).hexdigest()})
+ # Retain complete text for the command/inspection ledger rather than omitted grep context.
+ with (S/'inspections.log').open('a') as out:out.write('\nFILE '+str(f.relative_to(R))+'\n'+text+'\n')
+(S/'inspected_files.json').write_text(json.dumps(inv,indent=2))
+val=(R/'docs/science/validation.md').read_text();val=val[val.index('## VAL-0019'):]
+val=val.split('\n## VAL-',1)[0]
+checks=[]
+for line in val.splitlines():
+ hs=re.findall(r'\b[0-9a-f]{64}\b',line)
+ names=re.findall(r'`([^`]+\.(?:py|txt|json))`',line)
+ for name in names:
+  p=D/name
+  if p.is_file():
+   h=hashlib.sha256(p.read_bytes()).hexdigest();checks.append({'file':name,'digest':h,'claimed':hs,'match':h in hs})
+(S/'record_digest_checks.json').write_text(json.dumps(checks,indent=2))
+print('Inspected file inventory',len(inv),'VAL digest checks',len(checks));print(json.dumps(checks,indent=2))
+# All previous raw reviews/prompts must be preserved relative to previous checkpoint.
+print('raw review changes:',subprocess.check_output(['git','diff','--name-only','c15fbd4','HEAD','--','docs/reviews/raw/M3-T0-codex-review01*','docs/reviews/raw/M3-T0-codex-review02*','docs/reviews/raw/M3-T0-codex-review03*','docs/reviews/raw/M3-T0-codex-review04*'],text=True))
+sup=json.loads((R/'docs/reviews/raw/M3-T0-review05-correction-evidence/mutation_check_review04.json').read_text())
+print('supplied mutation keys:',sup.keys());print('all supplied outcomes:',{k:v['outcome'] for k,v in sup['mutants'].items()})

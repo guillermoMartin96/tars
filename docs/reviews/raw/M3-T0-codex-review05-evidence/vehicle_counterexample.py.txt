@@ -1,0 +1,15 @@
+import sys, pathlib, math, json
+from decimal import Decimal as D,localcontext
+import numpy as np
+sys.path.insert(0,str(pathlib.Path('docs/science/experiments/m3-t0').resolve()))
+import t0_model as m,t0_termination as t
+with localcontext() as c:
+ c.prec=90
+ mass=math.ulp(0.0);cd=1.9;area=1.;b=mass/(cd*area)
+ r=np.array([m.A_WGS84+180000000.,0.,0.]);v=np.zeros(3)
+ drag=m.Drag(cd,area)
+ vec=m.acceleration(m.Config(mu=0,drag=drag),0.,r,v,mass)
+ actual=sum(D(float(x))**2 for x in vec).sqrt()
+ envelope=t.drag_envelope(180000000.,0.,b,cd,area)
+ out={'r':r.tolist(),'v':v.tolist(),'mass':mass,'cd':cd,'area':area,'b_computed':b,'b_exact':str(D(mass)/(D(cd)*D(area))),'phi_b':t.FP['phi_B'],'mass_over_cd_area_ge_b_over_phi':D(mass)/(D(cd)*D(area))>=D(b)/D(t.FP['phi_B']),'height':m.geodetic_iterative(r)[1],'rho':m.density(m.geodetic_iterative(r)[1]),'drag_components':vec.tolist(),'actual_norm':str(actual),'envelope':envelope,'ratio':str(actual/D(envelope)),'all_actual_outputs_finite':all(math.isfinite(x) for x in vec)}
+ print(json.dumps(out,indent=2))

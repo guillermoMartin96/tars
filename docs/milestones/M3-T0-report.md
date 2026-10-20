@@ -26,6 +26,13 @@
 - The three P1 bounds are unchanged to the last bit, and the P1 recommendation is unchanged. The quotation of the drag-free bound to the nearest centimetre is clarified (IM-2).
 - A-FP-2 remains an assumption, measured on macOS x86_64 only. It is weakened to "within 2^5 ulps" for the published bounds.
 - New checks: `check_review04.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-04.md`. Review 05 follows. T0 is not accepted.  
+**Status update (2026-10-19, append-only):** **Review 05 (Codex, at `88f9752`): REQUEST_CHANGES.**
+- R2-F1, R2-F3, IM-1, IM-2, F1, F3, F4 and F5 are RESOLVED.
+- R4-F1, R3-F1, R2-F2 and F2 are PARTIALLY RESOLVED: the original point and both illustrative vehicles are covered, but the unrestricted envelope contract is not.
+- New findings, both MINOR, verified and ACCEPTED, **not applied**:
+  - M3T0-R5-F1: the conversion to the ballistic coefficient keeps a relative-only rounding factor. A subnormal b (mass 17 × 2^-1074 kg) gives drag 1.94× the envelope. It does not affect the published floors, which use B 25.8, B 100 and the drag-free limit.
+  - M3T0-R5-F2: the empirical maximum 0.983 is scoped as the whole subnormal regime, but the committed transition scan reaches 0.99999999999886 at subnormal densities.
+- Record: `docs/reviews/M3-T0-review-05.md`. T0 is not accepted. A correction pass and any Review 06 await authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

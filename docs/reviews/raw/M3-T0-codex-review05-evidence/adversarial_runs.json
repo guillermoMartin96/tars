@@ -1,0 +1,274 @@
+{
+  "red_before": {
+    "args": [
+      "<snap>/.venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "-rf",
+      "<snap>/review_scratch/red_before/docs/science/experiments/m3-t0/check_review04.py"
+    ],
+    "exit": 1,
+    "tail": "17 failed, 31 passed in 12.60s"
+  },
+  "mutations": {
+    "control_unmodified": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_control_unmodified/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 0,
+      "tail": "48 passed in 17.11s",
+      "declared_checks": [],
+      "failed_checks": [],
+      "declared_detected": false
+    },
+    "r4_absolute_part_removed": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_absolute_part_removed/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "8 failed, 40 passed in 16.31s",
+      "declared_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_rk4_stages_at_high_altitude"
+      ],
+      "declared_detected": true
+    },
+    "r4_coefficient_underflow_term_removed": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_coefficient_underflow_term_removed/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "8 failed, 40 passed in 16.49s",
+      "declared_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_rk4_stages_at_high_altitude"
+      ],
+      "declared_detected": true
+    },
+    "r4_coefficient_last_division_term_removed": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_coefficient_last_division_term_removed/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "8 failed, 40 passed in 16.50s",
+      "declared_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_rk4_stages_at_high_altitude"
+      ],
+      "declared_detected": true
+    },
+    "r4_density_underflow_term_removed": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_density_underflow_term_removed/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "1 failed, 47 passed in 17.11s",
+      "declared_checks": [
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "declared_detected": true
+    },
+    "r4_zero_density_height_too_low": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_zero_density_height_too_low/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "3 failed, 45 passed in 17.23s",
+      "declared_checks": [
+        "test_r4f1_zero_density_height",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r4f1_zero_density_height"
+      ],
+      "declared_detected": true
+    },
+    "r4_libm_absolute_term_ignored": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_libm_absolute_term_ignored/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "3 failed, 45 passed in 17.18s",
+      "declared_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r4f1_zero_density_height"
+      ],
+      "declared_detected": true
+    },
+    "r4_gravity_and_stage_underflow_terms_removed": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_gravity_and_stage_underflow_terms_removed/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "1 failed, 47 passed in 17.20s",
+      "declared_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "declared_detected": true
+    },
+    "r4_height_underflow_terms_removed": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_height_underflow_terms_removed/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "1 failed, 47 passed in 18.14s",
+      "declared_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "declared_detected": true
+    },
+    "r4_stage_condition_uses_superseded_envelope": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_stage_condition_uses_superseded_envelope/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "1 failed, 47 passed in 18.12s",
+      "declared_checks": [
+        "test_stage_condition_uses_the_corrected_envelope"
+      ],
+      "failed_checks": [
+        "test_stage_condition_uses_the_corrected_envelope"
+      ],
+      "declared_detected": true
+    },
+    "r4_oracle_density_in_binary64": {
+      "args": [
+        "<snap>/.venv/bin/python",
+        "-m",
+        "pytest",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-rf",
+        "<snap>/review_scratch/mutant_r4_oracle_density_in_binary64/docs/science/experiments/m3-t0/check_review04.py"
+      ],
+      "exit": 1,
+      "tail": "1 failed, 47 passed in 18.14s",
+      "declared_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered"
+      ],
+      "failed_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered"
+      ],
+      "declared_detected": true
+    }
+  }
+}

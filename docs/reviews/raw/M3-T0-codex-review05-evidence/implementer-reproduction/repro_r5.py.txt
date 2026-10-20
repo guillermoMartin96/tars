@@ -1,0 +1,45 @@
+"""Implementer reproduction of Review 05 findings R5-F1 and R5-F2 (no fix). Run from m3-t0/."""
+import sys
+from decimal import Decimal as D
+from fractions import Fraction
+import numpy as np
+sys.path.insert(0, ".")
+import t0_model as m
+import t0_oracle as o
+import t0_termination as tt
+import check_review04 as c
+
+T = 2.0 ** -1074
+print("== R5-F1 (rounded ballistic coefficient) ==")
+r = np.array([186378137.0, 0.0, 0.0]); v = np.zeros(3)
+print("model height", m.geodetic_iterative(r)[1], "oracle height", float(o.true_height(r)))
+for label, mass in [("mass=17*2^-1074", 17 * T), ("mass=fl(fl(2^-1074*2.2)*15)", (T * 2.2) * 15.0)]:
+    b = mass / (c.CD * c.AREA)
+    exact = Fraction(mass) / (Fraction(c.CD) * Fraction(c.AREA))
+    phi_b = Fraction(tt.FP["phi_B"]) if not isinstance(tt.FP["phi_B"], Fraction) else tt.FP["phi_B"]
+    need = Fraction(b) / phi_b
+    drag = c.model_drag_norm(r, v, mass)
+    env = tt.drag_envelope(180_000_000.0, 0.0, b)
+    print(f"{label}: mass/2^-1074={mass / T:g} b/2^-1074={b / T:g} "
+          f"exact mass/(cd area)={D(exact.numerator) / D(exact.denominator):.12e} b/phi_B={D(need.numerator) / D(need.denominator):.12e} prerequisite={exact >= need}")
+    print(f"   drag={float(drag):.15e} envelope={env:.15e} drag/envelope={float(drag / D(env)):.12f}")
+print("== R5-F2 (scope of the 0.983 maximum) ==")
+for veh in ("B25.8", "B100"):
+    mass, b = c.MASSES[veh], c.VEHICLES[veh]
+    h_n = float(o.top_band_height(D(2) ** -1022)); h_z = float(o.top_band_height(c.TINY / 2))
+    h_c = c.coefficient_rounding_height(mass)
+    rng = np.random.default_rng(4040 + int(b)); pts = []
+    for lo, hi, n in ((h_n - 3e5, h_n + 3e5, 60), (h_c - 5e5, h_c + 1e5, 90),
+                      (h_z - 3e5, h_z + 3e5, 60), (h_n - 1e6, h_z + 1e6, 90)):
+        pts += c.scan_points(rng, lo, hi, n)
+    best = (0, None)
+    for r_, v_ in pts:
+        rho = c.model_density(r_)
+        if c.classify(rho) != "subnormal":
+            continue
+        a = c.model_drag_norm(r_, v_, mass)
+        env = D(tt.drag_envelope(tt._dn(o.true_height(r_)), c.up(float(np.linalg.norm(v_))), b))
+        q = a / env
+        if q > best[0]:
+            best = (q, rho)
+    print(f"{veh}: max drag/envelope over subnormal-density transition-scan points = {float(best[0]):.15f} (density {best[1]:.6e})")
