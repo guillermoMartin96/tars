@@ -811,6 +811,11 @@ All 10 approved rejection codes are exercised.
           - all 27 bases and the lower edge;
           - high-altitude RK4 stages;
           - a second implementation of the constants, the envelope, the bounds and the sensitivity.
+
+        Corrected after Review 05 R5-F1 (the conversion between the ballistic coefficient and the mass was bounded by a relative factor only; with B = 2^-1074 the model's drag was 1.94 times the envelope):
+        - cd·area/mass is bounded with the absolute error of every underflowing rounding of either construction, b = fl(mass/fl(cd·area)) or mass = fl(fl(b·cd)·area) (E4a). The bound equals φ_B/B wherever the conversion is normal. A vehicle with cd·area ≤ 2^-1075 has exactly zero force (E4b). No vehicle condition is introduced;
+        - the three bounds and every other termination result are unchanged to the last bit;
+        - confirmed by `check_review05.py`: both Review 05 counterexamples (now 0.971 and 0.550 of the envelope), 243 vehicles of either construction against exact rationals, a second implementation of the bound and the envelope, and zero force without area. R5-F2: the 0.983 maximum is scoped to the coefficient-rounding subset; the transition scan reaches 0.99999999999886 at subnormal densities.
       - Height error (`t0_height_error.py`, empirical): the largest |computed − true| over 13 050 sampled points is 2.06e-9 m, 0.22 of the derived bound. The libm maxima measured on this platform are, in units of 2^-52 relative, cos 0.94, sin 0.74 and atan2, hypot, exp and pow ≤ 0.50; in ulps, cos reaches 1.41. A measurement, not a proof of A-FP-2. For subnormal results (R4-F1), the largest absolute errors are 0.74 (exp), 0.59 (hypot) and 0.50 (atan2) × 2^-1074. The platform does gradual underflow (no flush-to-zero).
   - **Geodetic height:**
     - iterative and Vermeille (2002) inverses reproduce 640 forward-constructed points to ≤ 3e-9 m;
@@ -828,15 +833,16 @@ All 10 approved rejection codes are exercised.
   - `t0_gmat.py` `204d47c12fd4b7311fc056f894001f6c84bc827818456c23c461664d1a533e23`
   - `t0_model.py` `1d70e86c25546a91365a5ed101ad0d390bc9e507862ca4eacbfa78fe2160b09d`
   - `t0_regression.py` `06ac4c0bdf82aa442a111fc380cf94457322e37a2aae72384afda3cfe93f413c`
-  - `t0_termination.py` `bc4c834e2908ed18bb49316117e6c78f4ea9bac46add86c5328b076206347807` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`; corrected after Review 04, was `05e7463a…9554`)
+  - `t0_termination.py` `793d8348f036640478d02eeb1c3e9753142c37c6c816d894c66df02df2e58c1c` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`; corrected after Review 04, was `05e7463a…9554`; corrected after Review 05, was `bc4c834e…7807`)
   - `t0_axis_ablation.py` `c6683775974f594975f6f1e71c2dfa967f8158127c5c4570d311132ac688afd5` (added after Review 02, IM-1)
   - `check_review01.py` `e6e0ad64ba553d5ca6fb1a057669dab76b197fb4cf70dbff13478251107c2ce3` (Review 01 regression checks; two F1 checks amended after Review 02, was `6e40cd61…1b1b`)
   - `check_review02.py` `cdb9c6eefc9fe1dbe64a85ba75d2ca0cc5f0036047161bb0f33097c021eba398` (Review 02 regression checks; adversarial oracle corrected after Review 03, was `89b90dd0…6456`)
-  - `mutation_check_review02.py` `127357799fa7adc32bd752afbcf39f53373347b1e9a727dcb130b613f767768e` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`; R4-F1 mutants added after Review 04, was `2fdb49f3…2213`)
+  - `mutation_check_review02.py` `337f7d4ab2526a0ab685f7ae10b71fc8d361caff14cf4dc1ff393136a8407da4` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`; R4-F1 mutants added after Review 04, was `2fdb49f3…2213`; R5-F1 and R5-F2 mutants added after Review 05, was `12735779…768e`)
   - `t0_oracle.py` `986ea5bbff9e42683cd03bfd4d814ca6299c4cc6753e971588f7da6881a7422a` (added after Review 03, R3-F1: independent high-precision height and density reference; `top_band_height` added after Review 04, was `f70ab96d…9e93`)
   - `t0_height_error.py` `8d38d6ffe323630ff916b6027fbb7d751a9fdc31831c14f4ea0a4e55d3036a19` (added after Review 03, R3-F1: empirical height error, libm measurement, band crossings; subnormal-result measurement added after Review 04, was `b8e59c9a…2ac7`)
   - `check_review03.py` `9072614100447bca8bc4d6fb494f21d0c03fffd9988345a044841fce81ca59e5` (Review 03 regression checks)
   - `check_review04.py` `eeb051c3cbf71caa8d2034a3e2e32f9b821fbe99f426075dca592d7ae824e75f` (Review 04 regression checks)
+  - `check_review05.py` `dbf2f4a0f5d66fb55214af8abf00a2ecfa8b244029a5b1df229beff79da22609` (Review 05 regression checks)
   - `data/EarthExponentialAtmosphereData.txt` `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`
 - **Classification:** spike evidence for the T0 proposals (DR-0029). Model and frame agreement are exact where attributed. One configuration sensitivity is unresolved and escalated.
 - **J-ax-1 limitation, quantified against GMAT's real Earth over 53 700 s:**
@@ -900,3 +906,22 @@ All 10 approved rejection codes are exercised.
       - the stage condition using the superseded envelope (numerically identical floors; declared for the static guard);
       - the oracle density rounded to binary64.
 <!-- /review04-correction-log -->
+<!-- review05-correction-log -->
+- **Correction log (Review 05, 2026-10-19; "Authorization I-6 — M3 T0 Review 05 corrections only").** The superseded wording is preserved at `17b2229`.
+  - R5-F1: the envelope bounded cd·area/mass by φ_B/B, a relative-only rounding of the conversion between B and the mass. E4a now bounds it with the absolute error of every underflowing rounding of either construction, and E4b shows zero force for cd·area ≤ 2^-1075. No vehicle condition and no new or stronger assumption is introduced. The three bounds and every pre-existing termination result are unchanged to the last bit.
+  - R5-F2: 0.983 is scoped to the coefficient-rounding subset, and the transition scan's 0.99999999999886 is stated next to it. The Review 04 record is amended by an appended note.
+  - Evidence in `docs/reviews/raw/M3-T0-review05-findings-correction-evidence/`:
+    - red before: with the new `check_review05.py` on the unmodified `17b2229` tree (no shim needed), all 17 checks fail:
+      - 4 are behavioural: both counterexamples (1.94 and 1.10 times the envelope), the force grid, and the envelope against its second implementation;
+      - 4 fail because the E4a bound does not exist;
+      - 5 fail on the new E4b constant only (the force without area was already exactly 0);
+      - 4 are record checks;
+    - green after: `check_review01.py` … `check_review05.py` 157/157;
+    - mutation (`mutation_check_review02.py`, 45 mutants plus a control, run against all five check files): the control passes; 44 are detected by a declared check, and the two-body stationary-point mutant is equivalent. All 10 R4-F1 mutants are detected again. The 10 new mutants cover:
+      - the relative-only conversion (the original defect);
+      - the C1 quotient's absolute term removed, or halved;
+      - the C1 product's absolute term removed, and C2's absolute terms removed (each detected by the lemma checks only: the coefficient's own underflow term W masks them in the force);
+      - the corrected b_R applied to the relative part only (detected by the second implementation of the envelope only);
+      - for R5-F2: the superseded sentence restored, the subset presented as the subnormal regime, the transition-scan maximum hidden, and the Review 04 row rewritten instead of amended;
+    - a first mutation run left the "transition-scan maximum hidden" mutant undetected. The check found the value in the new correction log rather than in P1. The check now reads the P1 sentence, and the rerun detects the mutant. Both runs are kept.
+<!-- /review05-correction-log -->

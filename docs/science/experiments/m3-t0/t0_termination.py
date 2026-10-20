@@ -42,7 +42,7 @@ from __future__ import annotations
 import json
 import math
 import sys
-from decimal import Decimal, localcontext
+from decimal import ROUND_FLOOR, Decimal, localcontext
 from fractions import Fraction
 
 import numpy as np
@@ -487,8 +487,10 @@ def _sqrt_bounds(q: Fraction) -> tuple[Fraction, Fraction]:
 
 
 def _up(q) -> float:
-    """The smallest binary64 >= q (q a Fraction or a Decimal)."""
+    """The smallest binary64 >= q (q a Fraction or a Decimal); +inf beyond the largest."""
     x = float(q)
+    if math.isinf(x):
+        return x
     return x if Fraction(x) >= Fraction(q) else math.nextafter(x, math.inf)
 
 
@@ -567,15 +569,37 @@ def rounding_allowances(libm_ulp: int = LIBM_ULP) -> dict:
     sqrt(1 + gamma_3) S^2 (1 + tau), tau = 3 eta0 / S_min + 2 eta0 / S_min^2 + 2 eta0^2 /
     S_min^2, S_min = omega b, and k <= (1 + u)^3 (cd area / mass) 0.5 rho^ + W with
     W = eta0 (1 + (1 + u)^3 cd area / mass + (1 + u)^2 area / mass + (1 + u) / mass).
-    For a vehicle with mass / (cd area) >= b / phi_B (the constructions b = fl(mass /
-    fl(cd area)) and mass = fl(fl(b cd) area) used here both satisfy it):
-        |d^| <= F_D' rho(h_s) exp(theta_x X) S^2 / (2 b)                   (relative)
-              + (F_A N_rho / (2 b) + K_W W) S^2 + K_1 eta0 S + 2 eta0       (absolute)
+    The vehicle enters only through cd area / mass <= R (E4a, `inverse_ballistic_bound`,
+    corrected after Review 05 M3T0-R5-F1: the conversion between b and mass may underflow).
+    Writing R = phi_B / b_R (b_R <= b; b_R = b wherever the conversion is normal):
+        |d^| <= F_D' rho(h_s) exp(theta_x X) S^2 / (2 b_R)                 (relative)
+              + (F_A N_rho / (2 b_R) + K_W W) S^2 + K_1 eta0 S + 2 eta0     (absolute)
     with F_D' = F_D e^eta0 (1 + tau), F_D = F_rho (1 + u)^10 sqrt(1 + gamma_3) phi_B (the
     coefficient's 3 roundings, the dot and sqrt, the two products with v_rel and |v_rel^|^2),
     F_A = (1 + u)^10 sqrt(1 + gamma_3) phi_B (1 + tau), K_W = (1 + u)^7 sqrt(1 + gamma_3)
-    (1 + tau), K_1 = (1 + u)^3, and W <= eta0 (1 + phi_B / b ((1 + u)^3 + (1 + u)^2 / cd +
+    (1 + tau), K_1 = (1 + u)^3, and W <= eta0 (1 + phi_B / b_R ((1 + u)^3 + (1 + u)^2 / cd +
     (1 + u) / (cd area))).
+
+    E4a ballistic coefficient. The model takes mass; the envelope takes b, formed in one of
+    two ways (A-FP-1, each rounding may underflow):
+      C1  b = fl(mass / P), P = fl(cd area) (B 25.8 here). b finite and mass > 0 give P > 0,
+          so P >= 2 eta0 and cd area > eta0. P = cd area (1 + d) or cd area + e gives
+          cd area / P <= min(max(1 / (1 - u), cd area / (cd area - eta0)), cd area / (2 eta0));
+          b = (mass / P)(1 + d) or mass / P + e gives P / mass <= max((1 + u) / b,
+          1 / (b - eta0)) (b >= 2 eta0). R1 is the product of the two.
+      C2  mass = fl(fl(b cd) area) (B 100 here). mass > 0 gives Q = fl(b cd) >= 2 eta0 and
+          mass >= 2 eta0; Q >= Q_lo = max(2 eta0, min(b cd (1 - u), b cd - eta0)) and mass >=
+          M_lo = max(2 eta0, min(Q_lo area (1 - u), Q_lo area - eta0)); R2 = cd area / M_lo.
+    R = max(phi_B / b, R1, R2) holds for either construction, with no condition on the
+    vehicle. Where every result is normal, R1 = (1 + u) / ((1 - u) b) and R2 = 1 / ((1 -
+    u)^2 b) are below phi_B / b, so R = phi_B / b. The eta0 terms take over when b, P, Q or
+    mass is subnormal. R is non-increasing in b.
+
+    E4b no area. If cd area <= eta0 (C1 then gives b = +inf), the model's force is exactly
+    0. c0 = fl(0.5 rho^) <= 5/8 (rho^ <= F_rho e^eta0 rho0_max + N_rho). If area <= 1/4:
+    fl(c0 cd) area <= (5/8)(1 + u) eta0 + eta0 / 4 < eta0, which rounds to 0. Otherwise cd <
+    4 eta0, so cd = 2 eta0 and area <= 1/2; c0 cd <= 1.25 eta0 rounds to at most 2 eta0, and
+    2 eta0 area <= eta0 rounds to 0. Then k = 0 / mass = 0 and every drag component is 0.
 
     E5 gravity with J2. |a^_grav + a^_J2| <= (1 + u) max(F_g, F_J) G + 4 eta0 with G = (1 +
     3 J2 (a/b)^2) mu / b^2, from the operation counts of `t0_model.acceleration` and
@@ -645,6 +669,10 @@ def rounding_allowances(libm_ulp: int = LIBM_ULP) -> dict:
     n_rho = (1 + U) ** 2 * rho0_max * nu + ETA0
     f_a = (1 + U) ** 10 * sq1_hi * phi_b * (1 + tau)
     k_w = (1 + U) ** 7 * sq1_hi * (1 + tau)
+    # E4b: fl(0.5 rho^) <= 0.5 rho^ + eta0 <= 5/8
+    c0_max = (f_rho * exp_eta * rho0_max + n_rho) / 2 + ETA0
+    if not c0_max <= Fraction(5, 8):
+        raise ValueError("E4b: fl(0.5 rho^) <= 5/8 does not hold")
     # E5 gravity and J2
     rn_lo = sq1_lo * (1 - U)
     f_g = (1 + U) ** 2 / ((1 - uf) * rn_lo**3)
@@ -680,6 +708,7 @@ def rounding_allowances(libm_ulp: int = LIBM_ULP) -> dict:
         "K_W": k_w,
         "K_1": (1 + U) ** 3,
         "tau": tau,
+        "zero_force_c0_max": c0_max,
         "N_rho_in_2^-1074": n_rho / TINY,
         "nu_in_2^-1074": nu / TINY,
         "stage_abs_in_2^-1074": 2 * ETA0 / TINY,
@@ -746,7 +775,7 @@ def drag_envelope_exact_height(low: float, s: float, b: float) -> float:
     return max([f(low)] + [f(base) for base in BASES_M if base > low])
 
 
-def _envelope_relative(low: float, s: float, b: float, fp: dict) -> Decimal:
+def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
     """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
     beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
     al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
@@ -763,7 +792,7 @@ def _envelope_relative(low: float, s: float, b: float, fp: dict) -> Decimal:
     return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
 
 
-def _envelope_absolute(s: float, b: float, cd: float, area: float, fp: dict) -> Decimal:
+def _envelope_absolute(s: float, b: float | Decimal, cd: float, area: float, fp: dict) -> Decimal:
     """The absolute (underflow) part of E4: (F_A N_rho / (2 b) + K_W W) S_max^2 + K_1 eta0
     S_max + 2 eta0, with S_max = s + omega_E (a + (h_zero + beta_sel) / (1 - alpha_sel)),
     the largest |v| + omega |r| at which the computed density can be nonzero (E3)."""
@@ -793,6 +822,51 @@ def drag_envelope_relative_only(low: float, s: float, b: float) -> float:
         return _up(_envelope_relative(low, s, b, FP) * (1 + PAD))
 
 
+def drag_envelope_relative_conversion(
+    low: float, s: float, b: float, cd: float = CD_V1, area: float = AREA_V1
+) -> float:
+    """SUPERSEDED (Review 05 M3T0-R5-F1): the Review 04 correction, `drag_envelope` with cd
+    area / mass bounded by phi_B / b, a relative-only rounding of the conversion between b
+    and the mass. Exceeded where b is subnormal. Kept only to reproduce the finding."""
+    if math.isinf(b):
+        return 0.0
+    with localcontext() as ctx:
+        ctx.prec = PREC
+        rel = _envelope_relative(low, s, b, FP)
+        return _up((rel + _envelope_absolute(s, b, cd, area, FP)) * (1 + PAD))
+
+
+def inverse_ballistic_bound(b: float, cd: float, area: float, phi: Fraction) -> Fraction:
+    """R >= cd area / mass (E4a) for every positive binary64 vehicle whose finite ballistic
+    coefficient b was formed by C1, b = fl(mass / fl(cd area)), or C2, mass = fl(fl(b cd)
+    area), with the absolute error of every underflowing rounding (Review 05 M3T0-R5-F1).
+    phi >= phi_B is the relative factor the envelope uses."""
+    bq, prod = Fraction(b), Fraction(cd) * Fraction(area)
+    tiny = 2 * ETA0  # the smallest positive binary64
+    r1 = Fraction(0)  # C1 gives a finite b only when cd area > eta0 (P > 0)
+    if prod > ETA0:
+        p_ratio = min(max(1 / (1 - U), prod / (prod - ETA0)), prod / tiny)
+        r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+    bcd = bq * Fraction(cd)
+    q_lo = max(tiny, min(bcd * (1 - U), bcd - ETA0))
+    m_lo = max(tiny, min(q_lo * Fraction(area) * (1 - U), q_lo * Fraction(area) - ETA0))
+    r2 = prod / m_lo
+    return max(phi / bq, r1, r2)
+
+
+def envelope_ballistic_coefficient(b: float, cd: float, area: float, fp: dict) -> float | Decimal:
+    """b_R = phi_B / R <= b (E4a), the ballistic coefficient the envelope uses: b itself
+    (the same binary64) when R = phi_B / b, otherwise phi_B / R rounded down in decimals."""
+    phi = Fraction(fp["phi_B"])
+    r = inverse_ballistic_bound(b, cd, area, phi)
+    if r == phi / Fraction(b):
+        return b
+    q = phi / r
+    with localcontext() as ctx:
+        ctx.prec, ctx.rounding = PREC, ROUND_FLOOR
+        return Decimal(q.numerator) / Decimal(q.denominator)
+
+
 def drag_envelope(
     low: float,
     s: float,
@@ -820,6 +894,12 @@ def drag_envelope(
     the unbounded top band, and the supremum is attained at ell or at a band base above ell,
     where X = 0 and the band above applies (GMAT's rule). ell is clamped at the lower edge
     0: a computed height below it raises OutsideDomainError and applies no force.
+    Both parts use b_R = phi_B / R <= b (E4a), which bounds cd area / mass for a vehicle
+    whose b was formed from its mass by either construction, including subnormal b, P, Q or
+    mass (Review 05 M3T0-R5-F1). b_R = b where the conversion is normal. b = +inf is the
+    drag-free limit (0): a vehicle reaches it only through C1 with fl(cd area) = 0, where
+    the force is exactly 0 (E4b), or through an overflow of mass / P, which the supported
+    domain (no overflow) excludes.
     Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up."""
     fp = FP if fp is None else fp
     if math.isinf(b):
@@ -828,8 +908,9 @@ def drag_envelope(
         raise ValueError("the envelope is defined above the lower edge only")
     with localcontext() as ctx:
         ctx.prec = PREC
-        rel = _envelope_relative(low, s, b, fp)
-        return _up((rel + _envelope_absolute(s, b, cd, area, fp)) * (1 + PAD))
+        b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+        rel = _envelope_relative(low, s, b_r, fp)
+        return _up((rel + _envelope_absolute(s, b_r, cd, area, fp)) * (1 + PAD))
 
 
 def drag_only(cfg: m.Config, r: np.ndarray, v: np.ndarray, mass: float) -> float:
@@ -920,6 +1001,39 @@ def r4f1_counterexample() -> dict:
         "superseded_covers": old >= actual,
         "corrected_covers": new >= actual,
     }
+
+
+def r5f1_counterexamples() -> list[dict]:
+    """Review 05 M3T0-R5-F1: r = (186 378 137, 0, 0) m, whose true height is exactly
+    180 000 000 m, v = 0, cd 2.2, area 15 m^2 and b = 2^-1074, formed from mass 17 x 2^-1074
+    kg by C1 (b = fl(mass / fl(cd area))) and giving mass 30 x 2^-1074 kg by C2 (mass =
+    fl(fl(b cd) area)). The relative-only conversion bound is exceeded 1.94 and 1.10 times."""
+    r = np.array([186_378_137.0, 0.0, 0.0])
+    low = 180_000_000.0
+    if Decimal(r[0]) - Decimal(m.A_WGS84) != Decimal(low):
+        raise RuntimeError("the R5-F1 point does not have the stated true height")
+    tiny = math.ulp(0.0)
+    out = []
+    for construction, mass in (("C1", 17 * tiny), ("C2", (tiny * CD_V1) * AREA_V1)):
+        b = mass / (CD_V1 * AREA_V1) if construction == "C1" else tiny
+        actual = model_drag(r, np.zeros(3), mass)
+        old = drag_envelope_relative_conversion(low, 0.0, b)
+        new = drag_envelope(low, 0.0, b)
+        out.append(
+            {
+                "construction": construction,
+                "mass_in_2^-1074_kg": mass / tiny,
+                "b_in_2^-1074_kg_per_m2": b / tiny,
+                "true_height_m": low,
+                "computed_height_m": m.geodetic_iterative(r)[1],
+                "model_drag_mps2": actual,
+                "superseded_envelope_mps2": old,
+                "corrected_envelope_mps2": new,
+                "superseded_covers": old >= actual,
+                "corrected_covers": new >= actual,
+            }
+        )
+    return out
 
 
 # The floors published at Review 04 (`44260ef`, the Review 03 correction), for comparison.
@@ -1148,7 +1262,7 @@ def sufficient_stage_condition() -> dict:
     - computed drag <= `drag_envelope` at each stage's lower true-height bound and speed
       bound, E1-E4 (Review 03 M3T0-R3-F1: the envelope includes every band the computed
       height can select; Review 04 M3T0-R4-F1: and the absolute error of subnormal
-      results);
+      results; Review 05 M3T0-R5-F1: and of the conversion between b and the mass, E4a);
     - the stage's computed height is >= M_k = (1 - alpha) L_k - beta, E1.
     Monotonicity: H0 and L_k increase with h0 (the coefficient of h0 is 1 / (1 + alpha) -
     u / (1 - alpha) > 0), V decreases, the envelope is non-increasing in its lower height
@@ -1192,6 +1306,7 @@ def sufficient_stage_condition() -> dict:
         "review02_counterexample": envelope_counterexample(),
         "review03_counterexample": r3f1_counterexample(),
         "review04_counterexample": r4f1_counterexample(),
+        "review05_counterexamples": r5f1_counterexamples(),
         "stress": [
             stage_stress(r["vehicle"], r["B_kg_per_m2"], r["h_f_sufficient_at_least_m"])
             for r in rows
@@ -1227,7 +1342,11 @@ def floating_point_enclosure() -> dict:
             "eta0": "2^-1075",
             "zero_density_selection_height_m": FP["h_zero_m"],
             "absolute_part_mps2": {
-                f"{name} s={s:.0f}": _up(_envelope_absolute(s, b, CD_V1, AREA_V1, FP))
+                f"{name} s={s:.0f}": _up(
+                    _envelope_absolute(
+                        s, envelope_ballistic_coefficient(b, CD_V1, AREA_V1, FP), CD_V1, AREA_V1, FP
+                    )
+                )
                 for name, b in VEHICLES[:2]
                 for s in (0.0, 11_000.0)
             },

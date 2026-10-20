@@ -1,11 +1,13 @@
-"""Mutation evidence for M3T0-R2-F3, M3T0-R3-F1 and M3T0-R4-F1 (research only).
+"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1 and R5-F2 (research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
 `check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
 density discontinuities, and the Review 02 adversarial check hid it. Review 04 R4-F1: the
-envelope's rounding model dropped the absolute errors of subnormal results. This harness
-corrupts copies of the T0 result files, scripts, model and oracle, runs `check_review01.py`
-to `check_review04.py` on each copy, and classifies the outcome:
+envelope's rounding model dropped the absolute errors of subnormal results. Review 05
+R5-F1: the conversion between the ballistic coefficient and the mass was bounded by a
+relative factor only; R5-F2: an empirical maximum was quoted for the wrong population. This
+harness corrupts copies of the T0 result files, scripts, model, oracle and records, runs
+`check_review01.py` to `check_review05.py` on each copy, and classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
                  checks declared for that mutant is among the failures (a failure elsewhere
@@ -142,6 +144,23 @@ STAGES4 = "test_r4f1_rk4_stages_at_high_altitude"
 ENV2 = "test_r4f1_envelope_recomputed_by_a_second_implementation"
 UCONST = "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
 STATIC4 = "test_stage_condition_uses_the_corrected_envelope"
+R5CE = "test_r5f1_review05_counterexamples_are_covered"
+R5LEM = "test_r5f1_conversion_bound_holds_for_both_constructions"
+R5SEC = "test_r5f1_conversion_bound_recomputed_by_a_second_implementation"
+R5SWITCH = "test_r5f1_dominance_switch_between_relative_and_absolute_terms"
+R5GRID = "test_r5f1_model_drag_within_envelope_for_subnormal_conversions"
+R5ENV = "test_r5f1_envelope_recomputed_by_a_second_implementation"
+R5SCAN = "test_r5f2_transition_scan_maximum_is_quoted_and_near_one"
+R5SUB = "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope"
+R5REC = "test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime"
+DR29 = "../../../decisions/requests/DR-0029-m3-t0-proposals.md"
+REV04 = "../../../reviews/M3-T0-review-04.md"
+SCOPED = (
+    "Over the coefficient-rounding subset (equatorial points from 300 km below to 10 km above "
+    "the position where the model's drag coefficient rounds up from about 0.5 × 2^-1074 to "
+    "2^-1074, retrograde speeds 0, 2 and 11 km/s; `check_review05.py`), the largest ratio of "
+    "model drag to envelope is 0.983 (B 100; 0.953 for B 25.8)."
+)
 EQUIVALENT = "equivalent"
 ALLOWANCE = "    alpha_sel = alpha * (1 + U) + U\n    beta_sel = beta * (1 + U) + 1000 * ETA0\n"
 ORACLE_DOC = (
@@ -299,7 +318,7 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
     "r4_absolute_part_removed": (
         edit_text(
             "t0_termination.py",
-            "return _up((rel + _envelope_absolute(s, b, cd, area, fp)) * (1 + PAD))",
+            "return _up((rel + _envelope_absolute(s, b_r, cd, area, fp)) * (1 + PAD))",
             "return _up(rel * (1 + PAD))",
         ),
         (R4REV, SCAN, NEIGH, STAGES4, ENV2),
@@ -376,6 +395,94 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
         ),
         (R4REV,),
     ),
+    # ---- Review 05 M3T0-R5-F1
+    # the original defect: cd area / mass bounded by phi_B / b, a relative-only conversion
+    "r5_conversion_bound_relative_only": (
+        edit_text(
+            "t0_termination.py", "    return max(phi / bq, r1, r2)\n", "    return phi / bq\n"
+        ),
+        (R5CE, R5LEM, R5SEC, R5SWITCH, R5GRID, R5ENV),
+    ),
+    # C1's quotient may underflow (subnormal b): removed, and halved
+    "r5_c1_quotient_absolute_term_removed": (
+        edit_text(
+            "t0_termination.py",
+            "max((1 + U) / bq, 1 / (bq - ETA0))",
+            "(1 + U) / bq",
+        ),
+        (R5CE, R5LEM, R5SEC, R5SWITCH, R5GRID, R5ENV),
+    ),
+    "r5_c1_quotient_absolute_term_halved": (
+        edit_text("t0_termination.py", "1 / (bq - ETA0))", "1 / (bq - ETA0 / 2))"),
+        (R5CE, R5LEM, R5SEC),
+    ),
+    # C1's product may underflow (subnormal cd area): the force comparison cannot see it
+    # (the coefficient's own underflow term W exceeds it); declared for the lemma checks
+    "r5_c1_product_absolute_term_removed": (
+        edit_text(
+            "t0_termination.py",
+            "p_ratio = min(max(1 / (1 - U), prod / (prod - ETA0)), prod / tiny)",
+            "p_ratio = 1 / (1 - U)",
+        ),
+        (R5LEM, R5SEC),
+    ),
+    # C2's products may underflow (subnormal b cd or mass)
+    "r5_c2_absolute_terms_removed": (
+        both(
+            edit_text(
+                "t0_termination.py",
+                "q_lo = max(tiny, min(bcd * (1 - U), bcd - ETA0))",
+                "q_lo = bcd * (1 - U)",
+            ),
+            edit_text(
+                "t0_termination.py",
+                "min(q_lo * Fraction(area) * (1 - U), q_lo * Fraction(area) - ETA0)",
+                "q_lo * Fraction(area) * (1 - U)",
+            ),
+        ),
+        (R5LEM, R5SEC),
+    ),
+    # the corrected b_R applied to the relative part only
+    "r5_bound_applied_to_relative_part_only": (
+        edit_text(
+            "t0_termination.py",
+            "_envelope_absolute(s, b_r, cd, area, fp)",
+            "_envelope_absolute(s, b, cd, area, fp)",
+        ),
+        (R5GRID, R5ENV),
+    ),
+    # ---- Review 05 M3T0-R5-F2: a return to the superseded characterisation
+    "r5f2_superseded_sentence_restored": (
+        edit_text(
+            DR29,
+            SCOPED,
+            "The tightest observed case is where the coefficient rounds up from just above "
+            "0.5 × 2^-1074. There the largest observed ratio of model drag to envelope is "
+            "0.983 (B 100), an empirical figure.",
+        ),
+        (R5SUB, R5REC),
+    ),
+    "r5f2_subset_presented_as_the_subnormal_regime": (
+        edit_text(
+            DR29,
+            "Over the coefficient-rounding subset (equatorial points",
+            "In the subnormal regime (equatorial points",
+        ),
+        (R5SUB,),
+    ),
+    "r5f2_transition_scan_maximum_hidden": (
+        edit_text(DR29, "it is 0.99999999999886 (B 25.8)", "it is below 0.983 (B 25.8)"),
+        (R5SCAN,),
+    ),
+    "r5f2_review04_rewritten_instead_of_amended": (
+        edit_text(
+            REV04,
+            "The largest observed ratio of model drag to envelope in the subnormal regime is 0.983",
+            "The largest observed ratio of model drag to envelope in the coefficient-rounding "
+            "subset is 0.983",
+        ),
+        (R5REC,),
+    ),
 }
 
 
@@ -404,6 +511,7 @@ def run(name: str) -> dict:
                 str(d / "check_review02.py"),
                 str(d / "check_review03.py"),
                 str(d / "check_review04.py"),
+                str(d / "check_review05.py"),
             ],
             capture_output=True,
             text=True,

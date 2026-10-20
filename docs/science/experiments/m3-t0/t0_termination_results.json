@@ -65,7 +65,8 @@
       "stage_abs_in_2^-1074": 1.0,
       "tau": 5e-324,
       "theta_x": 3.3306690738754706e-16,
-      "u": 1.1102230246251565e-16
+      "u": 1.1102230246251565e-16,
+      "zero_force_c0_max": 0.6125000000000005
     },
     "eps_h_definition": "|computed - true| geodetic height <= alpha h + beta (true h)",
     "eps_h_m": {
@@ -984,6 +985,32 @@
       "superseded_envelope_mps2": 5.0632192e-316,
       "true_height_m": 190681000.0
     },
+    "review05_counterexamples": [
+      {
+        "b_in_2^-1074_kg_per_m2": 1.0,
+        "computed_height_m": 180000000.0,
+        "construction": "C1",
+        "corrected_covers": true,
+        "corrected_envelope_mps2": 9.610667198968579e+26,
+        "mass_in_2^-1074_kg": 17.0,
+        "model_drag_mps2": 9.328000516634907e+26,
+        "superseded_covers": false,
+        "superseded_envelope_mps2": 4.805333599484291e+26,
+        "true_height_m": 180000000.0
+      },
+      {
+        "b_in_2^-1074_kg_per_m2": 1.0,
+        "computed_height_m": 180000000.0,
+        "construction": "C2",
+        "corrected_covers": true,
+        "corrected_envelope_mps2": 9.610667198968579e+26,
+        "mass_in_2^-1074_kg": 30.0,
+        "model_drag_mps2": 5.285866959426447e+26,
+        "superseded_covers": false,
+        "superseded_envelope_mps2": 4.805333599484291e+26,
+        "true_height_m": 180000000.0
+      }
+    ],
     "rows": [
       {
         "B_kg_per_m2": 25.757575757575758,

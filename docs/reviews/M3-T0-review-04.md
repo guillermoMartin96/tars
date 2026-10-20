@@ -156,3 +156,14 @@ Evidence is in `docs/reviews/raw/M3-T0-review05-correction-evidence/`; scratch, 
 | Production and protected files | `git diff --name-only 86df2c3 a1feb79 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
 | T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 94 tracked experiment files are byte-identical; the checks then pass 140/140 (`reproducibility_twice.log`) |
 | CI on `a1feb79` | Run 39325494494 (https://github.com/guillermoMartin96/tars/actions/runs/39325494494): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion. CI does not collect the T0 checks (`testpaths = ["tests"]`) |
+
+### Amendment (Authorization I-6, Review 05 M3T0-R5-F2)
+The "Empirical observations" row of the evidence classification above is preserved as written. Review 05 found its scope wrong (M3T0-R5-F2). This amendment corrects it; the superseded wording stands above for the record.
+- **What 0.983 is.** 0.983 (B 100; 0.953 for B 25.8) is the largest ratio of model drag to envelope over the **coefficient-rounding subset**:
+  - equatorial points from 300 km below to 10 km above the position where the model's drag coefficient rounds up from about 0.5 × 2^-1074 to 2^-1074 (`coefficient_flip_x` in `check_review04.py`);
+  - the 200 binary64 neighbours on each side of that position, plus 400 uniform positions;
+  - retrograde speeds 0, 2 and 11 km/s.
+
+  It was an ad-hoc measurement during the I-5 pass. `check_review05.py` now recomputes it.
+- **What it is not.** It is not the maximum over the subnormal regime. Over the subnormal-density points of the committed transition scan (`check_review04.py`), the ratio reaches 0.99999999999886 (B 25.8) and 0.99999999999885 (B 100). Just below the smallest normal density the absolute terms are negligible, and the relative envelope is as tight there as for normal densities. These are covered points, not violations.
+- **Record:** `docs/reviews/M3-T0-review-05.md`.

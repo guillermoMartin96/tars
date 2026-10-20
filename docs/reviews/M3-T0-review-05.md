@@ -103,3 +103,96 @@ The reviewer states that the partial dispositions concern the unrestricted state
 - An underflow-aware derivation must cover every derived input, not only the state-dependent arithmetic. Here the vehicle-parameter conversion kept a relative-only factor.
 - A claim such as "both constructions satisfy it" is a lemma and needs its own check at the extremes of its domain (subnormal b).
 - Scope an empirical maximum to the population actually measured, and check it against every population the text names.
+
+## Correction pass (Authorization I-6, 2026-10-19)
+**Authority:** "Authorization I-6 — M3 T0 Review 05 corrections only" (Tech Lead), §1–§9. The scope is R5-F1 and R5-F2 only. T0 remains BLOCKED and NOT ACCEPTED. DR-0029 P1–P10 and DR-0028 P6(b) stay OPEN, and the GMAT geodetic-drag discrepancy stays ESCALATED_FOR_INVESTIGATION. The findings above and the reviewer's language are preserved unchanged. The superseded state is `17b2229`.
+
+**R5-F1 approach: option (b), as decided by the Tech Lead (I-6 §1).** The envelope keeps its unrestricted domain. The conversion between the ballistic coefficient and the mass now carries its absolute floating-point error. No vehicle prerequisite is introduced, and no assumption is added or strengthened.
+
+| ID | Disposition | Correction |
+|---|---|---|
+| M3T0-R5-F1 | **ACCEPTED; CORRECTED** (for an independent review to assess) | cd·area/mass is bounded by R(b, cd, area), derived for both constructions with the absolute error of every rounding that may underflow (E4a, `inverse_ballistic_bound`). The envelope uses b_R = φ_B/R ≤ b in both its relative and absolute parts. For normal conversions R = φ_B/b and b_R is the same binary64 b, so the B 25.8 and B 100 envelopes, and every termination result, are unchanged to the last bit. The false claim in the E4 docstring ("both satisfy it") is removed. The superseded envelope is kept as `drag_envelope_relative_conversion` to reproduce the finding |
+| M3T0-R5-F2 | **ACCEPTED; CORRECTED** | 0.983 is scoped to the coefficient-rounding subset (0.983 for B 100, 0.953 for B 25.8) in DR-0029 P1. The transition scan's maximum at subnormal densities, 0.99999999999886 (B 25.8) and 0.99999999999885 (B 100), is stated next to it. The Review 04 record is amended by an appended note; its original row is preserved. `check_review05.py` recomputes both maxima and checks how the records quote them |
+
+### Mathematical justification (R5-F1)
+- **Operations (A-FP-1, mixed model).** The model takes the mass; the envelope takes b. T0 forms one from the other in two ways:
+  - **C1 (B 25.8):** P = fl(cd·area), b = fl(mass/P).
+  - **C2 (B 100):** Q = fl(b·cd), mass = fl(Q·area).
+
+  Each of these products and quotients is (x op y)(1 + δ) + η, with |δ| ≤ u, |η| ≤ η₀ = 2^-1075 and δη = 0. A result of magnitude ≤ η₀ rounds to 0, and a positive binary64 is ≥ 2η₀.
+- **C1.** A finite b with a positive mass needs P > 0. So P ≥ 2η₀ and cd·area > η₀.
+  - From P: cd·area/P ≤ min(max(1/(1 − u), cd·area/(cd·area − η₀)), cd·area/(2η₀)).
+  - From b: mass/P ≥ min(b/(1 + u), b − η₀), so P/mass ≤ max((1 + u)/b, 1/(b − η₀)).
+  - R1 is the product of the two bounds.
+- **C2.** A positive mass needs Q > 0, so Q ≥ 2η₀ and mass ≥ 2η₀.
+  - Q ≥ Q_lo = max(2η₀, min(b·cd(1 − u), b·cd − η₀)).
+  - mass ≥ M_lo = max(2η₀, min(Q_lo·area(1 − u), Q_lo·area − η₀)).
+  - R2 = cd·area/M_lo.
+- **The bound.** R = max(φ_B/b, R1, R2) holds for either construction, so no vehicle condition is needed.
+  - **Normal conversions:** R1 = (1 + u)/((1 − u)b) and R2 = 1/((1 − u)²b), both below φ_B/b = (1 + u)/((1 − u)²b). So R = φ_B/b, the Review 04 bound.
+  - **Where the absolute terms take over:** with the V1 shape, R1 exceeds φ_B/b exactly when b < b* = cη₀/(c − 1), with c = φ_B(1 − u): b* ≈ 7.42e-309, two thirds of 2^-1023. They also take over for a subnormal P, b·cd or mass.
+  - **Monotonicity:** R is non-increasing in b, so "the bound for a B also covers every larger B" still holds.
+- **Composition with the R4-F1 terms.** In E4 the vehicle enters only through cd·area/mass. That covers the relative factor F_D/(2b), the density term F_A·N_ρ/(2b), and every term of W (area/mass = (cd·area/mass)/cd and 1/mass = (cd·area/mass)/(cd·area)). Replacing φ_B/b by R in all of them is the same as evaluating the Review 04 envelope at b_R = φ_B/R. h_zero, S_max, τ and the gravity and stage terms do not depend on the vehicle. The supremum over heights, the candidate set and the monotonicity in h0 are unchanged.
+- **b = +∞ (E4b).** C1 gives b = +∞ only when P = 0 (cd·area ≤ η₀), or when mass/P overflows, which is outside the domain like every overflow. With cd·area ≤ η₀ the model's force is exactly 0:
+  - c₀ = fl(0.5ρ̂) ≤ 5/8, a derived constant check;
+  - if area ≤ 1/4, fl(c₀·cd)·area ≤ (5/8)(1 + u)η₀ + η₀/4 < η₀, which rounds to 0;
+  - otherwise cd = 2η₀ and area ≤ 1/2, so fl(c₀·cd) ≤ 2η₀ and the product with area is ≤ η₀, which rounds to 0.
+
+  The drag-free envelope 0 therefore covers it. C2 with b = +∞ gives mass = +∞ and a zero coefficient.
+- **Outward rounding.** b_R is rounded down in 60-digit decimals (ROUND_FLOOR). `_up` now returns +∞ when the exact bound exceeds the largest binary64; before, it raised OverflowError for such vehicles. That is still an upper bound, and such forces overflow, which the domain excludes.
+
+### Effect on P1
+- **Floors.** The three published floors are unchanged to the last bit: 124 456.68544510857, 118 633.50894662621 and 111 511.96182508787 m. B 25.8 and B 100 have normal conversions, so the envelope receives the same b.
+- **Other results.** Every pre-existing value in `t0_termination_results.json` is bit-identical, including the root brackets of `floor_comparison` and the margins 7.2e-7, 1.0e-6 and 8.4e-7 m. Only two keys are added: `review05_counterexamples` and `zero_force_c0_max`.
+- **Recommendation.** The P1 recommendation is unchanged.
+
+### Counterexamples
+At r = (186 378 137, 0, 0) m (true and computed height 180 000 000 m), v = 0, cd 2.2, area 15 m², b = 2^-1074:
+
+| Construction | Mass | Model drag (m/s²) | Superseded envelope | Corrected envelope | Ratio before → after |
+|---|---|---|---|---|---|
+| C1 | 17 × 2^-1074 kg | 9.328000516634907e26 | 4.805333599484291e26 | 9.610667198968579e26 | 1.941 → 0.971 |
+| C2 | 30 × 2^-1074 kg | 5.285866959426447e26 | 4.805333599484291e26 | 9.610667198968579e26 | 1.100 → 0.550 |
+
+### A-FP status (unchanged by this pass)
+- **A-FP-1** (IEEE binary64, round to nearest, gradual underflow): standard. Probed at run time on macOS x86_64 only; CI does not collect the T0 checks.
+- **A-FP-2** (libm accuracy): required and unresolved. The published bounds tolerate up to 2^5 to 2^7 ulps (derived). The measured values are host measurements, not platform guarantees. E4a and E4b use no libm call.
+- **A-FP-3** (dot product): standard; unchanged.
+
+No assumption was added or strengthened.
+
+### Evidence classification
+| Class | Items |
+|---|---|
+| **Derived under A-FP-1** | E4a (R1, R2, R), its relative/absolute switch at b*, its monotonicity in b; E4b (zero force for cd·area ≤ η₀, with c₀ ≤ 5/8 checked from the derived constants) |
+| **Numerically verified** (exact rationals, not a proof) | 243 vehicles of either construction against the exact cd·area/mass and the rounding interval of b; a second implementation of R and of the envelope; both counterexamples; the model's drag within the corrected envelope for subnormal conversions from 100 000 to 191 700 km; zero force without area at sea level and above (`check_review05.py`). Also, as implementer evidence only, an exhaustive check over masses and coefficients k × 2^-1074 (k ≤ 20 000) on eight shapes: 219 983 vehicles, no violation |
+| **Empirical observations** | R5-F2: 0.983 (B 100) and 0.953 (B 25.8) over the coefficient-rounding subset; 0.99999999999886 and 0.99999999999885 over the transition scan's subnormal-density points |
+| **Unresolved assumptions** | A-FP-2, as before; A-FP-1's gradual underflow and A-FP-3, probed on the host only |
+| **Owner decisions still required** | DR-0029 P1–P10; whether a guarantee conditional on A-FP-2 is acceptable; how bounds are quoted (IM-2); DR-0028 P6(b); the escalated GMAT geodetic-drag discrepancy |
+
+### Regression and mutation evidence
+Evidence: `raw/M3-T0-review05-findings-correction-evidence/`.
+- **Red before.** The new `check_review05.py` on the unmodified `17b2229` tree (no shim needed) fails all 17 checks:
+  - 4 behavioural: both counterexamples, the force grid, and the envelope against its second implementation;
+  - 4 because E4a does not exist;
+  - 5 on the new E4b constant only (the force without area was already exactly 0);
+  - 4 record checks.
+- **Green after.** `check_review01.py` … `check_review05.py` pass 157/157.
+- **Mutation.** 45 mutants plus a control, run against all five check files, in 31 min. The control passes. 44 mutants are detected by a declared check, including all 10 R4-F1 mutants rerun, and the two-body stationary-point mutant is equivalent. The R5 mutants and the checks that detect them:
+  - **relative-only conversion (the original defect) and C1 quotient term removed:** the counterexamples, the lemma, its second implementation, the switch, the force grid and the envelope recomputation;
+  - **C1 quotient term halved:** the counterexamples and both lemma checks;
+  - **C1 product term removed, and C2 terms removed:** the lemma checks only. In the force, the coefficient's own underflow term W exceeds them;
+  - **b_R applied to the relative part only:** the envelope recomputation only;
+  - **the four R5-F2 record corruptions:** the R5-F2 checks.
+- **A survivor in the first run.** The first mutation run left `r5f2_transition_scan_maximum_hidden` undetected. The check accepted the value anywhere in DR-0029, and the new correction log also contains it. The check now reads the P1 sentence itself, and the rerun detects the mutant. Both runs are kept in the evidence.
+
+### R4-F1 and the related items after this pass (implementer's assessment, for an independent review)
+- **Review 05's grounds.** Review 05 marked R4-F1, R3-F1, R2-F2 and F2 PARTIALLY RESOLVED. For all four, the ground it gave was the unrestricted contract failing through R5-F1. The R4-F1 regressions (48 checks) and its 10 mutants pass and are detected again on the corrected tree.
+- **Remaining conditions I know of.** I know of no other condition specific to these items, but three remain:
+  - the guarantee stays conditional on A-FP-2, which is unresolved;
+  - the C1 overflow of mass/fl(cd·area) to +∞ is excluded only by the existing "no overflow" domain condition. This is now stated explicitly;
+  - the contract covers ballistic coefficients formed by C1 or C2, the two constructions T0 uses.
+- **Status.** Whether these items are now RESOLVED is for an independent review to judge. This pass does not change their status.
+
+### Validation
+Recorded in the validation commit that follows this correction commit (I-6 §9).

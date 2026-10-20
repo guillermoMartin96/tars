@@ -33,6 +33,12 @@
   - M3T0-R5-F1: the conversion to the ballistic coefficient keeps a relative-only rounding factor. A subnormal b (mass 17 × 2^-1074 kg) gives drag 1.94× the envelope. It does not affect the published floors, which use B 25.8, B 100 and the drag-free limit.
   - M3T0-R5-F2: the empirical maximum 0.983 is scoped as the whole subnormal regime, but the committed transition scan reaches 0.99999999999886 at subnormal densities.
 - Record: `docs/reviews/M3-T0-review-05.md`. T0 is not accepted. A correction pass and any Review 06 await authorization.  
+**Status update (2026-10-19, append-only):** under "Authorization I-6 — M3 T0 Review 05 corrections only", M3T0-R5-F1 and R5-F2 are corrected in the T0 records and experiments:
+- R5-F1: the drag envelope bounds cd·area/mass with the absolute error of every underflowing rounding of the conversion between the ballistic coefficient and the mass, for either construction (E4a). It equals the previous bound wherever the conversion is normal. A vehicle with cd·area ≤ 2^-1075 has exactly zero force (E4b). No vehicle condition is introduced, and the domain is unchanged.
+- The three P1 bounds and every other termination result are unchanged to the last bit. The P1 recommendation is unchanged.
+- R5-F2: 0.983 is scoped to the coefficient-rounding subset. The committed transition scan reaches 0.99999999999886 at subnormal densities. The Review 04 record is amended, not rewritten.
+- A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only.
+- New checks: `check_review05.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-05.md`. T0 is not accepted. Any Review 06 needs separate authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 
