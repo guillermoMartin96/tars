@@ -1,0 +1,29 @@
+from pathlib import Path
+import subprocess,hashlib,json,re,platform,sys
+r=Path.cwd(); d=r/'docs/science/experiments/m3-t0'
+print(platform.platform(),platform.processor(),sys.version)
+import numpy,scipy
+print('numpy',numpy.__version__,'scipy',scipy.__version__)
+for p in ['proof/thresholds/m1.json','proof/thresholds/m2.json','toolbox/references/gmat/m2/APPROVED_DIGESTS.json','toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz','proof/references/m2_final_states.json']:
+ data=(r/p).read_bytes(); assert data==subprocess.check_output(['git','show','86df2c3:'+p]); print('BASELINE MATCH',p,hashlib.sha256(data).hexdigest())
+n=0
+for line in (r/'docs/science/validation.md').read_text().split('## VAL-0019',1)[1].splitlines():
+ x=re.findall(r'`([^`]+)`',line)
+ if len(x)>=2 and re.fullmatch('[0-9a-f]{64}',x[1]) and (d/x[0]).is_file():
+  assert hashlib.sha256((d/x[0]).read_bytes()).hexdigest()==x[1],x; n+=1
+print('VAL digest matches',n); assert n==19
+for p in ['bin/GmatConsole','data/atmosphere/earth/EarthExponentialAtmosphereData.txt']:
+ print('GMAT',p,hashlib.sha256((r.parent/'GMAT R2026a'/p).read_bytes()).hexdigest())
+p='docs/science/experiments/m3-t0/t0_termination_results.json'
+a=json.loads(subprocess.check_output(['git','show','30a4e8d:'+p])); b=json.loads((r/p).read_text())
+def walk(a,b,path=''):
+ if isinstance(a,dict):
+  for k in a: walk(a[k],b[k],path+'/'+k)
+  for k in b.keys()-a.keys(): print('JSON ADDED',path+'/'+k)
+ else:
+  assert type(a) is type(b),(path,type(a),type(b))
+  assert (a.hex()==b.hex() if isinstance(a,float) else a==b),(path,a,b)
+walk(a,b)
+for p in ['docs/reviews/M3-T0-review-04.md','docs/reviews/M3-T0-review-05.md','docs/reviews/M3-T0-review-06.md']:
+ old=subprocess.check_output(['git','show','30a4e8d:'+p]); assert (r/p).read_bytes().startswith(old); print('APPEND ONLY',p)
+paths=subprocess.check_output(['git','diff','--name-only','86df2c3..HEAD']).decode().splitlines();assert all(p.startswith('docs/') for p in paths);print('All full diff paths under docs',len(paths))

@@ -1,0 +1,548 @@
+Inspected result files:
+docs/science/experiments/m3-t0/t0_atmosphere_results.json ['boundaries', 'edges', 'single_crossing_rk4', 'stiffness_dt10', 'summary', 'table_sha256']
+docs/science/experiments/m3-t0/t0_axis_ablation_results.json ['data_file', 'data_sha256', 'data_sha256_matches_gmat_metadata', 'fits', 'full_fit_reproduces_t0_gmat', 'rms_definition', 'stored_full_fit_rms_m', 'tolerance_m', 'units']
+docs/science/experiments/m3-t0/t0_decay_results.json ['configuration', 'dop853_time_to_geodetic_zero_s', 'floors', 'missed_crossing', 'rk4_divergence', 'rk4_last_committed_h_m', 'rk4_steps', 'sphere_minus_ellipsoid_max_m', 'stages']
+docs/science/experiments/m3-t0/t0_frames_results.json ['fc2a_vrel_equals_v_when_omega_zero', 'fc2b_nonzero', 'fc2b_vrel_at_rest_mps', 'fc3_j2_axisymmetry_max_rel_diff', 'fc5_air_velocity_at_aX_mps', 'fc5_expected_mps', 'fc5_prograde_vrel_minus_expected_mps', 'fc5_retrograde_vrel_minus_expected_mps', 'fc6_equator_accel', 'fc6_equator_inward', 'fc6_pole_accel', 'fc6_pole_outward', 'fc8_inclined_51.6', 'fc8_not_parallel_away_from_vertex', 'fc8_parallel_at_vertex', 'omega_r_over_v_at_250km']
+docs/science/experiments/m3-t0/t0_geodetic_results.json ['axisymmetry_fc4', 'ellipsoid', 'exact_answers', 'grid', 'published']
+docs/science/experiments/m3-t0/t0_gmat_results.json ['axis', 'burn', 'decay', 'density_probes', 'geodetic_points', 'provenance', 'regression_identity', 'regression_m3_form', 'trajectories']
+docs/science/experiments/m3-t0/t0_height_error_results.json ['crossings', 'height_error', 'libm']
+docs/science/experiments/m3-t0/t0_regression_results.json ['bitwise_equal_to_golden', 'final_position_difference_m', 'final_velocity_difference_mps', 'golden_platform', 'm1_cross_platform_bound_m_mps', 'perturbations_off_acceleration_bitwise_point_mass', 'this_host', 'ticks', 'within_m1_cross_platform_bound']
+docs/science/experiments/m3-t0/t0_termination_results.json ['admissibility_counterexamples', 'floating_point_enclosure', 'floor_comparison', 'libm_sensitivity', 'missed_crossing', 'stage_order', 'stiffness_thresholds', 'sufficient_stage_condition', 'vectorised_height_check_max_abs_m']
+floor_comparison {
+  "note": "root brackets [lo, hi] with need(lo) > 0 > need(hi); 'review03_correction' is the stage condition with the superseded relative-only envelope",
+  "rows": [
+    {
+      "need_at_published_floor_m": -7.170720652771883e-07,
+      "published_now_m": 124456.68544510857,
+      "published_review04_m": 124456.68544510857,
+      "published_unchanged": true,
+      "root_bracket_corrected_m": [
+        124456.68544484391,
+        124456.68544484489
+      ],
+      "root_bracket_review03_correction_m": [
+        124456.68544484391,
+        124456.68544484489
+      ],
+      "stage_bounds_at_published_floor_m": {
+        "M2": 69003.57940938401,
+        "M3": 68755.17649007885,
+        "M4": 7.170720652771883e-07
+      },
+      "two_decimals_nearest_is_sufficient": true,
+      "two_decimals_nearest_m": 124456.69,
+      "two_decimals_rounded_up_m": 124456.69,
+      "vehicle": "B25.8"
+    },
+    {
+      "need_at_published_floor_m": -1.0038993351683625e-06,
+      "published_now_m": 118633.50894662621,
+      "published_review04_m": 118633.50894662621,
+      "published_unchanged": true,
+      "root_bracket_corrected_m": [
+        118633.5089461096,
+        118633.50894611058
+      ],
+      "root_bracket_review03_correction_m": [
+        118633.5089461096,
+        118633.50894611058
+      ],
+      "stage_bounds_at_published_floor_m": {
+        "M2": 63155.474615659594,
+        "M3": 62907.56785361275,
+        "M4": 1.0038993351683625e-06
+      },
+      "two_decimals_nearest_is_sufficient": true,
+      "two_decimals_nearest_m": 118633.51,
+      "two_decimals_rounded_up_m": 118633.51,
+      "vehicle": "B100"
+    },
+    {
+      "need_at_published_floor_m": -8.427938228380506e-07,
+      "published_now_m": 111511.96182508787,
+      "published_review04_m": 111511.96182508787,
+      "published_unchanged": true,
+      "root_bracket_corrected_m": [
+        111511.96182425194,
+        111511.96182425291
+      ],
+      "root_bracket_review03_correction_m": [
+        111511.96182425194,
+        111511.96182425291
+      ],
+      "stage_bounds_at_published_floor_m": {
+        "M2": 56003.39528868884,
+        "M3": 55755.98091295595,
+        "M4": 8.427938228380506e-07
+      },
+      "two_decimals_nearest_is_sufficient": false,
+      "two_decimals_nearest_m": 111511.96,
+      "two_decimals_rounded_up_m": 111511.97,
+      "vehicle": "drag-free limit"
+    }
+  ]
+}
+libm_sensitivity {
+  "assumed_libm_ulp": 2,
+  "kind": "the derivation evaluated under weaker libm assumptions (not a measurement)",
+  "max_log2_tested": 40,
+  "rows": [
+    {
+      "published_bracket_end": {
+        "height_m": 124456.68544510857,
+        "largest_log2_libm_ulp": 5
+      },
+      "two_decimals_nearest": {
+        "height_m": 124456.69,
+        "largest_log2_libm_ulp": 19
+      },
+      "two_decimals_rounded_up": {
+        "height_m": 124456.69,
+        "largest_log2_libm_ulp": 19
+      },
+      "vehicle": "B25.8"
+    },
+    {
+      "published_bracket_end": {
+        "height_m": 118633.50894662621,
+        "largest_log2_libm_ulp": 6
+      },
+      "two_decimals_nearest": {
+        "height_m": 118633.51,
+        "largest_log2_libm_ulp": 17
+      },
+      "two_decimals_rounded_up": {
+        "height_m": 118633.51,
+        "largest_log2_libm_ulp": 17
+      },
+      "vehicle": "B100"
+    },
+    {
+      "published_bracket_end": {
+        "height_m": 111511.96182508787,
+        "largest_log2_libm_ulp": 7
+      },
+      "two_decimals_nearest": {
+        "height_m": 111511.96,
+        "largest_log2_libm_ulp": null
+      },
+      "two_decimals_rounded_up": {
+        "height_m": 111511.97,
+        "largest_log2_libm_ulp": 20
+      },
+      "vehicle": "drag-free limit"
+    }
+  ]
+}
+stage_order {
+  "height_minus_initial_m": {
+    "k2_input": 116.3127734689042,
+    "k3_input": -115.73415292799473,
+    "k4_input": 1.1612665504217148
+  },
+  "recorded_order": [
+    "k2 input y + dt/2 k1",
+    "k3 input y + dt/2 k2",
+    "k4 input y + dt k3"
+  ],
+  "state": "circular 180 km, i 51.6 deg, J2 + drag, dt 10 s"
+}
+floating_point_enclosure {
+  "assumptions": {
+    "A-FP-1": "IEEE 754 binary64, round to nearest even, gradual underflow (no flush-to-zero); * and / within relative u = 2^-53 plus, for an underflowing result, absolute 2^-1075; + - and sqrt within relative u",
+    "A-FP-2": "libm sin, cos, atan2, hypot, exp, pow: |error| <= 2 x 2^-52 |exact| + 2 x 2^-1074 (assumption; measured in t0_height_error.py, not proved; see libm_sensitivity)",
+    "A-FP-3": "numpy 3-element products elementwise; 3-term dot x.x within gamma_3 sum x_i^2 + 3 (1 + u)^2 2^-1075",
+    "domain": "true geodetic height >= 0 (outside the ellipsoid), no overflow"
+  },
+  "constants": {
+    "F_A": 1.0000000000000018,
+    "F_D": 1.0000000000000024,
+    "F_J": 1.0000000000000038,
+    "F_g": 1.0000000000000016,
+    "K_1": 1.0000000000000004,
+    "K_W": 1.000000000000001,
+    "N_rho_in_2^-1074": 2.9500000000000006,
+    "alpha": 1.2212453270876738e-15,
+    "alpha_relative_part": 1.2212453270876738e-15,
+    "alpha_sel": 1.3322676295501896e-15,
+    "alpha_underflow_part": 1.5e-323,
+    "b_lower_m": 6356752.314245179,
+    "beta_m": 8.877691069434738e-09,
+    "beta_relative_part_m": 8.877691069434738e-09,
+    "beta_sel_m": 8.87769106943474e-09,
+    "beta_underflow_part_m": 7.9468473e-317,
+    "contraction_k": 0.006830954755939884,
+    "gravity_hat_mps2": 9.896575029314999,
+    "gravity_relative_part_mps2": 9.896575029314999,
+    "gravity_underflow_part_mps2": 1e-323,
+    "h_zero_m": 191735430.7198785,
+    "lat_error_rad": 1.427749762648761e-15,
+    "lat_step_rounding_rad": 1.4111659138613635e-15,
+    "lat_step_underflow_rad": 1.5e-323,
+    "libm_ulp": 2.0,
+    "nu_in_2^-1074": 2.0,
+    "phi_B": 1.0000000000000004,
+    "stage_abs_in_2^-1074": 1.0,
+    "tau": 5e-324,
+    "theta_x": 3.3306690738754706e-16,
+    "u": 1.1102230246251565e-16,
+    "zero_force_c0_max": 0.6125000000000005
+  },
+  "eps_h_definition": "|computed - true| geodetic height <= alpha h + beta (true h)",
+  "eps_h_m": {
+    "0": 8.877691069434738e-09,
+    "1000000": 1.0098936396522411e-08,
+    "120000": 9.024240508685258e-09,
+    "2000000": 1.1320181723610085e-08
+  },
+  "eps_sel_m": {
+    "0": 8.87769106943474e-09,
+    "1000000": 1.0209958698984929e-08,
+    "120000": 9.037563184980762e-09,
+    "2000000": 1.1542226328535118e-08
+  },
+  "underflow": {
+    "absolute_part_mps2": {
+      "B100 s=0": 5.38473516e-316,
+      "B100 s=11000": 1.67062253e-315,
+      "B25.8 s=0": 6.0437817e-316,
+      "B25.8 s=11000": 1.8750986e-315
+    },
+    "eta0": "2^-1075",
+    "zero_density_selection_height_m": 191735430.7198785
+  },
+  "zero_force_cap": {
+    "c0_max": 0.6125000000000005,
+    "cap": 0.625,
+    "depends_on": "A-FP-2 (the density allowance F_rho, N_rho of E3)",
+    "log2_limit": 46.38529015588476,
+    "zero_force_cap_libm_limit": 91910196476947
+  }
+}
+counterexample results:
+rows [
+  {
+    "B_kg_per_m2": 25.757575757575758,
+    "at_floor": {
+      "A0": 9.936116772205674,
+      "A2": 271.00946745922334,
+      "H0": 124456.68544509953,
+      "L2": 69003.57940939297,
+      "L3": 68755.17649008782,
+      "L4": 7.25949756346624e-07,
+      "M2": 69003.57940938401,
+      "M3": 68755.17649007885,
+      "M4": 7.170720652771883e-07,
+      "V": 11090.621207141166,
+      "s2": 11140.301791002195,
+      "s3": 12445.668544437285
+    },
+    "h_f_sufficient_at_least_m": 124456.68544510857,
+    "need_at_floor_m": -7.170720652771883e-07,
+    "need_below_bracket_m": 1.74773507118729e-06,
+    "vehicle": "B25.8"
+  },
+  {
+    "B_kg_per_m2": 100.0,
+    "at_floor": {
+      "A0": 9.91627048187335,
+      "A2": 153.54880567415688,
+      "H0": 118633.50894661718,
+      "L2": 63155.47461566855,
+      "L3": 62907.56785362171,
+      "L4": 1.0127770262377983e-06,
+      "M2": 63155.474615659594,
+      "M3": 62907.56785361275,
+      "M4": 1.0038993351683625e-06,
+      "V": 11095.606866189582,
+      "s2": 11145.18821859895,
+      "s3": 11863.350894560368
+    },
+    "h_f_sufficient_at_least_m": 118633.50894662621,
+    "need_at_floor_m": -1.0038993351683625e-06,
+    "need_below_bracket_m": 7.647569496350357e-07,
+    "vehicle": "B100"
+  },
+  {
+    "B_kg_per_m2": null,
+    "at_floor": {
+      "A0": 9.896575029315,
+      "A2": 9.896575029315,
+      "H0": 111511.96182507885,
+      "L2": 56003.39528869778,
+      "L3": 55755.9809129649,
+      "L4": 8.516715139074864e-07,
+      "M2": 56003.39528868884,
+      "M3": 55755.98091295595,
+      "M4": 8.427938228380506e-07,
+      "V": 11101.713307276068,
+      "s2": 11151.196182422646,
+      "s3": 11151.196182422646
+    },
+    "h_f_sufficient_at_least_m": 111511.96182508787,
+    "need_at_floor_m": -8.427938228380506e-07,
+    "need_below_bracket_m": 7.45058703534579e-08,
+    "vehicle": "drag-free limit"
+  }
+]
+review02_counterexample {
+  "actual_drag_mps2": 48.65837703993666,
+  "actual_height_m": 80000.0,
+  "corrected_covers": true,
+  "corrected_envelope_mps2": 48.658377039936795,
+  "lower_height_m": 79999.9,
+  "speed_mps": 11000.0,
+  "superseded_covers": false,
+  "superseded_envelope_mps2": 48.658376978072056
+}
+review03_counterexample {
+  "computed_height_m": 119999.99999999907,
+  "corrected_covers": true,
+  "corrected_envelope_mps2": 0.06230901450421387,
+  "height_error_bound_m": 9.024240508685258e-09,
+  "lower_height_m": 120000.0,
+  "model_drag_mps2": 0.062309014504142814,
+  "speed_mps": 11000.0,
+  "superseded_covers": false,
+  "superseded_envelope_mps2": 0.06230417914238045,
+  "true_height_m": "120000.0000000000233 (high-precision reference, Review 03)"
+}
+review04_counterexample {
+  "computed_density_kg_m3": 1.3e-322,
+  "computed_height_m": 190681000.0,
+  "corrected_covers": true,
+  "corrected_envelope_mps2": 1.110700085e-315,
+  "model_drag_mps2": 1.02021455e-315,
+  "speed_mps": 0.0,
+  "superseded_covers": false,
+  "superseded_envelope_mps2": 5.0632192e-316,
+  "true_height_m": 190681000.0
+}
+review05_counterexamples [
+  {
+    "b_in_2^-1074_kg_per_m2": 1.0,
+    "computed_height_m": 180000000.0,
+    "construction": "C1",
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 9.610667198968579e+26,
+    "mass_in_2^-1074_kg": 17.0,
+    "model_drag_mps2": 9.328000516634907e+26,
+    "superseded_covers": false,
+    "superseded_envelope_mps2": 4.805333599484291e+26,
+    "true_height_m": 180000000.0
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 1.0,
+    "computed_height_m": 180000000.0,
+    "construction": "C2",
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 9.610667198968579e+26,
+    "mass_in_2^-1074_kg": 30.0,
+    "model_drag_mps2": 5.285866959426447e+26,
+    "superseded_covers": false,
+    "superseded_envelope_mps2": 4.805333599484291e+26,
+    "true_height_m": 180000000.0
+  }
+]
+review06_counterexamples [
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 1,
+    "model_drag_mps2": 1.5857600878279343e+28,
+    "ratio": 0.9999999999988138
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 2,
+    "model_drag_mps2": 7.928800439139672e+27,
+    "ratio": 0.4999999999994069
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 3,
+    "model_drag_mps2": 5.285866959426449e+27,
+    "ratio": 0.333333333332938
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 4,
+    "model_drag_mps2": 3.964400219569836e+27,
+    "ratio": 0.24999999999970346
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 5,
+    "model_drag_mps2": 3.171520175655869e+27,
+    "ratio": 0.19999999999976278
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 6,
+    "model_drag_mps2": 2.6429334797132244e+27,
+    "ratio": 0.166666666666469
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 7,
+    "model_drag_mps2": 2.2653715540399062e+27,
+    "ratio": 0.1428571428569734
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 8,
+    "model_drag_mps2": 1.982200109784918e+27,
+    "ratio": 0.12499999999985173
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 9,
+    "model_drag_mps2": 1.7619556531421492e+27,
+    "ratio": 0.11111111111097931
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 10,
+    "model_drag_mps2": 1.5857600878279345e+27,
+    "ratio": 0.09999999999988139
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 11,
+    "model_drag_mps2": 1.441600079843577e+27,
+    "ratio": 0.09090909090898308
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 12,
+    "model_drag_mps2": 1.3214667398566122e+27,
+    "ratio": 0.0833333333332345
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 13,
+    "model_drag_mps2": 1.2198154521753341e+27,
+    "ratio": 0.07692307692298568
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 14,
+    "model_drag_mps2": 1.1326857770199531e+27,
+    "ratio": 0.0714285714284867
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 15,
+    "model_drag_mps2": 1.0571733918852894e+27,
+    "ratio": 0.06666666666658758
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 0.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 1.5857600878298153e+28,
+    "mass_in_2^-1074_kg": 16,
+    "model_drag_mps2": 9.91100054892459e+26,
+    "ratio": 0.062499999999925865
+  },
+  {
+    "b_in_2^-1074_kg_per_m2": 1.0,
+    "corrected_covers": true,
+    "corrected_envelope_mps2": 9.610667198968579e+26,
+    "mass_in_2^-1074_kg": 17,
+    "model_drag_mps2": 9.328000516634907e+26,
+    "ratio": 0.9705882352929661
+  }
+]
+stress [
+  {
+    "all_within_bounds": true,
+    "kinds": {
+      "random": 667,
+      "retrograde_equator": 667,
+      "straight_down": 666
+    },
+    "lowest_stage_height_m": 23760.82779702358,
+    "min_margins": {
+      "a0_margin_mps2": 0.4482992574747797,
+      "a2_margin_mps2": 10.891702841021383,
+      "stage_margin_m": 0.10270217224024236
+    },
+    "states": 2000,
+    "vehicle": "B25.8"
+  },
+  {
+    "all_within_bounds": true,
+    "kinds": {
+      "random": 667,
+      "retrograde_equator": 667,
+      "straight_down": 666
+    },
+    "lowest_stage_height_m": 13807.590228691697,
+    "min_margins": {
+      "a0_margin_mps2": 0.42728458850486284,
+      "a2_margin_mps2": 7.830533082888362,
+      "stage_margin_m": 0.10278535047837067
+    },
+    "states": 2000,
+    "vehicle": "B100"
+  },
+  {
+    "all_within_bounds": true,
+    "kinds": {
+      "random": 667,
+      "retrograde_equator": 667,
+      "straight_down": 666
+    },
+    "lowest_stage_height_m": 14.881824808195233,
+    "min_margins": {
+      "a0_margin_mps2": 0.39952883654199667,
+      "a2_margin_mps2": 0.2350265175706454,
+      "stage_margin_m": 0.10288729552848963
+    },
+    "states": 2000,
+    "vehicle": "drag-free limit"
+  }
+]
+Supplied mutation artifact mutation_check_review06.json {'not detected': 1, 'detected': 59, 'equivalent': 2}
+Supplied mutation artifact mutation_run1_with_survivors.json {'not detected': 3, 'detected': 58, 'equivalent': 1}
+Implementer full pytest log: d in multiply
+    s = (x.conj() * x).real
+
+tests/test_mission_m2.py::test_numerical_extremes_end_as_recorded_failures[norm_overflow]
+tests/test_simulator.py::test_state_with_overflowing_norm_is_a_non_finite_failure
+  <scratch>/clone_m1/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2767: RuntimeWarning: overflow encountered in dot
+    sqnorm = x.dot(x)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1185 passed, 3 warnings in 1633.38s (0:27:13)
+pytest_exit=0
+

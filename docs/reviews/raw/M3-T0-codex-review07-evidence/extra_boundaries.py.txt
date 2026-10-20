@@ -1,0 +1,29 @@
+import math,sys,json
+from fractions import Fraction as F
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_termination as t
+import t0_model as m
+eta=F(1,2**1075);tiny=math.ulp(0.)
+shapes=[(tiny,0.125),(tiny,0.25),(tiny,0.5),(2*tiny,0.25),(4*tiny,0.125),(math.ldexp(1.,-1000),math.ldexp(1.,-75))]
+n=0
+for cd,area in shapes:
+ assert F(cd)*F(area)<=eta
+ for h in [0.,100000.,180000000.]:
+  r=np.array([m.A_WGS84+h,0.,0.])
+  for mass in [tiny,1.,sys.float_info.max]:
+   a=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,np.array([0.,-11000.,0.]),mass)
+   assert np.array_equal(a,np.zeros(3)),(cd,area,mass,h,a)
+   assert t.drag_envelope(h,11000.,math.inf,cd,area)==0.;n+=1
+print('E4b zero forces both area subcases',n)
+print('signed zeros',[(fn.__name__,str(q),fn(q),math.copysign(1.,fn(q))) for fn in [t._up,t._dn] for q in [-0.0,0]])
+for b in [0.,tiny,2*tiny,math.nextafter(math.ldexp(1.,-1022),0.),math.ldexp(1.,-1022),math.nextafter(math.ldexp(1.,-1022),math.inf),t.B_V1,100.,sys.float_info.max]:
+ r=t.inverse_ballistic_bound(b,2.2,15.,F(t.FP['phi_B'])); br=t.envelope_ballistic_coefficient(b,2.2,15.,t.FP)
+ assert br>0;print('B',b,'BR equals B',br==b,'BR type',type(br).__name__)
+# Verify the stored coefficients still cover the exact composed relative terms after division by stored phi.
+for key in ['F_D','F_A']:
+ assert F(t.FP[key])/F(t.FP['phi_B'])>=t.FPA[key]/t.FPA['phi_B']
+print('stored factor composition conservative')
+br=t.envelope_ballistic_coefficient(0.,2.2,15.,t.FP)
+assert br>0 and not br<=0
+print('stale inequality counterexample b=0 B_R=',br,'B_R<=b:',br<=0)

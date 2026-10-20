@@ -1,0 +1,13 @@
+import sys, math
+from pathlib import Path
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'docs/science/experiments/m3-t0'))
+import t0_termination as t
+
+def test_infinite_a0_has_the_documented_infinite_need():
+    b=math.ulp(0.0)
+    stage=t.stage_lower_heights(1.0,b)
+    need=t.stage_need(1.0,b)
+    assert stage['A0']==math.inf
+    assert stage['M3']==-math.inf
+    assert need>0  # correct rejection; no unsupported certification
+    assert need==math.inf, (stage,need)

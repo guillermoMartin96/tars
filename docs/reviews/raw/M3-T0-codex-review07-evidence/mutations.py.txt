@@ -1,0 +1,30 @@
+import sys,pathlib,shutil,subprocess,tempfile,json,re
+root=pathlib.Path.cwd();d=root/'docs/science/experiments/m3-t0';sys.path.insert(0,str(d))
+import mutation_check_review02 as h
+selected=['r6f1_zero_b_removed','r6f1_zero_b_bound_halved','r6f2_infinite_speed_unhandled','r6f3_cap_libm_independent']
+print('available selected',[(k,k in h.MUTANTS) for k in selected],flush=True)
+# Select by actual harness names; run only declared regression tests (full control separately).
+keys=[k for k in h.MUTANTS if k.startswith('r6') and ('zero_b' in k or 'infinite_speed' in k or 'cap_libm' in k)]
+reports={}
+for key in keys:
+ mutate,expected=h.MUTANTS[key]
+ with tempfile.TemporaryDirectory(dir=root/'review_scratch') as tmp:
+  dest=pathlib.Path(tmp);shutil.copytree(root/'docs',dest/'docs',ignore=shutil.ignore_patterns('__pycache__','.pytest_cache'))
+  dd=dest/'docs/science/experiments/m3-t0';mutate(dd)
+  cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider','-rf',*[str(dd/'check_review06.py')+'::'+n for n in expected]]
+  p=subprocess.run(cmd,cwd=dest,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+  (root/'review_scratch'/f'mutant-{key}.log').write_text(p.stdout)
+  reports[key]={'cmd':cmd,'exit':p.returncode,'tail':p.stdout[-1200:]};assert p.returncode==1,(key,p.stdout)
+ print(key,'detected',flush=True)
+# New mutations: zero-join uses min; lower helper takes successor when exact input.
+for key,old,new,tests in [
+ ('own_zero_join_min','return max(prod / tiny, inverse_ballistic_bound(math.ulp(0.0), cd, area, phi))','return min(prod / tiny, inverse_ballistic_bound(math.ulp(0.0), cd, area, phi))',['test_r6f1_zero_b_bound_covers_every_c1_mass']),
+ ('own_dn_exact_moves_up','return (f if Fraction(f) <= x else math.nextafter(f, -math.inf)) + 0.0','return (math.nextafter(f, math.inf) if Fraction(f) == x else (f if Fraction(f) <= x else math.nextafter(f, -math.inf))) + 0.0',['test_r6f2_up_and_dn_at_extremes'])]:
+ with tempfile.TemporaryDirectory(dir=root/'review_scratch') as tmp:
+  dest=pathlib.Path(tmp);shutil.copytree(root/'docs',dest/'docs',ignore=shutil.ignore_patterns('__pycache__','.pytest_cache'));dd=dest/'docs/science/experiments/m3-t0'
+  f=dd/'t0_termination.py';s=f.read_text();assert s.count(old)==1;f.write_text(s.replace(old,new))
+  cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider','-rf',*[str(dd/'check_review06.py')+'::'+n for n in tests]]
+  p=subprocess.run(cmd,cwd=dest,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+  (root/'review_scratch'/f'mutant-{key}.log').write_text(p.stdout);reports[key]={'cmd':cmd,'exit':p.returncode,'tail':p.stdout[-1200:]};assert p.returncode==1
+ print(key,'detected',flush=True)
+(root/'review_scratch/mutation-subset.json').write_text(json.dumps(reports,indent=2))

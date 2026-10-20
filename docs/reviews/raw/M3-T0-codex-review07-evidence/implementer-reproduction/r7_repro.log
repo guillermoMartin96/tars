@@ -1,0 +1,12 @@
+R7-F1: infinite envelope with the early return (M2 <= 0)
+  h0=1 b=5e-324: A0=inf M2=-55992.318990613036 M3=-inf M4=None need=55992.318990613036 certified=False
+  h0=1000 b=5e-324: A0=inf M2=-54988.91967459289 M3=-inf M4=None need=54988.91967459289 certified=False
+  h0=1e+07 b=5e-324: A0=1.0631664195232973e+302 M2=9965093.57666595 M3=-2.6579160488082413e+303 M4=-inf need=inf certified=False
+  h0=1 b=0.0: A0=inf M2=-55992.318990613036 M3=-inf M4=None need=55992.318990613036 certified=False
+  h0=1e+07 b=0.0: A0=1.7542245922134406e+303 M2=9965093.57666595 M3=-4.385561480533598e+304 M4=-inf need=inf certified=False
+R7-F2: b_R <= b at b = 0
+  b_R(0, 2.2, 15) = 1.49716862376135370816122787957320970213769789330427050938926E-325 ; b_R <= b: False
+  b=5e-324: b_R <= b: True
+  b=1e-323: b_R <= b: True
+  b=1e-310: b_R <= b: True
+  b=25.757575757575758: b_R <= b: True

@@ -1,0 +1,84 @@
+import sys,math,random,json
+from fractions import Fraction as F
+from decimal import Decimal
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_termination as t
+import t0_model as m
+import numpy as np
+rng=random.Random(7092026); tiny=math.ulp(0.0); maximum=sys.float_info.max
+# Check nearest directed bounds by exact ordering AND adjacent representable value.
+count=0
+qs=[F(maximum)+1,-F(maximum)-1,F(0),F(tiny)/2,-F(tiny)/2]
+for _ in range(2000):qs.append(F(rng.randrange(-2**80,2**80),2**rng.randrange(0,1200)))
+for q in qs:
+ u,d=t._up(q),t._dn(q)
+ assert u==math.inf or F(u)>=q
+ assert d==-math.inf or F(d)<=q
+ if u not in (-math.inf,math.inf): assert math.nextafter(u,-math.inf)==-math.inf or F(math.nextafter(u,-math.inf))<q
+ if d not in (-math.inf,math.inf): assert math.nextafter(d,math.inf)==math.inf or F(math.nextafter(d,math.inf))>q
+ count+=1
+for q in [float('nan'),Decimal('sNaN'),Decimal('NaN')]:
+ for fn in [t._up,t._dn]:
+  try:fn(q)
+  except ValueError:pass
+  else:raise AssertionError(q)
+for q in [True,1+0j,'0',None]:
+ for fn in [t._up,t._dn]:
+  try:fn(q)
+  except TypeError:pass
+  else:raise AssertionError(q)
+print('directed rounding exact adjacency checks',count,flush=True)
+phi=F(t.FP['phi_B']); cases=zeros=pairs=forces=0;best=F(0)
+shapes=[(tiny,maximum),(math.ldexp(1.,-1000),math.ldexp(1.,1000)),(maximum,1.),(1.,maximum),(1.9375,2.625),(math.ldexp(1.75,-510),math.ldexp(1.125,950))]
+for _ in range(700):
+ try: shapes.append((math.ldexp(rng.uniform(1,2),rng.randrange(-1074,1023)),math.ldexp(rng.uniform(1,2),rng.randrange(-1074,1023))))
+ except OverflowError:pass
+for cd,area in shapes:
+ if not (cd>0 and area>0):continue
+ p=cd*area
+ if not (p>0 and math.isfinite(p)):continue
+ boundary=F(p)*F(tiny)/2
+ mass0=float(boundary)
+ masses=[tiny,mass0,math.nextafter(mass0,0.),math.nextafter(mass0,math.inf)]
+ for mass in masses:
+  if not (0<mass<math.inf):continue
+  b=mass/p
+  if not math.isfinite(b):continue
+  ratio=F(cd)*F(area)/F(mass); R=t.inverse_ballistic_bound(b,cd,area,phi)
+  assert R>=ratio,(cd,area,mass,b,ratio/R)
+  best=max(best,ratio/R);cases+=1;zeros+=b==0
+  nxt=math.nextafter(b,math.inf)
+  if math.isfinite(nxt): assert R>=t.inverse_ballistic_bound(nxt,cd,area,phi);pairs+=1
+  br=t.envelope_ballistic_coefficient(b,cd,area,t.FP);assert F(br)>0 and phi/F(br)>=R
+ for b in [tiny,math.ldexp(1.,-1022),1.,math.ldexp(1.,500)]:
+  q=b*cd; mass=q*area
+  if not(0<q<math.inf and 0<mass<math.inf):continue
+  assert t.inverse_ballistic_bound(b,cd,area,phi)>=F(cd)*F(area)/F(mass); cases+=1
+print('C1/C2 exact ratio checks',cases,'zero b',zeros,'joins',pairs,'max ratio',float(best),flush=True)
+for cd,area in shapes[:60]:
+ p=cd*area
+ if not(2<=p<math.inf):continue
+ for h in [0.,123456.,1.9e8]:
+  r=np.array([m.A_WGS84+h,0.,0.]);v=np.array([0.,-7890.,0.])
+  with np.errstate(all='ignore'): vec=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,v,tiny)
+  if not np.isfinite(vec).all():continue
+  env=t.drag_envelope(h,7890.,0.,cd,area)
+  exact2=sum(F(float(x))**2 for x in vec)
+  assert math.isinf(env) or F(env)**2>=exact2,(cd,area,h,env,vec)
+  forces+=1
+print('additional force checks',forces,flush=True)
+# Independent affine cap calculation from density constants, exact rational.
+u=F(1,2**53); eta=F(1,2**1075);rho=F('1.225')
+def cap(L):return ((1+L*2*u)*(1+u)**2*(1+2*eta)*rho+(1+u)**2*rho*L*2*eta+eta)/2+eta
+limit=(F(5,8)-cap(0))//(cap(1)-cap(0));assert limit==91910196476947
+assert cap(limit)<=F(5,8)<cap(limit+1)
+for L in [limit,limit+1]:
+ try:t.rounding_allowances(L); outcome='accepted'
+ except ValueError as e:outcome=str(e)
+ print('cap threshold',L,outcome,flush=True)
+for ph in [phi,t.FPA['phi_B']]:
+ c=ph*(1-u); print('switch',float(c*eta/(c-1)),flush=True)
+for h in [1.,100000.,1e7]:
+ s=t.stage_lower_heights(h,tiny);need=t.stage_need(h,tiny)
+ print('noncert',h,'A0',s['A0'],'M2',s['M2'],'M3',s['M3'],'M4',s['M4'],'need',need,flush=True)
+ assert need>=0

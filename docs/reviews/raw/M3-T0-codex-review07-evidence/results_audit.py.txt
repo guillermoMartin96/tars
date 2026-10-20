@@ -1,0 +1,20 @@
+import pathlib,json,sys
+r=pathlib.Path.cwd();d=r/'docs/science/experiments/m3-t0'
+files=sorted(d.glob('*results.json'))
+print('Inspected result files:')
+for f in files:
+ x=json.loads(f.read_text()); print(str(f.relative_to(r)),list(x))
+t=json.loads((d/'t0_termination_results.json').read_text())
+for key in ['floor_comparison','libm_sensitivity','stage_order','floating_point_enclosure']:
+ print(key,json.dumps(t[key],indent=2))
+print('counterexample results:')
+ssc=t['sufficient_stage_condition']
+for k in ['rows','review02_counterexample','review03_counterexample','review04_counterexample','review05_counterexamples','review06_counterexamples','stress']:print(k,json.dumps(ssc[k],indent=2))
+raw=r/'docs/reviews/raw/M3-T0-review06-findings-correction-evidence'
+for name in ['mutation_check_review06.json','mutation_run1_with_survivors.json']:
+ j=json.loads((raw/name).read_text());counts={}
+ for k,v in j['mutants'].items():
+  counts[v['outcome']]=counts.get(v['outcome'],0)+1
+  if v['outcome']=='detected':assert set(v['expected_checks'])&set(v['failed_checks'])
+ print('Supplied mutation artifact',name,counts)
+print('Implementer full pytest log:',(raw/'pytest_full.log').read_text()[-500:])

@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_r6f1_zero_b_bound_covers_every_c1_mass __________________
+
+    def test_r6f1_zero_b_bound_covers_every_c1_mass():
+        """Detects: R(0) below the supremum of cd area / mass over the C1 masses that give b =
+        0 (attained at the smallest mass 2^-1074 whenever fl(cd area) >= 2), or b = 0 rejected
+        for a reachable shape."""
+        reachable = 0
+        for cd, area in SHAPES:
+            p = cd * area
+            prod = Fraction(cd) * Fraction(area)
+            r0 = tt.inverse_ballistic_bound(0.0, cd, area, PHI)
+>           assert r0 == r_zero_second(cd, area), (cd, area)
+E           AssertionError: (2.2, 15.0)
+E           assert Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...6064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 9007199254740991) == Fraction(6679274359141250944940286900419043451426926678924109991170838497597173026034089920632720078650314506466605536...5621795103208032165568849457763810909780986063487389550885278534736061501303403886623224467121195223344328757739520, 1)
+E            +  where Fraction(6679274359141250944940286900419043451426926678924109991170838497597173026034089920632720078650314506466605536...5621795103208032165568849457763810909780986063487389550885278534736061501303403886623224467121195223344328757739520, 1) = r_zero_second(2.2, 15.0)
+
+docs/science/experiments/m3-t0/check_review06.py:125: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_bound_covers_every_c1_mass
+1 failed in 0.97s

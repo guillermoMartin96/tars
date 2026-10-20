@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_r6f3_e4b_cap_depends_on_libm_ulp _____________________
+
+    def test_r6f3_e4b_cap_depends_on_libm_ulp():
+        """Detects: the cap computed without the density (libm) allowance, i.e. claimed
+        independent of A-FP-2. The derived constant equals the second implementation at every
+        LIBM_ULP, grows with it, and fails just above the largest LIBM_ULP computed here."""
+>       assert tt.FPA["zero_force_c0_max"] == c0_cap(tt.LIBM_ULP) <= Fraction(5, 8)
+E       assert Fraction(1609240519262126860858067424680213539634199355993142488222563875059808860958130202219505796356029465736950655...1381194558482897701656180328044350869564555379956012585029260984414001262096348134809756889590535261755919090440994816) == Fraction(1811843750724605309923163207856213139021524923025437079378434466576128314871059776175116550063818679908064114...7085494026686245211006117942703402327660993170980488874938090231273982538606187726190350098832729411295446401118371840)
+E        +  where Fraction(1811843750724605309923163207856213139021524923025437079378434466576128314871059776175116550063818679908064114...7085494026686245211006117942703402327660993170980488874938090231273982538606187726190350098832729411295446401118371840) = c0_cap(2)
+E        +    where 2 = tt.LIBM_ULP
+
+docs/science/experiments/m3-t0/check_review06.py:438: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f3_e4b_cap_depends_on_libm_ulp
+1 failed in 0.89s

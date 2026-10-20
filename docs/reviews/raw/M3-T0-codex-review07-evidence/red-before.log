@@ -1,0 +1,2599 @@
+FFFFFFFFFFFFFFFF.FFF.FFFFF.FFFFF.FFFFFF....FFFF.F..FF.F.F.....F...F..FF. [ 88%]
+FFF..FFFF                                                                [100%]
+=================================== FAILURES ===================================
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[1] ____________
+
+k = 1
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[2] ____________
+
+k = 2
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[3] ____________
+
+k = 3
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[4] ____________
+
+k = 4
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[5] ____________
+
+k = 5
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[6] ____________
+
+k = 6
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[7] ____________
+
+k = 7
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[8] ____________
+
+k = 8
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[9] ____________
+
+k = 9
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[10] ___________
+
+k = 10
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[11] ___________
+
+k = 11
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[12] ___________
+
+k = 12
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[13] ___________
+
+k = 13
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[14] ___________
+
+k = 14
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[15] ___________
+
+k = 15
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[16] ___________
+
+k = 16
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_________________ test_r6f1_zero_b_bound_covers_every_c1_mass __________________
+
+    def test_r6f1_zero_b_bound_covers_every_c1_mass():
+        """Detects: R(0) below the supremum of cd area / mass over the C1 masses that give b =
+        0 (attained at the smallest mass 2^-1074 whenever fl(cd area) >= 2), or b = 0 rejected
+        for a reachable shape."""
+        reachable = 0
+        for cd, area in SHAPES:
+            p = cd * area
+            prod = Fraction(cd) * Fraction(area)
+>           r0 = tt.inverse_ballistic_bound(0.0, cd, area, PHI)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:124: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_exhaustive_small_masses_on_adversarial_shapes ____________
+
+    def test_r6f1_exhaustive_small_masses_on_adversarial_shapes():
+        """Detects: any C1 vehicle with mass k x 2^-1074 (k <= 20 000) whose cd area / mass
+        exceeds R(b), b = 0 included (the Review 05 sweep filtered b > 0)."""
+        zeros = 0
+        for cd, area in SHAPES:
+            p = cd * area
+            prod = Fraction(cd) * Fraction(area)
+            cache: dict[float, Fraction] = {}
+            for k in range(1, 20_001):
+                mass = k * TINY
+                b = mass / p
+                if not b < math.inf:
+                    continue
+                if b not in cache:
+>                   cache[b] = tt.inverse_ballistic_bound(b, cd, area, PHI)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+________________ test_r6f1_transition_from_zero_b_on_each_shape ________________
+
+    def test_r6f1_transition_from_zero_b_on_each_shape():
+        """Detects: a gap or a decrease at the b = 0 / b = 2^-1074 transition: the largest mass
+        giving b = 0 and its successor are covered, and R(0) >= R(2^-1074) >= R(2 x 2^-1074)."""
+        for cd, area in SHAPES:
+            prod = Fraction(cd) * Fraction(area)
+>           r = [tt.inverse_ballistic_bound(b, cd, area, PHI) for b in (0.0, TINY, 2 * TINY)]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_________________ test_r6f1_signed_zero_b_is_the_same_vehicle __________________
+
+    def test_r6f1_signed_zero_b_is_the_same_vehicle():
+        for cd, area in SHAPES[:3]:
+>           assert tt.inverse_ballistic_bound(-0.0, cd, area, PHI) == r_zero_second(cd, area)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:187: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+________________ test_r6f1_model_drag_within_envelope_at_zero_b ________________
+
+    def test_r6f1_model_drag_within_envelope_at_zero_b():
+        """Detects: the b = 0 bound not applied to both parts of the envelope or too small in
+        the force, for C1 vehicles with b = 0 on several shapes (states whose force overflows
+        are outside the domain)."""
+        checked = 0
+        for cd, area in SHAPES:
+            top = largest_zero_mass(cd * area)
+            if top is None:
+                continue
+            for mass in sorted({x for x in (TINY, 3 * TINY, top) if x <= top}):
+                assert mass / (cd * area) == 0.0
+                for r, s in STATES:
+                    v = -s * c4.east(0.0)
+                    with np.errstate(over="ignore", invalid="ignore"):
+                        vec = m.acceleration(
+                            m.Config(mu=0.0, drag=m.Drag(cd=cd, area_m2=area)), 0.0, r, v, mass
+                        )
+                    if not np.all(np.isfinite(vec)):
+                        continue
+                    a = c5.model_drag_norm(r, v, mass, cd, area)
+                    low = tt._dn(o.true_height(r))
+>                   env = tt.drag_envelope(low, c4.up(s) if s else 0.0, 0.0, cd=cd, area=area)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:911: in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:861: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_______ test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation ________
+
+    def test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation():
+        """Detects: b_R at b = 0 rounded the unsafe way, or the b = 0 bound applied to one part
+        of the envelope only."""
+        for cd, area in SHAPES[:6]:
+            ratio = r_zero_second(cd, area)
+            for low, s in ((R5_LOW, 0.0), (1.0e8, 11_000.0), (120_000.0, 7_800.0)):
+>               env = tt.drag_envelope(low, s, 0.0, cd=cd, area=area)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:911: in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:861: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_____ test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down ______
+
+    def test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down():
+        """b_R = phi_B / R(0), rounded down: positive (no division by zero downstream) and <= the
+        exact quotient."""
+        for cd, area in SHAPES:
+            q = PHI / r_zero_second(cd, area)
+>           b_r = tt.envelope_ballistic_coefficient(0.0, cd, area, tt.FP)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:861: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+________________ test_r6f1_stage_condition_is_defined_at_zero_b ________________
+
+    def test_r6f1_stage_condition_is_defined_at_zero_b():
+        """Detects: the stage enclosure failing on a b = 0 vehicle instead of returning bounds
+        (finite or an explicit non-certification)."""
+        for h0 in (1.2e5, 1e6, 1e7, 2e8):
+>           need = tt.stage_need(h0, 0.0)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1242: in stage_need
+    s = stage_lower_heights(h0, b, fp, envelope)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1214: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1202: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:911: in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:861: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+____ test_r6f1_invalid_vehicles_are_rejected_not_bounded[-5e-324-2.2-15.0] _____
+
+b = -5e-324, cd = 2.2, area = 15.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:272: Failed
+______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[-1.0-2.2-15.0] ______
+
+b = -1.0, cd = 2.2, area = 15.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:272: Failed
+______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[inf-2.2-15.0] _______
+
+b = inf, cd = 2.2, area = 15.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+        with pytest.raises(ValueError):
+>           tt.inverse_ballistic_bound(b, cd, area, PHI)
+
+docs/science/experiments/m3-t0/check_review06.py:273: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:844: in inverse_ballistic_bound
+    bq, prod = Fraction(b), Fraction(cd) * Fraction(area)
+               ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-0.0-15.0] _______
+
+b = 1.0, cd = 0.0, area = 15.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:272: Failed
+______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0--2.2-15.0] ______
+
+b = 1.0, cd = -2.2, area = 15.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:272: Failed
+______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-inf-15.0] _______
+
+b = 1.0, cd = inf, area = 15.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+        with pytest.raises(ValueError):
+>           tt.inverse_ballistic_bound(b, cd, area, PHI)
+
+docs/science/experiments/m3-t0/check_review06.py:273: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:844: in inverse_ballistic_bound
+    bq, prod = Fraction(b), Fraction(cd) * Fraction(area)
+                            ^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-2.2-0.0] _______
+
+b = 1.0, cd = 2.2, area = 0.0
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:272: Failed
+_______ test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-2.2-inf] _______
+
+b = 1.0, cd = 2.2, area = inf
+
+    @pytest.mark.parametrize(
+        "b, cd, area",
+        [
+            (math.nan, CD, AREA),
+            (-TINY, CD, AREA),
+            (-1.0, CD, AREA),
+            (math.inf, CD, AREA),
+            (1.0, 0.0, AREA),
+            (1.0, -2.2, AREA),
+            (1.0, math.nan, AREA),
+            (1.0, math.inf, AREA),
+            (1.0, CD, 0.0),
+            (1.0, CD, math.inf),
+        ],
+    )
+    def test_r6f1_invalid_vehicles_are_rejected_not_bounded(b, cd, area):
+        """Detects: an input outside E4a's domain (b a non-negative finite binary64; cd and area
+        positive finite) silently turned into a ratio bound."""
+        with pytest.raises(ValueError):
+>           tt.inverse_ballistic_bound(b, cd, area, PHI)
+
+docs/science/experiments/m3-t0/check_review06.py:273: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:844: in inverse_ballistic_bound
+    bq, prod = Fraction(b), Fraction(cd) * Fraction(area)
+                                           ^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_______ test_r6f2_up_and_dn_at_extremes[q0-inf-1.7976931348623157e+308] ________
+
+q = Fraction(1797693134862315907729305190789024733617976978942306572734300811577326758055009631327084773224075360211201138...9453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216, 1)
+up = inf, dn = 1.7976931348623157e+308
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:491: in _up
+    x = float(q)
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(1797693134862315907729305190789024733617976978942306572734300811577326758055009631327084773224075360211201138...9453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+______ test_r6f2_up_and_dn_at_extremes[q1--1.7976931348623157e+308--inf] _______
+
+q = Decimal('-1.79769313486231590772930519078902473361797697894230657273430E+308')
+up = -1.7976931348623157e+308, dn = -inf
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                                    ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = -inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_______ test_r6f2_up_and_dn_at_extremes[q2-inf-1.7976931348623157e+308] ________
+
+q = Decimal('1.79769313486231590772930519078902473361797697894230657273430E+308')
+up = inf, dn = 1.7976931348623157e+308
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                                    ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_________________ test_r6f2_up_and_dn_at_extremes[q7-inf-inf] __________________
+
+q = Decimal('Infinity'), up = inf, dn = inf
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                                    ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+________________ test_r6f2_up_and_dn_at_extremes[q8--inf--inf] _________________
+
+q = Decimal('-Infinity'), up = -inf, dn = -inf
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                                    ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = -inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_________________ test_r6f2_up_and_dn_at_extremes[inf-inf-inf] _________________
+
+q = inf, up = inf, dn = inf
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                                    ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_______________ test_r6f2_up_and_dn_at_extremes[-inf--inf--inf] ________________
+
+q = -inf, up = -inf, dn = -inf
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                                    ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = -inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_______________ test_r6f2_up_and_dn_at_extremes[q12-0.0--5e-324] _______________
+
+q = Fraction(-1, 809609013229242473409981386875669228198226599056568473427605432109721358271981387567841534805748497980748...0980274248029933698770794472413422596638225363240226049435078209333658460922010128745310034584025053230830964373979136)
+up = 0.0, dn = -5e-324
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+        got_up, got_dn = tt._up(q), tt._dn(q)
+        assert got_up == up and got_dn == dn, (q, got_up, got_dn)
+        for got in (got_up, got_dn):
+>           assert math.copysign(1.0, got) == 1.0 or got != 0.0  # no -0.0
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert (-1.0 == 1.0 or -0.0 != 0.0)
+E            +  where -1.0 = <built-in function copysign>(1.0, -0.0)
+E            +    where <built-in function copysign> = math.copysign
+
+docs/science/experiments/m3-t0/check_review06.py:312: AssertionError
+_________________ test_r6f2_up_and_dn_at_extremes[q15-0.0-0.0] _________________
+
+q = Decimal('-0'), up = 0.0, dn = 0.0
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+        got_up, got_dn = tt._up(q), tt._dn(q)
+        assert got_up == up and got_dn == dn, (q, got_up, got_dn)
+        for got in (got_up, got_dn):
+>           assert math.copysign(1.0, got) == 1.0 or got != 0.0  # no -0.0
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert (-1.0 == 1.0 or -0.0 != 0.0)
+E            +  where -1.0 = <built-in function copysign>(1.0, -0.0)
+E            +    where <built-in function copysign> = math.copysign
+
+docs/science/experiments/m3-t0/check_review06.py:312: AssertionError
+________________ test_r6f2_up_and_dn_at_extremes[-0.0-0.0-0.0] _________________
+
+q = -0.0, up = 0.0, dn = 0.0
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+        got_up, got_dn = tt._up(q), tt._dn(q)
+        assert got_up == up and got_dn == dn, (q, got_up, got_dn)
+        for got in (got_up, got_dn):
+>           assert math.copysign(1.0, got) == 1.0 or got != 0.0  # no -0.0
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           assert (-1.0 == 1.0 or -0.0 != 0.0)
+E            +  where -1.0 = <built-in function copysign>(1.0, -0.0)
+E            +    where <built-in function copysign> = math.copysign
+
+docs/science/experiments/m3-t0/check_review06.py:312: AssertionError
+_ test_r6f2_up_and_dn_at_extremes[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000-inf-1.7976931348623157e+308] _
+
+q = 100000000000000000...0000000000000000000, up = inf
+dn = 1.7976931348623157e+308
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+q = 100000000000000000...0000000000000000000
+
+    def _up(q) -> float:
+        """The smallest binary64 >= q (q a Fraction or a Decimal); +inf beyond the largest."""
+>       x = float(q)
+            ^^^^^^^^
+E       OverflowError: int too large to convert to float
+
+docs/science/experiments/m3-t0/t0_termination.py:491: OverflowError
+_________________ test_r6f2_up_and_dn_bracket_random_rationals _________________
+
+    def test_r6f2_up_and_dn_bracket_random_rationals():
+        """_dn(q) <= q <= _up(q), each the nearest binary64 on its side, over 20 000 rationals
+        from below the subnormal range to beyond the largest binary64, both signs."""
+        rng = np.random.default_rng(606)
+        for _ in range(20_000):
+            e = int(rng.integers(-1100, 1030))
+            q = Fraction(int(rng.integers(1, 2**62)), 2**62) * Fraction(2) ** e
+            q = -q if rng.random() < 0.5 else q
+            for v in (q, D(q.numerator) / D(q.denominator) if abs(e) < 300 else q):
+>               hi, lo = tt._up(v), tt._dn(v)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:324: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:491: in _up
+    x = float(q)
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(-484971241179166782970968747056132954313471086583890936019319377361806633158779999295174231938414659279083407...5094816060422141308065530623571314095883043060326147600486260622215917333109834740219955517675712692430178227322880, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+________________ test_r6f2_unsupported_types_are_rejected[1.0] _________________
+
+q = '1.0'
+
+    @pytest.mark.parametrize("q", ["1.0", None, 1j, [1.0]])
+    def test_r6f2_unsupported_types_are_rejected(q):
+        for fn in (tt._up, tt._dn):
+>           with pytest.raises(TypeError):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE TypeError
+
+docs/science/experiments/m3-t0/check_review06.py:360: Failed
+_____ test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification _____
+
+    def test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification():
+        """Detects: the reviewer's stage_lower_heights(1e7, 2^-1074) ending in an incidental
+        OverflowError instead of bounds whose infinite parts make need(h0) = +inf (the step is
+        not certified at that height)."""
+>       lim = tt.stage_lower_heights(1e7, TINY)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:368: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1235: in stage_lower_heights
+    out.update(A2=_up(a2), s3=_up(s3), L4=_dn(l4), M4=_dn((1 - al) * l4 - be))
+                                          ^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = -inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_________ test_r6f2_invalid_envelope_inputs_are_rejected[0.0-nan-1.0] __________
+
+low = 0.0, s = nan, b = 1.0
+
+    @pytest.mark.parametrize(
+        "low, s, b",
+        [
+            (math.nan, 0.0, 1.0),
+            (-1.0, 0.0, 1.0),
+            (0.0, math.nan, 1.0),
+            (0.0, -1.0, 1.0),
+            (0.0, 0.0, math.nan),
+            (0.0, 0.0, -1.0),
+            (math.inf, 0.0, 1.0),
+        ],
+    )
+    def test_r6f2_invalid_envelope_inputs_are_rejected(low, s, b):
+        """Detects: an invalid input silently transformed into an envelope value."""
+        with pytest.raises(ValueError):
+>           tt.drag_envelope(low, s, b)
+
+docs/science/experiments/m3-t0/check_review06.py:395: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:912: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 0.0, s = nan, b = 1.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+>           best = max(best, rho * vr * vr)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+E           decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:791: InvalidOperation
+_________ test_r6f2_invalid_envelope_inputs_are_rejected[0.0--1.0-1.0] _________
+
+low = 0.0, s = -1.0, b = 1.0
+
+    @pytest.mark.parametrize(
+        "low, s, b",
+        [
+            (math.nan, 0.0, 1.0),
+            (-1.0, 0.0, 1.0),
+            (0.0, math.nan, 1.0),
+            (0.0, -1.0, 1.0),
+            (0.0, 0.0, math.nan),
+            (0.0, 0.0, -1.0),
+            (math.inf, 0.0, 1.0),
+        ],
+    )
+    def test_r6f2_invalid_envelope_inputs_are_rejected(low, s, b):
+        """Detects: an invalid input silently transformed into an envelope value."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:394: Failed
+_________ test_r6f2_invalid_envelope_inputs_are_rejected[0.0-0.0--1.0] _________
+
+low = 0.0, s = 0.0, b = -1.0
+
+    @pytest.mark.parametrize(
+        "low, s, b",
+        [
+            (math.nan, 0.0, 1.0),
+            (-1.0, 0.0, 1.0),
+            (0.0, math.nan, 1.0),
+            (0.0, -1.0, 1.0),
+            (0.0, 0.0, math.nan),
+            (0.0, 0.0, -1.0),
+            (math.inf, 0.0, 1.0),
+        ],
+    )
+    def test_r6f2_invalid_envelope_inputs_are_rejected(low, s, b):
+        """Detects: an invalid input silently transformed into an envelope value."""
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+docs/science/experiments/m3-t0/check_review06.py:394: Failed
+_________ test_r6f2_invalid_envelope_inputs_are_rejected[inf-0.0-1.0] __________
+
+low = inf, s = 0.0, b = 1.0
+
+    @pytest.mark.parametrize(
+        "low, s, b",
+        [
+            (math.nan, 0.0, 1.0),
+            (-1.0, 0.0, 1.0),
+            (0.0, math.nan, 1.0),
+            (0.0, -1.0, 1.0),
+            (0.0, 0.0, math.nan),
+            (0.0, 0.0, -1.0),
+            (math.inf, 0.0, 1.0),
+        ],
+    )
+    def test_r6f2_invalid_envelope_inputs_are_rejected(low, s, b):
+        """Detects: an invalid input silently transformed into an envelope value."""
+        with pytest.raises(ValueError):
+>           tt.drag_envelope(low, s, b)
+
+docs/science/experiments/m3-t0/check_review06.py:395: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:912: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = inf, s = 0.0, b = 1.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+>           best = max(best, rho * vr * vr)
+                             ^^^^^^^^
+E           decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:791: InvalidOperation
+________________ test_r6f2_invalid_stage_input_is_not_certified ________________
+
+    def test_r6f2_invalid_stage_input_is_not_certified():
+        for h0, b in ((math.nan, 1.0), (1e6, math.nan), (1e6, -1.0)):
+            with pytest.raises(ValueError):
+>               tt.stage_need(h0, b)
+
+docs/science/experiments/m3-t0/check_review06.py:401: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1242: in stage_need
+    s = stage_lower_heights(h0, b, fp, envelope)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1224: in stage_lower_heights
+    "L3": _dn(l3),
+          ^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:499: in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = -inf, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               OverflowError: cannot convert Infinity to integer ratio
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: OverflowError
+_________________ test_r6f3_records_classify_e4b_under_a_fp_2 __________________
+
+    def test_r6f3_records_classify_e4b_under_a_fp_2():
+        """Detects: E4b still classified as derived under A-FP-1 only, or the Review 05 record
+        rewritten instead of amended."""
+        rev = (ROOT / "docs/reviews/M3-T0-review-05.md").read_text()
+>       amend = rev.index("### Amendment (Authorization I-8, Review 06 M3T0-R6-F3)")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review06.py:454: ValueError
+___________ test_switch_point_stored_and_exact_phi_are_distinguished ___________
+
+    def test_switch_point_stored_and_exact_phi_are_distinguished():
+        """Detects: b* quoted without the phi_B it uses. With the stored phi_B (what the
+        envelope uses) b* ~ 7.42e-309; with the exact phi_B, b* = (1 + u) 2^-1023 ~ 1.11e-308."""
+        stored, exact = b_star(PHI), b_star(PHI_EXACT)
+        assert exact == (1 + U) * Fraction(1, 2**1023)
+        assert repr(float(stored)) == "7.416912861690675e-309"
+        assert repr(float(exact)) == "1.1125369292536007e-308"
+        above, below = tt._up(exact), tt._dn(exact)
+        r_exact = tt.inverse_ballistic_bound(above, CD, AREA, PHI_EXACT)
+        assert r_exact == PHI_EXACT / Fraction(above)  # switch at the exact b* with exact phi_B
+        assert tt.inverse_ballistic_bound(below, CD, AREA, PHI_EXACT) > PHI_EXACT / Fraction(below)
+        rev = (ROOT / "docs/reviews/M3-T0-review-05.md").read_text()
+>       amend = rev.index("### Amendment (Authorization I-8, switch point b*)")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review06.py:484: ValueError
+__________________ test_random_search_is_marked_unreproduced ___________________
+
+    def test_random_search_is_marked_unreproduced():
+        """Detects: the 5 287-point random search presented as reproduced evidence, or the
+        Review 04 record rewritten instead of amended."""
+        rev = c4.record("review04")
+        old = "A random search of 5 287 points found no violation"
+>       amend = rev.index("### Amendment (Authorization I-8, provenance of the random search)")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review06.py:496: ValueError
+____________________ test_records_state_the_r6_corrections _____________________
+
+    def test_records_state_the_r6_corrections():
+        for name in ("DR-0029", "VAL-0019", "report", "README"):
+>           assert "R6-F1" in c4.record(name), name
+E           AssertionError: DR-0029
+E           assert 'R6-F1' in '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...es 0.99999999999886 at subnormal densities. Both are now stated with their scope.\n<!-- /review05-correction-log -->\n'
+E            +  where '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...es 0.99999999999886 at subnormal densities. Both are now stated with their scope.\n<!-- /review05-correction-log -->\n' = <function record at 0x1079ca660>('DR-0029')
+E            +    where <function record at 0x1079ca660> = c4.record
+
+docs/science/experiments/m3-t0/check_review06.py:504: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[1]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[2]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[3]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[4]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[5]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[6]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[7]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[8]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[9]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[10]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[11]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[12]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[13]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[14]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[15]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[16]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_bound_covers_every_c1_mass
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_exhaustive_small_masses_on_adversarial_shapes
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_transition_from_zero_b_on_each_shape
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_signed_zero_b_is_the_same_vehicle
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_model_drag_within_envelope_at_zero_b
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_stage_condition_is_defined_at_zero_b
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[-5e-324-2.2-15.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[-1.0-2.2-15.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[inf-2.2-15.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-0.0-15.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0--2.2-15.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-inf-15.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-2.2-0.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_invalid_vehicles_are_rejected_not_bounded[1.0-2.2-inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q0-inf-1.7976931348623157e+308]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q1--1.7976931348623157e+308--inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q2-inf-1.7976931348623157e+308]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q7-inf-inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q8--inf--inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[inf-inf-inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[-inf--inf--inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q12-0.0--5e-324]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q15-0.0-0.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[-0.0-0.0-0.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000-inf-1.7976931348623157e+308]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_bracket_random_rationals
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_unsupported_types_are_rejected[1.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_invalid_envelope_inputs_are_rejected[0.0-nan-1.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_invalid_envelope_inputs_are_rejected[0.0--1.0-1.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_invalid_envelope_inputs_are_rejected[0.0-0.0--1.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_invalid_envelope_inputs_are_rejected[inf-0.0-1.0]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_invalid_stage_input_is_not_certified
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f3_records_classify_e4b_under_a_fp_2
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_switch_point_stored_and_exact_phi_are_distinguished
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_random_search_is_marked_unreproduced
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_records_state_the_r6_corrections
+55 failed, 26 passed in 3.43s

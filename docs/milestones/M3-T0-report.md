@@ -55,6 +55,13 @@
 - The 5 287-point random search quoted in the Review 04 record is marked UNREPRODUCED. The switch point b* is quoted for the stored φ_B (7.416912861690675e-309, used by the implementation) and the exact φ_B (1.1125369292536007e-308).
 - A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only.
 - New checks: `check_review06.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-06.md`. T0 is not accepted. Any Review 07 needs separate authorization.  
+**Status update (2026-10-20, append-only):** **Review 07 (Codex, at `0357196`): REQUEST_CHANGES.**
+- R6-F1, R6-F3, both Review 06 remarks, R5-F1, R5-F2, R4-F1, R3-F1, R2-F1, R2-F2, R2-F3, IM-1, IM-2 and F1–F5 are RESOLVED.
+- R6-F2 is PARTIALLY RESOLVED: the helpers are fixed and no false certification was found, but an unbounded enclosure does not always give need = +∞ (R7-F1).
+- New findings, both NOTE, verified and ACCEPTED, **not applied**:
+  - M3T0-R7-F1: when M2 ≤ 0 the stage condition returns need = −M2, which is finite (for example 55 992 m at h0 = 1 m, b = 2^-1074). The step is still not certified; the statement "need = +∞" is too strong.
+  - M3T0-R7-F2: two summaries keep "b_R ≤ b" without the b > 0 restriction.
+- No floor, bound or certification is affected. Record: `docs/reviews/M3-T0-review-07.md`. T0 is not accepted. A correction pass and any Review 08 await authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

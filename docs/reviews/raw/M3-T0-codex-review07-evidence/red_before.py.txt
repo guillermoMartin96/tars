@@ -1,0 +1,7 @@
+import sys,subprocess,pathlib,tarfile,io,shutil,json
+r=pathlib.Path.cwd();dest=r/'review_scratch/before';dest.mkdir(exist_ok=True)
+raw=subprocess.check_output(['git','archive','30a4e8d','docs']);tarfile.open(fileobj=io.BytesIO(raw)).extractall(dest,filter='data')
+d='docs/science/experiments/m3-t0';shutil.copyfile(r/d/'check_review06.py',dest/d/'check_review06.py')
+cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(dest/d/'check_review06.py')]
+p=subprocess.run(cmd,cwd=dest,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
+(r/'review_scratch/red-before.log').write_text(p.stdout);print('exit',p.returncode,p.stdout[-500:]);assert p.returncode==1

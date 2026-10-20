@@ -1,0 +1,14 @@
+import subprocess,sys,pathlib,json,hashlib,time
+root=pathlib.Path.cwd();scratch=root/'review_scratch';d=root/'docs/science/experiments/m3-t0';py=sys.executable
+files=subprocess.check_output(['git','ls-files',str(d.relative_to(root))]).decode().splitlines()
+def hashes():return {p:hashlib.sha256((root/p).read_bytes()).hexdigest() for p in files}
+before=hashes(); commands=[[py,str(d/f't0_{n}.py'),str(d/f't0_{n}_results.json')] for n in ['atmosphere','decay','geodetic','frames','regression','termination','height_error']]
+commands += [[py,str(d/'t0_gmat.py'),'--gmat-console',str(root.parent/'GMAT R2026a/bin/GmatConsole'),'--out',str(d/'t0_gmat_results.json')],[py,str(d/'t0_axis_ablation.py'),str(d/'t0_axis_ablation_results.json')]]
+ledger=[]
+for i,cmd in enumerate(commands):
+ with (scratch/f'experiment-{i}.log').open('w') as f:
+  start=time.monotonic();p=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
+ ledger.append({'command':cmd,'exit':p.returncode,'seconds':time.monotonic()-start});(scratch/'reproduction-commands.json').write_text(json.dumps(ledger,indent=2))
+ assert p.returncode==0,cmd
+changes={p:[before[p],h] for p,h in hashes().items() if before[p]!=h}
+(scratch/'experiment-changes.json').write_text(json.dumps(changes,indent=2));print('tracked files',len(files),'changes',changes)

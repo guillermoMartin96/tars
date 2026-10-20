@@ -1,0 +1,51 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification _____
+
+    def test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification():
+        """Detects: the reviewer's stage_lower_heights(1e7, 2^-1074) ending in an incidental
+        OverflowError instead of bounds whose infinite parts make need(h0) = +inf (the step is
+        not certified at that height)."""
+        lim = tt.stage_lower_heights(1e7, TINY)
+        values = [x for x in lim.values() if x is not None]
+        assert not any(math.isnan(x) for x in values)
+        assert any(math.isinf(x) for x in values)
+        assert tt.stage_need(1e7, TINY) == math.inf
+        assert tt.drag_envelope(1e7, math.inf, TINY) == math.inf
+        assert tt.drag_envelope(1e7, math.inf, math.inf) == 0.0  # drag-free: exactly 0 (E4b)
+        assert tt.drag_envelope(1e9, math.inf, 1.0) == math.inf  # above h_zero: no 0 x inf
+        # far above h_zero the decimal table density underflows to 0: 0 x inf must not arise
+>       assert tt.drag_envelope(1e12, math.inf, 1.0) == math.inf
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:377: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:988: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 1000000000000.0, s = inf, b = 1.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+>           best = max(best, rho * vr * vr)
+                             ^^^^^^^^
+E           decimal.InvalidOperation: [<class 'decimal.InvalidOperation'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:845: InvalidOperation
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification
+1 failed in 0.92s
