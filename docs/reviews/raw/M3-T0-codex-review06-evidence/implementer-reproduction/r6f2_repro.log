@@ -1,0 +1,6 @@
+_up(Decimal(2)**1024): inf
+_up(Fraction(2**1024)): OverflowError: integer division result too large for a float
+_up(-Decimal(2)**1024)  [should be >= -2^1024]: -inf
+_dn(Decimal('-Infinity')): OverflowError: cannot convert Infinity to integer ratio
+_dn(-Decimal(2)**1024): OverflowError: cannot convert Infinity to integer ratio
+stage_lower_heights(1e7, 2^-1074): OverflowError: cannot convert Infinity to integer ratio

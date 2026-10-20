@@ -1,0 +1,28 @@
+import math,sys
+from pathlib import Path
+from decimal import Decimal,localcontext
+import numpy as np
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'docs/science/experiments/m3-t0'))
+import t0_model as m
+import t0_termination as t
+
+def test_c1_zero_rounded_b_still_has_finite_nonzero_drag():
+    mass=16*math.ulp(0.0);cd=2.2;area=15.0
+    b=mass/(cd*area)
+    assert b==0.0 and mass>0 and cd>0 and area>0
+    r=np.array([186378137.0,0.,0.]);v=np.zeros(3)
+    assert -.5*0-m.MU/float(np.linalg.norm(r))<0
+    h=m.geodetic_iterative(r)[1]
+    assert h==180000000.0
+    vec=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,v,mass)
+    assert np.all(np.isfinite(vec)) and np.any(vec!=0)
+    # Independent host libm check for the exp and pow calls at this equatorial point.
+    band=m.TABLE[-1];x=-(h/1000.-band.base_km)/band.scale_km
+    with localcontext() as ctx:
+        ctx.prec=90
+        exact=Decimal(x).exp();err=abs(Decimal(math.exp(x))-exact)
+        assert err <= Decimal(2)*Decimal(2)**-52*abs(exact)+Decimal(2)*Decimal(2)**-1074
+        rn=float(np.linalg.norm(r));exactpow=Decimal(rn)**3
+        assert abs(Decimal(rn**3)-exactpow)<=Decimal(2)*Decimal(2)**-52*exactpow
+        actual=sum(Decimal(float(x))**2 for x in vec).sqrt()
+    assert actual<=Decimal(t.drag_envelope(h,0.,b))

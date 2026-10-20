@@ -1,0 +1,35 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope ____
+
+    def test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope():
+        """Detects: 0.983 quoted without its subset, or a misquoted subset maximum."""
+        dr = live_dr0029()
+        got = {v: coefficient_rounding_subset_maximum(v) for v in ("B25.8", "B100")}
+        assert f"{got['B100']:.3f}" == "0.983" and f"{got['B25.8']:.3f}" == "0.953", got
+>       assert "0.983 (B 100; 0.953 for B 25.8)" in dr
+E       AssertionError: assert '0.983 (B 100; 0.953 for B 25.8)' in '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...es 0.99999999999886 at subnormal densities. Both are now stated with their scope.\n<!-- /review05-correction-log -->\n'
+
+docs/science/experiments/m3-t0/check_review05.py:419: AssertionError
+________ test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime ________
+
+    def test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime():
+        """Detects: a return to the superseded characterisation in the live records, or the
+        historical Review 04 statement rewritten instead of amended."""
+        for name in ("DR-0029", "VAL-0019", "README", "report"):
+            text = c4.record(name)
+>           assert "The tightest observed case is where the coefficient rounds" not in text, name
+E           AssertionError: DR-0029
+E           assert 'The tightes...cient rounds' not in '# Decision ...on-log -->\n'
+E             
+E             'The tightest obser... coefficient rounds' is contained here:
+E             ?           ^^^^^^^^
+E               5 R5-F2). The tightest observed case is where the coefficient rounds up from just above 0.5 × 2^-1074. There the largest observed ratio of model drag to envelope is 0.983 (B 100), an empirical figure. Over the subnormal-density points of the committed transition scan (`check_review04.py`) it is 0.99999999999886 (B 25.8) and 0.99999999999885 (B 100). Just below the smallest normal density the absolute terms are negligible, and the relative envelope is as tight there as for normal densities...
+E             
+E             ...Full output truncated (367 lines hidden), use '-vv' to show
+
+docs/science/experiments/m3-t0/check_review05.py:429: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime
+2 failed, 63 deselected in 1.73s

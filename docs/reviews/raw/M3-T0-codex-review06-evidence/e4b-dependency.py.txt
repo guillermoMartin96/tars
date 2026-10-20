@@ -1,0 +1,13 @@
+import sys,math
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m
+original=math.exp
+try:
+ math.exp=lambda x:4.0 # deliberately violates A-FP-2; keeps IEEE operations unchanged
+ tiny=math.ulp(0.0)
+ r=np.array([m.A_WGS84+1.,0.,0.]);v=np.zeros(3)
+ vec=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=tiny,area_m2=.5)),0.,r,v,1.)
+ print('cd*area exact = eta0; A-FP-1 arithmetic unchanged; A-FP-2 intentionally absent')
+ print('rho',m.density(1.),'force',vec,'nonzero',bool(np.any(vec!=0)))
+finally:math.exp=original

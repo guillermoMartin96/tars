@@ -1,0 +1,12 @@
+import pathlib,hashlib,re,json,subprocess
+root=pathlib.Path.cwd();d=root/'docs/science/experiments/m3-t0'
+text=(root/'docs/science/validation.md').read_text();text=text[text.index('## VAL-0019'):]
+checked=[]
+for line in text.splitlines():
+ x=re.findall(r'`([^`]+)`',line)
+ if len(x)>=2 and re.fullmatch('[0-9a-f]{64}',x[1]) and (d/x[0]).is_file():
+  got=hashlib.sha256((d/x[0]).read_bytes()).hexdigest();checked.append({'path':x[0],'expected':x[1],'got':got,'match':got==x[1]})
+print(json.dumps(checked,indent=2));assert len(checked)==18 and all(x['match'] for x in checked)
+paths=['proof/thresholds/m1.json','proof/thresholds/m2.json','toolbox/references/gmat/m2/APPROVED_DIGESTS.json','toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz','proof/references/m2_final_states.json']
+for p in paths:
+ current=(root/p).read_bytes();base=subprocess.check_output(['git','show','86df2c3:'+p]);assert current==base;print(p,hashlib.sha256(current).hexdigest(),'MATCH BASELINE')

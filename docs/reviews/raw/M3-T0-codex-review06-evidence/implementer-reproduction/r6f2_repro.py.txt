@@ -1,0 +1,23 @@
+"""Implementer reproduction of Review 06 M3T0-R6-F2 (_up/_dn infinity handling)."""
+import sys
+from decimal import Decimal
+from fractions import Fraction
+
+sys.path.insert(0, sys.argv[1])
+import t0_termination as tt  # noqa: E402
+
+
+def attempt(label, f):
+    try:
+        print(f"{label}: {f()!r}")
+    except Exception as e:  # noqa: BLE001
+        print(f"{label}: {type(e).__name__}: {e}")
+
+
+attempt("_up(Decimal(2)**1024)", lambda: tt._up(Decimal(2) ** 1024))
+attempt("_up(Fraction(2**1024))", lambda: tt._up(Fraction(2**1024)))
+attempt("_up(-Decimal(2)**1024)  [should be >= -2^1024]", lambda: tt._up(-(Decimal(2) ** 1024)))
+attempt("_dn(Decimal('-Infinity'))", lambda: tt._dn(Decimal("-Infinity")))
+attempt("_dn(-Decimal(2)**1024)", lambda: tt._dn(-(Decimal(2) ** 1024)))
+if hasattr(tt, "stage_lower_heights"):
+    attempt("stage_lower_heights(1e7, 2^-1074)", lambda: tt.stage_lower_heights(1e7, 2.0**-1074))

@@ -1,0 +1,12 @@
+"""Implementer reproduction of Review 06 M3T0-R6-F3: E4b's c0 cap depends on the libm allowance (A-FP-2)."""
+import sys
+
+sys.path.insert(0, sys.argv[1])
+import t0_termination as tt  # noqa: E402
+
+for ulp in (0, 1, 2, 2**5, 2**20, 2**40, 2**48, 2**50):
+    try:
+        c = tt.rounding_allowances(ulp)["zero_force_c0_max"]
+        print(f"LIBM_ULP={ulp}: zero_force_c0_max={float(c)!r}")
+    except Exception as e:  # noqa: BLE001
+        print(f"LIBM_ULP={ulp}: {type(e).__name__}: {e}")

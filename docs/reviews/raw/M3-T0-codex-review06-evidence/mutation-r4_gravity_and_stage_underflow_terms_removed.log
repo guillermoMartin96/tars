@@ -1,0 +1,33 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_r4f1_underflow_constants_recomputed_by_a_second_implementation ______
+
+    def test_r4f1_underflow_constants_recomputed_by_a_second_implementation():
+        """Detects: an underflow term of E1-E6 removed or reduced (the density, coefficient,
+        libm, gravity or stage terms, or h_zero)."""
+        c = constants_second(tt.LIBM_ULP)
+        tiny = Fraction(1, 2**1074)
+        pairs = {
+            "alpha": tt.FPA["alpha"],
+            "beta_m": tt.FPA["beta_m"],
+            "alpha_sel": tt.FPA["alpha_sel"],
+            "beta_sel_m": tt.FPA["beta_sel_m"],
+            "F_D": tt.FPA["F_D"],
+            "F_A": tt.FPA["F_A"],
+            "K_W": tt.FPA["K_W"],
+            "N_rho": tt.FPA["N_rho_in_2^-1074"] * tiny,
+            "gravity_hat_mps2": tt.FPA["gravity_hat_mps2"],
+            "stage_abs": tt.FPA["stage_abs_in_2^-1074"] * tiny,
+        }
+        for key, got in pairs.items():
+            ref = c[key]
+>           assert got >= ref * (1 - Fraction(1, 10**14)), key  # not below the derivation
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: stage_abs
+E           assert Fraction(0, 1) >= (Fraction(1, 2024022533073106183524953467189173070495566497641421183569013580274303395679953468919603837014371244951870...2745068562007483424692698618103355649159556340810056512358769552333414615230502532186327508646006263307707741093494784) * (1 - Fraction(1, 100000000000000)))
+E            +  where Fraction(1, 100000000000000) = Fraction(1, (10 ** 14))
+
+docs/science/experiments/m3-t0/check_review04.py:576: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_underflow_constants_recomputed_by_a_second_implementation
+1 failed, 64 deselected in 1.11s

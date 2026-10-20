@@ -1,0 +1,49 @@
+import sys,math,random,json
+from fractions import Fraction as F
+from decimal import Decimal,localcontext
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_termination as t
+import t0_model as m
+rng=random.Random(62026); phi=F(t.FP['phi_B']); tiny=math.ulp(0.)
+counts={'C1':0,'C2':0,'C1_zero_b':0,'invalid_or_overflow':0,'ratio_violations':0,'downward_rounding_checks':0,'monotone_pairs':0,'zero_force_states':0}; bad=[]
+def value():
+ e=rng.choice([-1074,-1073,-1050,-1023,-1022,-1021,-900,-600,-300,-1,0,1,300,600,900,1022])
+ return math.ldexp(rng.uniform(1,1.999999999999),e)
+for i in range(15000):
+ cd,area,x=value(),value(),value()
+ if i%2==0:
+  mass=x;p=cd*area
+  if not 0<p<math.inf: counts['invalid_or_overflow']+=1;continue
+  b=mass/p;kind='C1'
+  if b==0: counts['C1_zero_b']+=1;continue
+ else:
+  b=x;q=b*cd;mass=q*area;kind='C2'
+  if not 0<q<math.inf: counts['invalid_or_overflow']+=1;continue
+ if not (0<b<math.inf and 0<mass<math.inf):counts['invalid_or_overflow']+=1;continue
+ r=t.inverse_ballistic_bound(b,cd,area,phi); exact=F(cd)*F(area)/F(mass)
+ counts[kind]+=1
+ if exact>r: counts['ratio_violations']+=1;bad.append((kind,b,cd,area,mass))
+ br=t.envelope_ballistic_coefficient(b,cd,area,t.FP)
+ assert F(br)<=phi/r and F(br)<=F(b)
+ if r==phi/F(b):assert br is b
+ counts['downward_rounding_checks']+=1
+ nb=math.nextafter(b,math.inf)
+ if math.isfinite(nb):
+  assert t.inverse_ballistic_bound(nb,cd,area,phi)<=r
+  counts['monotone_pairs']+=1
+# E4b: exact half-smallest-subnormal and adjacent product constructions.
+shapes=[(tiny,math.nextafter(.5,0)),(tiny,.5),(tiny,math.nextafter(.5,1))]
+for e in range(-1074,0,37):
+ cd=math.ldexp(1.,e); area=math.ldexp(1.,-1075-e)
+ for a in [math.nextafter(area,0),area,math.nextafter(area,math.inf)]:
+  if a>0 and F(cd)*F(a)<=t.ETA0:shapes.append((cd,a))
+for cd,area in shapes:
+ if F(cd)*F(area)>t.ETA0:continue
+ for h in [1.,80000.,1.8e8]:
+  for s in [0.,11000.]:
+   r=np.array([m.A_WGS84+h,0.,0.]);v=np.array([0.,-s,0.])
+   vec=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,v,tiny)
+   assert np.all(vec==0),(cd,area,h,s,vec)
+   counts['zero_force_states']+=1
+print(json.dumps({'counts':counts,'bad':bad,'c0_max':float(t.FPA['zero_force_c0_max']),'switch_using_stored_phi':float(phi*(1-t.U)*t.ETA0/(phi*(1-t.U)-1)),'switch_using_exact_phi':float(t.FPA['phi_B']*(1-t.U)*t.ETA0/(t.FPA['phi_B']*(1-t.U)-1))},indent=2))

@@ -1,0 +1,26 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_r5f1_envelope_recomputed_by_a_second_implementation ___________
+
+    def test_r5f1_envelope_recomputed_by_a_second_implementation():
+        """Detects: b_R applied to one part of the envelope only, or the envelope's use of the
+        E4a bound reduced, at vehicles whose conversion is subnormal."""
+        cases = [(R5_LOW, 0.0), (1.9e8, 2_000.0), (1.0e8, 11_000.0), (120_000.0, 7_800.0)]
+        for label, _, b, _, cd, area in VEHICLE_GRID[::9]:
+            ratio = ratio_second(b, cd, area)
+            for low, s in cases:
+                env = tt.drag_envelope(low, s, b, cd=cd, area=area)
+                ref = env_second(Fraction(low), Fraction(s), ratio, cd, area, CONST)
+                if env == math.inf:  # rounded up past the largest binary64: still a bound
+                    assert ref > Fraction(sys.float_info.max), (label, low, s)
+                    continue
+                got = Fraction(env)
+>               assert got >= ref * (1 - Fraction(1, 10**30)), (label, low, s)
+E               AssertionError: ('C1 b=4.941e-324 cd=2.2 A=15', 190000000.0, 2000.0)
+E               assert Fraction(2851927835834723, 32768) >= (<[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] Fraction object at 0x10ff56980> * (1 - Fraction(1, 1000000000000000000000000000000)))
+E                +  where Fraction(1, 1000000000000000000000000000000) = Fraction(1, (10 ** 30))
+
+docs/science/experiments/m3-t0/check_review05.py:310: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_envelope_recomputed_by_a_second_implementation
+1 failed, 1 passed, 63 deselected in 4.12s

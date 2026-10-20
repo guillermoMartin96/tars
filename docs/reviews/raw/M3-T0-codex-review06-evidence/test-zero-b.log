@@ -1,0 +1,56 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_c1_zero_rounded_b_still_has_finite_nonzero_drag _____________
+
+    def test_c1_zero_rounded_b_still_has_finite_nonzero_drag():
+        mass=16*math.ulp(0.0);cd=2.2;area=15.0
+        b=mass/(cd*area)
+        assert b==0.0 and mass>0 and cd>0 and area>0
+        r=np.array([186378137.0,0.,0.]);v=np.zeros(3)
+        assert -.5*0-m.MU/float(np.linalg.norm(r))<0
+        h=m.geodetic_iterative(r)[1]
+        assert h==180000000.0
+        vec=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,v,mass)
+        assert np.all(np.isfinite(vec)) and np.any(vec!=0)
+        # Independent host libm check for the exp and pow calls at this equatorial point.
+        band=m.TABLE[-1];x=-(h/1000.-band.base_km)/band.scale_km
+        with localcontext() as ctx:
+            ctx.prec=90
+            exact=Decimal(x).exp();err=abs(Decimal(math.exp(x))-exact)
+            assert err <= Decimal(2)*Decimal(2)**-52*abs(exact)+Decimal(2)*Decimal(2)**-1074
+            rn=float(np.linalg.norm(r));exactpow=Decimal(rn)**3
+            assert abs(Decimal(rn**3)-exactpow)<=Decimal(2)*Decimal(2)**-52*exactpow
+            actual=sum(Decimal(float(x))**2 for x in vec).sqrt()
+>       assert actual<=Decimal(t.drag_envelope(h,0.,b))
+                               ^^^^^^^^^^^^^^^^^^^^^^^
+
+review_scratch/test_zero_b.py:28: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:911: in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:861: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:849: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+=========================== short test summary info ============================
+FAILED review_scratch/test_zero_b.py::test_c1_zero_rounded_b_still_has_finite_nonzero_drag
+1 failed in 0.71s

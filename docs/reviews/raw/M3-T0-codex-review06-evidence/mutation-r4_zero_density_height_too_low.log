@@ -1,0 +1,82 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________________ test_r4f1_zero_density_height _________________________
+
+    def test_r4f1_zero_density_height():
+        """Detects: h_zero placed below the true onset of zero density (the absolute part would
+        then omit heights with nonzero force). The derived h_zero must not be below the oracle's
+        exact onset, and every point whose computed selection height is above it must have
+        computed density 0 and drag exactly 0."""
+        h_zero = tt.FP["h_zero_m"]
+        exact = o.top_band_height(TINY / 2)
+>       assert D(h_zero) >= exact and D(h_zero) - exact < 1, (h_zero, exact)
+E       AssertionError: (189735430.7198785, Decimal('191735430.719878400062362441221301387560232283165697235227824'))
+E       assert (Decimal('189735430.719878494739532470703125') >= Decimal('191735430.719878400062362441221301387560232283165697235227824'))
+E        +  where Decimal('189735430.719878494739532470703125') = D(189735430.7198785)
+
+docs/science/experiments/m3-t0/check_review04.py:283: AssertionError
+_____ test_r4f1_underflow_constants_recomputed_by_a_second_implementation ______
+
+    def test_r4f1_underflow_constants_recomputed_by_a_second_implementation():
+        """Detects: an underflow term of E1-E6 removed or reduced (the density, coefficient,
+        libm, gravity or stage terms, or h_zero)."""
+        c = constants_second(tt.LIBM_ULP)
+        tiny = Fraction(1, 2**1074)
+        pairs = {
+            "alpha": tt.FPA["alpha"],
+            "beta_m": tt.FPA["beta_m"],
+            "alpha_sel": tt.FPA["alpha_sel"],
+            "beta_sel_m": tt.FPA["beta_sel_m"],
+            "F_D": tt.FPA["F_D"],
+            "F_A": tt.FPA["F_A"],
+            "K_W": tt.FPA["K_W"],
+            "N_rho": tt.FPA["N_rho_in_2^-1074"] * tiny,
+            "gravity_hat_mps2": tt.FPA["gravity_hat_mps2"],
+            "stage_abs": tt.FPA["stage_abs_in_2^-1074"] * tiny,
+        }
+        for key, got in pairs.items():
+            ref = c[key]
+            assert got >= ref * (1 - Fraction(1, 10**14)), key  # not below the derivation
+            assert got <= ref * (1 + Fraction(1, 10**9)), key  # no padding
+        # the underflow parts themselves, not only their sums with larger terms
+        assert tt.FPA["N_rho_in_2^-1074"] >= Fraction(295, 100) - Fraction(1, 10**12)
+        assert tt.FPA["nu_in_2^-1074"] == tt.LIBM_ULP
+>       assert abs(Fraction(tt.FP["h_zero_m"]) - c["h_zero_m"]) < Fraction(1, 10**6)
+E       assert Fraction(249999999999996529453486864952224648678477086593071447873945904064618950457028428496486784770865928317785855460559809, 125000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000) < Fraction(1, 1000000)
+E        +  where Fraction(249999999999996529453486864952224648678477086593071447873945904064618950457028428496486784770865928317785855460559809, 125000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000) = abs((Fraction(3183232304040437, 16777216) - Fraction(2396692883998480837189504570284284964867847708659307144787394590406461895045702842849648678477086592831778585...59809, 125000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000)))
+E        +    where Fraction(3183232304040437, 16777216) = Fraction(189735430.7198785)
+E        +  and   Fraction(1, 1000000) = Fraction(1, (10 ** 6))
+
+docs/science/experiments/m3-t0/check_review04.py:581: AssertionError
+___________ test_r4f1_envelope_recomputed_by_a_second_implementation ___________
+
+    def test_r4f1_envelope_recomputed_by_a_second_implementation():
+        """Detects: a term of the corrected envelope removed or reduced in its evaluation (the
+        absolute part, its density, coefficient and product terms, h_zero, or the relative
+        part), including terms too small for any constructed point to expose."""
+        c = constants_second(tt.LIBM_ULP)
+        h_zero = tt.FP["h_zero_m"]
+        cases = [
+            (190_681_000.0, 0.0, "B25.8"),
+            (185_000_000.0, 11_000.0, "B100"),
+            (h_zero - 1e5, 2_000.0, "B25.8"),
+            (h_zero + 1e6, 0.0, "B25.8"),
+            (120_000.0, 11_000.0, "B25.8"),
+            (450_000.0, 7_800.0, "B100"),
+            (0.0, 7_800.0, "B25.8"),
+        ]
+        for low, s, vehicle in cases:
+            b = VEHICLES[vehicle]
+            got = Fraction(tt.drag_envelope(low, s, b))
+            ref = env_second(Fraction(low), Fraction(s), b, c)
+>           assert got >= ref * (1 - Fraction(1, 10**30)), (low, s, vehicle)
+E           AssertionError: (190681000.0, 0.0, 'B25.8')
+E           assert Fraction(222350893, 20240225330731061835249534671891730704955664976414211835690135802743033956799534689196038370143712...2745068562007483424692698618103355649159556340810056512358769552333414615230502532186327508646006263307707741093494784) >= (<[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] Fraction object at 0x115065f30> * (1 - Fraction(1, 1000000000000000000000000000000)))
+E            +  where Fraction(1, 1000000000000000000000000000000) = Fraction(1, (10 ** 30))
+
+docs/science/experiments/m3-t0/check_review04.py:620: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_zero_density_height
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_underflow_constants_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_envelope_recomputed_by_a_second_implementation
+3 failed, 62 deselected in 1.15s

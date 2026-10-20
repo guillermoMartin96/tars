@@ -1,0 +1,14 @@
+import subprocess,sys,pathlib,json,time,hashlib
+root=pathlib.Path.cwd(); scratch=root/'review_scratch'; d=root/'docs/science/experiments/m3-t0'; py=str(root/'.venv/bin/python')
+def hashes(): return {str(p.relative_to(root)):hashlib.sha256(p.read_bytes()).hexdigest() for p in d.rglob('*') if p.is_file() and '__pycache__' not in str(p)}
+before=hashes(); (scratch/'experiment-before.json').write_text(json.dumps(before,indent=2))
+commands=[[py,str(d/f't0_{name}.py'),str(d/f't0_{name}_results.json')] for name in ['atmosphere','decay','geodetic','frames','regression','termination','height_error']]
+commands += [[py,str(d/'t0_gmat.py'),'--gmat-console',str(root.parent/'GMAT R2026a/bin/GmatConsole'),'--out',str(d/'t0_gmat_results.json')],[py,str(d/'t0_axis_ablation.py'),str(d/'t0_axis_ablation_results.json')]]
+ledger=[]
+for i,cmd in enumerate(commands):
+ start=time.time()
+ with (scratch/f'experiment-{i}.log').open('w') as f: r=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
+ ledger.append({'command':cmd,'exit':r.returncode,'seconds':time.time()-start})
+ (scratch/'execution.json').write_text(json.dumps(ledger,indent=2))
+after=hashes(); changes={k:{'before':before.get(k),'after':after.get(k)} for k in before.keys()|after.keys() if before.get(k)!=after.get(k)}
+(scratch/'experiment-changes.json').write_text(json.dumps(changes,indent=2)); print(json.dumps(ledger,indent=2)); print('changes',changes)

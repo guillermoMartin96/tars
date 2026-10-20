@@ -1,0 +1,36 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________ test_r5f1_conversion_bound_holds_for_both_constructions ____________
+
+    def test_r5f1_conversion_bound_holds_for_both_constructions():
+        """Detects: an absolute term of E4a missing or too small (the quotient's for subnormal
+        b, the product's for subnormal cd area, or C2's for subnormal b cd or mass). Expected
+        values: the exact cd area / mass of each constructed vehicle (C2) and the supremum over
+        b's rounding interval (C1)."""
+        kinds = {"subnormal b": 0, "subnormal P": 0, "subnormal b cd": 0, "beyond phi_B / b": 0}
+        for label, kind, b, mass, cd, area in VEHICLE_GRID:
+            r = tt.inverse_ballistic_bound(b, cd, area, PHI)
+            actual = Fraction(cd) * Fraction(area) / Fraction(mass)
+>           assert actual <= r, label
+E           AssertionError: C2 b=2.470e-323 cd=0.5 A=3
+E           assert Fraction(5060056332682765458812383667972932676238916244103552958922533950685758489199883672299009592535928112379676946...6267140501870856173174654525838912289889085202514128089692388083353653807625633046581877161501565826926935273373696, 1) <= Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 81064793292668919)
+
+docs/science/experiments/m3-t0/check_review05.py:213: AssertionError
+_______ test_r5f1_conversion_bound_recomputed_by_a_second_implementation _______
+
+    def test_r5f1_conversion_bound_recomputed_by_a_second_implementation():
+        """Detects: a term of E4a removed, reduced or applied to the wrong construction,
+        including terms too small for a force comparison to expose."""
+        for label, _, b, _, cd, area in VEHICLE_GRID:
+>           assert tt.inverse_ballistic_bound(b, cd, area, PHI) == ratio_second(b, cd, area), label
+E           AssertionError: C1 b=9.881e-324 cd=1 A=1
+E           assert Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 27021597764222973) == Fraction(2024022533073106183524953467189173070495566497641421183569013580274303395679953468919603837014371244951870778...5068562007483424692698618103355649159556340810056512358769552333414615230502532186327508646006263307707741093494784, 1)
+E            +  where Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 27021597764222973) = <function inverse_ballistic_bound at 0x1114db9c0>(1e-323, 1.0, 1.0, Fraction(2251799813685249, 2251799813685248))
+E            +    where <function inverse_ballistic_bound at 0x1114db9c0> = tt.inverse_ballistic_bound
+E            +  and   Fraction(2024022533073106183524953467189173070495566497641421183569013580274303395679953468919603837014371244951870778...5068562007483424692698618103355649159556340810056512358769552333414615230502532186327508646006263307707741093494784, 1) = ratio_second(1e-323, 1.0, 1.0)
+
+docs/science/experiments/m3-t0/check_review05.py:227: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_holds_for_both_constructions
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_recomputed_by_a_second_implementation
+2 failed, 63 deselected in 1.06s

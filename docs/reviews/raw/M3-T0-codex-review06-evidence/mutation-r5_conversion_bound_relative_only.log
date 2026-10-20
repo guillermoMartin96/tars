@@ -1,0 +1,177 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+____ test_r5f1_review05_counterexamples_are_covered[17-C1-reviewer_ratio0] _____
+
+mass_units = 17, construction = 'C1'
+reviewer_ratio = Decimal('1.94117647058593')
+
+    @pytest.mark.parametrize(
+        "mass_units, construction, reviewer_ratio",
+        [(17, "C1", D("1.94117647058593")), (30, "C2", D("1.09999999999869"))],
+    )
+    def test_r5f1_review05_counterexamples_are_covered(mass_units, construction, reviewer_ratio):
+        """Detects: the conversion between b and mass bounded by a relative factor only (the
+        R5-F1 defect), or its absolute term missing or too small."""
+        mass = mass_units * TINY
+        b = mass / (CD * AREA) if construction == "C1" else TINY
+        assert b == TINY
+        if construction == "C2":
+            assert (b * CD) * AREA == mass  # the second construction gives the same pair
+        assert o.true_height(R5_R) == D(R5_LOW)  # exact: the foot point is (a, 0, 0)
+        assert m.geodetic_iterative(R5_R)[1] == R5_LOW
+        v = np.zeros(3)
+        a = model_drag_norm(R5_R, v, mass, CD, AREA)
+        exact_ratio = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+        assert exact_ratio > PHI / Fraction(b)  # the superseded prerequisite fails
+        old = env_second(Fraction(R5_LOW), Fraction(0), PHI / Fraction(b), CD, AREA, CONST)
+        assert abs(a / D(old.numerator) * D(old.denominator) - reviewer_ratio) < D("1e-9")
+>       assert a <= D(tt.drag_envelope(R5_LOW, 0.0, b))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('932800051663490532794957824') <= Decimal('480533359948429083080130560')
+E        +  where Decimal('480533359948429083080130560') = D(4.805333599484291e+26)
+E        +    where 4.805333599484291e+26 = <function drag_envelope at 0x10beb7ce0>(180000000.0, 0.0, 5e-324)
+E        +      where <function drag_envelope at 0x10beb7ce0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review05.py:197: AssertionError
+____ test_r5f1_review05_counterexamples_are_covered[30-C2-reviewer_ratio1] _____
+
+mass_units = 30, construction = 'C2'
+reviewer_ratio = Decimal('1.09999999999869')
+
+    @pytest.mark.parametrize(
+        "mass_units, construction, reviewer_ratio",
+        [(17, "C1", D("1.94117647058593")), (30, "C2", D("1.09999999999869"))],
+    )
+    def test_r5f1_review05_counterexamples_are_covered(mass_units, construction, reviewer_ratio):
+        """Detects: the conversion between b and mass bounded by a relative factor only (the
+        R5-F1 defect), or its absolute term missing or too small."""
+        mass = mass_units * TINY
+        b = mass / (CD * AREA) if construction == "C1" else TINY
+        assert b == TINY
+        if construction == "C2":
+            assert (b * CD) * AREA == mass  # the second construction gives the same pair
+        assert o.true_height(R5_R) == D(R5_LOW)  # exact: the foot point is (a, 0, 0)
+        assert m.geodetic_iterative(R5_R)[1] == R5_LOW
+        v = np.zeros(3)
+        a = model_drag_norm(R5_R, v, mass, CD, AREA)
+        exact_ratio = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+        assert exact_ratio > PHI / Fraction(b)  # the superseded prerequisite fails
+        old = env_second(Fraction(R5_LOW), Fraction(0), PHI / Fraction(b), CD, AREA, CONST)
+        assert abs(a / D(old.numerator) * D(old.denominator) - reviewer_ratio) < D("1e-9")
+>       assert a <= D(tt.drag_envelope(R5_LOW, 0.0, b))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('528586695942644616925282304') <= Decimal('480533359948429083080130560')
+E        +  where Decimal('480533359948429083080130560') = D(4.805333599484291e+26)
+E        +    where 4.805333599484291e+26 = <function drag_envelope at 0x10beb7ce0>(180000000.0, 0.0, 5e-324)
+E        +      where <function drag_envelope at 0x10beb7ce0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review05.py:197: AssertionError
+___________ test_r5f1_conversion_bound_holds_for_both_constructions ____________
+
+    def test_r5f1_conversion_bound_holds_for_both_constructions():
+        """Detects: an absolute term of E4a missing or too small (the quotient's for subnormal
+        b, the product's for subnormal cd area, or C2's for subnormal b cd or mass). Expected
+        values: the exact cd area / mass of each constructed vehicle (C2) and the supremum over
+        b's rounding interval (C1)."""
+        kinds = {"subnormal b": 0, "subnormal P": 0, "subnormal b cd": 0, "beyond phi_B / b": 0}
+        for label, kind, b, mass, cd, area in VEHICLE_GRID:
+            r = tt.inverse_ballistic_bound(b, cd, area, PHI)
+            actual = Fraction(cd) * Fraction(area) / Fraction(mass)
+>           assert actual <= r, label
+E           AssertionError: C1 b=4.941e-324 cd=2.2 A=15
+E           assert Fraction(6679274359141250944940286900419043451426926678924109991170838497597173026034089920632720078650314506466605536...621795103208032165568849457763810909780986063487389550885278534736061501303403886623224467121195223344328757739520, 17) <= Fraction(2024022533073107082371520898347126935148161892153787992557503051427589762830359257582982864519186908494257390...4795103483525927577117693444526880600293297365326925977351227588756908379622505809296748504158680985872553205563392, 1)
+
+docs/science/experiments/m3-t0/check_review05.py:213: AssertionError
+_______ test_r5f1_conversion_bound_recomputed_by_a_second_implementation _______
+
+    def test_r5f1_conversion_bound_recomputed_by_a_second_implementation():
+        """Detects: a term of E4a removed, reduced or applied to the wrong construction,
+        including terms too small for a force comparison to expose."""
+        for label, _, b, _, cd, area in VEHICLE_GRID:
+>           assert tt.inverse_ballistic_bound(b, cd, area, PHI) == ratio_second(b, cd, area), label
+E           AssertionError: C1 b=4.941e-324 cd=2.2 A=15
+E           assert Fraction(2024022533073107082371520898347126935148161892153787992557503051427589762830359257582982864519186908494257390...4795103483525927577117693444526880600293297365326925977351227588756908379622505809296748504158680985872553205563392, 1) == Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...6064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 9007199254740991)
+E            +  where Fraction(2024022533073107082371520898347126935148161892153787992557503051427589762830359257582982864519186908494257390...4795103483525927577117693444526880600293297365326925977351227588756908379622505809296748504158680985872553205563392, 1) = <function inverse_ballistic_bound at 0x10beb7ba0>(5e-324, 2.2, 15.0, Fraction(2251799813685249, 2251799813685248))
+E            +    where <function inverse_ballistic_bound at 0x10beb7ba0> = tt.inverse_ballistic_bound
+E            +  and   Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...6064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 9007199254740991) = ratio_second(5e-324, 2.2, 15.0)
+
+docs/science/experiments/m3-t0/check_review05.py:227: AssertionError
+________ test_r5f1_dominance_switch_between_relative_and_absolute_terms ________
+
+    def test_r5f1_dominance_switch_between_relative_and_absolute_terms():
+        """Detects: the quotient's absolute term missing, or taking over at the wrong b. For
+        the V1 shape (P normal), R1 = (1 / (1 - u)) max((1 + u) / b, 1 / (b - eta0)) exceeds
+        phi_B / b exactly when b < b* = c eta0 / (c - 1), c = phi_B (1 - u) (derived here)."""
+        c = PHI * (1 - U)
+        b_star = c * ETA0 / (c - 1)
+        above = tt._up(b_star)
+        below = tt._dn(b_star)
+        assert below < above
+        assert 2.0**-1024 < above < 2.0**-1022  # about 2^-1023: subnormal b
+        assert tt.inverse_ballistic_bound(above, CD, AREA, PHI) == PHI / Fraction(above)
+        assert tt.envelope_ballistic_coefficient(above, CD, AREA, tt.FP) is above
+>       assert tt.inverse_ballistic_bound(below, CD, AREA, PHI) > PHI / Fraction(below)
+E       assert Fraction(1348269851146736930796978893091768550213482734206729929550725608682995068541257223495313579918056520158400854...9589812214063754326628613011756847161105434832905620427872512883013439723679960434453859787228626517247218168102912, 1) > (Fraction(2251799813685249, 2251799813685248) / Fraction(750599937895083, 10120112665365530917624767335945865352477832488207105917845067901371516978399767344598019185...6372534281003741712346349309051677824579778170405028256179384776166707307615251266093163754323003131653853870546747392))
+E        +  where Fraction(1348269851146736930796978893091768550213482734206729929550725608682995068541257223495313579918056520158400854...9589812214063754326628613011756847161105434832905620427872512883013439723679960434453859787228626517247218168102912, 1) = <function inverse_ballistic_bound at 0x10beb7ba0>(7.416912861690675e-309, 2.2, 15.0, Fraction(2251799813685249, 2251799813685248))
+E        +    where <function inverse_ballistic_bound at 0x10beb7ba0> = tt.inverse_ballistic_bound
+E        +  and   Fraction(750599937895083, 10120112665365530917624767335945865352477832488207105917845067901371516978399767344598019185...6372534281003741712346349309051677824579778170405028256179384776166707307615251266093163754323003131653853870546747392) = Fraction(7.416912861690675e-309)
+
+docs/science/experiments/m3-t0/check_review05.py:242: AssertionError
+________ test_r5f1_model_drag_within_envelope_for_subnormal_conversions ________
+
+    def test_r5f1_model_drag_within_envelope_for_subnormal_conversions():
+        """Detects: the corrected bound not applied to both parts of the envelope, or too small
+        in the force (vehicles with subnormal b, P or b cd, at normal, subnormal and zero
+        computed densities; states whose force overflows are outside the domain)."""
+        checked = beyond = overflow = 0
+        for label, _, b, mass, cd, area in VEHICLE_GRID:
+            if b >= 2.0**-1022 and cd * area >= 2.0**-1022 and b * cd >= 2.0**-1022:
+                continue
+            for r, s in STATES:
+                v = -s * c4.east(0.0)
+                with np.errstate(over="ignore", invalid="ignore"):
+                    vec = m.acceleration(
+                        m.Config(mu=0.0, drag=m.Drag(cd=cd, area_m2=area)), 0.0, r, v, mass
+                    )
+                if not np.all(np.isfinite(vec)):
+                    overflow += 1
+                    continue
+                a = model_drag_norm(r, v, mass, cd, area)
+                low = tt._dn(o.true_height(r))
+                env = tt.drag_envelope(low, c4.up(s) if s else 0.0, b, cd=cd, area=area)
+>               assert a <= D(env), (label, r[0], s)
+E               AssertionError: ('C1 b=4.941e-324 cd=2.2 A=15', np.float64(106378137.0), 0.0)
+E               assert Decimal('1.32692764162612939655293773460941015778410718773200556831976E+156') <= Decimal('683568785080587707674642695792957033045501722895621425771539339902343590573992292565179617699579006964900542006170621833867218983732808172972189852756869120')
+E                +  where Decimal('683568785080587707674642695792957033045501722895621425771539339902343590573992292565179617699579006964900542006170621833867218983732808172972189852756869120') = D(6.835687850805877e+155)
+
+docs/science/experiments/m3-t0/check_review05.py:289: AssertionError
+___________ test_r5f1_envelope_recomputed_by_a_second_implementation ___________
+
+    def test_r5f1_envelope_recomputed_by_a_second_implementation():
+        """Detects: b_R applied to one part of the envelope only, or the envelope's use of the
+        E4a bound reduced, at vehicles whose conversion is subnormal."""
+        cases = [(R5_LOW, 0.0), (1.9e8, 2_000.0), (1.0e8, 11_000.0), (120_000.0, 7_800.0)]
+        for label, _, b, _, cd, area in VEHICLE_GRID[::9]:
+            ratio = ratio_second(b, cd, area)
+            for low, s in cases:
+                env = tt.drag_envelope(low, s, b, cd=cd, area=area)
+                ref = env_second(Fraction(low), Fraction(s), ratio, cd, area, CONST)
+                if env == math.inf:  # rounded up past the largest binary64: still a bound
+                    assert ref > Fraction(sys.float_info.max), (label, low, s)
+                    continue
+                got = Fraction(env)
+>               assert got >= ref * (1 - Fraction(1, 10**30)), (label, low, s)
+E               AssertionError: ('C1 b=4.941e-324 cd=2.2 A=15', 180000000.0, 0.0)
+E               assert Fraction(480533359948429083080130560, 1) >= (<[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] Fraction object at 0x10bef46d0> * (1 - Fraction(1, 1000000000000000000000000000000)))
+E                +  where Fraction(1, 1000000000000000000000000000000) = Fraction(1, (10 ** 30))
+
+docs/science/experiments/m3-t0/check_review05.py:310: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_review05_counterexamples_are_covered[17-C1-reviewer_ratio0]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_review05_counterexamples_are_covered[30-C2-reviewer_ratio1]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_holds_for_both_constructions
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_dominance_switch_between_relative_and_absolute_terms
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_model_drag_within_envelope_for_subnormal_conversions
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_envelope_recomputed_by_a_second_implementation
+7 failed, 58 deselected in 1.13s

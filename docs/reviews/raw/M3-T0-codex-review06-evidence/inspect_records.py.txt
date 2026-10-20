@@ -1,0 +1,36 @@
+from pathlib import Path
+import hashlib,json,subprocess
+root=Path.cwd(); files=[]
+for pattern in ['docs/reviews/raw/M3-T0-codex-review0*.md','docs/reviews/M3-T0-review-0*.md','docs/decisions/requests/DR-002[4-9]*.md','docs/science/assumptions.md','docs/science/validation.md','docs/milestones/M3-T0*.md','docs/science/experiments/m3-t0/README.md','docs/science/experiments/m3-t0/*results.json','docs/reviews/raw/M3-T0-review05-findings-correction-evidence/*']:
+ files+=list(root.glob(pattern))
+files=sorted(set(p for p in files if p.is_file()))
+(root/'review_scratch/inspected_files.json').write_text(json.dumps([str(p.relative_to(root)) for p in files],indent=2))
+with (root/'review_scratch/inspections.log').open('w') as f:
+ for p in files: f.write('\nFILE '+str(p.relative_to(root))+'\n'+p.read_text()+'\n')
+old=json.loads(subprocess.check_output(['git','show','17b2229:docs/science/experiments/m3-t0/t0_termination_results.json']))
+new=json.loads((root/'docs/science/experiments/m3-t0/t0_termination_results.json').read_text())
+diffs=[]
+def compare(a,b,path=''):
+ if isinstance(a,dict) and isinstance(b,dict):
+  for k in a.keys()|b.keys():
+   if k not in a:diffs.append(['ADDED',path+'/'+k])
+   elif k not in b:diffs.append(['REMOVED',path+'/'+k])
+   else:compare(a[k],b[k],path+'/'+k)
+ elif a!=b:diffs.append(['CHANGED',path,a,b])
+compare(old,new)
+print('termination diff',json.dumps(diffs))
+print('floors',json.dumps(new['floor_comparison'],indent=2))
+for name in ['atmosphere','axis_ablation','decay','frames','geodetic','gmat','regression','termination','height_error']:
+ p=root/f'docs/science/experiments/m3-t0/t0_{name}_results.json'; data=json.loads(p.read_text());print(name,'top-level',list(data))
+# Validate all literal full sha256 digest assertions in VAL-0019 against local files.
+import re
+text=(root/'docs/science/validation.md').read_text();text=text[text.index('## VAL-0019'):]
+checked=[]
+for line in text.splitlines():
+ matches=re.findall(r'`([^`]+)`',line)
+ for x in matches:
+  if re.fullmatch('[0-9a-f]{64}',x):
+   candidates=[s for s in matches if (root/s).is_file()]
+   for c in candidates:
+    got=hashlib.sha256((root/c).read_bytes()).hexdigest();checked.append((c,x,got,got==x))
+print('VAL digest matches',json.dumps(checked,indent=2))

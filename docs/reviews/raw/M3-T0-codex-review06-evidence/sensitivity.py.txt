@@ -1,0 +1,26 @@
+import sys,pathlib,shutil,subprocess,tarfile,io,json,concurrent.futures
+root=pathlib.Path.cwd(); scratch=root/'review_scratch'; rel=pathlib.Path('docs/science/experiments/m3-t0');sys.path.insert(0,str(root/rel))
+import mutation_check_review02 as h
+py=str(root/'.venv/bin/python')
+base=scratch/'red-before';base.mkdir(exist_ok=True)
+blob=subprocess.check_output(['git','archive','17b2229','docs'])
+with tarfile.open(fileobj=io.BytesIO(blob)) as t:t.extractall(base,filter='data')
+shutil.copy2(root/rel/'check_review05.py',base/rel/'check_review05.py')
+cmd=[py,'-m','pytest','-q','-p','no:cacheprovider','-rf',str(base/rel/'check_review05.py')]
+r=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,cwd=base)
+(scratch/'red-before.log').write_text(r.stdout);print('red-before',r.returncode,r.stdout.splitlines()[-1],flush=True)
+selected=[k for k in h.MUTANTS if k.startswith('r5') or k.startswith('r4')]
+print('selected',selected,flush=True)
+def run(name):
+ droot=scratch/'mutants'/name
+ shutil.copytree(root/'docs',droot/'docs',ignore=shutil.ignore_patterns('__pycache__'),dirs_exist_ok=True)
+ mutation,expected=h.MUTANTS[name];mutation(droot/rel)
+ cmd=[py,'-m','pytest','-q','-p','no:cacheprovider','-rf',str(droot/rel/'check_review04.py'),str(droot/rel/'check_review05.py'),'-k',' or '.join(expected)]
+ r=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,cwd=droot)
+ (scratch/f'mutation-{name}.log').write_text(r.stdout)
+ failed=sorted(set(h.re.findall(r'^FAILED \S+::(\w+)',r.stdout,h.re.M)))
+ return name,{'command':cmd,'exit':r.returncode,'expected':expected,'failed':failed,'declared_detected':bool(set(expected)&set(failed)),'summary':r.stdout.splitlines()[-1] if r.stdout else ''}
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+ results=dict(pool.map(run,selected))
+(scratch/'mutation-subset.json').write_text(json.dumps(results,indent=2))
+print(json.dumps(results,indent=2))

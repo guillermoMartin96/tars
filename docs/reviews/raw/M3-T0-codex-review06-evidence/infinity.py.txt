@@ -1,0 +1,4 @@
+exec(open('review_scratch/probe.py').read().split('for name, f in [')[0])
+for name,f in [('up fraction',lambda:t._up(Fraction(2**1024))),('up negative decimal',lambda:t._up(-Decimal(2)**1024)),('stage tiny at 1e7',lambda:t.stage_lower_heights(1e7,math.ulp(0.))),('dn negative infinity',lambda:t._dn(Decimal('-Infinity')))]:
+ try: print(name,f())
+ except Exception as e: print(name,type(e).__name__,str(e))

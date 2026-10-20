@@ -1,0 +1,569 @@
+{
+ "cases": {
+  "kepler_250x800_i51.6_perigee_midstep": {
+   "dip_m": 4.98764459323138,
+   "sampled_max_hddot_upper_over_step_mps2": 0.42261415057364893,
+   "sampled_estimate_m": 5.282676882170612,
+   "two_body_domain_bound_m": 5.283316482977662,
+   "bound_m": 5.283316482977662,
+   "bound_kind": "certified: two-body orbit bound, maximised in closed form",
+   "bound_holds": true
+  },
+  "j2drag_250x800_i51.6_perigee_midstep": {
+   "dip_m": 4.817096536979079,
+   "sampled_max_hddot_upper_over_step_mps2": 0.408970573595024,
+   "sampled_estimate_m": 5.1121321699378,
+   "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
+   "dip_within_sampled_estimate": true
+  },
+  "kepler_circular250_i51.6_equator_midstep": {
+   "dip_m": 0.4516185065731406,
+   "sampled_max_hddot_upper_over_step_mps2": 0.05882667119122864,
+   "sampled_estimate_m": 0.735333389890358,
+   "two_body_domain_bound_m": 0.7359729906974088,
+   "bound_m": 0.7359729906974088,
+   "bound_kind": "certified: two-body orbit bound, maximised in closed form",
+   "bound_holds": true
+  },
+  "j2drag_circular250_i51.6_equator_midstep": {
+   "dip_m": 0.28107060864567757,
+   "sampled_max_hddot_upper_over_step_mps2": 0.04518387694145076,
+   "sampled_estimate_m": 0.5647984617681345,
+   "estimate_kind": "sampled estimate of dt^2/8 sup U on a numerical trajectory; not a bound",
+   "dip_within_sampled_estimate": true
+  }
+ },
+ "all_certified_bounds_hold": true,
+ "all_dips_within_sampled_estimates": true
+}
+kepler     250 x    250 i   0.0: dip 0.00000 m (phase 9.25 s); certified bound 0.73597 m
+j2drag     250 x    250 i   0.0: dip 0.16727 m (phase 2.50 s); sampled estimate 0.91492 m (not a bound)
+kepler     250 x    250 i  51.6: dip 0.44341 m (phase 5.25 s); certified bound 0.73597 m
+j2drag     250 x    250 i  51.6: dip 0.48249 m (phase 9.75 s); sampled estimate 0.77109 m (not a bound)
+kepler     250 x    250 i  97.0: dip 0.71124 m (phase 5.25 s); certified bound 0.73597 m
+j2drag     250 x    250 i  97.0: dip 0.64848 m (phase 7.25 s); sampled estimate 0.68416 m (not a bound)
+kepler     180 x    180 i  51.6: dip 0.46132 m (phase 7.75 s); certified bound 0.75984 m
+j2drag     180 x    180 i  51.6: dip 0.46952 m (phase 9.00 s); sampled estimate 0.78917 m (not a bound)
+kepler     250 x    400 i  51.6: dip 1.69372 m (phase 6.75 s); certified bound 2.01316 m
+j2drag     250 x    400 i  51.6: dip 1.49714 m (phase 7.25 s); sampled estimate 1.84198 m (not a bound)
+kepler     250 x    800 i  51.6: dip 4.90292 m (phase 3.00 s); certified bound 5.28332 m
+j2drag     250 x    800 i  51.6: dip 4.64126 m (phase 3.75 s); sampled estimate 5.11213 m (not a bound)
+kepler     250 x    800 i  97.0: dip 5.18175 m (phase 3.00 s); certified bound 5.28332 m
+j2drag     250 x    800 i  97.0: dip 5.00357 m (phase 3.50 s); sampled estimate 5.11213 m (not a bound)
+kepler     180 x    800 i  51.6: dip 5.61169 m (phase 4.25 s); certified bound 6.02300 m
+j2drag     180 x    800 i  51.6: dip 5.50339 m (phase 9.75 s); sampled estimate 5.84440 m (not a bound)
+kepler     250 x   2000 i  51.6: dip 13.30150 m (phase 3.00 s); certified bound 14.04777 m
+j2drag     250 x   2000 i  51.6: dip 13.32783 m (phase 8.75 s); sampled estimate 13.87659 m (not a bound)
+{
+ "stiffness_thresholds": {
+  "circular_speed": {
+   "B25.8": {
+    "2.785293563405282": {
+     "threshold_m": 51244.545260572435,
+     "lambda_dt_at_threshold": 2.7852935634052804,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 59825.0849189536,
+     "lambda_dt_at_threshold": 1.0000000000000215,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 76445.47737908902,
+     "lambda_dt_at_threshold": 0.09999999999999741,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 90185.09165917509,
+     "lambda_dt_at_threshold": 0.010000000000000002,
+     "sign_changes_on_10m_grid": 1
+    }
+   },
+   "B100": {
+    "2.785293563405282": {
+     "threshold_m": 40881.38962378401,
+     "lambda_dt_at_threshold": 2.785293563405281,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 48614.80661172269,
+     "lambda_dt_at_threshold": 1.0000000000000002,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 67133.48614929448,
+     "lambda_dt_at_threshold": 0.1000000000000001,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 82337.14381719701,
+     "lambda_dt_at_threshold": 0.009999999999999686,
+     "sign_changes_on_10m_grid": 1
+    }
+   }
+  },
+  "bound_speed": {
+   "B25.8": {
+    "2.785293563405282": {
+     "threshold_m": 54506.73727267767,
+     "lambda_dt_at_threshold": 2.785293563405328,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 62842.26145531463,
+     "lambda_dt_at_threshold": 1.0000000000000002,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 78996.122325464,
+     "lambda_dt_at_threshold": 0.09999999999999706,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 92282.0718994342,
+     "lambda_dt_at_threshold": 0.010000000000000009,
+     "sign_changes_on_10m_grid": 1
+    }
+   },
+   "B100": {
+    "2.785293563405282": {
+     "threshold_m": 43820.779476079435,
+     "lambda_dt_at_threshold": 2.785293563405282,
+     "sign_changes_on_10m_grid": 1
+    },
+    "1.0": {
+     "threshold_m": 51724.77386192621,
+     "lambda_dt_at_threshold": 0.9999999999999997,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.1": {
+     "threshold_m": 70116.7597914731,
+     "lambda_dt_at_threshold": 0.09999999999999597,
+     "sign_changes_on_10m_grid": 1
+    },
+    "0.01": {
+     "threshold_m": 84596.11573594392,
+     "lambda_dt_at_threshold": 0.009999999999999908,
+     "sign_changes_on_10m_grid": 1
+    }
+   }
+  },
+  "lambda_dt_circular_at_90km_B25.8": 0.010350038817203828,
+  "lambda_dt_circular_at_80km_B100": 0.014966155077666268
+ },
+ "admissibility_counterexamples": {
+  "stress_input": {
+   "h_f_m": 21500.0,
+   "initial_h_m": 22000.0,
+   "a_minus_b_m": 21384.685754820704,
+   "lambda_dt_circular": 4.9801435971955024e-06,
+   "lambda_dt_bound": 7.349265929085124e-06,
+   "two_body_energy_J_per_kg": -12279985.85030289,
+   "fail_closed": "OutsideDomainError: h = -28000.0 m below the table's lower edge",
+   "diagnostic_stage_heights_m": [
+    -28000.0,
+    -28243.59463945497,
+    -78347.73289555125
+   ],
+   "diagnostic_committed_h_m": -78392.69368719496,
+   "diagnostic_committed_spherical_alt_m": -78392.69368719496,
+   "reentry_and_impact_same_tick": true,
+   "lipschitz_lower_bound_holds": true
+  },
+  "eccentric_retrograde": {
+   "h_m": 90185.09165917509,
+   "vrel_mps": 11292.240774733824,
+   "lambda_dt_actual": 0.014384907069861974,
+   "lambda_dt_circular_proxy": 0.010000000000000002,
+   "vrel_bound_mps": 11591.738210967576,
+   "covered_by_bound_speed": true
+  }
+ },
+ "floating_point_enclosure": {
+  "assumptions": {
+   "A-FP-1": "IEEE 754 binary64, round to nearest even, gradual underflow (no flush-to-zero); * and / within relative u = 2^-53 plus, for an underflowing result, absolute 2^-1075; + - and sqrt within relative u",
+   "A-FP-2": "libm sin, cos, atan2, hypot, exp, pow: |error| <= 2 x 2^-52 |exact| + 2 x 2^-1074 (assumption; measured in t0_height_error.py, not proved; see libm_sensitivity)",
+   "A-FP-3": "numpy 3-element products elementwise; 3-term dot x.x within gamma_3 sum x_i^2 + 3 (1 + u)^2 2^-1075",
+   "domain": "true geodetic height >= 0 (outside the ellipsoid), no overflow"
+  },
+  "constants": {
+   "F_A": 1.0000000000000018,
+   "F_D": 1.0000000000000024,
+   "F_J": 1.0000000000000038,
+   "F_g": 1.0000000000000016,
+   "K_1": 1.0000000000000004,
+   "K_W": 1.000000000000001,
+   "N_rho_in_2^-1074": 2.9500000000000006,
+   "alpha": 1.2212453270876738e-15,
+   "alpha_relative_part": 1.2212453270876738e-15,
+   "alpha_sel": 1.3322676295501896e-15,
+   "alpha_underflow_part": 1.5e-323,
+   "b_lower_m": 6356752.314245179,
+   "beta_m": 8.877691069434738e-09,
+   "beta_relative_part_m": 8.877691069434738e-09,
+   "beta_sel_m": 8.87769106943474e-09,
+   "beta_underflow_part_m": 7.9468473e-317,
+   "contraction_k": 0.006830954755939884,
+   "gravity_hat_mps2": 9.896575029314999,
+   "gravity_relative_part_mps2": 9.896575029314999,
+   "gravity_underflow_part_mps2": 1e-323,
+   "h_zero_m": 191735430.7198785,
+   "lat_error_rad": 1.427749762648761e-15,
+   "lat_step_rounding_rad": 1.4111659138613635e-15,
+   "lat_step_underflow_rad": 1.5e-323,
+   "libm_ulp": 2.0,
+   "nu_in_2^-1074": 2.0,
+   "phi_B": 1.0000000000000004,
+   "stage_abs_in_2^-1074": 1.0,
+   "tau": 5e-324,
+   "theta_x": 3.3306690738754706e-16,
+   "u": 1.1102230246251565e-16,
+   "zero_force_c0_max": 0.6125000000000005
+  },
+  "eps_h_m": {
+   "0": 8.877691069434738e-09,
+   "120000": 9.024240508685258e-09,
+   "1000000": 1.0098936396522411e-08,
+   "2000000": 1.1320181723610085e-08
+  },
+  "eps_sel_m": {
+   "0": 8.87769106943474e-09,
+   "120000": 9.037563184980762e-09,
+   "1000000": 1.0209958698984929e-08,
+   "2000000": 1.1542226328535118e-08
+  },
+  "eps_h_definition": "|computed - true| geodetic height <= alpha h + beta (true h)",
+  "underflow": {
+   "eta0": "2^-1075",
+   "zero_density_selection_height_m": 191735430.7198785,
+   "absolute_part_mps2": {
+    "B25.8 s=0": 6.0437817e-316,
+    "B25.8 s=11000": 1.8750986e-315,
+    "B100 s=0": 5.38473516e-316,
+    "B100 s=11000": 1.67062253e-315
+   }
+  }
+ },
+ "sufficient_stage_condition": {
+  "dt_s": 10.0,
+  "lower_edge_m": 0.0,
+  "gravity_bound_mps2": 9.89657502931496,
+  "gravity_bound_computed_mps2": 9.896575029314999,
+  "floor_height_kind": "computed committed geodetic height (Review 03 M3T0-R3-F1)",
+  "rows": [
+   {
+    "vehicle": "B25.8",
+    "B_kg_per_m2": 25.757575757575758,
+    "h_f_sufficient_at_least_m": 124456.68544510857,
+    "need_at_floor_m": -7.170720652771883e-07,
+    "need_below_bracket_m": 1.74773507118729e-06,
+    "at_floor": {
+     "H0": 124456.68544509953,
+     "V": 11090.621207141166,
+     "A0": 9.936116772205674,
+     "L2": 69003.57940939297,
+     "L3": 68755.17649008782,
+     "s2": 11140.301791002195,
+     "M2": 69003.57940938401,
+     "M3": 68755.17649007885,
+     "A2": 271.00946745922334,
+     "s3": 12445.668544437285,
+     "L4": 7.25949756346624e-07,
+     "M4": 7.170720652771883e-07
+    }
+   },
+   {
+    "vehicle": "B100",
+    "B_kg_per_m2": 100.0,
+    "h_f_sufficient_at_least_m": 118633.50894662621,
+    "need_at_floor_m": -1.0038993351683625e-06,
+    "need_below_bracket_m": 7.647569496350357e-07,
+    "at_floor": {
+     "H0": 118633.50894661718,
+     "V": 11095.606866189582,
+     "A0": 9.91627048187335,
+     "L2": 63155.47461566855,
+     "L3": 62907.56785362171,
+     "s2": 11145.18821859895,
+     "M2": 63155.474615659594,
+     "M3": 62907.56785361275,
+     "A2": 153.54880567415688,
+     "s3": 11863.350894560368,
+     "L4": 1.0127770262377983e-06,
+     "M4": 1.0038993351683625e-06
+    }
+   },
+   {
+    "vehicle": "drag-free limit",
+    "B_kg_per_m2": null,
+    "h_f_sufficient_at_least_m": 111511.96182508787,
+    "need_at_floor_m": -8.427938228380506e-07,
+    "need_below_bracket_m": 7.45058703534579e-08,
+    "at_floor": {
+     "H0": 111511.96182507885,
+     "V": 11101.713307276068,
+     "A0": 9.896575029315,
+     "L2": 56003.39528869778,
+     "L3": 55755.9809129649,
+     "s2": 11151.196182422646,
+     "M2": 56003.39528868884,
+     "M3": 55755.98091295595,
+     "A2": 9.896575029315,
+     "s3": 11151.196182422646,
+     "L4": 8.516715139074864e-07,
+     "M4": 8.427938228380506e-07
+    }
+   }
+  ],
+  "review02_counterexample": {
+   "lower_height_m": 79999.9,
+   "actual_height_m": 80000.0,
+   "speed_mps": 11000.0,
+   "actual_drag_mps2": 48.65837703993666,
+   "superseded_envelope_mps2": 48.658376978072056,
+   "corrected_envelope_mps2": 48.658377039936795,
+   "superseded_covers": false,
+   "corrected_covers": true
+  },
+  "review03_counterexample": {
+   "true_height_m": "120000.0000000000233 (high-precision reference, Review 03)",
+   "computed_height_m": 119999.99999999907,
+   "height_error_bound_m": 9.024240508685258e-09,
+   "lower_height_m": 120000.0,
+   "speed_mps": 11000.0,
+   "model_drag_mps2": 0.062309014504142814,
+   "superseded_envelope_mps2": 0.06230417914238045,
+   "corrected_envelope_mps2": 0.06230901450421387,
+   "superseded_covers": false,
+   "corrected_covers": true
+  },
+  "review04_counterexample": {
+   "true_height_m": 190681000.0,
+   "computed_height_m": 190681000.0,
+   "computed_density_kg_m3": 1.3e-322,
+   "speed_mps": 0.0,
+   "model_drag_mps2": 1.02021455e-315,
+   "superseded_envelope_mps2": 5.0632192e-316,
+   "corrected_envelope_mps2": 1.110700085e-315,
+   "superseded_covers": false,
+   "corrected_covers": true
+  },
+  "review05_counterexamples": [
+   {
+    "construction": "C1",
+    "mass_in_2^-1074_kg": 17.0,
+    "b_in_2^-1074_kg_per_m2": 1.0,
+    "true_height_m": 180000000.0,
+    "computed_height_m": 180000000.0,
+    "model_drag_mps2": 9.328000516634907e+26,
+    "superseded_envelope_mps2": 4.805333599484291e+26,
+    "corrected_envelope_mps2": 9.610667198968579e+26,
+    "superseded_covers": false,
+    "corrected_covers": true
+   },
+   {
+    "construction": "C2",
+    "mass_in_2^-1074_kg": 30.0,
+    "b_in_2^-1074_kg_per_m2": 1.0,
+    "true_height_m": 180000000.0,
+    "computed_height_m": 180000000.0,
+    "model_drag_mps2": 5.285866959426447e+26,
+    "superseded_envelope_mps2": 4.805333599484291e+26,
+    "corrected_envelope_mps2": 9.610667198968579e+26,
+    "superseded_covers": false,
+    "corrected_covers": true
+   }
+  ],
+  "stress": [
+   {
+    "vehicle": "B25.8",
+    "states": 2000,
+    "kinds": {
+     "random": 667,
+     "retrograde_equator": 667,
+     "straight_down": 666
+    },
+    "lowest_stage_height_m": 23760.82779702358,
+    "min_margins": {
+     "stage_margin_m": 0.10270217224024236,
+     "a0_margin_mps2": 0.4482992574747797,
+     "a2_margin_mps2": 10.891702841021383
+    },
+    "all_within_bounds": true
+   },
+   {
+    "vehicle": "B100",
+    "states": 2000,
+    "kinds": {
+     "random": 667,
+     "retrograde_equator": 667,
+     "straight_down": 666
+    },
+    "lowest_stage_height_m": 13807.590228691697,
+    "min_margins": {
+     "stage_margin_m": 0.10278535047837067,
+     "a0_margin_mps2": 0.42728458850486284,
+     "a2_margin_mps2": 7.830533082888362
+    },
+    "all_within_bounds": true
+   },
+   {
+    "vehicle": "drag-free limit",
+    "states": 2000,
+    "kinds": {
+     "random": 667,
+     "retrograde_equator": 667,
+     "straight_down": 666
+    },
+    "lowest_stage_height_m": 14.881824808195233,
+    "min_margins": {
+     "stage_margin_m": 0.10288729552848963,
+     "a0_margin_mps2": 0.39952883654199667,
+     "a2_margin_mps2": 0.2350265175706454
+    },
+    "all_within_bounds": true
+   }
+  ],
+  "note": "Sufficient, not necessary. A sharper condition needs a restriction of the admissible initial states (for example the inward velocity), which is an owner decision and is not proposed here."
+ },
+ "floor_comparison": {
+  "rows": [
+   {
+    "vehicle": "B25.8",
+    "published_review04_m": 124456.68544510857,
+    "published_now_m": 124456.68544510857,
+    "published_unchanged": true,
+    "root_bracket_review03_correction_m": [
+     124456.68544484391,
+     124456.68544484489
+    ],
+    "root_bracket_corrected_m": [
+     124456.68544484391,
+     124456.68544484489
+    ],
+    "need_at_published_floor_m": -7.170720652771883e-07,
+    "stage_bounds_at_published_floor_m": {
+     "M2": 69003.57940938401,
+     "M3": 68755.17649007885,
+     "M4": 7.170720652771883e-07
+    },
+    "two_decimals_nearest_m": 124456.69,
+    "two_decimals_nearest_is_sufficient": true,
+    "two_decimals_rounded_up_m": 124456.69
+   },
+   {
+    "vehicle": "B100",
+    "published_review04_m": 118633.50894662621,
+    "published_now_m": 118633.50894662621,
+    "published_unchanged": true,
+    "root_bracket_review03_correction_m": [
+     118633.5089461096,
+     118633.50894611058
+    ],
+    "root_bracket_corrected_m": [
+     118633.5089461096,
+     118633.50894611058
+    ],
+    "need_at_published_floor_m": -1.0038993351683625e-06,
+    "stage_bounds_at_published_floor_m": {
+     "M2": 63155.474615659594,
+     "M3": 62907.56785361275,
+     "M4": 1.0038993351683625e-06
+    },
+    "two_decimals_nearest_m": 118633.51,
+    "two_decimals_nearest_is_sufficient": true,
+    "two_decimals_rounded_up_m": 118633.51
+   },
+   {
+    "vehicle": "drag-free limit",
+    "published_review04_m": 111511.96182508787,
+    "published_now_m": 111511.96182508787,
+    "published_unchanged": true,
+    "root_bracket_review03_correction_m": [
+     111511.96182425194,
+     111511.96182425291
+    ],
+    "root_bracket_corrected_m": [
+     111511.96182425194,
+     111511.96182425291
+    ],
+    "need_at_published_floor_m": -8.427938228380506e-07,
+    "stage_bounds_at_published_floor_m": {
+     "M2": 56003.39528868884,
+     "M3": 55755.98091295595,
+     "M4": 8.427938228380506e-07
+    },
+    "two_decimals_nearest_m": 111511.96,
+    "two_decimals_nearest_is_sufficient": false,
+    "two_decimals_rounded_up_m": 111511.97
+   }
+  ],
+  "note": "root brackets [lo, hi] with need(lo) > 0 > need(hi); 'review03_correction' is the stage condition with the superseded relative-only envelope"
+ },
+ "libm_sensitivity": {
+  "rows": [
+   {
+    "vehicle": "B25.8",
+    "published_bracket_end": {
+     "height_m": 124456.68544510857,
+     "largest_log2_libm_ulp": 5
+    },
+    "two_decimals_rounded_up": {
+     "height_m": 124456.69,
+     "largest_log2_libm_ulp": 19
+    },
+    "two_decimals_nearest": {
+     "height_m": 124456.69,
+     "largest_log2_libm_ulp": 19
+    }
+   },
+   {
+    "vehicle": "B100",
+    "published_bracket_end": {
+     "height_m": 118633.50894662621,
+     "largest_log2_libm_ulp": 6
+    },
+    "two_decimals_rounded_up": {
+     "height_m": 118633.51,
+     "largest_log2_libm_ulp": 17
+    },
+    "two_decimals_nearest": {
+     "height_m": 118633.51,
+     "largest_log2_libm_ulp": 17
+    }
+   },
+   {
+    "vehicle": "drag-free limit",
+    "published_bracket_end": {
+     "height_m": 111511.96182508787,
+     "largest_log2_libm_ulp": 7
+    },
+    "two_decimals_rounded_up": {
+     "height_m": 111511.97,
+     "largest_log2_libm_ulp": 20
+    },
+    "two_decimals_nearest": {
+     "height_m": 111511.96,
+     "largest_log2_libm_ulp": null
+    }
+   }
+  ],
+  "assumed_libm_ulp": 2,
+  "max_log2_tested": 40,
+  "kind": "the derivation evaluated under weaker libm assumptions (not a measurement)"
+ },
+ "stage_order": {
+  "state": "circular 180 km, i 51.6 deg, J2 + drag, dt 10 s",
+  "recorded_order": [
+   "k2 input y + dt/2 k1",
+   "k3 input y + dt/2 k2",
+   "k4 input y + dt k3"
+  ],
+  "height_minus_initial_m": {
+   "k2_input": 116.3127734689042,
+   "k3_input": -115.73415292799473,
+   "k4_input": 1.1612665504217148
+  }
+ },
+ "vectorised_height_check_max_abs_m": 1.862645149230957e-09
+}

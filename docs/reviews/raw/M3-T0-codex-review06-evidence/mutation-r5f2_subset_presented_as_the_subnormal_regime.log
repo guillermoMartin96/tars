@@ -1,0 +1,18 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope ____
+
+    def test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope():
+        """Detects: 0.983 quoted without its subset, or a misquoted subset maximum."""
+        dr = live_dr0029()
+        got = {v: coefficient_rounding_subset_maximum(v) for v in ("B25.8", "B100")}
+        assert f"{got['B100']:.3f}" == "0.983" and f"{got['B25.8']:.3f}" == "0.953", got
+        assert "0.983 (B 100; 0.953 for B 25.8)" in dr
+        sentence = dr[dr.index("0.983 (B 100") - 400 : dr.index("0.983 (B 100")]
+>       assert "coefficient-rounding subset" in sentence
+E       AssertionError: assert 'coefficient-rounding subset' in '315 against an envelope of 1.111e-315 m/s². Two empirical observations, not bounds (scope corrected after Review 05 R... to 2^-1074, retrograde speeds 0, 2 and 11 km/s; `check_review05.py`), the largest ratio of model drag to envelope is '
+
+docs/science/experiments/m3-t0/check_review05.py:421: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope
+1 failed, 64 deselected in 1.63s

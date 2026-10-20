@@ -1,0 +1,18 @@
+import sys, math, traceback
+from decimal import Decimal
+from fractions import Fraction
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_termination as t
+for name, f in [
+ ('up fraction',lambda:t._up(Fraction(2**1024))),
+ ('up decimal',lambda:t._up(Decimal(2)**1024)),
+ ('up negative decimal',lambda:t._up(-(Decimal(2)**1024))),
+ ('dn negative decimal',lambda:t._dn(-(Decimal(2)**1024))),
+ ('tiny stage',lambda:t.stage_lower_heights(180000000.,math.ulp(0.0))),
+ ('tiny need',lambda:t.stage_need(180000000.,math.ulp(0.0))),
+ ('tiny envelope',lambda:t.drag_envelope(180000000.,0.,math.ulp(0.0))),
+ ('low tiny envelope',lambda:t.drag_envelope(0.,11000.,math.ulp(0.0))),
+]:
+ print(name)
+ try: print(f())
+ except Exception as e: print(type(e).__name__,str(e)); traceback.print_exc()

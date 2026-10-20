@@ -1,0 +1,23 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime ________
+
+    def test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime():
+        """Detects: a return to the superseded characterisation in the live records, or the
+        historical Review 04 statement rewritten instead of amended."""
+        for name in ("DR-0029", "VAL-0019", "README", "report"):
+            text = c4.record(name)
+            assert "The tightest observed case is where the coefficient rounds" not in text, name
+            assert not re.search(r"subnormal regime is 0\.983", text), name
+        rev = c4.record("review04")
+        old = "The largest observed ratio of model drag to envelope in the subnormal regime is 0.983"
+>       assert rev.count(old) == 1  # preserved, append-only
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 0 == 1
+E        +  where 0 = <built-in method count of str object at 0x7fce10078000>('The largest observed ratio of model drag to envelope in the subnormal regime is 0.983')
+E        +    where <built-in method count of str object at 0x7fce10078000> = '# M3 T0 Review 04 (independent review of the R3-F1 correction pass)\n\n**Reviewer:** Codex (separate provider), `code...as for normal densities. These are covered points, not violations.\n- **Record:** `docs/reviews/M3-T0-review-05.md`.\n'.count
+
+docs/science/experiments/m3-t0/check_review05.py:433: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime
+1 failed, 64 deselected in 0.90s

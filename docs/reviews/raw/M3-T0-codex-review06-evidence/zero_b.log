@@ -1,0 +1,40 @@
+Traceback (most recent call last):
+  File "<snap>/review_scratch/zero_b.py", line 18, in <module>
+    try: print(name,f())
+                    ^^^
+  File "<snap>/review_scratch/zero_b.py", line 17, in <lambda>
+    for name,f in [('inverse_ballistic_bound',lambda:t.inverse_ballistic_bound(b,cd,area,Fraction(t.FP['phi_B']))),('drag_envelope',lambda:t.drag_envelope(h,0.,b))]:
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_termination.py", line 849, in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ~~~~~~~~^~~~
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 615, in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 763, in _div
+    raise ZeroDivisionError('Fraction(%s, 0)' % db)
+ZeroDivisionError: Fraction(1, 0)
+Traceback (most recent call last):
+  File "<snap>/review_scratch/zero_b.py", line 18, in <module>
+    try: print(name,f())
+                    ^^^
+  File "<snap>/review_scratch/zero_b.py", line 17, in <lambda>
+    for name,f in [('inverse_ballistic_bound',lambda:t.inverse_ballistic_bound(b,cd,area,Fraction(t.FP['phi_B']))),('drag_envelope',lambda:t.drag_envelope(h,0.,b))]:
+                                                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_termination.py", line 911, in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_termination.py", line 861, in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_termination.py", line 849, in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ~~~~~~~~^~~~
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 615, in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 763, in _div
+    raise ZeroDivisionError('Fraction(%s, 0)' % db)
+ZeroDivisionError: Fraction(1, 0)
+mass 5e-324 P 33.0 b 0.0 height 180000000.0 rho 2.5706399040162615e-305 coefficient 8.585004598740571e+19 vrel [     0.        -13590.9080849      0.       ] dot 184712782.5721336 drag [-0.00000000e+00  1.58576009e+28 -0.00000000e+00]
+all intermediates finite True

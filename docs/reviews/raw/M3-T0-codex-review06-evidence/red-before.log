@@ -1,0 +1,373 @@
+FFFFFFFFFFFFFFFFF                                                        [100%]
+=================================== FAILURES ===================================
+____ test_r5f1_review05_counterexamples_are_covered[17-C1-reviewer_ratio0] _____
+
+mass_units = 17, construction = 'C1'
+reviewer_ratio = Decimal('1.94117647058593')
+
+    @pytest.mark.parametrize(
+        "mass_units, construction, reviewer_ratio",
+        [(17, "C1", D("1.94117647058593")), (30, "C2", D("1.09999999999869"))],
+    )
+    def test_r5f1_review05_counterexamples_are_covered(mass_units, construction, reviewer_ratio):
+        """Detects: the conversion between b and mass bounded by a relative factor only (the
+        R5-F1 defect), or its absolute term missing or too small."""
+        mass = mass_units * TINY
+        b = mass / (CD * AREA) if construction == "C1" else TINY
+        assert b == TINY
+        if construction == "C2":
+            assert (b * CD) * AREA == mass  # the second construction gives the same pair
+        assert o.true_height(R5_R) == D(R5_LOW)  # exact: the foot point is (a, 0, 0)
+        assert m.geodetic_iterative(R5_R)[1] == R5_LOW
+        v = np.zeros(3)
+        a = model_drag_norm(R5_R, v, mass, CD, AREA)
+        exact_ratio = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+        assert exact_ratio > PHI / Fraction(b)  # the superseded prerequisite fails
+        old = env_second(Fraction(R5_LOW), Fraction(0), PHI / Fraction(b), CD, AREA, CONST)
+        assert abs(a / D(old.numerator) * D(old.denominator) - reviewer_ratio) < D("1e-9")
+>       assert a <= D(tt.drag_envelope(R5_LOW, 0.0, b))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('932800051663490532794957824') <= Decimal('480533359948429083080130560')
+E        +  where Decimal('480533359948429083080130560') = D(4.805333599484291e+26)
+E        +    where 4.805333599484291e+26 = <function drag_envelope at 0x105e976a0>(180000000.0, 0.0, 5e-324)
+E        +      where <function drag_envelope at 0x105e976a0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review05.py:197: AssertionError
+____ test_r5f1_review05_counterexamples_are_covered[30-C2-reviewer_ratio1] _____
+
+mass_units = 30, construction = 'C2'
+reviewer_ratio = Decimal('1.09999999999869')
+
+    @pytest.mark.parametrize(
+        "mass_units, construction, reviewer_ratio",
+        [(17, "C1", D("1.94117647058593")), (30, "C2", D("1.09999999999869"))],
+    )
+    def test_r5f1_review05_counterexamples_are_covered(mass_units, construction, reviewer_ratio):
+        """Detects: the conversion between b and mass bounded by a relative factor only (the
+        R5-F1 defect), or its absolute term missing or too small."""
+        mass = mass_units * TINY
+        b = mass / (CD * AREA) if construction == "C1" else TINY
+        assert b == TINY
+        if construction == "C2":
+            assert (b * CD) * AREA == mass  # the second construction gives the same pair
+        assert o.true_height(R5_R) == D(R5_LOW)  # exact: the foot point is (a, 0, 0)
+        assert m.geodetic_iterative(R5_R)[1] == R5_LOW
+        v = np.zeros(3)
+        a = model_drag_norm(R5_R, v, mass, CD, AREA)
+        exact_ratio = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+        assert exact_ratio > PHI / Fraction(b)  # the superseded prerequisite fails
+        old = env_second(Fraction(R5_LOW), Fraction(0), PHI / Fraction(b), CD, AREA, CONST)
+        assert abs(a / D(old.numerator) * D(old.denominator) - reviewer_ratio) < D("1e-9")
+>       assert a <= D(tt.drag_envelope(R5_LOW, 0.0, b))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('528586695942644616925282304') <= Decimal('480533359948429083080130560')
+E        +  where Decimal('480533359948429083080130560') = D(4.805333599484291e+26)
+E        +    where 4.805333599484291e+26 = <function drag_envelope at 0x105e976a0>(180000000.0, 0.0, 5e-324)
+E        +      where <function drag_envelope at 0x105e976a0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review05.py:197: AssertionError
+___________ test_r5f1_conversion_bound_holds_for_both_constructions ____________
+
+    def test_r5f1_conversion_bound_holds_for_both_constructions():
+        """Detects: an absolute term of E4a missing or too small (the quotient's for subnormal
+        b, the product's for subnormal cd area, or C2's for subnormal b cd or mass). Expected
+        values: the exact cd area / mass of each constructed vehicle (C2) and the supremum over
+        b's rounding interval (C1)."""
+        kinds = {"subnormal b": 0, "subnormal P": 0, "subnormal b cd": 0, "beyond phi_B / b": 0}
+        for label, kind, b, mass, cd, area in VEHICLE_GRID:
+>           r = tt.inverse_ballistic_bound(b, cd, area, PHI)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 't0_termination' has no attribute 'inverse_ballistic_bound'
+
+docs/science/experiments/m3-t0/check_review05.py:211: AttributeError
+_______ test_r5f1_conversion_bound_recomputed_by_a_second_implementation _______
+
+    def test_r5f1_conversion_bound_recomputed_by_a_second_implementation():
+        """Detects: a term of E4a removed, reduced or applied to the wrong construction,
+        including terms too small for a force comparison to expose."""
+        for label, _, b, _, cd, area in VEHICLE_GRID:
+>           assert tt.inverse_ballistic_bound(b, cd, area, PHI) == ratio_second(b, cd, area), label
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 't0_termination' has no attribute 'inverse_ballistic_bound'
+
+docs/science/experiments/m3-t0/check_review05.py:227: AttributeError
+________ test_r5f1_dominance_switch_between_relative_and_absolute_terms ________
+
+    def test_r5f1_dominance_switch_between_relative_and_absolute_terms():
+        """Detects: the quotient's absolute term missing, or taking over at the wrong b. For
+        the V1 shape (P normal), R1 = (1 / (1 - u)) max((1 + u) / b, 1 / (b - eta0)) exceeds
+        phi_B / b exactly when b < b* = c eta0 / (c - 1), c = phi_B (1 - u) (derived here)."""
+        c = PHI * (1 - U)
+        b_star = c * ETA0 / (c - 1)
+        above = tt._up(b_star)
+        below = tt._dn(b_star)
+        assert below < above
+        assert 2.0**-1024 < above < 2.0**-1022  # about 2^-1023: subnormal b
+>       assert tt.inverse_ballistic_bound(above, CD, AREA, PHI) == PHI / Fraction(above)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 't0_termination' has no attribute 'inverse_ballistic_bound'
+
+docs/science/experiments/m3-t0/check_review05.py:240: AttributeError
+____________ test_r5f1_normal_ballistic_coefficients_are_unchanged _____________
+
+    def test_r5f1_normal_ballistic_coefficients_are_unchanged():
+        """Detects: the correction changing the envelope where the conversion is normal (the
+        published B 25.8 and B 100 vehicles included), which would move the floors."""
+        for b in NORMAL_B[1:]:
+            for cd, area in SHAPES:
+>               assert tt.inverse_ballistic_bound(b, cd, area, PHI) == PHI / Fraction(b), (b, cd)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 't0_termination' has no attribute 'inverse_ballistic_bound'
+
+docs/science/experiments/m3-t0/check_review05.py:252: AttributeError
+________ test_r5f1_model_drag_within_envelope_for_subnormal_conversions ________
+
+    def test_r5f1_model_drag_within_envelope_for_subnormal_conversions():
+        """Detects: the corrected bound not applied to both parts of the envelope, or too small
+        in the force (vehicles with subnormal b, P or b cd, at normal, subnormal and zero
+        computed densities; states whose force overflows are outside the domain)."""
+        checked = beyond = overflow = 0
+        for label, _, b, mass, cd, area in VEHICLE_GRID:
+            if b >= 2.0**-1022 and cd * area >= 2.0**-1022 and b * cd >= 2.0**-1022:
+                continue
+            for r, s in STATES:
+                v = -s * c4.east(0.0)
+                with np.errstate(over="ignore", invalid="ignore"):
+                    vec = m.acceleration(
+                        m.Config(mu=0.0, drag=m.Drag(cd=cd, area_m2=area)), 0.0, r, v, mass
+                    )
+                if not np.all(np.isfinite(vec)):
+                    overflow += 1
+                    continue
+                a = model_drag_norm(r, v, mass, cd, area)
+                low = tt._dn(o.true_height(r))
+                env = tt.drag_envelope(low, c4.up(s) if s else 0.0, b, cd=cd, area=area)
+>               assert a <= D(env), (label, r[0], s)
+E               AssertionError: ('C1 b=4.941e-324 cd=2.2 A=15', np.float64(106378137.0), 0.0)
+E               assert Decimal('1.32692764162612939655293773460941015778410718773200556831976E+156') <= Decimal('683568785080587707674642695792957033045501722895621425771539339902343590573992292565179617699579006964900542006170621833867218983732808172972189852756869120')
+E                +  where Decimal('683568785080587707674642695792957033045501722895621425771539339902343590573992292565179617699579006964900542006170621833867218983732808172972189852756869120') = D(6.835687850805877e+155)
+
+docs/science/experiments/m3-t0/check_review05.py:289: AssertionError
+___________ test_r5f1_envelope_recomputed_by_a_second_implementation ___________
+
+    def test_r5f1_envelope_recomputed_by_a_second_implementation():
+        """Detects: b_R applied to one part of the envelope only, or the envelope's use of the
+        E4a bound reduced, at vehicles whose conversion is subnormal."""
+        cases = [(R5_LOW, 0.0), (1.9e8, 2_000.0), (1.0e8, 11_000.0), (120_000.0, 7_800.0)]
+        for label, _, b, _, cd, area in VEHICLE_GRID[::9]:
+            ratio = ratio_second(b, cd, area)
+            for low, s in cases:
+                env = tt.drag_envelope(low, s, b, cd=cd, area=area)
+                ref = env_second(Fraction(low), Fraction(s), ratio, cd, area, CONST)
+                if env == math.inf:  # rounded up past the largest binary64: still a bound
+                    assert ref > Fraction(sys.float_info.max), (label, low, s)
+                    continue
+                got = Fraction(env)
+>               assert got >= ref * (1 - Fraction(1, 10**30)), (label, low, s)
+E               AssertionError: ('C1 b=4.941e-324 cd=2.2 A=15', 180000000.0, 0.0)
+E               assert Fraction(480533359948429083080130560, 1) >= (<[ValueError('Exceeds the limit (4300 digits) for integer string conversion; use sys.set_int_max_str_digits() to increase the limit') raised in repr()] Fraction object at 0x105eae740> * (1 - Fraction(1, 1000000000000000000000000000000)))
+E                +  where Fraction(1, 1000000000000000000000000000000) = Fraction(1, (10 ** 30))
+
+docs/science/experiments/m3-t0/check_review05.py:310: AssertionError
+__________ test_r5f1_no_area_vehicles_have_zero_force[5e-324-0.5-1.0] __________
+
+cd = 5e-324, area = 0.5, mass = 1.0
+
+    @pytest.mark.parametrize(
+        "cd, area, mass",
+        [
+            (TINY, 0.5, 1.0),
+            (TINY, 0.25, 17 * TINY),
+            (0.4, TINY, 1e-300),
+            (1e-200, 1e-124, 1.0),
+            (1e-200, 1e-124, 17 * TINY),
+        ],
+    )
+    def test_r5f1_no_area_vehicles_have_zero_force(cd, area, mass):
+        """E4b. Detects: a vehicle with cd area <= 2^-1075, which C1 maps to b = +inf (envelope
+        0), receiving a nonzero force anywhere, including at the largest density (sea level)."""
+        assert Fraction(cd) * Fraction(area) <= ETA0
+        assert cd * area == 0.0  # P = 0
+        with np.errstate(divide="ignore"):
+            assert np.float64(mass) / np.float64(cd * area) == math.inf  # C1 gives b = +inf
+>       assert tt.FPA["zero_force_c0_max"] <= Fraction(5, 8)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'zero_force_c0_max'
+
+docs/science/experiments/m3-t0/check_review05.py:331: KeyError
+_______ test_r5f1_no_area_vehicles_have_zero_force[5e-324-0.25-8.4e-323] _______
+
+cd = 5e-324, area = 0.25, mass = 8.4e-323
+
+    @pytest.mark.parametrize(
+        "cd, area, mass",
+        [
+            (TINY, 0.5, 1.0),
+            (TINY, 0.25, 17 * TINY),
+            (0.4, TINY, 1e-300),
+            (1e-200, 1e-124, 1.0),
+            (1e-200, 1e-124, 17 * TINY),
+        ],
+    )
+    def test_r5f1_no_area_vehicles_have_zero_force(cd, area, mass):
+        """E4b. Detects: a vehicle with cd area <= 2^-1075, which C1 maps to b = +inf (envelope
+        0), receiving a nonzero force anywhere, including at the largest density (sea level)."""
+        assert Fraction(cd) * Fraction(area) <= ETA0
+        assert cd * area == 0.0  # P = 0
+        with np.errstate(divide="ignore"):
+            assert np.float64(mass) / np.float64(cd * area) == math.inf  # C1 gives b = +inf
+>       assert tt.FPA["zero_force_c0_max"] <= Fraction(5, 8)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'zero_force_c0_max'
+
+docs/science/experiments/m3-t0/check_review05.py:331: KeyError
+________ test_r5f1_no_area_vehicles_have_zero_force[0.4-5e-324-1e-300] _________
+
+cd = 0.4, area = 5e-324, mass = 1e-300
+
+    @pytest.mark.parametrize(
+        "cd, area, mass",
+        [
+            (TINY, 0.5, 1.0),
+            (TINY, 0.25, 17 * TINY),
+            (0.4, TINY, 1e-300),
+            (1e-200, 1e-124, 1.0),
+            (1e-200, 1e-124, 17 * TINY),
+        ],
+    )
+    def test_r5f1_no_area_vehicles_have_zero_force(cd, area, mass):
+        """E4b. Detects: a vehicle with cd area <= 2^-1075, which C1 maps to b = +inf (envelope
+        0), receiving a nonzero force anywhere, including at the largest density (sea level)."""
+        assert Fraction(cd) * Fraction(area) <= ETA0
+        assert cd * area == 0.0  # P = 0
+        with np.errstate(divide="ignore"):
+            assert np.float64(mass) / np.float64(cd * area) == math.inf  # C1 gives b = +inf
+>       assert tt.FPA["zero_force_c0_max"] <= Fraction(5, 8)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'zero_force_c0_max'
+
+docs/science/experiments/m3-t0/check_review05.py:331: KeyError
+________ test_r5f1_no_area_vehicles_have_zero_force[1e-200-1e-124-1.0] _________
+
+cd = 1e-200, area = 1e-124, mass = 1.0
+
+    @pytest.mark.parametrize(
+        "cd, area, mass",
+        [
+            (TINY, 0.5, 1.0),
+            (TINY, 0.25, 17 * TINY),
+            (0.4, TINY, 1e-300),
+            (1e-200, 1e-124, 1.0),
+            (1e-200, 1e-124, 17 * TINY),
+        ],
+    )
+    def test_r5f1_no_area_vehicles_have_zero_force(cd, area, mass):
+        """E4b. Detects: a vehicle with cd area <= 2^-1075, which C1 maps to b = +inf (envelope
+        0), receiving a nonzero force anywhere, including at the largest density (sea level)."""
+        assert Fraction(cd) * Fraction(area) <= ETA0
+        assert cd * area == 0.0  # P = 0
+        with np.errstate(divide="ignore"):
+            assert np.float64(mass) / np.float64(cd * area) == math.inf  # C1 gives b = +inf
+>       assert tt.FPA["zero_force_c0_max"] <= Fraction(5, 8)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'zero_force_c0_max'
+
+docs/science/experiments/m3-t0/check_review05.py:331: KeyError
+______ test_r5f1_no_area_vehicles_have_zero_force[1e-200-1e-124-8.4e-323] ______
+
+cd = 1e-200, area = 1e-124, mass = 8.4e-323
+
+    @pytest.mark.parametrize(
+        "cd, area, mass",
+        [
+            (TINY, 0.5, 1.0),
+            (TINY, 0.25, 17 * TINY),
+            (0.4, TINY, 1e-300),
+            (1e-200, 1e-124, 1.0),
+            (1e-200, 1e-124, 17 * TINY),
+        ],
+    )
+    def test_r5f1_no_area_vehicles_have_zero_force(cd, area, mass):
+        """E4b. Detects: a vehicle with cd area <= 2^-1075, which C1 maps to b = +inf (envelope
+        0), receiving a nonzero force anywhere, including at the largest density (sea level)."""
+        assert Fraction(cd) * Fraction(area) <= ETA0
+        assert cd * area == 0.0  # P = 0
+        with np.errstate(divide="ignore"):
+            assert np.float64(mass) / np.float64(cd * area) == math.inf  # C1 gives b = +inf
+>       assert tt.FPA["zero_force_c0_max"] <= Fraction(5, 8)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'zero_force_c0_max'
+
+docs/science/experiments/m3-t0/check_review05.py:331: KeyError
+___________ test_r5f2_transition_scan_maximum_is_quoted_and_near_one ___________
+
+    def test_r5f2_transition_scan_maximum_is_quoted_and_near_one():
+        """Detects: the records quoting a subnormal-regime maximum other than the transition
+        scan's, or hiding it."""
+        dr = live_dr0029()
+>       start = dr.index("Over the subnormal-density points of the committed transition scan")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review05.py:405: ValueError
+____ test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope ____
+
+    def test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope():
+        """Detects: 0.983 quoted without its subset, or a misquoted subset maximum."""
+        dr = live_dr0029()
+        got = {v: coefficient_rounding_subset_maximum(v) for v in ("B25.8", "B100")}
+        assert f"{got['B100']:.3f}" == "0.983" and f"{got['B25.8']:.3f}" == "0.953", got
+>       assert "0.983 (B 100; 0.953 for B 25.8)" in dr
+E       AssertionError: assert '0.983 (B 100; 0.953 for B 25.8)' in '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...1.8 mm below it; 111 511.97 m suffices).\n  - The P1 recommendation is unchanged.\n<!-- /review04-correction-log -->\n'
+
+docs/science/experiments/m3-t0/check_review05.py:419: AssertionError
+________ test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime ________
+
+    def test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime():
+        """Detects: a return to the superseded characterisation in the live records, or the
+        historical Review 04 statement rewritten instead of amended."""
+        for name in ("DR-0029", "VAL-0019", "README", "report"):
+            text = c4.record(name)
+>           assert "The tightest observed case is where the coefficient rounds" not in text, name
+E           AssertionError: DR-0029
+E           assert 'The tightes...cient rounds' not in '# Decision ...on-log -->\n'
+E             
+E             'The tightest obser... coefficient rounds' is contained here:
+E             ?           ^^^^^^^^
+E               315 m/s². The tightest observed case is where the coefficient rounds up from just above 0.5 × 2^-1074. There the largest observed ratio of model drag to envelope is 0.983 (B 100), an empirical figure. No new altitude restriction is introduced: the supported domain is unchanged (outside the ellipsoid, no overflow).
+E             ?           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E                   - **Assumptions (unresolved; the guarantee holds only under them). Corrected after Review 04 R...
+E             
+E             ...Full output truncated (356 lines hidden), use '-vv' to show
+
+docs/science/experiments/m3-t0/check_review05.py:429: AssertionError
+____________________ test_records_state_the_r5f1_correction ____________________
+
+    def test_records_state_the_r5f1_correction():
+        for name in ("DR-0029", "VAL-0019", "report", "README"):
+>           assert "R5-F1" in c4.record(name), name
+E           AssertionError: DR-0029
+E           assert 'R5-F1' in '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...1.8 mm below it; 111 511.97 m suffices).\n  - The P1 recommendation is unchanged.\n<!-- /review04-correction-log -->\n'
+E            +  where '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes...1.8 mm below it; 111 511.97 m suffices).\n  - The P1 recommendation is unchanged.\n<!-- /review04-correction-log -->\n' = <function record at 0x105e96480>('DR-0029')
+E            +    where <function record at 0x105e96480> = c4.record
+
+docs/science/experiments/m3-t0/check_review05.py:443: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_review05_counterexamples_are_covered[17-C1-reviewer_ratio0]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_review05_counterexamples_are_covered[30-C2-reviewer_ratio1]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_holds_for_both_constructions
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_dominance_switch_between_relative_and_absolute_terms
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_normal_ballistic_coefficients_are_unchanged
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_model_drag_within_envelope_for_subnormal_conversions
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_envelope_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_no_area_vehicles_have_zero_force[5e-324-0.5-1.0]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_no_area_vehicles_have_zero_force[5e-324-0.25-8.4e-323]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_no_area_vehicles_have_zero_force[0.4-5e-324-1e-300]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_no_area_vehicles_have_zero_force[1e-200-1e-124-1.0]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_no_area_vehicles_have_zero_force[1e-200-1e-124-8.4e-323]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_transition_scan_maximum_is_quoted_and_near_one
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_records_state_the_r5f1_correction
+17 failed in 1.51s

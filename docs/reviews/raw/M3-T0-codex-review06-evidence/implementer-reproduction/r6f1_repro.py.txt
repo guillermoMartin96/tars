@@ -1,0 +1,44 @@
+"""Implementer reproduction of Review 06 M3T0-R6-F1 (C1 quotient rounding to b = 0).
+
+Independent of the reviewer's scripts. Run from the repository root:
+  uv run --no-sync python <this file> docs/science/experiments/m3-t0
+"""
+import math
+import sys
+from decimal import Decimal, localcontext
+from fractions import Fraction
+
+import numpy as np
+
+sys.path.insert(0, sys.argv[1])
+import t0_model as m  # noqa: E402
+import t0_oracle as o  # noqa: E402
+import t0_termination as tt  # noqa: E402
+
+CD, AREA = 2.2, 15.0
+TINY = 2.0**-1074
+ETA0 = Fraction(1, 2**1075)
+r = np.array([186_378_137.0, 0.0, 0.0])
+v = np.zeros(3)
+print("true height (oracle) m:", o.true_height(r))
+print("computed height m:", m.geodetic_iterative(r)[1])
+P = CD * AREA
+print("P = fl(cd*area) =", P)
+rows = []
+for k in range(1, 18):
+    mass = k * TINY
+    b = mass / P  # C1
+    exact_q = Fraction(mass) / Fraction(P)
+    cfg = m.Config(mu=0.0, drag=m.Drag(cd=CD, area_m2=AREA))
+    acc = m.acceleration(cfg, 0.0, r, v, mass)
+    with localcontext() as c:
+        c.prec = 60
+        drag = sum(Decimal(float(x)) ** 2 for x in acc).sqrt()
+    try:
+        env = tt.drag_envelope(180_000_000.0, 0.0, b, CD, AREA)
+        env_s = repr(env)
+        ratio = float(drag / Decimal(env)) if env not in (0.0, math.inf) else None
+    except Exception as e:  # noqa: BLE001
+        env_s, ratio = f"{type(e).__name__}: {e}", None
+    print(f"k={k:2d} mass={mass!r} exact mass/P={float(exact_q):.3e} (<= eta0: {exact_q <= ETA0}) "
+          f"b={b!r} drag={float(drag):.6e} oracle={float(o.drag(r, v, mass, CD, AREA)):.6e} envelope={env_s} ratio={ratio}")

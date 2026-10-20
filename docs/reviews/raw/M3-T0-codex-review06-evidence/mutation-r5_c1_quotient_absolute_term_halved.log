@@ -1,0 +1,70 @@
+F.FF                                                                     [100%]
+=================================== FAILURES ===================================
+____ test_r5f1_review05_counterexamples_are_covered[17-C1-reviewer_ratio0] _____
+
+mass_units = 17, construction = 'C1'
+reviewer_ratio = Decimal('1.94117647058593')
+
+    @pytest.mark.parametrize(
+        "mass_units, construction, reviewer_ratio",
+        [(17, "C1", D("1.94117647058593")), (30, "C2", D("1.09999999999869"))],
+    )
+    def test_r5f1_review05_counterexamples_are_covered(mass_units, construction, reviewer_ratio):
+        """Detects: the conversion between b and mass bounded by a relative factor only (the
+        R5-F1 defect), or its absolute term missing or too small."""
+        mass = mass_units * TINY
+        b = mass / (CD * AREA) if construction == "C1" else TINY
+        assert b == TINY
+        if construction == "C2":
+            assert (b * CD) * AREA == mass  # the second construction gives the same pair
+        assert o.true_height(R5_R) == D(R5_LOW)  # exact: the foot point is (a, 0, 0)
+        assert m.geodetic_iterative(R5_R)[1] == R5_LOW
+        v = np.zeros(3)
+        a = model_drag_norm(R5_R, v, mass, CD, AREA)
+        exact_ratio = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+        assert exact_ratio > PHI / Fraction(b)  # the superseded prerequisite fails
+        old = env_second(Fraction(R5_LOW), Fraction(0), PHI / Fraction(b), CD, AREA, CONST)
+        assert abs(a / D(old.numerator) * D(old.denominator) - reviewer_ratio) < D("1e-9")
+>       assert a <= D(tt.drag_envelope(R5_LOW, 0.0, b))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('932800051663490532794957824') <= Decimal('640711146597905260854902784')
+E        +  where Decimal('640711146597905260854902784') = D(6.407111465979053e+26)
+E        +    where 6.407111465979053e+26 = <function drag_envelope at 0x10f97fce0>(180000000.0, 0.0, 5e-324)
+E        +      where <function drag_envelope at 0x10f97fce0> = tt.drag_envelope
+
+docs/science/experiments/m3-t0/check_review05.py:197: AssertionError
+___________ test_r5f1_conversion_bound_holds_for_both_constructions ____________
+
+    def test_r5f1_conversion_bound_holds_for_both_constructions():
+        """Detects: an absolute term of E4a missing or too small (the quotient's for subnormal
+        b, the product's for subnormal cd area, or C2's for subnormal b cd or mass). Expected
+        values: the exact cd area / mass of each constructed vehicle (C2) and the supremum over
+        b's rounding interval (C1)."""
+        kinds = {"subnormal b": 0, "subnormal P": 0, "subnormal b cd": 0, "beyond phi_B / b": 0}
+        for label, kind, b, mass, cd, area in VEHICLE_GRID:
+            r = tt.inverse_ballistic_bound(b, cd, area, PHI)
+            actual = Fraction(cd) * Fraction(area) / Fraction(mass)
+>           assert actual <= r, label
+E           AssertionError: C1 b=4.941e-324 cd=2.2 A=15
+E           assert Fraction(6679274359141250944940286900419043451426926678924109991170838497597173026034089920632720078650314506466605536...621795103208032165568849457763810909780986063487389550885278534736061501303403886623224467121195223344328757739520, 17) <= Fraction(7292309700590022739414262022877422190801598279886340981745171257367098068725104131911619179029222940482597888...129729133236389394983621105149364781798798084034090722628823189432924536844353025348744168091942912, 27021597764222973)
+
+docs/science/experiments/m3-t0/check_review05.py:213: AssertionError
+_______ test_r5f1_conversion_bound_recomputed_by_a_second_implementation _______
+
+    def test_r5f1_conversion_bound_recomputed_by_a_second_implementation():
+        """Detects: a term of E4a removed, reduced or applied to the wrong construction,
+        including terms too small for a force comparison to expose."""
+        for label, _, b, _, cd, area in VEHICLE_GRID:
+>           assert tt.inverse_ballistic_bound(b, cd, area, PHI) == ratio_second(b, cd, area), label
+E           AssertionError: C1 b=4.941e-324 cd=2.2 A=15
+E           assert Fraction(7292309700590022739414262022877422190801598279886340981745171257367098068725104131911619179029222940482597888...129729133236389394983621105149364781798798084034090722628823189432924536844353025348744168091942912, 27021597764222973) == Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...6064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 9007199254740991)
+E            +  where Fraction(7292309700590022739414262022877422190801598279886340981745171257367098068725104131911619179029222940482597888...129729133236389394983621105149364781798798084034090722628823189432924536844353025348744168091942912, 27021597764222973) = <function inverse_ballistic_bound at 0x10f97fba0>(5e-324, 2.2, 15.0, Fraction(2251799813685249, 2251799813685248))
+E            +    where <function inverse_ballistic_bound at 0x10f97fba0> = tt.inverse_ballistic_bound
+E            +  and   Fraction(3646154850295011369707131011438711095400799139943170490872585628683549034362552065955809589514611470241298944...6064864566618194697491810552574682390899399042017045361314411594716462268422176512674372084045971456, 9007199254740991) = ratio_second(5e-324, 2.2, 15.0)
+
+docs/science/experiments/m3-t0/check_review05.py:227: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_review05_counterexamples_are_covered[17-C1-reviewer_ratio0]
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_holds_for_both_constructions
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_conversion_bound_recomputed_by_a_second_implementation
+3 failed, 1 passed, 61 deselected in 1.04s

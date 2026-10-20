@@ -1,0 +1,39 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_r4f1_underflow_constants_recomputed_by_a_second_implementation ______
+
+    def test_r4f1_underflow_constants_recomputed_by_a_second_implementation():
+        """Detects: an underflow term of E1-E6 removed or reduced (the density, coefficient,
+        libm, gravity or stage terms, or h_zero)."""
+        c = constants_second(tt.LIBM_ULP)
+        tiny = Fraction(1, 2**1074)
+        pairs = {
+            "alpha": tt.FPA["alpha"],
+            "beta_m": tt.FPA["beta_m"],
+            "alpha_sel": tt.FPA["alpha_sel"],
+            "beta_sel_m": tt.FPA["beta_sel_m"],
+            "F_D": tt.FPA["F_D"],
+            "F_A": tt.FPA["F_A"],
+            "K_W": tt.FPA["K_W"],
+            "N_rho": tt.FPA["N_rho_in_2^-1074"] * tiny,
+            "gravity_hat_mps2": tt.FPA["gravity_hat_mps2"],
+            "stage_abs": tt.FPA["stage_abs_in_2^-1074"] * tiny,
+        }
+        for key, got in pairs.items():
+            ref = c[key]
+            assert got >= ref * (1 - Fraction(1, 10**14)), key  # not below the derivation
+            assert got <= ref * (1 + Fraction(1, 10**9)), key  # no padding
+        # the underflow parts themselves, not only their sums with larger terms
+        assert tt.FPA["N_rho_in_2^-1074"] >= Fraction(295, 100) - Fraction(1, 10**12)
+        assert tt.FPA["nu_in_2^-1074"] == tt.LIBM_ULP
+        assert abs(Fraction(tt.FP["h_zero_m"]) - c["h_zero_m"]) < Fraction(1, 10**6)
+        assert Fraction(tt.FP["h_zero_m"]) >= c["h_zero_m"] - Fraction(1, 10**7)
+        # the underflow parts themselves (far below the totals' 1e-14 agreement), exactly
+        f = tt.FPA
+>       assert f["alpha"] == f["alpha_relative_part"] + f["alpha_underflow_part"]
+E       assert Fraction(5311802766169222562243503837013895192598830642066581005250725108505443980740537781707925463225316887407577912...8509063932299743239994891196146017231205346233375183937917454897464859012308949178429311953965662116143078868971945984) == (Fraction(5311802766169222562243503837013895192598830642066581005250725108505443980740537781707925463225316887407577912...8509063932299743239994891196146017231205346233375183937917454897464859012308949178429311953965662116143078868971945984) + Fraction(730750818665451702490757660178213618792745926657, 73952806152024657265011173929025897696584921783843248059889...8427137350667156130275152948567585058191524829274512221873452255781849563465154693154758752470818235282386160027959296))
+
+docs/science/experiments/m3-t0/check_review04.py:585: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review04.py::test_r4f1_underflow_constants_recomputed_by_a_second_implementation
+1 failed, 64 deselected in 1.09s

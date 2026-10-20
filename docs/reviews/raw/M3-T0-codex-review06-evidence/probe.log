@@ -1,0 +1,44 @@
+Traceback (most recent call last):
+  File "<snap>/review_scratch/probe.py", line 17, in <module>
+    try: print(f())
+               ^^^
+  File "<snap>/review_scratch/probe.py", line 7, in <lambda>
+    ('up fraction',lambda:t._up(Fraction(2**1024))),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_termination.py", line 491, in _up
+    x = float(q)
+        ^^^^^^^^
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py", line 316, in __float__
+    return int(self.numerator) / int(self.denominator)
+           ~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~
+OverflowError: integer division result too large for a float
+Traceback (most recent call last):
+  File "<snap>/review_scratch/probe.py", line 17, in <module>
+    try: print(f())
+               ^^^
+  File "<snap>/review_scratch/probe.py", line 10, in <lambda>
+    ('dn negative decimal',lambda:t._dn(-(Decimal(2)**1024))),
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<snap>/docs/science/experiments/m3-t0/t0_termination.py", line 499, in _dn
+    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+                ^^^^^^^^^^^
+  File "<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 232, in __new__
+    self._numerator, self._denominator = numerator.as_integer_ratio()
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OverflowError: cannot convert Infinity to integer ratio
+up fraction
+OverflowError integer division result too large for a float
+up decimal
+inf
+up negative decimal
+-inf
+dn negative decimal
+OverflowError cannot convert Infinity to integer ratio
+tiny stage
+{'H0': 179999999.99999976, 'V': 2068.2894612325968, 'A0': 1.2758381779575312e+27, 'L2': 179989658.55269358, 'L3': -3.1895954448938293e+28, 's2': 6.379190889787657e+27, 'M2': 179989658.55269334, 'M3': -3.1895954448938253e+28, 'A2': 2.2006253833652696e+74, 's3': 1.1003126916826352e+75, 'L4': -1.1003126916826354e+76, 'M4': -1.1003126916826341e+76}
+tiny need
+1.1003126916826341e+76
+tiny envelope
+9.610667198968579e+26
+low tiny envelope
+inf

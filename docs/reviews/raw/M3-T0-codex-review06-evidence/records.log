@@ -1,0 +1,85 @@
+termination diff [["ADDED", "/sufficient_stage_condition/review05_counterexamples"], ["ADDED", "/floating_point_enclosure/constants/zero_force_c0_max"]]
+floors {
+  "note": "root brackets [lo, hi] with need(lo) > 0 > need(hi); 'review03_correction' is the stage condition with the superseded relative-only envelope",
+  "rows": [
+    {
+      "need_at_published_floor_m": -7.170720652771883e-07,
+      "published_now_m": 124456.68544510857,
+      "published_review04_m": 124456.68544510857,
+      "published_unchanged": true,
+      "root_bracket_corrected_m": [
+        124456.68544484391,
+        124456.68544484489
+      ],
+      "root_bracket_review03_correction_m": [
+        124456.68544484391,
+        124456.68544484489
+      ],
+      "stage_bounds_at_published_floor_m": {
+        "M2": 69003.57940938401,
+        "M3": 68755.17649007885,
+        "M4": 7.170720652771883e-07
+      },
+      "two_decimals_nearest_is_sufficient": true,
+      "two_decimals_nearest_m": 124456.69,
+      "two_decimals_rounded_up_m": 124456.69,
+      "vehicle": "B25.8"
+    },
+    {
+      "need_at_published_floor_m": -1.0038993351683625e-06,
+      "published_now_m": 118633.50894662621,
+      "published_review04_m": 118633.50894662621,
+      "published_unchanged": true,
+      "root_bracket_corrected_m": [
+        118633.5089461096,
+        118633.50894611058
+      ],
+      "root_bracket_review03_correction_m": [
+        118633.5089461096,
+        118633.50894611058
+      ],
+      "stage_bounds_at_published_floor_m": {
+        "M2": 63155.474615659594,
+        "M3": 62907.56785361275,
+        "M4": 1.0038993351683625e-06
+      },
+      "two_decimals_nearest_is_sufficient": true,
+      "two_decimals_nearest_m": 118633.51,
+      "two_decimals_rounded_up_m": 118633.51,
+      "vehicle": "B100"
+    },
+    {
+      "need_at_published_floor_m": -8.427938228380506e-07,
+      "published_now_m": 111511.96182508787,
+      "published_review04_m": 111511.96182508787,
+      "published_unchanged": true,
+      "root_bracket_corrected_m": [
+        111511.96182425194,
+        111511.96182425291
+      ],
+      "root_bracket_review03_correction_m": [
+        111511.96182425194,
+        111511.96182425291
+      ],
+      "stage_bounds_at_published_floor_m": {
+        "M2": 56003.39528868884,
+        "M3": 55755.98091295595,
+        "M4": 8.427938228380506e-07
+      },
+      "two_decimals_nearest_is_sufficient": false,
+      "two_decimals_nearest_m": 111511.96,
+      "two_decimals_rounded_up_m": 111511.97,
+      "vehicle": "drag-free limit"
+    }
+  ]
+}
+atmosphere top-level ['boundaries', 'edges', 'single_crossing_rk4', 'stiffness_dt10', 'summary', 'table_sha256']
+axis_ablation top-level ['data_file', 'data_sha256', 'data_sha256_matches_gmat_metadata', 'fits', 'full_fit_reproduces_t0_gmat', 'rms_definition', 'stored_full_fit_rms_m', 'tolerance_m', 'units']
+decay top-level ['configuration', 'dop853_time_to_geodetic_zero_s', 'floors', 'missed_crossing', 'rk4_divergence', 'rk4_last_committed_h_m', 'rk4_steps', 'sphere_minus_ellipsoid_max_m', 'stages']
+frames top-level ['fc2a_vrel_equals_v_when_omega_zero', 'fc2b_nonzero', 'fc2b_vrel_at_rest_mps', 'fc3_j2_axisymmetry_max_rel_diff', 'fc5_air_velocity_at_aX_mps', 'fc5_expected_mps', 'fc5_prograde_vrel_minus_expected_mps', 'fc5_retrograde_vrel_minus_expected_mps', 'fc6_equator_accel', 'fc6_equator_inward', 'fc6_pole_accel', 'fc6_pole_outward', 'fc8_inclined_51.6', 'fc8_not_parallel_away_from_vertex', 'fc8_parallel_at_vertex', 'omega_r_over_v_at_250km']
+geodetic top-level ['axisymmetry_fc4', 'ellipsoid', 'exact_answers', 'grid', 'published']
+gmat top-level ['axis', 'burn', 'decay', 'density_probes', 'geodetic_points', 'provenance', 'regression_identity', 'regression_m3_form', 'trajectories']
+regression top-level ['bitwise_equal_to_golden', 'final_position_difference_m', 'final_velocity_difference_mps', 'golden_platform', 'm1_cross_platform_bound_m_mps', 'perturbations_off_acceleration_bitwise_point_mass', 'this_host', 'ticks', 'within_m1_cross_platform_bound']
+termination top-level ['admissibility_counterexamples', 'floating_point_enclosure', 'floor_comparison', 'libm_sensitivity', 'missed_crossing', 'stage_order', 'stiffness_thresholds', 'sufficient_stage_condition', 'vectorised_height_check_max_abs_m']
+height_error top-level ['crossings', 'height_error', 'libm']
+VAL digest matches []

@@ -39,6 +39,15 @@
 - R5-F2: 0.983 is scoped to the coefficient-rounding subset. The committed transition scan reaches 0.99999999999886 at subnormal densities. The Review 04 record is amended, not rewritten.
 - A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only.
 - New checks: `check_review05.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-05.md`. T0 is not accepted. Any Review 06 needs separate authorization.  
+**Status update (2026-10-20, append-only):** **Review 06 (Codex, at `fcd5997`): REQUEST_CHANGES.**
+- R5-F2, R2-F1, R2-F3, IM-1, IM-2, F1, F3, F4 and F5 are RESOLVED.
+- R5-F1, R4-F1, R3-F1, R2-F2 and F2 are PARTIALLY RESOLVED: both Review 05 counterexamples are covered, but the unrestricted envelope contract is not.
+- New findings, verified and ACCEPTED, **not applied**:
+  - M3T0-R6-F1 (MINOR): under C1 a positive mass can round to a ballistic coefficient of exactly 0 (mass ≤ 16 × 2^-1074 kg with cd·area = 33 m²). The model's drag is finite and nonzero; the envelope raises a division by zero. The statement above that E4a needs "no vehicle condition" therefore does not yet hold for b = 0. It does not affect the published floors, which use B 25.8, B 100 and the drag-free limit.
+  - M3T0-R6-F2 (NOTE): `_up`/`_dn` do not handle every overflow or sign as their docstring claims; no published result is affected.
+  - M3T0-R6-F3 (NOTE): E4b's zero-force cap inherits A-FP-2 through the density bound; it was classified as derived under A-FP-1 only.
+- The 5 287-point random search quoted in the Review 04 record is unreproduced historical evidence.
+- Record: `docs/reviews/M3-T0-review-06.md`. T0 is not accepted. A correction pass and any Review 07 await authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

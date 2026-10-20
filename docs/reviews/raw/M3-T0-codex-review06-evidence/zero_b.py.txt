@@ -1,0 +1,19 @@
+import sys, math, json, traceback
+from decimal import Decimal, localcontext
+from fractions import Fraction
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m
+import t0_termination as t
+cd, area, mass = 2.2, 15.0, math.ulp(0.0)
+r=np.array([186378137.,0.,0.]); v=np.zeros(3)
+p=cd*area; b=mass/p
+h=m.geodetic_iterative(r)[1]; rho=m.density(h)
+vrel=v-m.air_velocity(r,m.OMEGA_E)
+k=0.5*rho*cd*area/mass
+vec=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,v,mass)
+print('mass',mass,'P',p,'b',b,'height',h,'rho',rho,'coefficient',k,'vrel',vrel,'dot',vrel@vrel,'drag',vec)
+print('all intermediates finite',all(math.isfinite(x) for x in [p,b,h,rho,k,*vrel,vrel@vrel,*vec]))
+for name,f in [('inverse_ballistic_bound',lambda:t.inverse_ballistic_bound(b,cd,area,Fraction(t.FP['phi_B']))),('drag_envelope',lambda:t.drag_envelope(h,0.,b))]:
+ try: print(name,f())
+ except Exception: traceback.print_exc()

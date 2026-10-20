@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_r5f2_transition_scan_maximum_is_quoted_and_near_one ___________
+
+    def test_r5f2_transition_scan_maximum_is_quoted_and_near_one():
+        """Detects: the records quoting a subnormal-regime maximum other than the transition
+        scan's, or hiding it."""
+        dr = live_dr0029()
+        start = dr.index("Over the subnormal-density points of the committed transition scan")
+        sentence = dr[start : dr.index(".", dr.index("(B 100)", start))]  # P1 itself, not the log
+        for vehicle, quoted in (("B25.8", "0.99999999999886"), ("B100", "0.99999999999885")):
+            got = transition_scan_maximum(vehicle)
+            assert 0.9999999999 < got <= 1.0, vehicle
+            assert f"{got:.14f}" == quoted, (vehicle, got)
+>           assert f"{quoted} ({vehicle[0]} {vehicle[1:]})" in sentence, vehicle
+E           AssertionError: B25.8
+E           assert '0.99999999999886 (B 25.8)' in 'Over the subnormal-density points of the committed transition scan (`check_review04.py`) it is below 0.983 (B 25.8) and 0.99999999999885 (B 100)'
+
+docs/science/experiments/m3-t0/check_review05.py:411: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f2_transition_scan_maximum_is_quoted_and_near_one
+1 failed, 64 deselected in 1.15s
