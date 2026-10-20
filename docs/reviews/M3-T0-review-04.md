@@ -167,3 +167,7 @@ The "Empirical observations" row of the evidence classification above is preserv
   It was an ad-hoc measurement during the I-5 pass. `check_review05.py` now recomputes it.
 - **What it is not.** It is not the maximum over the subnormal regime. Over the subnormal-density points of the committed transition scan (`check_review04.py`), the ratio reaches 0.99999999999886 (B 25.8) and 0.99999999999885 (B 100). Just below the smallest normal density the absolute terms are negligible, and the relative envelope is as tight there as for normal densities. These are covered points, not violations.
 - **Record:** `docs/reviews/M3-T0-review-05.md`.
+
+### Amendment (Authorization I-8, provenance of the random search)
+The "Empirical observations" row above is preserved as written. Its sentence "A random search of 5 287 points found no violation of the corrected envelope and 161 of the superseded one" is **UNREPRODUCED**: the search was an ad-hoc run during the I-5 pass, and its script, seed and outputs were not committed. Review 06 noted the gap. The original evidence could not be recovered. The figure is historical only, and no conclusion rests on it. The committed, reproducible evidence for the same envelope is the transition scan and force grids of `check_review04.py` and `check_review05.py`, and, after Review 06, the exhaustive and adversarial sweeps of `check_review06.py`.
+- **Record:** `docs/reviews/M3-T0-review-06.md`.

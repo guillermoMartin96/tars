@@ -212,3 +212,20 @@ Evidence is in `docs/reviews/raw/M3-T0-review05-findings-correction-evidence/`. 
 | T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 95 tracked experiment files are byte-identical; the checks then pass 157/157 (`reproducibility_twice.log`) |
 | CI on `411cabd` | Run 39361891229 (https://github.com/guillermoMartin96/tars/actions/runs/39361891229): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion. CI does not collect the T0 checks (`testpaths = ["tests"]`) |
 | A-FP-2 | Not affected by this validation: the host measurements above are macOS x86_64 only and are not a platform guarantee |
+
+### Amendment (Authorization I-8, Review 06 M3T0-R6-F3)
+Two statements above are preserved as written: "E4a and E4b use no libm call." under A-FP-2, and the classification of E4b in the row "Derived under A-FP-1". Review 06 found the classification of E4b incomplete (M3T0-R6-F3). This amendment corrects it.
+- **E4a** uses no libm call. It is derived under A-FP-1 only. That statement stands.
+- **E4b's cap c₀ ≤ 5/8 depends on A-FP-2.** The cap is c₀ = fl(0.5·ρ̂) ≤ (F_ρ·e^η₀·ρ₀,max + N_ρ)/2 + η₀, with F_ρ = (1 + UF)(1 + u)² and N_ρ = (1 + u)²·ρ₀,max·ν + η₀. UF = LIBM_ULP × 2^-52 and ν = LIBM_ULP × 2^-1074 are the libm allowance of the density's exp (A-FP-2, through E3). E4b is therefore derived under A-FP-1 and A-FP-2.
+- **How far it can be weakened [derived].** c₀ is affine in LIBM_ULP. It is 0.6125000000000005 at LIBM_ULP = 2 (rounded up). The cap holds while LIBM_ULP ≤ 91910196476947 (about 2^46.4), and fails above it. `rounding_allowances` refuses to derive the constants there.
+  - This limit is far above the 2^5 to 2^7 ulps that the published bounds tolerate, so it does not narrow the guarantee. It is still a dependency, not libm-independence.
+  - `check_review06.py` computes the limit from a second implementation and checks the boundary on either side.
+- **What the zero-force result covers.** It holds for every state in the domain, under A-FP-1 and A-FP-2. A-FP-2 is not strengthened and no platform guarantee is claimed.
+
+### Amendment (Authorization I-8, switch point b*)
+The derivation above quotes "b* ≈ 7.42e-309, two thirds of 2^-1023". That is preserved as written. It does not say which φ_B it uses. Review 06 noted this. b* = cη₀/(c − 1) with c = φ(1 − u) depends on φ:
+- **with the stored φ_B** (`FP["phi_B"]`, the binary64 rounded up from (1 + u)/(1 − u)², i.e. 1 + 4u; the value the envelope and `inverse_ballistic_bound` use): b* = 7.416912861690675e-309, about 2^-1022/3. This is the switch the implementation shows, and the figure quoted above;
+- **with the exact φ_B** = (1 + u)/(1 − u)²: c − 1 = 2u/(1 − u), so b* = (1 + u)·2^-1023 = 1.1125369292536007e-308. This is the switch of the bound as derived on paper.
+
+R = max(φ/b, R1, R2) is an upper bound for any φ ≥ the exact φ_B; the switch only says which term is the largest. So both figures describe valid bounds, and the implementation's is the stored one. No constant changes; `check_review06.py` checks both switches.
+- **Record:** `docs/reviews/M3-T0-review-06.md`.

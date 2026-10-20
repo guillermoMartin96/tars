@@ -1,0 +1,128 @@
+"""Seeded adversarial probe of E4a after the R6-F1 correction (implementer evidence, Review 06
+correction pass). Usage: python adversarial_r6.py <m3-t0 directory>
+
+1. Random C1 vehicles: cd and area log-uniform over [2^-1074, 2^1023] (products kept finite),
+   masses at the b = 0 boundary (the largest mass with fl(mass / P) = 0, its successor,
+   2^-1074 and random masses below eta0 P), and random masses k 2^-1074. Each must satisfy
+   cd area / mass <= R(b) exactly (Fractions), b = 0 included.
+2. Random C2 vehicles from subnormal and normal b.
+3. Monotonicity: R(b) >= R(next(b)) for random b including 0 and subnormals.
+4. Force: the model's drag against the envelope for random b = 0 vehicles at random heights
+   100 000 ... 191 700 km and speeds 0 ... 11 km/s (states whose force overflows skipped).
+Fixed seed; prints counts and the largest ratios. Not a proof.
+"""
+
+import math
+import sys
+from decimal import Decimal, localcontext
+from fractions import Fraction
+
+import numpy as np
+
+sys.path.insert(0, sys.argv[1])
+import t0_model as m  # noqa: E402
+import t0_oracle as o  # noqa: E402
+import t0_termination as tt  # noqa: E402
+
+TINY = math.ulp(0.0)
+ETA0 = Fraction(1, 2**1075)
+PHI = Fraction(tt.FP["phi_B"])
+rng = np.random.default_rng(20261020)
+
+
+def rand_pos(lo_e: int, hi_e: int) -> float:
+    e = int(rng.integers(lo_e, hi_e))
+    x = math.ldexp(float(rng.uniform(1.0, 2.0)), e)
+    return x if x > 0 else TINY
+
+
+def largest_zero_mass(p: float):
+    if p < 2.0:
+        return None
+    x = float(ETA0 * Fraction(p))
+    while x / p != 0.0:
+        x = math.nextafter(x, 0.0)
+    while math.nextafter(x, math.inf) / p == 0.0:
+        x = math.nextafter(x, math.inf)
+    return x
+
+
+c1 = zeros = c2 = 0
+worst = Fraction(0)
+for _ in range(20_000):
+    cd, area = rand_pos(-1074, 1023), rand_pos(-1074, 1023)
+    p = cd * area
+    if not 0.0 < p < math.inf:
+        continue
+    prod = Fraction(cd) * Fraction(area)
+    masses = [TINY, math.nextafter(TINY, 1.0), int(rng.integers(1, 10**6)) * TINY]
+    top = largest_zero_mass(p)
+    if top is not None:
+        masses += [top, math.nextafter(top, math.inf)]
+        masses.append(float(Fraction(top) * Fraction(float(rng.uniform(0.0, 1.0)))) or TINY)
+    masses.append(rand_pos(-1074, 1023))
+    for mass in masses:
+        b = mass / p
+        if not b < math.inf:
+            continue
+        r = tt.inverse_ballistic_bound(b, cd, area, PHI)
+        ratio = prod / Fraction(mass) / r
+        assert ratio <= 1, (cd, area, mass)
+        worst = max(worst, ratio)
+        c1 += 1
+        zeros += b == 0.0
+    for b in (TINY, rand_pos(-1074, -1000), rand_pos(-1022, 300)):
+        mass = (b * cd) * area
+        if 0.0 < mass < math.inf:
+            assert prod / Fraction(mass) <= tt.inverse_ballistic_bound(b, cd, area, PHI)
+            c2 += 1
+print(f"C1 vehicles {c1} (b = 0: {zeros}), C2 vehicles {c2}; largest (cd area / mass) / R = "
+      f"{float(worst):.15f}")
+
+mono = 0
+for _ in range(5_000):
+    cd, area = rand_pos(-600, 600), rand_pos(-600, 600)
+    if not 0.0 < cd * area < math.inf:
+        continue
+    b = 0.0 if rng.random() < 0.3 else rand_pos(-1074, -1015)
+    nb = math.nextafter(b, math.inf)
+    assert tt.inverse_ballistic_bound(b, cd, area, PHI) >= tt.inverse_ballistic_bound(
+        nb, cd, area, PHI
+    )
+    mono += 1
+print(f"monotonicity pairs {mono}: R(b) >= R(next b) in every pair")
+
+forces = covered = 0
+best = Decimal(0)
+for _ in range(400):
+    cd, area = rand_pos(-3, 12), rand_pos(-3, 12)
+    p = cd * area
+    top = largest_zero_mass(p)
+    if top is None:
+        continue
+    mass = float(rng.choice([TINY, top, 3 * TINY if 3 * TINY <= top else TINY]))
+    assert mass / p == 0.0
+    h = float(rng.uniform(1.0e8, 1.917e8))
+    lat = float(rng.uniform(-1.5, 1.5))
+    lon = float(rng.uniform(-math.pi, math.pi))
+    r = m.geodetic_to_cartesian(lat, lon, h)
+    d = rng.normal(size=3)
+    s = float(rng.uniform(0.0, 11_000.0))
+    v = s * d / np.linalg.norm(d)
+    with np.errstate(over="ignore", invalid="ignore"):
+        vec = m.acceleration(m.Config(mu=0.0, drag=m.Drag(cd=cd, area_m2=area)), 0.0, r, v, mass)
+    if not np.all(np.isfinite(vec)):
+        continue
+    with localcontext() as c:
+        c.prec = 60
+        a = sum(Decimal(float(x)) ** 2 for x in vec).sqrt()
+    low = tt._dn(o.true_height(r))
+    env = tt.drag_envelope(low, tt._up(Decimal(float(np.linalg.norm(v))) * (1 + Decimal("1e-15"))),
+                           0.0, cd=cd, area=area)
+    forces += 1
+    covered += a <= Decimal(env)
+    if env > 0 and math.isfinite(env):
+        best = max(best, a / Decimal(env))
+print(f"b = 0 force states {forces}, covered {covered}; largest drag / envelope {float(best):.15f}")
+assert covered == forces
+print("ADVERSARIAL_OK")

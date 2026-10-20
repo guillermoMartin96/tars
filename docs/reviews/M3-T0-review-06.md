@@ -92,3 +92,84 @@ The reviewer states that the partial dispositions concern the unrestricted contr
 - When a lemma's premise says "finite and positive", check every rounding outcome of the premise's inputs, including exactly zero, not only subnormal results.
 - A sweep that filters out inputs (here `0 < b < inf`) cannot be cited as covering them; state the filter wherever the sweep is cited.
 - A helper's docstring is a contract: "+∞ beyond the largest" must hold for every input type and sign the helper accepts, or the docstring must say which.
+
+## Correction pass (Authorization I-8, 2026-10-20; appended)
+"Authorization I-8 — M3 T0 Review 06 Corrections" authorizes a focused correction of R6-F1, R6-F2 and R6-F3, and of the provenance and switch-point records. It is correction authorization only: T0 remains BLOCKED and NOT ACCEPTED, and Review 07 needs separate authorization. Everything above this section is preserved as written. The statuses Review 06 gave (PARTIALLY RESOLVED for R5-F1, R4-F1, R3-F1, R2-F2 and F2) are **not** changed here; whether they are now resolved is for an independent review to judge.
+
+Preconditions (I-8 §1), verified before any change: branch `milestone-3-t0-reference-spike`, HEAD = origin = `30a4e8d`, clean worktree, CI run 39452378624 green on all four jobs, no protected path changed since `86df2c3`, the five pinned digests match.
+
+| Finding | Disposition | Correction |
+|---|---|---|
+| M3T0-R6-F1 (MINOR) | **ACCEPTED; CORRECTED** (for an independent review to assess) | E4a at b = 0 through mass ≥ 2^-1074 (below). `inverse_ballistic_bound`, `envelope_ballistic_coefficient`, the E4a docstring and the records |
+| M3T0-R6-F2 (NOTE) | **ACCEPTED; CORRECTED** | `_up`/`_dn` over the extended reals with NaN and type rejection; envelope and stage-condition input validation; explicit non-certification |
+| M3T0-R6-F3 (NOTE) | **ACCEPTED; CORRECTED** (records) | E4b reclassified as derived under A-FP-1 and A-FP-2; the cap's LIBM_ULP limit computed and published (`zero_force_cap`) |
+| Provenance remark (5 287-point search) | **ACCEPTED; CORRECTED** (records) | Marked UNREPRODUCED by an amendment appended to the Review 04 record. The original script, seed and outputs could not be recovered |
+| Switch-point remark (b*) | **ACCEPTED; CORRECTED** (records) | Both values stated, by an amendment appended to the Review 05 record |
+
+### R6-F1: the mathematical correction and its domain
+- **Domain of E4a.** b is a non-negative finite binary64 (−0.0 is 0; b = +∞ is E4b). cd and area are positive and finite. The vehicle's b was formed by C1, b = fl(mass/fl(cd·area)), or C2, mass = fl(fl(b·cd)·area), with mass a positive finite binary64. Overflow stays excluded by the existing domain condition. Inputs outside this domain raise `ValueError` and never receive a bound.
+- **b > 0 (unchanged).** b is a binary64, so b > 0 means b ≥ 2η₀ = 2^-1074. Then b = (mass/P)(1 + δ) or mass/P + η gives P/mass ≤ max((1 + u)/b, 1/(b − η₀)), with b − η₀ ≥ η₀ > 0. The premise "b finite and mass > 0 give b ≥ 2η₀" in the Review 05 docstring was false (it holds for P, not for b). The bound for b > 0 is unchanged, and so is every value it produced.
+- **b = 0 (new).** mass/P ≤ η₀ rounds to 0, so b carries no information on the mass beyond mass > 0. Every positive binary64 is ≥ 2^-1074, so cd·area/mass ≤ cd·area/2^-1074 (exact rationals, no rounding). The supremum over C1 masses with b = 0 is attained at mass = 2^-1074 whenever fl(cd·area) ≥ 2 (below 2, b = 0 is unreachable: 2^-1074/P > η₀). C2 with b = 0 gives mass 0, so b = 0 is a C1 case only.
+  - R(0) = max(cd·area/2^-1074, R(2^-1074)). The max with the bound at the smallest positive b is not needed for the bound itself. It keeps R non-increasing on all b ≥ 0: R(0) ≥ R(2^-1074) ≥ R(b) for every b ≥ 2^-1074, since R is non-increasing on b > 0 (φ_B/b, R1 and R2 each are). Without it, R(0) < R(2^-1074) whenever cd·area is below about 2.
+  - **Denominator positivity.** The only divisor is the constant 2^-1074 > 0. b_R = φ_B/R(0) > 0 because R(0) is finite and positive (cd·area finite and positive). The envelope divides by b_R only.
+  - **Rounding direction.** R(0) is exact. b_R is rounded down (ROUND_FLOOR, 60 digits), so the envelope's ratio φ_B/b_R ≥ R(0). The envelope is then rounded up. `envelope_ballistic_coefficient` returns b itself only when b > 0 and R = φ_B/b.
+  - **Subnormal arithmetic.** Nothing in R(0) is evaluated in binary64. The model's own subnormal operations (the coefficient chain and its division by a subnormal mass) are the E4 terms already derived under A-FP-1. The vehicle enters them only through cd·area/mass ≤ R, which now holds at b = 0.
+  - b_R ≤ b no longer holds at b = 0 (b_R > 0 = b). The envelope needs only R ≥ cd·area/mass, so nothing depends on b_R ≤ b.
+- **Result.** At the Review 06 point, the model's drag is 0.9999999999988 (k = 1) to 0.0625 (k = 16) of the corrected envelope (1.5857600878298153e28 m/s² for every k ≤ 16). k = 17 (b = 2^-1074) is unchanged at 0.9705882352929661. The reviewer's `test_zero_b.py` case is k = 1. The bound is tight at k = 1, which is expected: R(0) is attained there.
+- **Not changed.** No vehicle condition is introduced. Every positive ballistic coefficient, the three floors (124456.68544510857, 118633.50894662621 and 111511.96182508787 m), their root brackets and margins, and every pre-existing termination result are unchanged to the last bit. Only the keys `review06_counterexamples` and `zero_force_cap` are added (`termination_results_diff.txt`).
+
+### R6-F2: the rounding helpers
+- **`_up(q)`** is the smallest binary64 ≥ q in the extended reals: +∞ above the largest finite binary64 (MAX), −MAX below −MAX, ±∞ for ±∞. **`_dn(q)`** mirrors it: MAX above MAX, −∞ below −MAX. Zero is returned as +0.0. q may be an int, Fraction, float or Decimal. NaN (quiet or signalling) raises `ValueError`, and any other type raises `TypeError`.
+- **Infinite bound versus invalid input versus failed certification.**
+  - A finite envelope value is a certified bound.
+  - +∞ is still an upper bound but certifies nothing: the exact bound exceeds MAX, or s = +∞.
+  - In `stage_lower_heights` an infinite A0 or A2 makes the speeds after it +∞ and the heights after it −∞, so need(h0) = +∞: the step is **not certified** at h0. The floor bisection only accepts need < 0.
+  - The reviewer's `stage_lower_heights(1e7, 2^-1074)` now returns A2 = s3 = +∞ and L4 = M4 = −∞ (need = +∞) instead of an incidental OverflowError.
+  - Invalid inputs raise `ValueError`: low not finite or < 0, s NaN or < 0, b NaN or < 0, cd or area not positive and finite, h0 not finite.
+- **Unsupported inputs**, documented in the docstrings: NaN, non-real types, b = +∞ for `inverse_ballistic_bound` (E4b; the envelope returns 0 for it).
+- No published value changed. The published vehicles' floors and brackets are re-checked bit for bit.
+
+### R6-F3: E4b and A-FP-2
+- The cap c₀ = fl(0.5·ρ̂) ≤ (F_ρ·e^η₀·ρ₀,max + N_ρ)/2 + η₀ uses F_ρ = (1 + UF)(1 + u)² and N_ρ = (1 + u)²·ρ₀,max·ν + η₀, with UF = LIBM_ULP × 2^-52 and ν = LIBM_ULP × 2^-1074, the libm allowance of the density's exp. **c₀ ≤ 5/8 depends on A-FP-2.**
+- c₀ is affine in LIBM_ULP. It is 0.6125000000000005 at LIBM_ULP = 2, and the cap holds while LIBM_ULP ≤ 91910196476947 (about 2^46.4). `rounding_allowances` refuses to derive the constants above that limit.
+- `check_review06.py` derives the limit by a second implementation. It checks that the derived constant equals it at LIBM_ULP = 1, 2, 2^8, 2^20 and 2^40, that it holds at the limit, and that it fails at limit + 1, 2^47 and 2^48.
+- The limit is far above the 2^5 to 2^7 ulps the published bounds tolerate, so it does not narrow the guarantee. It is a dependency, not libm-independence. A-FP-2 is not strengthened.
+
+### Provenance and b*
+- **The 5 287-point random search** quoted in the Review 04 record is marked **UNREPRODUCED** there by an appended amendment. Its script, seed and outputs were never committed and could not be recovered. No conclusion rests on it. The seeded probe of this pass is committed with its script and log (`adversarial_r6.py.txt`, `adversarial_r6.log`).
+- **b*** = cη₀/(c − 1), c = φ(1 − u):
+  - with the stored φ_B (1 + 4u, the binary64 that the implementation uses) it is 7.416912861690675e-309. This is the figure the Review 05 record quoted;
+  - with the exact φ_B = (1 + u)/(1 − u)² it is (1 + u)·2^-1023 = 1.1125369292536007e-308.
+
+  Both describe valid bounds: R takes the max of its terms for any φ ≥ φ_B. `check_review06.py` checks the implementation's switch at each. No constant changed.
+
+### Evidence (`docs/reviews/raw/M3-T0-review06-findings-correction-evidence/`)
+- **Red before.** The new `check_review06.py` (81 checks) on the unmodified `30a4e8d` tree: 55 fail and 26 pass (`checks06_before_30a4e8d.log`).
+  - The 55 failures:
+    - 24 are R6-F1 behaviour: ZeroDivisionError at the 16 Review 06 masses and in the 8 b = 0 checks;
+    - 8 are R6-F1 domain rejections;
+    - 19 are R6-F2: helper extremes, random rationals, an unsupported type, the non-certification, the envelope and stage input validation;
+    - 4 are record checks.
+  - The 26 passes are expected. They are k = 17 (b > 0, already covered); C2 near b = 0; NaN inputs, which the old helpers rejected incidentally; finite in-range helper rows; the unchanged published vehicles; the E4b cap's LIBM_ULP behaviour (the code already enforced the cap, so the defect was its classification); and the equivalence check below.
+- **Green after.** `check_review01.py` … `check_review06.py`: 238/238 (`checks_after.log`).
+- **Mutation** (`mutation_check_review02.py`, run against all six check files): the control passes 238/238; 59 of 61 corruptions are detected by a declared check, including all 10 R4-F1 and all 10 R5 mutants; 2 are declared equivalent (the two-body stationary-point mutant, and removing the explicit float NaN guard in `_exact`, because `Fraction(nan)` raises ValueError itself; `test_r6f2_float_nan_is_rejected_even_without_the_explicit_guard` establishes it); about 42 min (`mutation_check_review06.json`). The 16 new mutants cover:
+  - R6-F1: the b = 0 case removed (the original defect), its bound halved, the monotonicity max dropped, b_R rounded up, and the domain check removed;
+  - R6-F2: the overflow cases removed from `_up`, `_up` returning −∞ below −MAX, an infinite Decimal raising (the Review 06 symptom), −0.0 escaping, the float NaN guard removed (equivalent), the infinite-speed guard removed, and the envelope's speed validation removed;
+  - R6-F3: the cap computed without the libm allowance, and the Review 05 amendment removed;
+  - records: the UNREPRODUCED mark removed, and the exact-φ_B b* unlabelled.
+  - A first run (`mutation_run1_with_survivors.json`) left two survivors. The float NaN guard is a true equivalent and is now declared as one. The infinite-speed guard was **not** equivalent: far above h_zero the decimal table density underflows to 0, and 0 × ∞ raises InvalidOperation. The non-certification check now covers that case (`drag_envelope(1e12, inf, 1.0)`), and the rerun detects the mutant. Both runs are kept.
+- **Adversarial probe** (seed 20261020; `adversarial_r6.py.txt`, `adversarial_r6.log`). Every case is within the bound, compared in exact rationals:
+  - 79 951 random C1 vehicles (37 241 with b = 0), with cd and area across the whole binary64 range, including masses at the b = 0 boundary and its successor. The largest (cd·area/mass)/R is 1 exactly, at mass = 2^-1074, where R(0) is attained;
+  - 20 780 C2 vehicles;
+  - 4 934 monotonicity pairs R(b) ≥ R(next b), including b = 0;
+  - 353 random b = 0 force states, all covered, with a largest drag/envelope of 0.983.
+- **Termination results.** Only two keys are added; every pre-existing value is bit-identical (`termination_results_diff.txt`).
+
+### Unresolved assumptions and conditional guarantees (unchanged by this pass)
+- **A-FP-2** (libm accuracy) remains an unresolved, explicitly conditional assumption, measured on macOS x86_64 only. It is not a platform guarantee, and E4b now depends on it explicitly. A-FP-1 (IEEE binary64 with gradual underflow) is checked at run time on this host only. A-FP-3 is stated as before.
+- **Contract scope.** The contract covers ballistic coefficients formed by C1 or C2 from a positive finite binary64 mass, with no overflow. It does not cover arbitrary independently supplied (mass, b) pairs.
+- **Conditions of the floors.** The floors are sufficient, not necessary. They hold under A-FP-1 to A-FP-3 for computed committed heights, bound states with negative two-body energy, no thrust, dt = 10 s, and the stated vehicle constructions.
+- **Unchanged.** The GMAT geodetic-drag discrepancy remains escalated (DR-0029 Q-G2-1), and IM-2 is unchanged. DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
+
+### Validation
+Recorded in the validation commit that follows this correction commit.

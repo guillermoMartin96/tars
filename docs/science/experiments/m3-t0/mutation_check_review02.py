@@ -1,13 +1,16 @@
-"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1 and R5-F2 (research only).
+"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1, R5-F2 and R6-F1 ... F3 (research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
 `check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
 density discontinuities, and the Review 02 adversarial check hid it. Review 04 R4-F1: the
 envelope's rounding model dropped the absolute errors of subnormal results. Review 05
 R5-F1: the conversion between the ballistic coefficient and the mass was bounded by a
-relative factor only; R5-F2: an empirical maximum was quoted for the wrong population. This
-harness corrupts copies of the T0 result files, scripts, model, oracle and records, runs
-`check_review01.py` to `check_review05.py` on each copy, and classifies the outcome:
+relative factor only; R5-F2: an empirical maximum was quoted for the wrong population.
+Review 06 R6-F1: C1's b = 0 was outside the conversion bound; R6-F2: the rounding helpers
+mishandled infinite and out-of-range values; R6-F3: E4b's cap was classified as
+libm-independent. This harness corrupts copies of the T0 result files, scripts, model,
+oracle and records, runs `check_review01.py` to `check_review06.py` on each copy, and
+classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
                  checks declared for that mutant is among the failures (a failure elsewhere
@@ -155,6 +158,24 @@ R5SUB = "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope"
 R5REC = "test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime"
 DR29 = "../../../decisions/requests/DR-0029-m3-t0-proposals.md"
 REV04 = "../../../reviews/M3-T0-review-04.md"
+REV05 = "../../../reviews/M3-T0-review-05.md"
+R6CE = "test_r6f1_reviewer_counterexample_masses_are_covered"
+R6SUP = "test_r6f1_zero_b_bound_covers_every_c1_mass"
+R6EXH = "test_r6f1_exhaustive_small_masses_on_adversarial_shapes"
+R6TRANS = "test_r6f1_transition_from_zero_b_on_each_shape"
+R6FORCE = "test_r6f1_model_drag_within_envelope_at_zero_b"
+R6ENV = "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+R6BR = "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down"
+R6DOM = "test_r6f1_invalid_vehicles_are_rejected_not_bounded"
+R6EXT = "test_r6f2_up_and_dn_at_extremes"
+R6RAND = "test_r6f2_up_and_dn_bracket_random_rationals"
+R6NONCERT = "test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification"
+R6NANEQ = "test_r6f2_float_nan_is_rejected_even_without_the_explicit_guard"
+R6ENVIN = "test_r6f2_invalid_envelope_inputs_are_rejected"
+R6CAP = "test_r6f3_e4b_cap_depends_on_libm_ulp"
+R6CAPREC = "test_r6f3_records_classify_e4b_under_a_fp_2"
+R6BSTAR = "test_switch_point_stored_and_exact_phi_are_distinguished"
+R6SEARCH = "test_random_search_is_marked_unreproduced"
 SCOPED = (
     "Over the coefficient-rounding subset (equatorial points from 300 km below to 10 km above "
     "the position where the model's drag coefficient rounds up from about 0.5 × 2^-1074 to "
@@ -483,6 +504,127 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
         ),
         (R5REC,),
     ),
+    # ---- Review 06 M3T0-R6-F1: the original defect, b = 0 divided by
+    "r6_zero_b_case_removed": (
+        edit_text(
+            "t0_termination.py",
+            "    if b == 0.0:  # every positive binary64 mass is >= tiny\n",
+            "    if False:  # mutant: b = 0 falls through to the b > 0 derivation\n",
+        ),
+        (R6CE, R6SUP, R6EXH, R6TRANS, R6FORCE, R6ENV, R6BR),
+    ),
+    # the positive-mass bound halved (as if mass >= 2 x 2^-1074)
+    "r6_zero_b_bound_halved": (
+        edit_text("t0_termination.py", "return max(prod / tiny,", "return max(prod / (2 * tiny),"),
+        (R6CE, R6SUP, R6EXH, R6FORCE),
+    ),
+    # the max that keeps R non-increasing in b dropped
+    "r6_zero_b_monotone_max_dropped": (
+        edit_text(
+            "t0_termination.py",
+            "inverse_ballistic_bound(math.ulp(0.0), cd, area, phi))",
+            "Fraction(0))",
+        ),
+        (R6SUP, R6TRANS),
+    ),
+    # b_R rounded the unsafe way (above phi_B / R)
+    "r6_b_r_rounded_up": (
+        edit_text(
+            "t0_termination.py",
+            "        return Decimal(q.numerator) / Decimal(q.denominator)\n",
+            "        return Decimal(q.numerator) / Decimal(q.denominator)"
+            ' * (1 + Decimal("1e-50"))\n',
+        ),
+        (R6BR,),
+    ),
+    # an invalid vehicle bounded instead of rejected
+    "r6_domain_check_removed": (
+        edit_text(
+            "t0_termination.py",
+            "    if not (0.0 <= b < math.inf):\n"
+            '        raise ValueError(f"b = {b!r} is outside E4a\'s domain")\n',
+            "",
+        ),
+        (R6DOM,),
+    ),
+    # ---- Review 06 M3T0-R6-F2
+    "r6f2_up_overflow_restored": (
+        edit_text(
+            "t0_termination.py",
+            "    if x > FLOAT_MAX:\n        return math.inf\n    if x < -FLOAT_MAX:\n"
+            "        return -sys.float_info.max\n",
+            "",
+        ),
+        (R6EXT, R6RAND),
+    ),
+    "r6f2_up_negative_overflow_to_minus_inf": (
+        edit_text(
+            "t0_termination.py",
+            "        return -sys.float_info.max\n",
+            "        return -math.inf\n",
+        ),
+        (R6EXT, R6RAND),
+    ),
+    # the Review 06 symptom: an infinite Decimal (the stage enclosure's -inf) raises
+    "r6f2_decimal_infinity_raises": (
+        edit_text(
+            "t0_termination.py",
+            "            return -math.inf if q.is_signed() else math.inf\n",
+            '            raise OverflowError("cannot convert Infinity to integer ratio")\n',
+        ),
+        (R6EXT, R6NONCERT),
+    ),
+    # Equivalent: Fraction(nan) raises ValueError itself; the guard states the semantics
+    "r6f2_float_nan_accepted": (
+        edit_text("t0_termination.py", "        if math.isnan(q):\n", "        if False:\n"),
+        (EQUIVALENT, R6NANEQ),
+    ),
+    "r6f2_negative_zero_escapes": (
+        edit_text(
+            "t0_termination.py",
+            "    return (f if Fraction(f) >= x else math.nextafter(f, math.inf)) + 0.0\n",
+            "    return f if Fraction(f) >= x else math.nextafter(f, math.inf)\n",
+        ),
+        (R6EXT,),
+    ),
+    "r6f2_infinite_speed_unhandled": (
+        edit_text("t0_termination.py", "    if math.isinf(s):\n        return math.inf\n", ""),
+        (R6NONCERT,),
+    ),
+    "r6f2_envelope_input_validation_removed": (
+        edit_text(
+            "t0_termination.py",
+            '    if not s >= 0.0:\n        raise ValueError(f"speed bound {s!r} is not >= 0")\n',
+            "",
+        ),
+        (R6ENVIN,),
+    ),
+    # ---- Review 06 M3T0-R6-F3: the cap computed without the libm allowance
+    "r6f3_cap_libm_independent": (
+        edit_text(
+            "t0_termination.py",
+            "    c0_max = (f_rho * exp_eta * rho0_max + n_rho) / 2 + ETA0\n",
+            "    c0_max = ((1 + U) ** 2 * exp_eta * rho0_max + ETA0) / 2 + ETA0\n",
+        ),
+        (R6CAP,),
+    ),
+    "r6f3_amendment_removed": (
+        edit_text(
+            REV05,
+            "### Amendment (Authorization I-8, Review 06 M3T0-R6-F3)",
+            "### Note",
+        ),
+        (R6CAPREC,),
+    ),
+    # ---- records: provenance and the switch point
+    "r6_random_search_mark_removed": (
+        edit_text(REV04, "UNREPRODUCED", "reproduced"),
+        (R6SEARCH,),
+    ),
+    "r6_b_star_phi_unlabelled": (
+        edit_text(REV05, "1.1125369292536007e-308", "1.11e-308"),
+        (R6BSTAR,),
+    ),
 }
 
 
@@ -512,6 +654,7 @@ def run(name: str) -> dict:
                 str(d / "check_review03.py"),
                 str(d / "check_review04.py"),
                 str(d / "check_review05.py"),
+                str(d / "check_review06.py"),
             ],
             capture_output=True,
             text=True,

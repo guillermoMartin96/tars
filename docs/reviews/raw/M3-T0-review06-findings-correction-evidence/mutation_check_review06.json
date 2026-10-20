@@ -1,0 +1,1017 @@
+{
+  "control_passes_and_every_mutant_detected_or_equivalent": true,
+  "mutants": {
+    "control_unmodified": {
+      "expected_checks": [],
+      "failed_checks": [],
+      "outcome": "not detected",
+      "pytest_exit": 0,
+      "pytest_summary": "238 passed in 168.37s (0:02:48)"
+    },
+    "json_floors_in_km": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_r3f1_floors_are_unchanged_at_the_quoted_precision",
+        "test_r3f1_floors_recomputed_by_a_second_implementation",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_floors_by_a_second_implementation_and_unchanged",
+        "test_r6f2_published_vehicles_unchanged"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "19 failed, 219 passed in 156.92s (0:02:36)"
+    },
+    "json_floors_minus_10km": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_r3f1_floors_are_unchanged_at_the_quoted_precision",
+        "test_r3f1_floors_recomputed_by_a_second_implementation",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_floors_by_a_second_implementation_and_unchanged",
+        "test_r6f2_published_vehicles_unchanged"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "15 failed, 223 passed in 155.40s (0:02:35)"
+    },
+    "json_floors_plus_10km": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r3f1_floors_are_unchanged_at_the_quoted_precision",
+        "test_r3f1_floors_recomputed_by_a_second_implementation",
+        "test_r4f1_floors_by_a_second_implementation_and_unchanged",
+        "test_r6f2_published_vehicles_unchanged"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "13 failed, 225 passed in 154.22s (0:02:34)"
+    },
+    "json_floors_zeroed": {
+      "expected_checks": [
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_r3f1_floors_are_unchanged_at_the_quoted_precision",
+        "test_r3f1_floors_recomputed_by_a_second_implementation",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_floors_by_a_second_implementation_and_unchanged",
+        "test_r6f2_published_vehicles_unchanged"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "19 failed, 219 passed in 155.40s (0:02:35)"
+    },
+    "json_im1_quadratic_rms_shifted": {
+      "expected_checks": [
+        "test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report"
+      ],
+      "failed_checks": [
+        "test_im1_axis_fit_residual_is_reproduced_from_the_committed_gmat_report"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 163.29s (0:02:43)"
+    },
+    "json_kepler_bound_inflated": {
+      "expected_checks": [
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "10 failed, 228 passed in 163.39s (0:02:43)"
+    },
+    "json_perturbed_relabelled_as_bound": {
+      "expected_checks": [
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "2 failed, 236 passed in 163.54s (0:02:43)"
+    },
+    "json_reviewer_R2F3_mutant": {
+      "expected_checks": [
+        "test_r2f1_sweep_covers_the_declared_matrix",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f2_floors_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum",
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f1_sweep_covers_the_declared_matrix",
+        "test_r2f2_floors_recomputed_by_a_second_implementation",
+        "test_r2f2_records_quote_the_recomputed_floors_and_the_corrected_derivation",
+        "test_r2f2_rk4_steps_from_bound_states_at_the_floor_stay_in_the_domain",
+        "test_r3f1_floors_are_unchanged_at_the_quoted_precision",
+        "test_r3f1_floors_recomputed_by_a_second_implementation",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_floors_by_a_second_implementation_and_unchanged",
+        "test_r6f2_published_vehicles_unchanged",
+        "test_units_and_declared_constants"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "41 failed, 197 passed in 75.61s (0:01:15)"
+    },
+    "json_sweep_dips_halved": {
+      "expected_checks": [
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "18 failed, 220 passed in 93.64s (0:01:33)"
+    },
+    "json_sweep_dips_zeroed": {
+      "expected_checks": [
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "18 failed, 220 passed in 93.62s (0:01:33)"
+    },
+    "json_sweep_row_dropped": {
+      "expected_checks": [
+        "test_r2f1_sweep_covers_the_declared_matrix",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_perturbed_values_are_labelled_estimates_not_bounds",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f1_sweep_covers_the_declared_matrix"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "21 failed, 217 passed in 84.68s (0:01:24)"
+    },
+    "r3_allowance_removed_and_review02_oracle_reverted": {
+      "expected_checks": [
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_boundary_points"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r3f1_boundary_points",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation",
+        "test_r3f1_height_error_bound_holds_on_global_polar_and_low_points",
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_every_band_base_both_sides_and_neighbours",
+        "test_r4f1_height_error_bound_at_high_altitude",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation",
+        "test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "44 failed, 194 passed in 157.36s (0:02:37)"
+    },
+    "r3_envelope_band_of_unwidened_limit": {
+      "expected_checks": [
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_boundary_points"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r3f1_boundary_points",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_every_band_base_both_sides_and_neighbours",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "32 failed, 206 passed in 170.94s (0:02:50)"
+    },
+    "r3_envelope_lower_limit_unwidened": {
+      "expected_checks": [
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_boundary_points"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r3f1_boundary_points",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_every_band_base_both_sides_and_neighbours",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "35 failed, 203 passed in 160.73s (0:02:40)"
+    },
+    "r3_height_allowance_below_observed_error": {
+      "expected_checks": [
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_boundary_points"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r3f1_boundary_points",
+        "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "15 failed, 223 passed in 160.96s (0:02:40)"
+    },
+    "r3_height_allowance_removed": {
+      "expected_checks": [
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_boundary_points",
+        "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r3f1_boundary_points",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation",
+        "test_r3f1_height_error_bound_holds_on_global_polar_and_low_points",
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_every_band_base_both_sides_and_neighbours",
+        "test_r4f1_height_error_bound_at_high_altitude",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "44 failed, 194 passed in 153.53s (0:02:33)"
+    },
+    "r3_height_allowance_slightly_below_bound": {
+      "expected_checks": [
+        "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "8 failed, 230 passed in 162.43s (0:02:42)"
+    },
+    "r3_model_exact_base_in_band_below": {
+      "expected_checks": [
+        "test_r3f1_boundary_points"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f1_between_sample_extremum_exceeds_the_sampled_maximum",
+        "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+        "test_r2f2_drag_factor_decreases_inside_every_band",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered",
+        "test_r3f1_boundary_points",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "34 failed, 204 passed in 138.60s (0:02:18)"
+    },
+    "r3_oracle_returns_the_model_height": {
+      "expected_checks": [
+        "test_oracle_detects_the_r3f1_defect",
+        "test_oracle_does_not_use_the_model_height_or_band_code",
+        "test_oracles_agree"
+      ],
+      "failed_checks": [
+        "test_oracle_detects_the_r3f1_defect",
+        "test_oracle_does_not_use_the_model_height_or_band_code",
+        "test_oracles_agree",
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_r3f1_boundary_points",
+        "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+        "test_r3f1_height_error_bound_holds_on_global_polar_and_low_points",
+        "test_r3f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_height_error_bound_at_high_altitude"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "31 failed, 207 passed in 162.90s (0:02:42)"
+    },
+    "r3_review02_oracle_reverted_to_model_height": {
+      "expected_checks": [
+        "test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height"
+      ],
+      "failed_checks": [
+        "test_review02_adversarial_check_no_longer_adapts_its_bound_to_the_model_height"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 165.03s (0:02:45)"
+    },
+    "r4_absolute_part_removed": {
+      "expected_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "12 failed, 226 passed in 166.03s (0:02:46)"
+    },
+    "r4_coefficient_last_division_term_removed": {
+      "expected_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "12 failed, 226 passed in 167.98s (0:02:47)"
+    },
+    "r4_coefficient_underflow_term_removed": {
+      "expected_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_binary64_neighbours_of_the_critical_boundaries",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_normal_to_subnormal_transition_scan",
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered",
+        "test_r4f1_rk4_stages_at_high_altitude",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope",
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "12 failed, 226 passed in 165.32s (0:02:45)"
+    },
+    "r4_density_underflow_term_removed": {
+      "expected_checks": [
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "4 failed, 234 passed in 167.55s (0:02:47)"
+    },
+    "r4_gravity_and_stage_underflow_terms_removed": {
+      "expected_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "2 failed, 236 passed in 168.33s (0:02:48)"
+    },
+    "r4_height_underflow_terms_removed": {
+      "expected_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 167.32s (0:02:47)"
+    },
+    "r4_libm_absolute_term_ignored": {
+      "expected_checks": [
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r4f1_zero_density_height",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope",
+        "test_r6f3_e4b_cap_depends_on_libm_ulp"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "7 failed, 231 passed in 167.84s (0:02:47)"
+    },
+    "r4_oracle_density_in_binary64": {
+      "expected_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered"
+      ],
+      "failed_checks": [
+        "test_r4f1_reviewer_counterexample_is_reproduced_and_covered"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 168.60s (0:02:48)"
+    },
+    "r4_stage_condition_uses_superseded_envelope": {
+      "expected_checks": [
+        "test_stage_condition_uses_the_corrected_envelope"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r6f1_stage_condition_is_defined_at_zero_b",
+        "test_r6f2_invalid_stage_input_is_not_certified",
+        "test_stage_condition_uses_the_corrected_envelope"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "4 failed, 234 passed in 167.06s (0:02:47)"
+    },
+    "r4_zero_density_height_too_low": {
+      "expected_checks": [
+        "test_r4f1_zero_density_height",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r4f1_envelope_recomputed_by_a_second_implementation",
+        "test_r4f1_underflow_constants_recomputed_by_a_second_implementation",
+        "test_r4f1_zero_density_height",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "6 failed, 232 passed in 167.77s (0:02:47)"
+    },
+    "r5_bound_applied_to_relative_part_only": {
+      "expected_checks": [
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r6f1_model_drag_within_envelope_at_zero_b",
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_stage_condition_is_defined_at_zero_b",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "22 failed, 216 passed in 132.42s (0:02:12)"
+    },
+    "r5_c1_product_absolute_term_removed": {
+      "expected_checks": [
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "3 failed, 235 passed in 170.84s (0:02:50)"
+    },
+    "r5_c1_quotient_absolute_term_halved": {
+      "expected_checks": [
+        "test_r5f1_review05_counterexamples_are_covered",
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_dominance_switch_between_relative_and_absolute_terms",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r5f1_review05_counterexamples_are_covered",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation",
+        "test_switch_point_stored_and_exact_phi_are_distinguished"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "15 failed, 223 passed in 162.27s (0:02:42)"
+    },
+    "r5_c1_quotient_absolute_term_removed": {
+      "expected_checks": [
+        "test_r5f1_review05_counterexamples_are_covered",
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_dominance_switch_between_relative_and_absolute_terms",
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_dominance_switch_between_relative_and_absolute_terms",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r5f1_review05_counterexamples_are_covered",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation",
+        "test_switch_point_stored_and_exact_phi_are_distinguished"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "15 failed, 223 passed in 162.21s (0:02:42)"
+    },
+    "r5_c2_absolute_terms_removed": {
+      "expected_checks": [
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r6f1_second_construction_never_gives_zero_b_with_positive_mass"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "5 failed, 233 passed in 167.95s (0:02:47)"
+    },
+    "r5_conversion_bound_relative_only": {
+      "expected_checks": [
+        "test_r5f1_review05_counterexamples_are_covered",
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_dominance_switch_between_relative_and_absolute_terms",
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r5f1_conversion_bound_holds_for_both_constructions",
+        "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+        "test_r5f1_dominance_switch_between_relative_and_absolute_terms",
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+        "test_r5f1_review05_counterexamples_are_covered",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_second_construction_never_gives_zero_b_with_positive_mass",
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation",
+        "test_switch_point_stored_and_exact_phi_are_distinguished"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "17 failed, 221 passed in 161.62s (0:02:41)"
+    },
+    "r5f2_review04_rewritten_instead_of_amended": {
+      "expected_checks": [
+        "test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime"
+      ],
+      "failed_checks": [
+        "test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 170.00s (0:02:50)"
+    },
+    "r5f2_subset_presented_as_the_subnormal_regime": {
+      "expected_checks": [
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope"
+      ],
+      "failed_checks": [
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 166.69s (0:02:46)"
+    },
+    "r5f2_superseded_sentence_restored": {
+      "expected_checks": [
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope",
+        "test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime"
+      ],
+      "failed_checks": [
+        "test_r5f2_coefficient_rounding_subset_maximum_is_quoted_with_its_scope",
+        "test_r5f2_records_no_longer_scope_0983_to_the_subnormal_regime"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "2 failed, 236 passed in 169.50s (0:02:49)"
+    },
+    "r5f2_transition_scan_maximum_hidden": {
+      "expected_checks": [
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one"
+      ],
+      "failed_checks": [
+        "test_r5f2_transition_scan_maximum_is_quoted_and_near_one"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 168.51s (0:02:48)"
+    },
+    "r6_b_r_rounded_up": {
+      "expected_checks": [
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down"
+      ],
+      "failed_checks": [
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 168.84s (0:02:48)"
+    },
+    "r6_b_star_phi_unlabelled": {
+      "expected_checks": [
+        "test_switch_point_stored_and_exact_phi_are_distinguished"
+      ],
+      "failed_checks": [
+        "test_switch_point_stored_and_exact_phi_are_distinguished"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 158.22s (0:02:38)"
+    },
+    "r6_domain_check_removed": {
+      "expected_checks": [
+        "test_r6f1_invalid_vehicles_are_rejected_not_bounded"
+      ],
+      "failed_checks": [
+        "test_r6f1_invalid_vehicles_are_rejected_not_bounded"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "3 failed, 235 passed in 169.28s (0:02:49)"
+    },
+    "r6_random_search_mark_removed": {
+      "expected_checks": [
+        "test_random_search_is_marked_unreproduced"
+      ],
+      "failed_checks": [
+        "test_random_search_is_marked_unreproduced"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 164.96s (0:02:44)"
+    },
+    "r6_zero_b_bound_halved": {
+      "expected_checks": [
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_model_drag_within_envelope_at_zero_b"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_model_drag_within_envelope_at_zero_b",
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "24 failed, 214 passed in 167.38s (0:02:47)"
+    },
+    "r6_zero_b_case_removed": {
+      "expected_checks": [
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_model_drag_within_envelope_at_zero_b",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r6f1_exhaustive_small_masses_on_adversarial_shapes",
+        "test_r6f1_model_drag_within_envelope_at_zero_b",
+        "test_r6f1_reviewer_counterexample_masses_are_covered",
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_stage_condition_is_defined_at_zero_b",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "25 failed, 213 passed in 129.88s (0:02:09)"
+    },
+    "r6_zero_b_monotone_max_dropped": {
+      "expected_checks": [
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_transition_from_zero_b_on_each_shape"
+      ],
+      "failed_checks": [
+        "test_r6f1_signed_zero_b_is_the_same_vehicle",
+        "test_r6f1_transition_from_zero_b_on_each_shape",
+        "test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down",
+        "test_r6f1_zero_b_bound_covers_every_c1_mass",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "5 failed, 233 passed in 170.11s (0:02:50)"
+    },
+    "r6f2_decimal_infinity_raises": {
+      "expected_checks": [
+        "test_r6f2_up_and_dn_at_extremes",
+        "test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification"
+      ],
+      "failed_checks": [
+        "test_r6f1_stage_condition_is_defined_at_zero_b",
+        "test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification",
+        "test_r6f2_up_and_dn_at_extremes"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "4 failed, 234 passed in 168.86s (0:02:48)"
+    },
+    "r6f2_envelope_input_validation_removed": {
+      "expected_checks": [
+        "test_r6f2_invalid_envelope_inputs_are_rejected"
+      ],
+      "failed_checks": [
+        "test_r6f2_invalid_envelope_inputs_are_rejected"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "2 failed, 236 passed in 168.99s (0:02:48)"
+    },
+    "r6f2_float_nan_accepted": {
+      "expected_checks": [
+        "equivalent",
+        "test_r6f2_float_nan_is_rejected_even_without_the_explicit_guard"
+      ],
+      "failed_checks": [],
+      "outcome": "equivalent",
+      "pytest_exit": 0,
+      "pytest_summary": "238 passed in 168.27s (0:02:48)"
+    },
+    "r6f2_infinite_speed_unhandled": {
+      "expected_checks": [
+        "test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification"
+      ],
+      "failed_checks": [
+        "test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 168.28s (0:02:48)"
+    },
+    "r6f2_negative_zero_escapes": {
+      "expected_checks": [
+        "test_r6f2_up_and_dn_at_extremes"
+      ],
+      "failed_checks": [
+        "test_r6f2_up_and_dn_at_extremes"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 168.54s (0:02:48)"
+    },
+    "r6f2_up_negative_overflow_to_minus_inf": {
+      "expected_checks": [
+        "test_r6f2_up_and_dn_at_extremes",
+        "test_r6f2_up_and_dn_bracket_random_rationals"
+      ],
+      "failed_checks": [
+        "test_r6f2_up_and_dn_at_extremes",
+        "test_r6f2_up_and_dn_bracket_random_rationals"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "3 failed, 235 passed in 167.08s (0:02:47)"
+    },
+    "r6f2_up_overflow_restored": {
+      "expected_checks": [
+        "test_r6f2_up_and_dn_at_extremes",
+        "test_r6f2_up_and_dn_bracket_random_rationals"
+      ],
+      "failed_checks": [
+        "test_r5f1_envelope_recomputed_by_a_second_implementation",
+        "test_r6f1_model_drag_within_envelope_at_zero_b",
+        "test_r6f1_stage_condition_is_defined_at_zero_b",
+        "test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation",
+        "test_r6f2_unbounded_stage_enclosure_is_an_explicit_non_certification",
+        "test_r6f2_up_and_dn_at_extremes",
+        "test_r6f2_up_and_dn_bracket_random_rationals"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "10 failed, 228 passed in 165.76s (0:02:45)"
+    },
+    "r6f3_amendment_removed": {
+      "expected_checks": [
+        "test_r6f3_records_classify_e4b_under_a_fp_2"
+      ],
+      "failed_checks": [
+        "test_r6f3_records_classify_e4b_under_a_fp_2"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 165.03s (0:02:45)"
+    },
+    "r6f3_cap_libm_independent": {
+      "expected_checks": [
+        "test_r6f3_e4b_cap_depends_on_libm_ulp"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r6f3_e4b_cap_depends_on_libm_ulp"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "2 failed, 236 passed in 169.50s (0:02:49)"
+    },
+    "script_envelope_rotation_at_lower_end": {
+      "expected_checks": [
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered",
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_height_error_results",
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "4 failed, 234 passed in 164.72s (0:02:44)"
+    },
+    "script_envelope_without_band_bases": {
+      "expected_checks": [
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered",
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r2f2_envelope_bounds_adversarial_drag_points",
+        "test_r2f2_review02_counterexample_is_covered",
+        "test_r4f1_every_band_base_both_sides_and_neighbours"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "18 failed, 220 passed in 158.36s (0:02:38)"
+    },
+    "script_sampled_label_says_certified": {
+      "expected_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "1 failed, 237 passed in 165.98s (0:02:45)"
+    },
+    "script_stage_speed_circular": {
+      "expected_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r3f1_floors_recomputed_by_a_second_implementation"
+      ],
+      "failed_checks": [
+        "test_provenance_rerun_reproduces_the_committed_termination_results",
+        "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+        "test_r4f1_rk4_stages_at_high_altitude"
+      ],
+      "outcome": "detected",
+      "pytest_exit": 1,
+      "pytest_summary": "6 failed, 232 passed in 166.71s (0:02:46)"
+    },
+    "script_two_body_without_stationary_points": {
+      "expected_checks": [
+        "equivalent",
+        "test_r2f1_two_body_maximum_is_at_an_endpoint_on_a_domain_scan"
+      ],
+      "failed_checks": [],
+      "outcome": "equivalent",
+      "pytest_exit": 0,
+      "pytest_summary": "238 passed in 163.62s (0:02:43)"
+    }
+  }
+}

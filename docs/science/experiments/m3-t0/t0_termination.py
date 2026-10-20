@@ -486,17 +486,55 @@ def _sqrt_bounds(q: Fraction) -> tuple[Fraction, Fraction]:
     return Fraction(s, 10**40), Fraction(s + 1, 10**40)
 
 
+FLOAT_MAX = Fraction(sys.float_info.max)
+
+
+def _exact(q) -> Fraction | float:
+    """q (an int, Fraction, float or Decimal) as an exact Fraction, or as the float +-inf
+    when q is infinite (Review 06 M3T0-R6-F2). NaN raises ValueError and any other type
+    TypeError: neither has a bound, and neither may become one."""
+    if isinstance(q, bool) or not isinstance(q, int | Fraction | float | Decimal):
+        raise TypeError(f"not a real number: {q!r}")
+    if isinstance(q, Decimal):
+        if q.is_nan():  # quiet or signalling
+            raise ValueError("NaN has no binary64 bound")
+        if q.is_infinite():
+            return -math.inf if q.is_signed() else math.inf
+    elif isinstance(q, float):
+        if math.isnan(q):
+            raise ValueError("NaN has no binary64 bound")
+        if math.isinf(q):
+            return q
+    return Fraction(q)
+
+
 def _up(q) -> float:
-    """The smallest binary64 >= q (q a Fraction or a Decimal); +inf beyond the largest."""
-    x = float(q)
-    if math.isinf(x):
+    """The smallest binary64 >= q in the extended reals: +inf above the largest finite
+    binary64 (an upper bound with no finite value: no certification), -MAX below -MAX, +-inf
+    for +-inf; 0 is returned as +0.0. Review 06 M3T0-R6-F2: before, a Fraction beyond the
+    range raised OverflowError and a Decimal below -MAX gave -inf."""
+    x = _exact(q)
+    if isinstance(x, float):
         return x
-    return x if Fraction(x) >= Fraction(q) else math.nextafter(x, math.inf)
+    if x > FLOAT_MAX:
+        return math.inf
+    if x < -FLOAT_MAX:
+        return -sys.float_info.max
+    f = float(x)  # correctly rounded and finite here
+    return (f if Fraction(f) >= x else math.nextafter(f, math.inf)) + 0.0
 
 
 def _dn(q) -> float:
-    x = float(q)
-    return x if Fraction(x) <= Fraction(q) else math.nextafter(x, -math.inf)
+    """The largest binary64 <= q, the mirror of `_up`: -inf below -MAX, MAX above it."""
+    x = _exact(q)
+    if isinstance(x, float):
+        return x
+    if x > FLOAT_MAX:
+        return sys.float_info.max
+    if x < -FLOAT_MAX:
+        return -math.inf
+    f = float(x)
+    return (f if Fraction(f) <= x else math.nextafter(f, -math.inf)) + 0.0
 
 
 def _decimal_table() -> tuple[tuple[Decimal, Decimal, Decimal], ...]:
@@ -584,19 +622,35 @@ def rounding_allowances(libm_ulp: int = LIBM_ULP) -> dict:
     two ways (A-FP-1, each rounding may underflow):
       C1  b = fl(mass / P), P = fl(cd area) (B 25.8 here). b finite and mass > 0 give P > 0,
           so P >= 2 eta0 and cd area > eta0. P = cd area (1 + d) or cd area + e gives
-          cd area / P <= min(max(1 / (1 - u), cd area / (cd area - eta0)), cd area / (2 eta0));
-          b = (mass / P)(1 + d) or mass / P + e gives P / mass <= max((1 + u) / b,
-          1 / (b - eta0)) (b >= 2 eta0). R1 is the product of the two.
+          cd area / P <= min(max(1 / (1 - u), cd area / (cd area - eta0)), cd area / (2 eta0)).
+          b > 0 means b >= 2 eta0 (b is a binary64); then b = (mass / P)(1 + d) or mass / P
+          + e gives P / mass <= max((1 + u) / b, 1 / (b - eta0)), with b - eta0 >= eta0 > 0.
+          R1 is the product of the two. b = 0 (Review 06 M3T0-R6-F1): a positive mass does
+          not give a positive quotient; mass / P <= eta0 rounds to 0 (for example mass <= 16
+          x 2^-1074 with P = 33). b then carries no information on the mass beyond mass > 0,
+          and every positive binary64 is >= 2 eta0, so cd area / mass <= cd area / (2 eta0),
+          attained at mass = 2^-1074 whenever P >= 2. R(0) = max(cd area / (2 eta0),
+          R(2 eta0)): the max with the bound at the smallest positive b is not needed for
+          the bound itself; it keeps R non-increasing in b on all b >= 0.
       C2  mass = fl(fl(b cd) area) (B 100 here). mass > 0 gives Q = fl(b cd) >= 2 eta0 and
           mass >= 2 eta0; Q >= Q_lo = max(2 eta0, min(b cd (1 - u), b cd - eta0)) and mass >=
           M_lo = max(2 eta0, min(Q_lo area (1 - u), Q_lo area - eta0)); R2 = cd area / M_lo.
-    R = max(phi_B / b, R1, R2) holds for either construction, with no condition on the
-    vehicle. Where every result is normal, R1 = (1 + u) / ((1 - u) b) and R2 = 1 / ((1 -
+    R = max(phi_B / b, R1, R2) for b > 0 and R(0) above hold for either construction (C2
+    with b = 0 gives mass 0, no vehicle), with no condition on the vehicle beyond its
+    domain: b a non-negative binary64 (+inf is E4b), cd and area positive and finite.
+    Where every result is normal, R1 = (1 + u) / ((1 - u) b) and R2 = 1 / ((1 -
     u)^2 b) are below phi_B / b, so R = phi_B / b. The eta0 terms take over when b, P, Q or
-    mass is subnormal. R is non-increasing in b.
+    mass is subnormal. R is non-increasing in b. The switch from phi_B / b to R1 (V1
+    shape) is at b* = c eta0 / (c - 1), c = phi (1 - u), which depends on the phi used: b* =
+    7.416912861690675e-309 with the stored (binary64, rounded up) phi_B that the envelope
+    uses, and (1 + u) 2^-1023 = 1.1125369292536007e-308 with the exact phi_B.
 
     E4b no area. If cd area <= eta0 (C1 then gives b = +inf), the model's force is exactly
-    0. c0 = fl(0.5 rho^) <= 5/8 (rho^ <= F_rho e^eta0 rho0_max + N_rho). If area <= 1/4:
+    0. c0 = fl(0.5 rho^) <= 5/8 (rho^ <= F_rho e^eta0 rho0_max + N_rho, E3).
+    E4b depends on A-FP-2 (Review 06 M3T0-R6-F3): F_rho and N_rho carry the libm allowance
+    of the density's exp, so the cap is checked from the constants for each LIBM_ULP and
+    holds while LIBM_ULP <= `zero_force_cap_libm_limit` (about 2^46.4); it is not
+    libm-independent. If area <= 1/4:
     fl(c0 cd) area <= (5/8)(1 + u) eta0 + eta0 / 4 < eta0, which rounds to 0. Otherwise cd <
     4 eta0, so cd = 2 eta0 and area <= 1/2; c0 cd <= 1.25 eta0 rounds to at most 2 eta0, and
     2 eta0 area <= eta0 rounds to 0. Then k = 0 / mass = 0 and every drag component is 0.
@@ -839,10 +893,20 @@ def drag_envelope_relative_conversion(
 def inverse_ballistic_bound(b: float, cd: float, area: float, phi: Fraction) -> Fraction:
     """R >= cd area / mass (E4a) for every positive binary64 vehicle whose finite ballistic
     coefficient b was formed by C1, b = fl(mass / fl(cd area)), or C2, mass = fl(fl(b cd)
-    area), with the absolute error of every underflowing rounding (Review 05 M3T0-R5-F1).
-    phi >= phi_B is the relative factor the envelope uses."""
-    bq, prod = Fraction(b), Fraction(cd) * Fraction(area)
+    area), with the absolute error of every underflowing rounding (Review 05 M3T0-R5-F1),
+    b = 0 included (Review 06 M3T0-R6-F1: a positive mass may round to b = 0 under C1).
+    phi >= phi_B is the relative factor the envelope uses. Domain: b a non-negative finite
+    binary64 (-0.0 is 0; b = +inf is E4b and has no ratio bound), cd and area positive and
+    finite; anything else raises ValueError rather than receive a bound."""
+    if not (0.0 <= b < math.inf):
+        raise ValueError(f"b = {b!r} is outside E4a's domain")
+    if not (0.0 < cd < math.inf and 0.0 < area < math.inf):
+        raise ValueError(f"cd = {cd!r}, area = {area!r} is outside E4a's domain")
     tiny = 2 * ETA0  # the smallest positive binary64
+    if b == 0.0:  # every positive binary64 mass is >= tiny
+        prod = Fraction(cd) * Fraction(area)
+        return max(prod / tiny, inverse_ballistic_bound(math.ulp(0.0), cd, area, phi))
+    bq, prod = Fraction(b), Fraction(cd) * Fraction(area)
     r1 = Fraction(0)  # C1 gives a finite b only when cd area > eta0 (P > 0)
     if prod > ETA0:
         p_ratio = min(max(1 / (1 - U), prod / (prod - ETA0)), prod / tiny)
@@ -855,11 +919,13 @@ def inverse_ballistic_bound(b: float, cd: float, area: float, phi: Fraction) -> 
 
 
 def envelope_ballistic_coefficient(b: float, cd: float, area: float, fp: dict) -> float | Decimal:
-    """b_R = phi_B / R <= b (E4a), the ballistic coefficient the envelope uses: b itself
-    (the same binary64) when R = phi_B / b, otherwise phi_B / R rounded down in decimals."""
+    """b_R = phi_B / R (E4a), the ballistic coefficient the envelope uses: b itself (the
+    same binary64) when R = phi_B / b, otherwise phi_B / R rounded down in decimals. b_R <=
+    b for b > 0; at b = 0, b_R = phi_B / R(0) > 0 (Review 06 M3T0-R6-F1), and the envelope
+    needs only R >= cd area / mass, not b_R <= b."""
     phi = Fraction(fp["phi_B"])
     r = inverse_ballistic_bound(b, cd, area, phi)
-    if r == phi / Fraction(b):
+    if b > 0.0 and r == phi / Fraction(b):
         return b
     q = phi / r
     with localcontext() as ctx:
@@ -896,16 +962,28 @@ def drag_envelope(
     0: a computed height below it raises OutsideDomainError and applies no force.
     Both parts use b_R = phi_B / R <= b (E4a), which bounds cd area / mass for a vehicle
     whose b was formed from its mass by either construction, including subnormal b, P, Q or
-    mass (Review 05 M3T0-R5-F1). b_R = b where the conversion is normal. b = +inf is the
-    drag-free limit (0): a vehicle reaches it only through C1 with fl(cd area) = 0, where
-    the force is exactly 0 (E4b), or through an overflow of mass / P, which the supported
-    domain (no overflow) excludes.
-    Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up."""
+    mass (Review 05 M3T0-R5-F1), and b = 0 (Review 06 M3T0-R6-F1). b_R = b where the
+    conversion is normal. b = +inf is the drag-free limit (0): a vehicle reaches it only
+    through C1 with fl(cd area) = 0, where the force is exactly 0 (E4b), or through an
+    overflow of mass / P, which the supported domain (no overflow) excludes.
+    Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up.
+    Values (Review 06 M3T0-R6-F2): a finite result is a certified bound; +inf is still an
+    upper bound but certifies nothing (the exact bound exceeds the largest binary64, or s =
+    +inf); invalid input (low not finite or < 0, s NaN or < 0, b NaN or < 0, cd or area not
+    positive and finite) raises ValueError and never becomes a bound."""
     fp = FP if fp is None else fp
+    if not 0.0 <= low < math.inf:
+        raise ValueError("the envelope is defined above the lower edge only")
+    if not s >= 0.0:
+        raise ValueError(f"speed bound {s!r} is not >= 0")
+    if not b >= 0.0:
+        raise ValueError(f"ballistic coefficient {b!r} is not >= 0")
+    if not (0.0 < cd < math.inf and 0.0 < area < math.inf):
+        raise ValueError(f"cd = {cd!r}, area = {area!r} is outside the envelope's domain")
     if math.isinf(b):
         return 0.0
-    if not low >= 0.0:
-        raise ValueError("the envelope is defined above the lower edge only")
+    if math.isinf(s):
+        return math.inf
     with localcontext() as ctx:
         ctx.prec = PREC
         b_r = envelope_ballistic_coefficient(b, cd, area, fp)
@@ -1031,6 +1109,32 @@ def r5f1_counterexamples() -> list[dict]:
                 "corrected_envelope_mps2": new,
                 "superseded_covers": old >= actual,
                 "corrected_covers": new >= actual,
+            }
+        )
+    return out
+
+
+def r6f1_counterexamples() -> list[dict]:
+    """Review 06 M3T0-R6-F1: the R5-F1 point (true height 180 000 000 m, v = 0), cd 2.2,
+    area 15 m^2 and mass k x 2^-1074 kg, k = 1 ... 17, with b = fl(mass / fl(cd area)) (C1).
+    k <= 16 gives b = 0, where the envelope raised ZeroDivisionError; k = 17 gives b =
+    2^-1074."""
+    r = np.array([186_378_137.0, 0.0, 0.0])
+    tiny = math.ulp(0.0)
+    out = []
+    for k in range(1, 18):
+        mass = k * tiny
+        b = mass / (CD_V1 * AREA_V1)
+        actual = model_drag(r, np.zeros(3), mass)
+        env = drag_envelope(180_000_000.0, 0.0, b)
+        out.append(
+            {
+                "mass_in_2^-1074_kg": k,
+                "b_in_2^-1074_kg_per_m2": b / tiny,
+                "model_drag_mps2": actual,
+                "corrected_envelope_mps2": env,
+                "ratio": actual / env,
+                "corrected_covers": env >= actual,
             }
         )
     return out
@@ -1197,7 +1301,13 @@ def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=No
     so fl(h / 1000) >= 0). Evaluated in 60-digit decimal arithmetic with outward pads;
     lower bounds are rounded down and upper bounds up when returned. fp (the constants for
     another LIBM_ULP) and envelope (the superseded one) serve `libm_sensitivity` and
-    `floor_comparison` only."""
+    `floor_comparison` only.
+    Non-certification (Review 06 M3T0-R6-F2): an envelope of +inf (no finite bound, for
+    example b = 2^-1074 at 10 000 km) makes A0 or A2 +inf, the speeds after it +inf and the
+    heights after it -inf, so need(h0) = +inf: the step is not certified at h0. A
+    non-finite h0 or an invalid b raises ValueError."""
+    if not math.isfinite(h0):
+        raise ValueError(f"h0 = {h0!r} is not a finite computed height")
     fp = FP if fp is None else fp
     env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
     with localcontext() as ctx:
@@ -1307,6 +1417,7 @@ def sufficient_stage_condition() -> dict:
         "review03_counterexample": r3f1_counterexample(),
         "review04_counterexample": r4f1_counterexample(),
         "review05_counterexamples": r5f1_counterexamples(),
+        "review06_counterexamples": r6f1_counterexamples(),
         "stress": [
             stage_stress(r["vehicle"], r["B_kg_per_m2"], r["h_f_sufficient_at_least_m"])
             for r in rows
@@ -1314,6 +1425,21 @@ def sufficient_stage_condition() -> dict:
         "note": "Sufficient, not necessary. A sharper condition needs a restriction of the "
         "admissible initial states (for example the inward velocity), which is an owner "
         "decision and is not proposed here.",
+    }
+
+
+def zero_force_cap() -> dict:
+    """Review 06 M3T0-R6-F3: E4b's cap c0 <= 5/8 depends on A-FP-2. c0_max is affine in
+    LIBM_ULP (through UF and nu), so the largest LIBM_ULP for which the cap holds follows
+    from its values at 1 and 2."""
+    c1, c2 = (rounding_allowances(j)["zero_force_c0_max"] for j in (1, 2))
+    limit = math.floor((Fraction(5, 8) - (2 * c1 - c2)) / (c2 - c1))
+    return {
+        "c0_max": FP["zero_force_c0_max"],
+        "cap": 0.625,
+        "depends_on": "A-FP-2 (the density allowance F_rho, N_rho of E3)",
+        "zero_force_cap_libm_limit": limit,
+        "log2_limit": math.log2(limit),
     }
 
 
@@ -1338,6 +1464,7 @@ def floating_point_enclosure() -> dict:
             for h in (0.0, 120e3, 1.0e6, 2.0e6)
         },
         "eps_h_definition": "|computed - true| geodetic height <= alpha h + beta (true h)",
+        "zero_force_cap": zero_force_cap(),
         "underflow": {
             "eta0": "2^-1075",
             "zero_density_selection_height_m": FP["h_zero_m"],

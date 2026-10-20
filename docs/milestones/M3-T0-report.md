@@ -48,6 +48,13 @@
   - M3T0-R6-F3 (NOTE): E4b's zero-force cap inherits A-FP-2 through the density bound; it was classified as derived under A-FP-1 only.
 - The 5 287-point random search quoted in the Review 04 record is unreproduced historical evidence.
 - Record: `docs/reviews/M3-T0-review-06.md`. T0 is not accepted. A correction pass and any Review 07 await authorization.  
+**Status update (2026-10-20, append-only):** under "Authorization I-8 — M3 T0 Review 06 Corrections", M3T0-R6-F1, R6-F2 and R6-F3 are corrected in the T0 records and experiments:
+- R6-F1: E4a covers a ballistic coefficient of exactly 0 under C1 through the positive-mass fact mass ≥ 2^-1074 (R(0) = max(cd·area/2^-1074, R(2^-1074))). The Review 06 masses are within the corrected envelope (ratio 0.9999999999988 at k = 1). Every positive ballistic coefficient, the three P1 bounds and every pre-existing termination result are unchanged to the last bit. The P1 recommendation is unchanged.
+- R6-F2: the rounding helpers handle infinite and out-of-range values and reject NaN. An envelope of +∞ certifies nothing, and invalid inputs raise an error instead of receiving a bound.
+- R6-F3: E4b's cap c₀ ≤ 5/8 depends on A-FP-2 (it holds for LIBM_ULP ≤ 91910196476947); E4b is classified as derived under A-FP-1 and A-FP-2.
+- The 5 287-point random search quoted in the Review 04 record is marked UNREPRODUCED. The switch point b* is quoted for the stored φ_B (7.416912861690675e-309, used by the implementation) and the exact φ_B (1.1125369292536007e-308).
+- A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only.
+- New checks: `check_review06.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-06.md`. T0 is not accepted. Any Review 07 needs separate authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 
