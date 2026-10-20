@@ -945,4 +945,5 @@ All 10 approved rejection codes are exercised.
     - mutation: 61 mutants plus a control; 59 detected, 2 declared equivalent; all 16 R6 mutants covered. A first run left two survivors, one equivalent and one closed by a stronger check. Both runs are kept;
     - a seeded adversarial probe (79 951 C1 and 20 780 C2 vehicles, 4 934 monotonicity pairs, 353 B = 0 force states), all within the bound.
   - Dispositions and the derivation: `docs/reviews/M3-T0-review-06.md`.
+  - Validation of the correction commit `9e44850`: M1 Proof 9/9 and M2 Proof 20/20 (228 PASS, 0 FAIL) in fresh clones; full pytest 1185 passed; the five pinned digests match; no protected path changed since `86df2c3`; all 96 T0 experiment files reproduce byte for byte twice, including GMAT; CI run 39489593015 green on all four jobs. Logs in the same evidence directory; the table is in `docs/reviews/M3-T0-review-06.md`.
 <!-- /review06-correction-log -->

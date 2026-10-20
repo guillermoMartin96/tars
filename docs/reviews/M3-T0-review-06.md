@@ -173,3 +173,19 @@ Preconditions (I-8 §1), verified before any change: branch `milestone-3-t0-refe
 
 ### Validation
 Recorded in the validation commit that follows this correction commit.
+
+### Validation of the correction commit `9e44850` (appended 2026-10-20)
+Evidence is in `docs/reviews/raw/M3-T0-review06-findings-correction-evidence/`. Scratch, home and temporary paths are redacted. Environment: macOS 26.2 x86_64 (the M1/M2 reference host), Python 3.12.15, the locked `uv` environment.
+
+| Check | Result |
+|---|---|
+| Review 01–06 checks | `check_review01.py` … `check_review06.py`: 238/238 pass (`checks_after.log`; again in the reproducibility clone). Red before, at `30a4e8d`: `check_review06.py` 55 of 81 fail (`checks06_before_30a4e8d.log`) |
+| Mutation tests | Control 238/238; 59/59 non-equivalent corruptions detected by a declared check (all R4, R5 and 15 R6 mutants); 2 declared equivalent with an establishing check (`mutation_check_review06.json`; the first run with two survivors is `mutation_run1_with_survivors.json`) |
+| Floors and termination results | Only `zero_force_cap` and `review06_counterexamples` added; every other value bit-identical, including the three floors, the root brackets and the margins (`termination_results_diff.txt`) |
+| M1 Proof (`run_m1_proof.sh`, fresh clone at `9e44850`) | PASS, 9/9 steps; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`). A separate full pytest run in the same clone: 1185 passed, 3 warnings (`pytest_full.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`) |
+| Pinned digests | The five pinned artifacts equal `86df2c3` byte for byte, and all 19 VAL-0019 spike digests match (`pinned_digests.log`) |
+| Production and protected files | `git diff --name-only 86df2c3 9e44850 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 96 tracked experiment files are byte-identical; the checks then pass 238/238 (`reproducibility_twice.log`) |
+| CI on `9e44850` | Run 39489593015 (https://github.com/guillermoMartin96/tars/actions/runs/39489593015): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`). CI does not collect the T0 checks (`testpaths = ["tests"]`) |
+| Platform limitations | All T0 measurements and checks ran on macOS x86_64 only. A-FP-1's gradual-underflow check and the A-FP-2 libm measurements are host measurements, not platform guarantees |
