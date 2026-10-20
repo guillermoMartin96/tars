@@ -1,0 +1,46 @@
+revision: 411cabd0e7a2be57ee59baa040d0ea5607d8f00a
+branch: HEAD
+date_utc: 2026-10-20T03:27:03Z
+working_tree_clean_excluding_evidence: yes
+== uv sync --locked: <home>/Library/Python/3.9/bin/uv sync --locked
+   exit=0
+== m2 cross-platform record (this platform): <home>/Library/Python/3.9/bin/uv run python toolbox/validators/m2_cross_platform.py collect --out <tmp>/m2_final_states_record.json
+   exit=0
+== ruff check: <home>/Library/Python/3.9/bin/uv run ruff check .
+   exit=0
+== ruff format --check: <home>/Library/Python/3.9/bin/uv run ruff format --check .
+   exit=0
+== pytest: <home>/Library/Python/3.9/bin/uv run pytest -q
+   exit=0
+== m1 determinism (cross-process): <home>/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py
+   exit=0
+== m1 cross-platform: sh -c "<home>/Library/Python/3.9/bin/uv" run python toolbox/validators/cross_platform.py > "<tmp>/m1_cross_platform.json"
+   exit=0
+== m1_proof (non-GMAT): <home>/Library/Python/3.9/bin/uv run python toolbox/validators/m1_proof.py --out <tmp>/m1_non_gmat.json
+   exit=0
+== gmat m1 compare: sh -c "<home>/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m1.py compare > "<tmp>/gmat_m1_reference.json"
+   exit=0
+== m2 determinism m2_burn_to_depletion: <home>/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py --scenario scenarios/m2_burn_to_depletion.json
+   exit=0
+== m2 determinism m2_invalid_commands: <home>/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py --scenario scenarios/m2_invalid_commands.json
+   exit=0
+== m2 determinism m2_prograde_burn: <home>/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py --scenario scenarios/m2_prograde_burn.json
+   exit=0
+== m2 determinism m2_retrograde_burn: <home>/Library/Python/3.9/bin/uv run python toolbox/validators/determinism.py --scenario scenarios/m2_retrograde_burn.json
+   exit=0
+== gmat m2 compare: sh -c "<home>/Library/Python/3.9/bin/uv" run python toolbox/scripts/gmat_m2.py compare > "<tmp>/gmat_m2_reference.json"
+   exit=0
+== reference snapshot verify-baseline (DR-0021): <home>/Library/Python/3.9/bin/uv run python toolbox/scripts/reference_snapshot.py verify-baseline toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz
+   exit=0
+== m2_proof (O1-O9, contract, golden cross-platform): sh -c "<home>/Library/Python/3.9/bin/uv" run python toolbox/validators/m2_proof.py --out "<tmp>/m2_proof_report.json" > "<tmp>/m2_proof_stdout.txt"
+   exit=0
+== run_mission m2_burn_to_depletion: <home>/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out <tmp>/mission_m2_burn_to_depletion
+   exit=0
+== run_mission m2_invalid_commands: <home>/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out <tmp>/mission_m2_invalid_commands
+   exit=0
+== run_mission m2_prograde_burn: <home>/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out <tmp>/mission_m2_prograde_burn
+   exit=0
+== run_mission m2_retrograde_burn: <home>/Library/Python/3.9/bin/uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out <tmp>/mission_m2_retrograde_burn
+   exit=0
+overall: PASS
+exit=0

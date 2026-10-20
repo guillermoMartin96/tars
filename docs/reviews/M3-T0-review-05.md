@@ -196,3 +196,19 @@ Evidence: `raw/M3-T0-review05-findings-correction-evidence/`.
 
 ### Validation
 Recorded in the validation commit that follows this correction commit (I-6 §9).
+
+### Validation of the correction commit `411cabd` (appended 2026-10-19)
+Evidence is in `docs/reviews/raw/M3-T0-review05-findings-correction-evidence/`. Scratch, home and temporary paths are redacted. Environment: macOS 26.2 x86_64 (the M1/M2 reference host), Python 3.12.15, the locked `uv` environment.
+
+| Check | Result |
+|---|---|
+| Focused R5 checks, R4-F1 checks and the existing T0 suite | `check_review01.py` … `check_review05.py`: 157/157 pass (`checks_after.log`; again in the reproducibility clone). Red before, at `17b2229` with no shim: `check_review05.py` 17 of 17 fail (`checks05_before_17b2229.log`) |
+| Mutation tests | `mutation_check_review02.py`: the control passes 157/157; 44/44 corruptions detected by a declared check, including all 10 R4-F1 mutants and the 10 new R5 mutants; 1 declared equivalent; about 31 min (`mutation_check_review05.json`). The first run, with one survivor that was explained and fixed, is kept as `mutation_run1_with_survivor.json` |
+| Floors and termination results | `t0_termination_results.json` regenerated: only two keys added (`zero_force_c0_max`, `review05_counterexamples`); every other value is bit-identical, including the three floors, the root brackets and the margins (`termination_results_diff.txt`) |
+| M1 Proof (`run_m1_proof.sh`, fresh clone at `411cabd`) | PASS, 9/9 steps; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`). A separate full pytest run in the same clone after the Proof: 1185 passed, 3 warnings (`pytest_full.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`) |
+| Five pinned digests | All match (`pinned_digests.log`) |
+| Production and protected files | `git diff --name-only 86df2c3 411cabd -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 95 tracked experiment files are byte-identical; the checks then pass 157/157 (`reproducibility_twice.log`) |
+| CI on `411cabd` | Run 39361891229 (https://github.com/guillermoMartin96/tars/actions/runs/39361891229): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`), verified via the GitHub API after completion. CI does not collect the T0 checks (`testpaths = ["tests"]`) |
+| A-FP-2 | Not affected by this validation: the host measurements above are macOS x86_64 only and are not a platform guarantee |

@@ -924,4 +924,5 @@ All 10 approved rejection codes are exercised.
       - the corrected b_R applied to the relative part only (detected by the second implementation of the envelope only);
       - for R5-F2: the superseded sentence restored, the subset presented as the subnormal regime, the transition-scan maximum hidden, and the Review 04 row rewritten instead of amended;
     - a first mutation run left the "transition-scan maximum hidden" mutant undetected. The check found the value in the new correction log rather than in P1. The check now reads the P1 sentence, and the rerun detects the mutant. Both runs are kept.
+  - Validation of the correction commit `411cabd`: M1 Proof 9/9 and M2 Proof 20/20 (228 PASS, 0 FAIL) in fresh clones; full pytest 1185 passed; the five pinned digests match; no protected path changed since `86df2c3`; all 95 T0 experiment files reproduce byte for byte twice, including GMAT; CI run 39361891229 green on all four jobs. Logs in the same evidence directory; the table is in `docs/reviews/M3-T0-review-05.md`.
 <!-- /review05-correction-log -->
