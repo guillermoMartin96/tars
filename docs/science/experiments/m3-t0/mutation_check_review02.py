@@ -1,4 +1,5 @@
-"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1, R5-F2 and R6-F1 ... F3 (research only).
+"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1, R5-F2, R6-F1 ... F3, R7-F1 and R7-F2
+(research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
 `check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
@@ -8,8 +9,11 @@ R5-F1: the conversion between the ballistic coefficient and the mass was bounded
 relative factor only; R5-F2: an empirical maximum was quoted for the wrong population.
 Review 06 R6-F1: C1's b = 0 was outside the conversion bound; R6-F2: the rounding helpers
 mishandled infinite and out-of-range values; R6-F3: E4b's cap was classified as
-libm-independent. This harness corrupts copies of the T0 result files, scripts, model,
-oracle and records, runs `check_review01.py` to `check_review06.py` on each copy, and
+libm-independent. Review 07 R7-F1: the stage condition's non-certification was documented
+as need = +inf only; R7-F2: "b_R <= b" was stated without b > 0 (both documentation
+defects: the R7 mutants corrupt the implementation behind the corrected contract, or revert
+the corrected text). This harness corrupts copies of the T0 result files, scripts, model,
+oracle and records, runs `check_review01.py` to `check_review07.py` on each copy, and
 classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
@@ -176,6 +180,22 @@ R6CAP = "test_r6f3_e4b_cap_depends_on_libm_ulp"
 R6CAPREC = "test_r6f3_records_classify_e4b_under_a_fp_2"
 R6BSTAR = "test_switch_point_stored_and_exact_phi_are_distinguished"
 R6SEARCH = "test_random_search_is_marked_unreproduced"
+REV06 = "../../../reviews/M3-T0-review-06.md"
+VAL = "../../../science/validation.md"
+R7CE = "test_r7f1_review07_counterexample_has_finite_positive_need"
+R7EARLY = "test_r7f1_early_return_need_is_minus_m2_for_every_vehicle"
+R7EDGE = "test_r7f1_early_return_edge_quoted_in_the_docstring"
+R7INF = "test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need"
+R7OVF = "test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need"
+R7NOCERT = "test_r7f1_no_finite_bound_is_ever_certified"
+R7DOC = "test_r7f1_docstring_states_both_non_certification_paths"
+R7REC = "test_r7f1_records_state_both_paths"
+R7BZERO = "test_r7f2_review07_counterexample_b_r_positive_at_zero_b"
+R7BLEB = "test_r7f2_b_r_at_most_b_for_positive_b"
+R7F2DOC = "test_r7f2_docstrings_qualify_b_r_at_most_b"
+R7DOCONLY = "test_r7_correction_is_documentation_only"
+R7F1_NEW = "        and need(h0) = -M2, finite and >= 0. M2 depends"
+R7F1_OLD = "        and need(h0) = +inf, as for an unbounded envelope. M2 depends"
 SCOPED = (
     "Over the coefficient-rounding subset (equatorial points from 300 km below to 10 km above "
     "the position where the model's drag coefficient rounds up from about 0.5 × 2^-1074 to "
@@ -625,6 +645,109 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
         edit_text(REV05, "1.1125369292536007e-308", "1.11e-308"),
         (R6BSTAR,),
     ),
+    # ---- Review 07 M3T0-R7-F1: the contract behind the corrected documentation
+    "r7f1_early_return_normalised_to_inf": (
+        edit_text(
+            "t0_termination.py",
+            '        return -s["M2"]  # >= 0 already',
+            "        return math.inf  # mutant",
+        ),
+        (R7CE, R7EARLY),
+    ),
+    "r7f1_early_return_sign_flipped": (
+        edit_text(
+            "t0_termination.py",
+            '        return -s["M2"]  # >= 0 already',
+            '        return s["M2"]  # mutant',
+        ),
+        (R7CE, R7EARLY, R7NOCERT),
+    ),
+    "r7f1_early_return_removed": (
+        edit_text("t0_termination.py", '        if out["M2"] <= 0.0:', "        if False:"),
+        (R7CE, R7EARLY, R7EDGE),
+    ),
+    "r7f1_infinite_need_clamped": (
+        edit_text(
+            "t0_termination.py",
+            '    return -min(s["M2"], s["M3"], s["M4"])',
+            '    return min(-min(s["M2"], s["M3"], s["M4"]), sys.float_info.max)',
+        ),
+        (R7INF, R7OVF),
+    ),
+    "r7f1_dn_overflow_not_outward": (
+        edit_text(
+            "t0_termination.py",
+            "    if x < -FLOAT_MAX:\n        return -math.inf\n",
+            "    if x < -FLOAT_MAX:\n        return -sys.float_info.max\n",
+        ),
+        (R7INF, R7OVF),
+    ),
+    # the corrected text reverted
+    "r7f1_docstring_universal_claim_restored": (
+        edit_text("t0_termination.py", R7F1_NEW, R7F1_OLD),
+        (R7DOC,),
+    ),
+    "r7f1_docstring_edge_misquoted": (
+        edit_text("t0_termination.py", "up to h0 = 55 749.393 m", "up to h0 = 56 003.395 m"),
+        (R7DOC,),
+    ),
+    "r7f1_review06_amendment_removed": (
+        edit_text(REV06, "### Amendment (Authorization I-10, Review 07 M3T0-R7-F1)", "### Note"),
+        (R7REC,),
+    ),
+    "r7f1_val0019_body_reverted": (
+        edit_text(
+            VAL,
+            "an envelope of +∞ certifies nothing (need ≥ 0; corrected after Review 07 "
+            "M3T0-R7-F1: need = −M2, finite and ≥ 0,",
+            "an envelope of +∞ certifies nothing (need = +∞; corrected after Review 07 "
+            "M3T0-R7-F1: need = −M2 when",
+        ),
+        (R7REC,),
+    ),
+    "r7f1_dr0029_body_reverted": (
+        edit_text(
+            DR29,
+            "(the stage condition then reports need ≥ 0, not certified;",
+            "(the stage condition then reports need = +∞, not certified;",
+        ),
+        (R7REC,),
+    ),
+    # ---- Review 07 M3T0-R7-F2
+    "r7f2_e4_summary_reverted": (
+        edit_text(
+            "t0_termination.py",
+            "(b_R <= b for b > 0, and b_R = b wherever the conversion is\n"
+            "    normal; at b = 0, b_R = phi_B / R(0) > 0, Review 07 M3T0-R7-F2):",
+            "(b_R <= b; b_R = b wherever the conversion is normal):",
+        ),
+        (R7F2DOC,),
+    ),
+    "r7f2_drag_envelope_summary_reverted": (
+        edit_text(
+            "t0_termination.py",
+            "    Both parts use b_R = phi_B / R (E4a), which",
+            "    Both parts use b_R = phi_B / R <= b (E4a), which",
+        ),
+        (R7F2DOC,),
+    ),
+    "r7f2_zero_b_returns_b": (
+        edit_text(
+            "t0_termination.py",
+            "    if b > 0.0 and r == phi / Fraction(b):\n",
+            "    if b == 0.0 or r == phi / Fraction(b):\n",
+        ),
+        (R7BZERO,),
+    ),
+    "r7f2_b_r_above_b": (
+        edit_text(
+            "t0_termination.py",
+            "    if b > 0.0 and r == phi / Fraction(b):\n        return b\n",
+            "    if b > 0.0 and r == phi / Fraction(b):\n"
+            "        return math.nextafter(b, math.inf)\n",
+        ),
+        (R7BLEB, R7DOCONLY),
+    ),
 }
 
 
@@ -655,6 +778,7 @@ def run(name: str) -> dict:
                 str(d / "check_review04.py"),
                 str(d / "check_review05.py"),
                 str(d / "check_review06.py"),
+                str(d / "check_review07.py"),
             ],
             capture_output=True,
             text=True,

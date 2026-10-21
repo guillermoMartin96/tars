@@ -189,3 +189,10 @@ Evidence is in `docs/reviews/raw/M3-T0-review06-findings-correction-evidence/`. 
 | T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 96 tracked experiment files are byte-identical; the checks then pass 238/238 (`reproducibility_twice.log`) |
 | CI on `9e44850` | Run 39489593015 (https://github.com/guillermoMartin96/tars/actions/runs/39489593015): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`). CI does not collect the T0 checks (`testpaths = ["tests"]`) |
 | Platform limitations | All T0 measurements and checks ran on macOS x86_64 only. A-FP-1's gradual-underflow check and the A-FP-2 libm measurements are host measurements, not platform guarantees |
+
+### Amendment (Authorization I-10, Review 07 M3T0-R7-F1)
+Appended 2026-10-20; the text above is kept as written. Review 07 found that the R6-F2 statement "so need(h0) = +∞" holds only when M2 > 0. A step is certified only when need < 0 (the floor bisection and `libm_sensitivity` accept nothing else), and the stage condition reports a non-certification on two paths:
+- **M2 ≤ 0:** `stage_lower_heights` returns before M4 (the k2 input may already be below the edge; this return dates from the Review 03 correction, `489d4e7`), and `stage_need` returns need = −M2, finite and ≥ 0. M2 depends on h0 only, not on B or the envelope; with the published constants M2 ≤ 0 up to h0 = 55 749.393 m. The value is finite even when A0 = +∞: h0 = 1 m, B = 2^-1074 gives need = 55 992.318990613036 m;
+- **M2 > 0:** need = −min(M2, M3, M4). An envelope of +∞ at A0 or A2, or a stage value outside the binary64 range, gives M3 or M4 = −∞ and need = +∞, as in the reviewer's case `stage_lower_heights(1e7, 2^-1074)` above.
+
+Both are non-certifications, so no floor, bound or certification changes. Review 07 M3T0-R7-F2 is corrected in the docstrings only: "b_R ≤ b" holds for B > 0, as stated above for B = 0. Checks: `check_review07.py`.

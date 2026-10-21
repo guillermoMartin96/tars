@@ -62,6 +62,11 @@
   - M3T0-R7-F1: when M2 ≤ 0 the stage condition returns need = −M2, which is finite (for example 55 992 m at h0 = 1 m, b = 2^-1074). The step is still not certified; the statement "need = +∞" is too strong.
   - M3T0-R7-F2: two summaries keep "b_R ≤ b" without the b > 0 restriction.
 - No floor, bound or certification is affected. Record: `docs/reviews/M3-T0-review-07.md`. T0 is not accepted. A correction pass and any Review 08 await authorization.  
+**Status update (2026-10-20, append-only):** under "Authorization I-10 — M3 T0 Review 07 Corrections and Independent Review 08", M3T0-R7-F1 and R7-F2 are corrected. Both are documentation corrections: no executable statement, value, floor, bracket or threshold changed.
+- R7-F1: a step is certified only when need < 0. The stage condition reports a non-certification on two paths: need = −M2, finite and ≥ 0, when M2 ≤ 0 (up to h0 = 55 749.393 m, for every vehicle), and need = +∞ when M2 > 0 with an unbounded envelope or a stage value outside the binary64 range.
+- R7-F2: "b_R ≤ b" is qualified with b > 0; at b = 0, b_R = φ_B/R(0) > 0.
+- A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only.
+- New checks: `check_review07.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-07.md`. T0 is not accepted. Review 08 follows under I-10.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

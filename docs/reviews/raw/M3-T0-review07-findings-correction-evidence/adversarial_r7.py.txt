@@ -1,0 +1,73 @@
+"""Seeded adversarial probe of the corrected stage-condition contract (Review 07 R7-F1/F2).
+Usage: python -I adversarial_r7.py <docs/science/experiments/m3-t0>
+Contract under test (t0_termination.stage_lower_heights docstring):
+  C0 need is never NaN; certified iff need < 0; a certified need never has A0 or A2 infinite;
+  C1 M2 <= 0  =>  M4 is None and need == -M2, finite and >= 0;
+  C2 M2 > 0   =>  need == -min(M2, M3, M4); and A0 or A2 infinite => need == +inf;
+  C3 M2 depends on h0 only (identical across vehicles);
+  C4 b = +inf  =>  finite need;
+  C5 b_R <= b for b > 0; b_R > 0 at b = 0 (R7-F2)."""
+import math, random, sys
+from fractions import Fraction
+sys.path.insert(0, sys.argv[1])
+import t0_termination as tt
+rng = random.Random(20261021)
+T = 2.0 ** -1074
+MAX = sys.float_info.max
+def rand_b():
+    k = rng.random()
+    if k < 0.1: return 0.0
+    if k < 0.15: return math.inf
+    if k < 0.45: return rng.randint(1, 2**20) * T                    # subnormal
+    if k < 0.55: return math.nextafter(2.0 ** -1022, rng.choice((0.0, math.inf)))
+    return 10.0 ** rng.uniform(-307, 308)
+def rand_h():
+    k = rng.random()
+    if k < 0.3: return rng.uniform(1.0, 55749.393)
+    if k < 0.4: return 55749.39300208564 + rng.choice((-1, 1)) * rng.randint(0, 50) * 7.3e-12
+    return 10.0 ** rng.uniform(4.75, 9.5)
+counts = dict(cases=0, early=0, early_inf_a0=0, m4=0, m4_inf=0, certified=0, dragfree=0)
+m2_by_h = {}
+for _ in range(4000):
+    h0, b = rand_h(), rand_b()
+    s = tt.stage_lower_heights(h0, b); need = tt.stage_need(h0, b)
+    counts["cases"] += 1
+    assert not math.isnan(need), (h0, b)
+    m2_by_h.setdefault(h0, set()).add(s["M2"])
+    if need < 0:
+        counts["certified"] += 1
+        assert math.isfinite(s["A0"]) and math.isfinite(s["A2"]), (h0, b)
+    if s["M2"] <= 0:
+        counts["early"] += 1; counts["early_inf_a0"] += s["A0"] == math.inf
+        assert s["M4"] is None and need == -s["M2"] and math.isfinite(need) and need >= 0, (h0, b)
+    else:
+        counts["m4"] += 1
+        assert need == -min(s["M2"], s["M3"], s["M4"]), (h0, b)
+        if math.inf in (s["A0"], s["A2"]):
+            counts["m4_inf"] += 1
+            assert need == math.inf, (h0, b, s)
+    if b == math.inf:
+        counts["dragfree"] += 1; assert math.isfinite(need)
+# C3: every h0 drawn, across extra vehicles
+extra = (0.0, T, 1e-310, 25.757575757575758, 1e300, math.inf)
+for h0 in list(m2_by_h)[:300]:
+    for b in extra:
+        m2_by_h[h0].add(tt.stage_lower_heights(h0, b)["M2"])
+assert all(len(v) == 1 for v in m2_by_h.values())
+# C5
+br = 0
+for _ in range(20000):
+    cd, area = 10.0 ** rng.uniform(-300, 300), 10.0 ** rng.uniform(-300, 300)
+    if not (0 < cd < math.inf and 0 < area < math.inf and math.isfinite(cd * 1.0)): continue
+    b = rand_b()
+    if b == math.inf: continue
+    try:
+        b_r = tt.envelope_ballistic_coefficient(b, cd, area, tt.FP)
+    except ValueError:
+        continue
+    br += 1
+    assert (Fraction(b_r) <= Fraction(b)) if b > 0 else b_r > 0, (b, cd, area)
+print(counts)
+print("distinct h0 with M2 compared across >= 7 vehicles:", min(300, len(m2_by_h)), "all identical")
+print("b_R cases:", br)
+print("ALL CONTRACT ASSERTIONS HOLD")

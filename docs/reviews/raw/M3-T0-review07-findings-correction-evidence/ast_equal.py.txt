@@ -1,0 +1,14 @@
+"""Compare two Python files with every docstring removed: equal ASTs mean only docstrings
+(and comments/formatting) differ, so no executable behaviour changed."""
+import ast, sys
+def strip(path):
+    t = ast.parse(open(path).read())
+    for n in ast.walk(t):
+        if isinstance(n, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n.body \
+           and isinstance(n.body[0], ast.Expr) and isinstance(n.body[0].value, ast.Constant) \
+           and isinstance(n.body[0].value.value, str):
+            n.body = n.body[1:] or [ast.Pass()]
+    return ast.dump(t, include_attributes=False)
+a, b = strip(sys.argv[1]), strip(sys.argv[2])
+print("AST without docstrings identical:", a == b, sys.argv[1], sys.argv[2])
+sys.exit(0 if a == b else 1)

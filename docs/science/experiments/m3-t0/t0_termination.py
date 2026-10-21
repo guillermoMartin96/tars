@@ -609,7 +609,8 @@ def rounding_allowances(libm_ulp: int = LIBM_ULP) -> dict:
     W = eta0 (1 + (1 + u)^3 cd area / mass + (1 + u)^2 area / mass + (1 + u) / mass).
     The vehicle enters only through cd area / mass <= R (E4a, `inverse_ballistic_bound`,
     corrected after Review 05 M3T0-R5-F1: the conversion between b and mass may underflow).
-    Writing R = phi_B / b_R (b_R <= b; b_R = b wherever the conversion is normal):
+    Writing R = phi_B / b_R (b_R <= b for b > 0, and b_R = b wherever the conversion is
+    normal; at b = 0, b_R = phi_B / R(0) > 0, Review 07 M3T0-R7-F2):
         |d^| <= F_D' rho(h_s) exp(theta_x X) S^2 / (2 b_R)                 (relative)
               + (F_A N_rho / (2 b_R) + K_W W) S^2 + K_1 eta0 S + 2 eta0     (absolute)
     with F_D' = F_D e^eta0 (1 + tau), F_D = F_rho (1 + u)^10 sqrt(1 + gamma_3) phi_B (the
@@ -960,12 +961,14 @@ def drag_envelope(
     the unbounded top band, and the supremum is attained at ell or at a band base above ell,
     where X = 0 and the band above applies (GMAT's rule). ell is clamped at the lower edge
     0: a computed height below it raises OutsideDomainError and applies no force.
-    Both parts use b_R = phi_B / R <= b (E4a), which bounds cd area / mass for a vehicle
-    whose b was formed from its mass by either construction, including subnormal b, P, Q or
-    mass (Review 05 M3T0-R5-F1), and b = 0 (Review 06 M3T0-R6-F1). b_R = b where the
-    conversion is normal. b = +inf is the drag-free limit (0): a vehicle reaches it only
-    through C1 with fl(cd area) = 0, where the force is exactly 0 (E4b), or through an
-    overflow of mass / P, which the supported domain (no overflow) excludes.
+    Both parts use b_R = phi_B / R (E4a), which bounds cd area / mass for a vehicle whose b
+    was formed from its mass by either construction, including subnormal b, P, Q or mass
+    (Review 05 M3T0-R5-F1), and b = 0 (Review 06 M3T0-R6-F1). b_R <= b for b > 0, and b_R
+    = b where the conversion is normal; at b = 0, b_R = phi_B / R(0) > 0 (Review 07
+    M3T0-R7-F2): the envelope needs only R >= cd area / mass. b = +inf is the drag-free
+    limit (0): a vehicle reaches it only through C1 with fl(cd area) = 0, where the force is
+    exactly 0 (E4b), or through an overflow of mass / P, which the supported domain (no
+    overflow) excludes.
     Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up.
     Values (Review 06 M3T0-R6-F2): a finite result is a certified bound; +inf is still an
     upper bound but certifies nothing (the exact bound exceeds the largest binary64, or s =
@@ -1302,10 +1305,23 @@ def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=No
     lower bounds are rounded down and upper bounds up when returned. fp (the constants for
     another LIBM_ULP) and envelope (the superseded one) serve `libm_sensitivity` and
     `floor_comparison` only.
-    Non-certification (Review 06 M3T0-R6-F2): an envelope of +inf (no finite bound, for
-    example b = 2^-1074 at 10 000 km) makes A0 or A2 +inf, the speeds after it +inf and the
-    heights after it -inf, so need(h0) = +inf: the step is not certified at h0. A
-    non-finite h0 or an invalid b raises ValueError."""
+    Certification (Review 06 M3T0-R6-F2, corrected after Review 07 M3T0-R7-F1): the step
+    is certified at h0 only when need(h0) < 0 (`stage_need`; the floor bisection and
+    `libm_sensitivity` accept nothing else). need(h0) >= 0 is a non-certification, reached
+    on one of two paths:
+      - M2 <= 0: the k2 input may already be below the edge, so A2, s3, L4 and M4 are None
+        and need(h0) = -M2, finite and >= 0. M2 depends on h0 and fp only, not on b or the
+        envelope (with FP, M2 <= 0 up to h0 = 55 749.393 m), so this need is finite even
+        when A0 = +inf: h0 = 1, b = 2^-1074 gives A0 = +inf, M3 = -inf and need(h0) =
+        55 992.32 m;
+      - M2 > 0: need(h0) = -min(M2, M3, M4). An envelope of +inf at A0 or A2 (no finite
+        bound, for example b = 2^-1074 at 10 000 km), or a stage value outside the binary64
+        range (rounded outward to +-inf), makes the speeds after it +inf and the heights
+        after it -inf, so need(h0) = +inf. Otherwise need(h0) is finite.
+    The vehicle b = +inf is drag-free (envelope 0) and has a finite need on both paths. A
+    non-finite h0, or b NaN or < 0, raises ValueError on both paths (the envelope is
+    evaluated for A0 before the M2 test). This describes the existing implementation; no
+    value changed."""
     if not math.isfinite(h0):
         raise ValueError(f"h0 = {h0!r} is not a finite computed height")
     fp = FP if fp is None else fp

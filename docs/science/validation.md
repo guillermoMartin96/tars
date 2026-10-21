@@ -819,9 +819,14 @@ All 10 approved rejection codes are exercised.
 
         Corrected after Review 06 R6-F1 (under C1 a positive mass ≤ 16 × 2^-1074 kg with cd·area = 33 m² rounds to B = 0; the model's drag was finite and the envelope divided by zero):
         - E4a at B = 0 uses only mass ≥ 2^-1074: R(0) = max(cd·area/2^-1074, R(2^-1074)), which keeps R non-increasing in B. Every B > 0, the three bounds and every pre-existing termination result are unchanged to the last bit;
-        - R6-F2: the rounding helpers handle infinite and out-of-range values and reject NaN; an envelope of +∞ certifies nothing (need = +∞), and invalid inputs raise an error;
+        - R6-F2: the rounding helpers handle infinite and out-of-range values and reject NaN; an envelope of +∞ certifies nothing (need ≥ 0; corrected after Review 07 M3T0-R7-F1: need = −M2, finite and ≥ 0, when M2 ≤ 0 (up to h0 = 55 749.393 m with the published constants, for every B; M2 does not depend on the envelope), and need = +∞ when M2 > 0), and invalid inputs raise an error;
         - R6-F3: c₀ ≤ 5/8 depends on A-FP-2 (it holds for LIBM_ULP ≤ 91910196476947, about 2^46.4); E4b is derived under A-FP-1 and A-FP-2;
         - confirmed by `check_review06.py`: the 17 Review 06 masses (drag 0.9999999999988 to 0.0625 of the envelope at B = 0), every C1 mass k × 2^-1074 kg with k ≤ 20 000 on 10 adversarial shapes, the B = 0 transition, the helpers' extremes and 20 000 random rationals, the non-certification, the E4b dependency, and the records.
+
+        Corrected after Review 07 (documentation only: no executable statement and no value changed):
+        - M3T0-R7-F1: a step is certified only when need < 0, and every need ≥ 0 is a non-certification. The stage condition reaches it on two paths. When M2 ≤ 0 the k2 input may already be below the edge, and need = −M2, finite and ≥ 0, even when A0 = +∞ (h0 = 1 m, B = 2^-1074: need = 55 992.32 m). M2 depends on h0 only, so this holds up to h0 = 55 749.393 m for every B. When M2 > 0, an envelope of +∞, or a stage value outside the binary64 range, gives need = +∞. The early return dates from the Review 03 correction (`489d4e7`); the floor bisection accepts need < 0 only, so no floor is affected;
+        - M3T0-R7-F2: b_R ≤ b holds for B > 0 only. At B = 0, b_R = φ_B/R(0) > 0 (1.497e-325 for cd = 2.2, area = 15 m²); the envelope needs only R ≥ cd·area/mass;
+        - confirmed by `check_review07.py`: both Review 07 counterexamples; both non-certification paths for ten vehicles from B = 0 to +∞; M2 recomputed by a second implementation; the quoted edge 55 749.393 m; the overflow path with a finite envelope; the drag-free vehicle; invalid inputs on both paths; b_R at B = 0 on 10 shapes and b_R ≤ b for B > 0; the published floors re-derived bit for bit; and the corrected docstrings and records.
       - Height error (`t0_height_error.py`, empirical): the largest |computed − true| over 13 050 sampled points is 2.06e-9 m, 0.22 of the derived bound. The libm maxima measured on this platform are, in units of 2^-52 relative, cos 0.94, sin 0.74 and atan2, hypot, exp and pow ≤ 0.50; in ulps, cos reaches 1.41. A measurement, not a proof of A-FP-2. For subnormal results (R4-F1), the largest absolute errors are 0.74 (exp), 0.59 (hypot) and 0.50 (atan2) × 2^-1074. The platform does gradual underflow (no flush-to-zero).
   - **Geodetic height:**
     - iterative and Vermeille (2002) inverses reproduce 640 forward-constructed points to ≤ 3e-9 m;
@@ -839,17 +844,18 @@ All 10 approved rejection codes are exercised.
   - `t0_gmat.py` `204d47c12fd4b7311fc056f894001f6c84bc827818456c23c461664d1a533e23`
   - `t0_model.py` `1d70e86c25546a91365a5ed101ad0d390bc9e507862ca4eacbfa78fe2160b09d`
   - `t0_regression.py` `06ac4c0bdf82aa442a111fc380cf94457322e37a2aae72384afda3cfe93f413c`
-  - `t0_termination.py` `40247c2bd36fd16d41c01cd671ac0ce2f7a28150841af4462d823e4b1d99cc84` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`; corrected after Review 04, was `05e7463a…9554`; corrected after Review 05, was `bc4c834e…7807`; corrected after Review 06, was `793d8348…8c1c`)
+  - `t0_termination.py` `766f43cea5d43dae9ffb4492d0e3a96395d57a653356189b39e1271a96f1f1db` (added after Review 01; corrected after Review 02, was `2cb1a038…aa0a`; corrected after Review 03, was `f4135bc3…df80`; corrected after Review 04, was `05e7463a…9554`; corrected after Review 05, was `bc4c834e…7807`; corrected after Review 06, was `793d8348…8c1c`; docstrings corrected after Review 07, was `40247c2b…cc84`)
   - `t0_axis_ablation.py` `c6683775974f594975f6f1e71c2dfa967f8158127c5c4570d311132ac688afd5` (added after Review 02, IM-1)
   - `check_review01.py` `e6e0ad64ba553d5ca6fb1a057669dab76b197fb4cf70dbff13478251107c2ce3` (Review 01 regression checks; two F1 checks amended after Review 02, was `6e40cd61…1b1b`)
   - `check_review02.py` `cdb9c6eefc9fe1dbe64a85ba75d2ca0cc5f0036047161bb0f33097c021eba398` (Review 02 regression checks; adversarial oracle corrected after Review 03, was `89b90dd0…6456`)
-  - `mutation_check_review02.py` `704f7e87db2d6544a71aede2ab49acd212a5c669b3e20f310f95d81c3cea2d88` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`; R4-F1 mutants added after Review 04, was `2fdb49f3…2213`; R5-F1 and R5-F2 mutants added after Review 05, was `12735779…768e`; R6-F1 … F3 mutants added after Review 06, was `337f7d4a…7da4`)
+  - `mutation_check_review02.py` `876938a1e40cdfd25d62b5be708b96f4bce8d28ddcd0eb3dab966398dbd89568` (Review 02 mutation harness; R3-F1 mutants added after Review 03, was `d2541a7e…e3f5`; R4-F1 mutants added after Review 04, was `2fdb49f3…2213`; R5-F1 and R5-F2 mutants added after Review 05, was `12735779…768e`; R6-F1 … F3 mutants added after Review 06, was `337f7d4a…7da4`; R7-F1 and R7-F2 mutants added after Review 07, was `704f7e87…2d88`)
   - `t0_oracle.py` `986ea5bbff9e42683cd03bfd4d814ca6299c4cc6753e971588f7da6881a7422a` (added after Review 03, R3-F1: independent high-precision height and density reference; `top_band_height` added after Review 04, was `f70ab96d…9e93`)
   - `t0_height_error.py` `8d38d6ffe323630ff916b6027fbb7d751a9fdc31831c14f4ea0a4e55d3036a19` (added after Review 03, R3-F1: empirical height error, libm measurement, band crossings; subnormal-result measurement added after Review 04, was `b8e59c9a…2ac7`)
   - `check_review03.py` `9072614100447bca8bc4d6fb494f21d0c03fffd9988345a044841fce81ca59e5` (Review 03 regression checks)
   - `check_review04.py` `eeb051c3cbf71caa8d2034a3e2e32f9b821fbe99f426075dca592d7ae824e75f` (Review 04 regression checks)
   - `check_review05.py` `dbf2f4a0f5d66fb55214af8abf00a2ecfa8b244029a5b1df229beff79da22609` (Review 05 regression checks)
   - `check_review06.py` `1362cc7283761d0ca0aba3b0b3e90a2998dfc40aadec961743d01098be0c6aa9` (Review 06 regression checks)
+  - `check_review07.py` `263a3aecac5a44f65f1683d70548b3b86cb4a417523c36289bb82af196a92580` (Review 07 regression checks)
   - `data/EarthExponentialAtmosphereData.txt` `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e`
 - **Classification:** spike evidence for the T0 proposals (DR-0029). Model and frame agreement are exact where attributed. One configuration sensitivity is unresolved and escalated.
 - **J-ax-1 limitation, quantified against GMAT's real Earth over 53 700 s:**
@@ -947,3 +953,9 @@ All 10 approved rejection codes are exercised.
   - Dispositions and the derivation: `docs/reviews/M3-T0-review-06.md`.
   - Validation of the correction commit `9e44850`: M1 Proof 9/9 and M2 Proof 20/20 (228 PASS, 0 FAIL) in fresh clones; full pytest 1185 passed; the five pinned digests match; no protected path changed since `86df2c3`; all 96 T0 experiment files reproduce byte for byte twice, including GMAT; CI run 39489593015 green on all four jobs. Logs in the same evidence directory; the table is in `docs/reviews/M3-T0-review-06.md`.
 <!-- /review06-correction-log -->
+<!-- review07-correction-log -->
+- **Correction log (Review 07, 2026-10-20; "Authorization I-10 — M3 T0 Review 07 Corrections and Independent Review 08").** The superseded wording is preserved at `72f9e00`. Documentation only: no executable statement, value, floor, bracket or threshold changed (the docstring-free AST of `t0_termination.py` is identical to `72f9e00`). T0 remains blocked and not accepted.
+  - M3T0-R7-F1: the R6-F2 statement "an envelope of +∞ certifies nothing (need = +∞)", in the VAL-0019 body (now corrected) and in the Review 06 log entry (kept as written), is too strong. A step is certified only when need < 0. Need = −M2, finite and ≥ 0, when M2 ≤ 0 (up to h0 = 55 749.393 m with the published constants, for every B; M2 does not depend on the envelope), and need = +∞ when M2 > 0. Corrected in the `stage_lower_heights` docstring, in the VAL-0019 body, in DR-0029 and by an amendment to the Review 06 record.
+  - M3T0-R7-F2: "b_R ≤ b" is qualified with B > 0 in the E4 summary and the `drag_envelope` docstring, with the B = 0 case beside it (b_R = φ_B/R(0) > 0).
+  - Evidence in `docs/reviews/raw/M3-T0-review07-findings-correction-evidence/`; dispositions in `docs/reviews/M3-T0-review-07.md`.
+<!-- /review07-correction-log -->
