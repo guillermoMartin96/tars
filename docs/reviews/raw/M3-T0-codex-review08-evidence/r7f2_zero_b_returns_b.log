@@ -1,0 +1,465 @@
+.FFFFFFF..F.....F..F...                                                  [100%]
+=================================== FAILURES ===================================
+_______ test_r7f1_review07_counterexample_has_finite_positive_need[0.0] ________
+
+b = 0.0
+
+    @pytest.mark.parametrize("b", [TINY, 0.0])
+    def test_r7f1_review07_counterexample_has_finite_positive_need(b):
+        """Detects: the early-return path (M2 <= 0) changed, for example normalised to +inf or
+        removed. The reviewer's case, b = 2^-1074 (and b = 0), h0 = 1: A0 = +inf, M3 = -inf,
+        M4 = None and need = -M2 = 55 992.318990613036 m, finite and > 0 (not certified)."""
+>       s = tt.stage_lower_heights(1.0, b)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 0.9999999911223076, s = 11198.663798118925, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+________ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1.0] ________
+
+h0 = 1.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+>           s = tt.stage_lower_heights(h0, b)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 0.9999999911223076, s = 11198.663798118925, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+______ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1000.0] _______
+
+h0 = 1000.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+>           s = tt.stage_lower_heights(h0, b)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 999.9999999911211, s = 11197.783934914898, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+______ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[20000.0] ______
+
+h0 = 20000.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+>           s = tt.stage_lower_heights(h0, b)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 19999.999999991098, s = 11181.089181634263, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+______ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[50000.0] ______
+
+h0 = 50000.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+>           s = tt.stage_lower_heights(h0, b)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 49999.99999999106, s = 11154.880405962254, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+_____ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[55749.393] _____
+
+h0 = 55749.393
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+>           s = tt.stage_lower_heights(h0, b)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 55749.39299999105, s = 11149.878600415233, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+_____________ test_r7f1_early_return_edge_quoted_in_the_docstring ______________
+
+    def test_r7f1_early_return_edge_quoted_in_the_docstring():
+        """Detects: a wrong quoted edge of the early-return path (55 749.393 m with FP): M2 <= 0
+        at and below it, M2 > 0 from 55 749.394 m."""
+        assert m2_second(M2_EDGE, tt.FP) < 0 < m2_second(55749.394, tt.FP)
+        for b in (0.0, TINY, B_V1, math.inf):
+>           assert tt.stage_lower_heights(M2_EDGE, b)["M4"] is None
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 55749.39299999105, s = 11149.878600415233, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+_ test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[100000.0-0.0] _
+
+h0 = 100000.0, b = 0.0
+
+    @pytest.mark.parametrize("h0, b", [(55749.394, TINY), (6e4, TINY), (1e5, 0.0), (1e7, TINY)])
+    def test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need(h0, b):
+        """Detects: the M2 > 0 path losing the +inf of an unbounded envelope (need clamped or
+        made finite)."""
+>       s = tt.stage_lower_heights(h0, b)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:124: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 99999.99999999099, s = 11111.605709713642, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+_________________ test_r7f1_no_finite_bound_is_ever_certified __________________
+
+    def test_r7f1_no_finite_bound_is_ever_certified():
+        """Detects: a false certification. Over both paths and every vehicle, an infinite A0 or
+        A2 never comes with need < 0."""
+        for h0 in (1.0, 5e4, M2_EDGE, 55749.394, 6e4, 1.2e5, 1e6, 1e7, 2e8):
+            for b in VEHICLES:
+>               s = tt.stage_lower_heights(h0, b)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review07.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:993: in drag_envelope
+    rel = _envelope_relative(low, s, b_r, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = 0.9999999911223076, s = 11198.663798118925, b = 0.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def _envelope_relative(low: float, s: float, b: float | Decimal, fp: dict) -> Decimal:
+        """sup over h_s >= ell of F_D' rho(h_s) exp(theta_x X) (s + omega_E (a + (h_s +
+        beta_sel) / (1 - alpha_sel)))^2 / (2 b), in 60-digit decimals (see `drag_envelope`)."""
+        al, be, tx = Decimal(fp["alpha_sel"]), Decimal(fp["beta_sel_m"]), Decimal(fp["theta_x"])
+        a, w = Decimal(m.A_WGS84), Decimal(m.OMEGA_E)
+        if not all(2 * row[2] < (1 - al) * (1 - tx) * a for row in DEC_TABLE):
+            raise ValueError("a band violates (1 - alpha)(1 - theta_x) a > 2 H")
+        ell = max((1 - al) * Decimal(low) - be, Decimal(0))
+        best = Decimal(0)
+        for h in [ell] + [row[0] for row in DEC_TABLE if row[0] > ell]:
+            base, rho0, scale = DEC_TABLE[max(i for i, r in enumerate(DEC_TABLE) if r[0] <= h)]
+            rho = rho0 * (-(1 - tx) * (h - base) / scale).exp()
+            vr = Decimal(s) + w * (a + (h + be) / (1 - al))
+            best = max(best, rho * vr * vr)
+>       return best * Decimal(fp["F_D"]) / (2 * Decimal(b))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       decimal.DivisionByZero: [<class 'decimal.DivisionByZero'>]
+
+docs/science/experiments/m3-t0/t0_termination.py:847: DivisionByZero
+___________ test_r7f2_review07_counterexample_b_r_positive_at_zero_b ___________
+
+    def test_r7f2_review07_counterexample_b_r_positive_at_zero_b():
+        """Detects: b_R at b = 0 made equal to b (0) or non-positive. The reviewer's case:
+        envelope_ballistic_coefficient(0, 2.2, 15) = phi_B / R(0) = 1.497e-325, rounded down,
+        with R(0) recomputed independently (`check_review06.r_zero_second`)."""
+        b_r = tt.envelope_ballistic_coefficient(0.0, 2.2, 15.0, tt.FP)
+        q = c6.PHI / c6.r_zero_second(2.2, 15.0)
+>       assert isinstance(b_r, D) and b_r > 0 and not b_r <= 0.0
+E       assert (False)
+E        +  where False = isinstance(0.0, D)
+
+docs/science/experiments/m3-t0/check_review07.py:236: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_review07_counterexample_has_finite_positive_need[0.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1000.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[20000.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[50000.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[55749.393]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_edge_quoted_in_the_docstring
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[100000.0-0.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_no_finite_bound_is_ever_certified
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f2_review07_counterexample_b_r_positive_at_zero_b
+10 failed, 13 passed in 1.69s

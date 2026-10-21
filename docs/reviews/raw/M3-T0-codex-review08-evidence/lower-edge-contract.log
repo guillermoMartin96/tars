@@ -1,0 +1,162 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_finite_need_for_an_exterior_bound_state_below_beta[25.757575757575758] __
+
+b = 25.757575757575758
+
+    @pytest.mark.parametrize('b',[t.B_V1,math.inf])
+    def test_finite_need_for_an_exterior_bound_state_below_beta(b):
+     r=np.array([math.nextafter(m.A_WGS84,math.inf),0.,0.])
+     h=m.geodetic_iterative(r)[1]
+     assert r[0]>m.A_WGS84 and 0<h<t.FP['beta_m']
+     assert -m.MU/float(np.linalg.norm(r))<0
+     # R7 contract says finite non-certification on the M2 <= 0 path and that
+     # drag-free b has finite need on both paths. This input instead raises.
+>    assert math.isfinite(t.stage_need(h,b))
+                          ^^^^^^^^^^^^^^^^^
+
+review_scratch/test_lower_edge_contract.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1368: in stage_need
+    s = stage_lower_heights(h0, b, fp, envelope)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = -7.946368494819251e-09, s = 11198.664678966785, b = 25.757575757575758
+cd = 2.2, area = 15.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def drag_envelope(
+        low: float,
+        s: float,
+        b: float,
+        cd: float = CD_V1,
+        area: float = AREA_V1,
+        fp: dict | None = None,
+    ) -> float:
+        """Upper bound on the model's computed drag acceleration |a^_drag| at every point whose
+        true geodetic height is >= low (>= 0), with inertial speed |v| <= s, for a vehicle of
+        ballistic coefficient b with drag coefficient cd and area [m^2] (E4).
+    
+        The density is selected and evaluated at h_s, with |h_s - h| <= alpha_sel h + beta_sel
+        (E1, E2). For true h >= low, h_s >= low - eps_sel(low) =: ell, and |r| <= a + h <= a +
+        (h_s + beta_sel) / (1 - alpha_sel). So
+            |a^_drag| <= sup over h_s >= ell of g(h_s) + A(s, b),
+            g(h) = F_D' rho(h) exp(theta_x X(h)) (s + omega_E (a + (h + beta_sel) / (1 -
+            alpha_sel)))^2 / (2 b),
+        with rho the exact table formula (decimal values) and X(h) = (h - base_i) / H_i inside
+        band i, and A the absolute (underflow) part of E4 at S_max (Review 04 M3T0-R4-F1: the
+        sup of the absolute part is taken over every selection height with nonzero computed
+        density, h_s <= h_zero). On band i, d ln g / dh = -(1 - theta_x) / H_i + 2 omega_E / ((1 -
+        alpha_sel) s + omega_E ((1 - alpha_sel) a + h + beta_sel)) < 0 whenever (1 - alpha_sel)
+        (1 - theta_x) a > 2 H_i (ell >= -beta_sel), so g decreases inside every band, including
+        the unbounded top band, and the supremum is attained at ell or at a band base above ell,
+        where X = 0 and the band above applies (GMAT's rule). ell is clamped at the lower edge
+        0: a computed height below it raises OutsideDomainError and applies no force.
+        Both parts use b_R = phi_B / R (E4a), which bounds cd area / mass for a vehicle whose b
+        was formed from its mass by either construction, including subnormal b, P, Q or mass
+        (Review 05 M3T0-R5-F1), and b = 0 (Review 06 M3T0-R6-F1). b_R <= b for b > 0, and b_R
+        = b where the conversion is normal; at b = 0, b_R = phi_B / R(0) > 0 (Review 07
+        M3T0-R7-F2): the envelope needs only R >= cd area / mass. b = +inf is the drag-free
+        limit (0): a vehicle reaches it only through C1 with fl(cd area) = 0, where the force is
+        exactly 0 (E4b), or through an overflow of mass / P, which the supported domain (no
+        overflow) excludes.
+        Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up.
+        Values (Review 06 M3T0-R6-F2): a finite result is a certified bound; +inf is still an
+        upper bound but certifies nothing (the exact bound exceeds the largest binary64, or s =
+        +inf); invalid input (low not finite or < 0, s NaN or < 0, b NaN or < 0, cd or area not
+        positive and finite) raises ValueError and never becomes a bound."""
+        fp = FP if fp is None else fp
+        if not 0.0 <= low < math.inf:
+>           raise ValueError("the envelope is defined above the lower edge only")
+E           ValueError: the envelope is defined above the lower edge only
+
+docs/science/experiments/m3-t0/t0_termination.py:979: ValueError
+_________ test_finite_need_for_an_exterior_bound_state_below_beta[inf] _________
+
+b = inf
+
+    @pytest.mark.parametrize('b',[t.B_V1,math.inf])
+    def test_finite_need_for_an_exterior_bound_state_below_beta(b):
+     r=np.array([math.nextafter(m.A_WGS84,math.inf),0.,0.])
+     h=m.geodetic_iterative(r)[1]
+     assert r[0]>m.A_WGS84 and 0<h<t.FP['beta_m']
+     assert -m.MU/float(np.linalg.norm(r))<0
+     # R7 contract says finite non-certification on the M2 <= 0 path and that
+     # drag-free b has finite need on both paths. This input instead raises.
+>    assert math.isfinite(t.stage_need(h,b))
+                          ^^^^^^^^^^^^^^^^^
+
+review_scratch/test_lower_edge_contract.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:1368: in stage_need
+    s = stage_lower_heights(h0, b, fp, envelope)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1340: in stage_lower_heights
+    a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:1328: in <lambda>
+    env = (lambda low, s, b: drag_envelope(low, s, b, fp=fp)) if envelope is None else envelope
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+low = -7.946368494819251e-09, s = 11198.664678966785, b = inf, cd = 2.2
+area = 15.0
+fp = {'u': 1.1102230246251565e-16, 'libm_ulp': 2.0, 'contraction_k': 0.006830954755939884, 'lat_step_rounding_rad': 1.4111659138613635e-15, ...}
+
+    def drag_envelope(
+        low: float,
+        s: float,
+        b: float,
+        cd: float = CD_V1,
+        area: float = AREA_V1,
+        fp: dict | None = None,
+    ) -> float:
+        """Upper bound on the model's computed drag acceleration |a^_drag| at every point whose
+        true geodetic height is >= low (>= 0), with inertial speed |v| <= s, for a vehicle of
+        ballistic coefficient b with drag coefficient cd and area [m^2] (E4).
+    
+        The density is selected and evaluated at h_s, with |h_s - h| <= alpha_sel h + beta_sel
+        (E1, E2). For true h >= low, h_s >= low - eps_sel(low) =: ell, and |r| <= a + h <= a +
+        (h_s + beta_sel) / (1 - alpha_sel). So
+            |a^_drag| <= sup over h_s >= ell of g(h_s) + A(s, b),
+            g(h) = F_D' rho(h) exp(theta_x X(h)) (s + omega_E (a + (h + beta_sel) / (1 -
+            alpha_sel)))^2 / (2 b),
+        with rho the exact table formula (decimal values) and X(h) = (h - base_i) / H_i inside
+        band i, and A the absolute (underflow) part of E4 at S_max (Review 04 M3T0-R4-F1: the
+        sup of the absolute part is taken over every selection height with nonzero computed
+        density, h_s <= h_zero). On band i, d ln g / dh = -(1 - theta_x) / H_i + 2 omega_E / ((1 -
+        alpha_sel) s + omega_E ((1 - alpha_sel) a + h + beta_sel)) < 0 whenever (1 - alpha_sel)
+        (1 - theta_x) a > 2 H_i (ell >= -beta_sel), so g decreases inside every band, including
+        the unbounded top band, and the supremum is attained at ell or at a band base above ell,
+        where X = 0 and the band above applies (GMAT's rule). ell is clamped at the lower edge
+        0: a computed height below it raises OutsideDomainError and applies no force.
+        Both parts use b_R = phi_B / R (E4a), which bounds cd area / mass for a vehicle whose b
+        was formed from its mass by either construction, including subnormal b, P, Q or mass
+        (Review 05 M3T0-R5-F1), and b = 0 (Review 06 M3T0-R6-F1). b_R <= b for b > 0, and b_R
+        = b where the conversion is normal; at b = 0, b_R = phi_B / R(0) > 0 (Review 07
+        M3T0-R7-F2): the envelope needs only R >= cd area / mass. b = +inf is the drag-free
+        limit (0): a vehicle reaches it only through C1 with fl(cd area) = 0, where the force is
+        exactly 0 (E4b), or through an overflow of mass / P, which the supported domain (no
+        overflow) excludes.
+        Evaluated in 60-digit decimal arithmetic with an outward pad, then rounded up.
+        Values (Review 06 M3T0-R6-F2): a finite result is a certified bound; +inf is still an
+        upper bound but certifies nothing (the exact bound exceeds the largest binary64, or s =
+        +inf); invalid input (low not finite or < 0, s NaN or < 0, b NaN or < 0, cd or area not
+        positive and finite) raises ValueError and never becomes a bound."""
+        fp = FP if fp is None else fp
+        if not 0.0 <= low < math.inf:
+>           raise ValueError("the envelope is defined above the lower edge only")
+E           ValueError: the envelope is defined above the lower edge only
+
+docs/science/experiments/m3-t0/t0_termination.py:979: ValueError
+=========================== short test summary info ============================
+FAILED review_scratch/test_lower_edge_contract.py::test_finite_need_for_an_exterior_bound_state_below_beta[25.757575757575758]
+FAILED review_scratch/test_lower_edge_contract.py::test_finite_need_for_an_exterior_bound_state_below_beta[inf]
+2 failed in 0.77s

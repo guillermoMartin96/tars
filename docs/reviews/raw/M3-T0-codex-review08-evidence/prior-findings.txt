@@ -1,0 +1,69 @@
+docs/reviews/raw/M3-T0-codex-review02.md:11:| M3T0-F1 | PARTIALLY RESOLVED | The chord/curvature theorem is sound; the eccentric and circular counterexamples reproduce. The old 4.165 m estimate is removed and 1.564 m is labelled a measurement. However, perturbed numerical “bounds” still substitute a sampled maximum for a supremum: R2-F1. |
+docs/reviews/raw/M3-T0-codex-review02.md:12:| M3T0-F2 | PARTIALLY RESOLVED | Exact thresholds, the negative-energy speed bound, the −28 km stage counterexample and same-tick semantics are corrected. The added sufficient stage-domain derivation contains an invalid drag-envelope step: R2-F2. |
+docs/reviews/raw/M3-T0-codex-review02.md:13:| M3T0-F3 | RESOLVED | Reexecution gives k2/k3/k4 height offsets +116.312773/−115.734153/+1.161267 m. Records identify k3 as the inward stage. |
+docs/reviews/raw/M3-T0-codex-review02.md:14:| M3T0-F4 | RESOLVED | The GMAT rerun reproduces `6.95223445873689e-6 m`; DR-0029 and VAL-0019 quote `6.95e-6 m`, below the unchanged `1e-4 m` gate. |
+docs/reviews/raw/M3-T0-codex-review02.md:15:| M3T0-F5 | RESOLVED | The decision matrix explicitly distinguishes the technical dependency map from the owner's controlling gate: P10 before T1 and P1–P10 before T2. This conclusion rests on record inspection. |
+docs/reviews/raw/M3-T0-codex-review02.md:21:**M3T0-R2-F1 — MINOR — sampled curvature maxima are presented as numerical upper bounds. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review02.md:36:**M3T0-R2-F2 — MINOR — the sufficient stage-domain proof does not bound the full drag expression. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review02.md:56:**M3T0-R2-F3 — NOTE — the new guarantee and sweep coverage are not protected by the 12 checks. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review04.md:7:**M3T0-R4-F1 — MINOR — the floating-point drag enclosure drops underflow errors that violate its bound. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review04.md:47:| M3T0-R3-F1 | PARTIALLY RESOLVED | Known 120/200/250 km and all 12 downward-jump cases are covered; independent oracle and selection-height widening are present. The replacement global computed-force guarantee remains invalid through R4-F1. |
+docs/reviews/raw/M3-T0-codex-review04.md:48:| M3T0-R2-F1 | RESOLVED | Own checks/rerun confirm perturbed values are sampled estimates, not certified bounds; between-sample refinement exceeds sampling. Uses needing a perturbed bound remain blocked. |
+docs/reviews/raw/M3-T0-codex-review04.md:49:| M3T0-R2-F2 | PARTIALLY RESOLVED | Radius-product correction and original 80 km counterexample pass; the global envelope used by the sufficient-condition proof still fails through R4-F1. |
+docs/reviews/raw/M3-T0-codex-review04.md:50:| M3T0-R2-F3 | RESOLVED | Own zeroed-evidence mutant fails 22 selected checks; coverage, recomputation, units and provenance protections exist. This resolves the original vacuous-evidence defect. |
+docs/reviews/raw/M3-T0-codex-review04.md:52:| M3T0-F1 | RESOLVED | Chord/curvature argument remains valid; two-body bound checks and experiment rerun pass; perturbed estimates are explicitly separated. |
+docs/reviews/raw/M3-T0-codex-review04.md:53:| M3T0-F2 | PARTIALLY RESOLVED | Thresholds, speed bound, admissible failing-stage example and same-tick semantics reproduce. The replacement sufficient-condition proof depends on the defective global force enclosure. |
+docs/reviews/raw/M3-T0-codex-review04.md:54:| M3T0-F3 | RESOLVED | Own rerun gives k2/k3/k4 offsets +116.312773/−115.734153/+1.161267 m; records identify k3. |
+docs/reviews/raw/M3-T0-codex-review04.md:55:| M3T0-F4 | RESOLVED | GMAT rerun reproduces the corrected 6.95e-6 m quotation, below the unchanged 1e-4 m gate. |
+docs/reviews/raw/M3-T0-codex-review04.md:56:| M3T0-F5 | RESOLVED | Record inspection confirms the owner's gate controls: P10 before T1, P1–P10 before T2. The narrower technical dependency map remains explicitly subordinate. |
+docs/reviews/raw/M3-T0-codex-review03.md:5:## Checkpoint and scope
+docs/reviews/raw/M3-T0-codex-review03.md:11:## Execution ledger
+docs/reviews/raw/M3-T0-codex-review03.md:48:## Resolution table
+docs/reviews/raw/M3-T0-codex-review03.md:52:| M3T0-R2-F1 | RESOLVED | Own reruns and inspection confirm perturbed rows use sampled estimates, without `bound_m`/`bound_holds`. The cubic is correct; refinement exceeds sampling. Current records explicitly disclaim a perturbed bound and block uses requiring one. |
+docs/reviews/raw/M3-T0-codex-review03.md:53:| M3T0-R2-F2 | PARTIALLY RESOLVED | The real-arithmetic product envelope, per-band derivative and height monotonicity are correct; the original counterexample is covered and numerical roots reproduce. Floating-point height evaluation is not covered: R3-F1. |
+docs/reviews/raw/M3-T0-codex-review03.md:54:| M3T0-R2-F3 | RESOLVED | The original zeroed-sweep/floor defect is detected. Independent recomputation, coverage, units, provenance and mutation checks now protect those quantities. The additional boundary-testing weakness is included in R3-F1. |
+docs/reviews/raw/M3-T0-codex-review03.md:56:| M3T0-F1 | RESOLVED | Chord/curvature theorem retained; two-body bound verified; perturbed estimates correctly separated; phase/refinement checks pass. |
+docs/reviews/raw/M3-T0-codex-review03.md:57:| M3T0-F2 | PARTIALLY RESOLVED | Exact stiffness roots, speed bound, original counterexamples and same-tick semantics reproduce. The added sufficient-domain argument still lacks the numerical-height coverage identified in R3-F1. |
+docs/reviews/raw/M3-T0-codex-review03.md:58:| M3T0-F3 | RESOLVED | Rerun gives k2/k3/k4 height offsets +116.312773/−115.734153/+1.161267 m; records identify k3. |
+docs/reviews/raw/M3-T0-codex-review03.md:59:| M3T0-F4 | RESOLVED | GMAT rerun reproduces 6.95223445873689e-6 m; current records quote 6.95e-6 m against the unchanged 1e-4 m gate. |
+docs/reviews/raw/M3-T0-codex-review03.md:60:| M3T0-F5 | RESOLVED | Record inspection confirms the owner's gate controls: P10 before T1 and P1–P10 before T2; the narrower technical dependency map is explicitly subordinate. |
+docs/reviews/raw/M3-T0-codex-review03.md:64:## Mathematical and numerical assessment
+docs/reviews/raw/M3-T0-codex-review03.md:90:## New finding
+docs/reviews/raw/M3-T0-codex-review03.md:92:**M3T0-R3-F1 — MINOR — the drag-envelope guarantee omits numerical height error at density discontinuities. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review03.md:123:## Verification limits and checkpoint
+docs/reviews/raw/M3-T0-codex-review05.md:5:## Checkpoint and scope
+docs/reviews/raw/M3-T0-codex-review05.md:11:## Ledger and reproduced evidence
+docs/reviews/raw/M3-T0-codex-review05.md:41:## Resolution table
+docs/reviews/raw/M3-T0-codex-review05.md:45:| M3T0-R4-F1 | PARTIALLY RESOLVED | Original point and both fixed vehicles pass underflow checks; unrestricted parameter conversion still fails through R5-F1. |
+docs/reviews/raw/M3-T0-codex-review05.md:46:| M3T0-R3-F1 | PARTIALLY RESOLVED | Height widening, independent oracle and all downward-jump checks pass; the replacement global force-enclosure contract remains incomplete. |
+docs/reviews/raw/M3-T0-codex-review05.md:47:| M3T0-R2-F1 | RESOLVED | Rerun and checks preserve sampled-estimate labels and separate the certified two-body result. |
+docs/reviews/raw/M3-T0-codex-review05.md:48:| M3T0-R2-F2 | PARTIALLY RESOLVED | Radius-product correction, candidate maximization and original counterexample pass; unrestricted global enclosure remains affected by R5-F1. |
+docs/reviews/raw/M3-T0-codex-review05.md:49:| M3T0-R2-F3 | RESOLVED | Recomputing checks pass; mutation classification requires declared failures. New parameter coverage gap is identified separately. |
+docs/reviews/raw/M3-T0-codex-review05.md:51:| IM-2 | RESOLVED | Governing bracket ends are explicit; tests confirm 111511.96 m fails the condition and 111511.97 m satisfies it. |
+docs/reviews/raw/M3-T0-codex-review05.md:52:| M3T0-F1 | RESOLVED | Chord/curvature reasoning remains sound; sweep and two-body recomputation checks pass. |
+docs/reviews/raw/M3-T0-codex-review05.md:53:| M3T0-F2 | PARTIALLY RESOLVED | Thresholds, speed bound and counterexamples reproduce; unrestricted sufficient-condition evidence still depends on the incomplete global contract. |
+docs/reviews/raw/M3-T0-codex-review05.md:54:| M3T0-F3 | RESOLVED | Reproduced stage offsets identify the k3 input as the inward stage. |
+docs/reviews/raw/M3-T0-codex-review05.md:55:| M3T0-F4 | RESOLVED | GMAT rerun reproduces the corrected approximately 6.95e-6 m residual and unchanged gates. |
+docs/reviews/raw/M3-T0-codex-review05.md:56:| M3T0-F5 | RESOLVED | Record inspection preserves owner gates: P10 before T1 and P1–P10 before T2. |
+docs/reviews/raw/M3-T0-codex-review05.md:60:## Mathematical and numerical assessment
+docs/reviews/raw/M3-T0-codex-review05.md:94:## New findings
+docs/reviews/raw/M3-T0-codex-review05.md:96:**M3T0-R5-F1 — MINOR — rounded ballistic-coefficient construction is not underflow-safe. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review05.md:125:**M3T0-R5-F2 — MINOR — the 0.983 empirical maximum is incorrectly scoped. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review05.md:140:## Verification limits and checkpoint
+docs/reviews/raw/M3-T0-codex-review06.md:43:| M3T0-R5-F1 | PARTIALLY RESOLVED | Both original counterexamples are covered; the positive-b conversion inequalities hold in additional exact-rational checks. C1 can also produce zero b from positive vehicle parameters, leaving the unrestricted contract undefined: R6-F1. |
+docs/reviews/raw/M3-T0-codex-review06.md:44:| M3T0-R5-F2 | RESOLVED | Both empirical populations recompute to the corrected numbers; P1 displays the transition maximum; Review 04's historical sentence is retained and followed by an amendment. |
+docs/reviews/raw/M3-T0-codex-review06.md:45:| M3T0-R4-F1 | PARTIALLY RESOLVED | The coefficient/division, density and other absolute underflow terms survive recomputation and all ten R4 mutant checks. The force decomposition composes correctly with positive-b E4a. Its unrestricted vehicle coverage still omits C1's zero quotient. |
+docs/reviews/raw/M3-T0-codex-review06.md:46:| M3T0-R3-F1 | PARTIALLY RESOLVED | Selection-height widening, the support-function height argument and all downward-jump checks cover the original defect. These do not repair the undefined conversion boundary in the replacement global envelope. |
+docs/reviews/raw/M3-T0-codex-review06.md:47:| M3T0-R2-F1 | RESOLVED | Rerun preserves the certified two-body/sampled perturbed distinction; between-sample refinement remains explicitly an estimate. |
+docs/reviews/raw/M3-T0-codex-review06.md:48:| M3T0-R2-F2 | PARTIALLY RESOLVED | The height-dependent co-rotation factor is maximized with density over the candidate heights, rather than frozen at the lower edge. Its original counterexample passes. The advertised unrestricted envelope remains undefined for zero-b C1 vehicles. |
+docs/reviews/raw/M3-T0-codex-review06.md:49:| M3T0-R2-F3 | RESOLVED | Recomputing checks pass and the mutation machinery requires declared failures. Selected corruptions genuinely fail; the new boundary coverage gap is separately identified. |
+docs/reviews/raw/M3-T0-codex-review06.md:51:| IM-2 | RESOLVED | Governing bracket ends remain explicit. The drag-free nearest-centimetre quotation fails the condition; 111511.97 m satisfies it. Existing owner-directed disposition retained; no floor changed. |
+docs/reviews/raw/M3-T0-codex-review06.md:52:| M3T0-F1 | RESOLVED | Chord/curvature argument and the independently recomputing checks remain sound; experimental rerun preserves the sweeps and distinct perturbed-motion limitations. |
+docs/reviews/raw/M3-T0-codex-review06.md:53:| M3T0-F2 | PARTIALLY RESOLVED | Exact stiffness thresholds, escape/co-rotation speed bound, inadmissible-stage counterexample and fixed-vehicle stage tests reproduce. The generalized sufficient-condition evidence still relies on the incomplete unrestricted vehicle-conversion contract. |
+docs/reviews/raw/M3-T0-codex-review06.md:54:| M3T0-F3 | RESOLVED | Recomputed stage offsets identify the k3 input as the inward stage. |
+docs/reviews/raw/M3-T0-codex-review06.md:55:| M3T0-F4 | RESOLVED | GMAT rerun reproduces the corrected approximately 6.95e-6 m residual; approved gates are unchanged. |
+docs/reviews/raw/M3-T0-codex-review06.md:56:| M3T0-F5 | RESOLVED | Matrix and authorization distinguish technical dependencies from owner gates: P10 before T1, P1–P10 before T2. |
+docs/reviews/raw/M3-T0-codex-review06.md:98:**M3T0-R6-F1 — MINOR — C1 underflow to zero b remains outside the purported unrestricted conversion. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review06.md:110:**M3T0-R6-F2 — NOTE — infinity handling is narrower than the helper's advertised contract. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review06.md:118:**M3T0-R6-F3 — NOTE — E4b's evidence classification omits its inherited density assumption. VERIFIED.**
+docs/reviews/raw/M3-T0-codex-review06.md:128:The GMAT geodetic-drag discrepancy remains escalated; reproducing its outputs does not identify or close its cause. DR-0029 P1–P10 and DR-0028 P6(b) remain undecided. Existing IM-2 disposition is unchanged. No acceptance, merge, T1/T2 work, correction or Review 07 was started.

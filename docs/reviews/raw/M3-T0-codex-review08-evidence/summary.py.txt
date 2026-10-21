@@ -1,0 +1,12 @@
+import json,subprocess,hashlib
+from pathlib import Path
+R=Path.cwd();S=R/'review_scratch';D=R/'docs/science/experiments/m3-t0'
+for name in ['m1','m2']:
+ data=json.loads((S/(name+'.json')).read_text());print(name,'keys',list(data));print('overall',data.get('overall_pass'),data.get('passed'));print('results',len(data.get('results',[])))
+x=json.loads((D/'t0_termination_results.json').read_text())
+for k in ['stiffness_thresholds','floor_comparison','libm_sensitivity','stage_order']:print(k,json.dumps(x[k],sort_keys=True))
+for row in x['sufficient_stage_condition']['rows']:print('floor',row['vehicle'],row['h_f_sufficient_at_least_m'],row['need_at_floor_m'],row['need_below_bracket_m'])
+for p in ['t0_gmat_results.json','t0_axis_ablation_results.json','t0_height_error_results.json']:
+ x=json.loads((D/p).read_text());print(p,json.dumps(x,sort_keys=True)[:2500])
+for rev in ['72f9e00','86df2c3']:
+ names=subprocess.check_output(['git','diff','--name-only',rev+'..HEAD'],text=True).splitlines();print(rev,'changed',len(names),'outside docs',[n for n in names if not n.startswith('docs/')])

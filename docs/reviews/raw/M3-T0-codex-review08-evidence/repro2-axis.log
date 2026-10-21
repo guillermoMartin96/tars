@@ -1,0 +1,49 @@
+COMMAND ['<clone>/.venv/bin/python', '<clone>/docs/science/experiments/m3-t0/t0_axis_ablation.py', '<clone>/docs/science/experiments/m3-t0/t0_axis_ablation_results.json']
+{
+ "data_file": "gmat_runs/axis_probe__m1_two_body_report.txt",
+ "data_sha256": "ee1cab2b289b0f5e259a08e5ba1ecdee0d6c2bbf5afe98a6b157b4a4637f3bb5",
+ "data_sha256_matches_gmat_metadata": true,
+ "units": "metres of GMAT EarthFixed Z (report values in km x 1000)",
+ "rms_definition": "sqrt(mean over both spacecraft and all epochs of e_i^2)",
+ "tolerance_m": 1e-06,
+ "fits": {
+  "full": {
+   "basis_columns": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ],
+   "equations": 1792,
+   "unknowns": 15,
+   "epochs": 896,
+   "t_first_s": 0.0,
+   "t_last_s": 53700.0,
+   "step_s": 60.0,
+   "rms_residual_m": 7.798189467053526e-05,
+   "max_abs_residual_m": 0.0004353248085559383,
+   "condition_number": 389.6628548468954,
+   "rounding_scale_m": 5.734742959981594e-07
+  },
+  "quadratic_only": {
+   "basis_columns": [
+    0,
+    1,
+    2
+   ],
+   "equations": 1792,
+   "unknowns": 9,
+   "epochs": 896,
+   "t_first_s": 0.0,
+   "t_last_s": 53700.0,
+   "step_s": 60.0,
+   "rms_residual_m": 0.9856650955520649,
+   "max_abs_residual_m": 4.030214526899556,
+   "condition_number": 32.491159181505886,
+   "rounding_scale_m": 4.78178620466643e-08
+  }
+ },
+ "stored_full_fit_rms_m": 7.798189467053526e-05,
+ "full_fit_reproduces_t0_gmat": true
+}

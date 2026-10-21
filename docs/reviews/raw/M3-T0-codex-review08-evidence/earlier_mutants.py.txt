@@ -1,0 +1,15 @@
+import sys,subprocess,shutil,json
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+R=Path.cwd();S=R/'review_scratch';D=R/'docs/science/experiments/m3-t0';sys.path.insert(0,str(D))
+import mutation_check_review02 as h
+names=['json_reviewer_R2F3_mutant','r4_absolute_part_removed','r5_conversion_bound_relative_only','r6_zero_b_case_removed','r6f2_up_overflow_restored']
+def run(name):
+ root=S/'mutants'/name;shutil.copytree(R/'docs',root/'docs',ignore=shutil.ignore_patterns('__pycache__'),dirs_exist_ok=True);d=root/h.REL
+ corr,expected=h.MUTANTS[name];corr(d)
+ args=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider',*[str(d/f'check_review0{n}.py') for n in range(1,8)],'-k',' or '.join(expected)]
+ p=subprocess.run(args,cwd=root,capture_output=True,text=True)
+ (S/(name+'.log')).write_text('COMMAND '+repr(args)+'\n'+p.stdout+p.stderr)
+ out={'exit':p.returncode,'expected':expected,'summary':p.stdout.splitlines()[-1:]};print(name,out,flush=True);return name,out
+with ThreadPoolExecutor(max_workers=4) as pool:out=dict(pool.map(run,names))
+(S/'earlier-mutation-results.json').write_text(json.dumps(out,indent=2))

@@ -1,0 +1,21 @@
+import sys,shutil,subprocess,json,re
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+R=Path.cwd();S=R/'review_scratch';D=R/'docs/science/experiments/m3-t0';sys.path.insert(0,str(D))
+import mutation_check_review02 as h
+names=['control_unmodified']+[n for n in h.MUTANTS if n.startswith('r7')]
+own={
+ 'own_zero_need_early':h.edit_text('t0_termination.py','        return -s["M2"]  # >= 0 already','        return -0.0  # mutant'),
+ 'own_M3_ignored':h.edit_text('t0_termination.py','return -min(s["M2"], s["M3"], s["M4"])','return -min(s["M2"], s["M4"])'),
+ 'own_dragfree_infinite':h.edit_text('t0_termination.py','    s = stage_lower_heights(h0, b, fp, envelope)','    if b == math.inf: return math.inf\n    s = stage_lower_heights(h0, b, fp, envelope)'),
+ 'own_m2_depends_vehicle':h.edit_text('t0_termination.py','"M2": _dn((1 - al) * l2 - be),','"M2": _dn((1 - al) * l2 - be) - (1.0 if b == 0 else 0.0),'),
+}
+def run(name):
+ root=S/'mutants'/name;shutil.copytree(R/'docs',root/'docs',ignore=shutil.ignore_patterns('__pycache__'),dirs_exist_ok=True);d=root/h.REL
+ corr=own[name] if name in own else h.MUTANTS[name][0]
+ if corr:corr(d)
+ p=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(d/'check_review07.py')],cwd=root,capture_output=True,text=True)
+ (S/(name+'.log')).write_text(p.stdout+p.stderr)
+ result={'exit':p.returncode,'summary':p.stdout.splitlines()[-1:]};print(name,result,flush=True);return name,result
+with ThreadPoolExecutor(max_workers=4) as pool:out=dict(pool.map(run,names+list(own)))
+(S/'mutation-results.json').write_text(json.dumps(out,indent=2))

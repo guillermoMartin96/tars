@@ -1,0 +1,89 @@
+diff --git a/docs/reviews/M3-T0-review-06.md b/docs/reviews/M3-T0-review-06.md
+index bf54d95..a068895 100644
+--- a/docs/reviews/M3-T0-review-06.md
++++ b/docs/reviews/M3-T0-review-06.md
+@@ -189,3 +189,10 @@ Evidence is in `docs/reviews/raw/M3-T0-review06-findings-correction-evidence/`.
+ | T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 96 tracked experiment files are byte-identical; the checks then pass 238/238 (`reproducibility_twice.log`) |
+ | CI on `9e44850` | Run 39489593015 (https://github.com/guillermoMartin96/tars/actions/runs/39489593015): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`). CI does not collect the T0 checks (`testpaths = ["tests"]`) |
+ | Platform limitations | All T0 measurements and checks ran on macOS x86_64 only. A-FP-1's gradual-underflow check and the A-FP-2 libm measurements are host measurements, not platform guarantees |
++
++### Amendment (Authorization I-10, Review 07 M3T0-R7-F1)
++Appended 2026-10-20; the text above is kept as written. Review 07 found that the R6-F2 statement "so need(h0) = +∞" holds only when M2 > 0. A step is certified only when need < 0 (the floor bisection and `libm_sensitivity` accept nothing else), and the stage condition reports a non-certification on two paths:
++- **M2 ≤ 0:** `stage_lower_heights` returns before M4 (the k2 input may already be below the edge; this return dates from the Review 03 correction, `489d4e7`), and `stage_need` returns need = −M2, finite and ≥ 0. M2 depends on h0 only, not on B or the envelope; with the published constants M2 ≤ 0 up to h0 = 55 749.393 m. The value is finite even when A0 = +∞: h0 = 1 m, B = 2^-1074 gives need = 55 992.318990613036 m;
++- **M2 > 0:** need = −min(M2, M3, M4). An envelope of +∞ at A0 or A2, or a stage value outside the binary64 range, gives M3 or M4 = −∞ and need = +∞, as in the reviewer's case `stage_lower_heights(1e7, 2^-1074)` above.
++
++Both are non-certifications, so no floor, bound or certification changes. Review 07 M3T0-R7-F2 is corrected in the docstrings only: "b_R ≤ b" holds for B > 0, as stated above for B = 0. Checks: `check_review07.py`.
+diff --git a/docs/reviews/M3-T0-review-07.md b/docs/reviews/M3-T0-review-07.md
+index 1386723..9dc6f11 100644
+--- a/docs/reviews/M3-T0-review-07.md
++++ b/docs/reviews/M3-T0-review-07.md
+@@ -126,3 +126,69 @@ The Proof wrappers write into `proof/`, so the reviewer may not run them. The im
+   - no certified J2-plus-drag missed-dip bound;
+   - the GMAT geodetic-drag discrepancy stays escalated;
+   - DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
++
++## Correction pass (Authorization I-10, 2026-10-20; appended)
++"Authorization I-10 — M3 T0 Review 07 Corrections and Independent Review 08" authorizes correcting only M3T0-R7-F1 and R7-F2, then an independent Review 08. Everything above this section is preserved as written. The statuses Review 07 gave (PARTIALLY RESOLVED for R6-F2) are **not** changed here; whether they are now resolved is for Review 08 to judge.
++
++Preconditions (I-10 §1), verified before any change: branch `milestone-3-t0-reference-spike`, HEAD = origin = `72f9e00` after a fetch, clean worktree, the Review 07 evidence committed with its `SHA256SUMS` verified, CI run 39515314270 green on all four jobs, the five pinned digests and all 19 VAL-0019 digests match, no protected path changed since `86df2c3` (`pinned_digests_before.log`).
++
++**Both corrections are documentation only.** No executable statement changed: `t0_termination.py` with every docstring removed has the same AST as at `72f9e00` (`ast_docstring_free_equal.log`). No value, floor, bracket, margin, threshold or published result changed. Neither is a numerical algorithm fix.
++
++| Finding | Disposition | Correction |
++|---|---|---|
++| M3T0-R7-F1 (NOTE) | **ACCEPTED; CORRECTED** (documentation; for Review 08 to assess) | The `stage_lower_heights` docstring and the records now state both non-certification paths (below). The code is kept, not normalised to +∞: I-10 §2 forbids changing numerical behaviour |
++| M3T0-R7-F2 (NOTE) | **ACCEPTED; CORRECTED** (documentation) | "b_R ≤ b" is qualified with b > 0 in the E4 summary and the `drag_envelope` docstring, with the b = 0 case beside it |
++
++### R7-F1: the stated non-certification semantics
++The implementation, unchanged since the Review 03 correction (`489d4e7`) for this path:
++- **Certification.** A step from computed height h0 is certified only when need(h0) < 0. The floor bisection (`need(lo) > 0 > need(hi)`, then `need(mid) < 0`) and `libm_sensitivity` (`need >= 0` is a failure) accept nothing else. Every need ≥ 0, finite or +∞, is a non-certification.
++- **Path 1, M2 ≤ 0.** `stage_lower_heights` returns before A2 (the k2 input may already be below the edge), with A2, s3, L4 and M4 = None, and `stage_need` returns −M2: **finite and ≥ 0**. M2 = (1 − α)·L2 − β with L2 = H0 − 5(1 + u)²V − u·R0 − 2η₀ uses h0 and the constants only, not b or the envelope. With the published constants M2 ≤ 0 up to h0 = 55 749.393 m (55 749.39300208564 is the largest such binary64) for every vehicle. So this need is finite even when A0 = +∞: the reviewer's h0 = 1 m, b = 2^-1074 gives A0 = +∞, M3 = −∞ and need = 55 992.318990613036 m.
++- **Path 2, M2 > 0.** need = −min(M2, M3, M4). An envelope of +∞ at A0 makes s2 = +∞, and the envelope at s2 = +∞ is +∞ again, so A2 = s3 = +∞ and L4 = M4 = −∞. A stage value beyond the binary64 range is rounded outward by `_up`/`_dn` to ±∞ with the same effect. Either gives **need = +∞**. Otherwise need is finite; it may still be ≥ 0 (not certified).
++- **Other inputs.** The vehicle b = +∞ is drag-free (envelope 0) and has a finite need on both paths. A non-finite h0, or b NaN or < 0, raises `ValueError` on both paths, because the envelope is evaluated for A0 before the M2 test.
++- Corrected in: the `stage_lower_heights` docstring; the VAL-0019 body and DR-0029 P1 body (inline, "corrected after Review 07"); the VAL-0019 and DR-0029 Review 07 correction logs (the Review 06 log entries are kept as written and qualified there); and an amendment appended to the Review 06 record.
++
++### R7-F2: b_R ≤ b
++- For b > 0, b_R ≤ b, and b_R is the same binary64 b where the conversion is normal. At b = 0, b_R = φ_B/R(0) > 0 = b (1.497e-325 for cd = 2.2, area = 15 m²). The envelope needs only R ≥ cd·area/mass, which holds at b = 0 (Review 06 R6-F1). Corrected at the E4 summary (`t0_termination.py`, formerly line 612) and the `drag_envelope` docstring (formerly line 963). `envelope_ballistic_coefficient` already stated it correctly.
++- **Observation, not corrected (outside I-10's scope).** The module docstring of `check_review05.py` (line 9) still describes the Review 05 correction as "the envelope uses b_R = phi_B / R <= b". It was written when b = 0 raised, and describes that pass. It is a check file's historical summary, not part of the envelope's contract; I-10 names two statements, so it is left as written and reported here.
++
++### Implementer's observation (not a finding of Review 07; not corrected)
++A computed h0 ≤ β = 8.877691069434738e-09 m makes H0 < 0, and the envelope raises `ValueError` ("defined above the lower edge only"). For h0 so negative that b_lower + H0 ≤ 0 (b_lower = 6 356 752.314 m; for example h0 = −6.4e6 m or −1e308 m) the Decimal square root in V raises `decimal.InvalidOperation` instead. Both raise, and neither certifies. Such an h0 is not the computed height of a state in the domain (outside the ellipsoid), and the docstring claims nothing for it.
++
++### Evidence (`docs/reviews/raw/M3-T0-review07-findings-correction-evidence/`)
++- **Red before.** The new `check_review07.py` (23 checks) on the unmodified `72f9e00` tree: 3 fail and 20 pass (`checks07_before_72f9e00.log`). The 3 failures are the record and docstring checks (`test_r7f1_docstring_states_both_non_certification_paths`, `test_r7f1_records_state_both_paths`, `test_r7f2_docstrings_qualify_b_r_at_most_b`). The 20 passes are the contract checks. They pass because the implementation did not change: they pin its behaviour, including both Review 07 counterexamples, and fail if the semantics change (mutation below). This is the expected pattern for a documentation-only correction; it is not presented as a numerical fix.
++- **The reviewer's contract test** (`test_noncert_contract.py` from the Review 07 evidence, which asserts the superseded universal need = +∞ claim) still fails on the corrected tree with need = 55992.318990613036 (`reviewer_test_noncert_after.log`): the behaviour is unchanged, and the old claim stays false.
++- **Green after.** `check_review01.py` … `check_review07.py`: 261/261 (`checks_after.log`).
++- **Mutation** (`mutation_check_review02.py`, run against all seven check files): the control passes 261/261; 73 of 73 non-equivalent corruptions are detected by a declared check; the 2 declared equivalents are unchanged (`mutation_check_review07.json`). The 14 new R7 mutants cover:
++  - R7-F1 contract: the early-return need normalised to +∞, its sign flipped (a false certification), the early return removed, an infinite need clamped to MAX, and `_dn` not rounding below −MAX outward to −∞;
++  - R7-F1 text: the universal claim restored in the docstring, the edge misquoted, the Review 06 amendment removed, and the VAL-0019 and DR-0029 body corrections reverted;
++  - R7-F2: both summaries reverted, b_R = b returned at b = 0, and b_R one ulp above b.
++
++  A first smoke run of the R7 mutants against `check_review07.py` alone left one survivor: the VAL-0019 body revert, which the new log text still masked. The record check now excludes the logs, and the full run detects it (`smoke_r7.py.txt`, `smoke_r7.log` after the fix).
++- **Adversarial probe** (seed 20261021; `adversarial_r7.py.txt`, `adversarial_r7.log`): 4 000 random (h0, b) cases, h0 from 1 m to 3 × 10^9 m with a concentration at the early-return edge, b from 0 through subnormals to +∞. Path 1: 1 391 cases (727 with A0 = +∞); path 2: 2 609 (1 212 with an infinite envelope); 1 014 certified. Every case satisfies the corrected contract: no NaN; certified only with finite A0 and A2; need = −M2 finite and ≥ 0 on path 1; need = +∞ on path 2 with an infinite envelope; M2 identical across vehicles for 300 heights; and b_R ≤ b for b > 0, b_R > 0 at b = 0, on 18 969 random vehicle shapes.
++- **No executable change.** The docstring-free AST of `t0_termination.py` equals `72f9e00` (`ast_docstring_free_equal.log`, `ast_equal.py.txt`; the diff is `t0_termination_docstring.diff`). `t0_termination.py` regenerates `t0_termination_results.json` byte for byte (`termination_regenerated.log`).
++- **Preconditions:** `pinned_digests_before.log` (`digests.py.txt`).
++
++### Unresolved assumptions and conditional guarantees (unchanged by this pass)
++- **A-FP-2** (libm accuracy) remains an unresolved, explicitly conditional assumption, measured on macOS x86_64 only; E4b depends on it explicitly (LIBM_ULP ≤ 91910196476947). A-FP-1 (IEEE binary64 with gradual underflow) is checked at run time on this host only. A-FP-3 is stated as before.
++- **Contract scope.** C1 or C2 from a positive finite binary64 mass, no overflow; not arbitrary independently supplied (mass, b) pairs.
++- **Conditions of the floors.** Sufficient, not necessary; under A-FP-1 to A-FP-3, for computed committed heights, bound states with negative two-body energy, no thrust and dt = 10 s. There is no certified J2-plus-drag missed-dip bound.
++- **Unchanged.** The GMAT geodetic-drag discrepancy remains escalated (DR-0029 Q-G2-1); IM-2 is unchanged; DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
++
++### Validation
++Recorded in the validation commit that follows this correction commit.
++
++### Validation of the correction commit `9afbbbf` (appended 2026-10-20)
++Evidence is in `docs/reviews/raw/M3-T0-review07-findings-correction-evidence/`. Scratch, home and temporary paths are redacted. Environment: macOS 26.2 x86_64 (the M1/M2 reference host), Python 3.12.15, the locked `uv` environment.
++
++| Check | Result |
++|---|---|
++| Review 01–07 checks | `check_review01.py` … `check_review07.py`: 261/261 pass (`checks_after.log`; again in the reproducibility clone). Red before, at `72f9e00`: `check_review07.py` 3 of 23 fail, all on the docstring and records (`checks07_before_72f9e00.log`) |
++| Mutation tests | Control 261/261; 73/73 non-equivalent corruptions detected by a declared check (all R4–R6 mutants and the 14 R7 mutants); 2 declared equivalent with an establishing check (`mutation_check_review07.json`) |
++| Termination results | `t0_termination.py` regenerates `t0_termination_results.json` byte for byte (`termination_regenerated.log`); the docstring-free AST equals `72f9e00` (`ast_docstring_free_equal.log`) |
++| M1 Proof (`run_m1_proof.sh`, fresh clone at `9afbbbf`) | PASS, 9/9 steps; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`). A separate full pytest run in the same clone: 1185 passed, 3 warnings (`pytest_full.log`) |
++| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`) |
++| Pinned digests | The five pinned artifacts equal `86df2c3` byte for byte, and all 20 VAL-0019 spike digests match (`pinned_digests.log`) |
++| Production and protected files | `git diff --name-only 86df2c3 9afbbbf -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
++| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` is empty after each run, so all 97 tracked experiment files are byte-identical; the checks then pass 261/261 (`reproducibility_twice.log`) |
++| CI on `9afbbbf` | Run 39537301986 (https://github.com/guillermoMartin96/tars/actions/runs/39537301986): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`). CI does not collect the T0 checks (`testpaths = ["tests"]`) |
++| Platform limitations | All T0 measurements and checks ran on macOS x86_64 only. A-FP-1's gradual-underflow check and the A-FP-2 libm measurements are host measurements, not platform guarantees |

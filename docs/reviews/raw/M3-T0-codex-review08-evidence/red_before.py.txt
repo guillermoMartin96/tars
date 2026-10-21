@@ -1,0 +1,8 @@
+import subprocess,tarfile,io,shutil,sys
+from pathlib import Path
+R=Path.cwd();S=R/'review_scratch';root=S/'before72';root.mkdir(exist_ok=True)
+blob=subprocess.check_output(['git','archive','72f9e00','docs'])
+with tarfile.open(fileobj=io.BytesIO(blob)) as tf:tf.extractall(root,filter='data')
+p=Path('docs/science/experiments/m3-t0/check_review07.py');shutil.copy(R/p,root/p)
+r=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(root/p)],cwd=root,capture_output=True,text=True)
+(S/'red-before.log').write_text(r.stdout+r.stderr);print('exit',r.returncode,r.stdout.splitlines()[-1])

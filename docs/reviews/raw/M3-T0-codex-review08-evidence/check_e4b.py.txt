@@ -1,0 +1,32 @@
+import sys,math
+from fractions import Fraction as F
+from pathlib import Path
+import numpy as np
+sys.path.insert(0,str(Path.cwd()/'docs/science/experiments/m3-t0'))
+import t0_model as m
+import t0_termination as t
+T=math.ulp(0.);eta=F(T)/2
+count=0
+# Exact products at, below and above eta. Only <= eta claims zero force.
+for cd in [T,2*T,4*T,1e-300,1e-200,1e-100,1.,1e100,1e300]:
+ target=float(eta/F(cd))
+ for area in [math.nextafter(target,0.),target,math.nextafter(target,math.inf)]:
+  if not (0<area<math.inf and F(cd)*F(area)<=eta):continue
+  assert cd*area==0.
+  for h in [1e-6,25000.,180e6]:
+   r=np.array([m.A_WGS84+h,0.,0.]);v=np.array([0.,-11000.,0.])
+   for mass in [T,850.]:
+    force=m.acceleration(m.Config(mu=0.,drag=m.Drag(cd=cd,area_m2=area)),0.,r,v,mass)
+    assert np.array_equal(force,np.zeros(3)),(cd,area,h,mass,force)
+    count+=1
+print('E4b exact-product boundary zero-force states',count)
+# independent rational cap boundary, using E3 mixed error directly
+u=F(1,2**53);tiny=F(T);rho=max(F(row.rho0) for row in m.TABLE)
+# Use exact decimal table density, not binary64's upward/downward representation.
+rho=max(F(row[1]) for row in t.DEC_TABLE)
+def cap(L):
+ uf=2*L*u;nu=L*tiny;fr=(1+uf)*(1+u)**2;nr=(1+u)**2*rho*nu+eta
+ return (fr*(1+2*eta)*rho+nr)/2+eta
+limit=math.floor((F(5,8)-cap(0))/(cap(1)-cap(0)))
+assert limit==91910196476947 and cap(limit)<=F(5,8)<cap(limit+1)
+print('independent exact E4b cap limit',limit)

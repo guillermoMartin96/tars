@@ -1,0 +1,78 @@
+docs/science/experiments/m3-t0/check_review04.py:397:        lim = tt.stage_lower_heights(model_height(r0), b)
+docs/science/experiments/m3-t0/check_review04.py:740:    see it): stage_lower_heights defaults to `drag_envelope`, and the floors are computed
+docs/science/experiments/m3-t0/check_review04.py:742:    src = inspect.getsource(tt.stage_lower_heights)
+docs/science/experiments/m3-t0/check_review04.py:746:    assert "return stage_need(h0, b)\n" in body and "envelope=" not in body
+docs/science/experiments/m3-t0/check_review03.py:525:        lim = tt.stage_lower_heights(h0c, b)
+docs/science/experiments/m3-t0/mutation_check_review02.py:197:R7F1_NEW = "        and need(h0) = -M2, finite and >= 0. M2 depends"
+docs/science/experiments/m3-t0/mutation_check_review02.py:198:R7F1_OLD = "        and need(h0) = +inf, as for an unbounded envelope. M2 depends"
+docs/science/experiments/m3-t0/check_review07.py:10:R7-F1: the stage condition's docstring said an envelope of +inf always gives need(h0) =
+docs/science/experiments/m3-t0/check_review07.py:11:+inf. When M2 <= 0, `stage_lower_heights` returns before M4 and `stage_need` returns -M2,
+docs/science/experiments/m3-t0/check_review07.py:57:    """M2 written out again from the stage_lower_heights docstring without the outward pads
+docs/science/experiments/m3-t0/check_review07.py:79:def test_r7f1_review07_counterexample_has_finite_positive_need(b):
+docs/science/experiments/m3-t0/check_review07.py:83:    s = tt.stage_lower_heights(1.0, b)
+docs/science/experiments/m3-t0/check_review07.py:86:    need = tt.stage_need(1.0, b)
+docs/science/experiments/m3-t0/check_review07.py:100:        s = tt.stage_lower_heights(h0, b)
+docs/science/experiments/m3-t0/check_review07.py:103:        need = tt.stage_need(h0, b)
+docs/science/experiments/m3-t0/check_review07.py:116:        assert tt.stage_lower_heights(M2_EDGE, b)["M4"] is None
+docs/science/experiments/m3-t0/check_review07.py:117:        assert tt.stage_lower_heights(55749.394, b)["M4"] is not None
+docs/science/experiments/m3-t0/check_review07.py:121:def test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need(h0, b):
+docs/science/experiments/m3-t0/check_review07.py:124:    s = tt.stage_lower_heights(h0, b)
+docs/science/experiments/m3-t0/check_review07.py:127:    assert tt.stage_need(h0, b) == math.inf and not certified(tt.stage_need(h0, b))
+docs/science/experiments/m3-t0/check_review07.py:130:def test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need():
+docs/science/experiments/m3-t0/check_review07.py:134:    s = tt.stage_lower_heights(1e7, B_V1, envelope=lambda low, sp, b: MAX)
+docs/science/experiments/m3-t0/check_review07.py:137:    assert tt.stage_need(1e7, B_V1, envelope=lambda low, sp, b: MAX) == math.inf
+docs/science/experiments/m3-t0/check_review07.py:143:        s = tt.stage_lower_heights(h0, math.inf)
+docs/science/experiments/m3-t0/check_review07.py:146:        assert math.isfinite(tt.stage_need(h0, math.inf))
+docs/science/experiments/m3-t0/check_review07.py:147:    assert tt.stage_need(1e7, math.inf) < 0.0  # certified far above the floors
+docs/science/experiments/m3-t0/check_review07.py:156:            tt.stage_need(h0, b)
+docs/science/experiments/m3-t0/check_review07.py:159:            tt.stage_need(bad, B_V1)
+docs/science/experiments/m3-t0/check_review07.py:167:            s = tt.stage_lower_heights(h0, b)
+docs/science/experiments/m3-t0/check_review07.py:168:            need = tt.stage_need(h0, b)
+docs/science/experiments/m3-t0/check_review07.py:179:    """Detects: the universal "need(h0) = +inf" claim restored, or either path undocumented."""
+docs/science/experiments/m3-t0/check_review07.py:180:    doc = norm(tt.stage_lower_heights.__doc__)
+docs/science/experiments/m3-t0/check_review07.py:181:    assert "so need(h0) = +inf: the step is not certified at h0" not in doc  # the R7-F1 text
+docs/science/experiments/m3-t0/check_review07.py:183:        "certified at h0 only when need(h0) < 0",
+docs/science/experiments/m3-t0/check_review07.py:184:        "need(h0) >= 0 is a non-certification",
+docs/science/experiments/m3-t0/check_review07.py:186:        "need(h0) = -M2, finite and >= 0",
+docs/science/experiments/m3-t0/check_review07.py:189:        "need(h0) = 55 992.32 m",
+docs/science/experiments/m3-t0/check_review07.py:190:        "M2 > 0: need(h0) = -min(M2, M3, M4)",
+docs/science/experiments/m3-t0/check_review07.py:191:        "so need(h0) = +inf",
+docs/science/experiments/m3-t0/check_review07.py:206:    old = "so need(h0) = +∞: the step is **not certified** at h0."
+docs/science/experiments/m3-t0/check_review07.py:277:        assert tt.stage_need(floor, b) == row["need_at_floor_m"] < 0.0
+docs/science/experiments/m3-t0/check_review07.py:278:        assert tt.stage_lower_heights(floor, b) == row["at_floor"]
+docs/science/experiments/m3-t0/t0_termination.py:1155:    """Review 04 M3T0-R4-F1 (I-5 section 3): the root of need(h0) before the correction (the
+docs/science/experiments/m3-t0/t0_termination.py:1167:            if not stage_need(lo, b, envelope=env) > 0.0 > stage_need(hi, b, envelope=env):
+docs/science/experiments/m3-t0/t0_termination.py:1171:                lo, hi = (lo, mid) if stage_need(mid, b, envelope=env) < 0.0 else (mid, hi)
+docs/science/experiments/m3-t0/t0_termination.py:1173:        at = stage_lower_heights(floor, b)
+docs/science/experiments/m3-t0/t0_termination.py:1182:                "need_at_published_floor_m": stage_need(floor, b),
+docs/science/experiments/m3-t0/t0_termination.py:1185:                "two_decimals_nearest_is_sufficient": stage_need(round(floor, 2), b) < 0.0,
+docs/science/experiments/m3-t0/t0_termination.py:1191:        "note": "root brackets [lo, hi] with need(lo) > 0 > need(hi); 'review03_correction' "
+docs/science/experiments/m3-t0/t0_termination.py:1198:    non-decreasing in LIBM_ULP (through UF and nu), so need(h0) is too: if need < 0 at a
+docs/science/experiments/m3-t0/t0_termination.py:1222:                if stage_need(h, b, fp=fp_for(j)) >= 0.0:
+docs/science/experiments/m3-t0/t0_termination.py:1270:        lim = stage_lower_heights(h0c, bb)
+docs/science/experiments/m3-t0/t0_termination.py:1290:def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=None) -> dict:
+docs/science/experiments/m3-t0/t0_termination.py:1309:    is certified at h0 only when need(h0) < 0 (`stage_need`; the floor bisection and
+docs/science/experiments/m3-t0/t0_termination.py:1310:    `libm_sensitivity` accept nothing else). need(h0) >= 0 is a non-certification, reached
+docs/science/experiments/m3-t0/t0_termination.py:1313:        and need(h0) = -M2, finite and >= 0. M2 depends on h0 and fp only, not on b or the
+docs/science/experiments/m3-t0/t0_termination.py:1315:        when A0 = +inf: h0 = 1, b = 2^-1074 gives A0 = +inf, M3 = -inf and need(h0) =
+docs/science/experiments/m3-t0/t0_termination.py:1317:      - M2 > 0: need(h0) = -min(M2, M3, M4). An envelope of +inf at A0 or A2 (no finite
+docs/science/experiments/m3-t0/t0_termination.py:1320:        after it -inf, so need(h0) = +inf. Otherwise need(h0) is finite.
+docs/science/experiments/m3-t0/t0_termination.py:1365:def stage_need(h0: float, b: float, fp: dict | None = None, envelope=None) -> float:
+docs/science/experiments/m3-t0/t0_termination.py:1366:    """need(h0) = -min(M2, M3, M4) (or -M2 when the k2 input may already be below the edge):
+docs/science/experiments/m3-t0/t0_termination.py:1368:    s = stage_lower_heights(h0, b, fp, envelope)
+docs/science/experiments/m3-t0/t0_termination.py:1383:    energy, any velocity direction, no thrust. Bounds used (`stage_lower_heights`):
+docs/science/experiments/m3-t0/t0_termination.py:1396:    increases with h0. need(h0) = -min(M2, M3, M4) is therefore strictly decreasing and
+docs/science/experiments/m3-t0/t0_termination.py:1403:        def need(h0: float, b: float = b) -> float:
+docs/science/experiments/m3-t0/t0_termination.py:1404:            return stage_need(h0, b)
+docs/science/experiments/m3-t0/t0_termination.py:1407:        if not (need(lo) > 0.0 > need(hi)):
+docs/science/experiments/m3-t0/t0_termination.py:1411:            if need(mid) < 0.0:
+docs/science/experiments/m3-t0/t0_termination.py:1420:                "need_at_floor_m": need(hi),
+docs/science/experiments/m3-t0/t0_termination.py:1421:                "need_below_bracket_m": need(lo),
+docs/science/experiments/m3-t0/t0_termination.py:1422:                "at_floor": stage_lower_heights(hi, b),
+docs/science/experiments/m3-t0/check_review06.py:250:        need = tt.stage_need(h0, 0.0)
+docs/science/experiments/m3-t0/check_review06.py:365:    """Detects: the reviewer's stage_lower_heights(1e7, 2^-1074) ending in an incidental
+docs/science/experiments/m3-t0/check_review06.py:366:    OverflowError instead of bounds whose infinite parts make need(h0) = +inf (the step is
+docs/science/experiments/m3-t0/check_review06.py:368:    lim = tt.stage_lower_heights(1e7, TINY)
+docs/science/experiments/m3-t0/check_review06.py:372:    assert tt.stage_need(1e7, TINY) == math.inf
+docs/science/experiments/m3-t0/check_review06.py:401:            tt.stage_need(h0, b)
+docs/science/experiments/m3-t0/check_review06.py:414:        assert tt.stage_need(floors[name], b) < 0.0

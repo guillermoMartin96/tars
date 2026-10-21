@@ -1,0 +1,35 @@
+..................F....                                                  [100%]
+=================================== FAILURES ===================================
+______________________ test_r7f1_records_state_both_paths ______________________
+
+    def test_r7f1_records_state_both_paths():
+        """Detects: the records keeping need = +inf as the only non-certification, or the
+        Review 06 record rewritten instead of amended."""
+        rev = (ROOT / "docs/reviews/M3-T0-review-06.md").read_text()
+        amend = rev.index("### Amendment (Authorization I-10, Review 07 M3T0-R7-F1)")
+        old = "so need(h0) = +∞: the step is **not certified** at h0."
+        assert rev[:amend].count(old) == 1  # preserved above the amendment
+        tail = rev[amend:]
+        for phrase in ("need = −M2", "finite and ≥ 0", "55 749.393", "need < 0"):
+            assert phrase in tail, phrase
+        for name in ("DR-0029", "VAL-0019"):
+            text = c4.record(name)
+            assert "need = −M2, finite and ≥ 0" in text, name
+            assert "M3T0-R7-F1" in text, name
+            log = re.search(
+                r"<!-- review06-correction-log -->.*<!-- /review07-correction-log -->", text, re.S
+            )
+            body = text[: log.start()] + text[log.end() :]  # the logs keep or quote the old text
+            assert "need = +∞" in log.group(0), name
+>           assert not re.search(
+                r"certifies nothing \((?:the stage condition then reports )?need = \+∞", body
+            ), name
+E           AssertionError: DR-0029
+E           assert not <re.Match object; span=(16960, 17021), match='certifies nothing (the stage condition then repor>
+E            +  where <re.Match object; span=(16960, 17021), match='certifies nothing (the stage condition then repor> = <function search at 0x1111ac400>('certifies nothing \\((?:the stage condition then reports )?need = \\+∞', '# Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic tes....99999999999886 at subnormal densities. Both are now stated with their scope.\n<!-- /review05-correction-log -->\n\n\n')
+E            +    where <function search at 0x1111ac400> = re.search
+
+docs/science/experiments/m3-t0/check_review07.py:220: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_records_state_both_paths
+1 failed, 22 passed in 1.13s

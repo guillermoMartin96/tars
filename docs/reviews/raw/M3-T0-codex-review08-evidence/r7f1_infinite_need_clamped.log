@@ -1,0 +1,97 @@
+........FFFFF..........                                                  [100%]
+=================================== FAILURES ===================================
+_ test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[55749.394-5e-324] _
+
+h0 = 55749.394, b = 5e-324
+
+    @pytest.mark.parametrize("h0, b", [(55749.394, TINY), (6e4, TINY), (1e5, 0.0), (1e7, TINY)])
+    def test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need(h0, b):
+        """Detects: the M2 > 0 path losing the +inf of an unbounded envelope (need clamped or
+        made finite)."""
+        s = tt.stage_lower_heights(h0, b)
+        assert s["M2"] > 0.0 and s["M4"] == -math.inf
+        assert math.inf in (s["A0"], s["A2"])
+>       assert tt.stage_need(h0, b) == math.inf and not certified(tt.stage_need(h0, b))
+E       assert (1.7976931348623157e+308 == inf)
+E        +  where 1.7976931348623157e+308 = <function stage_need at 0x10b25fe20>(55749.394, 5e-324)
+E        +    where <function stage_need at 0x10b25fe20> = tt.stage_need
+E        +  and   inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:127: AssertionError
+_ test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[60000.0-5e-324] _
+
+h0 = 60000.0, b = 5e-324
+
+    @pytest.mark.parametrize("h0, b", [(55749.394, TINY), (6e4, TINY), (1e5, 0.0), (1e7, TINY)])
+    def test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need(h0, b):
+        """Detects: the M2 > 0 path losing the +inf of an unbounded envelope (need clamped or
+        made finite)."""
+        s = tt.stage_lower_heights(h0, b)
+        assert s["M2"] > 0.0 and s["M4"] == -math.inf
+        assert math.inf in (s["A0"], s["A2"])
+>       assert tt.stage_need(h0, b) == math.inf and not certified(tt.stage_need(h0, b))
+E       assert (1.7976931348623157e+308 == inf)
+E        +  where 1.7976931348623157e+308 = <function stage_need at 0x10b25fe20>(60000.0, 5e-324)
+E        +    where <function stage_need at 0x10b25fe20> = tt.stage_need
+E        +  and   inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:127: AssertionError
+_ test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[100000.0-0.0] _
+
+h0 = 100000.0, b = 0.0
+
+    @pytest.mark.parametrize("h0, b", [(55749.394, TINY), (6e4, TINY), (1e5, 0.0), (1e7, TINY)])
+    def test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need(h0, b):
+        """Detects: the M2 > 0 path losing the +inf of an unbounded envelope (need clamped or
+        made finite)."""
+        s = tt.stage_lower_heights(h0, b)
+        assert s["M2"] > 0.0 and s["M4"] == -math.inf
+        assert math.inf in (s["A0"], s["A2"])
+>       assert tt.stage_need(h0, b) == math.inf and not certified(tt.stage_need(h0, b))
+E       assert (1.7976931348623157e+308 == inf)
+E        +  where 1.7976931348623157e+308 = <function stage_need at 0x10b25fe20>(100000.0, 0.0)
+E        +    where <function stage_need at 0x10b25fe20> = tt.stage_need
+E        +  and   inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:127: AssertionError
+_ test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[10000000.0-5e-324] _
+
+h0 = 10000000.0, b = 5e-324
+
+    @pytest.mark.parametrize("h0, b", [(55749.394, TINY), (6e4, TINY), (1e5, 0.0), (1e7, TINY)])
+    def test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need(h0, b):
+        """Detects: the M2 > 0 path losing the +inf of an unbounded envelope (need clamped or
+        made finite)."""
+        s = tt.stage_lower_heights(h0, b)
+        assert s["M2"] > 0.0 and s["M4"] == -math.inf
+        assert math.inf in (s["A0"], s["A2"])
+>       assert tt.stage_need(h0, b) == math.inf and not certified(tt.stage_need(h0, b))
+E       assert (1.7976931348623157e+308 == inf)
+E        +  where 1.7976931348623157e+308 = <function stage_need at 0x10b25fe20>(10000000.0, 5e-324)
+E        +    where <function stage_need at 0x10b25fe20> = tt.stage_need
+E        +  and   inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:127: AssertionError
+_____ test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need _____
+
+    def test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need():
+        """Detects: an overflow of a stage value (with a finite envelope) not rounded outward to
+        +-inf. The injected envelope returns the largest binary64: A0 exceeds it, so the speeds
+        after it are +inf and M3 = M4 = -inf."""
+        s = tt.stage_lower_heights(1e7, B_V1, envelope=lambda low, sp, b: MAX)
+        assert s["M2"] > 0.0 and s["A0"] == math.inf and s["s2"] == math.inf
+        assert s["M3"] == -math.inf and s["M4"] == -math.inf
+>       assert tt.stage_need(1e7, B_V1, envelope=lambda low, sp, b: MAX) == math.inf
+E       assert 1.7976931348623157e+308 == inf
+E        +  where 1.7976931348623157e+308 = <function stage_need at 0x10b25fe20>(10000000.0, 25.757575757575758, envelope=<function test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need.<locals>.<lambda> at 0x10b3762a0>)
+E        +    where <function stage_need at 0x10b25fe20> = tt.stage_need
+E        +  and   inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:137: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[55749.394-5e-324]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[60000.0-5e-324]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[100000.0-0.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_unbounded_envelope_with_m2_positive_gives_infinite_need[10000000.0-5e-324]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need
+5 failed, 18 passed in 1.27s

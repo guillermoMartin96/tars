@@ -1,0 +1,19 @@
+"""Review 08 falsifier for the newly stated universal finite-path claim.
+Expected failure reproduces a documentation defect, not a proposed algorithm change.
+"""
+import math,sys
+from pathlib import Path
+import numpy as np
+import pytest
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'docs/science/experiments/m3-t0'))
+import t0_model as m
+import t0_termination as t
+@pytest.mark.parametrize('b',[t.B_V1,math.inf])
+def test_finite_need_for_an_exterior_bound_state_below_beta(b):
+ r=np.array([math.nextafter(m.A_WGS84,math.inf),0.,0.])
+ h=m.geodetic_iterative(r)[1]
+ assert r[0]>m.A_WGS84 and 0<h<t.FP['beta_m']
+ assert -m.MU/float(np.linalg.norm(r))<0
+ # R7 contract says finite non-certification on the M2 <= 0 path and that
+ # drag-free b has finite need on both paths. This input instead raises.
+ assert math.isfinite(t.stage_need(h,b))

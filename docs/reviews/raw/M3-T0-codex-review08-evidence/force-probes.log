@@ -1,0 +1,16 @@
+STRICT EXTERIOR [6378137.000000001, 0.0, 0.0] exact h 9.31322574615478515625E-10 computed h 9.313225746154785e-10 beta 8.877691069434738e-09 energy -62494807.15136723 rho 1.2249999999998427
+need exception 25.757575757575758 ValueError the envelope is defined above the lower edge only
+need exception inf ValueError the envelope is defined above the lower edge only
+Traceback (most recent call last):
+  File "<review-root>/force_probes.py", line 25, in <module>
+    drag=t.model_drag(r,v,mass);env=t.drag_envelope(low,speed,b)
+         ^^^^^^^^^^^^^^^^^^^^^^
+  File "<clone>/docs/science/experiments/m3-t0/t0_termination.py", line 1013, in model_drag
+    return _up(sum(Decimal(float(x)) ** 2 for x in vec).sqrt() * (1 + PAD))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<clone>/docs/science/experiments/m3-t0/t0_termination.py", line 516, in _up
+    x = _exact(q)
+        ^^^^^^^^^
+  File "<clone>/docs/science/experiments/m3-t0/t0_termination.py", line 500, in _exact
+    raise ValueError("NaN has no binary64 bound")
+ValueError: NaN has no binary64 bound

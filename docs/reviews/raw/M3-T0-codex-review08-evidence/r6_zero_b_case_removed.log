@@ -1,0 +1,897 @@
+COMMAND ['<clone>/.venv/bin/python', '-m', 'pytest', '-q', '-p', 'no:cacheprovider', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review01.py', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review02.py', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review03.py', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review04.py', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review05.py', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review06.py', '<review-root>/mutants/r6_zero_b_case_removed/docs/science/experiments/m3-t0/check_review07.py', '-k', 'test_r6f1_reviewer_counterexample_masses_are_covered or test_r6f1_zero_b_bound_covers_every_c1_mass or test_r6f1_exhaustive_small_masses_on_adversarial_shapes or test_r6f1_transition_from_zero_b_on_each_shape or test_r6f1_model_drag_within_envelope_at_zero_b or test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation or test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down']
+FFFFFFFFFFFFFFFF.FFFFFF                                                  [100%]
+=================================== FAILURES ===================================
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[1] ____________
+
+k = 1
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[2] ____________
+
+k = 2
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[3] ____________
+
+k = 3
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[4] ____________
+
+k = 4
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[5] ____________
+
+k = 5
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[6] ____________
+
+k = 6
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[7] ____________
+
+k = 7
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[8] ____________
+
+k = 8
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[9] ____________
+
+k = 9
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[10] ___________
+
+k = 10
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[11] ___________
+
+k = 11
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[12] ___________
+
+k = 12
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[13] ___________
+
+k = 13
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[14] ___________
+
+k = 14
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[15] ___________
+
+k = 15
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_reviewer_counterexample_masses_are_covered[16] ___________
+
+k = 16
+
+    @pytest.mark.parametrize("k", range(1, 18))
+    def test_r6f1_reviewer_counterexample_masses_are_covered(k):
+        """Detects: the b = 0 case of C1 missing (ZeroDivisionError, the R6-F1 defect) or too
+        small. mass = k x 2^-1074, cd 2.2, area 15 m^2 at r = (186 378 137, 0, 0) m (true height
+        exactly 180 000 000 m), v = 0. k <= 16 gives b = 0 and k = 17 gives b = 2^-1074."""
+        mass = k * TINY
+        b = mass / (CD * AREA)
+        assert b == (0.0 if k <= 16 else TINY)
+        assert o.true_height(R5_R) == D(R5_LOW)
+        a = c5.model_drag_norm(R5_R, np.zeros(3), mass, CD, AREA)
+        assert 0 < a < D(MAX)  # finite, nonzero drag
+        actual = Fraction(CD) * Fraction(AREA) / Fraction(mass)
+>       r = tt.inverse_ballistic_bound(b, CD, AREA, PHI)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_________________ test_r6f1_zero_b_bound_covers_every_c1_mass __________________
+
+    def test_r6f1_zero_b_bound_covers_every_c1_mass():
+        """Detects: R(0) below the supremum of cd area / mass over the C1 masses that give b =
+        0 (attained at the smallest mass 2^-1074 whenever fl(cd area) >= 2), or b = 0 rejected
+        for a reachable shape."""
+        reachable = 0
+        for cd, area in SHAPES:
+            p = cd * area
+            prod = Fraction(cd) * Fraction(area)
+>           r0 = tt.inverse_ballistic_bound(0.0, cd, area, PHI)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:124: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+___________ test_r6f1_exhaustive_small_masses_on_adversarial_shapes ____________
+
+    def test_r6f1_exhaustive_small_masses_on_adversarial_shapes():
+        """Detects: any C1 vehicle with mass k x 2^-1074 (k <= 20 000) whose cd area / mass
+        exceeds R(b), b = 0 included (the Review 05 sweep filtered b > 0)."""
+        zeros = 0
+        for cd, area in SHAPES:
+            p = cd * area
+            prod = Fraction(cd) * Fraction(area)
+            cache: dict[float, Fraction] = {}
+            for k in range(1, 20_001):
+                mass = k * TINY
+                b = mass / p
+                if not b < math.inf:
+                    continue
+                if b not in cache:
+>                   cache[b] = tt.inverse_ballistic_bound(b, cd, area, PHI)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+________________ test_r6f1_transition_from_zero_b_on_each_shape ________________
+
+    def test_r6f1_transition_from_zero_b_on_each_shape():
+        """Detects: a gap or a decrease at the b = 0 / b = 2^-1074 transition: the largest mass
+        giving b = 0 and its successor are covered, and R(0) >= R(2^-1074) >= R(2 x 2^-1074)."""
+        for cd, area in SHAPES:
+            prod = Fraction(cd) * Fraction(area)
+>           r = [tt.inverse_ballistic_bound(b, cd, area, PHI) for b in (0.0, TINY, 2 * TINY)]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+________________ test_r6f1_model_drag_within_envelope_at_zero_b ________________
+
+    def test_r6f1_model_drag_within_envelope_at_zero_b():
+        """Detects: the b = 0 bound not applied to both parts of the envelope or too small in
+        the force, for C1 vehicles with b = 0 on several shapes (states whose force overflows
+        are outside the domain)."""
+        checked = 0
+        for cd, area in SHAPES:
+            top = largest_zero_mass(cd * area)
+            if top is None:
+                continue
+            for mass in sorted({x for x in (TINY, 3 * TINY, top) if x <= top}):
+                assert mass / (cd * area) == 0.0
+                for r, s in STATES:
+                    v = -s * c4.east(0.0)
+                    with np.errstate(over="ignore", invalid="ignore"):
+                        vec = m.acceleration(
+                            m.Config(mu=0.0, drag=m.Drag(cd=cd, area_m2=area)), 0.0, r, v, mass
+                        )
+                    if not np.all(np.isfinite(vec)):
+                        continue
+                    a = c5.model_drag_norm(r, v, mass, cd, area)
+                    low = tt._dn(o.true_height(r))
+>                   env = tt.drag_envelope(low, c4.up(s) if s else 0.0, 0.0, cd=cd, area=area)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:215: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:992: in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:928: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_______ test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation ________
+
+    def test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation():
+        """Detects: b_R at b = 0 rounded the unsafe way, or the b = 0 bound applied to one part
+        of the envelope only."""
+        for cd, area in SHAPES[:6]:
+            ratio = r_zero_second(cd, area)
+            for low, s in ((R5_LOW, 0.0), (1.0e8, 11_000.0), (120_000.0, 7_800.0)):
+>               env = tt.drag_envelope(low, s, 0.0, cd=cd, area=area)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:992: in drag_envelope
+    b_r = envelope_ballistic_coefficient(b, cd, area, fp)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:928: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+_____ test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down ______
+
+    def test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down():
+        """b_R = phi_B / R(0), rounded down: positive (no division by zero downstream) and <= the
+        exact quotient."""
+        for cd, area in SHAPES:
+            q = PHI / r_zero_second(cd, area)
+>           b_r = tt.envelope_ballistic_coefficient(0.0, cd, area, tt.FP)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:928: in envelope_ballistic_coefficient
+    r = inverse_ballistic_bound(b, cd, area, phi)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+docs/science/experiments/m3-t0/t0_termination.py:914: in inverse_ballistic_bound
+    r1 = p_ratio * max((1 + U) / bq, 1 / (bq - ETA0))
+                       ^^^^^^^^^^^^
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:615: in forward
+    return monomorphic_operator(a, b)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+a = Fraction(9007199254740993, 9007199254740992), b = Fraction(0, 1)
+
+    def _div(a, b):
+        """a / b"""
+        # Same as _mul(), with inversed b.
+        nb, db = b._numerator, b._denominator
+        if nb == 0:
+>           raise ZeroDivisionError('Fraction(%s, 0)' % db)
+E           ZeroDivisionError: Fraction(1, 0)
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:763: ZeroDivisionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[1]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[2]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[3]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[4]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[5]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[6]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[7]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[8]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[9]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[10]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[11]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[12]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[13]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[14]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[15]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_reviewer_counterexample_masses_are_covered[16]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_bound_covers_every_c1_mass
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_exhaustive_small_masses_on_adversarial_shapes
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_transition_from_zero_b_on_each_shape
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_model_drag_within_envelope_at_zero_b
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_envelope_recomputed_by_a_second_implementation
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f1_zero_b_ballistic_coefficient_is_positive_and_rounded_down
+22 failed, 1 passed, 238 deselected in 2.66s

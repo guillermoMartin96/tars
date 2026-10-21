@@ -1,0 +1,282 @@
+COMMAND ['<clone>/.venv/bin/python', '-m', 'pytest', '-q', '-p', 'no:cacheprovider', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review01.py', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review02.py', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review03.py', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review04.py', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review05.py', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review06.py', '<review-root>/mutants/r6f2_up_overflow_restored/docs/science/experiments/m3-t0/check_review07.py', '-k', 'test_r6f2_up_and_dn_at_extremes or test_r6f2_up_and_dn_bracket_random_rationals']
+FFF...............F.F                                                    [100%]
+=================================== FAILURES ===================================
+_______ test_r6f2_up_and_dn_at_extremes[q0-inf-1.7976931348623157e+308] ________
+
+q = Fraction(1797693134862315907729305190789024733617976978942306572734300811577326758055009631327084773224075360211201138...9453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216, 1)
+up = inf, dn = 1.7976931348623157e+308
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:519: in _up
+    f = float(x)  # correctly rounded and finite here
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(1797693134862315907729305190789024733617976978942306572734300811577326758055009631327084773224075360211201138...9453082952085005768838150682342462881473913110540827237163350510684586298239947245938479716304835356329624224137216, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+______ test_r6f2_up_and_dn_at_extremes[q1--1.7976931348623157e+308--inf] _______
+
+q = Decimal('-1.79769313486231590772930519078902473361797697894230657273430E+308')
+up = -1.7976931348623157e+308, dn = -inf
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:519: in _up
+    f = float(x)  # correctly rounded and finite here
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(-179769313486231590772930519078902473361797697894230657273430000000000000000000000000000000000000000000000000...0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+_______ test_r6f2_up_and_dn_at_extremes[q2-inf-1.7976931348623157e+308] ________
+
+q = Decimal('1.79769313486231590772930519078902473361797697894230657273430E+308')
+up = inf, dn = 1.7976931348623157e+308
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:519: in _up
+    f = float(x)  # correctly rounded and finite here
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(1797693134862315907729305190789024733617976978942306572734300000000000000000000000000000000000000000000000000...0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+_ test_r6f2_up_and_dn_at_extremes[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000-inf-1.7976931348623157e+308] _
+
+q = 100000000000000000...0000000000000000000, up = inf
+dn = 1.7976931348623157e+308
+
+    @pytest.mark.parametrize(
+        "q, up, dn",
+        [
+            (Fraction(2**1024), math.inf, MAX),
+            (-(D(2) ** 1024), -MAX, -math.inf),
+            (D(2) ** 1024, math.inf, MAX),
+            (Fraction(MAX), MAX, MAX),
+            (-Fraction(MAX), -MAX, -MAX),
+            (Fraction(MAX) + Fraction(1, 2), math.inf, MAX),
+            (-Fraction(MAX) - Fraction(1, 2), -MAX, -math.inf),
+            (D("Infinity"), math.inf, math.inf),
+            (D("-Infinity"), -math.inf, -math.inf),
+            (math.inf, math.inf, math.inf),
+            (-math.inf, -math.inf, -math.inf),
+            (Fraction(1, 2**1076), TINY, 0.0),
+            (-Fraction(1, 2**1076), 0.0, -TINY),
+            (ETA0, TINY, 0.0),
+            (Fraction(0), 0.0, 0.0),
+            (D("-0"), 0.0, 0.0),
+            (-0.0, 0.0, 0.0),
+            (Fraction(1, 3), math.nextafter(1 / 3, 1.0), 1 / 3),
+            (10**400, math.inf, MAX),
+            (D("1e-400"), TINY, 0.0),
+        ],
+    )
+    def test_r6f2_up_and_dn_at_extremes(q, up, dn):
+        """Detects: OverflowError on a finite rational beyond the binary64 range, -inf for a
+        negative one (not an upper bound's smallest binary64 >= q), an exception on an infinite
+        Decimal, or -0.0 escaping. Expected values from exact comparison."""
+>       got_up, got_dn = tt._up(q), tt._dn(q)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:519: in _up
+    f = float(x)  # correctly rounded and finite here
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000...0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+_________________ test_r6f2_up_and_dn_bracket_random_rationals _________________
+
+    def test_r6f2_up_and_dn_bracket_random_rationals():
+        """_dn(q) <= q <= _up(q), each the nearest binary64 on its side, over 20 000 rationals
+        from below the subnormal range to beyond the largest binary64, both signs."""
+        rng = np.random.default_rng(606)
+        for _ in range(20_000):
+            e = int(rng.integers(-1100, 1030))
+            q = Fraction(int(rng.integers(1, 2**62)), 2**62) * Fraction(2) ** e
+            q = -q if rng.random() < 0.5 else q
+            for v in (q, D(q.numerator) / D(q.denominator) if abs(e) < 300 else q):
+>               hi, lo = tt._up(v), tt._dn(v)
+                         ^^^^^^^^^
+
+docs/science/experiments/m3-t0/check_review06.py:324: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+docs/science/experiments/m3-t0/t0_termination.py:519: in _up
+    f = float(x)  # correctly rounded and finite here
+        ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Fraction(-484971241179166782970968747056132954313471086583890936019319377361806633158779999295174231938414659279083407...5094816060422141308065530623571314095883043060326147600486260622215917333109834740219955517675712692430178227322880, 1)
+
+    def __float__(self):
+        """float(self) = self.numerator / self.denominator
+    
+        It's important that this conversion use the integer's "true"
+        division rather than casting one side to float before dividing
+        so that ratios of huge integers convert without overflowing.
+    
+        """
+>       return int(self.numerator) / int(self.denominator)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       OverflowError: integer division result too large for a float
+
+<home>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/numbers.py:316: OverflowError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q0-inf-1.7976931348623157e+308]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q1--1.7976931348623157e+308--inf]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[q2-inf-1.7976931348623157e+308]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_at_extremes[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000-inf-1.7976931348623157e+308]
+FAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_bracket_random_rationals
+5 failed, 16 passed, 240 deselected in 1.64s

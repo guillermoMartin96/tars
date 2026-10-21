@@ -1,0 +1,23 @@
+COMMAND ['sh', '-c', 'uname -a; sw_vers; sysctl -n machdep.cpu.brand_string; git branch -avv; git remote -v; git log -4 --oneline']
+Darwin Guillermos-MacBook-Pro.local 25.2.0 Darwin Kernel Version 25.2.0: Tue Nov 18 21:09:34 PST 2025; root:xnu-12377.61.12~1/RELEASE_X86_64 x86_64
+ProductName:		macOS
+ProductVersion:		26.2
+BuildVersion:		25C56
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+* (HEAD detached at 95fff22)                           95fff22 docs(M3-T0): record validation of the Review 07 correction commit
+  main                                                 86df2c3 [origin/main] Merge pull request #4: M3: Accept planning baseline and verification evidence
+  remotes/origin/HEAD                                  -> origin/main
+  remotes/origin/investigation/rev-012-gmat-epoch      ba42395 docs(REV-012): results, VAL-0010 root cause, DR-0016 comparison method
+  remotes/origin/main                                  86df2c3 Merge pull request #4: M3: Accept planning baseline and verification evidence
+  remotes/origin/milestone-1-orbit                     abe08d6 proof(M1): final verification PASS at 18e14a3; Proof record updated (VAL-0007, REV-012 deferred)
+  remotes/origin/milestone-2-propulsion-f90f9ba4       f05bc1e docs(review): T8 round 3 pre-merge PASS; T8-F6 (Low) accepted: cite the source of forward requirements
+  remotes/origin/milestone-3-planning                  93e356a docs(M3): record the owner's acceptance of the M3 planning checkpoint at 865210c (I-13); merge, T0 and later not authorized
+  remotes/origin/milestone-3-t0-reference-spike        95fff22 docs(M3-T0): record validation of the Review 07 correction commit
+  remotes/origin/research/flight-software-architecture 2d6d7e5 docs(research): record planning constraint PC-1; AT-1 investigated as a hypothesis; AT-1..AT-7 carried forward open
+  remotes/origin/review/m1-independent-audit           427d976 proof(M1): record independent-audit remediation and passing validation
+origin	https://github.com/guillermoMartin96/tars.git (fetch)
+origin	https://github.com/guillermoMartin96/tars.git (push)
+95fff22 docs(M3-T0): record validation of the Review 07 correction commit
+9afbbbf docs(M3-T0): correct Review 07 findings R7-F1 and R7-F2 (documentation only)
+72f9e00 docs(M3-T0): record independent Review 07 (Codex, REQUEST_CHANGES)
+0357196 docs(M3-T0): record validation of the Review 06 correction commit

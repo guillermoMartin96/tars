@@ -1,0 +1,59 @@
+import sys,math,json,ast,subprocess,random
+from pathlib import Path
+from fractions import Fraction as F
+from decimal import Decimal as D, localcontext
+R=Path.cwd(); sys.path.insert(0,str(R/'docs/science/experiments/m3-t0'))
+import t0_termination as t
+import t0_model as m
+import numpy as np
+T=math.ulp(0.0); MAX=sys.float_info.max
+print('HEIGHT BOUNDARIES')
+for h in [-6.4e6,-1.,-0.,0.,T,t.FP['beta_m'],math.nextafter(t.FP['beta_m'],math.inf),1.,55749.39300208564,math.nextafter(55749.39300208564,math.inf),1e100,1e300,MAX]:
+ for b in [0.,T,25.757575757575758,math.inf]:
+  try:
+   s=t.stage_lower_heights(h,b); n=t.stage_need(h,b)
+   print(h,b,n,s['M2'],s['A0'],s['A2'])
+   assert not math.isnan(n)
+   if n<0: assert min(s[k] for k in ['M2','M3','M4'])>0
+  except Exception as e: print(h,b,type(e).__name__,str(e))
+print('surface point',m.geodetic_iterative(np.array([m.A_WGS84,0.,0.])))
+# Derive M2 independently at 100-digit precision, then locate sign boundary using floats.
+def m2(h):
+ with localcontext() as c:
+  c.prec=100; u=D(t.FP['u']); al=D(t.FP['alpha']); be=D(t.FP['beta_m']); H=(D(h)-be)/(1+al); r=D(m.A_WGS84)+(D(h)+be)/(1-al); v=(2*D(m.MU)/(D(t.FP['b_lower_m'])+H)).sqrt()
+  return (1-al)*(H-5*(1+u)**2*v-u*r-D(T))-be
+edge=55749.39300208564
+print('independent edge',edge,m2(edge),m2(math.nextafter(edge,math.inf)))
+print('counterexamples')
+for name in ['envelope_counterexample','r3f1_counterexample','r4f1_counterexample','r5f1_counterexamples','r6f1_counterexamples','zero_force_cap']:
+ print(name,json.dumps(getattr(t,name)(),sort_keys=True))
+print('IM2',t.stage_need(111511.96,math.inf),t.stage_need(111511.97,math.inf))
+# Independently bound actual ratios at exact binary64 C1 and C2 endpoints, varying all scales.
+rng=random.Random(80621); count=[0,0]; zero=0
+shapes=[(2.2,15.),(T,1.),(1.,T),(1e-200,1e-124),(1e300,1e-300),(1e-300,1e300),(MAX,T),(T,MAX),(1e150,1e150)]
+for _ in range(2500):
+ cd,area=rng.choice(shapes) if rng.random()<.5 else (math.ldexp(rng.uniform(.5,1),rng.randrange(-1073,1024)),math.ldexp(rng.uniform(.5,1),rng.randrange(-1073,1024)))
+ mass=rng.choice([T,2*T,16*T,17*T,30*T,1.,MAX]); prod=cd*area
+ if 0<prod<math.inf:
+  b=mass/prod
+  if math.isfinite(b):
+   assert t.inverse_ballistic_bound(b,cd,area,F(t.FP['phi_B']))>=F(cd)*F(area)/F(mass)
+   count[0]+=1
+ b=rng.choice([T,2*T,1e-310,1.,1e100,MAX]); q=b*cd; mass=q*area
+ if 0<q<math.inf and 0<mass<math.inf:
+  assert t.inverse_ballistic_bound(b,cd,area,F(t.FP['phi_B']))>=F(cd)*F(area)/F(mass)
+  count[1]+=1
+print('exact C1/C2 checks',count)
+print('E4b caps',[(x,str(t.rounding_allowances(x)['zero_force_c0_max'])) for x in [91910196476946,91910196476947,91910196476948]])
+# Compare whole executable AST rather than source text.
+class Strip(ast.NodeTransformer):
+ def generic_visit(self,node):
+  super().generic_visit(node)
+  if isinstance(node,(ast.Module,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and node.body and isinstance(node.body[0],ast.Expr) and isinstance(node.body[0].value,ast.Constant) and isinstance(node.body[0].value.value,str): node.body.pop(0)
+  return node
+p='docs/science/experiments/m3-t0/t0_termination.py'; old=subprocess.check_output(['git','show','72f9e00:'+p],text=True)
+assert ast.dump(Strip().visit(ast.parse(old)))==ast.dump(Strip().visit(ast.parse(Path(p).read_text())))
+print('AST equal')
+for rev in ['06','07']:
+ p=f'docs/reviews/M3-T0-review-{rev}.md'; old=subprocess.check_output(['git','show','72f9e00:'+p],text=True); assert Path(p).read_text().startswith(old)
+print('historical records append-only')

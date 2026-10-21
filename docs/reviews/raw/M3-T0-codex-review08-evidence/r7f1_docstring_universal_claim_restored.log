@@ -1,0 +1,31 @@
+.................F.....                                                  [100%]
+=================================== FAILURES ===================================
+___________ test_r7f1_docstring_states_both_non_certification_paths ____________
+
+    def test_r7f1_docstring_states_both_non_certification_paths():
+        """Detects: the universal "need(h0) = +inf" claim restored, or either path undocumented."""
+        doc = norm(tt.stage_lower_heights.__doc__)
+        assert "so need(h0) = +inf: the step is not certified at h0" not in doc  # the R7-F1 text
+        for phrase in (
+            "certified at h0 only when need(h0) < 0",
+            "need(h0) >= 0 is a non-certification",
+            "M2 <= 0",
+            "need(h0) = -M2, finite and >= 0",
+            "M2 depends on h0 and fp only, not on b or the envelope",
+            "M2 <= 0 up to h0 = 55 749.393 m",
+            "need(h0) = 55 992.32 m",
+            "M2 > 0: need(h0) = -min(M2, M3, M4)",
+            "so need(h0) = +inf",
+            "outside the binary64 range",
+            "b = +inf is drag-free (envelope 0) and has a finite need on both paths",
+            "raises ValueError on both paths",
+            "no value changed",
+        ):
+>           assert phrase in doc, phrase
+E           AssertionError: need(h0) = -M2, finite and >= 0
+E           assert 'need(h0) = -M2, finite and >= 0' in 'Bounds for an RK4 step from any bound committed state whose *computed* geodetic height is h0 (E1-E6; the simulator on...s (the envelope is evaluated for A0 before the M2 test). This describes the existing implementation; no value changed.'
+
+docs/science/experiments/m3-t0/check_review07.py:197: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_docstring_states_both_non_certification_paths
+1 failed, 22 passed in 1.19s

@@ -1,0 +1,13 @@
+"""Injected-envelope propagation case from Review 08: +inf at A0, 0 afterwards (not a physical force)."""
+import math, sys
+sys.path.insert(0, sys.argv[1])
+import t0_termination as t
+def env(low, s, b, calls=[0]):
+    calls[0] += 1
+    return math.inf if calls[0] == 1 else 0.0
+st = t.stage_lower_heights(1e7, t.B_V1, envelope=env)
+print({k: st[k] for k in ("A0", "M2", "M3", "A2", "M4")})
+need = -min(st["M2"], st["M3"], st["M4"])
+need_mut = -min(st["M2"], st["M4"])
+print("need (committed formula) =", need, "certified:", need < 0)
+print("need (M3 dropped)        =", need_mut, "certified:", need_mut < 0)

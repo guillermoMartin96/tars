@@ -1,0 +1,27 @@
+from pathlib import Path
+import subprocess,sys,hashlib,json,platform,os
+R=Path.cwd(); S=R/'review_scratch'; D=R/'docs/science/experiments/m3-t0'; P=str(R/'.venv/bin/python')
+def run(label,args,cwd=R):
+ with (S/(label+'.log')).open('w') as f:
+  f.write('COMMAND '+repr(args)+'\n'); f.flush(); p=subprocess.run(args,cwd=cwd,stdout=f,stderr=subprocess.STDOUT)
+ print(label,p.returncode,flush=True); return p.returncode
+run('environment',['sh','-c','uname -a; sw_vers; sysctl -n machdep.cpu.brand_string; git branch -avv; git remote -v; git log -4 --oneline'])
+run('digests',[P,'-I',str(R/'docs/reviews/raw/M3-T0-review07-findings-correction-evidence/digests.py.txt'),str(R)])
+g=R.parent/'GMAT R2026a'; hits=list(g.rglob('EarthExponentialDensity*')); hits+=list(g.rglob('*Exponential*'))
+with (S/'gmat-digests.log').open('w') as f:
+ for p in [g/'bin/GmatConsole',*dict.fromkeys(hits)]:
+  if p.is_file(): f.write(str(p)+' '+hashlib.sha256(p.read_bytes()).hexdigest()+'\n')
+run('gmat-m1',[P,'toolbox/scripts/gmat_m1.py','compare'])
+run('gmat-m2',[P,'toolbox/scripts/gmat_m2.py','compare'])
+run('ruff',[P,'-m','ruff','check','.'])
+run('ast',[P,'-I',str(R/'docs/reviews/raw/M3-T0-review07-findings-correction-evidence/ast_equal.py.txt'),str(R)])
+run('implementer-probe',[P,'-I',str(R/'docs/reviews/raw/M3-T0-review07-findings-correction-evidence/adversarial_r7.py.txt'),str(D)])
+files=[p for p in D.rglob('*') if p.is_file() and '__pycache__' not in str(p)]; before={str(p.relative_to(D)):hashlib.sha256(p.read_bytes()).hexdigest() for p in files}
+for k in (1,2):
+ for x in ['atmosphere','decay','geodetic','frames','regression','termination','height_error']:
+  run(f'repro{k}-{x}',[P,str(D/f't0_{x}.py'),str(D/f't0_{x}_results.json')])
+ run(f'repro{k}-gmat',[P,str(D/'t0_gmat.py'),'--gmat-console',str(g/'bin/GmatConsole'),'--out',str(D/'t0_gmat_results.json')])
+ run(f'repro{k}-axis',[P,str(D/'t0_axis_ablation.py'),str(D/'t0_axis_ablation_results.json')])
+ changed=[n for n,h in before.items() if hashlib.sha256((D/n).read_bytes()).hexdigest()!=h]
+ (S/f'repro{k}-changes.json').write_text(json.dumps(changed)); print('CHANGED',k,changed,flush=True)
+run('post-repro-state',['sh','-c','git status --porcelain; git diff --stat'])

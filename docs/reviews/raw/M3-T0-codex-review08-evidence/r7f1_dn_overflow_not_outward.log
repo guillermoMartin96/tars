@@ -1,0 +1,18 @@
+............F..........                                                  [100%]
+=================================== FAILURES ===================================
+_____ test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need _____
+
+    def test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need():
+        """Detects: an overflow of a stage value (with a finite envelope) not rounded outward to
+        +-inf. The injected envelope returns the largest binary64: A0 exceeds it, so the speeds
+        after it are +inf and M3 = M4 = -inf."""
+        s = tt.stage_lower_heights(1e7, B_V1, envelope=lambda low, sp, b: MAX)
+        assert s["M2"] > 0.0 and s["A0"] == math.inf and s["s2"] == math.inf
+>       assert s["M3"] == -math.inf and s["M4"] == -math.inf
+E       assert (-1.7976931348623157e+308 == -inf)
+E        +  where inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:136: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_stage_value_outside_the_binary64_range_gives_infinite_need
+1 failed, 22 passed in 1.22s

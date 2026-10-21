@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_infinite_a0_has_the_documented_infinite_need _______________
+
+    def test_infinite_a0_has_the_documented_infinite_need():
+        b=math.ulp(0.0)
+        stage=t.stage_lower_heights(1.0,b)
+        need=t.stage_need(1.0,b)
+        assert stage['A0']==math.inf
+        assert stage['M3']==-math.inf
+        assert need>0  # correct rejection; no unsupported certification
+>       assert need==math.inf, (stage,need)
+E       AssertionError: ({'H0': 0.9999999911223076, 'V': 11198.663798118925, 'A0': inf, 'L2': -55992.318990604224, ...}, 55992.318990613036)
+E       assert 55992.318990613036 == inf
+E        +  where inf = math.inf
+
+review_scratch/test_noncert_contract.py:13: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/test_noncert_contract.py::test_infinite_a0_has_the_documented_infinite_need
+1 failed in 0.61s

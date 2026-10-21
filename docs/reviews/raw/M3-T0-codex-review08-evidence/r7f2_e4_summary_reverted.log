@@ -1,0 +1,25 @@
+.....................F.                                                  [100%]
+=================================== FAILURES ===================================
+__________________ test_r7f2_docstrings_qualify_b_r_at_most_b __________________
+
+    def test_r7f2_docstrings_qualify_b_r_at_most_b():
+        """Detects: "b_R <= b" stated without b > 0 in t0_termination.py, or the b = 0 case
+        dropped beside either qualified summary."""
+        src = norm((HERE / "t0_termination.py").read_text())
+        assert "phi_B / R <= b" not in src  # the stale drag_envelope summary
+        for hit in re.finditer(r"b_R <= b", src):
+            after, before = src[hit.end() : hit.end() + 10], src[hit.start() - 4 : hit.start()]
+>           assert after == " for b > 0" or before == "not ", src[hit.start() - 60 : hit.end() + 20]
+E           AssertionError: between b and mass may underflow). Writing R = phi_B / b_R (b_R <= b; b_R = b wherever t
+E           assert ('; b_R = b ' == ' for b > 0'
+E             
+E             -  for b > 0
+E             + ; b_R = b  or '_R (' == 'not '
+E             
+E             - not 
+E             + _R ()
+
+docs/science/experiments/m3-t0/check_review07.py:262: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f2_docstrings_qualify_b_r_at_most_b
+1 failed, 22 passed in 1.14s

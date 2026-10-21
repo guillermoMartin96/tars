@@ -1,0 +1,23 @@
+"""Independent reproduction of Review 08 M3T0-R8-F1 (implementer, no correction)."""
+import math, sys
+from fractions import Fraction
+from pathlib import Path
+import numpy as np
+D = Path(sys.argv[1]); sys.path.insert(0, str(D))
+import t0_model as m
+import t0_termination as t
+beta = t.FP["beta_m"]
+print("beta_m", repr(beta))
+for label, x in [("surface a", m.A_WGS84), ("next float above a", math.nextafter(m.A_WGS84, math.inf)),
+                 ("a + 8 ulp", m.A_WGS84 + 8 * 2.0**-30), ("a + 9 ulp", m.A_WGS84 + 9 * 2.0**-30),
+                 ("a + 10 ulp", m.A_WGS84 + 10 * 2.0**-30)]:
+    r = np.array([x, 0.0, 0.0])
+    exact_h = Fraction(x) - Fraction(m.A_WGS84)  # on the equator the geodetic height is exactly x - a
+    h = m.geodetic_iterative(r)[1]
+    energy = -m.MU / float(np.linalg.norm(r))  # v = 0
+    print(f"-- {label}: x={x!r} exact_h={float(exact_h)!r} computed_h={h!r} h<=beta={h <= beta} energy={energy!r}")
+    for bname, b in [("B_V1", t.B_V1), ("drag-free", math.inf)]:
+        try:
+            print(f"   {bname}: need={t.stage_need(h, b)!r}")
+        except Exception as e:
+            print(f"   {bname}: raises {type(e).__name__}: {e}")

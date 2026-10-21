@@ -1,0 +1,30 @@
+import sys,math
+from pathlib import Path
+sys.path.insert(0,sys.argv[1] if len(sys.argv)>1 else str(Path.cwd()/'docs/science/experiments/m3-t0'))
+import t0_termination as t
+# An independent adversarial oracle for the surviving M3-ignored mutant: return an
+# unbounded A0 and a bounded A2 to require M3's contribution to need.
+def pulse():
+ count=0
+ def e(low,s,b):
+  nonlocal count
+  count+=1
+  return math.inf if count==1 else 0.
+ return e
+print('CONTROL',t.stage_need(1e7,100.,envelope=pulse()))
+assert t.stage_need(1e7,100.,envelope=pulse())==math.inf
+s=t.stage_lower_heights(1e7,100.,envelope=pulse());print('bounds',s)
+assert -min(s['M2'],s['M4'])<0
+print('M3-ignored mutant falsely certifies this injected enclosure; detected by independent assertion')
+# Consumers must not accept either sign of zero or positive/infinite need.
+real=t.stage_need
+for bad in [0.,-0.,1.,math.inf]:
+ t.stage_need=lambda *a,**kw:bad
+ try:t.sufficient_stage_condition()
+ except RuntimeError:print('floor rejected',repr(bad))
+ else:raise AssertionError(bad)
+ rows=[{'h_f_sufficient_at_least_m':1e5} for _ in t.VEHICLES]
+ out=t.libm_sensitivity(rows,max_log2=0)
+ assert all(v['largest_log2_libm_ulp'] is None for row in out['rows'] for k,v in row.items() if k!='vehicle')
+t.stage_need=real
+print('consumers reject both signed zeros, positive and infinite need')

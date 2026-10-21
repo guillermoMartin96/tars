@@ -1,0 +1,148 @@
+..FFFFF......F........F                                                  [100%]
+=================================== FAILURES ===================================
+________ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1.0] ________
+
+h0 = 1.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+            s = tt.stage_lower_heights(h0, b)
+            m2s.add(s["M2"])
+            assert s["M4"] is None
+            need = tt.stage_need(h0, b)
+>           assert need == -s["M2"] and math.isfinite(need) and need >= 0.0
+E           assert (inf == --55992.318990613036)
+
+docs/science/experiments/m3-t0/check_review07.py:104: AssertionError
+______ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1000.0] _______
+
+h0 = 1000.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+            s = tt.stage_lower_heights(h0, b)
+            m2s.add(s["M2"])
+            assert s["M4"] is None
+            need = tt.stage_need(h0, b)
+>           assert need == -s["M2"] and math.isfinite(need) and need >= 0.0
+E           assert (inf == --54988.91967459289)
+
+docs/science/experiments/m3-t0/check_review07.py:104: AssertionError
+______ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[20000.0] ______
+
+h0 = 20000.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+            s = tt.stage_lower_heights(h0, b)
+            m2s.add(s["M2"])
+            assert s["M4"] is None
+            need = tt.stage_need(h0, b)
+>           assert need == -s["M2"] and math.isfinite(need) and need >= 0.0
+E           assert (inf == --35905.44590818977)
+
+docs/science/experiments/m3-t0/check_review07.py:104: AssertionError
+______ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[50000.0] ______
+
+h0 = 50000.0
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+            s = tt.stage_lower_heights(h0, b)
+            m2s.add(s["M2"])
+            assert s["M4"] is None
+            need = tt.stage_need(h0, b)
+>           assert need == -s["M2"] and math.isfinite(need) and need >= 0.0
+E           assert (inf == --5774.402029829804)
+
+docs/science/experiments/m3-t0/check_review07.py:104: AssertionError
+_____ test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[55749.393] _____
+
+h0 = 55749.393
+
+    @pytest.mark.parametrize("h0", [1.0, 1000.0, 2e4, 5e4, M2_EDGE])
+    def test_r7f1_early_return_need_is_minus_m2_for_every_vehicle(h0):
+        """Detects: the early-return need depending on the vehicle or the envelope, or not equal
+        to -M2. M2 is independent of b, and a second implementation of M2 (exact decimals, no
+        pads) bounds it from above within 1e-9 m."""
+        second = m2_second(h0, tt.FP)
+        assert second <= 0
+        m2s = set()
+        for b in VEHICLES:
+            s = tt.stage_lower_heights(h0, b)
+            m2s.add(s["M2"])
+            assert s["M4"] is None
+            need = tt.stage_need(h0, b)
+>           assert need == -s["M2"] and math.isfinite(need) and need >= 0.0
+E           assert (inf == --2.0947129883763754e-06)
+
+docs/science/experiments/m3-t0/check_review07.py:104: AssertionError
+__________ test_r7f1_drag_free_vehicle_has_finite_need_on_both_paths ___________
+
+    def test_r7f1_drag_free_vehicle_has_finite_need_on_both_paths():
+        """Detects: b = +inf (the drag-free vehicle, envelope 0) reported as unbounded."""
+        for h0 in (1.0, 5e4, 6e4, 1e7):
+            s = tt.stage_lower_heights(h0, math.inf)
+            values = [x for x in s.values() if x is not None]
+            assert all(math.isfinite(x) for x in values)
+>           assert math.isfinite(tt.stage_need(h0, math.inf))
+E           assert False
+E            +  where False = <built-in function isfinite>(inf)
+E            +    where <built-in function isfinite> = math.isfinite
+E            +    and   inf = <function stage_need at 0x10abfbe20>(1.0, inf)
+E            +      where <function stage_need at 0x10abfbe20> = tt.stage_need
+E            +      and   inf = math.inf
+
+docs/science/experiments/m3-t0/check_review07.py:146: AssertionError
+___________________ test_r7_correction_is_documentation_only ___________________
+
+    def test_r7_correction_is_documentation_only():
+        """Detects: an executable change hidden in the documentation correction. Every published
+        floor, bracket and need is re-derived bit for bit from the committed results."""
+        res = c4.results("termination")["sufficient_stage_condition"]
+        for row in res["rows"]:
+            b = dict(tt.VEHICLES)[row["vehicle"]]
+            floor = row["h_f_sufficient_at_least_m"]
+>           assert tt.stage_need(floor, b) == row["need_at_floor_m"] < 0.0
+E           assert inf == -8.427938228380506e-07
+E            +  where inf = <function stage_need at 0x10abfbe20>(111511.96182508787, inf)
+E            +    where <function stage_need at 0x10abfbe20> = tt.stage_need
+
+docs/science/experiments/m3-t0/check_review07.py:277: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[1000.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[20000.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[50000.0]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_early_return_need_is_minus_m2_for_every_vehicle[55749.393]
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_drag_free_vehicle_has_finite_need_on_both_paths
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7_correction_is_documentation_only
+7 failed, 16 passed in 1.13s

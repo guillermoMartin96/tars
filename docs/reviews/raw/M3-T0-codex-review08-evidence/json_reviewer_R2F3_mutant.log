@@ -1,0 +1,338 @@
+COMMAND ['<clone>/.venv/bin/python', '-m', 'pytest', '-q', '-p', 'no:cacheprovider', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review01.py', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review02.py', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review03.py', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review04.py', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review05.py', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review06.py', '<review-root>/mutants/json_reviewer_R2F3_mutant/docs/science/experiments/m3-t0/check_review07.py', '-k', 'test_r2f1_sweep_covers_the_declared_matrix or test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases or test_r2f2_floors_recomputed_by_a_second_implementation']
+FFFFFFFFFFFFFFFFFFFFFF                                                   [100%]
+=================================== FAILURES ===================================
+__________________ test_r2f1_sweep_covers_the_declared_matrix __________________
+
+    def test_r2f1_sweep_covers_the_declared_matrix():
+        mc = results("termination").get("missed_crossing", {})
+>       got = sorted(
+            (r["physics"], r["perigee_km"], r["apogee_km"], r["inclination_deg"]) for r in sweep_rows()
+        )
+
+docs/science/experiments/m3-t0/check_review02.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x10ae92320>
+
+    got = sorted(
+>       (r["physics"], r["perigee_km"], r["apogee_km"], r["inclination_deg"]) for r in sweep_rows()
+         ^^^^^^^^^^^^
+    )
+E   KeyError: 'physics'
+
+docs/science/experiments/m3-t0/check_review02.py:254: KeyError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[0] _
+
+idx = 0
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[1] _
+
+idx = 1
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[2] _
+
+idx = 2
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[3] _
+
+idx = 3
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[4] _
+
+idx = 4
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[5] _
+
+idx = 5
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[6] _
+
+idx = 6
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[7] _
+
+idx = 7
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[8] _
+
+idx = 8
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[9] _
+
+idx = 9
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[10] _
+
+idx = 10
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[11] _
+
+idx = 11
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[12] _
+
+idx = 12
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[13] _
+
+idx = 13
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[14] _
+
+idx = 14
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[15] _
+
+idx = 15
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[16] _
+
+idx = 16
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_ test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[17] _
+
+idx = 17
+
+    @pytest.mark.parametrize("idx", range(len(ORBITS) * 2))
+    def test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases(idx):
+        rows = sweep_rows()
+>       assert len(rows) == len(ORBITS) * 2
+E       AssertionError: assert 1 == (9 * 2)
+E        +  where 1 = len([{'bound_m': 0.0, 'max_dip_m': 0.0}])
+E        +  and   9 = len(((250.0, 250.0, 0.0), (250.0, 250.0, 51.6), (250.0, 250.0, 97.0), (180.0, 180.0, 51.6), (250.0, 400.0, 51.6), (250.0, 800.0, 51.6), ...))
+
+docs/science/experiments/m3-t0/check_review02.py:267: AssertionError
+_________ test_r2f2_floors_recomputed_by_a_second_implementation[B100] _________
+
+vehicle = 'B100'
+
+    @pytest.mark.parametrize("vehicle", sorted(VEHICLES))
+    def test_r2f2_floors_recomputed_by_a_second_implementation(vehicle):
+        got = floors()
+>       assert set(got) == set(VEHICLES)
+E       AssertionError: assert {'x'} == {'B100', 'B25...g-free limit'}
+E         
+E         Extra items in the left set:
+E         'x'
+E         Extra items in the right set:
+E         'drag-free limit'
+E         'B25.8'
+E         'B100'
+E         Use -v to get more diff
+
+docs/science/experiments/m3-t0/check_review02.py:444: AssertionError
+________ test_r2f2_floors_recomputed_by_a_second_implementation[B25.8] _________
+
+vehicle = 'B25.8'
+
+    @pytest.mark.parametrize("vehicle", sorted(VEHICLES))
+    def test_r2f2_floors_recomputed_by_a_second_implementation(vehicle):
+        got = floors()
+>       assert set(got) == set(VEHICLES)
+E       AssertionError: assert {'x'} == {'B100', 'B25...g-free limit'}
+E         
+E         Extra items in the left set:
+E         'x'
+E         Extra items in the right set:
+E         'drag-free limit'
+E         'B25.8'
+E         'B100'
+E         Use -v to get more diff
+
+docs/science/experiments/m3-t0/check_review02.py:444: AssertionError
+___ test_r2f2_floors_recomputed_by_a_second_implementation[drag-free limit] ____
+
+vehicle = 'drag-free limit'
+
+    @pytest.mark.parametrize("vehicle", sorted(VEHICLES))
+    def test_r2f2_floors_recomputed_by_a_second_implementation(vehicle):
+        got = floors()
+>       assert set(got) == set(VEHICLES)
+E       AssertionError: assert {'x'} == {'B100', 'B25...g-free limit'}
+E         
+E         Extra items in the left set:
+E         'x'
+E         Extra items in the right set:
+E         'drag-free limit'
+E         'B25.8'
+E         'B100'
+E         Use -v to get more diff
+
+docs/science/experiments/m3-t0/check_review02.py:444: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_sweep_covers_the_declared_matrix
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[0]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[1]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[2]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[3]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[4]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[5]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[6]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[7]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[8]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[9]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[10]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[11]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[12]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[13]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[14]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[15]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[16]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases[17]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_floors_recomputed_by_a_second_implementation[B100]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_floors_recomputed_by_a_second_implementation[B25.8]
+FAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_floors_recomputed_by_a_second_implementation[drag-free limit]
+22 failed, 239 deselected in 1.65s

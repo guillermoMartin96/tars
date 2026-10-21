@@ -1,0 +1,16 @@
+..................F....                                                  [100%]
+=================================== FAILURES ===================================
+______________________ test_r7f1_records_state_both_paths ______________________
+
+    def test_r7f1_records_state_both_paths():
+        """Detects: the records keeping need = +inf as the only non-certification, or the
+        Review 06 record rewritten instead of amended."""
+        rev = (ROOT / "docs/reviews/M3-T0-review-06.md").read_text()
+>       amend = rev.index("### Amendment (Authorization I-10, Review 07 M3T0-R7-F1)")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review07.py:205: ValueError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f1_records_state_both_paths
+1 failed, 22 passed in 1.14s

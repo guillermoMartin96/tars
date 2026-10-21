@@ -1,0 +1,12 @@
+from pathlib import Path
+import hashlib,subprocess,json
+R=Path.cwd();E=R/'docs/reviews/raw/M3-T0-review07-findings-correction-evidence';n=0
+for line in (E/'SHA256SUMS').read_text().splitlines():
+ digest,name=line.split(maxsplit=1);assert hashlib.sha256((E/name).read_bytes()).hexdigest()==digest,name;n+=1
+print('evidence manifests',n,'match')
+for r in ['06','07']:
+ p=f'docs/reviews/M3-T0-review-{r}.md';old=subprocess.check_output(['git','show','72f9e00:'+p]);assert (R/p).read_bytes().startswith(old);print('append only',p)
+D=R/'docs/science/experiments/m3-t0';tracked=subprocess.check_output(['git','ls-files',str(D.relative_to(R))],text=True).splitlines();print('tracked experiment files',len(tracked))
+for p in sorted(D.glob('*results.json')):
+ data=json.loads(p.read_text());print('RESULT',p.name,'keys',list(data))
+print('all result files unchanged',subprocess.check_output(['git','diff','--name-only','72f9e00..HEAD','--',str(D.relative_to(R)/'*results.json')],text=True))

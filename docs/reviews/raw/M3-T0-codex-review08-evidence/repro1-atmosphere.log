@@ -1,0 +1,57 @@
+COMMAND ['<clone>/.venv/bin/python', '<clone>/docs/science/experiments/m3-t0/t0_atmosphere.py', '<clone>/docs/science/experiments/m3-t0/t0_atmosphere_results.json']
+{
+  "boundaries": 27,
+  "max_abs_value_jump": 0.0013615580335040178,
+  "max_abs_value_jump_at_km": 25.0,
+  "km_route_boundaries_with_upper_band_below_base": [],
+  "max_km_route_upper_band_below_base_m": 0.0
+}
+{
+  "configuration": "equatorial circular, start 252 km, Cd 2.2, A 600 m^2, m 850 kg (B 0.644 kg/m^2, chosen only to reach the boundary quickly), full table vs one-band",
+  "crossing_time_s": 1261.0306647618488,
+  "t_end_s": 2480.0,
+  "relative_value_jump_at_250km": -1.534535340763643e-05,
+  "rk4": [
+    {
+      "dt": 20.0,
+      "pos_err_m": 0.9436440733265496,
+      "pos_err_smooth_control_m": 0.614043969531443
+    },
+    {
+      "dt": 10.0,
+      "pos_err_m": 0.05812703664302724,
+      "pos_err_smooth_control_m": 0.03821027922414195,
+      "pos_ratio_m": 16.234167916071574,
+      "apparent_order_m": 4.0209615359252195,
+      "pos_ratio_smooth_control_m": 16.07012516002445,
+      "apparent_order_smooth_control_m": 4.006309260181852
+    },
+    {
+      "dt": 5.0,
+      "pos_err_m": 0.003608247205330945,
+      "pos_err_smooth_control_m": 0.002383292019558895,
+      "pos_ratio_m": 16.109493982881332,
+      "apparent_order_m": 4.009839272988139,
+      "pos_ratio_smooth_control_m": 16.032562904823553,
+      "apparent_order_smooth_control_m": 4.002933162583821
+    },
+    {
+      "dt": 2.5,
+      "pos_err_m": 0.00019847537624707634,
+      "pos_err_smooth_control_m": 0.0001492280294629823,
+      "pos_ratio_m": 18.17982297632297,
+      "apparent_order_m": 4.184266246431243,
+      "pos_ratio_smooth_control_m": 15.970806745458617,
+      "apparent_order_smooth_control_m": 3.9973652854245945
+    },
+    {
+      "dt": 1.25,
+      "pos_err_m": 2.7710741049506712e-05,
+      "pos_err_smooth_control_m": 9.718151144308475e-06,
+      "pos_ratio_m": 7.162398720860245,
+      "apparent_order_m": 2.840442833737504,
+      "pos_ratio_smooth_control_m": 15.355598739620248,
+      "apparent_order_smooth_control_m": 3.940692861309925
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+....................F.F                                                  [100%]
+=================================== FAILURES ===================================
+____________________ test_r7f2_b_r_at_most_b_for_positive_b ____________________
+
+    def test_r7f2_b_r_at_most_b_for_positive_b():
+        """Detects: the qualified claim b_R <= b (b > 0) failing, or b_R not the same binary64 b
+        where the conversion is normal."""
+        for cd, area in [(CD, AREA), *c6.SHAPES]:
+            for b in (TINY, 2 * TINY, 3 * TINY, 1e-320, 1e-310, 2.0**-1022, 1e-300, 1.0, 1e300):
+                b_r = tt.envelope_ballistic_coefficient(b, cd, area, tt.FP)
+>               assert Fraction(b_r) <= Fraction(b), (b, cd, area)
+E               AssertionError: (2.2250738585072014e-308, 2.2, 15.0)
+E               assert Fraction(4503599627370497, 2024022533073106183524953467189173070495566497641421183569013580274303395679953468919603837...2745068562007483424692698618103355649159556340810056512358769552333414615230502532186327508646006263307707741093494784) <= Fraction(1, 4494232837155789769323262976972561834044942447355766431835752028943316895137524078317711933060188400528002...3529863270738021251442209537670585615720368478277635206809290837627671146574559986811484619929076208839082406056034304)
+E                +  where Fraction(4503599627370497, 2024022533073106183524953467189173070495566497641421183569013580274303395679953468919603837...2745068562007483424692698618103355649159556340810056512358769552333414615230502532186327508646006263307707741093494784) = Fraction(2.225073858507202e-308)
+E                +  and   Fraction(1, 4494232837155789769323262976972561834044942447355766431835752028943316895137524078317711933060188400528002...3529863270738021251442209537670585615720368478277635206809290837627671146574559986811484619929076208839082406056034304) = Fraction(2.2250738585072014e-308)
+
+docs/science/experiments/m3-t0/check_review07.py:250: AssertionError
+___________________ test_r7_correction_is_documentation_only ___________________
+
+    def test_r7_correction_is_documentation_only():
+        """Detects: an executable change hidden in the documentation correction. Every published
+        floor, bracket and need is re-derived bit for bit from the committed results."""
+        res = c4.results("termination")["sufficient_stage_condition"]
+        for row in res["rows"]:
+            b = dict(tt.VEHICLES)[row["vehicle"]]
+            floor = row["h_f_sufficient_at_least_m"]
+>           assert tt.stage_need(floor, b) == row["need_at_floor_m"] < 0.0
+E           assert -7.170749074481314e-07 == -7.170720652771883e-07
+E            +  where -7.170749074481314e-07 = <function stage_need at 0x10e3a3f60>(124456.68544510857, 25.757575757575758)
+E            +    where <function stage_need at 0x10e3a3f60> = tt.stage_need
+
+docs/science/experiments/m3-t0/check_review07.py:277: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f2_b_r_at_most_b_for_positive_b
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7_correction_is_documentation_only
+2 failed, 21 passed in 1.13s

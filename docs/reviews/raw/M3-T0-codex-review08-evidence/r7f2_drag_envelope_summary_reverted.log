@@ -1,0 +1,21 @@
+.....................F.                                                  [100%]
+=================================== FAILURES ===================================
+__________________ test_r7f2_docstrings_qualify_b_r_at_most_b __________________
+
+    def test_r7f2_docstrings_qualify_b_r_at_most_b():
+        """Detects: "b_R <= b" stated without b > 0 in t0_termination.py, or the b = 0 case
+        dropped beside either qualified summary."""
+        src = norm((HERE / "t0_termination.py").read_text())
+>       assert "phi_B / R <= b" not in src  # the stale drag_envelope summary
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       assert 'phi_B / R <= b' not in '"""M3 T0: t...__": main() '
+E         
+E         'phi_B / R <= b' is contained here:
+E           use b_R = phi_B / R <= b (E4a), which bounds cd area / mass for a vehicle whose b was formed from its mass by either construction, including subnormal b, P, Q or mass (Review 05 M3T0-R5-F1), and b = 0 (Review 06 M3T0-R6-F1). b_R <= b for b > 0, and b_R = b where the conversion is normal; at b = 0, b_R = phi_B / R(0) > 0 (Review 07 M3T0-R7-F2): the envelope needs only R >= cd area / mass. b = +inf is the drag-free limit (0): a vehicle reaches it only through C1 with fl(cd area) = 0, where the force is exactly 0 (E4b), or through an overflow of ma...
+E         
+E         ...Full output truncated (2 lines hidden), use '-vv' to show
+
+docs/science/experiments/m3-t0/check_review07.py:259: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review07.py::test_r7f2_docstrings_qualify_b_r_at_most_b
+1 failed, 22 passed in 1.58s

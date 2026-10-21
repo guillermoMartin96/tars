@@ -1,0 +1,16 @@
+beta_m 8.877691069434738e-09
+-- surface a: x=6378137.0 exact_h=0.0 computed_h=0.0 h<=beta=True energy=-62494807.15136724
+   B_V1: raises ValueError: the envelope is defined above the lower edge only
+   drag-free: raises ValueError: the envelope is defined above the lower edge only
+-- next float above a: x=6378137.000000001 exact_h=9.313225746154785e-10 computed_h=9.313225746154785e-10 h<=beta=True energy=-62494807.15136723
+   B_V1: raises ValueError: the envelope is defined above the lower edge only
+   drag-free: raises ValueError: the envelope is defined above the lower edge only
+-- a + 8 ulp: x=6378137.000000007 exact_h=7.450580596923828e-09 computed_h=7.450580596923828e-09 h<=beta=True energy=-62494807.151367165
+   B_V1: raises ValueError: the envelope is defined above the lower edge only
+   drag-free: raises ValueError: the envelope is defined above the lower edge only
+-- a + 9 ulp: x=6378137.000000008 exact_h=8.381903171539307e-09 computed_h=8.381903171539307e-09 h<=beta=True energy=-62494807.15136716
+   B_V1: raises ValueError: the envelope is defined above the lower edge only
+   drag-free: raises ValueError: the envelope is defined above the lower edge only
+-- a + 10 ulp: x=6378137.000000009 exact_h=9.313225746154785e-09 computed_h=9.313225746154785e-09 h<=beta=False energy=-62494807.15136715
+   B_V1: need=55993.323394842984
+   drag-free: need=55993.323394842984

@@ -1,0 +1,20 @@
+#!/bin/sh
+# Review 08 reviewer mutant `own_M3_ignored`: run all seven T0 check files and regenerate
+# t0_termination_results.json against a copy of docs/ with M3 dropped from stage_need.
+# usage: m3_dropped_mutant.sh <repo> <workdir> <uv>
+set -u
+REPO=$1; W=$2; UV=$3
+rm -rf "$W"; mkdir -p "$W"; cp -R "$REPO/docs" "$W/docs"
+D="$W/docs/science/experiments/m3-t0"
+python3 - "$D/t0_termination.py" <<'PY'
+import sys
+p = sys.argv[1]; s = open(p).read()
+o = 'return -min(s["M2"], s["M3"], s["M4"])'
+assert s.count(o) == 1
+open(p, "w").write(s.replace(o, 'return -min(s["M2"], s["M4"])'))
+print("mutant applied:", o, "->", 'return -min(s["M2"], s["M4"])')
+PY
+cd "$D"
+"$UV" run --project "$REPO" --no-sync pytest -q -p no:cacheprovider check_review0*.py 2>&1 | grep -E "FAILED|passed|failed"
+"$UV" run --project "$REPO" --no-sync python t0_termination.py "$W/mutant_results.json" > /dev/null 2>&1; echo "t0_termination.py exit=$?"
+cmp "$W/mutant_results.json" "$REPO/docs/science/experiments/m3-t0/t0_termination_results.json" && echo "t0_termination_results.json regenerated under the mutant: byte-identical to the committed file"

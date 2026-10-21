@@ -1,0 +1,49 @@
+import sys,math,random,json
+from pathlib import Path
+from decimal import Decimal as D,localcontext
+import numpy as np
+sys.path.insert(0,str(Path.cwd()/'docs/science/experiments/m3-t0'))
+import t0_termination as t
+import t0_model as m
+import t0_oracle as o
+r=np.array([math.nextafter(m.A_WGS84,math.inf),0.,0.]);v=np.zeros(3);h=m.geodetic_iterative(r)[1]
+print('STRICT EXTERIOR',r.tolist(),'exact h',D(float(r[0]))-D(m.A_WGS84),'computed h',h,'beta',t.FP['beta_m'],'energy',-m.MU/np.linalg.norm(r),'rho',m.density(h))
+for b in [t.B_V1,math.inf]:
+ try: print('need',b,t.stage_need(h,b))
+ except Exception as e: print('need exception',b,type(e).__name__,str(e))
+rng=random.Random(80622); n=0; best=(0,None); errors=0
+heights=[1e-6,55749.39300208564,111511.96184,124455.,180e6,190681e3,191735430.72]
+heights += [b.base_km*1000+d for b in m.TABLE for d in [-1e-8,0,1e-8]]
+for i in range(450):
+ h=rng.choice(heights);h=max(h,1e-6);lat=rng.uniform(-1.5,1.5);lon=rng.uniform(-3.14,3.14)
+ r=m.geodetic_to_cartesian(lat,lon,h);true=o.true_height(r)
+ low=float(true)
+ if D(low)>true:low=math.nextafter(low,0)
+ speed=rng.choice([0.,T:=math.ulp(0.),1.,11000.,1e10,1e100]);v=np.array([0.,-speed,0.])
+ mass=rng.choice([T,16*T,17*T,30*T,850.,3300.]);cd,area=2.2,15.;b=mass/(cd*area)
+ with np.errstate(all='ignore'):
+  try: drag=t.model_drag(r,v,mass);env=t.drag_envelope(low,speed,b)
+  except ValueError: errors+=1;continue
+ if not math.isfinite(drag):errors+=1;continue
+ assert drag<=env,(i,low,b,speed,drag,env)
+ ratio=drag/env if env else 0
+ if ratio>best[0]:best=ratio,(low,b,speed,drag,env)
+ n+=1
+print('force checks',n,'excluded nonfinite model',errors,'max ratio',best)
+# Actual stages just above the recomputed sufficient floors: directions deliberately
+# inward and retrograde, alternating at equator and near pole.
+n=0
+for name,b in t.VEHICLES:
+ floor=next(z['h_f_sufficient_at_least_m'] for z in json.loads(Path('docs/science/experiments/m3-t0/t0_termination_results.json').read_text())['sufficient_stage_condition']['rows'] if z['vehicle']==name)
+ cfg=m.Config(j2=m.J2_FROM_C20) if math.isinf(b) else t.J2_DRAG
+ for lat in [0.,1e-12,1.4,math.pi/2-1e-9]:
+  for dh in [1e-6,1e-4,1.]:
+   r=m.geodetic_to_cartesian(lat,0.,floor+dh);esc=math.sqrt(2*m.MU/float(np.linalg.norm(r)))*math.nextafter(1.,0.)
+   for direction in [-r/np.linalg.norm(r),np.array([0.,-1.,0.])]:
+    v=esc*direction;hc=m.geodetic_iterative(r)[1];s=t.stage_lower_heights(hc,b); assert t.stage_need(hc,b)<0
+    stages=[];mass=850 if math.isinf(b) else b*2.2*15
+    m.rk4_step(m.rhs(cfg),0.,np.r_[r,v,mass],10.,stages)
+    hs=[m.geodetic_iterative(x.r)[1] for x in stages]
+    assert all(a>=s[k]>0 for a,k in zip(hs,['M2','M3','M4']))
+    n+=1
+print('adversarial certified steps',n)
