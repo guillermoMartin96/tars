@@ -34,6 +34,7 @@ import decimal
 import math
 import re
 import sys
+from decimal import Decimal, localcontext
 from fractions import Fraction
 from pathlib import Path
 
@@ -56,7 +57,10 @@ EDGE_MSG = "the envelope is defined above the lower edge only"
 # along the equator the last raising point is k = floor(beta / 2^-30) = 9 (Review 08: k = 1)
 K_LAST_RAISING = math.floor(Fraction(BETA) / Fraction(ULP))
 A = Fraction(m.A_WGS84)
-B_EXACT = A * (1 - Fraction(m.F_WGS84))  # the model's ellipsoid, in exact arithmetic
+# the model's ellipsoid (Review 09 M3T0-R9-F2): the binary64 a and e2 of `geodetic_iterative`
+# and `t0_oracle`, polar radius b = a sqrt(1 - e2); b is irrational, so b^2 is kept exact
+# (A (1 - F), used before, is a different ellipsoid, 2.48e-13 m smaller)
+B2_EXACT = A * A * (1 - Fraction(m.E2_WGS84))
 
 
 def computed_height(r: np.ndarray) -> float:
@@ -70,10 +74,13 @@ def equator(k: int) -> tuple[np.ndarray, Fraction]:
     return np.array([x, 0.0, 0.0]), Fraction(x) - A
 
 
-def pole(k: int) -> tuple[np.ndarray, Fraction]:
-    """r = [0, 0, fl(b) + k 2^-30]; the mathematical geodetic height is exactly z - b."""
+def pole(k: int) -> tuple[np.ndarray, Decimal]:
+    """r = [0, 0, fl(b) + k 2^-30]; the mathematical geodetic height is z - b, to 80 digits."""
     z = m.B_WGS84 + k * ULP
-    return np.array([0.0, 0.0, z]), Fraction(z) - B_EXACT
+    with localcontext() as ctx:
+        ctx.prec = 80
+        b = (Decimal(B2_EXACT.numerator) / Decimal(B2_EXACT.denominator)).sqrt()
+        return np.array([0.0, 0.0, z]), Decimal(z) - b
 
 
 def bound_at_rest(r: np.ndarray) -> bool:
@@ -152,20 +159,25 @@ def test_r8f1_computed_height_differs_from_mathematical_at_the_pole(vehicle):
     """Detects: the outcome decided by the mathematical instead of the computed height. At
     the pole the computed height of [0, 0, fl(b) + k 2^-30] is k 2^-30 while the
     mathematical height is k 2^-30 - (b - fl(b)): at k = 0 the point is inside the
-    ellipsoid (mathematical height -2.03e-10 m) with computed height 0, and at k = 10 the
-    mathematical height is 9.11e-9 m."""
+    ellipsoid (mathematical height -2.04e-10 m on the model ellipsoid, polar radius
+    a sqrt(1 - e2); corrected after Review 09 M3T0-R9-F2) with computed height 0, and at
+    k = 10 the mathematical height is 9.11e-9 m."""
     _, b = vehicle
-    shift = Fraction(m.B_WGS84) - B_EXACT
-    assert -2.04e-10 < shift < -2.03e-10  # fl(b) lies below the exact b
+    shift = pole(0)[1]  # fl(b) - b
+    assert Decimal("-2.03737e-10") < shift < Decimal("-2.03736e-10")  # fl(b) below b
     for k in range(0, 13):
         r, h_math = pole(k)
-        assert h_math == k * Fraction(ULP) + shift
+        with localcontext() as ctx:
+            ctx.prec = 80
+            assert abs(h_math - (Decimal(k * ULP) + shift)) <= Decimal("1e-70")
         h0 = computed_height(r)
         assert h0 == k * ULP, (k, h0)
-        assert abs(Fraction(h0) - h_math) <= Fraction(BETA)  # within E1
+        with localcontext() as ctx:
+            ctx.prec = 80
+            assert abs(Decimal(h0) - h_math) <= Decimal(BETA)  # within E1
         kind, _ = outcome(h0, b)
         assert kind == ("rejected" if k <= K_LAST_RAISING else "returned"), k
-    assert pole(0)[1] < 0  # inside, yet computed height 0
+    assert Fraction(m.B_WGS84) ** 2 < B2_EXACT  # [0, 0, fl(b)] inside (exact), computed height 0
 
 
 @pytest.mark.parametrize("vehicle", VEHICLES, ids=[v[0] for v in VEHICLES])

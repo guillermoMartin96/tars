@@ -1316,7 +1316,8 @@ def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=No
     r = [a + k 2^-30, 0, 0] m for k = 1 ... 9 (v = 0, bound) has mathematical and computed
     height k 2^-30 m <= beta. The test is on the computed height, and the computed height
     is not the mathematical height (E1: they differ by up to alpha h + beta): [0, 0, fl(b)]
-    lies inside the ellipsoid (mathematical height -2.03e-10 m) with computed height 0. So
+    lies inside the ellipsoid (mathematical height -2.04e-10 m on the model ellipsoid, polar
+    radius a sqrt(1 - e2); corrected after Review 09 M3T0-R9-F2) with computed height 0. So
     the stage condition does not return a finite need for every state outside the
     ellipsoid; the rejection certifies nothing. (An h0 so negative that b_lower + H0 <= 0
     raises decimal.InvalidOperation from the square root in V instead; by E1 no exterior

@@ -1,0 +1,19 @@
+"""Smoke run: the R9 mutants of mutation_check_review02.py through its own run() (all nine
+check files). Usage: python smoke_r9.py <repo root>"""
+import json
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+sys.path.insert(0, str(Path(sys.argv[1]) / "docs/science/experiments/m3-t0"))
+import mutation_check_review02 as h  # noqa: E402
+
+names = [n for n in h.MUTANTS if n.startswith(("r9f1_", "r9f2_", "r9_"))]
+with ThreadPoolExecutor(max_workers=4) as pool:
+    out = dict(zip(names, pool.map(h.run, names), strict=True))
+for n, r in out.items():
+    print(n, r["outcome"], "| declared:", r["expected_checks"], "| failed:", r["failed_checks"],
+          "|", r["pytest_summary"])
+ok = all(r["outcome"] == "detected" for r in out.values())
+print(len(names), "R9 mutants; all detected by a declared check:", ok)
+json.dump(out, open(sys.argv[2], "w"), indent=2, sort_keys=True)

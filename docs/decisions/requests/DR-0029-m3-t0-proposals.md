@@ -490,3 +490,9 @@ Authorization I-10 — M3 T0 Review 07 Corrections and Independent Review 08. Th
 Authorization I-11 — M3 T0 Review 08 Corrections and Independent Review 09. The superseded wording is preserved at commit `115e747`. Documentation and checks only; no option, identifier, recommendation status or owner decision changed; DR-0029 P1–P10 stay OPEN, and DR-0028's scope ruling for P6 (b) stays open.
 - **M3T0-R8-F1 (P1):** the Review 07 entry above ("need = −M2, finite and ≥ 0, when M2 ≤ 0 … for every B") is kept as written and qualified here: it holds for a computed h0 > β only. A computed h0 ≤ β raises `ValueError` before the M2 test, for B_V1 and the drag-free vehicle, and strictly exterior states reach such heights. No floor changes; the floor bisection accepts need < 0 only.
 <!-- /review08-correction-log -->
+<!-- review09-correction-log -->
+## Correction log (Review 09, 2026-10-21)
+Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 10. Checks and documentation only. No option, identifier, recommendation status or owner decision changed. DR-0029 P1–P10 stay OPEN, and DR-0028's scope ruling for P6 (b) is still undecided. No P1 bound, floor or margin changes.
+- **M3T0-R9-F1 (P1 evidence):** a check now pins need = −M3 whenever a finite M3 is the stage minimum (`check_review09.py`), and the finite-only M3 mutant is in the mutation harness. The stage condition's code and every published value are unchanged.
+- **M3T0-R9-F2 (P1 evidence):** the pole example's mathematical height is −2.04e-10 m on the model's ellipsoid (polar radius a·√(1 − e2)), not −2.03e-10 m (A·(1 − F)). It does not appear in this DR's text; recorded here for traceability. Dispositions are in `docs/reviews/M3-T0-review-09.md`.
+<!-- /review09-correction-log -->

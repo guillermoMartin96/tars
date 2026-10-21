@@ -81,6 +81,10 @@
 - Every tracked finding is RESOLVED: R8-F1, R7-F1, R7-F2, R6-F1 … R6-F3, both Review 06 remarks, R5-F1, R5-F2, R4-F1, R3-F1, R2-F1 … R2-F3, IM-1, IM-2, F1–F5 and the Review 08 M3 coverage observation.
 - Two new NOTEs, verified and ACCEPTED, **not applied** (I-11 §7): M3T0-R9-F1, a mutant that drops M3 only when it is finite passes all 288 checks (a coverage gap; the code is correct); M3T0-R9-F2, the pole check and the quoted −2.03e-10 m use the F-defined polar radius instead of the model's E2 ellipsoid (−2.04e-10 m there; no classification changes).
 - No floor, bound or certification is affected. Record: `docs/reviews/M3-T0-review-09.md`. Acceptance dossier: `docs/reviews/M3-T0-acceptance-dossier.md`. **T0 is not accepted**; it awaits the owner's decision. Not merged; T1 and T2 not started.  
+**Status update (2026-10-21, append-only):** under "Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 10", both Review 09 NOTEs are corrected in checks and documentation. No executable statement of the model, oracle or termination code changed, and no value, floor, bracket or threshold changed.
+- R9-F1: a finite M3 that is the minimum decides need = −M3 (the Review 09 counterexample: need = +2 499 855 380.144757, not certified). `check_review09.py` pins it, and the finite-only M3 mutant is in the mutation harness.
+- R9-F2: the model's polar radius is a·√(1 − e2), 2.48e-13 m above A·(1 − F). The pole check now uses it, and [0, 0, fl(b)] has mathematical height −2.04e-10 m (amended from −2.03e-10 m in appended notes).
+- The Review 09 verdict (PASS) and its raw output are unchanged. Dispositions are in `docs/reviews/M3-T0-review-09.md`. **T0 is not accepted.** Review 10 follows under I-12.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

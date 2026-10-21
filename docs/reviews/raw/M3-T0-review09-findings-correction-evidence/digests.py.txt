@@ -1,0 +1,26 @@
+"""Verify VAL-0019 spike digests and the five pinned digests at the current HEAD."""
+import hashlib, re, subprocess, sys
+from pathlib import Path
+R = Path(sys.argv[1])
+D = R / "docs/science/experiments/m3-t0"
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+print("HEAD", subprocess.check_output(["git", "-C", str(R), "rev-parse", "HEAD"], text=True).strip())
+v = (R / "docs/science/validation.md").read_text()
+blk = v[v.index("- **Spike digests (sha256, as committed with this record):**"):v.index("- **Classification:** spike evidence for the T0")]
+bad = 0; n = 0
+for f, h in re.findall(r"- `([^`]+)` `([0-9a-f]{64})`", blk):
+    n += 1; ok = sha(D / f) == h; bad += not ok
+    print("MATCH" if ok else "MISMATCH", "spike", f, "" if ok else sha(D / f))
+print("spike digests checked:", n)
+PIN = {"proof/thresholds/m1.json": "446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d",
+ "proof/thresholds/m2.json": "9d4eab47133a4f9eb1125cf7242ada0c720fbe9e4b8dd12b0f698cc79e5f0ce9",
+ "toolbox/references/gmat/m2/APPROVED_DIGESTS.json": "f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585",
+ "toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz": "a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b",
+ "proof/references/m2_final_states.json": "dc3baf7abb209a11ca463b9ca5001ce886c62b92b191ac76249d32924aa951dc"}
+for f, h in PIN.items():
+    ok = sha(R / f) == h; bad += not ok
+    print("MATCH" if ok else "MISMATCH", f, h)
+c = subprocess.check_output(["git", "-C", str(R), "diff", "--name-only", "86df2c3..HEAD", "--", "src", "proof", "toolbox", "scenarios", "tests", ".github", "uv.lock", "pyproject.toml"], text=True).split()
+print("protected paths changed since 86df2c3:", len(c)); bad += len(c)
+print("RESULT", "OK" if not bad else f"FAIL {bad}")
+sys.exit(1 if bad else 0)

@@ -98,3 +98,60 @@ The GMAT geodetic-drag discrepancy remains **ESCALATED_FOR_INVESTIGATION** (DR-0
   - host measurements on macOS x86_64 only;
   - the GMAT geodetic-drag discrepancy stays escalated;
   - DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
+
+## Correction pass (Authorization I-12, 2026-10-21; appended)
+"Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 10" authorizes correcting M3T0-R9-F1 and M3T0-R9-F2, full revalidation, and one independent Review 10. Everything above this section is preserved as written, including the Review 09 verdict (PASS, unconditional) and its raw output. T0 remains NOT ACCEPTED.
+
+Preconditions (I-12 §1), verified before any change:
+- branch `milestone-3-t0-reference-spike`, with HEAD = origin = `5978bfe` after a fetch, and a clean worktree;
+- `86df2c3` is an ancestor, and CI run 39668100686 succeeded;
+- the five pinned digests and all 21 VAL-0019 digests match, and no protected path has changed since `86df2c3` (`pinned_digests_before.log`).
+
+**Checks and documentation only.** No executable statement of the model (`t0_model.py`), the oracle (`t0_oracle.py`) or the termination code changed. The docstring-free AST of `t0_termination.py` equals `5978bfe` (`ast_docstring_free_equal.log`), and `t0_model.py` and `t0_oracle.py` are byte-identical. No value, floor, bracket, margin, threshold, constant or reference configuration changed. No defect in the numerical implementation was found.
+
+| Item | Disposition | Correction |
+|---|---|---|
+| M3T0-R9-F1 (NOTE) | **ACCEPTED; CORRECTED** (checks only; for Review 10 to assess) | `check_review09.py` pins need = −M3 whenever a finite M3 is the stage minimum, through the production `stage_lower_heights` and `stage_need`. This uses the Review 09 counterexample and 14 further cases of both signs, and distinguishes +∞, finite ≥ 0 and certification. Three R9-F1 mutants were added to the harness, among them the reviewer's |
+| M3T0-R9-F2 (NOTE) | **ACCEPTED; CORRECTED** (check and documentation; for Review 10 to assess) | The pole reference of `check_review08.py` is now the model's ellipsoid b² = a²(1 − e2) (was A·(1 − F)), with heights to 80 digits. A consistency regression ties it to the model's computed polar radius and the oracle. The quotation −2.03e-10 m is corrected to −2.04e-10 m in the `stage_lower_heights` docstring and the pole-check docstring. Appended amendments in the Review 07 and Review 08 records and VAL-0019 keep the original sentences |
+
+### R9-F1: a finite binding M3
+- **The gap.** The Review 08 regression made M3 the minimum only through M3 = −∞, and its finite control always had M4 < M3. So `if math.isfinite(M3): return -min(M2, M4)` passed every check.
+- **The regression** (`check_review09.py`). Each case calls `tt.stage_lower_heights` and `tt.stage_need`, with only the force bound injected through their `envelope` argument (10^4 … 10^8 at the first call, 0 after it). It asserts need = −M3 exactly, where the case precondition is that M3 is finite and strictly below M2 and M4.
+  - **Review 09 counterexample** (h0 = 200 km, B_V1, 10^8): M2 = 144 867.2696173568, M3 = −2 499 855 380.144757 and M4 = 89 239.71048326683. The code returns need = +2 499 855 380.144757, a finite non-certification. Under the reviewer's mutant the regression fails with `need = -89239.71048326683`, a false certification (`r9f1_mutant_vs_check09.log`).
+  - **Negative M3 binding** (at h0 = 200 km, 1 000 km and 10 000 km): the committed code does not certify, and the mutant certifies.
+  - **Positive M3 binding** (for example h0 = 1 000 km, 10^4): need = −697 703.7734500183. The step is certified with the M3 margin; the mutant returns −895 407.5469000572.
+  - **Three outcomes** at 200 km are classified separately: A0 = +∞ gives need = +∞, 10^8 gives a finite need > 0, and a constant 1 gives a certification.
+- **Why no published value moves.** With the default envelope, M4 < M3 < M2 at the heights the check pins, and in every path-2 case of a sampled sweep: 8 835 heights from 55.75 km to 20 000 km, all three vehicles (`m4_binding.log`; a sample, not a proof). `t0_termination_results.json` regenerates byte for byte with M3 dropped (Review 08 implementer reproduction).
+
+### R9-F2: the model's polar radius
+- **The model's expression.** `geodetic_iterative` (a = A_WGS84, e2 = E2_WGS84 = fl(F(2 − F))) returns h = p cos φ + z sin φ − a√(1 − e2 sin²φ). At the pole φ = π/2 (sin φ = 1, p = 0), so h = z − fl(a·√(1 − e2)), and fl(a·√(1 − e2)) = fl(b) = `B_WGS84`. `t0_oracle` uses B2 = a²(1 − e2). The model's ellipsoid is therefore defined by the binary64 a and e2, with polar radius a·√(1 − e2). This radius is irrational, and b² is exact.
+- **Recomputed at 80 digits.**
+  - a·√(1 − e2) − A·(1 − F) = 2.4767215814979376e-13 m.
+  - At z = fl(b), the mathematical height is −2.0373635292484448e-10 m on the model's ellipsoid (**−2.04e-10 m**) and −2.0348868076669469e-10 m on the A·(1 − F) ellipsoid.
+  - [0, 0, fl(b) + k·2^-30] has mathematical height k·2^-30 − 2.0373635e-10 m, and 9.11e-9 m at k = 10 on either ellipsoid.
+- **Unchanged.** The point is inside on both ellipsoids, its computed height is 0, and the k = 9 → 10 transition and E1 are unchanged. The seed-20261022 probe's 37 541 states classify identically on both ellipsoids (Review 09 implementer reproduction).
+- **The consistency regression** (`check_review09.py`) asserts the following:
+  - fl(a·√(1 − e2)) = fl(b), and the model's pole height equals z − fl(a·√(1 − e2)) at four heights;
+  - the reference b² of `check_review08.py` equals a²(1 − e2) exactly and the oracle's B2 to 58 digits;
+  - its 13 pole heights equal the 80-digit model heights (to 1e-40 m) and the oracle (to 1e-30 m);
+  - fl(b) − b lies in (−2.03737e-10, −2.03736e-10) m, which separates the two ellipsoids, and [0, 0, fl(b)] is rejected as interior by the oracle.
+
+  The pole check in `check_review08.py` also asserts that interval.
+
+### Evidence (`docs/reviews/raw/M3-T0-review09-findings-correction-evidence/`)
+- **Red before.** `check_review09.py` against the unmodified `5978bfe` tree fails 3 and passes 23 (`checks09_before_5978bfe.log`). The 3 failures are the pole reference, the docstrings and the records. The 23 passes are the R9-F1 contract checks, which pin the committed implementation's correct behaviour. For R9-F1 the red state is shown by mutation: the reviewer's mutant passes all 288 earlier checks (Review 09 implementer reproduction) and fails 16 R9-F1 checks of `check_review09.py` (`r9f1_mutant_vs_check09.log`).
+- **Green after.** `check_review01.py` … `check_review09.py`: 314 passed, 0 failed (288 earlier + 26 new; `checks_after.log`).
+- **Mutation** (`mutation_check_review02.py`, run against all nine check files): the control passes 314/314; all 100 non-equivalent mutants (87 earlier + 13 new R9) are detected, each by at least one of its declared checks; 2 are declared equivalent (`r6f2_float_nan_accepted`, `script_two_body_without_stationary_points`, as before); none survive (`mutation_check_review09.json`).
+- **Smoke run** of the R9 mutants against the checks they target (`smoke_r9.py.txt`, `smoke_r9.log`).
+- **No executable change.** The docstring-free AST of `t0_termination.py` equals `5978bfe` (`ast_docstring_free_equal.log`), and `t0_termination_results.json` regenerates byte for byte (`termination_regenerated.log`).
+- **Preconditions:** `pinned_digests_before.log`.
+
+### Unresolved assumptions and conditional guarantees (unchanged by this pass)
+- **A-FP-2** (libm accuracy) remains an unresolved, explicitly conditional assumption, measured on macOS x86_64 only. E4b depends on it explicitly (LIBM_ULP ≤ 91910196476947).
+- **A-FP-1** is checked at run time on this host only, and A-FP-3 is stated as before. Host measurements are not platform guarantees.
+- **Contract scope.** C1 or C2 vehicles constructed from a positive finite binary64 mass, cd and area; no overflow.
+- **Conditions of the floors.** Sufficient, not necessary; under A-FP-1 to A-FP-3, for computed committed heights > β, bound states with negative two-body energy, no thrust and dt = 10 s. There is no certified J2-plus-drag missed-dip bound.
+- **Unchanged.** The GMAT geodetic-drag discrepancy remains escalated (DR-0029 Q-G2-1); IM-2 is unchanged; DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
+
+### Validation
+Recorded in the validation commit that follows this correction commit.

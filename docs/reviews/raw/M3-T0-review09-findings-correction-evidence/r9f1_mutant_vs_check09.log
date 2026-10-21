@@ -1,0 +1,332 @@
+FFFFFFFFFFFFFFF.F......FFF                                               [100%]
+=================================== FAILURES ===================================
+______________________ test_r9f1_review09_counterexample _______________________
+
+    def test_r9f1_review09_counterexample():
+        """Detects: M3 dropped from the minimum when it is finite. The Review 09 values (h0 =
+        200 km, B_V1, envelope 1e8 then 0): M2 = 144 867.2696173568, M3 = -2 499 855 380.144757,
+        M4 = 89 239.71048326683; the committed code returns need = +2 499 855 380.144757 and the
+        finite-only mutant returns -89 239.71048326683, a false certification."""
+        s = tt.stage_lower_heights(2e5, B_V1, envelope=first_call(1e8))
+        assert s["M2"] == 144867.2696173568
+        assert s["M3"] == -2499855380.144757
+        assert s["M4"] == 89239.71048326683
+        need = tt.stage_need(2e5, B_V1, envelope=first_call(1e8))
+>       assert need == 2499855380.144757 == -s["M3"], f"need = {need!r}"
+E       AssertionError: need = -89239.71048326683
+E       assert -89239.71048326683 == 2499855380.144757
+
+docs/science/experiments/m3-t0/check_review09.py:91: AssertionError
+__________ test_r9f1_finite_m3_minimum_decides_need[200000.0-10000.0] __________
+
+h0 = 200000.0, first = 10000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -89239.71048326683, -M3 = 105380.14475837591
+E       assert -89239.71048326683 == --105380.14475837591
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_________ test_r9f1_finite_m3_minimum_decides_need[200000.0-100000.0] __________
+
+h0 = 200000.0, first = 100000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -89239.71048326683, -M3 = 2355380.1447583744
+E       assert -89239.71048326683 == --2355380.1447583744
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_________ test_r9f1_finite_m3_minimum_decides_need[200000.0-1000000.0] _________
+
+h0 = 200000.0, first = 1000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -89239.71048326683, -M3 = 24855380.144758362
+E       assert -89239.71048326683 == --24855380.144758362
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+________ test_r9f1_finite_m3_minimum_decides_need[200000.0-10000000.0] _________
+
+h0 = 200000.0, first = 10000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -89239.71048326683, -M3 = 249855380.14475822
+E       assert -89239.71048326683 == --249855380.14475822
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_________ test_r9f1_finite_m3_minimum_decides_need[1000000.0-10000.0] __________
+
+h0 = 1000000.0, first = 10000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -895407.5469000572, -M3 = -697703.7734500183
+E       assert -895407.5469000572 == -697703.7734500183
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_________ test_r9f1_finite_m3_minimum_decides_need[1000000.0-100000.0] _________
+
+h0 = 1000000.0, first = 100000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -895407.5469000572, -M3 = 1552296.2265499802
+E       assert -895407.5469000572 == --1552296.2265499802
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+________ test_r9f1_finite_m3_minimum_decides_need[1000000.0-1000000.0] _________
+
+h0 = 1000000.0, first = 1000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -895407.5469000572, -M3 = 24052296.226549968
+E       assert -895407.5469000572 == --24052296.226549968
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+________ test_r9f1_finite_m3_minimum_decides_need[1000000.0-10000000.0] ________
+
+h0 = 1000000.0, first = 10000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -895407.5469000572, -M3 = 249052296.22654983
+E       assert -895407.5469000572 == --249052296.22654983
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_______ test_r9f1_finite_m3_minimum_decides_need[1000000.0-100000000.0] ________
+
+h0 = 1000000.0, first = 100000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -895407.5469000572, -M3 = 2499052296.2265487
+E       assert -895407.5469000572 == --2499052296.2265487
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_________ test_r9f1_finite_m3_minimum_decides_need[10000000.0-10000.0] _________
+
+h0 = 10000000.0, first = 10000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -9929692.324580478, -M3 = -9714846.162290215
+E       assert -9929692.324580478 == -9714846.162290215
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+________ test_r9f1_finite_m3_minimum_decides_need[10000000.0-100000.0] _________
+
+h0 = 10000000.0, first = 100000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -9929692.324580478, -M3 = -7464846.162290218
+E       assert -9929692.324580478 == -7464846.162290218
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+________ test_r9f1_finite_m3_minimum_decides_need[10000000.0-1000000.0] ________
+
+h0 = 10000000.0, first = 1000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -9929692.324580478, -M3 = 15035153.837709768
+E       assert -9929692.324580478 == --15035153.837709768
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_______ test_r9f1_finite_m3_minimum_decides_need[10000000.0-10000000.0] ________
+
+h0 = 10000000.0, first = 10000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -9929692.324580478, -M3 = 240035153.83770964
+E       assert -9929692.324580478 == --240035153.83770964
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_______ test_r9f1_finite_m3_minimum_decides_need[10000000.0-100000000.0] _______
+
+h0 = 10000000.0, first = 100000000.0
+
+    @pytest.mark.parametrize(("h0", "first"), M3_BINDING)
+    def test_r9f1_finite_m3_minimum_decides_need(h0, first):
+        """Detects: a finite M3 dropped or ignored. When a finite M3 is the strict minimum,
+        need = -M3 exactly. If M3 < 0 the step is not certified (the omission would certify
+        it); if M3 > 0 it is certified with the M3 margin (the omission would overstate it)."""
+        s = tt.stage_lower_heights(h0, B_V1, envelope=first_call(first))
+        assert math.isfinite(s["M3"]) and s["M3"] < s["M2"] and s["M3"] < s["M4"], s
+        need = tt.stage_need(h0, B_V1, envelope=first_call(first))
+>       assert need == -s["M3"], f"need = {need!r}, -M3 = {-s['M3']!r}"
+E       AssertionError: need = -9929692.324580478, -M3 = 2490035153.8377085
+E       assert -9929692.324580478 == --2490035153.8377085
+
+docs/science/experiments/m3-t0/check_review09.py:116: AssertionError
+_____________________ test_r9_three_outcomes_distinguished _____________________
+
+    def test_r9_three_outcomes_distinguished():
+        """Detects: +inf, a finite positive need and a certification confused. At h0 = 200 km
+        and B_V1: an envelope +inf at A0 gives need = +inf; 1e8 at A0 gives a finite need > 0
+        (= -M3); a constant envelope of 1 gives need < 0 (= -M4)."""
+        inf_need = tt.stage_need(2e5, B_V1, envelope=first_call(math.inf))
+        fin_need = tt.stage_need(2e5, B_V1, envelope=first_call(1e8))
+        cert = tt.stage_need(2e5, B_V1, envelope=lambda low, sp, b: 1.0)
+        assert classify(inf_need) == "infinite non-certification"
+>       assert classify(fin_need) == "finite non-certification" and fin_need > 0.0
+E       AssertionError: assert ('certification' == 'finite non-certification'
+E         
+E         - finite non-certification
+E         + certification)
+
+docs/science/experiments/m3-t0/check_review09.py:139: AssertionError
+_____________ test_r9f2_pole_reference_matches_the_model_ellipsoid _____________
+
+    def test_r9f2_pole_reference_matches_the_model_ellipsoid():
+        """Detects: the pole reference of `check_review08.py` off the model's ellipsoid (for
+        example A (1 - F) restored). Its exact b^2 equals a^2 (1 - e2), agrees with the
+        oracle's B2, and its heights equal the 80-digit model heights and the oracle's."""
+>       assert Fraction(m.A_WGS84) ** 2 * (1 - Fraction(m.E2_WGS84)) == c8.B2_EXACT
+                                                                        ^^^^^^^^^^^
+E       AttributeError: module 'check_review08' has no attribute 'B2_EXACT'. Did you mean: 'B_EXACT'?
+
+docs/science/experiments/m3-t0/check_review09.py:182: AttributeError
+________________ test_r9f2_docstrings_quote_the_model_ellipsoid ________________
+
+    def test_r9f2_docstrings_quote_the_model_ellipsoid():
+        """Detects: the -2.03e-10 m (A (1 - F)) quotation restored in the stage-condition or
+        pole-check docstring."""
+        doc = c8.norm(tt.stage_lower_heights.__doc__)
+>       assert "(mathematical height -2.04e-10 m on the model ellipsoid, polar radius" in doc
+E       AssertionError: assert '(mathematical height -2.04e-10 m on the model ellipsoid, polar radius' in 'Bounds for an RK4 step from any bound committed state whose *computed* geodetic height is h0 (E1-E6; the simulator on...s (the envelope is evaluated for A0 before the M2 test). This describes the existing implementation; no value changed.'
+
+docs/science/experiments/m3-t0/check_review09.py:207: AssertionError
+___________________________ test_r9_records_amended ____________________________
+
+    def test_r9_records_amended():
+        """Detects: R9-F1 or R9-F2 unrecorded, or a historical record rewritten instead of
+        amended."""
+        old = "(mathematical height −2.03e-10 m)"
+        for name, header in (
+            ("M3-T0-review-07.md", "### Amendment 2 (Authorization I-12, Review 09 M3T0-R9-F2)"),
+            ("M3-T0-review-08.md", "### Amendment (Authorization I-12, Review 09 M3T0-R9-F2)"),
+        ):
+            text = (ROOT / "docs/reviews" / name).read_text()
+>           at = text.index(header)
+                 ^^^^^^^^^^^^^^^^^^
+E           ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review09.py:223: ValueError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_review09_counterexample
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[200000.0-10000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[200000.0-100000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[200000.0-1000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[200000.0-10000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-10000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-100000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-1000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-10000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-100000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-10000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-100000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-1000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-10000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-100000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9_three_outcomes_distinguished
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_pole_reference_matches_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_docstrings_quote_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9_records_amended
+19 failed, 7 passed in 0.87s

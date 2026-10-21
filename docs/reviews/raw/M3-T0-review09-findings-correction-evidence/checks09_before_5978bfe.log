@@ -1,0 +1,44 @@
+.......................FFF                                               [100%]
+=================================== FAILURES ===================================
+_____________ test_r9f2_pole_reference_matches_the_model_ellipsoid _____________
+
+    def test_r9f2_pole_reference_matches_the_model_ellipsoid():
+        """Detects: the pole reference of `check_review08.py` off the model's ellipsoid (for
+        example A (1 - F) restored). Its exact b^2 equals a^2 (1 - e2), agrees with the
+        oracle's B2, and its heights equal the 80-digit model heights and the oracle's."""
+>       assert Fraction(m.A_WGS84) ** 2 * (1 - Fraction(m.E2_WGS84)) == c8.B2_EXACT
+                                                                        ^^^^^^^^^^^
+E       AttributeError: module 'check_review08' has no attribute 'B2_EXACT'. Did you mean: 'B_EXACT'?
+
+docs/science/experiments/m3-t0/check_review09.py:182: AttributeError
+________________ test_r9f2_docstrings_quote_the_model_ellipsoid ________________
+
+    def test_r9f2_docstrings_quote_the_model_ellipsoid():
+        """Detects: the -2.03e-10 m (A (1 - F)) quotation restored in the stage-condition or
+        pole-check docstring."""
+        doc = c8.norm(tt.stage_lower_heights.__doc__)
+>       assert "(mathematical height -2.04e-10 m on the model ellipsoid, polar radius" in doc
+E       AssertionError: assert '(mathematical height -2.04e-10 m on the model ellipsoid, polar radius' in 'Bounds for an RK4 step from any bound committed state whose *computed* geodetic height is h0 (E1-E6; the simulator on...s (the envelope is evaluated for A0 before the M2 test). This describes the existing implementation; no value changed.'
+
+docs/science/experiments/m3-t0/check_review09.py:207: AssertionError
+___________________________ test_r9_records_amended ____________________________
+
+    def test_r9_records_amended():
+        """Detects: R9-F1 or R9-F2 unrecorded, or a historical record rewritten instead of
+        amended."""
+        old = "(mathematical height −2.03e-10 m)"
+        for name, header in (
+            ("M3-T0-review-07.md", "### Amendment 2 (Authorization I-12, Review 09 M3T0-R9-F2)"),
+            ("M3-T0-review-08.md", "### Amendment (Authorization I-12, Review 09 M3T0-R9-F2)"),
+        ):
+            text = (ROOT / "docs/reviews" / name).read_text()
+>           at = text.index(header)
+                 ^^^^^^^^^^^^^^^^^^
+E           ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review09.py:223: ValueError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_pole_reference_matches_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_docstrings_quote_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9_records_amended
+3 failed, 23 passed in 0.83s

@@ -1,5 +1,5 @@
 """Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1, R5-F2, R6-F1 ... F3, R7-F1, R7-F2
-and R8-F1 (research only).
+R8-F1, R9-F1 and R9-F2 (research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
 `check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
@@ -15,9 +15,12 @@ defects: the R7 mutants corrupt the implementation behind the corrected contract
 the corrected text). Review 08 R8-F1: the finite need was documented without the
 precondition computed h0 > beta (documentation); its reviewer also found that dropping M3
 from the stage minimum passed every check (the R8 mutants hide the lower-edge rejection,
-drop M3, or revert the corrected text). This harness corrupts copies of the T0 result
-files, scripts, model, oracle and records, runs `check_review01.py` to `check_review08.py`
-on each copy, and classifies the outcome:
+drop M3, or revert the corrected text). Review 09 R9-F1: a mutant that drops M3 only when
+it is finite passed every check; R9-F2: the pole check's reference was the A (1 - F)
+ellipsoid, not the model's (the R9 mutants drop a finite or positive M3, move a reference
+back to A (1 - F), or revert the corrected text). This harness corrupts copies of the T0
+result files, scripts, model, oracle, checks and records, runs `check_review01.py` to
+`check_review09.py` on each copy, and classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
                  checks declared for that mutant is among the failures (a failure elsewhere
@@ -213,6 +216,17 @@ R8FIN = "test_r8_finite_injected_envelope_certifies"
 R8DOC = "test_r8f1_docstring_states_the_lower_edge_rejection"
 R8REC = "test_r8f1_records_amended"
 R8LOW = (R8SURF, R8SUCC, R8CE, R8POLE, R8BETA)
+REV08 = "../../../reviews/M3-T0-review-08.md"
+REV09 = "../../../reviews/M3-T0-review-09.md"
+R9CE = "test_r9f1_review09_counterexample"
+R9BIND = "test_r9f1_finite_m3_minimum_decides_need"
+R9SIGNS = "test_r9f1_m3_minimum_cases_cover_both_signs"
+R9THREE = "test_r9_three_outcomes_distinguished"
+R9RADIUS = "test_r9f2_model_polar_radius_is_a_sqrt_1_minus_e2"
+R9REF = "test_r9f2_pole_reference_matches_the_model_ellipsoid"
+R9DOC = "test_r9f2_docstrings_quote_the_model_ellipsoid"
+R9REC = "test_r9_records_amended"
+NEED_MIN = '    return -min(s["M2"], s["M3"], s["M4"])  # >= 0: a stage may leave the domain\n'
 R7F1_OLD = "        and need(h0) = +inf, as for an unbounded envelope. M2 depends"
 SCOPED = (
     "Over the coefficient-rounding subset (equatorial points from 300 km below to 10 km above "
@@ -872,6 +886,100 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
         ),
         (R8REC,),
     ),
+    # ---- Review 09: a finite binding M3 (R9-F1) and the pole reference (R9-F2)
+    "r9f1_m3_dropped_when_finite": (  # the Review 09 reviewer's mutant
+        edit_text(
+            "t0_termination.py",
+            NEED_MIN,
+            '    if math.isfinite(s["M3"]):\n        return -min(s["M2"], s["M4"])  # mutant\n'
+            + NEED_MIN,
+        ),
+        (R9CE, R9BIND, R9THREE),
+    ),
+    "r9f1_m3_dropped_when_positive": (
+        edit_text(
+            "t0_termination.py",
+            NEED_MIN,
+            '    if s["M3"] > 0.0:\n        return -min(s["M2"], s["M4"])  # mutant\n' + NEED_MIN,
+        ),
+        (R9BIND,),
+    ),
+    "r9f1_binding_cases_negative_m3_only": (
+        edit_text(
+            "check_review09.py",
+            "    for first in (1e4, 1e5, 1e6, 1e7, 1e8)\n",
+            "    for first in (1e6, 1e7, 1e8)\n",
+        ),
+        (R9SIGNS,),
+    ),
+    "r9f2_pole_reference_reverted_to_flattening": (
+        edit_text(
+            "check_review08.py",
+            "B2_EXACT = A * A * (1 - Fraction(m.E2_WGS84))\n",
+            "B2_EXACT = (A * (1 - Fraction(m.F_WGS84))) ** 2  # mutant: the A (1 - F) ellipsoid\n",
+        ),
+        (R8POLE, R9REF),
+    ),
+    "r9f2_oracle_polar_radius_from_flattening": (
+        edit_text(
+            "t0_oracle.py",
+            "    B2 = A2 * (1 - E2)\n",
+            "    B2 = (A * (1 - D(m.F_WGS84))) ** 2  # mutant\n",
+        ),
+        (R9REF,),
+    ),
+    "r9f2_docstring_quote_reverted": (
+        edit_text(
+            "t0_termination.py",
+            "(mathematical height -2.04e-10 m on the model ellipsoid, polar\n",
+            "(mathematical height -2.03e-10 m on the model ellipsoid, polar\n",
+        ),
+        (R9DOC,),
+    ),
+    "r9f2_pole_check_docstring_reverted": (
+        edit_text(
+            "check_review08.py",
+            "    ellipsoid (mathematical height -2.04e-10 m on the model ellipsoid, polar radius\n",
+            "    ellipsoid (mathematical height -2.03e-10 m on the model ellipsoid, polar radius\n",
+        ),
+        (R9DOC,),
+    ),
+    "r9f2_review07_amendment_removed": (
+        edit_text(
+            REV07, "### Amendment 2 (Authorization I-12, Review 09 M3T0-R9-F2)", "### Note 2"
+        ),
+        (R9REC,),
+    ),
+    "r9f2_review08_amendment_removed": (
+        edit_text(REV08, "### Amendment (Authorization I-12, Review 09 M3T0-R9-F2)", "### Note"),
+        (R9REC,),
+    ),
+    "r9f2_review07_original_sentence_rewritten": (
+        edit_text(
+            REV07,
+            "[0, 0, fl(b)] lies inside the ellipsoid (mathematical height −2.03e-10 m) with "
+            "computed height 0, and",
+            "[0, 0, fl(b)] lies inside the ellipsoid (mathematical height −2.04e-10 m) with "
+            "computed height 0, and",
+        ),
+        (R9REC,),
+    ),
+    "r9f2_val0019_amendment_removed": (
+        edit_text(VAL, "Amended after Review 09 M3T0-R9-F2 and M3T0-R9-F1", "Note"),
+        (R9REC,),
+    ),
+    "r9_review09_correction_section_removed": (
+        edit_text(REV09, "## Correction pass (Authorization I-12", "## Notes (Authorization I-12"),
+        (R9REC,),
+    ),
+    "r9f1_report_note_reverted": (
+        edit_text(
+            REPORT,
+            "- R9-F1: a finite M3 that is the minimum decides need = −M3",
+            "- R9-F1: M3 is checked",
+        ),
+        (R9REC,),
+    ),
 }
 
 
@@ -904,6 +1012,7 @@ def run(name: str) -> dict:
                 str(d / "check_review06.py"),
                 str(d / "check_review07.py"),
                 str(d / "check_review08.py"),
+                str(d / "check_review09.py"),
             ],
             capture_output=True,
             text=True,
