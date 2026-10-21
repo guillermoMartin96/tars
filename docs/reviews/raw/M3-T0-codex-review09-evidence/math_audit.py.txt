@@ -1,0 +1,38 @@
+import sys,math,json,hashlib,pathlib,re,subprocess,ast
+from decimal import Decimal as D,localcontext
+from fractions import Fraction as Q
+sys.path.insert(0,'docs/science/experiments/m3-t0');import t0_termination as t,t0_model as m
+with localcontext() as c:
+ c.prec=100
+ u,al,be=map(lambda k:D(t.FP[k]),['u','alpha','beta_m'])
+ def M2(h):
+  H=(D(h)-be)/(1+al);V=(2*D(m.MU)/(D(t.FP['b_lower_m'])+H)).sqrt();R=D(m.A_WGS84)+(D(h)+be)/(1-al)
+  return (1-al)*(H-5*(1+u)**2*V-u*R-D(math.ulp(0.)))-be
+ lo,hi=D(55000),D(56000)
+ for _ in range(250):
+  mid=(lo+hi)/2
+  if M2(mid)<=0:lo=mid
+  else:hi=mid
+ print('M2 root',lo,hi)
+ x=float(lo)
+ for h in [math.nextafter(x,-math.inf),x,math.nextafter(x,math.inf)]:print('M2 neighbour',h,M2(h),t.stage_lower_heights(h,t.B_V1)['M2'])
+ eta=Q(math.ulp(0.))/2;uQ=Q(1,2**53)
+ for label,phi in [('stored',Q(t.FP['phi_B'])),('exact',(1+uQ)/(1-uQ)**2)]:
+  cc=phi*(1-uQ);switch=cc*eta/(cc-1);print('b_switch',label,float(switch))
+ print('beta',be,'binary gap',D(math.nextafter(float(be),math.inf))-be)
+# Validate every evidence manifest entry independently.
+p=pathlib.Path('docs/reviews/raw/M3-T0-review08-findings-correction-evidence')
+for ln in (p/'SHA256SUMS').read_text().splitlines():
+ if not ln.strip():continue
+ digest,name=ln.split(maxsplit=1); f=p/name.lstrip('*')
+ # manifest paths may already be root-relative
+ if not f.exists():f=pathlib.Path(name.lstrip('*'))
+ got=hashlib.sha256(f.read_bytes()).hexdigest();print('manifest',name,got==digest);assert got==digest
+j=json.loads((p/'mutation_check_review08.json').read_text());mut=j['mutants'];print('recorded mutation outcomes',{s:sum(v['outcome']==s for v in mut.values()) for s in {v['outcome'] for v in mut.values()}})
+# Independent AST canonicalization, stripping only leading string expressions.
+class NoDocs(ast.NodeTransformer):
+ def generic_visit(self,node):
+  super().generic_visit(node)
+  if isinstance(node,(ast.Module,ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)) and node.body and isinstance(node.body[0],ast.Expr) and isinstance(node.body[0].value,ast.Constant) and isinstance(node.body[0].value.value,str):node.body.pop(0)
+  return node
+path='docs/science/experiments/m3-t0/t0_termination.py';before=subprocess.check_output(['git','show','115e747:'+path],text=True);after=pathlib.Path(path).read_text();assert ast.dump(NoDocs().visit(ast.parse(before)))==ast.dump(NoDocs().visit(ast.parse(after)));print('own AST equal')

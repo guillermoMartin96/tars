@@ -1,0 +1,9 @@
+# Implementer reproduction of M3T0-R9-F1 (run from the repository root at f04f995).
+# 1. copy docs/ into a scratch tree; 2. apply r9f1_mutant.diff to its t0_termination.py
+#    (stage_need: return -min(M2, M4) when M3 is finite); 3. run all eight check files there.
+R=<scratch>/r9repro
+rm -rf $R/mut && mkdir -p $R/mut && cp -R docs $R/mut/
+# (patch applied with a one-line Python string replacement; result shown in r9f1_mutant.diff)
+cd $R/mut && uv run --project <repo> --no-sync pytest -q -p no:cacheprovider \
+  docs/science/experiments/m3-t0/check_review0{1,2,3,4,5,6,7,8}.py > $R/r9f1_mutant_checks.log
+# the checks import the mutated module: c.tt.__file__ = <scratch>/r9repro/mut/docs/science/experiments/m3-t0/t0_termination.py

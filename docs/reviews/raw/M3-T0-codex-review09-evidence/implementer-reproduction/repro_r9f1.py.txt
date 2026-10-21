@@ -1,0 +1,36 @@
+"""Implementer reproduction of M3T0-R9-F1: a finite-M3-only omission. Usage: python -I repro_r9f1.py <m3-t0 dir>"""
+import math
+import sys
+
+sys.path.insert(0, sys.argv[1])
+import t0_termination as tt  # noqa: E402
+import check_review04 as c4  # noqa: E402
+
+B_V1 = c4.VEHICLES["B25.8"]
+
+
+def injected(first):
+    calls = []
+
+    def env(low, s, b):
+        calls.append(1)
+        return first if len(calls) == 1 else 0.0
+
+    return env
+
+
+def mutant_need(h0, b, envelope):
+    s = tt.stage_lower_heights(h0, b, None, envelope)
+    if s["M4"] is None:
+        return -s["M2"]
+    if math.isfinite(s["M3"]):
+        return -min(s["M2"], s["M4"])  # the R9-F1 mutant: M3 dropped when finite
+    return -min(s["M2"], s["M3"], s["M4"])
+
+
+for h0, first in ((2e5, 1e8), (2e5, math.inf), (1e6, 1e8), (2e5, 1.0)):
+    s = tt.stage_lower_heights(h0, B_V1, None, injected(first))
+    need = tt.stage_need(h0, B_V1, envelope=injected(first))
+    mut = mutant_need(h0, B_V1, injected(first))
+    print(f"h0={h0!r} first={first!r} M2={s['M2']!r} M3={s['M3']!r} M4={s['M4']!r} "
+          f"need={need!r} mutant={mut!r} mutant_certifies={mut < 0} code_certifies={need < 0}")

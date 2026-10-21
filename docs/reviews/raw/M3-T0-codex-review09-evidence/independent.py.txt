@@ -1,0 +1,92 @@
+import sys,math,random,json,warnings
+from fractions import Fraction as Q
+from decimal import Decimal as D,localcontext
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m,t0_termination as t,t0_oracle as o
+rng=random.Random(906210); tiny=math.ulp(0.); eta=Q(tiny)/2
+counts={'C1':0,'C2':0,'exterior':0,'rejected':0,'returned':0,'forces':0,'excluded_nonfinite':0,'stages':0,'e4b':0}
+# exact-rational conversion checks, exponent grid unlike supplied sweep
+vals=[tiny,2*tiny,17*tiny,math.ldexp(1.,-1022),1e-200,1e-80,0.25,0.5,2.2,15.,33.,1e80,1e200,1e300]
+for cd in vals:
+ for ar in vals:
+  prod=cd*ar
+  for source in vals:
+   for kind in ('C1','C2'):
+    mass=source if kind=='C1' else (source*cd)*ar
+    b=(mass/prod if prod else math.inf) if kind=='C1' else source
+    if not(0<mass<math.inf and b<math.inf and (kind=='C2' or prod<math.inf)):continue
+    R=t.inverse_ballistic_bound(b,cd,ar,Q(t.FP['phi_B']))
+    assert R>=Q(cd)*Q(ar)/Q(mass),(kind,cd,ar,mass,b)
+    counts[kind]+=1
+# Ellipsoid exterior classification uses model e2, no latitude inversion
+A=Q(m.A_WGS84); B2=A*A*(1-Q(m.E2_WGS84))
+for i in range(600):
+ lat=rng.uniform(-math.pi/2,math.pi/2); lon=rng.uniform(-math.pi,math.pi)
+ r=m.geodetic_to_cartesian(lat,lon,0.)
+ for k in range(rng.randrange(1,24)):
+  r=np.nextafter(r,np.where(r>=0,math.inf,-math.inf))
+ x,y,z=map(lambda x:Q(float(x)),r)
+ if (x*x+y*y)/(A*A)+z*z/B2<=1:continue
+ counts['exterior']+=1; h=m.geodetic_iterative(r)[1]; ht=o.true_height(r)
+ assert abs(D(h)-ht)<=D(t.FP['alpha'])*ht+D(t.FP['beta_m'])
+ for b in (0.,tiny,t.B_V1,100.,math.inf):
+  try:n=t.stage_need(h,b)
+  except ValueError:
+   assert h<=t.FP['beta_m'];counts['rejected']+=1
+  else:assert h>t.FP['beta_m'] and n>=0;counts['returned']+=1
+# force extremes / boundaries. finite model values only; no-overflow exclusion explicit
+with warnings.catch_warnings():
+ warnings.simplefilter('ignore')
+ for height in [0.,1e-8,79999.9,80000.,120000.,math.nextafter(120000.,-math.inf),250000.,1e7,1.90681e8,1.98e8]:
+  r=np.array([m.A_WGS84+height,0.,0.]); ht=o.true_height(r); low=max(0.,math.nextafter(float(ht),-math.inf))
+  for cd,ar,mass in [(2.2,15.,850.),(2.2,15.,tiny),(tiny,.25,1.),(1e200,1e-200,1e-300),(1e-200,1e200,1e-300)]:
+   P=cd*ar;b=mass/P if P else math.inf
+   if not math.isfinite(P):continue
+   for speed in [0.,tiny,1.,11000.,1e10,1e100]:
+    v=np.array([0.,-speed,0.]);cfg=m.Config(drag=m.Drag(cd,ar))
+    try:
+     # drag-only identical order, avoids subtractive cancellation with gravity
+     rho=m.density(m.geodetic_iterative(r)[1]); rel=v-m.air_velocity(r,m.OMEGA_E)
+     force=-(.5*rho*cd*ar/mass)*math.sqrt(float(rel@rel))*rel
+     val=math.hypot(*force)
+     if not math.isfinite(val):counts['excluded_nonfinite']+=1;continue
+     bound=t.drag_envelope(low,speed,b,cd,ar)
+     assert val<=bound,(height,cd,ar,mass,speed,val,bound)
+     counts['forces']+=1
+    except OverflowError:counts['excluded_nonfinite']+=1
+# RK4 near floor at near-escape inward and retrograde directions, both signs of latitude
+for b,mass in [(t.B_V1,850.),(100.,(100.*2.2)*15.),(math.inf,850.)]:
+ floor={r['vehicle']:r['h_f_sufficient_at_least_m'] for r in json.load(open('docs/science/experiments/m3-t0/t0_termination_results.json'))['sufficient_stage_condition']['rows']}['drag-free limit' if math.isinf(b) else ('B25.8' if b==t.B_V1 else 'B100')]
+ for lat in [-1.570796326794, -1.1,0.,.7,1.570796326794]:
+  for direction in ('in','retro'):
+   r=m.geodetic_to_cartesian(lat,.37,floor+1e-5); h=m.geodetic_iterative(r)[1]
+   d=-r/np.linalg.norm(r) if direction=='in' else np.array([math.sin(.37),-math.cos(.37),0.])
+   v=math.sqrt(2*m.MU/np.linalg.norm(r))*(1.-1e-12)*d
+   assert float(v@v)/2-m.MU/np.linalg.norm(r)<0
+   cfg=m.Config(j2=m.J2_FROM_C20,drag=None if math.isinf(b) else m.Drag(2.2,15.))
+   stages=[];m.rk4_step(m.rhs(cfg),0.,np.r_[r,v,mass],10.,stages)
+   bounds=t.stage_lower_heights(h,b);assert t.stage_need(h,b)<0
+   for st,key in zip(stages,['M2','M3','M4']):assert m.geodetic_iterative(st.r)[1]>=bounds[key]>0
+   counts['stages']+=1
+# E4b exact product cases, both area cases
+for ar in [.125,.25,.375,.5,1.,2.,1e100]:
+ for cd in [tiny,2*tiny,4*tiny]:
+  if Q(cd)*Q(ar)>eta:continue
+  for h in [0.,1000.,120000.]:
+   rho=m.density(h);k=(.5*rho*cd*ar)/tiny;assert k==0.;counts['e4b']+=1
+# independently solve affine cap at rational constants
+c0=t.rounding_allowances(0)['zero_force_c0_max'];c1=t.rounding_allowances(1)['zero_force_c0_max']
+limit=(Q(5,8)-c0)//(c1-c0);assert limit==91910196476947
+assert t.rounding_allowances(limit)['zero_force_c0_max']<=Q(5,8)
+try:t.rounding_allowances(limit+1)
+except ValueError:pass
+else:raise AssertionError('cap limit')
+print('counts',counts);print('cap_limit',limit)
+for f in [t.r3f1_counterexample,t.r4f1_counterexample,t.r5f1_counterexamples,t.r6f1_counterexamples,t.envelope_counterexample]:print(f.__name__,json.dumps(f(),default=str))
+print('IM2',t.stage_need(111511.96,math.inf),t.stage_need(111511.97,math.inf))
+with localcontext() as c:
+ c.prec=70
+ print('pole_shift_f',D(m.B_WGS84)-D(m.A_WGS84)*(1-D(m.F_WGS84)))
+ print('pole_shift_e2',D(m.B_WGS84)-D(m.A_WGS84)*(1-D(m.E2_WGS84)).sqrt())
+print('PASS independent probes')

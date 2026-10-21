@@ -1,0 +1,16 @@
+import sys,pathlib,tempfile,shutil,subprocess,re,json
+sys.path.insert(0,'docs/science/experiments/m3-t0');import mutation_check_review02 as h
+names=['json_reviewer_R2F3_mutant','r3_height_allowance_removed','r4_stage_condition_uses_superseded_envelope','r5_conversion_bound_relative_only','r6f2_up_overflow_restored','r6f3_cap_libm_independent','r6f2_float_nan_accepted','script_two_body_without_stationary_points']
+results={}
+for name in names:
+ corr,expected=h.MUTANTS[name]
+ with tempfile.TemporaryDirectory(dir='review_scratch') as tmp:
+  root=pathlib.Path(tmp).absolute();shutil.copytree('docs',root/'docs');d=root/h.REL;corr(d)
+  exp=[x for x in expected if x!=h.EQUIVALENT]
+  cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider','-rf',*[str(d/f'check_review0{i}.py') for i in range(1,9)],'-k',' or '.join(exp)]
+  r=subprocess.run(cmd,capture_output=True,text=True,cwd=root)
+  pathlib.Path('review_scratch/'+name+'.log').write_text(r.stdout+r.stderr)
+  failed=set(re.findall(r'^FAILED \S+::(\w+)',r.stdout,re.M)); equivalent=h.EQUIVALENT in expected
+  ok=(r.returncode==0 if equivalent else r.returncode==1 and bool(failed&set(exp)))
+  results[name]=dict(ok=ok,equivalent=equivalent,exit=r.returncode,failed=sorted(failed),summary=r.stdout[-250:]);print(name,results[name],flush=True)
+pathlib.Path('review_scratch/old_mutants.json').write_text(json.dumps(results,indent=2));assert all(x['ok'] for x in results.values())

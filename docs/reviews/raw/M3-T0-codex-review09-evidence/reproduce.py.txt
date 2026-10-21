@@ -1,0 +1,14 @@
+import subprocess,pathlib,hashlib,json,time,sys
+D=pathlib.Path('docs/science/experiments/m3-t0'); py=str(pathlib.Path('.venv/bin/python').absolute()); console=str(pathlib.Path('../GMAT R2026a/bin/GmatConsole').absolute())
+files=subprocess.check_output(['git','ls-files',str(D)],text=True).splitlines(); before={f:hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest() for f in files}
+for iteration in (1,2):
+ for name in ['atmosphere','decay','geodetic','frames','regression','termination','height_error','gmat','axis_ablation']:
+  cmd=[py,str(D/f't0_{name}.py')]; out=str(D/f't0_{name}_results.json')
+  cmd+=['--gmat-console',console,'--out',out] if name=='gmat' else [out]
+  start=time.time(); r=subprocess.run(cmd,capture_output=True,text=True)
+  pathlib.Path(f'review_scratch/repro_{iteration}_{name}.log').write_text(r.stdout+r.stderr)
+  print(iteration,name,r.returncode,round(time.time()-start,1),flush=True)
+  if r.returncode:sys.exit(r.returncode)
+ changed=[f for f,h in before.items() if hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest()!=h]
+ print('CHANGED',iteration,changed,flush=True)
+ pathlib.Path(f'review_scratch/repro_{iteration}_changes.json').write_text(json.dumps(changed))

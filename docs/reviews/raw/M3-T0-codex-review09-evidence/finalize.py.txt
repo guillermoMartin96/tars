@@ -1,0 +1,15 @@
+from pathlib import Path
+import subprocess,re,json,hashlib
+S=Path('review_scratch');p=S/'pytest.log';log=p.read_text()
+match=re.search(r'(\d+ passed(?:, \d+ warnings)? in [^\n]+)',log)
+assert match and '1185 passed' in match.group(1),log[-1000:]
+assert not re.search(r'\d+ failed|\d+ error',log)
+status=subprocess.check_output(['git','status','--porcelain']);diff=subprocess.check_output(['git','diff','--stat'])
+(S/'final_status.txt').write_bytes(status);(S/'final_diff_stat.txt').write_bytes(diff)
+assert not status and not diff,(status,diff)
+draft=(S/'review_draft.md').read_text().replace('PYTEST_RESULT',match.group(1))
+assert not any(w in draft for w in ['PYTEST_RESULT','CONVERSION_COUNTS','228_CHECKS'])
+(S/'M3-T0-codex-review09.md').write_text(draft)
+files=[f for f in S.iterdir() if f.is_file() and f.name not in ['review_SHA256SUMS','review_draft.md','finalize.log']]
+(S/'review_SHA256SUMS').write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n' for f in sorted(files)))
+print('pytest',match.group(1));print('tracked_status',repr(status));print('tracked_diff_stat',repr(diff));print('review',S/'M3-T0-codex-review09.md');print('sha256',hashlib.sha256((S/'M3-T0-codex-review09.md').read_bytes()).hexdigest())

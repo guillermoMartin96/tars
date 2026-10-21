@@ -1,0 +1,81 @@
+{
+  "json_reviewer_R2F3_mutant": {
+    "ok": true,
+    "equivalent": false,
+    "exit": 1,
+    "failed": [
+      "test_r2f1_stored_dip_is_recomputed_at_its_location_and_bounds_other_phases",
+      "test_r2f1_sweep_covers_the_declared_matrix",
+      "test_r2f2_floors_recomputed_by_a_second_implementation"
+    ],
+    "summary": "3-t0/check_review02.py::test_r2f2_floors_recomputed_by_a_second_implementation[B25.8]\nFAILED docs/science/experiments/m3-t0/check_review02.py::test_r2f2_floors_recomputed_by_a_second_implementation[drag-free limit]\n22 failed, 266 deselected in 1.10s\n"
+  },
+  "r3_height_allowance_removed": {
+    "ok": true,
+    "equivalent": false,
+    "exit": 1,
+    "failed": [
+      "test_r3f1_boundary_points",
+      "test_r3f1_counterexamples_at_every_downward_jump_are_covered",
+      "test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation",
+      "test_r3f1_reviewer_counterexample_is_reproduced_and_covered"
+    ],
+    "summary": "ED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[1000]\nFAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation\n26 failed, 262 deselected in 1.46s\n"
+  },
+  "r4_stage_condition_uses_superseded_envelope": {
+    "ok": true,
+    "equivalent": false,
+    "exit": 1,
+    "failed": [
+      "test_stage_condition_uses_the_corrected_envelope"
+    ],
+    "summary": "iew04.py:743: AssertionError\n=========================== short test summary info ============================\nFAILED docs/science/experiments/m3-t0/check_review04.py::test_stage_condition_uses_the_corrected_envelope\n1 failed, 287 deselected in 0.81s\n"
+  },
+  "r5_conversion_bound_relative_only": {
+    "ok": true,
+    "equivalent": false,
+    "exit": 1,
+    "failed": [
+      "test_r5f1_conversion_bound_holds_for_both_constructions",
+      "test_r5f1_conversion_bound_recomputed_by_a_second_implementation",
+      "test_r5f1_dominance_switch_between_relative_and_absolute_terms",
+      "test_r5f1_envelope_recomputed_by_a_second_implementation",
+      "test_r5f1_model_drag_within_envelope_for_subnormal_conversions",
+      "test_r5f1_review05_counterexamples_are_covered"
+    ],
+    "summary": "e/experiments/m3-t0/check_review05.py::test_r5f1_model_drag_within_envelope_for_subnormal_conversions\nFAILED docs/science/experiments/m3-t0/check_review05.py::test_r5f1_envelope_recomputed_by_a_second_implementation\n7 failed, 281 deselected in 0.89s\n"
+  },
+  "r6f2_up_overflow_restored": {
+    "ok": true,
+    "equivalent": false,
+    "exit": 1,
+    "failed": [
+      "test_r6f2_up_and_dn_at_extremes",
+      "test_r6f2_up_and_dn_bracket_random_rationals"
+    ],
+    "summary": "0000000000000000000000000000000000000000000000000000000000000000000000000-inf-1.7976931348623157e+308]\nFAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f2_up_and_dn_bracket_random_rationals\n5 failed, 16 passed, 267 deselected in 1.02s\n"
+  },
+  "r6f3_cap_libm_independent": {
+    "ok": true,
+    "equivalent": false,
+    "exit": 1,
+    "failed": [
+      "test_r6f3_e4b_cap_depends_on_libm_ulp"
+    ],
+    "summary": "0/check_review06.py:438: AssertionError\n=========================== short test summary info ============================\nFAILED docs/science/experiments/m3-t0/check_review06.py::test_r6f3_e4b_cap_depends_on_libm_ulp\n1 failed, 287 deselected in 0.78s\n"
+  },
+  "r6f2_float_nan_accepted": {
+    "ok": true,
+    "equivalent": true,
+    "exit": 0,
+    "failed": [],
+    "summary": ".                                                                        [100%]\n1 passed, 287 deselected in 0.68s\n"
+  },
+  "script_two_body_without_stationary_points": {
+    "ok": true,
+    "equivalent": true,
+    "exit": 0,
+    "failed": [],
+    "summary": ".                                                                        [100%]\n1 passed, 287 deselected in 0.75s\n"
+  }
+}

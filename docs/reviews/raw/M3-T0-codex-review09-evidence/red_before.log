@@ -1,0 +1,42 @@
+.........................FF                                              [100%]
+=================================== FAILURES ===================================
+_____________ test_r8f1_docstring_states_the_lower_edge_rejection ______________
+
+    def test_r8f1_docstring_states_the_lower_edge_rejection():
+        """Detects: the rejection undocumented, its threshold or vehicle scope misstated, or a
+        finite need claimed for every exterior state."""
+        doc = norm(tt.stage_lower_heights.__doc__)
+        for phrase in (
+            "Review 08 M3T0-R8-F1",
+            "Every returned value needs a computed h0 > beta",
+            "a computed h0 <= beta (H0 < 0) raises ValueError",
+            "before the M2 test, for b = B_V1 and for the drag-free b = +inf alike",
+            "the computed height is not the mathematical height",
+            "r = [a + k 2^-30, 0, 0] m for k = 1 ... 9",
+            "does not return a finite need for every state outside the ellipsoid",
+            "certifies only under the premises above and A-FP-1 to A-FP-3",
+            "decimal.InvalidOperation",
+            "For h0 > beta, need(h0) >= 0 is a non-certification",
+            "has a finite need on both paths for h0 > beta",
+        ):
+>           assert phrase in doc, phrase
+E           AssertionError: Review 08 M3T0-R8-F1
+E           assert 'Review 08 M3T0-R8-F1' in 'Bounds for an RK4 step from any bound committed state whose *computed* geodetic height is h0 (E1-E6; the simulator on...s (the envelope is evaluated for A0 before the M2 test). This describes the existing implementation; no value changed.'
+
+docs/science/experiments/m3-t0/check_review08.py:273: AssertionError
+__________________________ test_r8f1_records_amended ___________________________
+
+    def test_r8f1_records_amended():
+        """Detects: the false exclusion left unqualified, or a historical record rewritten
+        instead of amended."""
+        rev7 = (ROOT / "docs/reviews/M3-T0-review-07.md").read_text()
+>       amend7 = rev7.index("### Amendment (Authorization I-11, Review 08 M3T0-R8-F1)")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review08.py:281: ValueError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review08.py::test_r8f1_docstring_states_the_lower_edge_rejection
+FAILED docs/science/experiments/m3-t0/check_review08.py::test_r8f1_records_amended
+2 failed, 25 passed in 0.82s
+

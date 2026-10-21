@@ -1,0 +1,20 @@
+"""Implementer reproduction of M3T0-R9-F2: pole height on the F- and E2-defined ellipsoids.
+Usage: python -I repro_r9f2.py <m3-t0 dir>"""
+import sys
+from decimal import Decimal as D, getcontext
+from fractions import Fraction
+
+sys.path.insert(0, sys.argv[1])
+import t0_model as m  # noqa: E402
+
+getcontext().prec = 60
+A = D(m.A_WGS84)
+b_F = A * (1 - D(m.F_WGS84))  # check_review08.B_EXACT
+b_E2 = A * (1 - D(m.E2_WGS84)).sqrt()  # t0_oracle: B2 = A^2 (1 - E2)
+z = D(m.B_WGS84)
+print("F_WGS84 =", repr(m.F_WGS84), " E2_WGS84 =", repr(m.E2_WGS84))
+print("E2 == fl(F(2-F)):", m.E2_WGS84 == m.F_WGS84 * (2 - m.F_WGS84))
+print("b_F - b_E2 =", f"{b_F - b_E2:.17e}")
+print("height at fl(b), F ellipsoid  =", f"{z - b_F:.17e}")
+print("height at fl(b), E2 ellipsoid =", f"{z - b_E2:.17e}")
+print("computed height at fl(b) =", repr(m.HEIGHTS["geodetic"](__import__("numpy").array([0.0, 0.0, m.B_WGS84]))))

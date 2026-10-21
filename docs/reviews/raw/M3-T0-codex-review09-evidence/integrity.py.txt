@@ -1,0 +1,10 @@
+import subprocess,pathlib,hashlib,json,ast
+R=pathlib.Path('.'); S=R/'review_scratch'
+def git(*args):return subprocess.check_output(['git',*args])
+for name,args in [('status_initial',['status','--porcelain']),('origin',['show-ref']),('changed_files',['diff','--name-status','115e747..HEAD']),('protected',['diff','86df2c3..HEAD','--','src','proof','toolbox','scenarios','tests','.github','uv.lock','pyproject.toml']),('results_diff',['diff','115e747..HEAD','--','docs/science/experiments/m3-t0/*results.json']),('reviews_diff',['diff','115e747..HEAD','--','docs/reviews'])]:
+ (S/(name+'.txt')).write_bytes(git(*args))
+for f in ['docs/reviews/M3-T0-review-06.md','docs/reviews/M3-T0-review-07.md','docs/reviews/M3-T0-review-08.md']:
+ old=git('show','115e747:'+f); now=pathlib.Path(f).read_bytes(); print('append-only',f,now.startswith(old))
+for f in ['../GMAT R2026a/bin/GmatConsole','../GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt']: print(f,hashlib.sha256(pathlib.Path(f).read_bytes()).hexdigest())
+for f in sorted(pathlib.Path('docs/science/experiments/m3-t0').glob('*results.json')):
+ data=json.loads(f.read_text()); print('INSPECT',f,len(f.read_bytes()),list(data) if isinstance(data,dict) else len(data))

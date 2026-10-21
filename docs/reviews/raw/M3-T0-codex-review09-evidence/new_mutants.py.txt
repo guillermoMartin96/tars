@@ -1,0 +1,20 @@
+import pathlib,sys,subprocess,shutil,tempfile,re,json
+D=pathlib.Path('docs/science/experiments/m3-t0').absolute()
+old='return -min(s["M2"], s["M3"], s["M4"])'
+new='return -min(s["M2"], s["M4"]) if math.isfinite(s["M3"]) else -min(s["M2"], s["M3"], s["M4"])'
+with tempfile.TemporaryDirectory(dir='review_scratch') as tmp:
+ root=pathlib.Path(tmp).absolute();shutil.copytree('docs',root/'docs');d=root/'docs/science/experiments/m3-t0'
+ p=d/'t0_termination.py';text=p.read_text();assert text.count(old)==1;p.write_text(text.replace(old,new))
+ r=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider',*[str(d/f'check_review0{i}.py') for i in range(1,9)]],capture_output=True,text=True,cwd=root)
+ pathlib.Path('review_scratch/new_mutant_checks.log').write_text(r.stdout+r.stderr);print('FINITE_M3_DROPPED',r.returncode,r.stdout[-300:],flush=True)
+ code='''import t0_termination as t
+calls=[]
+def env(*args):
+ calls.append(args);return 1e8 if len(calls)==1 else 0.
+s=t.stage_lower_heights(2e5,t.B_V1,envelope=env)
+calls.clear()
+print(s)
+print("need",t.stage_need(2e5,t.B_V1,envelope=env))
+'''
+ for label,path in [('control',D),('mutant',d)]:
+  z=subprocess.run([sys.executable,'-c','import sys;sys.path.insert(0,'+repr(str(path))+');'+code],capture_output=True,text=True);print(label,z.stdout,z.stderr,flush=True)

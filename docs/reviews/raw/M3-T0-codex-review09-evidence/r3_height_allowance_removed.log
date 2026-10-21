@@ -1,0 +1,1068 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFF                                               [100%]
+=================================== FAILURES ===================================
+_________ test_r3f1_reviewer_counterexample_is_reproduced_and_covered __________
+
+    def test_r3f1_reviewer_counterexample_is_reproduced_and_covered():
+        ht = o.true_height(REVIEWER_R)
+        assert abs(ht - D("120000.0000000000233")) < D("1e-13")
+        assert model_height(REVIEWER_R) == 119999.99999999907 < 120_000.0
+        a = model_drag_norm(REVIEWER_R, REVIEWER_V)
+        assert a > D(tt.drag_envelope_exact_height(120_000.0, 11_000.0, B_V1))  # the defect
+        assert a > defective_envelope(D(120_000), 11_000.0, B_V1)
+>       assert a <= D(tt.drag_envelope(120_000.0, 11_000.0, B_V1))  # the correction
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert Decimal('0.0623090145041428100451613705533837007436770394774023308671922') <= Decimal('0.06230417914238060850262712619951344095170497894287109375')
+E        +  where Decimal('0.06230417914238060850262712619951344095170497894287109375') = D(0.06230417914238061)
+E        +    where 0.06230417914238061 = <function drag_envelope at 0x10d96b060>(120000.0, 11000.0, 25.757575757575758)
+E        +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:176: AssertionError
+_______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[50] _______
+
+base_km = 50
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('2698.88680020645335452302273013997022699436211101096019413815') <= Decimal('2698.80782847523323653149418532848358154296875')
+E            +  where Decimal('2698.80782847523323653149418532848358154296875') = D(2698.8078284752332)
+E            +    where 2698.8078284752332 = <function drag_envelope at 0x10d96b060>(50000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+_______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[90] _______
+
+base_km = 90
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('8.67559525626633879391715980399276982992452581418083518035672') <= Decimal('8.675320646646579092475803918205201625823974609375')
+E            +  where Decimal('8.675320646646579092475803918205201625823974609375') = D(8.675320646646579)
+E            +    where 8.675320646646579 = <function drag_envelope at 0x10d96b060>(90000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[110] _______
+
+base_km = 110
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.246879322907822871490416056361059888934633565852970223931685') <= Decimal('0.24685978997037738569275688860216177999973297119140625')
+E            +  where Decimal('0.24685978997037738569275688860216177999973297119140625') = D(0.24685978997037739)
+E            +    where 0.24685978997037739 = <function drag_envelope at 0x10d96b060>(110000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[120] _______
+
+base_km = 120
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.0623088850387085855862687849465611542643131628029113160496473') <= Decimal('0.06230417914238060850262712619951344095170497894287109375')
+E            +  where Decimal('0.06230417914238060850262712619951344095170497894287109375') = D(0.06230417914238061)
+E            +    where 0.06230417914238061 = <function drag_envelope at 0x10d96b060>(120000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[140] _______
+
+base_km = 140
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.00982872431282354291563606145914270661452248090205980455159489') <= Decimal('0.00982856738076997617226115977473455131985247135162353515625')
+E            +  where Decimal('0.00982856738076997617226115977473455131985247135162353515625') = D(0.009828567380769976)
+E            +    where 0.009828567380769976 = <function drag_envelope at 0x10d96b060>(140000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[200] _______
+
+base_km = 200
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.000713466473434204116630260014445346148605847092503822464206593') <= Decimal('0.000713466357114544481345108639658292304375208914279937744140625')
+E            +  where Decimal('0.000713466357114544481345108639658292304375208914279937744140625') = D(0.0007134663571145445)
+E            +    where 0.0007134663571145445 = <function drag_envelope at 0x10d96b060>(200000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[250] _______
+
+base_km = 250
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.000185534755227729150789624947096372331154582213481815649897092') <= Decimal('0.00018553207334160275458929956204912059547496028244495391845703125')
+E            +  where Decimal('0.00018553207334160275458929956204912059547496028244495391845703125') = D(0.00018553207334160275)
+E            +    where 0.00018553207334160275 = <function drag_envelope at 0x10d96b060>(250000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[450] _______
+
+base_km = 450
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('0.00000406754726708058816715046720688957777019498225406022583283429') <= Decimal('0.0000040675464209814933468577734243520893642198643647134304046630859375')
+E            +  where Decimal('0.0000040675464209814933468577734243520893642198643647134304046630859375') = D(4.067546420981493e-06)
+E            +    where 4.067546420981493e-06 = <function drag_envelope at 0x10d96b060>(450000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[600] _______
+
+base_km = 600
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('3.73849738535038336122573644660726531050908587300720656279737E-7') <= Decimal('3.7384671548829016595998238868536756029925527400337159633636474609375E-7')
+E            +  where Decimal('3.7384671548829016595998238868536756029925527400337159633636474609375E-7') = D(3.7384671548829017e-07)
+E            +    where 3.7384671548829017e-07 = <function drag_envelope at 0x10d96b060>(600000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[700] _______
+
+base_km = 700
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('9.30399713035596032685916571674097513226878195786116553465077E-8') <= Decimal('9.30395246244963734743354459404141021394707422587089240550994873046875E-8')
+E            +  where Decimal('9.30395246244963734743354459404141021394707422587089240550994873046875E-8') = D(9.303952462449637e-08)
+E            +    where 9.303952462449637e-08 = <function drag_envelope at 0x10d96b060>(700000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[900] _______
+
+base_km = 900
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('1.35370692398489645017636766206580732203948624797354115027825E-8') <= Decimal('1.353705289740720836545617602846014460027390668983571231365203857421875E-8')
+E            +  where Decimal('1.353705289740720836545617602846014460027390668983571231365203857421875E-8') = D(1.3537052897407208e-08)
+E            +    where 1.3537052897407208e-08 = <function drag_envelope at 0x10d96b060>(900000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+______ test_r3f1_counterexamples_at_every_downward_jump_are_covered[1000] ______
+
+base_km = 1000
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_counterexamples_at_every_downward_jump_are_covered(base_km):
+        """Includes the 200 km and 250 km cases of Review 03."""
+        cases = crossing_cases(base_km)
+        assert len(cases) == 2, base_km
+        base = base_km * 1000.0
+        for case in cases:
+            assert case["drag"] > D(tt.drag_envelope_exact_height(base, 11_000.0, B_V1))
+>           assert case["drag"] <= D(tt.drag_envelope(base, 11_000.0, B_V1))
+E           AssertionError: assert Decimal('7.80184769220666045331937023185961184170011521132838298320414E-9') <= Decimal('7.8017292513549250195629167041466711651764853741042315959930419921875E-9')
+E            +  where Decimal('7.8017292513549250195629167041466711651764853741042315959930419921875E-9') = D(7.801729251354925e-09)
+E            +    where 7.801729251354925e-09 = <function drag_envelope at 0x10d96b060>(1000000.0, 11000.0, 25.757575757575758)
+E            +      where <function drag_envelope at 0x10d96b060> = tt.drag_envelope
+
+../../docs/science/experiments/m3-t0/check_review03.py:189: AssertionError
+________________________ test_r3f1_boundary_points[50] _________________________
+
+base_km = 50
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([ 1905862.550469  , -6139100.19169048,    -9028.88518109]), 49999.999999989755, Decimal('49999.9999999901292967595651093517456728942314046165144676167'))
+E               assert Decimal('3.738450803353730236206728942314046165144676167E-10') <= Decimal('0')
+E                +  where Decimal('3.738450803353730236206728942314046165144676167E-10') = abs((Decimal('49999.999999989755451679229736328125') - Decimal('49999.9999999901292967595651093517456728942314046165144676167')))
+E                +    where Decimal('49999.999999989755451679229736328125') = D(49999.999999989755)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(49999.99999999013)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   49999.99999999013 = float(Decimal('49999.9999999901292967595651093517456728942314046165144676167'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[90] _________________________
+
+base_km = 90
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([-2648709.34948294, -4914357.92534276,  3255730.97602517]), 89999.99999998882, Decimal('89999.9999999889410016206989851076088343971546434023571621548'))
+E               assert Decimal('1.168725160847272951088343971546434023571621548E-10') <= Decimal('0')
+E                +  where Decimal('1.168725160847272951088343971546434023571621548E-10') = abs((Decimal('89999.9999999888241291046142578125') - Decimal('89999.9999999889410016206989851076088343971546434023571621548')))
+E                +    where Decimal('89999.9999999888241291046142578125') = D(89999.99999998882)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(89999.99999998894)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   89999.99999998894 = float(Decimal('89999.9999999889410016206989851076088343971546434023571621548'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[110] ________________________
+
+base_km = 110
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([6055152.79010853, 2318146.16307471, -238470.25927695]), 109999.99999998976, Decimal('109999.999999989713853413437854858464148625525187039691487244'))
+E               assert Decimal('4.1598265791881469660851374474812960308512756E-11') <= Decimal('0')
+E                +  where Decimal('4.1598265791881469660851374474812960308512756E-11') = abs((Decimal('109999.999999989755451679229736328125') - Decimal('109999.999999989713853413437854858464148625525187039691487244')))
+E                +    where Decimal('109999.999999989755451679229736328125') = D(109999.99999998976)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(109999.99999998971)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   109999.99999998971 = float(Decimal('109999.999999989713853413437854858464148625525187039691487244'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[120] ________________________
+
+base_km = 120
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([ 4279864.15766274,  3046517.47492984, -3811976.55092112]), 119999.99999999069, Decimal('119999.999999989950696111552201320531782383201659828233216518'))
+E               assert Decimal('7.36078142293013523218217616798340171766783482E-10') <= Decimal('0')
+E                +  where Decimal('7.36078142293013523218217616798340171766783482E-10') = abs((Decimal('119999.99999999068677425384521484375') - Decimal('119999.999999989950696111552201320531782383201659828233216518')))
+E                +    where Decimal('119999.99999999068677425384521484375') = D(119999.99999999069)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(119999.99999998994)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   119999.99999998994 = float(Decimal('119999.999999989950696111552201320531782383201659828233216518'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[140] ________________________
+
+base_km = 140
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([  507268.06264743, -2906156.47449561, -5793249.36775391]), 139999.99999998976, Decimal('139999.999999989870732829214356942924843048717240979478979279'))
+E               assert Decimal('1.15281149984620614799843048717240979478979279E-10') <= Decimal('0')
+E                +  where Decimal('1.15281149984620614799843048717240979478979279E-10') = abs((Decimal('139999.999999989755451679229736328125') - Decimal('139999.999999989870732829214356942924843048717240979478979279')))
+E                +    where Decimal('139999.999999989755451679229736328125') = D(139999.99999998976)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(139999.99999998987)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   139999.99999998987 = float(Decimal('139999.999999989870732829214356942924843048717240979478979279'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[200] ________________________
+
+base_km = 200
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([-5413366.58092638, -3421899.9036168 ,  1497762.88459957]), 199999.99999999162, Decimal('199999.999999990883110358748630076140545976294053674403311779'))
+E               assert Decimal('7.34986469712063283234454023705946325596688221E-10') <= Decimal('0')
+E                +  where Decimal('7.34986469712063283234454023705946325596688221E-10') = abs((Decimal('199999.999999991618096828460693359375') - Decimal('199999.999999990883110358748630076140545976294053674403311779')))
+E                +    where Decimal('199999.999999991618096828460693359375') = D(199999.99999999162)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(199999.9999999909)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   199999.9999999909 = float(Decimal('199999.999999990883110358748630076140545976294053674403311779'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[250] ________________________
+
+base_km = 250
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([-5622306.23169114,  1145276.93936559,  3307459.12171782]), 249999.9999999907, Decimal('249999.999999990235625900204462043573701279949481760219118537'))
+E               assert Decimal('4.51148353640752800176298720050518239780881463E-10') <= Decimal('0')
+E                +  where Decimal('4.51148353640752800176298720050518239780881463E-10') = abs((Decimal('249999.99999999068677425384521484375') - Decimal('249999.999999990235625900204462043573701279949481760219118537')))
+E                +    where Decimal('249999.99999999068677425384521484375') = D(249999.9999999907)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(249999.99999999022)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   249999.99999999022 = float(Decimal('249999.999999990235625900204462043573701279949481760219118537'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[450] ________________________
+
+base_km = 450
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([ 3918616.03285881, -4976382.59128923, -2542213.83382054]), 449999.9999999888, Decimal('449999.999999989450573999948856425934073594252029646977274187'))
+E               assert Decimal('6.26444895334598613434073594252029646977274187E-10') <= Decimal('0')
+E                +  where Decimal('6.26444895334598613434073594252029646977274187E-10') = abs((Decimal('449999.9999999888241291046142578125') - Decimal('449999.999999989450573999948856425934073594252029646977274187')))
+E                +    where Decimal('449999.9999999888241291046142578125') = D(449999.9999999888)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(449999.99999998946)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   449999.99999998946 = float(Decimal('449999.999999989450573999948856425934073594252029646977274187'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[600] ________________________
+
+base_km = 600
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([-6.13426758e+06,  5.47759339e+02, -3.31624027e+06]), 599999.9999999898, Decimal('599999.999999990006153544543907484499958506058011738356111075'))
+E               assert Decimal('2.50701865314171156374958506058011738356111075E-10') <= Decimal('0')
+E                +  where Decimal('2.50701865314171156374958506058011738356111075E-10') = abs((Decimal('599999.999999989755451679229736328125') - Decimal('599999.999999990006153544543907484499958506058011738356111075')))
+E                +    where Decimal('599999.999999989755451679229736328125') = D(599999.9999999898)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(599999.99999999)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   599999.99999999 = float(Decimal('599999.999999990006153544543907484499958506058011738356111075'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[700] ________________________
+
+base_km = 700
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([  264093.53503208,  2307006.4214776 , -6666203.25899858]), 699999.9999999898, Decimal('699999.999999990057137360388543089813573670810738971562724883'))
+E               assert Decimal('3.01685681158806761688573670810738971562724883E-10') <= Decimal('0')
+E                +  where Decimal('3.01685681158806761688573670810738971562724883E-10') = abs((Decimal('699999.999999989755451679229736328125') - Decimal('699999.999999990057137360388543089813573670810738971562724883')))
+E                +    where Decimal('699999.999999989755451679229736328125') = D(699999.9999999898)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(699999.9999999901)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   699999.9999999901 = float(Decimal('699999.999999990057137360388543089813573670810738971562724883'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+________________________ test_r3f1_boundary_points[900] ________________________
+
+base_km = 900
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([ 2737576.95513924,  3906329.57371971, -5480898.25180899]), 899999.9999999898, Decimal('899999.999999989128521128472271889667644654885976539602393442'))
+E               assert Decimal('6.26930550757464438457355345114023460397606558E-10') <= Decimal('0')
+E                +  where Decimal('6.26930550757464438457355345114023460397606558E-10') = abs((Decimal('899999.999999989755451679229736328125') - Decimal('899999.999999989128521128472271889667644654885976539602393442')))
+E                +    where Decimal('899999.999999989755451679229736328125') = D(899999.9999999898)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(899999.9999999892)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   899999.9999999892 = float(Decimal('899999.999999989128521128472271889667644654885976539602393442'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+_______________________ test_r3f1_boundary_points[1000] ________________________
+
+base_km = 1000
+
+    @pytest.mark.parametrize("base_km", DOWNWARD_KM)
+    def test_r3f1_boundary_points(base_km):
+        base_d = D(base_km) * 1000
+        base = float(base_d)
+        i_up = o.band(base_d)
+        # (a) exactly representable base heights and adjacent binary64 values: equatorial
+        #     points, where the true height is x - a exactly.
+        x0 = m.A_WGS84 + base
+        xs = [x0]
+        for _ in range(3):
+            xs = [math.nextafter(xs[0], 0.0), *xs, math.nextafter(xs[-1], math.inf)]
+        for x in xs:
+            r = np.array([x, 0.0, 0.0])
+            ht = D(x) - o.A  # exact: the foot point is (a, 0, 0)
+            assert abs(o.true_height(r) - ht) < D("1e-40")
+            hc = model_height(r)
+            assert D(hc) == ht  # exact at the equator
+            rho = m.density(hc)
+            assert abs(D(rho) / o.density(ht) - 1) < D("1e-14"), (x, hc)
+            assert (o.band(ht) == i_up) == (ht >= base_d)  # GMAT: the base belongs above
+            for s in SPEEDS:
+                a = model_drag_norm(r, retrograde(0.0, s))
+                assert abs(
+                    a
+                    / (
+                        o.density(ht)
+                        * (D(s) + o.OMEGA * D(x)) ** 2
+                        * D(DRAG.cd)
+                        * D(DRAG.area_m2)
+                        / (2 * D(MASS))
+                    )
+                    - 1
+                ) < D("1e-13")
+                for low in (hc, base):
+                    if ht >= D(low):
+                        assert a <= D(tt.drag_envelope(low, s, B_V1)), (x, s, low)
+        # (b) true heights just below and above the base off the equator, and (c) points
+        #     whose computed and true heights select different bands.
+        rng = np.random.default_rng(1000 + base_km)
+        eps_sel = tt._up(tt.FPA["alpha_sel"] * Fraction(base) + tt.FPA["beta_sel_m"])
+        env = {s: D(tt.drag_envelope(base, s, B_V1)) for s in SPEEDS}
+        down = up = below = above = 0
+        for k in range(120):
+            lat = rng.uniform(-0.01, 0.01) if k % 2 else rng.uniform(-1.5, 1.5)
+            lon = rng.uniform(-math.pi, math.pi)
+            for dh in (-1e-8, -3e-9, -1e-9, 0.0, 1e-9, 3e-9, 1e-8):
+                r = m.geodetic_to_cartesian(lat, lon, base + dh)
+                ht, hc = o.true_height(r), model_height(r)
+                below += ht < base_d
+                above += ht >= base_d
+>               assert abs(D(hc) - ht) <= D(tt.height_error_bound(float(ht))), (r, hc, ht)
+E               AssertionError: (array([3989392.32504209, 5984750.86327579, 1639744.13268286]), 999999.9999999907, Decimal('999999.999999990404452401068115802479865522934904599933598501'))
+E               assert Decimal('2.82321852777099041270134477065095400066401499E-10') <= Decimal('0')
+E                +  where Decimal('2.82321852777099041270134477065095400066401499E-10') = abs((Decimal('999999.99999999068677425384521484375') - Decimal('999999.999999990404452401068115802479865522934904599933598501')))
+E                +    where Decimal('999999.99999999068677425384521484375') = D(999999.9999999907)
+E                +  and   Decimal('0') = D(0.0)
+E                +    where 0.0 = <function height_error_bound at 0x10d96ab60>(999999.9999999905)
+E                +      where <function height_error_bound at 0x10d96ab60> = tt.height_error_bound
+E                +      and   999999.9999999905 = float(Decimal('999999.999999990404452401068115802479865522934904599933598501'))
+
+../../docs/science/experiments/m3-t0/check_review03.py:248: AssertionError
+___ test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation ___
+
+    def test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation():
+        ref = recomputed_constants()
+        for key, val in ref.items():
+            got = Fraction(tt.FP[key])
+>           assert got >= val * (1 - Fraction(1, 10**12)), key  # not below the derivation
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: alpha
+E           assert Fraction(0, 1) >= (Fraction(2600117267873885200361792484593336959687348089327601561410617934731974745661204430311269513110634726596260027...2521640741588569540762133363649763379618730000093040099123811583085481261955587044649240404552698591012093563959771136) * (1 - Fraction(1, 1000000000000)))
+E            +  where Fraction(1, 1000000000000) = Fraction(1, (10 ** 12))
+
+../../docs/science/experiments/m3-t0/check_review03.py:363: AssertionError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_reviewer_counterexample_is_reproduced_and_covered
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[50]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[90]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[110]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[120]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[140]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[200]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[250]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[450]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[600]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[700]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[900]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_counterexamples_at_every_downward_jump_are_covered[1000]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[50]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[90]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[110]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[120]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[140]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[200]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[250]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[450]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[600]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[700]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[900]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_boundary_points[1000]
+FAILED docs/science/experiments/m3-t0/check_review03.py::test_r3f1_derivation_constants_are_recomputed_by_a_second_implementation
+26 failed, 262 deselected in 1.46s

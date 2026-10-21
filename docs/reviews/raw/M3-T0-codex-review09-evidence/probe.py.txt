@@ -1,0 +1,7 @@
+import sys,math,decimal,json
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_termination as t
+for h in [-math.inf,math.nan,-6.4e6,-6e6,0,t.FP['beta_m'],math.nextafter(t.FP['beta_m'],math.inf),1,55749.393,2e5,1e7,1e100,1e300,sys.float_info.max]:
+ for b in [-1,math.nan,-0.,math.ulp(0.),t.B_V1,math.inf]:
+  try:r=t.stage_need(h,b); print(h,b,'need',r)
+  except Exception as e:print(h,b,type(e).__name__,str(e))

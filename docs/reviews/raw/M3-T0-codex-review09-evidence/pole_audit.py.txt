@@ -1,0 +1,10 @@
+from decimal import Decimal as D,localcontext
+import sys
+sys.path.insert(0,'docs/science/experiments/m3-t0')
+import t0_model as m,t0_oracle as o
+with localcontext() as c:
+ c.prec=90
+ a=D(m.A_WGS84);b_f=a*(1-D(m.F_WGS84));b_e=a*(1-D(m.E2_WGS84)).sqrt()
+ print('B_exact_from_F',b_f);print('B_exact_from_E2',b_e);print('difference_b',b_e-b_f)
+ print('h_pole_from_F',D(m.B_WGS84)-b_f);print('h_pole_from_E2',D(m.B_WGS84)-b_e)
+ print('computed',m.geodetic_iterative([0.,0.,m.B_WGS84])[1])

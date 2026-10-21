@@ -77,6 +77,10 @@
 - R8-F1: every value the stage condition returns needs a computed h0 > β (8.88e-9 m). A computed h0 ≤ β raises `ValueError`, for B_V1 and the drag-free vehicle, including for strictly exterior states just above the ellipsoid (r = [a + k·2^-30, 0, 0] m, k = 1 … 9). The finite need on the M2 ≤ 0 path quoted in the I-10 note above, and the drag-free vehicle's finite need, hold for h0 > β only. The decision is on the computed height, not the mathematical height.
 - Coverage: an injected envelope that is +∞ at the first stage only must give need = +∞; the reviewer's M3-dropped mutant is now detected.
 - A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only. New checks: `check_review08.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-08.md`. T0 is not accepted. Review 09 follows under I-11.  
+**Status update (2026-10-21, append-only):** **Review 09 (Codex, at `f04f995`): PASS (unconditional).**
+- Every tracked finding is RESOLVED: R8-F1, R7-F1, R7-F2, R6-F1 … R6-F3, both Review 06 remarks, R5-F1, R5-F2, R4-F1, R3-F1, R2-F1 … R2-F3, IM-1, IM-2, F1–F5 and the Review 08 M3 coverage observation.
+- Two new NOTEs, verified and ACCEPTED, **not applied** (I-11 §7): M3T0-R9-F1, a mutant that drops M3 only when it is finite passes all 288 checks (a coverage gap; the code is correct); M3T0-R9-F2, the pole check and the quoted −2.03e-10 m use the F-defined polar radius instead of the model's E2 ellipsoid (−2.04e-10 m there; no classification changes).
+- No floor, bound or certification is affected. Record: `docs/reviews/M3-T0-review-09.md`. Acceptance dossier: `docs/reviews/M3-T0-acceptance-dossier.md`. **T0 is not accepted**; it awaits the owner's decision. Not merged; T1 and T2 not started.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

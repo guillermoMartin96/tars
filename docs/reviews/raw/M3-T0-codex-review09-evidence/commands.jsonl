@@ -1,0 +1,23 @@
+{"command": [".venv/bin/python", "-c", "import platform,sys,numpy,scipy; print(platform.platform(),platform.machine(),platform.processor()); print(sys.version); print(numpy.__version__, scipy.__version__); numpy.show_config()"], "exit": 0, "seconds": 0.1555778980255127, "log": "env.log"}
+{"command": [".venv/bin/python", "review_scratch/probe.py"], "exit": 0, "seconds": 0.623117208480835, "log": "probe.log"}
+{"command": [".venv/bin/python", "-I", "docs/reviews/raw/M3-T0-review08-findings-correction-evidence/digests.py.txt", "."], "exit": 0, "seconds": 0.12954378128051758, "log": "digests.log"}
+{"command": [".venv/bin/python", "-I", "docs/reviews/raw/M3-T0-review08-findings-correction-evidence/ast_equal.py.txt", "115e747", "HEAD"], "exit": 1, "seconds": 0.04053473472595215, "log": "ast.log"}
+{"command": [".venv/bin/python", "toolbox/validators/m1_proof.py", "--out", "review_scratch/m1.json"], "exit": 0, "seconds": 9.331562042236328, "log": "m1.log"}
+{"command": [".venv/bin/python", "review_scratch/reproduce.py"], "exit": 1, "seconds": 0.18823719024658203, "log": "reproduce.log"}
+{"command": [".venv/bin/python", "-I", "docs/reviews/raw/M3-T0-review08-findings-correction-evidence/ast_equal.py.txt", "review_scratch/termination_before.py", "docs/science/experiments/m3-t0/t0_termination.py"], "exit": 0, "seconds": 0.12703728675842285, "log": "ast_fixed.log"}
+{"command": [".venv/bin/python", "toolbox/scripts/gmat_m1.py", "compare"], "exit": 0, "seconds": 0.9715731143951416, "log": "m1_compare.log"}
+{"command": [".venv/bin/python", "review_scratch/integrity.py"], "exit": 0, "seconds": 0.6061408519744873, "log": "integrity.log"}
+{"command": [".venv/bin/python", "-I", "docs/reviews/raw/M3-T0-review08-findings-correction-evidence/smoke_r8.py.txt", "docs/science/experiments/m3-t0"], "exit": 0, "seconds": 42.16257381439209, "log": "smoke_r8.log"}
+{"command": [".venv/bin/python", "toolbox/scripts/gmat_m2.py", "compare"], "exit": 0, "seconds": 44.79900598526001, "log": "m2_compare.log"}
+{"command": [".venv/bin/python", "-I", "docs/reviews/raw/M3-T0-review08-findings-correction-evidence/adversarial_r8.py.txt", "docs/science/experiments/m3-t0"], "exit": 0, "seconds": 52.655067920684814, "log": "adversarial_r8.log"}
+{"command": [".venv/bin/python", "review_scratch/independent.py"], "exit": 1, "seconds": 2.016649007797241, "log": "independent.log"}
+{"command": [".venv/bin/python", "review_scratch/reproduce.py"], "exit": 1, "seconds": 57.38290190696716, "log": "reproduce_fixed.log"}
+{"command": [".venv/bin/python", "review_scratch/independent.py"], "exit": 0, "seconds": 2.067548990249634, "log": "independent_fixed.log"}
+{"command": [".venv/bin/python", "toolbox/validators/m2_proof.py", "--out", "review_scratch/m2.json"], "exit": 0, "seconds": 139.03069686889648, "log": "m2.log"}
+{"command": [".venv/bin/python", "review_scratch/old_mutants.py"], "exit": 0, "seconds": 21.345420598983765, "log": "old_mutants.log"}
+{"command": [".venv/bin/python", "review_scratch/red_before.py"], "exit": 0, "seconds": 69.63918590545654, "log": "red_before.log"}
+{"command": [".venv/bin/python", "review_scratch/new_mutants.py"], "exit": 0, "seconds": 173.58639001846313, "log": "new_mutants.log"}
+{"command": [".venv/bin/python", "review_scratch/math_audit.py"], "exit": 0, "seconds": 0.7491199970245361, "log": "math_audit.log"}
+{"command": [".venv/bin/python", "review_scratch/reproduce.py"], "exit": 0, "seconds": 194.00309681892395, "log": "reproduce_absolute.log"}
+{"command": [".venv/bin/python", "review_scratch/pole_audit.py"], "exit": 0, "seconds": 0.6175751686096191, "log": "pole_audit.log"}
+{"command": [".venv/bin/python", "review_scratch/independent.py"], "exit": 0, "seconds": 1.935770034790039, "log": "independent_final.log"}

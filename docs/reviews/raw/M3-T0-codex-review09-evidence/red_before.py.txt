@@ -1,0 +1,9 @@
+import pathlib,subprocess,tempfile,shutil,sys
+with tempfile.TemporaryDirectory(dir='review_scratch') as tmp:
+ root=pathlib.Path(tmp).absolute()
+ files=subprocess.check_output(['git','ls-tree','-r','--name-only','115e747','docs'],text=True).splitlines()
+ for f in files:
+  p=root/f;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(subprocess.check_output(['git','show','115e747:'+f]))
+ d=root/'docs/science/experiments/m3-t0';shutil.copy('docs/science/experiments/m3-t0/check_review08.py',d)
+ r=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider','-rf',str(d/'check_review08.py')],capture_output=True,text=True,cwd=root)
+ print(r.stdout+r.stderr);assert r.returncode==1 and '2 failed, 25 passed' in r.stdout
