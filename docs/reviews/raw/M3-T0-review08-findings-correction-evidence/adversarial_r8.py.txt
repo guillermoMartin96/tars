@@ -1,0 +1,87 @@
+"""Seeded adversarial probe for the Review 08 corrections (usage: adversarial_r8.py <m3-t0 dir>).
+
+1. Near-surface exterior states at random latitudes and longitudes: a surface point from the
+   closed-form forward transformation, moved outward by k binary64 steps of its coordinates
+   (k = 0 ... 40). Exteriority is decided exactly (x^2/a^2 + y^2/a^2 + z^2/b^2 > 1 in rational
+   arithmetic, with the model's binary64 a and f), the mathematical height by `t0_oracle`, the
+   computed height by the model. Checked for B_V1 and b = +inf: ValueError (the lower-edge
+   message) exactly when the computed h0 <= beta, otherwise a finite need >= 0 equal to -M2;
+   never certified; E1 holds; no exterior computed height below -beta.
+2. Injected first-stage-infinity envelopes: random h0 with M2 > 0 and random finite values after
+   the first call; need = +inf every time, while -min(M2, M4) would certify where M4 > 0.
+"""
+import math, random, sys
+from fractions import Fraction
+import numpy as np
+sys.path.insert(0, sys.argv[1])
+import t0_model as m, t0_oracle as o, t0_termination as tt
+
+rng = random.Random(20261022)
+BETA, AL = tt.FP["beta_m"], tt.FP["alpha"]
+A, B = Fraction(m.A_WGS84), Fraction(m.A_WGS84) * (1 - Fraction(m.F_WGS84))
+VEH = (("B25.8", 850.0 / 33.0), ("drag-free", math.inf))
+assert VEH[0][1] == tt.B_V1
+MSG = "the envelope is defined above the lower edge only"
+
+def exterior(r):
+    x, y, z = (Fraction(float(c)) for c in r)
+    return (x * x + y * y) / (A * A) + z * z / (B * B) > 1
+
+stats = dict(states=0, exterior=0, ext_h_le_beta=0, ext_h_le_0=0, rejected=0, returned=0,
+             certified=0, min_ext_h0=math.inf, e1_ok=0, inside_skipped=0)
+for _ in range(1500):
+    lat = math.asin(rng.uniform(-1.0, 1.0)); lon = rng.uniform(-math.pi, math.pi)
+    base = m.geodetic_to_cartesian(lat, lon, 0.0)
+    sign = np.sign(base)
+    for k in range(0, 41, rng.choice((1, 2, 3))):
+        r = base.copy()
+        for i in range(3):
+            for _ in range(k):
+                r[i] = math.nextafter(r[i], math.inf * sign[i]) if sign[i] else r[i]
+        stats["states"] += 1
+        if not exterior(r):
+            stats["inside_skipped"] += 1
+            continue
+        stats["exterior"] += 1
+        assert -m.MU / float(np.linalg.norm(r)) < 0  # bound at rest
+        h0 = m.HEIGHTS["geodetic"](r)
+        h_true = float(o.true_height(r))
+        assert h_true >= 0.0
+        if abs(h0 - h_true) <= AL * h_true + BETA:
+            stats["e1_ok"] += 1
+        stats["min_ext_h0"] = min(stats["min_ext_h0"], h0)
+        assert h0 > -BETA
+        stats["ext_h_le_beta"] += h0 <= BETA
+        stats["ext_h_le_0"] += h0 <= 0.0
+        for _, b in VEH:
+            try:
+                need = tt.stage_need(h0, b)
+            except ValueError as e:
+                assert str(e) == MSG and h0 <= BETA, (h0, e)
+                stats["rejected"] += 1
+                continue
+            assert h0 > BETA and math.isfinite(need) and need >= 0.0, (h0, need)
+            assert need == -tt.stage_lower_heights(h0, b)["M2"]
+            stats["returned"] += 1
+            stats["certified"] += need < 0.0
+assert stats["e1_ok"] == stats["exterior"] and stats["certified"] == 0
+print("near-surface:", stats)
+
+inj = dict(cases=0, need_inf=0, omitted_would_certify=0)
+for _ in range(400):
+    h0 = 10 ** rng.uniform(math.log10(5.6e4), 8.5)
+    after = rng.choice((0.0, rng.uniform(0, 50), 10 ** rng.uniform(-300, 3)))
+    calls = []
+    def env(low, s, b):
+        calls.append(1)
+        return math.inf if len(calls) == 1 else after
+    s = tt.stage_lower_heights(h0, rng.choice((tt.B_V1, 100.0, 1e-300)), envelope=env)
+    if s["M4"] is None:
+        continue  # M2 <= 0 (path 1)
+    inj["cases"] += 1
+    need = -min(s["M2"], s["M3"], s["M4"])
+    assert s["A0"] == math.inf and s["M3"] == -math.inf and need == math.inf
+    inj["need_inf"] += 1
+    inj["omitted_would_certify"] += -min(s["M2"], s["M4"]) < 0.0
+assert inj["need_inf"] == inj["cases"] > 0
+print("first-stage-infinity:", inj)

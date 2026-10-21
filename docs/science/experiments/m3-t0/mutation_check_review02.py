@@ -1,5 +1,5 @@
-"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1, R5-F2, R6-F1 ... F3, R7-F1 and R7-F2
-(research only).
+"""Mutation evidence for M3T0-R2-F3, R3-F1, R4-F1, R5-F1, R5-F2, R6-F1 ... F3, R7-F1, R7-F2
+and R8-F1 (research only).
 
 Review 02 R2-F3: replacing the sweep and the stage floors with zeros passed every check in
 `check_review01.py`. Review 03 R3-F1: the drag envelope ignored the computed-height error at
@@ -12,9 +12,12 @@ mishandled infinite and out-of-range values; R6-F3: E4b's cap was classified as
 libm-independent. Review 07 R7-F1: the stage condition's non-certification was documented
 as need = +inf only; R7-F2: "b_R <= b" was stated without b > 0 (both documentation
 defects: the R7 mutants corrupt the implementation behind the corrected contract, or revert
-the corrected text). This harness corrupts copies of the T0 result files, scripts, model,
-oracle and records, runs `check_review01.py` to `check_review07.py` on each copy, and
-classifies the outcome:
+the corrected text). Review 08 R8-F1: the finite need was documented without the
+precondition computed h0 > beta (documentation); its reviewer also found that dropping M3
+from the stage minimum passed every check (the R8 mutants hide the lower-edge rejection,
+drop M3, or revert the corrected text). This harness corrupts copies of the T0 result
+files, scripts, model, oracle and records, runs `check_review01.py` to `check_review08.py`
+on each copy, and classifies the outcome:
 
 - detected:      pytest reports failures and no collection error, and at least one of the
                  checks declared for that mutant is among the failures (a failure elsewhere
@@ -195,6 +198,21 @@ R7BLEB = "test_r7f2_b_r_at_most_b_for_positive_b"
 R7F2DOC = "test_r7f2_docstrings_qualify_b_r_at_most_b"
 R7DOCONLY = "test_r7_correction_is_documentation_only"
 R7F1_NEW = "        and need(h0) = -M2, finite and >= 0. M2 depends"
+REV07 = "../../../reviews/M3-T0-review-07.md"
+REPORT = "../../../milestones/M3-T0-report.md"
+R8BETAGRID = "test_r8f1_beta_grid_transition_is_k9_to_k10"
+R8SURF = "test_r8f1_ellipsoid_surface_raises"
+R8SUCC = "test_r8f1_successive_floats_above_the_equatorial_radius"
+R8CE = "test_r8f1_review08_counterexample"
+R8POLE = "test_r8f1_computed_height_differs_from_mathematical_at_the_pole"
+R8BETA = "test_r8f1_binary64_transition_at_beta"
+R8NEG = "test_r8f1_very_negative_height_raises_decimal_error"
+R8CERT = "test_r8f1_valid_finite_certification_still_returned"
+R8INJ = "test_r8_first_stage_infinite_envelope_gives_infinite_need"
+R8FIN = "test_r8_finite_injected_envelope_certifies"
+R8DOC = "test_r8f1_docstring_states_the_lower_edge_rejection"
+R8REC = "test_r8f1_records_amended"
+R8LOW = (R8SURF, R8SUCC, R8CE, R8POLE, R8BETA)
 R7F1_OLD = "        and need(h0) = +inf, as for an unbounded envelope. M2 depends"
 SCOPED = (
     "Over the coefficient-rounding subset (equatorial points from 300 km below to 10 km above "
@@ -748,6 +766,112 @@ MUTANTS: dict[str, tuple[Callable[[Path], None] | None, tuple[str, ...]]] = {
         ),
         (R7BLEB, R7DOCONLY),
     ),
+    # ---- Review 08: the M3 term (the reviewer's own_M3_ignored) and the lower-edge rejection
+    "r8_m3_dropped_from_the_minimum": (
+        edit_text(
+            "t0_termination.py",
+            '    return -min(s["M2"], s["M3"], s["M4"])  # >= 0',
+            '    return -min(s["M2"], s["M4"])  # mutant',
+        ),
+        (R8INJ,),
+    ),
+    "r8f1_lower_edge_clamped_to_zero": (
+        edit_text(
+            "t0_termination.py",
+            "    if not 0.0 <= low < math.inf:\n",
+            "    low = max(low, 0.0)  # mutant (NaN stays NaN)\n"
+            "    if not 0.0 <= low < math.inf:\n",
+        ),
+        R8LOW,
+    ),
+    "r8f1_drag_free_skips_the_envelope": (
+        edit_text(
+            "t0_termination.py",
+            "        a0 = one_u * (g_hat + Decimal(env(_dn(big_h0), _up(v), b))) * (1 + PAD)",
+            "        a0 = one_u * (g_hat + Decimal(0 if b == math.inf else env(_dn(big_h0), "
+            "_up(v), b))) * (1 + PAD)",
+        ),
+        R8LOW,
+    ),
+    # the corrected text reverted
+    "r8f1_docstring_precondition_removed": (
+        edit_text(
+            "t0_termination.py",
+            "    Every returned value needs a computed h0 > beta (beta",
+            "    Every returned value is a bound (beta",
+        ),
+        (R8DOC,),
+    ),
+    "r8f1_docstring_universal_finite_claim_restored": (
+        edit_text(
+            "t0_termination.py",
+            "    the stage condition does not return a finite need for every state outside the\n",
+            "    the stage condition returns a finite need for every state outside the\n",
+        ),
+        (R8DOC,),
+    ),
+    "r8f1_docstring_vehicle_scope_dropped": (
+        edit_text(
+            "t0_termination.py",
+            "for b = B_V1 and for the\n    drag-free b = +inf alike.",
+            "for b = B_V1.",
+        ),
+        (R8DOC,),
+    ),
+    "r8f1_docstring_drag_free_unqualified": (
+        edit_text(
+            "t0_termination.py",
+            "has a finite need on both paths for\n    h0 > beta. A non-finite",
+            "has a finite need on both paths.\n    A non-finite",
+        ),
+        (R8DOC,),
+    ),
+    "r8f1_docstring_beta_misquoted": (
+        edit_text("t0_termination.py", "(beta = 8.877691069434738e-09 m)", "(beta = 9.02e-09 m)"),
+        (R8DOC,),
+    ),
+    "r8f1_review07_amendment_removed": (
+        edit_text(REV07, "### Amendment (Authorization I-11, Review 08 M3T0-R8-F1)", "### Note"),
+        (R8REC,),
+    ),
+    "r8f1_review07_false_sentence_rewritten": (
+        edit_text(
+            REV07,
+            "Such an h0 is not the computed height of a state in the domain (outside the "
+            "ellipsoid), and the docstring claims nothing for it.\n",
+            "Such an h0 can be the computed height of an exterior state.\n",
+        ),
+        (R8REC,),
+    ),
+    "r8f1_review06_amendment_removed": (
+        edit_text(
+            REV06, "### Amendment 2 (Authorization I-11, Review 08 M3T0-R8-F1)", "### Note 2"
+        ),
+        (R8REC,),
+    ),
+    "r8f1_val0019_qualification_removed": (
+        edit_text(
+            VAL, "Qualified after Review 08 M3T0-R8-F1 (documentation", "Note (documentation"
+        ),
+        (R8REC,),
+    ),
+    "r8f1_dr0029_qualification_removed": (
+        edit_text(
+            DR29,
+            " **Qualified after Review 08 M3T0-R8-F1:** every value the stage condition returns "
+            "needs a computed h0 > β (8.88e-9 m);",
+            " Every value the stage condition returns is finite;",
+        ),
+        (R8REC,),
+    ),
+    "r8f1_report_note_reverted": (
+        edit_text(
+            REPORT,
+            "- R8-F1: every value the stage condition returns needs a computed h0 > β (8.88e-9 m).",
+            "- R8-F1: the stage condition returns a finite need above the ellipsoid.",
+        ),
+        (R8REC,),
+    ),
 }
 
 
@@ -779,6 +903,7 @@ def run(name: str) -> dict:
                 str(d / "check_review05.py"),
                 str(d / "check_review06.py"),
                 str(d / "check_review07.py"),
+                str(d / "check_review08.py"),
             ],
             capture_output=True,
             text=True,

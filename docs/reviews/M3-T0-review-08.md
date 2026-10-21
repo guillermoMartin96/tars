@@ -116,3 +116,52 @@ The Proof wrappers write into `proof/`, so the reviewer may not run them. The im
   - no certified J2-plus-drag missed-dip bound;
   - the GMAT geodetic-drag discrepancy stays escalated;
   - DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
+
+## Correction pass (Authorization I-11, 2026-10-21; appended)
+"Authorization I-11 — M3 T0 Review 08 Corrections and Independent Review 09" authorizes a targeted correction of M3T0-R8-F1, closing the coverage gap found by Review 08, full validation and one independent Review 09. Everything above this section is preserved as written. The status Review 08 gave (PARTIALLY RESOLVED for R7-F1) is **not** changed here; whether it is now resolved is for Review 09 to judge.
+
+Preconditions (I-11 §1), verified before any change: branch `milestone-3-t0-reference-spike`, HEAD = origin = `115e747` after a fetch, clean worktree, CI run 39556949318 green on all four jobs, the five pinned digests and all 20 VAL-0019 digests match at `115e747`, no protected path changed since `86df2c3` (`pinned_digests_before.log`).
+
+**The R8-F1 correction is documentation only, and the coverage work adds checks only.** No executable statement of the model or the termination code changed: `t0_termination.py` with every docstring removed has the same AST as at `115e747` (`ast_docstring_free_equal.log`), and `t0_termination_results.json` regenerates byte for byte (`termination_regenerated.log`). No value, floor, bracket, margin, threshold or reference constant changed. Neither change is a numerical algorithm fix.
+
+| Item | Disposition | Correction |
+|---|---|---|
+| M3T0-R8-F1 (NOTE) | **ACCEPTED; CORRECTED** (documentation; for Review 09 to assess) | The `stage_lower_heights` docstring states the precondition computed h0 > β for every returned value and the `ValueError` rejection at a computed h0 ≤ β, for B_V1 and the drag-free vehicle, including states just outside the ellipsoid. Appended amendments to the Review 06 and Review 07 records; appended qualifications in VAL-0019, DR-0029 and the report; Review 08 correction logs |
+| M3 coverage gap (Review 08 reviewer observation) | **ACCEPTED; CLOSED** (checks only) | A first-stage-infinity regression in `check_review08.py`; the reviewer's M3-dropped mutant in `mutation_check_review02.py`, now detected |
+
+### R8-F1: the stated precondition
+The implementation, unchanged:
+- **The rejection.** `stage_lower_heights` evaluates the A0 envelope at H0 = (h0 − β)/(1 + α) − 10^-35 before the M2 test. For a binary64 h0, H0 < 0 exactly when h0 ≤ β = 8.877691069434738e-09 m (the next binary64 above β leaves h0 − β ≥ 2^-79, far above 10^-35·(1 + α)). `drag_envelope` then raises `ValueError("the envelope is defined above the lower edge only")`, for every b, including b = +∞. No need is returned, so nothing is certified.
+- **Exterior states reach it.** r = [a + k·2^-30, 0, 0] m (v = 0, bound) is strictly exterior for k ≥ 1 and has mathematical and computed height k·2^-30 m. It is rejected for k ≤ 9 = ⌊β/2^-30⌋ and returns a finite need ≥ 0 (path 1, need = −M2) for k ≥ 10 (need = 55 993.323394842984 m at k = 10, for both vehicles). The Review 07 record's sentence that such an h0 "is not the computed height of a state in the domain" is false; it is kept as written and amended.
+- **Mathematical and computed height.** The rejection is decided by the computed height. At the pole, [0, 0, fl(b)] lies inside the ellipsoid (mathematical height −2.03e-10 m) with computed height 0, and [0, 0, fl(b) + k·2^-30] has computed height k·2^-30 m and mathematical height 2.03e-10 m less. A seeded probe found exterior states with computed heights down to −1.86e-9 m, all above −β as E1 requires.
+- **Very negative h0.** If b_lower + H0 ≤ 0 the square root in V raises `decimal.InvalidOperation` first. By E1 no exterior state has such a computed height; this case is documented as outside the exterior-state domain.
+- **Certification.** A returned finite need < 0 certifies only under the stated premises and A-FP-1 to A-FP-3. Corrected in the `stage_lower_heights` docstring; appended to the Review 06 record ("Amendment 2"), the Review 07 record ("Amendment"), VAL-0019 ("Qualified after Review 08"), DR-0029 P1 (an appended qualification), the report (status note), the decision matrix, and the VAL-0019 and DR-0029 Review 08 correction logs.
+
+### The M3 coverage gap
+With an envelope that is +∞ at the first stage only, A0 = s2 = +∞ and M3 = −∞, while A2, M2 and M4 are finite and positive. M3 is then the only term that forbids certification: `-min(M2, M4)` is negative (a false certification) and `-min(M2, M3, M4)` = +∞. `test_r8_first_stage_infinite_envelope_gives_infinite_need` pins this for three heights and three finite values after the first stage, and `test_r8_finite_injected_envelope_certifies` pins the finite path. The reviewer's mutant is `r8_m3_dropped_from_the_minimum` in the harness.
+
+### What the checks distinguish (`check_review08.py`, 27 checks)
+- **Valid finite certification:** need finite and < 0 at the published floors and at 200 km, for both vehicles; a finite injected envelope.
+- **Intentional rejection:** `ValueError` with the lower-edge message (any other `ValueError` fails the check) at the ellipsoid surface; at 16 successive binary64 positions above the equatorial radius and 13 at and above fl(b) at the pole, with computed heights checked against exact rational heights; at h0 = β and below; for both vehicles. The very negative case raises `decimal.InvalidOperation`.
+- **Correct non-certification:** need = +∞ with the first-stage-infinite envelope; a finite need ≥ 0 equal to −M2 above β on path 1.
+- **False certification from an omitted term:** the check computes `-min(M2, M4)` beside the stage bounds and asserts it would certify.
+
+The expected outcome of every state is decided from its computed height and β alone; the transition k = 9 → 10 is derived from β and the grid spacing 2^-30, not read from the implementation.
+
+### Evidence (`docs/reviews/raw/M3-T0-review08-findings-correction-evidence/`)
+- **Red before.** `check_review08.py` on the unmodified `115e747` tree: 2 fail and 25 pass (`checks08_before_115e747.log`). The 2 failures are the docstring and record checks. The 25 passes are the contract checks: they pin behaviour that did not change. For the coverage gap the red state is shown by mutation: the M3-dropped mutant passed all 261 earlier checks (Review 08 implementer reproduction) and fails `check_review08.py` (below).
+- **Green after.** `check_review01.py` … `check_review08.py`: 288/288 (`checks_after.log`).
+- **Mutation** (`mutation_check_review02.py`, run against all eight check files): the control passes 288/288; 87 of 87 non-equivalent corruptions are detected by a declared check (the 73 earlier mutants and the 14 R8 mutants, among them the reviewer's `r8_m3_dropped_from_the_minimum`, detected by `test_r8_first_stage_infinite_envelope_gives_infinite_need`); no mutant survives; the 2 declared equivalents (`r6f2_float_nan_accepted`, `script_two_body_without_stationary_points`) are unchanged and each has an establishing check that passes (`mutation_check_review08.json`). Survivors: none. Equivalents: 2, reported separately.
+- **Smoke run** of the 14 R8 mutants against `check_review08.py` alone: each detected by a declared check, with no other failure (`smoke_r8.py.txt`, `smoke_r8.log`).
+- **Adversarial probe** (seed 20261022; `adversarial_r8.py.txt`, `adversarial_r8.log`): 37 541 near-surface states at random latitudes and longitudes, moved outward by up to 40 binary64 steps; 36 769 strictly exterior (decided in exact rational arithmetic), of which 7 687 have a computed h0 ≤ β and 480 a computed h0 ≤ 0 (lowest −1.86e-9 m). For B_V1 and b = +∞: 15 374 rejections, every one with h0 ≤ β and the lower-edge message; 58 164 returned needs, every one finite, ≥ 0 and equal to −M2; none certified; E1 holds against `t0_oracle` for every exterior state. 400 injected first-stage-infinity cases with M2 > 0: need = +∞ in all; omitting M3 would certify 371.
+- **No executable change.** The docstring-free AST of `t0_termination.py` equals `115e747` (`ast_docstring_free_equal.log`, `ast_equal.py.txt`; the diff is `t0_termination_docstring.diff`). `t0_termination_results.json` regenerates byte for byte (`termination_regenerated.log`).
+- **Preconditions:** `pinned_digests_before.log` (`digests.py.txt`).
+
+### Unresolved assumptions and conditional guarantees (unchanged by this pass)
+- **A-FP-2** (libm accuracy) remains an unresolved, explicitly conditional assumption, measured on macOS x86_64 only; E4b depends on it explicitly (LIBM_ULP ≤ 91910196476947). A-FP-1 (IEEE binary64 with gradual underflow) is checked at run time on this host only. A-FP-3 is stated as before. Host measurements are not platform guarantees.
+- **Contract scope.** C1 or C2 from a positive finite binary64 mass, no overflow; not arbitrary independently supplied (mass, b) pairs.
+- **Conditions of the floors.** Sufficient, not necessary; under A-FP-1 to A-FP-3, for computed committed heights, bound states with negative two-body energy, no thrust and dt = 10 s. There is no certified J2-plus-drag missed-dip bound.
+- **Unchanged.** The GMAT geodetic-drag discrepancy remains escalated (DR-0029 Q-G2-1); IM-2 is unchanged; DR-0029 P1–P10 and DR-0028 P6(b) are undecided.
+
+### Validation
+Recorded in the validation commit that follows this correction commit.

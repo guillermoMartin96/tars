@@ -1,0 +1,18 @@
+"""Smoke run of the R8 mutants against check_review08.py alone (usage: smoke_r8.py <m3-t0 dir>)."""
+import re, shutil, subprocess, sys, tempfile
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+import mutation_check_review02 as h
+for name, (corr, exp) in h.MUTANTS.items():
+    if not name.startswith("r8"):
+        continue
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        shutil.copytree(h.ROOT / "docs", root / "docs", ignore=shutil.ignore_patterns("__pycache__"))
+        d = root / h.REL
+        corr(d)
+        r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rf",
+                            str(d / "check_review08.py")], capture_output=True, text=True, cwd=root)
+        failed = set(re.findall(r"^FAILED \S+::(\w+)", r.stdout, re.M))
+        print(name, "exit", r.returncode, "declared hit:", sorted(failed & set(exp)),
+              "other:", sorted(failed - set(exp)))

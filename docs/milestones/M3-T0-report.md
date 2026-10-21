@@ -73,6 +73,10 @@
   - M3T0-R8-F1: a computed h0 ≤ β (8.88e-9 m) is attainable by strictly exterior bound states (for example 2^-30 m on the equator), and the stage condition then raises `ValueError` instead of returning the finite need stated above for M2 ≤ 0 and for the drag-free vehicle; the Review 07 record's claim that such heights are outside the domain is false. The step is still not certified.
 - Reviewer observation, reproduced, not applied: dropping M3 from the stage minimum passes all 261 checks (a coverage gap; the published results are unchanged under it).
 - No floor, bound or certification is affected. Record: `docs/reviews/M3-T0-review-08.md`. T0 is not accepted. A correction pass and any Review 09 await authorization.  
+**Status update (2026-10-21, append-only):** under "Authorization I-11 — M3 T0 Review 08 Corrections and Independent Review 09", M3T0-R8-F1 is corrected in the documentation, and the coverage gap is closed by new checks. No executable statement, value, floor, bracket or threshold changed.
+- R8-F1: every value the stage condition returns needs a computed h0 > β (8.88e-9 m). A computed h0 ≤ β raises `ValueError`, for B_V1 and the drag-free vehicle, including for strictly exterior states just above the ellipsoid (r = [a + k·2^-30, 0, 0] m, k = 1 … 9). The finite need on the M2 ≤ 0 path quoted in the I-10 note above, and the drag-free vehicle's finite need, hold for h0 > β only. The decision is on the computed height, not the mathematical height.
+- Coverage: an injected envelope that is +∞ at the first stage only must give need = +∞; the reviewer's M3-dropped mutant is now detected.
+- A-FP-2 remains an unresolved assumption, measured on macOS x86_64 only. New checks: `check_review08.py`, with mutation evidence. Dispositions are in `docs/reviews/M3-T0-review-08.md`. T0 is not accepted. Review 09 follows under I-11.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

@@ -1305,10 +1305,23 @@ def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=No
     lower bounds are rounded down and upper bounds up when returned. fp (the constants for
     another LIBM_ULP) and envelope (the superseded one) serve `libm_sensitivity` and
     `floor_comparison` only.
-    Certification (Review 06 M3T0-R6-F2, corrected after Review 07 M3T0-R7-F1): the step
-    is certified at h0 only when need(h0) < 0 (`stage_need`; the floor bisection and
-    `libm_sensitivity` accept nothing else). need(h0) >= 0 is a non-certification, reached
-    on one of two paths:
+    Certification (Review 06 M3T0-R6-F2, corrected after Review 07 M3T0-R7-F1 and Review
+    08 M3T0-R8-F1): the step is certified at h0 only when need(h0) < 0 (`stage_need`; the
+    floor bisection and `libm_sensitivity` accept nothing else), and a returned finite
+    need(h0) < 0 certifies only under the premises above and A-FP-1 to A-FP-3.
+    Every returned value needs a computed h0 > beta (beta = 8.877691069434738e-09 m): a
+    computed h0 <= beta (H0 < 0) raises ValueError ("the envelope is defined above the
+    lower edge only") from the A0 envelope, before the M2 test, for b = B_V1 and for the
+    drag-free b = +inf alike. States just outside the ellipsoid reach such heights:
+    r = [a + k 2^-30, 0, 0] m for k = 1 ... 9 (v = 0, bound) has mathematical and computed
+    height k 2^-30 m <= beta. The test is on the computed height, and the computed height
+    is not the mathematical height (E1: they differ by up to alpha h + beta): [0, 0, fl(b)]
+    lies inside the ellipsoid (mathematical height -2.03e-10 m) with computed height 0. So
+    the stage condition does not return a finite need for every state outside the
+    ellipsoid; the rejection certifies nothing. (An h0 so negative that b_lower + H0 <= 0
+    raises decimal.InvalidOperation from the square root in V instead; by E1 no exterior
+    state has a computed height below -beta.) For h0 > beta, need(h0) >= 0 is a
+    non-certification, reached on one of two paths:
       - M2 <= 0: the k2 input may already be below the edge, so A2, s3, L4 and M4 are None
         and need(h0) = -M2, finite and >= 0. M2 depends on h0 and fp only, not on b or the
         envelope (with FP, M2 <= 0 up to h0 = 55 749.393 m), so this need is finite even
@@ -1318,10 +1331,10 @@ def stage_lower_heights(h0: float, b: float, fp: dict | None = None, envelope=No
         bound, for example b = 2^-1074 at 10 000 km), or a stage value outside the binary64
         range (rounded outward to +-inf), makes the speeds after it +inf and the heights
         after it -inf, so need(h0) = +inf. Otherwise need(h0) is finite.
-    The vehicle b = +inf is drag-free (envelope 0) and has a finite need on both paths. A
-    non-finite h0, or b NaN or < 0, raises ValueError on both paths (the envelope is
-    evaluated for A0 before the M2 test). This describes the existing implementation; no
-    value changed."""
+    The vehicle b = +inf is drag-free (envelope 0) and has a finite need on both paths for
+    h0 > beta. A non-finite h0, or b NaN or < 0, raises ValueError on both paths (the
+    envelope is evaluated for A0 before the M2 test). This describes the existing
+    implementation; no value changed."""
     if not math.isfinite(h0):
         raise ValueError(f"h0 = {h0!r} is not a finite computed height")
     fp = FP if fp is None else fp

@@ -196,3 +196,6 @@ Appended 2026-10-20; the text above is kept as written. Review 07 found that the
 - **M2 > 0:** need = −min(M2, M3, M4). An envelope of +∞ at A0 or A2, or a stage value outside the binary64 range, gives M3 or M4 = −∞ and need = +∞, as in the reviewer's case `stage_lower_heights(1e7, 2^-1074)` above.
 
 Both are non-certifications, so no floor, bound or certification changes. Review 07 M3T0-R7-F2 is corrected in the docstrings only: "b_R ≤ b" holds for B > 0, as stated above for B = 0. Checks: `check_review07.py`.
+
+### Amendment 2 (Authorization I-11, Review 08 M3T0-R8-F1)
+Appended 2026-10-21; the text above, including the I-10 amendment, is kept as written. Review 08 found that both paths above need a computed h0 > β = 8.877691069434738e-09 m. For a computed h0 ≤ β, H0 < 0 and the A0 envelope raises `ValueError` ("the envelope is defined above the lower edge only") before the M2 test, for B_V1 and for the drag-free vehicle alike; no need is returned. Strictly exterior bound states reach such heights: r = [a + k·2^-30, 0, 0] m, v = 0, for k = 1 … 9 has mathematical and computed height k·2^-30 m ≤ β (the reviewer's case is k = 1). The rejection is a non-certification, so no floor, bound or certification changes. The statement "M2 depends on h0 only" above holds where M2 is evaluated, that is for h0 > β. Checks: `check_review08.py`.
