@@ -228,3 +228,12 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **T1:** its only DR-0029 decision prerequisite (P10) is satisfied. **T1 is still NOT AUTHORIZED**; an authorization packet is in `docs/milestones/M3-T1-authorization-packet.md`.
 - **T2 and later:** NOT AUTHORIZED; P1–P9 (and the rest of the T0 deferrals) remain undecided.
 - *Numbering note:* the planning series and the T0 series both used I-13, I-14 and I-15. The T0 series' I-15 (2026-10-22) is "I-15 — M3 Transition: Resolve DR-0029 P10 Before T1".
+
+## P10 merge and T1 (recorded 2026-10-22, append-only)
+- **P10 merge:** `m3-p10-decision-packet` was fast-forwarded into `main` under I-17 ("I-17 — Merge P10 Decision and Authorize M3 T1 J2 Force Model", Tech Lead, 2026-10-22). `main` = `60648b93385a9954194730006aeac29ea14875ad`. The decision branch is kept.
+- **T1:** **AUTHORIZED** (I-17, T1 only). It is implemented on `milestone-3-t1-j2-force-model`, and its status is **IMPLEMENTED; NOT REVIEWED, NOT ACCEPTED, NOT MERGED**.
+  - Records: VAL-0020; `docs/milestones/M3-T1-report.md`.
+  - The independent review needs separate authorization.
+- **T2 and later:** NOT AUTHORIZED.
+- **Unchanged and undecided:** DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2 (PROPOSED), DR-0028 P6(b) and Q-G2-4 (PROVISIONAL).
+- **Gate table, update 2026-10-22:** "T1 and later" now reads: T1 AUTHORIZED (I-17), implemented, not reviewed; T2 and later NOT AUTHORIZED.

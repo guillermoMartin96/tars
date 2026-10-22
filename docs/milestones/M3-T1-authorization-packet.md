@@ -119,3 +119,17 @@ Stop and report, without working around the problem, if:
 4. **Cross-platform behaviour.** The bit-for-bit derivation assumes IEEE 754 `sqrt` on every CI platform. CI's three platforms test this assumption for the first time; it is not established yet.
 5. **Q-G2-2** (identity-check rule) stays PROPOSED. T1's constant tests do not resolve it.
 6. **Process question §1.3** (merge the decision branch first, or branch from it).
+
+## Status update (recorded 2026-10-22, append-only)
+- **Authorized:** "I-17 — Merge P10 Decision and Authorize M3 T1 J2 Force Model" (Tech Lead, 2026-10-22). It chose §1.3 option (A).
+  - `m3-p10-decision-packet` was fast-forwarded into `main`, so `main` = `60648b93385a9954194730006aeac29ea14875ad`.
+  - The decision branch is kept.
+  - T1 branched from that `main` as `milestone-3-t1-j2-force-model`.
+- **§12 answers given by I-17:**
+  - item 1: the axis is fixed to the frame +Z axis and is not injectable;
+  - item 2: the existing `acceleration(t, r, v)` interface, with no mass interface;
+  - item 3: no invented tolerance. Measurements without a justified tolerance are reported as non-gating (I-17 §8);
+  - item 4: bit identity across the three platforms must be confirmed, or work stops (I-17 §11).
+- **Result:** T1 is **IMPLEMENTED; NOT REVIEWED, NOT ACCEPTED, NOT MERGED**. See `docs/milestones/M3-T1-report.md` and VAL-0020.
+  - The derived J2 is bit-identical on the three CI platforms (CI run 39852509134).
+- The independent T1 review (§11) needs separate owner authorization.
