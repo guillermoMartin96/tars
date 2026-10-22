@@ -1,0 +1,90 @@
+['<clone>/.venv/bin/python', '<clone>/docs/science/experiments/m3-t0/t0_gmat.py', '--gmat-console', '<review-root>/GMAT R2026a/bin/GmatConsole', '--out', '<clone>/docs/science/experiments/m3-t0/t0_gmat_results.json']
+== axis
+== regression_identity
+== regression_m3_form
+== trajectories
+j2 {"vs_spike_J_ax_1": 0.19151285982867433, "vs_spike_with_gmat_axis_DIAGNOSTIC": 7.5599935101616e-05}
+j2_default_nutation_interval {"vs_spike_J_ax_1": 0.27260975043981517, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.08280872350500143}
+drag1_sph {"vs_spike_J_ax_1": 0.0020507902894179265, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.0020489285252070118}
+drag_sph {"vs_spike_J_ax_1": 0.0019754148582523797, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.002007231365578}
+drag_geod {"vs_spike_J_ax_1": 0.32673368814768333, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.17536853163511534, "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": 0.13686377401812602}
+j2_drag_geod {"vs_spike_J_ax_1": 0.1986164980500005, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.18385064748079766, "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": 0.36596445339098854}
+j2_drag_geod_i97 {"vs_spike_J_ax_1": 0.5829754450736122, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.23183886148150074, "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": 0.5413891122833325}
+j2_drag_geod_ecc {"vs_spike_J_ax_1": 0.23706527035057554, "vs_spike_with_gmat_axis_DIAGNOSTIC": 0.09535567458036305, "vs_spike_with_gmat_axis_and_gmat_height_rule_DIAGNOSTIC": 0.18164775860885793}
+== burn
+== decay
+== density_probes
+== geodetic_points
+{
+ "regression_identity": {
+  "m1": {
+   "script_identical_to_committed": true,
+   "script_sha256": "f6bc397e4c72367d35885d58637fb52f3b56e0643dfc44a6d32e16491b321d1a",
+   "committed_script_sha256": "f6bc397e4c72367d35885d58637fb52f3b56e0643dfc44a6d32e16491b321d1a",
+   "report_identical_to_committed": true
+  },
+  "m2_prograde_burn": {
+   "script_identical_to_committed": true,
+   "report_identical_to_committed": true
+  },
+  "m2_retrograde_burn": {
+   "script_identical_to_committed": true,
+   "report_identical_to_committed": true
+  },
+  "m2_invalid_commands": {
+   "script_identical_to_committed": true,
+   "report_identical_to_committed": true
+  }
+ },
+ "regression_m3_form": {
+  "metrics": {
+   "position_error_max_m": 0.29832469517180304,
+   "velocity_error_max_mps": 0.00034901924623590314,
+   "gmat_vs_kepler_position_error_max_m": 6.95223445873689e-06,
+   "gmat_vs_kepler_velocity_error_max_mps": 8.105405057479292e-09,
+   "ours_vs_kepler_position_error_max_m": 0.29833164577041166,
+   "initial_sma_difference_m": 2.7939677238464355e-09,
+   "initial_state_difference_m": 1.8626487022123036e-09,
+   "period_difference_s": 3.637978807091713e-12,
+   "rows_compared": 896.0
+  },
+  "gates_m1_json": {
+   "position_error_max_m": {
+    "value": 0.29832469517180304,
+    "limit": 0.6,
+    "pass": true
+   },
+   "velocity_error_max_mps": {
+    "value": 0.00034901924623590314,
+    "limit": 0.0007,
+    "pass": true
+   },
+   "gmat_vs_kepler_position_error_max_m": {
+    "value": 6.95223445873689e-06,
+    "limit": 0.0001,
+    "pass": true
+   },
+   "gmat_vs_kepler_velocity_error_max_mps": {
+    "value": 8.105405057479292e-09,
+    "limit": 1e-07,
+    "pass": true
+   },
+   "initial_sma_difference_m": {
+    "value": 2.7939677238464355e-09,
+    "limit": 1e-06,
+    "pass": true
+   },
+   "initial_state_difference_m": {
+    "value": 1.8626487022123036e-09,
+    "limit": 1e-06,
+    "pass": true
+   },
+   "period_difference_s": {
+    "value": 3.637978807091713e-12,
+    "limit": 1e-08,
+    "pass": true
+   }
+  },
+  "all_applicable_gates_pass": true
+ }
+}

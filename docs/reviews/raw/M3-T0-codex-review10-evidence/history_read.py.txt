@@ -1,0 +1,9 @@
+from pathlib import Path
+import re
+for n in range(1,10):
+ for f in [Path(f'docs/reviews/raw/M3-T0-codex-review{n:02}.md'),Path(f'docs/reviews/raw/M3-T0-codex-review{n:02}-prompt.md'),Path(f'docs/reviews/M3-T0-review-{n:02}.md')]:
+  s=f.read_text();print('\nFILE',f,'lines',len(s.splitlines()))
+  lines=s.splitlines()
+  for i,l in enumerate(lines):
+   if (('F1' in l or 'F2' in l or 'F3' in l or 'F4' in l or 'F5' in l or 'IM-' in l or 'Authorization' in l) and (l.startswith('#') or l.startswith('**') or l.startswith('- **'))) or ('VERDICT:' in l and not l.startswith(' |')):
+    print(i+1,' '.join(lines[i:i+3])[:650])

@@ -1,0 +1,16 @@
+import pathlib,json,hashlib,re,subprocess
+R=pathlib.Path.cwd();E=R/'docs/reviews/raw/M3-T0-review09-findings-correction-evidence'
+for line in (E/'SHA256SUMS').read_text().splitlines():
+ h,n=line.split(maxsplit=1);p=E/n.lstrip('*');print('evidence hash',n,p.exists() and hashlib.sha256(p.read_bytes()).hexdigest()==h)
+a=json.loads((E/'mutation_check_review09.json').read_text());from collections import Counter
+print('reported mutation outcomes',Counter(x['outcome'] for x in a['mutants'].values()))
+for n in ['checks09_before_5978bfe.log','checks_after.log','r9f1_mutant_vs_check09.log','m1_proof_run.log','m2_proof_run.log','pytest_full.log','reproducibility_twice.log','m4_binding.log','pinned_digests_before.log','pinned_digests.log','smoke_r9.log']:
+ s=(E/n).read_text();print('\nFILE',n,'TAIL',s[-1600:])
+print('result files')
+for p in sorted((R/'docs/science/experiments/m3-t0').glob('*results.json')):
+ d=json.loads(p.read_text());print(p.name,list(d))
+# Provenance/status wording without rewriting historical documents.
+for f in ['docs/science/assumptions.md','docs/science/validation.md','docs/decisions/requests/DR-0029-m3-t0-proposals.md','docs/milestones/M3-T0-decision-matrix.md']:
+ print('RECORD',f)
+ for i,l in enumerate((R/f).read_text().splitlines(),1):
+  if any(x in l for x in ['UNREPRODUCED','ESCALATED_FOR_INVESTIGATION','P10 is a prerequisite','P1–P10 are prerequisites','C1 or C2']):print(i,l)

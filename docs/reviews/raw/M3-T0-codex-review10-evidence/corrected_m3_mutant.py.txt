@@ -1,0 +1,4 @@
+import pathlib,shutil,subprocess,sys
+D=pathlib.Path('docs/science/experiments/m3-t0').resolve();C=pathlib.Path('review_scratch/half_m3_corrected').resolve();shutil.copytree(D,C,dirs_exist_ok=True)
+p=C/'t0_termination.py';s=p.read_text();s=s.replace('l3 = big_h0 - 5 * one_u**2 * s2','l3 = big_h0 - Decimal("2.5") * one_u**2 * s2');p.write_text(s)
+r=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(C/'check_review09.py'),'-k','r9f1_review09_counterexample'],stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);print(r.stdout);print('exit',r.returncode)

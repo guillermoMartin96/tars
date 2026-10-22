@@ -1,0 +1,18 @@
+from pathlib import Path
+import subprocess,re,json,hashlib
+R=Path.cwd();S=R/'review_scratch'
+log=(S/'pytest.log').read_text();matches=re.findall(r'\d+ passed[^\n]* in [^\n]*',log)
+assert matches, 'pytest has not finished'
+summary=matches[-1];assert summary.startswith('1185 passed, 3 warnings'),summary
+m=json.loads((S/'mutations.json').read_text());assert len(m)==16 and sum(v['outcome']=='detected' for v in m.values())==13 and sum(v['outcome']=='equivalent' for v in m.values())==2 and m['control_unmodified']['pytest_exit']==0
+assert all(v['detected'] for v in json.loads((S/'earlier_mutations.json').read_text()).values())
+assert all(v['outcome']=='detected' for v in json.loads((S/'new_mutations.json').read_text()).values())
+assert all((S/f'repro{i}_changes.json').read_text()=='{}' for i in [1,2])
+for cmd,name in [(['git','status','--porcelain'],'final_status.txt'),(['git','diff','--stat'],'final_diff_stat.txt')]:
+ p=subprocess.run(cmd,check=True,capture_output=True,text=True);(S/name).write_text(p.stdout);assert p.stdout=='',p.stdout
+s=(S/'review-draft.md').read_text().replace('PYTEST_RESULT',summary)
+s=s.replace('(review_scratch/COMMANDS.md)',f'({S}/COMMANDS.md)')
+s=s.replace('**Ledger and integrity.**',f'Review file: [M3-T0-codex-review10.md]({S}/M3-T0-codex-review10.md).\n\n**Ledger and integrity.**',1)
+assert 'MUTATION_RESULT' not in s and 'PYTEST_RESULT' not in s
+(S/'M3-T0-codex-review10.md').write_text(s)
+print(summary);print('tracked status clean');print('review bytes',len(s.encode()),'sha256',hashlib.sha256(s.encode()).hexdigest())

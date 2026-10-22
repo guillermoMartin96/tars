@@ -1,0 +1,14 @@
+import math, sys
+sys.path.insert(0, "docs/science/experiments/m3-t0")
+import t0_termination as tt
+viol = {}; n = 0
+for name, b in tt.VEHICLES:
+    h = 55750.0
+    while h <= 2e7:
+        s = tt.stage_lower_heights(h, b)
+        if s["M4"] is not None:
+            n += 1
+            if not (s["M4"] < s["M3"] < s["M2"]):
+                viol.setdefault(name, []).append(h)
+        h *= 1.002
+print("cases", n, "violations", {k: (len(v), v[:3]) for k, v in viol.items()})

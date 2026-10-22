@@ -1,0 +1,11 @@
+import subprocess,pathlib,json,hashlib
+R=pathlib.Path.cwd();S=R/'review_scratch'
+def git(*args):return subprocess.check_output(['git',*args],text=True)
+print('HEAD',git('rev-parse','HEAD').strip());print('branch',git('rev-parse','--abbrev-ref','HEAD').strip())
+paths=git('diff','--name-only','86df2c3..HEAD').splitlines();print('all T0 paths docs only',all(p.startswith('docs/') for p in paths))
+paths=git('diff','--name-only','5978bfe..HEAD').splitlines();print('correction paths',len(paths))
+for base in ['5978bfe','f04f995']:
+ files=git('diff','--name-only',base+'..HEAD','--','docs/science/experiments/m3-t0').splitlines();print(base,'numerical changes',[p for p in files if p.endswith(('_results.json','.csv'))])
+for args,n in [(('status','--porcelain'),'final_status.txt'),(('diff','--stat'),'final_diff_stat.txt')]:
+ text=git(*args);(S/n).write_text(text);print(n,repr(text))
+print('all five pinned and all22 spike verified in integrity.log')

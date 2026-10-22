@@ -1,0 +1,76 @@
+import sys,pathlib,math,random,json
+from fractions import Fraction as Q
+from decimal import Decimal,localcontext
+import numpy as np
+D=pathlib.Path('docs/science/experiments/m3-t0').resolve();sys.path.insert(0,str(D));import t0_termination as t;import t0_model as m
+rng=random.Random(10122026)
+with localcontext() as c:
+ c.prec=110;a=Decimal(m.A_WGS84);e=Decimal(m.E2_WGS84);b=a*(1-e).sqrt();bf=a*(1-Decimal(m.F_WGS84));print('pole',b,Decimal(m.B_WGS84)-b,'radius delta',b-bf)
+# Exact rational stress on C1/C2. Random exponents deliberately span the entire format.
+counts={'C1':0,'C2':0}; worst=Q(0)
+for i in range(12000):
+ cd=math.ldexp(rng.uniform(1,2),rng.randint(-1074,1022));ar=math.ldexp(rng.uniform(1,2),rng.randint(-1074,1022))
+ if not cd or not ar:continue
+ p=cd*ar
+ for contract in ['C1','C2']:
+  if contract=='C1':
+   mass=math.ldexp(rng.uniform(1,2),rng.randint(-1074,1022))
+   if not 0<p<math.inf:continue
+   b=mass/p
+  else:
+   b=math.ldexp(rng.uniform(1,2),rng.randint(-1074,1022));q=b*cd;mass=q*ar
+   if not math.isfinite(q):continue
+  if not (0<mass<math.inf and math.isfinite(b)):continue
+  bound=t.inverse_ballistic_bound(b,cd,ar,Q(t.FP['phi_B']));actual=Q(cd)*Q(ar)/Q(mass)
+  assert bound>=actual,(contract,b,cd,ar,mass)
+  worst=max(worst,actual/bound);counts[contract]+=1
+print('E4a',counts,'worst',float(worst))
+# Zero-force product at/below half-tiny with very different shapes.
+tiny=math.ulp(0.0);z=0
+for ex in range(-1074,1,13):
+ cd=math.ldexp(1.,ex); ar=math.ldexp(1.,-1075-ex)
+ if ar==0:continue
+ for factor in [0.5,math.nextafter(1.,0.),1.]:
+  area=ar*factor
+  if area<=0 or Q(cd)*Q(area)>t.ETA0:continue
+  for h in [0.,50000.,100000.,180e6]:
+   r=np.array([m.A_WGS84+h,0.,0.]);v=np.array([0.,-11000.,0.]);a=m.acceleration(m.Config(mu=0,drag=m.Drag(cd=cd,area_m2=area)),0,r,v,tiny)
+   assert np.all(a==0),(cd,area,h,a);z+=1
+print('E4b zero force',z)
+for k in [91910196476946,91910196476947,91910196476948]:
+ try: f=t.rounding_allowances(k);print('cap',k,float(f['zero_force_c0_max']),f['zero_force_c0_max']<=Q(5,8))
+ except ValueError as e:print('cap rejection',k,str(e))
+# Drag comparisons at each band and nearby binary64 heights, top-band transitions, speed extremes.
+n=0;ratio=0
+for h in [0.,1e-8]+[float(x) for x in t.BASES_M]+[170e6,180e6,190681000.,float(t.FP['h_zero_m']),200e6]:
+ for dh in [0.,math.ulp(h) if h else tiny,-math.ulp(h) if h else 0.]:
+  hh=max(0.,h+dh); r=np.array([m.A_WGS84+hh,0.,0.]);low=float(Q(float(r[0]))-Q(m.A_WGS84))
+  for speed in [0.,tiny,11000.,1e100]:
+   v=np.array([0.,-speed,0.]);actual=t.model_drag(r,v,850.);env=t.drag_envelope(low,speed,t.B_V1)
+   assert actual<=env,(hh,speed,actual,env)
+   if env:ratio=max(ratio,actual/env)
+   n+=1
+print('drag probes',n,'worst',ratio)
+# Bound-energy directions at and above floors, including steep inward starts and poles.
+n=0;minimum=math.inf
+for _,b in t.VEHICLES:
+ floor=t.PUBLISHED_REVIEW04[dict((v,k) for k,v in t.VEHICLES)[b]] if False else next(t.PUBLISHED_REVIEW04[k] for k,v in t.VEHICLES if v==b)
+ for h in [floor,math.nextafter(floor,math.inf),floor+1.,300000.,3e6,1e8]:
+  need=t.stage_need(h,b);assert need<0
+  bounds=t.stage_lower_heights(h,b)
+  for lat in [0.,math.pi/4,math.pi/2]:
+   r=m.from_geodetic(lat,0.,h) if hasattr(m,'from_geodetic') else None
+   if r is None:break
+print('stage functions',[s for s in dir(m) if 'geodetic' in s])
+# Synthetic enclosures make M3 or M4 bind, and expose early M2.
+for h in [1.,55749.,55750.,200000.,300000.,2e6,2e7]:
+ for first,second in [(0.,0.),(1e8,0.),(0.,1e8),(1e8,1e8),(math.inf,0.),(0.,math.inf)]:
+  def factory():
+   calls=[]
+   def f(*a):calls.append(1);return first if len(calls)==1 else second
+   return f
+  s=t.stage_lower_heights(h,t.B_V1,envelope=factory());need=t.stage_need(h,t.B_V1,envelope=factory())
+  expected=-s['M2'] if s['M4'] is None else -min(s[k] for k in ['M2','M3','M4'])
+  assert need==expected
+  print('stage',h,first,second,need, 'early' if s['M4'] is None else min(['M2','M3','M4'],key=lambda k:s[k]))
+print('DONE')

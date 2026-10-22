@@ -1,0 +1,114 @@
+['<clone>/.venv/bin/python', '<clone>/docs/science/experiments/m3-t0/t0_geodetic.py', '<clone>/docs/science/experiments/m3-t0/t0_geodetic_results.json']
+{
+ "grid": {
+  "points": 640,
+  "by_algorithm": {
+   "iterative": {
+    "max_abs_h_err_m": 1.862645149230957e-09,
+    "max_abs_lat_err_rad": 2.220446049250313e-16,
+    "worst": {
+     "lat_deg": -51.6,
+     "lon_deg": -100.0,
+     "h_m": 900000.0,
+     "h_err_m": -1.862645149230957e-09
+    }
+   },
+   "vermeille": {
+    "max_abs_h_err_m": 2.923827846501581e-09,
+    "max_abs_lat_err_rad": 1.1102230246251565e-16,
+    "worst": {
+     "lat_deg": 33.3,
+     "lon_deg": 0.0,
+     "h_m": 1.0,
+     "h_err_m": -2.923827846501581e-09
+    }
+   },
+   "gmat_replica": {
+    "max_abs_h_err_m": 0.001361902803182602,
+    "max_abs_lat_err_rad": 4.111930795858143e-10,
+    "worst": {
+     "lat_deg": -30.0,
+     "lon_deg": 0.0,
+     "h_m": -10000.0,
+     "h_err_m": -0.001361902803182602
+    }
+   }
+  }
+ },
+ "published": {
+  "source": "GeographicLib CartConvert(1) manual, EXAMPLES (WGS 84 default)",
+  "forward": {
+   "lat_deg": 33.3,
+   "lon_deg": 44.4,
+   "h_m": 6000.0,
+   "xyz_m": [
+    3816209.6,
+    3737108.55,
+    3485109.57
+   ]
+  },
+  "reverse": {
+   "xyz_m": [
+    30000.0,
+    30000.0,
+    0.0
+   ],
+   "lat_deg": 6.483,
+   "lon_deg": 45.0,
+   "h_m": -6335709.73
+  },
+  "resolution": "xyz and h printed to 0.01 m; the reverse latitude to 0.001 deg",
+  "forward_xyz_minus_published_m": [
+   0.004493091255426407,
+   0.00025426456704735756,
+   0.0025680409744381905
+  ],
+  "inverse_of_published_xyz": {
+   "iterative": {
+    "lat_deg_minus_published": -2.5784743229451124e-09,
+    "h_minus_published_m": -0.0042417049407958984
+   },
+   "vermeille": {
+    "lat_deg_minus_published": -2.5784743229451124e-09,
+    "h_minus_published_m": -0.004241704344167374
+   },
+   "gmat_replica": {
+    "lat_deg_minus_published": -2.0675642531386984e-08,
+    "h_minus_published_m": -0.005561402998864651
+   }
+  },
+  "reverse_case": {
+   "iterative": {
+    "lat_deg": 0.0,
+    "h_m": -6335710.593128807,
+    "h_minus_published_m": -0.8631288064643741
+   },
+   "vermeille": "ZeroDivisionError: float division by zero",
+   "gmat_replica": {
+    "lat_deg": 0.0,
+    "h_m": -6335710.593128807,
+    "h_minus_published_m": -0.8631288064643741
+   }
+  },
+  "note": "the reverse case lies deep inside the ellipsoid (outside any M3 domain); it probes algorithm robustness only"
+ },
+ "axisymmetry_fc4": {
+  "max_abs_h_difference_m": 1.862645149230957e-09
+ }
+}
+equator -10000.0 {'iterative': 0.0, 'vermeille': -2.801243681460619e-10, 'gmat_replica': 0.0}
+equator -10000.0 {'iterative': 0.0, 'vermeille': -2.801243681460619e-10, 'gmat_replica': 0.0}
+equator -10000.0 {'iterative': 0.0, 'vermeille': -2.801243681460619e-10, 'gmat_replica': 0.0}
+equator 0.0 {'iterative': 0.0, 'vermeille': 0.0, 'gmat_replica': 0.0}
+equator 0.0 {'iterative': 0.0, 'vermeille': 0.0, 'gmat_replica': 0.0}
+equator 0.0 {'iterative': 0.0, 'vermeille': 0.0, 'gmat_replica': 0.0}
+equator 250000.0 {'iterative': 0.0, 'vermeille': 5.529727786779404e-10, 'gmat_replica': 0.0}
+equator 250000.0 {'iterative': 0.0, 'vermeille': 5.529727786779404e-10, 'gmat_replica': 0.0}
+equator 250000.0 {'iterative': 0.0, 'vermeille': 5.529727786779404e-10, 'gmat_replica': 0.0}
+equator 2000000.0 {'iterative': 0.0, 'vermeille': 4.656612873077393e-10, 'gmat_replica': 0.0}
+equator 2000000.0 {'iterative': 0.0, 'vermeille': 4.656612873077393e-10, 'gmat_replica': 0.0}
+equator 2000000.0 {'iterative': 0.0, 'vermeille': 4.656612873077393e-10, 'gmat_replica': 0.0}
+axis -10000.0 {'iterative': 0.0, 'vermeille': -2.7466739993542433e-10, 'gmat_replica': -6389593.625758493}
+axis 0.0 {'iterative': 0.0, 'vermeille': 0.0, 'gmat_replica': -6399593.625758493}
+axis 250000.0 {'iterative': 0.0, 'vermeille': -2.6193447411060333e-10, 'gmat_replica': -6649593.625758493}
+axis 250000.0 {'iterative': 0.0, 'vermeille': -2.6193447411060333e-10, 'gmat_replica': -6649593.625758493}

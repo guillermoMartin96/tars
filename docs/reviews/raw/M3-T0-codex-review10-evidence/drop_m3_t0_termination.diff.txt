@@ -1,0 +1,11 @@
+--- docs/science/experiments/m3-t0/t0_termination.py	2026-10-21 17:47:43
++++ <clone>/review_scratch/drop_m3/t0_termination.py	2026-10-21 18:47:47
+@@ -1382,7 +1382,7 @@
+     s = stage_lower_heights(h0, b, fp, envelope)
+     if s["M4"] is None:
+         return -s["M2"]  # >= 0 already: the k2 input may be below the edge
+-    return -min(s["M2"], s["M3"], s["M4"])  # >= 0: a stage may leave the domain
++    return -min(s["M2"], s["M4"])  # >= 0: a stage may leave the domain
+ 
+ 
+ VEHICLES = (("B25.8", B_V1), ("B100", 100.0), ("drag-free limit", math.inf))

@@ -1,0 +1,13 @@
+import sys,pathlib,shutil,subprocess,json,re,tempfile
+D=pathlib.Path('docs/science/experiments/m3-t0').resolve();sys.path.insert(0,str(D));import mutation_check_review02 as h
+names=['json_reviewer_R2F3_mutant','script_envelope_rotation_at_lower_end','r3_height_allowance_removed','r4_absolute_part_removed','r5_conversion_bound_relative_only','r6_zero_b_case_removed','r7f1_early_return_normalised_to_inf','r7f2_zero_b_returns_b','r8_m3_dropped_from_the_minimum']
+out={}
+for n in names:
+ edit,expected=h.MUTANTS[n]
+ with tempfile.TemporaryDirectory(dir='review_scratch') as td:
+  root=pathlib.Path(td).resolve();shutil.copytree(h.ROOT/'docs',root/'docs',ignore=shutil.ignore_patterns('__pycache__','.pytest_cache'));d=root/h.REL;edit(d)
+  # Run every declared detector, without unrelated expensive orbit/reproducibility tests.
+  cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider','-k',' or '.join(expected)]+[str(d/f'check_review{i:02}.py') for i in range(1,10)]
+  p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,cwd=root);failed=re.findall(r'^FAILED \S+::(\w+)',p.stdout,re.M)
+  detected=p.returncode==1 and bool(set(failed)&set(expected));out[n]={'detected':detected,'exit':p.returncode,'tail':p.stdout[-2500:]};print(n,out[n],flush=True)
+  pathlib.Path('review_scratch/earlier_mutations.json').write_text(json.dumps(out,indent=2))

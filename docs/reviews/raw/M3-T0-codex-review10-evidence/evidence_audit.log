@@ -1,0 +1,263 @@
+evidence hash ast_docstring_free_equal.log True
+evidence hash ast_equal.py.txt True
+evidence hash checks09_before_5978bfe.log True
+evidence hash checks_after.log True
+evidence hash digests.py.txt True
+evidence hash m1_proof_run.log True
+evidence hash m2_proof_run.log True
+evidence hash m2_proof_stdout.txt True
+evidence hash m4_binding.log True
+evidence hash m4_binding.py.txt True
+evidence hash mutation_check_review09.json True
+evidence hash pinned_digests.log True
+evidence hash pinned_digests_before.log True
+evidence hash pytest_full.log True
+evidence hash r9f1_mutant_vs_check09.log True
+evidence hash reproducibility_twice.log True
+evidence hash smoke_r9.json True
+evidence hash smoke_r9.log True
+evidence hash smoke_r9.py.txt True
+evidence hash t0_termination_docstring.diff True
+evidence hash termination_regenerated.log True
+reported mutation outcomes Counter({'detected': 100, 'equivalent': 2, 'not detected': 1})
+
+FILE checks09_before_5978bfe.log TAIL polar radius" in doc
+E       AssertionError: assert '(mathematical height -2.04e-10 m on the model ellipsoid, polar radius' in 'Bounds for an RK4 step from any bound committed state whose *computed* geodetic height is h0 (E1-E6; the simulator on...s (the envelope is evaluated for A0 before the M2 test). This describes the existing implementation; no value changed.'
+
+docs/science/experiments/m3-t0/check_review09.py:207: AssertionError
+___________________________ test_r9_records_amended ____________________________
+
+    def test_r9_records_amended():
+        """Detects: R9-F1 or R9-F2 unrecorded, or a historical record rewritten instead of
+        amended."""
+        old = "(mathematical height −2.03e-10 m)"
+        for name, header in (
+            ("M3-T0-review-07.md", "### Amendment 2 (Authorization I-12, Review 09 M3T0-R9-F2)"),
+            ("M3-T0-review-08.md", "### Amendment (Authorization I-12, Review 09 M3T0-R9-F2)"),
+        ):
+            text = (ROOT / "docs/reviews" / name).read_text()
+>           at = text.index(header)
+                 ^^^^^^^^^^^^^^^^^^
+E           ValueError: substring not found
+
+docs/science/experiments/m3-t0/check_review09.py:223: ValueError
+=========================== short test summary info ============================
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_pole_reference_matches_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_docstrings_quote_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9_records_amended
+3 failed, 23 passed in 0.83s
+
+
+FILE checks_after.log TAIL ........................................................................ [ 22%]
+........................................................................ [ 45%]
+........................................................................ [ 68%]
+........................................................................ [ 91%]
+..........................                                               [100%]
+314 passed in 156.29s (0:02:36)
+
+
+FILE r9f1_mutant_vs_check09.log TAIL cience/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-10000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-100000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-1000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-10000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[1000000.0-100000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-10000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-100000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-1000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-10000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f1_finite_m3_minimum_decides_need[10000000.0-100000000.0]
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9_three_outcomes_distinguished
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_pole_reference_matches_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9f2_docstrings_quote_the_model_ellipsoid
+FAILED docs/science/experiments/m3-t0/check_review09.py::test_r9_records_amended
+19 failed, 7 passed in 0.87s
+
+
+FILE m1_proof_run.log TAIL v" run python toolbox/validators/cross_platform.py > "<tmp>/cross_platform.json"
+   exit=0
+== m1_proof (non-GMAT): uv run python toolbox/validators/m1_proof.py --out <tmp>/m1_non_gmat.json
+[PASS] mission: failed=0, orbits_short_of_target=0
+[PASS] invariants: energy_rel_drift_max=3.82693e-10, angular_momentum_rel_drift_max=1.91347e-10, eccentricity_vector_drift_max=5.85589e-10, sma_drift_max_m=0.00253654
+[PASS] kepler_reference: position_error_max_m=0.298364, position_error_final_m=0.298364, velocity_error_max_mps=0.000349092, velocity_error_final_mps=0.000349092
+[PASS] period: analytic_period_s=5370.3, measured_mean_period_s=5370.3, period_error_max_s=5.23407e-06, node_crossing_time_error_max_s=3.84703e-05, orbits_measured=10
+[PASS] convergence: fitted_order=4.32893, order_deviation_from_4=0.328933
+[PASS] determinism: distinct_hashes_minus_one=0
+[PASS] architecture: violations=0
+convergence (dt s -> position error m, |dE/E|):
+       60 -> 1.1612e+03, 2.978e-06
+       30 -> 4.3522e+01, 9.300e-08
+       20 -> 6.6851e+00, 1.225e-08
+       10 -> 2.9833e-01, 3.826e-10
+        5 -> 1.4905e-02, 1.194e-11
+      2.5 -> 8.2243e-04, 3.974e-13
+        1 -> 1.5233e-05, 1.028e-14
+thresholds: approved; overall: PASS -> <tmp>/m1_non_gmat.json
+   exit=0
+== gmat compare: sh -c "uv" run python toolbox/scripts/gmat_m1.py compare > "<tmp>/gmat_reference.json"
+   exit=0
+== run_mission: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m1_leo_250km.json --out <tmp>/mission
+m1_leo_250km: success, 10 orbits, events sha256 7a4e18777ccd134b... -> <tmp>/mission
+   exit=0
+overall: PASS
+
+
+FILE m2_proof_run.log TAIL , max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 1.14e-09
+  independent agreement, max o6 kepler m/s: 1.36e-12
+  independent agreement, max o6 sma rel: 5.66e-16
+  independent agreement, max simpson rel: 0
+baseline verification: PASS
+   exit=0
+== m2_proof (O1-O9, contract, golden cross-platform): sh -c "uv" run python toolbox/validators/m2_proof.py --out "<tmp>/m2_proof_report.json" > "<tmp>/m2_proof_stdout.txt"
+   exit=0
+== run_mission m2_burn_to_depletion: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out <tmp>/mission_m2_burn_to_depletion
+m2_burn_to_depletion: success, 9 orbits, events sha256 6bd23e707020686d... -> <tmp>/mission_m2_burn_to_depletion
+   exit=0
+== run_mission m2_invalid_commands: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out <tmp>/mission_m2_invalid_commands
+m2_invalid_commands: success, 9 orbits, events sha256 7e52dd1d276b309c... -> <tmp>/mission_m2_invalid_commands
+   exit=0
+== run_mission m2_prograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out <tmp>/mission_m2_prograde_burn
+m2_prograde_burn: success, 9 orbits, events sha256 42316356a4c2b093... -> <tmp>/mission_m2_prograde_burn
+   exit=0
+== run_mission m2_retrograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out <tmp>/mission_m2_retrograde_burn
+m2_retrograde_burn: success, 10 orbits, events sha256 1c0037c202bb1d86... -> <tmp>/mission_m2_retrograde_burn
+   exit=0
+overall: PASS
+
+
+FILE pytest_full.log TAIL ........... [ 42%]
+........................................................................ [ 48%]
+........................................................................ [ 54%]
+........................................................................ [ 60%]
+........................................................................ [ 66%]
+........................................................................ [ 72%]
+........................................................................ [ 78%]
+........................................................................ [ 85%]
+........................................................................ [ 91%]
+........................................................................ [ 97%]
+.................................                                        [100%]
+=============================== warnings summary ===============================
+tests/test_gmat_m2.py::test_overflowing_finite_velocities_are_rejected
+  <scratch>/r13/clone_m1/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2803: RuntimeWarning: overflow encountered in multiply
+    s = (x.conj() * x).real
+
+tests/test_mission_m2.py::test_numerical_extremes_end_as_recorded_failures[norm_overflow]
+tests/test_simulator.py::test_state_with_overflowing_norm_is_a_non_finite_failure
+  <scratch>/r13/clone_m1/.venv/lib/python3.12/site-packages/numpy/linalg/_linalg.py:2767: RuntimeWarning: overflow encountered in dot
+    sqnorm = x.dot(x)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1185 passed, 3 warnings in 1617.50s (0:26:57)
+pytest_exit=0
+
+
+FILE reproducibility_twice.log TAIL == run 1
+git status after run 1 (empty = byte-identical to cc82ae7107b22a9c033bb7d03316f4e5655724b5):
+== run 2
+git status after run 2 (empty = byte-identical to cc82ae7107b22a9c033bb7d03316f4e5655724b5):
+314 passed in 162.07s (0:02:42)
+tracked experiment files:       99
+git status after checks:
+REPRO_DONE
+
+
+FILE m4_binding.log TAIL cases 8835 violations {}
+
+
+FILE pinned_digests_before.log TAIL HEAD 5978bfedcdfc67b8dc920176c7eaa63057e61fd9
+MATCH spike t0_atmosphere.py 
+MATCH spike t0_decay.py 
+MATCH spike t0_frames.py 
+MATCH spike t0_geodetic.py 
+MATCH spike t0_gmat.py 
+MATCH spike t0_model.py 
+MATCH spike t0_regression.py 
+MATCH spike t0_termination.py 
+MATCH spike t0_axis_ablation.py 
+MATCH spike check_review01.py 
+MATCH spike check_review02.py 
+MATCH spike mutation_check_review02.py 
+MATCH spike t0_oracle.py 
+MATCH spike t0_height_error.py 
+MATCH spike check_review03.py 
+MATCH spike check_review04.py 
+MATCH spike check_review05.py 
+MATCH spike check_review06.py 
+MATCH spike check_review07.py 
+MATCH spike check_review08.py 
+MATCH spike data/EarthExponentialAtmosphereData.txt 
+spike digests checked: 21
+MATCH proof/thresholds/m1.json 446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d
+MATCH proof/thresholds/m2.json 9d4eab47133a4f9eb1125cf7242ada0c720fbe9e4b8dd12b0f698cc79e5f0ce9
+MATCH toolbox/references/gmat/m2/APPROVED_DIGESTS.json f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585
+MATCH toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b
+MATCH proof/references/m2_final_states.json dc3baf7abb209a11ca463b9ca5001ce886c62b92b191ac76249d32924aa951dc
+protected paths changed since 86df2c3: 0
+RESULT OK
+
+
+FILE pinned_digests.log TAIL HEAD cc82ae7107b22a9c033bb7d03316f4e5655724b5
+MATCH spike t0_atmosphere.py 
+MATCH spike t0_decay.py 
+MATCH spike t0_frames.py 
+MATCH spike t0_geodetic.py 
+MATCH spike t0_gmat.py 
+MATCH spike t0_model.py 
+MATCH spike t0_regression.py 
+MATCH spike t0_termination.py 
+MATCH spike t0_axis_ablation.py 
+MATCH spike check_review01.py 
+MATCH spike check_review02.py 
+MATCH spike mutation_check_review02.py 
+MATCH spike t0_oracle.py 
+MATCH spike t0_height_error.py 
+MATCH spike check_review03.py 
+MATCH spike check_review04.py 
+MATCH spike check_review05.py 
+MATCH spike check_review06.py 
+MATCH spike check_review07.py 
+MATCH spike check_review08.py 
+MATCH spike check_review09.py 
+MATCH spike data/EarthExponentialAtmosphereData.txt 
+spike digests checked: 22
+MATCH proof/thresholds/m1.json 446e75ee8d5129a346263b5b06f873e0aed74c33fd756564e43423bbd16fdb3d
+MATCH proof/thresholds/m2.json 9d4eab47133a4f9eb1125cf7242ada0c720fbe9e4b8dd12b0f698cc79e5f0ce9
+MATCH toolbox/references/gmat/m2/APPROVED_DIGESTS.json f8d6bd788eb1e305af72cad2b821b4b85b2c65ab64410059ca43299eee5ce585
+MATCH toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b
+MATCH proof/references/m2_final_states.json dc3baf7abb209a11ca463b9ca5001ce886c62b92b191ac76249d32924aa951dc
+protected paths changed since 86df2c3: 0
+RESULT OK
+
+
+FILE smoke_r9.log TAIL s_the_committed_height_error_results', 'test_r9f2_pole_reference_matches_the_model_ellipsoid'] | 4 failed, 310 passed in 167.31s (0:02:47)
+r9f2_docstring_quote_reverted detected | declared: ['test_r9f2_docstrings_quote_the_model_ellipsoid'] | failed: ['test_r9f2_docstrings_quote_the_model_ellipsoid'] | 1 failed, 313 passed in 166.68s (0:02:46)
+r9f2_pole_check_docstring_reverted detected | declared: ['test_r9f2_docstrings_quote_the_model_ellipsoid'] | failed: ['test_r9f2_docstrings_quote_the_model_ellipsoid'] | 1 failed, 313 passed in 166.91s (0:02:46)
+r9f2_review07_amendment_removed detected | declared: ['test_r9_records_amended'] | failed: ['test_r9_records_amended'] | 1 failed, 313 passed in 166.08s (0:02:46)
+r9f2_review08_amendment_removed detected | declared: ['test_r9_records_amended'] | failed: ['test_r9_records_amended'] | 1 failed, 313 passed in 165.92s (0:02:45)
+r9f2_review07_original_sentence_rewritten detected | declared: ['test_r9_records_amended'] | failed: ['test_r9_records_amended'] | 1 failed, 313 passed in 167.10s (0:02:47)
+r9f2_val0019_amendment_removed detected | declared: ['test_r9_records_amended'] | failed: ['test_r9_records_amended'] | 1 failed, 313 passed in 165.83s (0:02:45)
+r9_review09_correction_section_removed detected | declared: ['test_r9_records_amended'] | failed: ['test_r9_records_amended'] | 1 failed, 313 passed in 166.49s (0:02:46)
+r9f1_report_note_reverted detected | declared: ['test_r9_records_amended'] | failed: ['test_r9_records_amended'] | 1 failed, 313 passed in 146.70s (0:02:26)
+13 R9 mutants; all detected by a declared check: True
+
+result files
+t0_atmosphere_results.json ['boundaries', 'edges', 'single_crossing_rk4', 'stiffness_dt10', 'summary', 'table_sha256']
+t0_axis_ablation_results.json ['data_file', 'data_sha256', 'data_sha256_matches_gmat_metadata', 'fits', 'full_fit_reproduces_t0_gmat', 'rms_definition', 'stored_full_fit_rms_m', 'tolerance_m', 'units']
+t0_decay_results.json ['configuration', 'dop853_time_to_geodetic_zero_s', 'floors', 'missed_crossing', 'rk4_divergence', 'rk4_last_committed_h_m', 'rk4_steps', 'sphere_minus_ellipsoid_max_m', 'stages']
+t0_frames_results.json ['fc2a_vrel_equals_v_when_omega_zero', 'fc2b_nonzero', 'fc2b_vrel_at_rest_mps', 'fc3_j2_axisymmetry_max_rel_diff', 'fc5_air_velocity_at_aX_mps', 'fc5_expected_mps', 'fc5_prograde_vrel_minus_expected_mps', 'fc5_retrograde_vrel_minus_expected_mps', 'fc6_equator_accel', 'fc6_equator_inward', 'fc6_pole_accel', 'fc6_pole_outward', 'fc8_inclined_51.6', 'fc8_not_parallel_away_from_vertex', 'fc8_parallel_at_vertex', 'omega_r_over_v_at_250km']
+t0_geodetic_results.json ['axisymmetry_fc4', 'ellipsoid', 'exact_answers', 'grid', 'published']
+t0_gmat_results.json ['axis', 'burn', 'decay', 'density_probes', 'geodetic_points', 'provenance', 'regression_identity', 'regression_m3_form', 'trajectories']
+t0_height_error_results.json ['crossings', 'height_error', 'libm']
+t0_regression_results.json ['bitwise_equal_to_golden', 'final_position_difference_m', 'final_velocity_difference_mps', 'golden_platform', 'm1_cross_platform_bound_m_mps', 'perturbations_off_acceleration_bitwise_point_mass', 'this_host', 'ticks', 'within_m1_cross_platform_bound']
+t0_termination_results.json ['admissibility_counterexamples', 'floating_point_enclosure', 'floor_comparison', 'libm_sensitivity', 'missed_crossing', 'stage_order', 'stiffness_thresholds', 'sufficient_stage_condition', 'vectorised_height_check_max_abs_m']
+RECORD docs/science/assumptions.md
+RECORD docs/science/validation.md
+764     - The GMAT result also depends on how the run is segmented into `Propagate` commands: 0.383 m for one command (the planning probe, rerun and reproduced byte for byte), 0.186 m for 895 × 60 s commands. ESCALATED_FOR_INVESTIGATION (DR-0029 P6).
+961   - Records: the 5 287-point random search is marked UNREPRODUCED (Review 04 record, amended), and b* is stated for the stored φ_B (7.416912861690675e-309) and the exact φ_B (1.1125369292536007e-308) (Review 05 record, amended).
+RECORD docs/decisions/requests/DR-0029-m3-t0-proposals.md
+319 **ESCALATED_FOR_INVESTIGATION.** The 0.137 m geodetic-drag difference at `NutationUpdateInterval` = 0 and the 0.18–0.23 m combined residuals are not explained.
+478 - **Records:** the 5 287-point random search quoted in the Review 04 record is marked UNREPRODUCED, and the switch point b* is quoted for the stored and for the exact φ_B (Review 04 and 05 records, amended).
+RECORD docs/milestones/M3-T0-decision-matrix.md
+6 - **P10 is a prerequisite for T1.**
+7 - **P1–P10 are prerequisites for T2.**
+18 | P6 | DR-0025 Q-G2-1: GMAT exact-configuration method? | **(a)** TOEEq + derived bound; **(b)** drive the validator reference with GMAT's axis; **(c)** informational only; **(d)** decomposed exact configuration (new) | (d), with the pinned settings list; (b) for the J2 link only if the DR-0028 scope ruling permits it, else the (a) bound | J2 0.076 mm with GMAT's axis at `NutationUpdateInterval` = 0 (8 cm at the default); spherical drag 2 mm; geodetic drag 0.14–0.38 m depending on interval and segmentation, **ESCALATED_FOR_INVESTIGATION**; J-ax-1 residual 0.19–0.58 m final, ≤ 1.08 m maximum (`gmat`). M3-form GMAT vs Kepler residual 6.95e-6 m (corrected after M3T0-F4). **IM-1 (resolved for Review 03):** a quadratic-only axis fit leaves 0.986 m RMS of GMAT Earth-fixed Z, against 7.8e-5 m with the diurnal term. It is reproduced from the committed GMAT report by `t0_axis_ablation.py`, and DR-0029 P6 states the quantity and the procedure. It is evidence only, not a threshold | (b) is exact but crosses a scope boundary; (a) leaves a ~1 m bound | Escalated item unresolved. **Requires a DR-0028 scope ruling for (b).** EOP-file dependence | T1: none (T1 is unit-level). Per I-15 §6 also a T2 prerequisite; per DR-0029, T4/T5 | Yes. No M3 reference exists yet |

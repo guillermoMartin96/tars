@@ -1,0 +1,47 @@
+{
+  "review10_half_M3_displacement": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r9f1_review09_counterexample"
+    ],
+    "failed_checks": [
+      "test_r9f1_review09_counterexample"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "1 failed, 25 deselected in 0.73s",
+    "evidence": "corrected_m3_mutant.log",
+    "reason": "Decimal(\"2.5\") multiplier produces M3=-1249827690.0723784, violating the exact expected M3; initial float/Decimal TypeError is excluded"
+  },
+  "review10_half_M4_displacement": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r9f1_review09_counterexample"
+    ],
+    "failed_checks": [
+      "test_provenance_rerun_reproduces_the_committed_termination_results",
+      "test_r3f1_rk4_stages_satisfy_the_corrected_bounds_with_oracle_heights",
+      "test_r4f1_rk4_stages_at_high_altitude",
+      "test_r7_correction_is_documentation_only",
+      "test_r8_finite_injected_envelope_certifies",
+      "test_r9_three_outcomes_distinguished",
+      "test_r9f1_default_envelope_m4_is_the_minimum",
+      "test_r9f1_review09_counterexample"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "12 failed, 302 passed in 241.03s (0:04:01)"
+  },
+  "review10_M3_absolute_value": {
+    "outcome": "detected",
+    "expected_checks": [
+      "test_r9f1_review09_counterexample"
+    ],
+    "failed_checks": [
+      "test_r8_first_stage_infinite_envelope_gives_infinite_need",
+      "test_r9_three_outcomes_distinguished",
+      "test_r9f1_finite_m3_minimum_decides_need",
+      "test_r9f1_review09_counterexample"
+    ],
+    "pytest_exit": 1,
+    "pytest_summary": "22 failed, 292 passed in 242.00s (0:04:01)"
+  }
+}

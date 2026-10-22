@@ -1,0 +1,5 @@
+import subprocess,pathlib,tarfile,io,sys,shutil
+R=pathlib.Path.cwd();S=R/'review_scratch';B=S/'baseline5978bfe';B.mkdir(exist_ok=True)
+a=subprocess.check_output(['git','archive','5978bfe','docs']);tarfile.open(fileobj=io.BytesIO(a)).extractall(B,filter='data')
+p=pathlib.Path('docs/science/experiments/m3-t0');shutil.copy2(R/p/'check_review09.py',B/p/'check_review09.py')
+r=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider',str(B/p/'check_review09.py')],cwd=B,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);print(r.stdout);print('exit',r.returncode)

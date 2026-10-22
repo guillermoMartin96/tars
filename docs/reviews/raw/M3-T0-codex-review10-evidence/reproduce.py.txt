@@ -1,0 +1,13 @@
+import pathlib,subprocess,sys,hashlib,json
+R=pathlib.Path.cwd();D=R/'docs/science/experiments/m3-t0';S=R/'review_scratch'
+files=subprocess.check_output(['git','ls-files',str(D.relative_to(R))],text=True).splitlines()
+def hashes():return {p:hashlib.sha256((R/p).read_bytes()).hexdigest() for p in files}
+orig=hashes()
+for i in [1,2]:
+ for x in ['atmosphere','decay','geodetic','frames','regression','termination','height_error','gmat','axis_ablation']:
+  cmd=[sys.executable,str(D/f't0_{x}.py')]
+  if x=='gmat':cmd+=['--gmat-console',str(R.parent/'GMAT R2026a/bin/GmatConsole'),'--out',str(D/'t0_gmat_results.json')]
+  else:cmd+=[str(D/f't0_{x}_results.json')]
+  p=subprocess.run(cmd,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);(S/f'repro{i}_{x}.log').write_text(repr(cmd)+'\n'+p.stdout);print(i,x,p.returncode,flush=True)
+ (S/f'repro{i}_changes.json').write_text(json.dumps({p:[orig[p],h] for p,h in hashes().items() if orig[p]!=h},indent=2))
+ print('changes',i,(S/f'repro{i}_changes.json').read_text(),flush=True)

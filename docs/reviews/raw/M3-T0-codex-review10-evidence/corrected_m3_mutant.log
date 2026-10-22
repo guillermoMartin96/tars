@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_r9f1_review09_counterexample _______________________
+
+    def test_r9f1_review09_counterexample():
+        """Detects: M3 dropped from the minimum when it is finite. The Review 09 values (h0 =
+        200 km, B_V1, envelope 1e8 then 0): M2 = 144 867.2696173568, M3 = -2 499 855 380.144757,
+        M4 = 89 239.71048326683; the committed code returns need = +2 499 855 380.144757 and the
+        finite-only mutant returns -89 239.71048326683, a false certification."""
+        s = tt.stage_lower_heights(2e5, B_V1, envelope=first_call(1e8))
+        assert s["M2"] == 144867.2696173568
+>       assert s["M3"] == -2499855380.144757
+E       assert -1249827690.0723784 == -2499855380.144757
+
+docs/science/experiments/m3-t0/check_review09.py:88: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/half_m3_corrected/check_review09.py::test_r9f1_review09_counterexample
+1 failed, 25 deselected in 0.73s
+
+exit 1

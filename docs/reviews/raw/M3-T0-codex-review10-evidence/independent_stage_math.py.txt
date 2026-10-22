@@ -1,0 +1,21 @@
+import sys,math
+from decimal import Decimal as D,localcontext
+from fractions import Fraction as Q
+sys.path.insert(0,'docs/science/experiments/m3-t0');import t0_termination as t;import t0_model as m
+# Independent high-precision implementation of the mathematical E1/E6 inequalities;
+# no production stage function is used to derive expected values.
+def dn(x):
+ f=float(x)
+ return math.nextafter(f,-math.inf) if Q(f)>Q(x) else f
+with localcontext() as ctx:
+ ctx.prec=110
+ for height,force in [(200000.,1e8),(1000000.,1e4),(300000.,1e7)]:
+  u=D(t.FP['u']);al=D(t.FP['alpha']);be=D(t.FP['beta_m']);a=D(m.A_WGS84);mu=D(m.MU);b=D(t.FP['b_lower_m']);G=D(t.FP['gravity_hat_mps2']);eta=D(math.ulp(0.))/2
+  H=(D(height)-be)/(1+al);R=a+(D(height)+be)/(1-al);V=(2*mu/(b+H)).sqrt();A0=(1+u)*(G+D(force));s2=(1+u)*V+5*(1+u)**2*A0+2*eta;A2=(1+u)*G;s3=(1+u)*V+5*(1+u)**2*A2+2*eta
+  M=[(1-al)*(H-c*(1+u)**2*s-u*R-2*eta)-be for c,s in [(D(5),V),(D(5),s2),(D(10),s3)]]
+  calls=[]
+  def env(*args):calls.append(1);return force if len(calls)==1 else 0.
+  actual=t.stage_lower_heights(height,t.B_V1,envelope=env)
+  for k,exact in zip(['M2','M3','M4'],M):
+   print(height,force,k,'independent',exact,'outward float',dn(exact),'production',actual[k]);assert dn(exact)==actual[k]
+print('all nine independently computed bounds match; negligible production pads do not change these floats')

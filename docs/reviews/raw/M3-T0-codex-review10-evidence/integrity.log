@@ -1,0 +1,91 @@
+macOS-26.2-x86_64-i386-64bit i386 3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ] 2.5.3 1.18.1
+sysctl: sysctl fmt -1 1024 1: Operation not permitted
+
+GMAT 1162803de3ed7172bce882b201b00e58de5b604c76a2ba02d16ac6765e7552e2
+<review-root>/GMAT R2026a/data/atmosphere/earth/EarthExponentialAtmosphereData.txt 75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e
+spike t0_atmosphere.py True
+spike t0_decay.py True
+spike t0_frames.py True
+spike t0_geodetic.py True
+spike t0_gmat.py True
+spike t0_model.py True
+spike t0_regression.py True
+spike t0_termination.py True
+spike t0_axis_ablation.py True
+spike check_review01.py True
+spike check_review02.py True
+spike mutation_check_review02.py True
+spike t0_oracle.py True
+spike t0_height_error.py True
+spike check_review03.py True
+spike check_review04.py True
+spike check_review05.py True
+spike check_review06.py True
+spike check_review07.py True
+spike check_review08.py True
+spike check_review09.py True
+spike data/EarthExponentialAtmosphereData.txt True
+pin proof/thresholds/m1.json True
+pin proof/thresholds/m2.json True
+pin toolbox/references/gmat/m2/APPROVED_DIGESTS.json True
+pin toolbox/references/snapshot/m2/REFERENCE_SNAPSHOT.json.gz True
+pin proof/references/m2_final_states.json True
+baseline identical t0_model.py True
+baseline identical t0_oracle.py True
+AST True
+append only docs/reviews/M3-T0-review-07.md True
+append only docs/reviews/M3-T0-review-08.md True
+append only docs/reviews/M3-T0-review-09.md True
+raw09 unchanged True
+numeric changes 
+m1.log 0 ergence: fitted_order=4.32893, order_deviation_from_4=0.328933
+[PASS] determinism: distinct_hashes_minus_one=0
+[PASS] architecture: violations=0
+convergence (dt s -> position error m, |dE/E|):
+       60 -> 1.1612e+03, 2.978e-06
+       30 -> 4.3522e+01, 9.300e-08
+       20 -> 6.6851e+00, 1.225e-08
+       10 -> 2.9833e-01, 3.826e-10
+        5 -> 1.4905e-02, 1.194e-11
+      2.5 -> 8.2243e-04, 3.974e-13
+        1 -> 1.5233e-05, 1.028e-14
+thresholds: approved; overall: PASS -> review_scratch/m1.json
+
+m2.log 0 =0, prograde_position_error_dt10_m=4.25844e-09, prograde_position_order=3.80491, retrograde_position_error_dt10_m=4.24543e-09, retrograde_position_order=3.88294, position_order_deviation_from_4_max=0.195091
+[PASS] reference_snapshot: violations=0
+[PASS] reference_snapshot_margins: violations=0
+[PASS] thresholds_all_consumed: violations=0
+[PASS] thresholds_cover_all_metrics: violations=0
+[PASS] report_only_metrics_finite: violations=0
+thresholds: approved; overall: PASS -> review_scratch/m2.json
+
+compare1.log 0 ifference_mps": 0.0
+  },
+  "thresholds": {
+    "position_error_max_m": 0.6,
+    "velocity_error_max_mps": 0.0007,
+    "gmat_vs_kepler_position_error_max_m": 0.0001,
+    "gmat_vs_kepler_velocity_error_max_mps": 1e-07,
+    "initial_sma_difference_m": 1e-06,
+    "initial_state_difference_m": 1e-06,
+    "period_difference_s": 1e-08,
+    "script_initial_position_difference_m": 1e-06,
+    "script_initial_velocity_difference_mps": 1e-09
+  },
+  "threshold_status": "approved",
+  "notes": "GMAT R2026a"
+}
+
+compare2.log 0 on_error_max_m": 0.6,
+    "ours_vs_gmat_sample_velocity_error_max_mps": 0.0007,
+    "ours_vs_gmat_burn_boundary_position_error_max_m": 0.016,
+    "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 2e-05,
+    "ours_vs_gmat_final_position_error_m": 0.6,
+    "ours_vs_gmat_final_velocity_error_mps": 0.0007,
+    "ours_vs_gmat_mass_error_max_kg": 1.3e-09,
+    "ours_vs_gmat_node_crossing_error_max_s": 8e-05
+  },
+  "threshold_status": "approved",
+  "notes": "GMAT R2026a, aligned stepping (DR-0016)"
+}
+

@@ -1,0 +1,11 @@
+import sys,math
+sys.path.insert(0,'docs/science/experiments/m3-t0');import t0_termination as t
+# Signed synthetic values are exclusively a reducer test, not valid acceleration bounds.
+def factory():
+ calls=[]
+ def env(*a):
+  calls.append(1);return -100. if len(calls)==1 else -2000.
+ return env
+s=t.stage_lower_heights(200000.,t.B_V1,envelope=factory());need=t.stage_need(200000.,t.B_V1,envelope=factory())
+print(s,need);assert 0<s['s3']<s['s2'];assert s['M2']<min(s['M3'],s['M4']);assert need==-s['M2']
+print('M2 strict minimum reducer test passes; signed injected envelopes do not certify physical forces')

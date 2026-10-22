@@ -1,0 +1,22 @@
+import sys,pathlib,math,json
+import numpy as np
+D=pathlib.Path('docs/science/experiments/m3-t0').resolve();sys.path.insert(0,str(D));import t0_model as m;import t0_termination as t;import t0_oracle as o
+n=0;worst=math.inf
+for name,b in t.VEHICLES:
+ for h in [t.PUBLISHED_REVIEW04[name],t.PUBLISHED_REVIEW04[name]+1e-8,300000.,3e6,1e8]:
+  for lat in [0.,0.34,1.31,math.pi/2]:
+   r=m.geodetic_to_cartesian(lat,0.713,h);h0=m.geodetic_iterative(r)[1];bound=t.stage_lower_heights(h0,b);assert t.stage_need(h0,b)<0
+   for vec in [-r/np.linalg.norm(r),np.array([0.,-1.,0.]),np.array([0.,0.,-1.])]:
+    v=vec*(math.sqrt(2*m.MU/np.linalg.norm(r))*(1-2**-40));cfg=m.Config(j2=m.J2_FROM_C20,drag=None if math.isinf(b) else m.Drag(cd=t.CD_V1,area_m2=t.AREA_V1));mass=850. if b==t.B_V1 else (b*t.CD_V1)*t.AREA_V1 if math.isfinite(b) else 850.
+    stages=[];m.rk4_step(m.rhs(cfg),0.,np.r_[r,v,mass],10.,stages)
+    for k,s in zip(['M2','M3','M4'],stages):
+     actual=m.geodetic_iterative(s.r)[1];assert actual>=bound[k],(name,h,lat,k,actual,bound[k]);worst=min(worst,actual-bound[k]);assert o.true_height(s.r)>=0
+    n+=1
+print('certified actual RK4 steps',n,'smallest bound gap',worst)
+for h in [0.,math.ulp(0.),t.FP['beta_m'],math.nextafter(t.FP['beta_m'],math.inf),55749.39300208564,math.nextafter(55749.39300208564,math.inf),1e308]:
+ for b in [0.,math.ulp(0.),t.B_V1,math.inf]:
+  try:print('edge',h,b,t.stage_need(h,b))
+  except Exception as e:print('edge',h,b,type(e).__name__)
+for h in [111511.96,111511.97]:print('IM2',h,t.stage_need(h,math.inf))
+for phi in [t.FPA['phi_B'],__import__('fractions').Fraction(t.FP['phi_B'])]:
+ c=phi*(1-t.U);print('bstar',float(c*t.ETA0/(c-1)))

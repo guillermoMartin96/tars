@@ -1,0 +1,233 @@
+['<clone>/.venv/bin/python', '<clone>/docs/science/experiments/m3-t0/t0_height_error.py', '<clone>/docs/science/experiments/m3-t0/t0_height_error_results.json']
+{
+ "libm": {
+  "max_error_ulp": {
+   "sin": 1.0451843817272015,
+   "cos": 1.4132060654188534,
+   "atan2": 0.7294964566317701,
+   "hypot": 0.4999474964132089,
+   "exp": 0.5132798593106519,
+   "pow3": 0.5042042722879121
+  },
+  "max_relative_error_in_2^-52": {
+   "sin": 0.736052199081913,
+   "cos": 0.9361071885889573,
+   "atan2": 0.49957559262020623,
+   "hypot": 0.4901494528842609,
+   "exp": 0.4960680264761166,
+   "pow3": 0.4967781223108996
+  },
+  "samples_per_function": {
+   "sin": 25000,
+   "cos": 25000,
+   "atan2": 20000,
+   "hypot": 20000,
+   "exp": 20000,
+   "pow3": 20000
+  },
+  "assumed_relative_bound_in_2^-52": 2,
+  "within_assumption": true,
+  "subnormal_results": {
+   "max_abs_error_in_2^-1074": {
+    "exp": 0.7414746044791101,
+    "sin": 1.010186961319045e-40,
+    "atan2": 0.4999288376979084,
+    "hypot": 0.589803678000067
+   },
+   "samples_per_function": {
+    "exp": 5001,
+    "sin": 4000,
+    "atan2": 4000,
+    "hypot": 4000
+   },
+   "assumed_abs_bound_in_2^-1074": 2,
+   "within_assumption": true,
+   "gradual_underflow_probe": {
+    "smallest_subnormal_positive": true,
+    "halving_smallest_normal_is_exact": true,
+    "tie_rounds_to_even": true,
+    "half_smallest_subnormal_rounds_to_zero": true,
+    "numpy_subnormal_product": true
+   },
+   "gradual_underflow": true
+  },
+  "kind": "measurement on this platform (sampled arguments), not a proof of A-FP-2"
+ },
+ "height_error": {
+  "categories": {
+   "global": {
+    "points": 6000,
+    "max_abs_error_m": 2.0564148063166248e-09,
+    "max_error_over_bound": 0.2055149978591631,
+    "computed_below_true_fraction": 0.5038333333333334,
+    "worst_point_m": [
+     5138264.539239325,
+     -925899.1860181871,
+     -5917121.915437073
+    ]
+   },
+   "near_bases": {
+    "points": 4050,
+    "max_abs_error_m": 1.981962323051969e-09,
+    "max_error_over_bound": 0.21666772648988325,
+    "computed_below_true_fraction": 0.5046913580246913,
+    "worst_point_m": [
+     -3186276.7462721304,
+     2742689.9086689507,
+     -5552465.081566412
+    ]
+   },
+   "polar": {
+    "points": 1000,
+    "max_abs_error_m": 1.715558395453124e-09,
+    "max_error_over_bound": 0.1769626219207603,
+    "computed_below_true_fraction": 0.266,
+    "worst_point_m": [
+     -273.93568557969843,
+     202.59724341811472,
+     7025558.532462527
+    ]
+   },
+   "low": {
+    "points": 1000,
+    "max_abs_error_m": 1.7744486174269015e-09,
+    "max_error_over_bound": 0.19987705555032453,
+    "computed_below_true_fraction": 0.489,
+    "worst_point_m": [
+     -5784917.026105984,
+     1099948.2039525602,
+     2442411.615925845
+    ]
+   },
+   "equator": {
+    "points": 1000,
+    "max_abs_error_m": 4.6562534702447127e-10,
+    "max_error_over_bound": 0.05195921631336081,
+    "computed_below_true_fraction": 0.502,
+    "worst_point_m": [
+     2131678.680380672,
+     -7449840.565142476,
+     0.0
+    ]
+   }
+  },
+  "max_abs_error_m": 2.0564148063166248e-09,
+  "max_error_over_bound": 0.21666772648988325,
+  "bound_m_at_120km": 9.024240508685258e-09,
+  "kind": "observed maximum over the sampled points (empirical); the bound is derived"
+ },
+ "crossings": {
+  "rows": [
+   {
+    "base_m": 50000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 12,
+    "computed_at_or_above_true_below": 93,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.001970389967380637
+   },
+   {
+    "base_m": 90000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 9,
+    "computed_at_or_above_true_below": 103,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.00042964937523404245
+   },
+   {
+    "base_m": 110000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 6,
+    "computed_at_or_above_true_below": 105,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.006397013401221008
+   },
+   {
+    "base_m": 120000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 15,
+    "computed_at_or_above_true_below": 96,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 7.824041165971352e-05
+   },
+   {
+    "base_m": 140000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 7,
+    "computed_at_or_above_true_below": 94,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.00039726390094063646
+   },
+   {
+    "base_m": 200000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 16,
+    "computed_at_or_above_true_below": 101,
+    "superseded_envelope_violations": 2,
+    "superseded_worst_relative_excess": 2.2712114353673485e-06,
+    "corrected_min_relative_margin": 7.861270723275027e-07
+   },
+   {
+    "base_m": 250000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 11,
+    "computed_at_or_above_true_below": 85,
+    "superseded_envelope_violations": 2,
+    "superseded_worst_relative_excess": 1.5278638167748326e-05,
+    "corrected_min_relative_margin": 6.694995180467345e-08
+   },
+   {
+    "base_m": 450000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 5,
+    "computed_at_or_above_true_below": 86,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.0005962591938595274
+   },
+   {
+    "base_m": 600000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 8,
+    "computed_at_or_above_true_below": 97,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.0001292478692340726
+   },
+   {
+    "base_m": 700000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 10,
+    "computed_at_or_above_true_below": 89,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 2.4422780521948795e-05
+   },
+   {
+    "base_m": 900000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 7,
+    "computed_at_or_above_true_below": 101,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.0024787793630551835
+   },
+   {
+    "base_m": 1000000.0,
+    "points": 400,
+    "computed_below_true_at_or_above": 17,
+    "computed_at_or_above_true_below": 130,
+    "superseded_envelope_violations": 0,
+    "superseded_worst_relative_excess": 0.0,
+    "corrected_min_relative_margin": 0.00019835274345281206
+   }
+  ],
+  "corrected_covers_all": true,
+  "velocity": "horizontal against the rotation (largest |v_rel|), s = 7800 and 11000 m/s"
+ }
+}

@@ -1,0 +1,5 @@
+import pathlib,shutil,subprocess,sys,json
+R=pathlib.Path.cwd();D=R/'docs/science/experiments/m3-t0';S=R/'review_scratch';C=S/'drop_m3';shutil.copytree(D,C,dirs_exist_ok=True)
+p=C/'t0_termination.py';s=p.read_text();old='return -min(s["M2"], s["M3"], s["M4"])';assert s.count(old)==1;p.write_text(s.replace(old,'return -min(s["M2"], s["M4"])'))
+r=subprocess.run([sys.executable,str(p),str(C/'out.json')],capture_output=True,text=True);print('exit',r.returncode,r.stdout[-300:],r.stderr[-300:]);print('output identical',(C/'out.json').read_bytes()==(D/'t0_termination_results.json').read_bytes())
+a=json.loads((D/'t0_termination_results.json').read_text());print('published rows',json.dumps(a['sufficient_stage_condition']['rows'],indent=2))

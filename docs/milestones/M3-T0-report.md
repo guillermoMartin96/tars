@@ -85,6 +85,9 @@
 - R9-F1: a finite M3 that is the minimum decides need = −M3 (the Review 09 counterexample: need = +2 499 855 380.144757, not certified). `check_review09.py` pins it, and the finite-only M3 mutant is in the mutation harness.
 - R9-F2: the model's polar radius is a·√(1 − e2), 2.48e-13 m above A·(1 − F). The pole check now uses it, and [0, 0, fl(b)] has mathematical height −2.04e-10 m (amended from −2.03e-10 m in appended notes).
 - The Review 09 verdict (PASS) and its raw output are unchanged. Dispositions are in `docs/reviews/M3-T0-review-09.md`. **T0 is not accepted.** Review 10 follows under I-12.  
+**Status update (2026-10-21, append-only):** **Review 10 (Codex, at `3c565e6`): PASS (unconditional), no new findings.**
+- Every tracked finding is RESOLVED, including R9-F1 and R9-F2; no finding is open.
+- No floor, bound or certification changed. Record: `docs/reviews/M3-T0-review-10.md`. Updated acceptance dossier: `docs/reviews/M3-T0-acceptance-dossier.md`. **T0 is not accepted**; it awaits the owner's final decision (I-12 §7). Not merged; T1 and T2 not started.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

@@ -1,0 +1,11 @@
+import sys,pathlib,json,concurrent.futures
+D=pathlib.Path('docs/science/experiments/m3-t0').resolve();sys.path.insert(0,str(D));import mutation_check_review02 as h
+names=[n for n in h.MUTANTS if n.startswith('r9') or n=='control_unmodified']
+# Earlier mutants are unchanged; all earlier checks run on each selected copy.
+names += [n for n in h.MUTANTS if n in ['r6f2_float_nan_accepted','script_two_body_without_stationary_points']]
+print(names,flush=True)
+out={}
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+ fs={pool.submit(h.run,n):n for n in names}
+ for f in concurrent.futures.as_completed(fs):
+  n=fs[f];out[n]=f.result(); print(n,out[n],flush=True);pathlib.Path('review_scratch/mutations.json').write_text(json.dumps(out,indent=2))

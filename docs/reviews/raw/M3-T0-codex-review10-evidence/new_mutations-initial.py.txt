@@ -1,0 +1,11 @@
+import pathlib,sys,json,concurrent.futures
+D=pathlib.Path('docs/science/experiments/m3-t0').resolve();sys.path.insert(0,str(D));import mutation_check_review02 as h
+h.MUTANTS.update({
+ 'review10_half_M3_displacement':(h.edit_text('t0_termination.py','l3 = big_h0 - 5 * one_u**2 * s2','l3 = big_h0 - 2.5 * one_u**2 * s2'),('test_r9f1_review09_counterexample',)),
+ 'review10_half_M4_displacement':(h.edit_text('t0_termination.py','l4 = big_h0 - 10 * one_u**2 * s3','l4 = big_h0 - 5 * one_u**2 * s3'),('test_r9f1_review09_counterexample',)),
+ 'review10_M3_absolute_value':(h.edit_text('t0_termination.py',h.NEED_MIN,h.NEED_MIN.replace('s["M3"]','abs(s["M3"])')),('test_r9f1_review09_counterexample',))})
+out={}
+with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+ fs={pool.submit(h.run,n):n for n in h.MUTANTS if n.startswith('review10')}
+ for f in concurrent.futures.as_completed(fs):
+  n=fs[f];out[n]=f.result();print(n,out[n],flush=True);pathlib.Path('review_scratch/new_mutations.json').write_text(json.dumps(out,indent=2))

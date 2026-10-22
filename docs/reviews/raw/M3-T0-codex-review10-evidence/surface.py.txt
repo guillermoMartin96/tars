@@ -1,0 +1,23 @@
+import sys,pathlib,math,random
+from fractions import Fraction as Q
+from decimal import Decimal,localcontext
+import numpy as np
+sys.path.insert(0,'docs/science/experiments/m3-t0');import t0_model as m;import t0_termination as t;import t0_oracle as o
+rng=random.Random(1010202610);a=Q(m.A_WGS84);b2=a*a*(1-Q(m.E2_WGS84));ext=inside=reject=finite=0;maxerr=Decimal(0)
+for i in range(1200):
+ lat=math.asin(rng.uniform(-1,1));lon=rng.uniform(-math.pi,math.pi);r=m.geodetic_to_cartesian(lat,lon,0.)
+ for k in [0,1,8,10,20]:
+  x=r.copy()
+  for j in range(3):
+   for _ in range(k):x[j]=math.nextafter(float(x[j]),math.copysign(math.inf,float(x[j])))
+  xx,yy,zz=map(lambda z:Q(float(z)),x)
+  if (xx*xx+yy*yy)/(a*a)+zz*zz/b2<1:inside+=1;continue
+  ext+=1;h=o.true_height(x);hc=m.geodetic_iterative(x)[1];err=abs(Decimal(hc)-h);maxerr=max(err,maxerr)
+  with localcontext() as c:
+   c.prec=80;limit=Decimal(t.FP['alpha'])*h+Decimal(t.FP['beta_m'])
+  assert err<=limit,(x,h,hc,err,limit)
+  for b in [0.,t.B_V1,math.inf]:
+   try:need=t.stage_need(hc,b)
+   except ValueError:reject+=1;assert hc<=t.FP['beta_m']
+   else:finite+=1;assert math.isfinite(need) and need>=0,(x,h,hc,b,need)
+print(dict(exterior=ext,interior_excluded=inside,rejected_calls=reject,finite_noncertifications=finite,max_height_error=str(maxerr),certifications=0))

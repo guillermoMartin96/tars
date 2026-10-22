@@ -1,0 +1,11 @@
+--- docs/science/experiments/m3-t0/t0_termination.py	2026-10-21 17:47:43
++++ <clone>/review_scratch/half_m3_corrected/t0_termination.py	2026-10-21 18:51:21
+@@ -1355,7 +1355,7 @@
+         uu = Decimal(fp["u"])
+         l2 = big_h0 - 5 * one_u**2 * v - uu * r0 - e6 - Decimal("1e-35")
+         s2 = (one_u * v + 5 * one_u**2 * a0 + e6) * (1 + PAD)
+-        l3 = big_h0 - 5 * one_u**2 * s2 - uu * r0 - e6 - Decimal("1e-35")
++        l3 = big_h0 - Decimal("2.5") * one_u**2 * s2 - uu * r0 - e6 - Decimal("1e-35")
+         out = {
+             "H0": _dn(big_h0),
+             "V": _up(v),
