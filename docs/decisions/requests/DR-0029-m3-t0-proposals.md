@@ -1,6 +1,6 @@
 # Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic test points, validation-scenario parameters
 
-**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). **Corrected after Review 04** (M3T0-R4-F1; fourth log at the end; authorized by "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05", 2026-10-19). **Corrected after Review 05** (M3T0-R5-F1, R5-F2; fifth log at the end; authorized by "Authorization I-6 — M3 T0 Review 05 corrections only", 2026-10-19). Every item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
+**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). **Corrected after Review 04** (M3T0-R4-F1; fourth log at the end; authorized by "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05", 2026-10-19). **Corrected after Review 05** (M3T0-R5-F1, R5-F2; fifth log at the end; authorized by "Authorization I-6 — M3 T0 Review 05 corrections only", 2026-10-19). **Update (2026-10-22, append-only): P10 DECIDED — Option (a)** under "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22) (P10 section and Resolution). P1–P9 remain OPEN. Every other item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-18  
 **Related milestone/issue:**
@@ -25,10 +25,10 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 | P7 | DR-0025 Q-G2-5: reference missions | RM-0 … RM-8 (table in P7), all exercised except RM-3b | Owner |
 | P8 | DR-0025 Q-G2-7: geodetic test points | Exact answers and forward-constructed points as the gate source; GeographicLib examples and GMAT as corroboration; the algorithm's domain stated | Owner |
 | P9 | DR-0024 Q9: C_d, A, mass, initial states | C_d 2.2 (illustrative). Vehicle V1: 850 kg, 15 m² (B 25.8 kg/m²). Vehicle V2: the M2 vehicle with A 15 m². Initial states per P7 | Owner |
-| P10 | New: J2 identity (decimal or C̄20) | Pin C̄20 as the source value, with J2 = −√5 C̄20 derived | Owner (before T1) |
+| P10 | New: J2 identity (decimal or C̄20) | Pin C̄20 as the source value, with J2 = −√5 C̄20 derived | Owner (before T1). **DECIDED — Option (a), I-16 (2026-10-22)** |
 
 **T1/T2 readiness (recommendation, not authorization):**
-- **T1 (J2):** no T0 item blocks it, once P10 is decided.
+- **T1 (J2):** no T0 item blocks it, once P10 is decided. *(2026-10-22: P10 decided, I-16; T1 still needs its own authorization.)*
 - **T2 (drag):** BLOCKED until P1–P5, P8 and P9 are decided.
 - **T4/T5:** need P6 and P7.
 
@@ -398,6 +398,39 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 
 **Recommendation.** (a), because the source publishes C̄20.
 
+**Owner decision (2026-10-22, append-only): DECIDED — Option (a).** Authority: "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22), §1. Recorded verbatim:
+
+> **DR-0029 P10 — DECIDED:** The canonical identity of the approved J2 representation from DR-0024 Q1 is the EGM2008 tide-free coefficient
+>
+> `C̄₂₀ = −0.484165143790815e−3`
+>
+> from NGA.STND.0036 Table 5.
+>
+> `J2` is derived from that canonical value using:
+>
+> `J2 = −√5 × C̄₂₀`
+>
+> which in the project's IEEE-754 binary64 computation gives approximately:
+>
+> `J2 = 1.0826261738522227e−3`.
+>
+> The decimal `1.0826261739e−3` appearing in DR-0024 Q1 is a rounded display representation, not an independent canonical constant.
+>
+> There shall be exactly one canonical stored physical value for this identity. Simulator constants, physics identities, generated GMAT coefficient/reference material, tests and future M3 references must derive consistently from that value.
+>
+> This decision selects the representation within the already-approved DR-0024 Q1. It does **not** reopen Q1's physical value or tide-system decision.
+
+**Basis (I-16 §2, as stated by the owner):** provenance (C̄20 is the published coefficient; J2 is derived); a single source of truth; T0 continuity (accepted T0 J2 computations used this representation); reference consistency (the GMAT coefficient-file path originates from C̄20); round-trip behaviour in the existing environment; lower migration cost. The trajectory comparison of (a) against (b) is supporting experimental evidence only, not a bound, certification or proof of physical equivalence.
+
+**Required invariant (I-16 §3):** one canonical value → all derived representations; no independent authoritative literals for both C̄20 and J2. Implementation belongs to T1 and is not authorized by I-16.
+
+**Implementer notes on the record (no change to the decision):**
+- The decision text cites "Table 5". The coefficient is in NGA.STND.0036 v1.0.0 **Table 5.1** (DR-0024 [NGA] reference, SCI-0013); the citation is read as Table 5.1.
+- The supporting comparison, from the unreviewed scratch probe `docs/science/experiments/m3-p10/` (one orbit, one host), is 3.20e-5 m (DOP853) and 3.48e-5 m (RK4, dt 10 s) after 53 700 s. The owner's "approximately 3.5e-5 m" matches the RK4 value.
+- The round-trip statement rests on that same probe on one host (`.14e` coefficient-file print of C̄20 reads back to the identical binary64). It is not cross-platform evidence.
+
+**Not decided by P10 (I-16 §4):** DR-0029 P1–P9; Q-G2-1/P6; DR-0025 Q-G2-2; DR-0028 P6(b); the final M3 time step; A-FP-2; E4b insofar as it depends on A-FP-2; the combined J2-plus-drag missed-crossing bound; cross-platform validation limitations; the unreproduced 5 287-point search; any sampled-sweep evidence as a proof; branch-protection recommendations. Their status is unchanged.
+
 ## Impact
 - **Architecture:** P2–P5 decide one v3 end condition, one failure cause, one domain rule and one pinned constant (κ). P6 decides the GMAT generator's settings. No production change is made here.
 - **Science/validation:** VAL-0019; SCI-0015/0016/0017 limitations (unsupported altitudes, termination); DR-0025 oracle design.
@@ -406,7 +439,7 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 
 ## Blocked work
 - **T2/T3** (drag, end conditions, contract): P1–P5, P8, P9.
-- **T1:** P10.
+- **T1:** P10. *(2026-10-22: P10 DECIDED, I-16; this block is lifted. T1 still needs its own authorization.)*
 - **T4/T5:** P6 and P7. Choosing P6 (b) additionally needs the DR-0028 scope ruling. The escalated geodetic-drag investigation blocks only geodetic GMAT gates.
 - **Any use that needs a guaranteed missed-dip magnitude for J2 + drag** (P2): no perturbed-motion bound exists in T0 (Review 02 R2-F1). A5-b as recommended does not need one.
 
@@ -419,6 +452,8 @@ For each of P1–P10: accept, choose an option, or `discuss`. P1 needs κ. P6 ne
 
 ## Resolution
 **Decision:** (pending)
+
+*(2026-10-22, append-only)* **P10: DECIDED — Option (a)** ("I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22)): C̄20 = −0.484165143790815e-3 (EGM2008 tide-free, NGA.STND.0036 Table 5.1) is the single canonical value; J2 = −√5·C̄20 is derived (binary64 1.0826261738522227e-3); 1.0826261739e-3 is a display rounding. DR-0024 Q1 is not reopened. Decision text verbatim in the P10 section. **P1–P9: still pending.** DR-0028's scope ruling for P6 (b) remains undecided; Q-G2-1 remains escalated.
 
 <!-- review01-correction-log -->
 ## Correction log (Review 01, 2026-10-18)

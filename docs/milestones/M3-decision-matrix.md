@@ -32,7 +32,7 @@ No OPEN or DEFERRED item has a default.
 ## DR-0024: G1 physical models and constants
 | Item | Decision | Status | Source | Also recorded in |
 |---|---|---|---|---|
-| Q1 | J2 = 1.0826261739e-3, EGM2008 tide-free | APPROVED | I-1 §1 | SCI-0013 |
+| Q1 | J2 = 1.0826261739e-3, EGM2008 tide-free | APPROVED. *Representation (2026-10-22): canonical C̄20, J2 derived; the decimal is a display form (DR-0029 P10 DECIDED (a), I-16)* | I-1 §1 | SCI-0013 |
 | Q2 | J2 reference radius = WGS 84 a; stop condition checked, not met (§3.5) | APPROVED | I-1 §1 | SCI-0013 |
 | Q3 | GM = WGS 84 3.986004418e14; SCI-0005 historical correction note | APPROVED; note added | I-1 §1, §4 | SCI-0005 (appended note) |
 | Q4 | Earth-fixed +Z is the common axis of J2, the ellipsoid and atmosphere rotation; Earth-fixed and inertial representations distinct; correct transformations; conventions and tests FC-1…FC-9 recorded | APPROVED w/ constraints | I-2 §1 | SCI-0013/0014/0017 status updates; ADR-0009 item 14 |
@@ -221,3 +221,10 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 | Planning merge | Needs the Tech Lead's explicit checkpoint approval (I-2 §7). Section 7 of I-1 alone no longer suffices. Update 2026-10-17: checkpoint **ACCEPTED** (I-13, `865210c`); the merge itself still needs separate authorization (I-13 §4). Update 2026-10-18: **MERGED**, PR #4, merge commit `86df2c3` (I-14; above) |
 | T0 | Needs the explicit checkpoint approval and the planning merge (I-1 §8, narrowed by I-2 §7). Update 2026-10-17: checkpoint approval given (I-13); still needs the planning merge and explicit T0 authorization; not started (I-13 §4). Update 2026-10-18: planning merged; **T0 AUTHORIZED (I-15) and in progress**; proposals in DR-0029 (OPEN) |
 | T1 and later | NOT AUTHORIZED. Was also blocked on DR-0028; that block is lifted by the J-ax-1 decision. T2 still depends on the DR-0027 T0 proposals (A-4, A-5, A-6, A-s, B-4) and the T0-checkpoint deferrals |
+
+## T0 merge and P10 decision (recorded 2026-10-22, append-only)
+- **T0:** ACCEPTED (T0 series I-13, at `3c565e6`) and fast-forward MERGED into `main` (T0 series I-14): `main` = `5fded7c6df50d60564f2bd025aeaf9dab4f541cd`. CI run 39827298093 green.
+- **DR-0029 P10: DECIDED — Option (a)** ("I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22)). Recorded on branch `m3-p10-decision-packet`.
+- **T1:** its only DR-0029 decision prerequisite (P10) is satisfied. **T1 is still NOT AUTHORIZED**; an authorization packet is in `docs/milestones/M3-T1-authorization-packet.md`.
+- **T2 and later:** NOT AUTHORIZED; P1–P9 (and the rest of the T0 deferrals) remain undecided.
+- *Numbering note:* the planning series and the T0 series both used I-13, I-14 and I-15. The T0 series' I-15 (2026-10-22) is "I-15 — M3 Transition: Resolve DR-0029 P10 Before T1".

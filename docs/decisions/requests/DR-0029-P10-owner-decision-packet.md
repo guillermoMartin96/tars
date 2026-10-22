@@ -1,5 +1,6 @@
 # DR-0029 P10 — Owner Decision Packet: identity of the pinned J2 value
 
+**Status update (2026-10-22, append-only): P10 DECIDED — Option (a)** under "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22); decision text in DR-0029 P10. The packet below is kept as prepared.  
 **Status:** PREPARED FOR OWNER DECISION. **P10 is not decided.** This packet analyses the existing proposal; it decides nothing, changes no production code and does not start T1.  
 **Authority:** "I-15 — M3 Transition: Resolve DR-0029 P10 Before T1" (Tech Lead, 2026-10-22). *Numbering note:* the T0 spike authorization of 2026-10-18 ("TARS — M3 T0 Reference-Configuration Spike Authorization", cited in DR-0029) was also numbered I-15. This packet refers to the 2026-10-22 authorization only.  
 **Baseline:** `origin/main` = `5fded7c6df50d60564f2bd025aeaf9dab4f541cd` (T0 ACCEPTED, I-13; MERGED by fast-forward, I-14).  

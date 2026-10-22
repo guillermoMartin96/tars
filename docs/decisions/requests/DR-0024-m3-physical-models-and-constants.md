@@ -466,3 +466,8 @@ Under DR-0028 A1 the first two equal their direct inertial evaluations identical
   - The trajectory effect is about 3e-5 m.
   - The Q1 decision itself is unchanged.
 - **FC-8 (revision 2):** the T0 spike measured v_rel parallel to v at an inclined orbit's highest-latitude point (VAL-0019). A T2 test of FC-8 must therefore sample away from that point. The specification text is unchanged.
+
+### P10 note (2026-10-22, append-only)
+- **DR-0029 P10 DECIDED — Option (a)** under "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22). The canonical stored value for Q1 is the EGM2008 tide-free C̄2,0 = −0.484165143790815e-3 ([NGA] Table 5.1). J2 = −√5·C̄2,0 is derived; in binary64 it is 1.0826261738522227e-3.
+- The Q1 decimal 1.0826261739e-3 is a rounded display representation, not an independent canonical constant. The Q1 row above is kept as written; its parenthetical "=" is exact only for the derived value.
+- **Q1's physical value and tide-system decision are not reopened.** Decision text: DR-0029 P10.
