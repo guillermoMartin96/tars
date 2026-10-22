@@ -155,3 +155,21 @@ Preconditions (I-12 §1), verified before any change:
 
 ### Validation
 Recorded in the validation commit that follows this correction commit.
+
+### Validation of the correction commit `cc82ae7` (appended 2026-10-21)
+Evidence is in `docs/reviews/raw/M3-T0-review09-findings-correction-evidence/`. Scratch, home and temporary paths are redacted. Environment: macOS 26.2 x86_64 (the M1/M2 reference host), Python 3.12.15, the locked `uv` environment.
+
+| Check | Result |
+|---|---|
+| Red before, green after | At `5978bfe`, `check_review09.py` fails 3 of 26 (pole reference, docstrings, records) (`checks09_before_5978bfe.log`). The reviewer's finite-only M3 mutant fails 16 R9-F1 checks (`r9f1_mutant_vs_check09.log`). At `cc82ae7`, all 26 pass |
+| Review 01–09 checks | `check_review01.py` … `check_review09.py`: 314/314 pass, 288 earlier plus 26 new (`checks_after.log`; again in the reproducibility clone) |
+| Mutation tests | Control 314/314. 100/100 non-equivalent corruptions are detected by a declared check: the 87 earlier mutants and the 13 R9 mutants, including `r9f1_m3_dropped_when_finite`. **Survivors: none.** **Equivalent: 2**, the same two as before (`r6f2_float_nan_accepted`, `script_two_body_without_stationary_points`) (`mutation_check_review09.json`) |
+| Termination results | `t0_termination.py` regenerates `t0_termination_results.json` byte for byte (`termination_regenerated.log`); its docstring-free AST equals `5978bfe` (`ast_docstring_free_equal.log`) |
+| M1 Proof (`run_m1_proof.sh`, fresh clone at `cc82ae7`) | PASS, 9/9 steps; `working_tree_clean_excluding_evidence: yes` (`m1_proof_run.log`). A separate full pytest run in the same clone gave 1185 passed, 3 warnings, unchanged from I-11 (`pytest_full.log`) |
+| M2 Proof (`run_m2_proof.sh`, a separate fresh clone) | PASS, 20/20 steps; m2_proof 228 PASS, 0 FAIL; clean: yes (`m2_proof_run.log`, `m2_proof_stdout.txt`). The rewritten `m2_final_states_record.json` differs from the committed one only in its `revision` field and the record's own `sha256` field, as at I-11 |
+| Pinned and spike digests | The five pinned artifacts equal `86df2c3` byte for byte, and all 22 VAL-0019 spike digests match at `cc82ae7` (`pinned_digests.log`). The count is 22, not 21: this pass adds `check_review09.py` and updates the `t0_termination.py` (docstring), `check_review08.py` and `mutation_check_review02.py` entries; VAL-0019 keeps their previous digests |
+| Production and protected files | `git diff --name-only 86df2c3 cc82ae7 -- src proof toolbox scenarios tests .github uv.lock pyproject.toml` is empty |
+| T0 reproducibility | A third fresh clone ran every T0 experiment twice, including the GMAT harness, `t0_height_error.py` and `t0_axis_ablation.py`. `git status` was empty after each run, so all 99 tracked experiment files are byte-identical; the checks then passed 314/314 (`reproducibility_twice.log`) |
+| Numerical outputs vs the I-11 baseline | No tracked `*_results.json` or `.csv` file under `docs/science/experiments/m3-t0/` differs between `f04f995` (I-11 validation) and `cc82ae7`, so **the numerical outputs are byte-identical** |
+| CI on `cc82ae7` | Run 39695797213 (https://github.com/guillermoMartin96/tars/actions/runs/39695797213): all four jobs succeeded (`check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`). CI does not collect the T0 checks (`testpaths = ["tests"]`), so CI does not validate them |
+| Platform limitations | All T0 measurements and checks ran on macOS x86_64 only. A-FP-1's gradual-underflow check and the A-FP-2 libm measurements are host measurements, not platform guarantees. The M4-binding statement for the default envelope rests on a sampled sweep (`m4_binding.log`) and on the byte-identical regeneration with M3 dropped; it is not a proof |
