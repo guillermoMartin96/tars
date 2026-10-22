@@ -1,0 +1,106 @@
+{
+  "control_pytest_exit": 0,
+  "control_passes": true,
+  "mutants": [
+    {
+      "id": "sign",
+      "file": "tars/sim/forces.py",
+      "defect": "acceleration sign reversed",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "magnitude",
+      "file": "tars/sim/forces.py",
+      "defect": "coefficient 3/2 -> 1.4",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "z_factor",
+      "file": "tars/sim/forces.py",
+      "defect": "z factor 3 -> 2 (non-conservative)",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "s2_coeff",
+      "file": "tars/sim/forces.py",
+      "defect": "latitude coefficient 5 -> 4 in x, y",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "xy_asym",
+      "file": "tars/sim/forces.py",
+      "defect": "x/y asymmetry 1e-9 (not axisymmetric)",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "z_scale_1e9",
+      "file": "tars/sim/forces.py",
+      "defect": "z component scaled by 1e-9",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "power",
+      "file": "tars/sim/forces.py",
+      "defect": "radial dependence perturbed",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "axis",
+      "file": "tars/sim/forces.py",
+      "defect": "symmetry axis +Y instead of +Z",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "j2_zero_offset",
+      "file": "tars/sim/forces.py",
+      "defect": "J2 = 0 not exactly zero",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "sqrt5_decimal",
+      "file": "tars/sim/constants.py",
+      "defect": "sqrt(5) replaced by a decimal",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "sqrt5_ulp",
+      "file": "tars/sim/constants.py",
+      "defect": "sqrt(5) one ulp high",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "j2_sign",
+      "file": "tars/sim/constants.py",
+      "defect": "J2 sign reversed",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "c20_digit",
+      "file": "tars/sim/constants.py",
+      "defect": "C20 last digit changed",
+      "pytest_exit": 1,
+      "detected": true
+    },
+    {
+      "id": "decimal_j2",
+      "file": "tars/sim/constants.py",
+      "defect": "decimal J2 used as the canonical value",
+      "pytest_exit": 1,
+      "detected": true
+    }
+  ],
+  "detected": 14,
+  "total": 14
+}

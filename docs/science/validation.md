@@ -989,3 +989,126 @@ All 10 approved rejection codes are exercised.
   - Validation of the correction commit `cc82ae7`: M1 Proof 9/9 and M2 Proof 20/20 (228 PASS, 0 FAIL) in fresh clones; full pytest 1185 passed; the five pinned digests and all 22 spike digests match; no protected path changed since `86df2c3`; all 99 T0 experiment files reproduce byte for byte twice, including GMAT, and the numerical outputs are byte-identical to the I-11 baseline `f04f995`; checks 314/314; mutation 100/100 detected, 2 equivalent, 0 survivors; CI run 39695797213 green on all four jobs (T0 checks not collected in CI). Logs in the same evidence directory; the table is in `docs/reviews/M3-T0-review-09.md`.
   - Review 10 (Codex, at `3c565e6`, I-12 §6): `VERDICT: PASS (unconditional)`, no new findings; R9-F1, R9-F2 and every earlier item RESOLVED. Record: `docs/reviews/M3-T0-review-10.md`. No VAL-0019 value or status changes; T0 is not accepted.
 <!-- /review09-correction-log -->
+
+---
+
+## VAL-0020 — M3 T1: J2 force component, unit-level validation (`zonal_j2` v1; not integrated)
+- **Date:** 2026-10-22.
+- **Authority:** "I-17 — Merge P10 Decision and Authorize M3 T1 J2 Force Model" (Tech Lead). T1 only.
+- **Revision:** branch `milestone-3-t1-j2-force-model`, from `main` = `60648b9` (contains the DR-0029 P10 decision). Code commit `e23675c`; tests `5fd24a2`.
+- **Capability:**
+  - `tars.sim.forces.ZonalJ2Gravity` (`zonal_j2`, version 1): the J2 perturbing acceleration about the frame +Z axis (SCI-0013; DR-0028 J-ax-1, axis not configurable);
+  - `tars.sim.constants.EarthJ2Constants` / `WGS84_EGM2008_TIDE_FREE`: the canonical C̄2,0, with J2 derived (DR-0029 P10).
+  - It is not used by any scenario, by the simulator or by the runner. v1/v2 cannot express it.
+- **Configuration:** WGS 84 μ = 3.986004418e14 m³/s² and a = 6 378 137.0 m; C̄2,0 = −0.484165143790815e-3 (EGM2008 tide-free, NGA.STND.0036 Table 5.1); J2 = −√5·C̄2,0.
+
+### Constant identity (gates; exact)
+| Check | Expectation | Result |
+|---|---|---|
+| C̄2,0 literal | equals the NGA string; shortest repr `-0.000484165143790815` | PASS |
+| √5 correctly rounded | 5 lies between the squares of the midpoints around fl(√5) (exact rationals) | PASS |
+| Product correctly rounded | J2 is a nearest binary64 to −fl(√5)·C̄2,0 (exact rationals) | PASS |
+| Pinned binary64 | J2 = 1.0826261738522227e-3 = `0x1.1bcdd00abd9aap-10` (the value recorded in P10) | PASS (reference host; three platforms: see "Cross-platform") |
+| Q1 display form | `f"{J2:.10e}"` = `1.0826261739e-03`, and J2 ≠ 1.0826261739e-3 | PASS |
+| One canonical value | no J2 field in `EarthJ2Constants`; no derived-J2 literal anywhere in `src/`; the C̄2,0 literal only in `constants.py` | PASS |
+
+- **Analytical basis:** IEEE 754 requires `sqrt` and `*` to be correctly rounded. The two rounding checks verify that property on each platform instead of assuming it.
+- These checks are unit tests of the constant. They do **not** adopt DR-0025 Q-G2-2's proposed project-wide rule ("constants are verified by identity"), which stays PROPOSED.
+
+### Force component (gates)
+| Check (DR-0025) | Expectation | Basis of the tolerance | Result |
+|---|---|---|---|
+| Known answers (FC-6) | at a·x̂: −(3/2) J2 μ/a² x̂ (inward); at a·ẑ: +3 J2 μ/a² ẑ (outward) | ≤ 16 roundings per side, so 2γ₁₆ relative (γₙ = nu/(1 − nu), u = 2⁻⁵³) | PASS |
+| Q3 gradient | a = ∇U₂ of the separately coded potential U₂ = −(μ J2 a²/2)(3z²/r⁵ − 1/r³), at 162 points (4 radii a … 6.6a, 10 latitudes incl. ±90° and ±35.264°, 4 longitudes, plus 2 general points) | Per component, the bound is γ₆₄·(sum of both evaluations taken in absolute values). This is Higham's forward error bound (*Accuracy and Stability of Numerical Algorithms*, 2nd ed., §3.1), with 64 bounding the roundings on any path (by inspection: ≤ 13 for the acceleration, ≤ 40 for the dual-number gradient) | PASS. Largest error = **3.6 %** of the bound |
+| Q3 sensitivity | the same bound rejects a z-factor 3 → 2 error | — | PASS |
+| Axisymmetry | a 90° rotation about +Z rotates a bitwise; z → −z reflects a_z exactly | exact (commutative IEEE addition, exact negation) | PASS |
+| Radial sign | a·r < 0 for \|lat\| < 35.26°, > 0 above (a·r ∝ −(1 − 3 sin²lat)) | exact sign of a closed form | PASS |
+| Q11 J2 = 0 | the component returns exact zeros; point mass + J2(0) is bitwise point mass for every sample state, and over 600 RK4 steps | exact | PASS |
+| Q11 polar plane | x-z polar orbit, RK4 dt 10 s, 5 370 steps: y = v_y = 0 at every step (no node motion) | exact: both y-accelerations are exactly 0 | PASS |
+| Parameter validation | μ ≤ 0, a ≤ 0, non-finite J2 and r = 0 raise `ValueError` | — | PASS |
+
+- **Independence:**
+  - The gradient and energy oracles use a potential coded separately from the acceleration.
+  - The derivative comes from forward-mode dual numbers, which use only correctly rounded operations. DR-0025 Q3 names the complex step. The dual-number method uses the same exact-derivative idea, so its bound needs no libm (complex `sqrt`) accuracy assumption.
+  - Evidence class: P (unit) for the gradient; exact identities otherwise.
+
+### Invariants E and h_z (DR-0025 Q2): structural gate
+- **Expectation:** E = v²/2 − μ/r − U₂ and h_z are exact invariants of point mass + J2. RK4 does not conserve them exactly.
+- **Gate:** for a correct model, RK4's global error is O(dt⁴) (ADR-0004), so the drift should fall by about 4⁴ = 256 when dt goes from 20 s to 5 s. A non-conservative or non-axisymmetric force would drift independently of dt (ratio ≈ 1).
+- **Decision boundary 1/2.** It was fixed from that reasoning before any measurement. It is a test that separates the two hypotheses, not an accuracy threshold.
+- **Setup:** 300 × 1000 km orbit, i = 28.5°, 51.6°, 97°, 10 orbits.
+
+| i | Energy drift ratio dt 5/20 | h_z drift ratio dt 5/20 | Gate |
+|---|---|---|---|
+| 28.5° | 1.20e-3 | 9.75e-4 | ≤ 0.5: PASS |
+| 51.6° | 1.20e-3 | 9.73e-4 | ≤ 0.5: PASS |
+| 97° | 1.22e-3 | 9.81e-4 | ≤ 0.5: PASS |
+
+- **Characterization (informational), i = 51.6°, max relative drift over 10 orbits:**
+
+  | dt (s) | Energy | h_z | Order (energy / h_z) vs previous dt |
+  |---|---|---|---|
+  | 40 | 2.75e-7 | 1.33e-7 | — |
+  | 20 | 8.86e-9 | 4.16e-9 | 4.95 / 5.00 |
+  | 10 | 2.98e-10 | 1.30e-10 | 4.89 / 5.00 |
+  | 5 | 1.07e-11 | 4.04e-12 | 4.81 / 5.01 |
+  | 2.5 | 4.19e-13 | 1.24e-13 | 4.67 / 5.03 |
+
+- **Observation, not explained here:** the invariant drift falls about as dt⁵, faster than the dt⁴ global-error bound. This is consistent with the bound, which is an upper limit. Its cause, plausibly RK4's error structure for this near-Keplerian problem, is not investigated.
+
+### First-order secular rates (DR-0025 Q1): INFORMATIONAL, no gate
+- **Theory:** first-order secular J2 theory, Ω̇ = −(3/2) n J2 (a/p)² cos i and ω̇ = (3/4) n J2 (a/p)² (5 cos² i − 1) (SCI-0013 sources).
+  - It is first order in J2 and holds for mean elements.
+  - The comparison here uses osculating elements, either initial or time-averaged. A first-order-in-J2 relative discrepancy is therefore expected.
+  - **No approved or derived tolerance exists** for this comparison. Following I-17 §8, it is measured and reported, and not asserted.
+- **Measured:** linear fits of the unwrapped osculating Ω(t), ω(t), with RK4 dt 10 s, 30 orbits (175 910 s). Orbit 300 × 1000 km (a 7 028 137 m, e 0.0498), Ω₀ 30°, ω₀ 40°.
+
+| i | Ω̇ fit (°/day) | Ω̇ theory, initial (°/day) | Δ vs initial / vs mean elements | ω̇ fit (°/day) | ω̇ theory, initial (°/day) | Δ vs initial / vs mean |
+|---|---|---|---|---|---|---|
+| 28.5° | −6.2827 | −6.2658 | −0.27 % / −0.23 % | 10.2033 | 10.2013 | +0.02 % / −0.02 % |
+| 51.6° | −4.4346 | −4.4287 | −0.13 % / −0.07 % | 3.3159 | 3.3122 | +0.11 % / +0.02 % |
+| 63.4349° | −3.1908 | −3.1886 | −0.07 % / +0.01 % | 0.0112 | 0.00001 | (theory ≈ 0: absolute 0.011 °/day) |
+| 80° | −1.2382 | −1.2381 | −0.01 % / +0.08 % | −3.0050 | −3.0274 | +0.74 % / +0.81 % |
+| 100° | +1.2382 | +1.2381 | +0.01 % / −0.08 % | −3.0050 | −3.0274 | +0.74 % / +0.81 % |
+| 120° | +3.5680 | +3.5649 | +0.09 % / +0.01 % | 0.9000 | 0.8912 | +0.98 % / +0.82 % |
+| 150° | +6.1908 | +6.1746 | +0.26 % / +0.22 % | 9.8050 | 9.8035 | +0.02 % / −0.03 % |
+
+- **Signs:**
+  - The node regresses for i < 90° and advances for i > 90°.
+  - The apsidal rate changes sign between 51.6° and 80°, and back between 100° and 120°, as 5 cos² i − 1 predicts.
+  - At the critical inclination the measured rate is 0.011 °/day, against a first-order 0.
+  - All signs agree with theory. These are informational observations too, not gates.
+- The 80°/100° rows agree to the printed digits, as the i ↔ 180° − i symmetry of the theory suggests. This is not asserted.
+- The discrepancies (≤ 1 % away from the critical inclination) are of the expected first-order-in-J2 size. VAL-0018 measured +0.53 % for the node at the M1 orbit. **They are not validated against an acceptance criterion.**
+
+### RK4 convergence (DR-0025 Q10): characterization, no gate
+- 300 × 1000 km, 51.6°, 58 640 s. Successive final-position differences: 123.1 m (40−20 s), 4.80 m (20−10 s), 0.210 m (10−5 s).
+- Observed orders 4.68 and 4.52 (pre-asymptotic, above 4). The Richardson estimate of the RK4 error at dt 10 s is 0.22 m.
+- Not gated: the M2 order rule is not reused (DR-0025 principle 4). dt = 10 s stays PROVISIONAL (Q-G2-4).
+
+### Test quality
+- 14 one-line mutants of the production code are each detected by the T1 tests (`t1_mutation_check_results.json`): sign, coefficient, z factor, latitude coefficient, a 1e-9 x/y asymmetry, a 1e-9 z scaling, radial power, axis swap, a non-zero J2 = 0 offset, √5 as a decimal, √5 one ulp high, J2 sign, the last digit of C̄2,0, and the decimal J2 used as the canonical value. The unmutated control passes.
+
+### Regression (VO-5)
+See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, goldens, digests, pytest, T0 checks.
+
+### Cross-platform
+- The constant-identity tests run in CI on ubuntu-latest, macos-latest (arm64) and macos-15-intel. A pass on all three shows that the derived J2 has the same binary64 value, `0x1.1bcdd00abd9aap-10`, on each. The result is recorded in the T1 report.
+- The informational measurements were run on the reference host only.
+
+### Classification and status
+- **Gates:**
+  - constant identity;
+  - known answers;
+  - gradient bound;
+  - exact symmetry and limit cases;
+  - polar-plane invariance;
+  - the invariant-drift structural test.
+- **Informational:** secular rates and their signs, the drift orders, RK4 convergence.
+- **Status:** unit-level validation of an unintegrated component. **Not reviewed, not accepted.**
+- **Unresolved assumptions:**
+  - the operation counts behind γ₁₆/γ₆₄ are by inspection, not mechanically verified;
+  - IEEE 754 correctly rounded basic operations on every platform (checked for `sqrt` and the product of the constant only);
+  - no tolerance exists for the secular-rate comparison;
+  - no external (GMAT) or DOP853 comparison is part of T1 (T4/T5).
+- **Related:** SCI-0013; DR-0024 Q1–Q4; DR-0025 VO-1, Q1–Q3, Q10, Q11; DR-0028; DR-0029 P10; ADR-0004; ADR-0009.
