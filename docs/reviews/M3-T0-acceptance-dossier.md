@@ -158,3 +158,11 @@ Environment: macOS 26.2 (Darwin 25.2.0) x86_64, Python 3.12.15, NumPy 2.5.3, Sci
   - No further review round is started.
   - Merging into `main` needs a separate authorization.
 - **Historical records preserved.** The review records, raw outputs and evidence are unchanged. The dossier sections above are kept as of `095956e`, including its earlier "T0 is NOT accepted" status, which this section supersedes.
+
+## Merge status (I-14) (appended 2026-10-22)
+- **Authorization:** I-14 (Tech Lead), merge of the accepted T0 into `main`.
+- **Result: T0 ACCEPTED AND MERGED.** `main` was fast-forwarded from `86df2c3` to `5fded7c6df50d60564f2bd025aeaf9dab4f541cd` (32 commits; no merge commit; no PR). `5fded7c` is the I-13 acceptance-record commit, so `3c565e6`, `095956e` and the I-13 record are all in `main`'s history.
+- **Post-merge verification:** in a fresh clone of `main`, the 314 T0 checks and the 27 digests (5 pinned + 22 spike) passed; CI on `main` at `5fded7c` (run 39827298093) green on all four jobs.
+- **Baseline re-verified on 2026-10-22** (under "I-15 — M3 Transition: Resolve DR-0029 P10 Before T1"; not the 2026-10-18 T0 spike authorization, also numbered I-15): `origin/main` = `5fded7c6df50d60564f2bd025aeaf9dab4f541cd`; clean tree; `86df2c3`, `3c565e6`, `095956e` and `5fded7c` are ancestors of `origin/main`; Review 10 still reads `VERDICT: PASS (unconditional)`; the "Owner acceptance (I-13)" section is present; `main` has no branch protection (unchanged).
+- **The I-13 section above is not rewritten.** Its "NOT MERGED" status was true when recorded and is superseded only by this section.
+- **Unchanged by the merge:** every item under "Not resolved by acceptance" in the I-13 section (A-FP-2 and E4b, the missing certified J2-plus-drag missed-crossing bound, single-host validation, the unreproduced 5 287-point search, the sampled M3 claim, Q-G2-1/P6 escalated, DR-0029 P1–P10, DR-0028 P6(b)). T1 and T2 are not authorized.

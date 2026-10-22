@@ -1,0 +1,39 @@
+"""Scratch P10 probe (not committed, not reviewed). Usage: python p10_probe.py <m3-t0 dir>"""
+import sys, math
+from decimal import Decimal, getcontext
+sys.path.insert(0, sys.argv[1])
+import numpy as np
+import t0_model as m
+getcontext().prec = 60
+c20 = m.C20_EGM2008_TIDE_FREE; jd = m.J2_APPROVED_DECIMAL; ja = m.J2_FROM_C20
+print("C20 double  ", repr(c20), Decimal(c20))
+print("J2 (a) fl(-sqrt5*C20)", repr(ja))
+print("J2 decimal  ", repr(jd))
+exact = -Decimal(5).sqrt() * Decimal("-0.484165143790815e-3")
+print("exact -sqrt5*C20 (decimal string) ", exact)
+print("rel (ja-jd)/jd", (ja-jd)/jd, " ulps apart", (jd-ja)/math.ulp(ja))
+print("ja vs exact rel", float((Decimal(ja)-exact)/exact), " ulp(ja)/ja", math.ulp(ja)/ja)
+print("decimal J2 rounding of exact to 11 sig digits:", f"{float(exact):.10e}")
+# option (b): C20 = -J2/sqrt5
+c20b = -jd / math.sqrt(5.0)
+print("(b) C20 = -J2/sqrt5 =", repr(c20b), " .14e ->", f"{c20b:.14e}")
+c20b_read = float(f"{c20b:.14e}")
+print("(b) after .cof .14e print/read, -sqrt5*C20 =", repr(-math.sqrt(5)*c20b_read), "== jd?", -math.sqrt(5)*c20b_read == jd)
+print("(b) repr round trip", repr(-math.sqrt(5)*float(repr(c20b))), "== jd?", -math.sqrt(5)*float(repr(c20b)) == jd)
+print("(a) .cof .14e string", f"{c20:.14e}", "== source?", float(f"{c20:.14e}") == c20)
+# trajectory effect, M1 orbit, J2 only, 53 700 s
+r0, v0 = m.circular_state(250000.0, 51.6)
+y0 = np.r_[r0, v0, 850.0]
+out = {}
+for name, j in (("a", ja), ("b", jd)):
+    f = m.rhs(m.Config(j2=j))
+    sol = m.dop853(f, y0, 53700.0, t_eval=np.linspace(0, 53700.0, 896))
+    out[name] = sol.y[:3]
+    # RK4 dt=10
+    y = y0.copy()
+    for k in range(5370):
+        y = m.rk4_step(f, 10.0*k, y, 10.0)
+    out[name+"_rk4"] = y[:3]
+d = np.linalg.norm(out["a"] - out["b"], axis=0)
+print("DOP853 |a-b| final %.3e max %.3e m" % (d[-1], d.max()))
+print("RK4 dt10 |a-b| final %.3e m" % np.linalg.norm(out["a_rk4"] - out["b_rk4"]))
