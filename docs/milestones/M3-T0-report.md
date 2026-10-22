@@ -88,6 +88,10 @@
 **Status update (2026-10-21, append-only):** **Review 10 (Codex, at `3c565e6`): PASS (unconditional), no new findings.**
 - Every tracked finding is RESOLVED, including R9-F1 and R9-F2; no finding is open.
 - No floor, bound or certification changed. Record: `docs/reviews/M3-T0-review-10.md`. Updated acceptance dossier: `docs/reviews/M3-T0-acceptance-dossier.md`. **T0 is not accepted**; it awaits the owner's final decision (I-12 §7). Not merged; T1 and T2 not started.  
+**Status update (2026-10-22, append-only):** **T0 ACCEPTED by the owner, NOT MERGED** ("Authorization I-13 — Accept M3 T0 Reference-Configuration Spike").
+- Accepted at the reviewed checkpoint `3c565e6`, together with the Review 10 record and acceptance-dossier commit `095956e`. Independent Review 10: PASS (unconditional).
+- Acceptance is limited to the validated reference-configuration spike and its documented scientific scope. It resolves none of the limitations or open decisions listed in `docs/reviews/M3-T0-acceptance-dossier.md` ("Owner acceptance (I-13)"), and it strengthens no certification statement.
+- Not merged into `main`; no PR; T1 and T2 not started; DR-0029 P1–P10 and DR-0028 P6(b) undecided; the GMAT geodetic-drag discrepancy remains escalated. Merging needs a separate authorization.  
 **Authority:** "TARS — M3 T0 Reference-Configuration Spike Authorization" (Tech Lead, I-15, 2026-10-18), T0 only.  
 **Branch:** `milestone-3-t0-reference-spike`, created from `main` = `86df2c3ff189db26f42bd273b6fe71de502c51a3`.
 

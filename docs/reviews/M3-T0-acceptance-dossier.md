@@ -117,3 +117,44 @@ Environment: macOS 26.2 (Darwin 25.2.0) x86_64, Python 3.12.15, NumPy 2.5.3, Sci
    - DR-0029 P1–P10 before T2;
    - DR-0028 P6(b);
    - the branch-protection recommendations.
+
+## Owner acceptance (I-13) (appended 2026-10-22)
+- **Authorization:** "Authorization I-13 — Accept M3 T0 Reference-Configuration Spike" (Tech Lead).
+- **Decision: ACCEPTED.** In the Tech Lead's words: "I formally ACCEPT M3 Task T0 at reviewed checkpoint `3c565e6`, including the Review 10 record and acceptance dossier commit `095956ed17a3eb805ea75fdb7a92877cddb028cd`."
+- **Reviewed implementation and evidence checkpoint:** `3c565e62e8257040b48bdd1d0d74fffc370d56d2`.
+- **Acceptance dossier commit:** `095956ed17a3eb805ea75fdb7a92877cddb028cd`.
+- **Independent review:** Review 10 (Codex, session `01a16146-9aef-7ae1-b0a5-05e9ec7dc795`), `VERDICT: PASS (unconditional)`, with no new findings. Every tracked finding is RESOLVED.
+- **Verification** (detailed in the sections above):
+  - T0 checks: 314/314;
+  - mutation harness: 100/100 non-equivalent mutants detected, 2 declared equivalents, 0 survivors;
+  - full pytest: 1 185 passed;
+  - M1 Proof 9/9 and M2 Proof 20/20 (228 PASS), in fresh clones;
+  - reproducibility: all 99 experiment files byte-identical over two runs, including GMAT;
+  - digests: the five pinned and 22 spike digests match;
+  - protected paths unchanged since `86df2c3`;
+  - CI: four jobs green on `cc82ae7`, `3c565e6` and `095956e` (runs 39695797213, 39701788045 and 39711248098). CI does not run the T0 checks.
+- **Preconditions verified before recording:**
+  - branch `milestone-3-t0-reference-spike`, with HEAD = origin = `095956e`;
+  - a clean tree;
+  - `86df2c3` an ancestor;
+  - the Review 10 PASS with all findings resolved;
+  - all four CI jobs green on `095956e` (run 39711248098);
+  - no protected path changed.
+- **Scope of acceptance.** It covers the validated reference-configuration spike and its documented scientific scope only. It covers the stated conditions of every guarantee in "Outstanding limitations" above, and nothing beyond them. **No certification statement is strengthened by this acceptance.**
+- **Not resolved by acceptance:**
+  - A-FP-2 (libm accuracy), and the E4b claim that depends on it;
+  - the absence of a certified combined J2-plus-drag missed-crossing bound;
+  - single-host validation (macOS x86_64 only);
+  - the unreproduced 5 287-point search;
+  - the sampled, non-proof nature of the claim that M3 decides no published value;
+  - the GMAT geodetic-drag discrepancy (DR-0029 Q-G2-1/P6), which stays ESCALATED_FOR_INVESTIGATION;
+  - DR-0029 P1–P10;
+  - DR-0028 P6(b).
+- **Status: T0 ACCEPTED, NOT MERGED.**
+  - No PR has been created.
+  - T1 and T2 are not started.
+  - No DR is decided.
+  - Branch protection is unchanged.
+  - No further review round is started.
+  - Merging into `main` needs a separate authorization.
+- **Historical records preserved.** The review records, raw outputs and evidence are unchanged. The dossier sections above are kept as of `095956e`, including its earlier "T0 is NOT accepted" status, which this section supersedes.
