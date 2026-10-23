@@ -12,6 +12,7 @@ comparisons with first-order secular theory are informational and live in
 """
 
 import math
+import sys
 from fractions import Fraction
 
 import numpy as np
@@ -176,6 +177,95 @@ def test_parameters_are_immutable_after_construction():
     assert model.acceleration(0.0, r, np.zeros(3)).tobytes() == before
 
 
+def test_parameters_are_owned_snapshots_not_caller_references():
+    """M3T1-R2-F2: parameters are converted to built-in floats at construction, so mutating a
+    caller's zero-dimensional array afterwards changes neither the visible parameters nor the
+    acceleration."""
+    reference = j2_model()
+    r = np.array([RE, 0.0, 0.0])
+    expected = reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+    mu, radius, j2 = np.array(MU), np.array(RE), np.array(J2)
+    model = ZonalJ2Gravity(mu, radius, j2)
+    mu[...], radius[...], j2[...] = -1.0, -RE, 0.0
+    assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+    assert (model.mu, model.equatorial_radius, model.j2) == (MU, RE, J2)
+    assert model.acceleration(0.0, r, np.zeros(3)).tobytes() == expected
+
+
+@pytest.mark.parametrize(
+    "convert",
+    [
+        float,
+        np.float64,
+        np.float32,
+        np.float16,
+        np.longdouble,
+        lambda v: np.array(v, dtype=np.float32),
+        lambda v: np.array(v),
+    ],
+)
+def test_supported_numeric_types_are_converted_to_binary64(convert):
+    """M3T1-R2-F2: every supported real type gives the model built from the same values as
+    built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+    values = [convert(v) for v in (MU, RE, J2)]
+    model = ZonalJ2Gravity(*values)
+    reference = ZonalJ2Gravity(*(float(v) for v in values))
+    r = np.array([RE, 2.0e6, 3.0e6])
+    a = model.acceleration(0.0, r, np.zeros(3))
+    assert a.dtype == np.float64
+    assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+    assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+
+
+def test_integer_parameters_are_supported():
+    """M3T1-R2-F2: int and NumPy integer scalars are real numbers and are converted."""
+    a = ZonalJ2Gravity(1, np.int64(1), 0.5).acceleration(0.0, np.array([2.0, 0, 0]), np.zeros(3))
+    b = ZonalJ2Gravity(1.0, 1.0, 0.5).acceleration(0.0, np.array([2.0, 0, 0]), np.zeros(3))
+    assert a.tobytes() == b.tobytes()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "6378137.0",
+        b"1",
+        [RE],
+        (RE,),
+        np.array([RE]),
+        np.array("1.0"),
+        True,
+        np.bool_(True),
+        1 + 0j,
+        np.complex128(1.0),
+        Fraction(1, 3),
+        None,
+    ],
+)
+def test_unsupported_parameter_types_are_rejected(value):
+    """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+    zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+    and other numeric types are rejected even where float() could convert them."""
+    for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+        with pytest.raises(TypeError, match="must be a real number"):
+            ZonalJ2Gravity(*args)
+
+
+def test_unrepresentable_integer_parameter_is_rejected():
+    """M3T1-R2-F2: an int beyond the binary64 range is a value error, not an OverflowError."""
+    with pytest.raises(ValueError, match="not representable as a binary64"):
+        ZonalJ2Gravity(10**400, RE, J2)
+
+
+@pytest.mark.parametrize(
+    ("mu", "radius", "j2"),
+    [(np.array(math.nan), RE, J2), (MU, np.float32(-1.0), J2), (MU, RE, np.array(np.inf))],
+)
+def test_converted_parameters_keep_the_validation_contract(mu, radius, j2):
+    """M3T1-R2-F2: conversion precedes, and does not weaken, the parameter validation."""
+    with pytest.raises(ValueError, match="must be finite"):
+        ZonalJ2Gravity(mu, radius, j2)
+
+
 @pytest.mark.parametrize(
     ("mu", "radius", "j2"),
     [
@@ -253,6 +343,98 @@ def test_result_overflow_raises():
     model = ZonalJ2Gravity(1e300, 1.0, -1.7e8 / 1.5)
     with pytest.raises(ValueError, match="acceleration overflows"):
         model.acceleration(0.0, np.array([0.0, 0.0, 1.1]), np.zeros(3))
+
+
+def exact_acceleration(r, mu: float, radius: float, j2: float) -> list[float]:
+    """Correctly rounded J2 acceleration at the binary64 position r, from exact rationals; |r|
+    is bracketed by an integer square root and both ends must round to the same value."""
+    x, y, z = (Fraction(float(c)) for c in r)
+    r2 = x * x + y * y + z * z
+    scale = 2**1200
+    lo = Fraction(math.isqrt(int(r2 * scale * scale)), scale)
+    k0 = Fraction(-3, 2) * Fraction(j2) * Fraction(mu) * Fraction(radius) ** 2
+    s2 = z * z / r2
+    ends = [
+        [
+            float(k0 / (r2 * r2 * n) * f)
+            for f in (x * (1 - 5 * s2), y * (1 - 5 * s2), z * (3 - 5 * s2))
+        ]
+        for n in (lo, lo + Fraction(1, scale))
+    ]
+    assert ends[0] == ends[1]
+    return ends[0]
+
+
+# Off-axis states where the coefficient k is normal but k (1 - 5 s^2) or k (3 - 5 s^2) is
+# below the normal range and inexact (R = 1, J2 = 1/2). The first is Review 02's
+# reproduction: k = -2^-1022, 1 - 5 s^2 = 2^-53.
+COMPONENT_UNDERFLOW_CASES = [
+    (5.1827254193540115e-108, [1e40, 0.0, 4.9999999999999995e39], 0),
+    (5.1827254193540115e-108, [0.0, 1e40, 4.9999999999999995e39], 1),
+    (1.3 * 2.931792231242491e-107, [1e40, 0.0, 1.224744871391589e40], 2),
+]
+
+
+@pytest.mark.parametrize(("mu", "r", "component"), COMPONENT_UNDERFLOW_CASES)
+def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, component):
+    """M3T1-R2-F1: the exact component is a normal binary64 number, but the product of the
+    coefficient and the latitude factor underflows, which before the correction returned it
+    as zero or as an inaccurate subnormal-scaled value without a diagnostic."""
+    exact = exact_acceleration(r, mu, 1.0, 0.5)[component]
+    assert abs(exact) >= sys.float_info.min
+    with pytest.raises(ValueError, match="numerical domain: a component product underflows"):
+        ZonalJ2Gravity(mu, 1.0, 0.5).acceleration(0.0, np.array(r), np.zeros(3))
+
+
+def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result():
+    """M3T1-R2-F1 (same defect in the coefficient): with J2 = 3 * 2^-1074 the first product
+    -(3/2) J2 rounds inexactly in the subnormal range and the normal-looking coefficient
+    -(3/2) J2 mu R^2 (mu = 2^1000) is 11 % wrong, so construction is rejected."""
+    with pytest.raises(ValueError, match="intermediate product underflows"):
+        ZonalJ2Gravity(2.0**1000, 1.0, 3 * 2.0**-1074)
+
+
+def test_exact_subnormal_intermediates_are_not_underflow():
+    """M3T1-R2-F1: a product below the normal range that is exact is not an underflow and is
+    accepted. Here -(3/2) J2 = -3 * 2^-1074 is exact and the result is the formula."""
+    model = ZonalJ2Gravity(2.0**1000, 1.0, 2 * 2.0**-1074)
+    r = np.array([2.0**10, 0.0, 0.0])
+    a = model.acceleration(0.0, r, np.zeros(3))
+    expected = exact_acceleration(r, 2.0**1000, 1.0, 2 * 2.0**-1074)
+    assert abs(a[0] - expected[0]) <= 2 * gamma(16) * abs(expected[0])
+    assert a[1] == 0.0 and a[2] == 0.0
+
+
+def test_legitimate_zero_components_are_returned():
+    """M3T1-R2-F1: exact zeros are not arithmetic underflow. With the coefficient at the edge
+    of the normal range (Review 02's parameters): at z^2/r^2 = 1/5 the factor 1 - 5 s^2 is
+    exactly 0 (power-of-two coordinates, so the computed factor is exactly 0 too) and the x
+    component is an exact zero although k (1 - 5 s^2) is below the normal range; y = 0 gives
+    an exact zero. The z component is the formula. J2 = 0 gives exact zeros everywhere."""
+    mu = 5.1827254193540115e-106
+    model = ZonalJ2Gravity(mu, 1.0, 0.5)
+    r = np.array([2.0**134, 0.0, 2.0**133])
+    a = model.acceleration(0.0, r, np.zeros(3))
+    expected = exact_acceleration(r, mu, 1.0, 0.5)
+    assert expected[0] == 0.0 and expected[1] == 0.0
+    assert a[0] == 0.0 and a[1] == 0.0
+    assert abs(a[2] - expected[2]) <= 2 * gamma(16) * abs(expected[2])
+    zero = ZonalJ2Gravity(5.1827254193540115e-108, 1.0, 0.0)
+    assert not zero.acceleration(0.0, np.array([1e40, 0.0, 5e39]), np.zeros(3)).any()
+
+
+def test_subnormal_result_components_are_returned():
+    """M3T1-R2-F1: a final component may be subnormal; the coefficient and both factor
+    products are normal, so only the last multiplication rounds into the subnormal range
+    (absolute error at most half the smallest subnormal). mu = R = 1, J2 = 1/2,
+    r = (2^200, 2^-50, 0)."""
+    model = ZonalJ2Gravity(1.0, 1.0, 0.5)
+    r = np.array([2.0**200, 2.0**-50, 0.0])
+    a = model.acceleration(0.0, r, np.zeros(3))
+    expected = exact_acceleration(r, 1.0, 1.0, 0.5)
+    assert 0.0 < abs(expected[1]) < sys.float_info.min
+    assert abs(a[1] - expected[1]) <= 2.0**-1074
+    assert a[0] == expected[0]
 
 
 @pytest.mark.parametrize("x", [1e-50, 1e-20, RE, 1e40, 1e61])
