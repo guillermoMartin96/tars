@@ -436,6 +436,48 @@ def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
         ZonalJ2Gravity(mu, radius, j2)
 
 
+SUBNORMAL_UNIT = Fraction(1, 2**1074)  # the smallest subnormal, 2^-1074, exactly
+
+
+def test_coefficient_product_underflow_in_the_upper_subnormal_band_raises():
+    """M3T1-R3-O1: an inexact product strictly between MIN_NORMAL/2 and MIN_NORMAL (2^51 and
+    2^52 units of 2^-1074) is an underflow, not only one below MIN_NORMAL/2. Construction,
+    in those units: mu = 2^52 + 1 (the normal MIN_NORMAL + 2^-1074) and J2 = 1/2, so
+    -(3/2) J2 = -3/4 exactly and -(3/2) J2 mu is exactly -(3 * 2^50 + 3/4) units, which
+    rounds (not a tie) to -(3 * 2^50 + 1) units. R = 2^10 makes the last two products exact
+    and k normal, so only the underflow check can reject the construction."""
+    mu, radius, j2 = (2**52 + 1) * 2.0**-1074, 2.0**10, 0.5
+    assert Fraction(mu) == (2**52 + 1) * SUBNORMAL_UNIT and mu >= sys.float_info.min
+    p1 = -1.5 * j2
+    p2 = p1 * mu
+    assert Fraction(p1) == Fraction(-3, 4)
+    exact = Fraction(p1) * Fraction(mu)
+    assert exact == -(3 * 2**50 + Fraction(3, 4)) * SUBNORMAL_UNIT
+    assert Fraction(p2) == -(3 * 2**50 + 1) * SUBNORMAL_UNIT != exact  # inexact
+    for q in (exact, Fraction(p2)):
+        assert 2**51 * SUBNORMAL_UNIT < abs(q) < 2**52 * SUBNORMAL_UNIT
+    assert sys.float_info.min / 2 < abs(p2) < sys.float_info.min
+    assert Fraction(p2 * radius) == Fraction(p2) * Fraction(radius)
+    assert abs(p2 * radius * radius) >= sys.float_info.min
+    with pytest.raises(ValueError, match="intermediate product underflows"):
+        ZonalJ2Gravity(mu, radius, j2)
+
+
+def test_exact_product_in_the_upper_subnormal_band_is_not_underflow():
+    """M3T1-R3-O1 companion: with mu = 2^52 units (MIN_NORMAL) the same product is exactly
+    -3 * 2^50 units, in the same band, and is accepted; the result is the formula."""
+    mu, radius, j2 = 2.0**-1022, 2.0**10, 0.5
+    p2 = -1.5 * j2 * mu
+    assert Fraction(p2) == Fraction(-3, 4) * Fraction(mu) == -3 * 2**50 * SUBNORMAL_UNIT
+    assert sys.float_info.min / 2 < abs(p2) < sys.float_info.min
+    r = np.array([1.0, 0.0, 0.0])
+    a = evaluated((mu, radius, j2), r)
+    assert isinstance(a, np.ndarray), a
+    expected = exact_acceleration(r, mu, radius, j2)
+    assert abs(a[0] - expected[0]) <= 2 * gamma(16) * abs(expected[0])
+    assert a[1] == 0.0 and a[2] == 0.0
+
+
 def evaluated(args, r):
     """The acceleration, or the exception construction or evaluation raised, so that a wrongly
     rejected legitimate result fails an assertion rather than erroring."""
