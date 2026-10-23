@@ -118,3 +118,24 @@ Proposed dispositions are the implementer's. None is applied; each awaits the Te
 - *Count correction (appended):*
   - In the Corrections table, the R2-F1 tests are 5 functions with **9** cases, not 8. The R2-F2 tests are 7 functions with 25 cases.
   - "95 T1 cases" counts `tests/test_zonal_j2.py` only. With `tests/test_constants.py`, the basis of Review 01's 73, there are **107 T1 cases**: 26 failed and 81 passed against `b1566ae`.
+
+## Validation of the correction pass (I-20 §6; recorded 2026-10-23 UTC, append-only)
+Run at `c456881d7a9f5968739731b89fdc291860b54a76` on the reference host, in three fresh clones with `uv sync --locked`: M1 Proof, M2 Proof, and the remaining checks, each in its own clone.
+
+| Check | Command | Result |
+|---|---|---|
+| M1 Proof | `bash toolbox/scripts/run_m1_proof.sh` | **PASS**, 9/9 steps, `working_tree_clean_excluding_evidence: yes`. Includes the M1 golden comparison, cross-process determinism and cross-platform validator |
+| M2 Proof | `bash toolbox/scripts/run_m2_proof.sh <scratch evidence dir>` | **PASS**, 20/20 steps, tree clean. `m2_proof` **228/228** (6 missions, threshold status approved). pytest **1288 passed**, 3 warnings (= 1254 + 34 new T1 cases). M1 golden hash `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` |
+| T0 checks | `pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py` | **314 passed** |
+| T1 tests | `pytest -q -p no:cacheprovider tests/test_zonal_j2.py tests/test_constants.py` | **107 passed** |
+| Mutation | `python docs/science/experiments/m3-t1/t1_mutation_check.py OUT` | control passes; **46/46 detected, 46 by assertion, none surviving**. Equal to the committed file except for object memory addresses inside six pytest assertion messages, which vary between runs; every verdict, failing test and summary is identical |
+| Review 02 correction check | `python …/t1_review02_correction_check.py <src at b1566ae> OUT` | **byte-identical** to the committed results: before/after of every Review 02 reproduction; 200 004 states and three RK4 trajectories bit-identical to `b1566ae` |
+| Review 01 correction check | `python …/t1_review01_correction_check.py <src at 97b69ef> OUT` | **byte-identical**. 200 004 states bit-identical to `97b69ef` |
+| Survivors | `python …/t1_review02_survivors.py OUT` | byte-identical: `near_min_normal_zero` killed; `canonical_one_ulp`, `narrow_band` survive |
+| Informational | `python …/t1_j2_informational.py OUT` | byte-identical |
+| Ruff | `ruff check .`, `ruff format --check .` | pass |
+| Tree | `git status --porcelain` | clean (T1 and M2 clones). The M1 clone changes only its evidence log, as the Proof records |
+
+- **Protected paths:** `git diff 60648b9..c456881 -- proof toolbox scenarios .github uv.lock pyproject.toml src/tars/validation` is empty. Since `97b69ef`, `src/` changes are confined to `src/tars/sim/forces.py` (`ZonalJ2Gravity`, its two helpers `_owned_float`/`_underflows`, `_MIN_NORMAL` and imports).
+- **Realistic-orbit bit identity (I-20 §6):** no difference anywhere. No stop was needed.
+- **CI:** the I-20 commits were pushed in three groups: `56ad329`…`a4dfda1` together, then `2f82c00`, then `c456881`. The runs and the run on the commit adding this section are reported at the checkpoint. Review 03 starts only once the final head's run is green on all four jobs.
