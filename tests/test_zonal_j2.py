@@ -198,7 +198,6 @@ def test_parameters_are_owned_snapshots_not_caller_references():
         float,
         np.float64,
         np.float32,
-        np.float16,
         np.longdouble,
         lambda v: np.array(v, dtype=np.float32),
         lambda v: np.array(v),
@@ -215,6 +214,14 @@ def test_supported_numeric_types_are_converted_to_binary64(convert):
     assert a.dtype == np.float64
     assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
     assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+
+
+def test_float16_parameter_is_supported():
+    """M3T1-R2-F2: float16 is a supported floating type (its range cannot hold mu or R)."""
+    r = np.array([RE, 2.0e6, 3.0e6])
+    a = ZonalJ2Gravity(MU, RE, np.float16(J2)).acceleration(0.0, r, np.zeros(3))
+    b = ZonalJ2Gravity(MU, RE, float(np.float16(J2))).acceleration(0.0, r, np.zeros(3))
+    assert a.dtype == np.float64 and a.tobytes() == b.tobytes()
 
 
 def test_integer_parameters_are_supported():
