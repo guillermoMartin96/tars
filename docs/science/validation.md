@@ -1198,3 +1198,4 @@ See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, golde
   4. The mutation classifier accepts a JUnit failure type `Failed` whatever its message, if another runner emitted one. Current kills are established by their messages. Not changed (I-20 §3).
 - **Not claimed:** complete IEEE 754 correctness, or the absence of other underflow or precision paths, from these finite tests and analyses.
 - **Status:** corrections implemented; not reviewed (Review 03 pending); not accepted.
+- *Count correction (appended):* "95 T1 cases" above counts `tests/test_zonal_j2.py` only. On the basis used in the Review 01 correction (both T1 files, `tests/test_zonal_j2.py` and `tests/test_constants.py`), there are now **107 T1 cases** (73 + 9 for R2-F1 + 25 for R2-F2). Against `b1566ae` they give **26 failed, 81 passed**. The `56ad329` message's "93 T1 cases" also counts the first file only.

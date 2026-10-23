@@ -115,3 +115,6 @@ Proposed dispositions are the implementer's. None is applied; each awaits the Te
    - `canonical_one_ulp`: survives;
    - `narrow_band`: survives.
 3. **Limits:** finite sampling and mutation testing do not establish the absence of defects. VAL-0020 correction 2, "Mutation limitations", gives the triggering conditions and why the two survivors do not invalidate the authorized T1 criteria. No survivor is found to violate an explicit required invariant or acceptance gate. Nothing is elevated.
+- *Count correction (appended):*
+  - In the Corrections table, the R2-F1 tests are 5 functions with **9** cases, not 8. The R2-F2 tests are 7 functions with 25 cases.
+  - "95 T1 cases" counts `tests/test_zonal_j2.py` only. With `tests/test_constants.py`, the basis of Review 01's 73, there are **107 T1 cases**: 26 failed and 81 passed against `b1566ae`.
