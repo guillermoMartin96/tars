@@ -7,100 +7,2328 @@
       "file": "tars/sim/forces.py",
       "defect": "acceleration sign reversed",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+          "type": "",
+          "message": "assert np.float64(5.2665382158541664e+225) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(5.2665382158541664e+225) = abs((np.float64(2.6332691079270832e+225) - -2.633"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+          "type": "",
+          "message": "assert np.float64(5.266538215854167e+105) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270836e+105)\n +  where np.float64(5.266538215854167e+105) = abs((np.float64(2.633269107927084e+105) - -2.633269"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+          "type": "",
+          "message": "assert np.float64(0.031823640955933014) <= ((2 * 1.7763568394002536e-15) * 0.015911820477966507)\n +  where np.float64(0.031823640955933014) = abs((np.float64(0.01591182047796651) - -0.0159118204779665"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+          "type": "",
+          "message": "assert np.float64(5.2665382158541663e-135) <= ((2 * 1.7763568394002536e-15) * 2.633269107927083e-135)\n +  where np.float64(5.2665382158541663e-135) = abs((np.float64(2.6332691079270835e-135) - -2.6332"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+          "type": "",
+          "message": "assert np.float64(5.266538215854169e-219) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270838e-219)\n +  where np.float64(5.266538215854169e-219) = abs((np.float64(2.6332691079270847e-219) - -2.63326"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(0.01591182047796651) < 0.0"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.046875) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fraction(1,"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.046875) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fraction(-1"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.03515625) == -0.03515625\n +  where -0.03515625 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fract"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(6.821210263296962e-13) == -6.821210263296962e-13\n +  where -6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(-6.821210263296962e-13) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(5.115907697472721e-13) == -5.115907697472721e-13\n +  where -5.115907697472721e-13 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(4.667261458395856e-61) == -4.667261458395856e-61\n +  where -4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(-4.667261458395856e-61) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(3.500446093796892e-61) == -3.500446093796892e-61\n +  where -3.500446093796892e-61 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(2.9044439361369887e-121) == -2.9044439361369887e-121\n +  where -2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.9044439361369887e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(2.1783329521027415e-121) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(1.1247726104217232e-241) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(16069380442589902755419620923411626025"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.1247726104217232e-241) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(16069380442589902755419620923411626025"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(8.435794578162924e-242) == -8.435794578162924e-242\n +  where -8.435794578162924e-242 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(16069380442589902755419620923411626025222"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(0.031823640955933014) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(0.031823640955933014) = abs((np.float64(0.01591182047796651) - -0.015911820477966507))\n +"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(1.0057842079899819e-05) <= (3.552713678800507e-15 * 5.0289210399499085e-06)\n +  where np.float64(1.0057842079899819e-05) = abs((np.float64(5.02892103994991e-06) - -5.0289210399499085"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(2.4555278515380417e-09) <= (3.552713678800507e-15 * 1.2277639257690206e-09)\n +  where np.float64(2.4555278515380417e-09) = abs((np.float64(1.227763925769021e-09) - -1.227763925769020"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(3.1823640955933016e-14) <= (3.552713678800507e-15 * 1.5911820477966508e-14)\n +  where np.float64(3.1823640955933016e-14) = abs((np.float64(1.5911820477966508e-14) - -1.59118204779665"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-3.8972720e-18, -0.0000000e+00,  3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-3.8972720e-18, -0.0000000e+00,  3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_radial_sign_changes_at_sin2_latitude_one_third",
+          "type": "",
+          "message": "assert 1.0 == -1\n +  where 1.0 = <built-in function copysign>(1.0, 76249.264408622)\n +    where <built-in function copysign> = math.copysign\n +    and   76249.264408622 = float((array([0.01086799, 0. "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0009790591522796281, 4.118598505509173e-09), 5.0: (0.000979092261991427, 4.01647394451269e-12)}\nassert 0.000979092261991427 <= (0.5 * 0.0009790591522796281)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.002163670577214347, 4.158485325181172e-09), 5.0: (0.0021637288275102853, 4.037686865574146e-12)}\nassert 0.0021637288275102853 <= (0.5 * 0.002163670577214347)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.003427262395803078, 4.197253547670373e-09), 5.0: (0.0034272699700569078, 4.0702898444792394e-12)}\nassert 0.0034272699700569078 <= (0.5 * 0.003427262395803078)"
+        }
+      ]
     },
     {
       "id": "magnitude",
       "file": "tars/sim/forces.py",
       "defect": "coefficient 3/2 -> 1.4",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+          "type": "",
+          "message": "assert np.float64(1.7555127386180596e+224) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(1.7555127386180596e+224) = abs((np.float64(-2.4577178340652772e+225) - -2.63"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+          "type": "",
+          "message": "assert np.float64(1.755512738618058e+104) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270836e+105)\n +  where np.float64(1.755512738618058e+104) = abs((np.float64(-2.457717834065278e+105) - -2.63326"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+          "type": "",
+          "message": "assert np.float64(0.001060788031864433) <= ((2 * 1.7763568394002536e-15) * 0.015911820477966507)\n +  where np.float64(0.001060788031864433) = abs((np.float64(-0.014851032446102074) - -0.01591182047796"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+          "type": "",
+          "message": "assert np.float64(1.7555127386180532e-136) <= ((2 * 1.7763568394002536e-15) * 2.633269107927083e-135)\n +  where np.float64(1.7555127386180532e-136) = abs((np.float64(-2.4577178340652775e-135) - -2.633"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+          "type": "",
+          "message": "assert np.float64(1.7555127386180523e-220) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270838e-219)\n +  where np.float64(1.7555127386180523e-220) = abs((np.float64(-2.4577178340652785e-219) - -2.63"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(0.001060788031864433) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(0.001060788031864433) = abs((np.float64(-0.014851032446102074) - -0.015911820477966507))\n"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.04375) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fraction(1,"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.04375) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fraction(-1, "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.032812499999999994) == -0.03515625\n +  where -0.03515625 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(-6.366462912410497e-13) == -6.821210263296962e-13\n +  where -6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(6.366462912410497e-13) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(-4.774847184307872e-13) == -5.115907697472721e-13\n +  where -5.115907697472721e-13 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(-4.356110694502799e-61) == -4.667261458395856e-61\n +  where -4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(4.356110694502799e-61) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Frac"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(-3.267083020877099e-61) == -3.500446093796892e-61\n +  where -3.500446093796892e-61 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.7108143403945226e-121) == -2.9044439361369887e-121\n +  where -2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) *"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(2.7108143403945226e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(-2.0331107552958917e-121) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) *"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.0497877697269416e-241) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(1.0497877697269416e-241) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(160693804425899027554196209234116260252"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(-7.873408272952061e-242) == -8.435794578162924e-242\n +  where -8.435794578162924e-242 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1606938044258990275541962092341162602522"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(0.001060788031864433) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(0.001060788031864433) = abs((np.float64(-0.014851032446102074) - -0.015911820477966507))\n"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(3.352614026633263e-07) <= (3.552713678800507e-15 * 5.0289210399499085e-06)\n +  where np.float64(3.352614026633263e-07) = abs((np.float64(-4.693659637286582e-06) - -5.0289210399499085"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(8.185092838460114e-11) <= (3.552713678800507e-15 * 1.2277639257690206e-09)\n +  where np.float64(8.185092838460114e-11) = abs((np.float64(-1.1459129973844195e-09) - -1.227763925769020"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(1.0607880318644372e-15) <= (3.552713678800507e-15 * 1.5911820477966508e-14)\n +  where np.float64(1.0607880318644372e-15) = abs((np.float64(-1.485103244610207e-14) - -1.59118204779665"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.63745387e-18,  0.00000000e+00, -2.97020649e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-3.63745387e-18, -0.00000000e+00,  2.97020649e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.63745387e-18,  0.00000000e+00, -2.97020649e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (3.258861380444464e-05, 4.1966270146796506e-09), 5.0: (3.259747953805568e-05, 4.0893902642315285e-12)}\nassert 3.259747953805568e-05 <= (0.5 * 3.258861380444464e-05)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (7.216427418047941e-05, 4.159050636195066e-09), 5.0: (7.218803767310176e-05, 4.070680767741404e-12)}\nassert 7.218803767310176e-05 <= (0.5 * 7.216427418047941e-05)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.00011357266907184314, 4.1233893927075e-09), 5.0: (0.00011358276285970441, 4.030025120966788e-12)}\nassert 0.00011358276285970441 <= (0.5 * 0.00011357266907184314)"
+        }
+      ]
     },
     {
       "id": "z_factor",
       "file": "tars/sim/forces.py",
       "defect": "z factor 3 -> 2 (non-conservative)",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(0.015911820477966514) <= (3.552713678800507e-15 * 0.031823640955933014)\n +  where np.float64(0.015911820477966514) = abs((np.float64(0.04773546143389953) - 0.031823640955933014))\n + "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.140625) == 0.09375\n +  where 0.09375 = float(((3 * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0.5)\n +    and   Fraction(2, 1) = Fraction(2.0)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.140625) == -0.09375\n +  where -0.09375 = float(((3 * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-1, 2) = Fraction(-0.5)\n +    and   Fraction(2, 1) = Fraction("
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.10546875) == 0.0703125\n +  where 0.0703125 = float(((3 * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0.375)\n +    and   Fraction(2, 1) = Fractio"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(2.0463630789890885e-12) == 1.3642420526593924e-12\n +  where 1.3642420526593924e-12 = float(((3 * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0."
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.0463630789890885e-12) == -1.3642420526593924e-12\n +  where -1.3642420526593924e-12 = float(((3 * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-1, 2) = Fracti"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(1.5347723092418164e-12) == 1.0231815394945443e-12\n +  where 1.0231815394945443e-12 = float(((3 * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0."
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(1.400178437518757e-60) == 9.334522916791713e-61\n +  where 9.334522916791713e-61 = float(((3 * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(1, 2) = Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.400178437518757e-60) == -9.334522916791713e-61\n +  where -9.334522916791713e-61 = float(((3 * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(-1, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(1.0501338281390677e-60) == 7.000892187593784e-61\n +  where 7.000892187593784e-61 = float(((3 * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(3, 8) = F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(8.713331808410966e-121) == 5.808887872273977e-121\n +  where 5.808887872273977e-121 = float(((3 * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(-8.713331808410966e-121) == -5.808887872273977e-121\n +  where -5.808887872273977e-121 = float(((3 * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    whe"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(6.534998856308225e-121) == 4.356665904205483e-121\n +  where 4.356665904205483e-121 = float(((3 * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(3.3743178312651696e-241) == 2.2495452208434464e-241\n +  where 2.2495452208434464e-241 = float(((3 * Fraction(1, 2)) / (Fraction(160693804425899027554196209234116260252220299378279283"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(-3.3743178312651696e-241) == -2.2495452208434464e-241\n +  where -2.2495452208434464e-241 = float(((3 * Fraction(-1, 2)) / (Fraction(16069380442589902755419620923411626025222029937827"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(2.5307383734488772e-241) == 1.6871589156325848e-241\n +  where 1.6871589156325848e-241 = float(((3 * Fraction(3, 8)) / (Fraction(160693804425899027554196209234116260252220299378279283"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(0.015911820477966514) <= (3.552713678800507e-15 * 0.031823640955933014)\n +  where np.float64(0.015911820477966514) = abs((np.float64(0.04773546143389953) - 0.031823640955933014))\n + "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(5.028921039949914e-06) <= (3.552713678800507e-15 * 1.0057842079899817e-05)\n +  where np.float64(5.028921039949914e-06) = abs((np.float64(1.508676311984973e-05) - 1.0057842079899817e-"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(1.2277639257690219e-09) <= (3.552713678800507e-15 * 2.4555278515380413e-09)\n +  where np.float64(1.2277639257690219e-09) = abs((np.float64(3.683291777307063e-09) - 2.4555278515380413"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(1.591182047796651e-14) <= (3.552713678800507e-15 * 3.1823640955933016e-14)\n +  where np.float64(1.591182047796651e-14) = abs((np.float64(4.773546143389953e-14) - 3.1823640955933016e-"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.89727200e-18,  0.00000000e+00, -4.77354614e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-3.89727200e-18, -0.00000000e+00,  4.77354614e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.89727200e-18,  0.00000000e+00, -4.77354614e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.00026993556436609564, 4.194350678851671e-09), 5.0: (0.00026994361912523266, 4.093167460973721e-12)}\nassert 0.00026994361912523266 <= (0.5 * 0.00026993556436609564)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0007345586934123392, 4.145660920700752e-09), 5.0: (0.000734624866224899, 4.0500014910309396e-12)}\nassert 0.000734624866224899 <= (0.5 * 0.0007345586934123392)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0011857642232798854, 4.099434250730739e-09), 5.0: (0.001185772172669329, 3.995237584108605e-12)}\nassert 0.001185772172669329 <= (0.5 * 0.0011857642232798854)"
+        }
+      ]
     },
     {
       "id": "s2_coeff",
       "file": "tars/sim/forces.py",
       "defect": "latitude coefficient 5 -> 4 in x, y",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 2.9229540e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-2.9229540e-18, -0.0000000e+00,  3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 2.9229540e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (4.018656216853129e-05, 4.2051652858024035e-09), 5.0: (4.0177875012012274e-05, 4.107619344161238e-12)}\nassert 4.0177875012012274e-05 <= (0.5 * 4.018656216853129e-05)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0002340114199450993, 4.170212798590243e-09), 5.0: (0.00023404185630769033, 4.0720748762836826e-12)}\nassert 0.00023404185630769033 <= (0.5 * 0.0002340114199450993)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0006811587003980268, 4.131792581291719e-09), 5.0: (0.0006811732273841538, 4.039795237701427e-12)}\nassert 0.0006811732273841538 <= (0.5 * 0.0006811587003980268)"
+        }
+      ]
     },
     {
       "id": "xy_asym",
       "file": "tars/sim/forces.py",
       "defect": "x/y asymmetry 1e-9 (not axisymmetric)",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 2.76159318e-10,  2.76159318e-10, -6.37813700e+06]), array([ 2.75578746e-18,  2.75578746e-18, -3.18236410e-02]), array([ 2.75578746e-18,  2.75578746e-18, -3.18236410e-02]))\nass"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 2.76159318e-10,  2.76159318e-10, -6.37813700e+06]), array([-2.75578746e-18, -2.75578746e-18,  3.18236410e-02]), array([-2.75578746e-18, -2.75578746e-18,  3.18236410e-02]))\nass"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.11905703e-10,  2.35037806e-10, -6.37813700e+06]), array([ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02]), array([ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02]))\nass"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_axisymmetry_is_exact",
+          "type": "",
+          "message": "AssertionError: assert b'\\x00\\x00\\x0...oJ20K\\xa0\\xbf' == b'\\x00\\x00\\x0...oJ20K\\xa0\\xbf'\n  \n  At index 8 diff: b'\\x87' != b'\\x02'\n  Use -v to get more diff"
+        }
+      ]
     },
     {
       "id": "z_scale_1e9",
       "file": "tars/sim/forces.py",
       "defect": "z component scaled by 1e-9",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(3.182364788356651e-11) <= (3.552713678800507e-15 * 0.031823640955933014)\n +  where np.float64(3.182364788356651e-11) = abs((np.float64(0.03182364098775666) - 0.031823640955933014))\n "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.09375000009375001) == 0.09375\n +  where 0.09375 = float(((3 * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0.5)\n +    and   Fraction(2, 1) = Frac"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.09375000009375001) == -0.09375\n +  where -0.09375 = float(((3 * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-1, 2) = Fraction(-0.5)\n +    and   Fraction(2, 1) "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.0703125000703125) == 0.0703125\n +  where 0.0703125 = float(((3 * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0.375)\n +    and   Fraction(2, 1) ="
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(1.3642420540236345e-12) == 1.3642420526593924e-12\n +  where 1.3642420526593924e-12 = float(((3 * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0."
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.3642420540236345e-12) == -1.3642420526593924e-12\n +  where -1.3642420526593924e-12 = float(((3 * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-1, 2) = Fracti"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(1.0231815405177259e-12) == 1.0231815394945443e-12\n +  where 1.0231815394945443e-12 = float(((3 * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0."
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(9.334522926126236e-61) == 9.334522916791713e-61\n +  where 9.334522916791713e-61 = float(((3 * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(1, 2) = Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(-9.334522926126236e-61) == -9.334522916791713e-61\n +  where -9.334522916791713e-61 = float(((3 * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(-1, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(7.000892194594677e-61) == 7.000892187593784e-61\n +  where 7.000892187593784e-61 = float(((3 * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(3, 8) = Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(5.808887878082866e-121) == 5.808887872273977e-121\n +  where 5.808887872273977e-121 = float(((3 * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(-5.808887878082866e-121) == -5.808887872273977e-121\n +  where -5.808887872273977e-121 = float(((3 * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    whe"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(4.356665908562149e-121) == 4.356665904205483e-121\n +  where 4.356665904205483e-121 = float(((3 * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(2.249545223092992e-241) == 2.2495452208434464e-241\n +  where 2.2495452208434464e-241 = float(((3 * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602522202993782792835"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.249545223092992e-241) == -2.2495452208434464e-241\n +  where -2.2495452208434464e-241 = float(((3 * Fraction(-1, 2)) / (Fraction(160693804425899027554196209234116260252220299378279"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(1.687158917319744e-241) == 1.6871589156325848e-241\n +  where 1.6871589156325848e-241 = float(((3 * Fraction(3, 8)) / (Fraction(1606938044258990275541962092341162602522202993782792835"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(3.182364788356651e-11) <= (3.552713678800507e-15 * 0.031823640955933014)\n +  where np.float64(3.182364788356651e-11) = abs((np.float64(0.03182364098775666) - 0.031823640955933014))\n "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(1.0057847092616486e-14) <= (3.552713678800507e-15 * 1.0057842079899817e-05)\n +  where np.float64(1.0057847092616486e-14) = abs((np.float64(1.0057842089957664e-05) - 1.005784207989981"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(2.4555290753458217e-18) <= (3.552713678800507e-15 * 2.4555278515380413e-09)\n +  where np.float64(2.4555290753458217e-18) = abs((np.float64(2.4555278539935703e-09) - 2.455527851538041"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(3.1823646036799816e-23) <= (3.552713678800507e-15 * 3.1823640955933016e-14)\n +  where np.float64(3.1823646036799816e-23) = abs((np.float64(3.182364098775666e-14) - 3.1823640955933016"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-3.8972720e-18, -0.0000000e+00,  3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        }
+      ]
     },
     {
       "id": "power",
       "file": "tars/sim/forces.py",
       "defect": "radial dependence perturbed",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+          "type": "",
+          "message": "assert np.float64(2.6332664743791544e+219) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(2.6332664743791544e+219) = abs((np.float64(-2.6332664746606088e+225) - -2.63"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+          "type": "",
+          "message": "assert np.float64(2.6332664745294286e+99) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270836e+105)\n +  where np.float64(2.6332664745294286e+99) = abs((np.float64(-2.633266474660609e+105) - -2.63326"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+          "type": "",
+          "message": "assert np.float64(1.591180456145258e-08) <= ((2 * 1.7763568394002536e-15) * 0.015911820477966507)\n +  where np.float64(1.591180456145258e-08) = abs((np.float64(-0.015911804566161945) - -0.015911820477"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+          "type": "",
+          "message": "assert np.float64(2.633266473975747e-141) <= ((2 * 1.7763568394002536e-15) * 2.633269107927083e-135)\n +  where np.float64(2.633266473975747e-141) = abs((np.float64(-2.633266474660609e-135) - -2.633269"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+          "type": "",
+          "message": "assert np.float64(2.6332664740254703e-225) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270838e-219)\n +  where np.float64(2.6332664740254703e-225) = abs((np.float64(-2.6332664746606097e-219) - -2.63"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(1.591180456145258e-08) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(1.591180456145258e-08) = abs((np.float64(-0.015911804566161945) - -0.015911820477966507)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.04687495312504688) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.04687495312504688) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.03515621484378516) == -0.03515625\n +  where -0.03515625 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    a"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(-6.82120344209352e-13) == -6.821210263296962e-13\n +  where -6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(6.82120344209352e-13) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) ="
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(-5.11590258157014e-13) == -5.115907697472721e-13\n +  where -5.115907697472721e-13 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(-4.6672567911390656e-61) == -4.667261458395856e-61\n +  where -4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(4.6672567911390656e-61) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(-3.500442593354299e-61) == -3.500446093796892e-61\n +  where -3.500446093796892e-61 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.9044410316959573e-121) == -2.9044439361369887e-121\n +  where -2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) *"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(2.9044410316959573e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(-2.178330773771968e-121) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.1247714856502377e-241) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(1.1247714856502377e-241) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(160693804425899027554196209234116260252"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(-8.435786142376782e-242) == -8.435794578162924e-242\n +  where -8.435794578162924e-242 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1606938044258990275541962092341162602522"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(1.591180456145258e-08) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(1.591180456145258e-08) = abs((np.float64(-0.015911804566161945) - -0.015911820477966507)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(5.028916009409078e-12) <= (3.552713678800507e-15 * 5.0289210399499085e-06)\n +  where np.float64(5.028916009409078e-12) = abs((np.float64(-5.028916011033899e-06) - -5.0289210399499085"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(1.2277626976096382e-15) <= (3.552713678800507e-15 * 1.2277639257690206e-09)\n +  where np.float64(1.2277626976096382e-15) = abs((np.float64(-1.227762698006323e-09) - -1.22776392576902"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(1.5911804565365613e-20) <= (3.552713678800507e-15 * 1.5911820477966508e-14)\n +  where np.float64(1.5911804565365613e-20) = abs((np.float64(-1.5911804566161943e-14) - -1.5911820477966"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.89726811e-18,  0.00000000e+00, -3.18236091e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-3.89726811e-18, -0.00000000e+00,  3.18236091e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.89726811e-18,  0.00000000e+00, -3.18236091e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        }
+      ]
     },
     {
       "id": "axis",
       "file": "tars/sim/forces.py",
       "defect": "symmetry axis +Y instead of +Z",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(-0.0) > 0.0"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 0.09375\n +  where 0.09375 = float(((3 * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0.5)\n +    and   Fraction(2, 1) = Fraction(2.0)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -0.09375\n +  where -0.09375 = float(((3 * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-1, 2) = Fraction(-0.5)\n +    and   Fraction(2, 1) = Fraction(2.0)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 0.0703125\n +  where 0.0703125 = float(((3 * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0.375)\n +    and   Fraction(2, 1) = Fraction(2.0)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 1.3642420526593924e-12\n +  where 1.3642420526593924e-12 = float(((3 * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0.5)\n +    and   Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -1.3642420526593924e-12\n +  where -1.3642420526593924e-12 = float(((3 * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-1, 2) = Fraction(-0.5)\n +    and  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 1.0231815394945443e-12\n +  where 1.0231815394945443e-12 = float(((3 * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0.375)\n +    and   F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 9.334522916791713e-61\n +  where 9.334522916791713e-61 = float(((3 * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(1, 2) = Fraction(0.5)\n +   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -9.334522916791713e-61\n +  where -9.334522916791713e-61 = float(((3 * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(-1, 2) = Fraction(-0.5)\n "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 7.000892187593784e-61\n +  where 7.000892187593784e-61 = float(((3 * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(3, 8) = Fraction(0.375)\n + "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 5.808887872273977e-121\n +  where 5.808887872273977e-121 = float(((3 * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where Fraction(1, 2) = Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -5.808887872273977e-121\n +  where -5.808887872273977e-121 = float(((3 * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where Fraction(-1, 2) ="
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 4.356665904205483e-121\n +  where 4.356665904205483e-121 = float(((3 * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where Fraction(3, 8) = Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 2.2495452208434464e-241\n +  where 2.2495452208434464e-241 = float(((3 * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602522202993782792835301376, 1) ** 4)))"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -2.2495452208434464e-241\n +  where -2.2495452208434464e-241 = float(((3 * Fraction(-1, 2)) / (Fraction(1606938044258990275541962092341162602522202993782792835301376, 1) ** 4)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == 1.6871589156325848e-241\n +  where 1.6871589156325848e-241 = float(((3 * Fraction(3, 8)) / (Fraction(1606938044258990275541962092341162602522202993782792835301376, 1) ** 4)))"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(0.031823640955933014) <= (3.552713678800507e-15 * 0.031823640955933014)\n +  where np.float64(0.031823640955933014) = abs((np.float64(-0.0) - 0.031823640955933014))\n +  and   0.031823"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(1.0057842079899817e-05) <= (3.552713678800507e-15 * 1.0057842079899817e-05)\n +  where np.float64(1.0057842079899817e-05) = abs((np.float64(-0.0) - 1.0057842079899817e-05))\n +  and   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(2.4555278515380413e-09) <= (3.552713678800507e-15 * 2.4555278515380413e-09)\n +  where np.float64(2.4555278515380413e-09) = abs((np.float64(-0.0) - 2.4555278515380413e-09))\n +  and   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(3.1823640955933016e-14) <= (3.552713678800507e-15 * 3.1823640955933016e-14)\n +  where np.float64(3.1823640955933016e-14) = abs((np.float64(-0.0) - 3.1823640955933016e-14))\n +  and   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-9.74318001e-19,  1.59118205e-02, -0.00000000e+00]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 9.74318001e-19, -1.59118205e-02,  0.00000000e+00]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-9.74318001e-19,  1.59118205e-02, -0.00000000e+00]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_axisymmetry_is_exact",
+          "type": "",
+          "message": "AssertionError: assert b'\\x00\\x00\\x0...\\xa1\\xf5J\\xbc' == b'\\roJ20K\\x90...0\\x00\\x00\\x80'\n  \n  At index 0 diff: b'\\x00' != b'\\r'\n  Use -v to get more diff"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_radial_sign_changes_at_sin2_latitude_one_third",
+          "type": "",
+          "message": "assert -1.0 == 1\n +  where -1.0 = <built-in function copysign>(1.0, -31504.359297810417)\n +    where <built-in function copysign> = math.copysign\n +    and   -31504.359297810417 = float((array([-0.006"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_polar_orbit_plane_is_exactly_invariant",
+          "type": "",
+          "message": "assert (np.False_)\n +  where np.False_ = <function all at 0x1108819b0>(array([ 0.00000000e+00, -2.66047890e-03, -2.12827489e-02, ...,\\n        3.10112986e+05,  3.09674854e+05,  3.09193553e+05], shape="
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.017149105736595116, 0.006227811573411555), 5.0: (0.01714909601613678, 0.006227817827343462)}\nassert 0.01714909601613678 <= (0.5 * 0.017149105736595116)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0632571539372842, 0.006610853231276795), 5.0: (0.06325295663254221, 0.006610858494630317)}\nassert 0.06325295663254221 <= (0.5 * 0.0632571539372842)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.04953740763331489, 0.06200569944002394), 5.0: (0.04952055147605719, 0.06199047732217962)}\nassert 0.04952055147605719 <= (0.5 * 0.04953740763331489)"
+        }
+      ]
     },
     {
       "id": "j2_zero_offset",
       "file": "tars/sim/forces.py",
       "defect": "J2 = 0 not exactly zero",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert (np.float64(1e-300) == 0.0)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.0) == np.float64(1e-300)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_axisymmetry_is_exact",
+          "type": "",
+          "message": "AssertionError: assert b'Y\\xf3\\xf8\\x...oJ20K\\xa0\\xbf' == b'\\x00\\x00\\x0...oJ20K\\xa0\\xbf'\n  \n  At index 0 diff: b'Y' != b'\\x00'\n  Use -v to get more diff"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged",
+          "type": "",
+          "message": "assert np.False_\n +  where np.False_ = <function all at 0x11038ddb0>(array([ 1.e-300,  0.e+000, -0.e+000]) == 0.0)\n +    where <function all at 0x11038ddb0> = np.all"
+        }
+      ]
     },
     {
       "id": "sqrt5_decimal",
       "file": "tars/sim/constants.py",
       "defect": "sqrt(5) replaced by a decimal",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+          "type": "",
+          "message": "assert False\n +  where False = _is_nearest(0.0010826261738523244, (-Fraction(629397181890197, 281474976710656) * Fraction(-4465635248459975, 9223372036854775808)))\n +    where Fraction(629397181890197"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+          "type": "",
+          "message": "AssertionError: assert '0.0010826261738523244' == '0.0010826261738522227'\n  \n  - 0.0010826261738522227\n  ?                   ^^^\n  + 0.0010826261738523244\n  ?                  + ^^"
+        }
+      ]
     },
     {
       "id": "sqrt5_ulp",
       "file": "tars/sim/constants.py",
       "defect": "sqrt(5) one ulp high",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+          "type": "",
+          "message": "assert False\n +  where False = _is_nearest(0.001082626173852223, (-Fraction(629397181890197, 281474976710656) * Fraction(-4465635248459975, 9223372036854775808)))\n +    where Fraction(629397181890197,"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+          "type": "",
+          "message": "AssertionError: assert '0.001082626173852223' == '0.0010826261738522227'\n  \n  - 0.0010826261738522227\n  ?                    ^^\n  + 0.001082626173852223\n  ?                    ^"
+        }
+      ]
     },
     {
       "id": "j2_sign",
       "file": "tars/sim/constants.py",
       "defect": "J2 sign reversed",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(0.01591182047796651) < 0.0"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_radial_sign_changes_at_sin2_latitude_one_third",
+          "type": "",
+          "message": "assert 1.0 == -1\n +  where 1.0 = <built-in function copysign>(1.0, 76249.264408622)\n +    where <built-in function copysign> = math.copysign\n +    and   76249.264408622 = float((array([0.01086799, 0. "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+          "type": "",
+          "message": "assert False\n +  where False = _is_nearest(-0.0010826261738522227, (-Fraction(629397181890197, 281474976710656) * Fraction(-4465635248459975, 9223372036854775808)))\n +    where Fraction(62939718189019"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+          "type": "",
+          "message": "AssertionError: assert '-0.0010826261738522227' == '0.0010826261738522227'\n  \n  - 0.0010826261738522227\n  + -0.0010826261738522227\n  ? +"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_q1_decimal_is_the_11_digit_display_form_of_derived_j2",
+          "type": "",
+          "message": "AssertionError: assert '-1.0826261739e-03' == '1.0826261739e-03'\n  \n  - 1.0826261739e-03\n  + -1.0826261739e-03\n  ? +"
+        }
+      ]
     },
     {
       "id": "c20_digit",
       "file": "tars/sim/constants.py",
       "defect": "C20 last digit changed",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_c20_is_the_published_nga_value",
+          "type": "",
+          "message": "AssertionError: assert -0.000484165143790815 == -0.000484165143790816\n +  where -0.000484165143790815 = float('-0.484165143790815e-3')"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+          "type": "",
+          "message": "AssertionError: assert '0.0010826261738522249' == '0.0010826261738522227'\n  \n  - 0.0010826261738522227\n  ?                    ^^\n  + 0.0010826261738522249\n  ?                    ^^"
+        }
+      ]
     },
     {
       "id": "decimal_j2",
       "file": "tars/sim/constants.py",
       "defect": "decimal J2 used as the canonical value",
       "pytest_exit": 1,
-      "detected": true
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+          "type": "",
+          "message": "assert False\n +  where False = _is_nearest(0.0010826261739, (-Fraction(629397181890197, 281474976710656) * Fraction(-4465635248459975, 9223372036854775808)))\n +    where Fraction(629397181890197, 2814"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+          "type": "",
+          "message": "AssertionError: assert '0.0010826261739' == '0.0010826261738522227'\n  \n  - 0.0010826261738522227\n  ?               ^^^^^^^\n  + 0.0010826261739\n  ?               ^"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_constants::test_q1_decimal_is_the_11_digit_display_form_of_derived_j2",
+          "type": "",
+          "message": "assert 0.0010826261739 != 0.0010826261739"
+        }
+      ]
+    },
+    {
+      "id": "r1_negative_j2_abs",
+      "file": "tars/sim/forces.py",
+      "defect": "sign of J2 ignored (survived Review 01)",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.046875) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fraction(-1"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(-6.821210263296962e-13) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(-4.667261458395856e-61) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.9044439361369887e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.1247726104217232e-241) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(16069380442589902755419620923411626025"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np"
+        }
+      ]
+    },
+    {
+      "id": "r1_small_coefficient_error",
+      "file": "tars/sim/forces.py",
+      "defect": "coefficient 4 ulp high (survived Review 01)",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.04687500000000002) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.04687500000000002) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.035156250000000014) == -0.03515625\n +  where -0.03515625 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(-6.821210263296965e-13) == -6.821210263296962e-13\n +  where -6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(6.821210263296965e-13) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(-5.115907697472723e-13) == -5.115907697472721e-13\n +  where -5.115907697472721e-13 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(-4.6672614583958584e-61) == -4.667261458395856e-61\n +  where -4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(4.6672614583958584e-61) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(-3.5004460937968936e-61) == -3.500446093796892e-61\n +  where -3.500446093796892e-61 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.90444393613699e-121) == -2.9044439361369887e-121\n +  where -2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(2.90444393613699e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(-2.1783329521027424e-121) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) *"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.1247726104217237e-241) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(1.1247726104217237e-241) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(160693804425899027554196209234116260252"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(-8.435794578162927e-242) == -8.435794578162924e-242\n +  where -8.435794578162924e-242 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1606938044258990275541962092341162602522"
+        }
+      ]
+    },
+    {
+      "id": "r1_far_field_zero",
+      "file": "tars/sim/forces.py",
+      "defect": "zero beyond 7 R (survived Review 01)",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+          "type": "",
+          "message": "assert np.float64(2.633269107927083e-135) <= ((2 * 1.7763568394002536e-15) * 2.633269107927083e-135)\n +  where np.float64(2.633269107927083e-135) = abs((np.float64(0.0) - -2.633269107927083e-135))\n + "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+          "type": "",
+          "message": "assert np.float64(2.6332691079270838e-219) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270838e-219)\n +  where np.float64(2.6332691079270838e-219) = abs((np.float64(0.0) - -2.6332691079270838e-219))"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -6.821210263296962e-13\n +  where -6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -5.115907697472721e-13\n +  where -5.115907697472721e-13 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -4.667261458395856e-61\n +  where -4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(-3, 2) = Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(-3, 2) = Frac"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -3.500446093796892e-61\n +  where -3.500446093796892e-61 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fraction(-3, 2) = Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -2.9044439361369887e-121\n +  where -2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) ** 4)))\n +    where Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602522202993782792835301"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.0) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(16069380442589902755419620923411626025222029937827928353013"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(0.0) == -8.435794578162924e-242\n +  where -8.435794578162924e-242 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(160693804425899027554196209234116260252220299378279283530137"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(5.0289210399499085e-06) <= (3.552713678800507e-15 * 5.0289210399499085e-06)\n +  where np.float64(5.0289210399499085e-06) = abs((np.float64(0.0) - -5.0289210399499085e-06))\n +  and   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(1.2277639257690206e-09) <= (3.552713678800507e-15 * 1.2277639257690206e-09)\n +  where np.float64(1.2277639257690206e-09) = abs((np.float64(0.0) - -1.2277639257690206e-09))\n +  and   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(1.5911820477966508e-14) <= (3.552713678800507e-15 * 1.5911820477966508e-14)\n +  where np.float64(1.5911820477966508e-14) = abs((np.float64(0.0) - -1.5911820477966508e-14))\n +  and   "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 2.92911190e-09,  0.00000000e+00, -4.78360275e+07]), array([0., 0., 0.]), array([ 1.23173041e-21,  0.00000000e+00, -1.00578421e-05]))\nassert np.False_\n +  where np.False_ = <fu"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 2.92911190e-09,  0.00000000e+00, -4.78360275e+07]), array([0., 0., 0.]), array([-1.23173041e-21,  0.00000000e+00,  1.00578421e-05]))\nassert np.False_\n +  where np.False_ = <fu"
+        }
+      ]
+    },
+    {
+      "id": "r1_high_lat_band",
+      "file": "tars/sim/forces.py",
+      "defect": "1 % x/y error for 0.99 < sin^2 lat < 0.9999 (survived Review 01)",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([  111313.83923668,        0.        , -6377165.5788417 ]), array([ 0.00112148,  0.        , -0.03179457]), array([ 0.00111038,  0.        , -0.03179457]))\nassert np.False_\n +  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([  111313.83923668,        0.        , -6377165.5788417 ]), array([-0.00112148, -0.        ,  0.03179457]), array([-0.00111038,  0.        ,  0.03179457]))\nassert np.False_\n +  "
+        }
+      ]
+    },
+    {
+      "id": "r1_off_axis_band",
+      "file": "tars/sim/forces.py",
+      "defect": "1 % x/y error for 0.36 < sin^2 lat < 0.37",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 5093806.69614651,        0.        , -3838458.66632194]), array([0.01040784, 0.        , 0.01138673]), array([0.01030479, 0.        , 0.01138673]))\nassert np.False_\n +  where "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 5093806.69614651,        0.        , -3838458.66632194]), array([-0.01040784, -0.        , -0.01138673]), array([-0.01030479,  0.        , -0.01138673]))\nassert np.False_\n +  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (2.0327905160469317e-07, 4.120865445884385e-09), 5.0: (1.5676250879068382e-07, 4.010188823354037e-12)}\nassert 1.5676250879068382e-07 <= (0.5 * 2.0327905160469317e-07)"
+        }
+      ]
+    },
+    {
+      "id": "r1_unnormalized",
+      "file": "tars/sim/forces.py",
+      "defect": "unnormalized C20 scaling used as J2",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+          "type": "",
+          "message": "assert np.float64(1.455635362252046e+225) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(1.455635362252046e+225) = abs((np.float64(-1.1776337456750373e+225) - -2.6332"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+          "type": "",
+          "message": "assert np.float64(1.4556353622520462e+105) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270836e+105)\n +  where np.float64(1.4556353622520462e+105) = abs((np.float64(-1.1776337456750375e+105) - -2.63"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+          "type": "",
+          "message": "assert np.float64(0.008795838031065248) <= ((2 * 1.7763568394002536e-15) * 0.015911820477966507)\n +  where np.float64(0.008795838031065248) = abs((np.float64(-0.007115982446901259) - -0.01591182047796"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+          "type": "",
+          "message": "assert np.float64(1.4556353622520455e-135) <= ((2 * 1.7763568394002536e-15) * 2.633269107927083e-135)\n +  where np.float64(1.4556353622520455e-135) = abs((np.float64(-1.1776337456750373e-135) - -2.633"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+          "type": "",
+          "message": "assert np.float64(1.455635362252046e-219) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270838e-219)\n +  where np.float64(1.455635362252046e-219) = abs((np.float64(-1.1776337456750378e-219) - -2.6332"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(0.008795838031065248) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(0.008795838031065248) = abs((np.float64(-0.007115982446901259) - -0.015911820477966507))\n"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+          "type": "",
+          "message": "assert np.float64(-0.02096313728906053) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+          "type": "",
+          "message": "assert np.float64(0.02096313728906053) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+          "type": "",
+          "message": "assert np.float64(-0.015722352966795396) == -0.03515625\n +  where -0.03515625 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+          "type": "",
+          "message": "assert np.float64(-3.050537967510249e-13) == -6.821210263296962e-13\n +  where -6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+          "type": "",
+          "message": "assert np.float64(3.050537967510249e-13) == 6.821210263296962e-13\n +  where 6.821210263296962e-13 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, 2) "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+          "type": "",
+          "message": "assert np.float64(-2.2879034756326867e-13) == -5.115907697472721e-13\n +  where -5.115907697472721e-13 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1024, 1) ** 4)))\n +    where Fraction(-3, "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+          "type": "",
+          "message": "assert np.float64(-2.0872627779475883e-61) == -4.667261458395856e-61\n +  where -4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where F"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+          "type": "",
+          "message": "assert np.float64(2.0872627779475883e-61) == 4.667261458395856e-61\n +  where 4.667261458395856e-61 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fra"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+          "type": "",
+          "message": "assert np.float64(-1.565447083460691e-61) == -3.500446093796892e-61\n +  where -3.500446093796892e-61 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1125899906842624, 1) ** 4)))\n +    where Fr"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+          "type": "",
+          "message": "assert np.float64(-1.298906815607873e-121) == -2.9044439361369887e-121\n +  where -2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+          "type": "",
+          "message": "assert np.float64(1.298906815607873e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) ** 4"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+          "type": "",
+          "message": "assert np.float64(-9.741801117059047e-122) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) **"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+          "type": "",
+          "message": "assert np.float64(-5.030136032265723e-242) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(16069380442589902755419620923411626025"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+          "type": "",
+          "message": "assert np.float64(5.030136032265723e-242) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1606938044258990275541962092341162602522"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+          "type": "",
+          "message": "assert np.float64(-3.772602024199292e-242) == -8.435794578162924e-242\n +  where -8.435794578162924e-242 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1606938044258990275541962092341162602522"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(0.008795838031065248) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(0.008795838031065248) = abs((np.float64(-0.007115982446901259) - -0.015911820477966507))\n"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(2.7799191801885224e-06) <= (3.552713678800507e-15 * 5.0289210399499085e-06)\n +  where np.float64(2.7799191801885224e-06) = abs((np.float64(-2.249001859761386e-06) - -5.02892103994990"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(6.786912061007135e-10) <= (3.552713678800507e-15 * 1.2277639257690206e-09)\n +  where np.float64(6.786912061007135e-10) = abs((np.float64(-5.490727196683072e-10) - -1.2277639257690206"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(8.795838031065249e-15) <= (3.552713678800507e-15 * 1.5911820477966508e-14)\n +  where np.float64(8.795838031065249e-15) = abs((np.float64(-7.11598244690126e-15) - -1.5911820477966508e"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.74291303e-18,  0.00000000e+00, -1.42319649e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-1.74291303e-18, -0.00000000e+00,  1.42319649e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.74291303e-18,  0.00000000e+00, -1.42319649e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.00026996158562892923, 4.176852404378604e-09), 5.0: (0.00026998223665038645, 4.0795367075127665e-12)}\nassert 0.00026998223665038645 <= (0.5 * 0.00026996158562892923)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0005979495256019484, 4.1588843887514e-09), 5.0: (0.0005980036974783238, 4.064871982148577e-12)}\nassert 0.0005980036974783238 <= (0.5 * 0.0005979495256019484)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.000942117316840664, 4.141745517634953e-09), 5.0: (0.0009421971825609014, 4.034762147262371e-12)}\nassert 0.0009421971825609014 <= (0.5 * 0.000942117316840664)"
+        }
+      ]
+    },
+    {
+      "id": "r1_mu_radius_swap",
+      "file": "tars/sim/forces.py",
+      "defect": "mu and R swapped in the coefficient",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_result_overflow_raises",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'acceleration overflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+          "type": "",
+          "message": "assert np.float64(1.645656424442868e+233) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(1.645656424442868e+233) = abs((np.float64(-1.645656450775559e+233) - -2.63326"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+          "type": "",
+          "message": "assert np.float64(1.6456564244428683e+113) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270836e+105)\n +  where np.float64(1.6456564244428683e+113) = abs((np.float64(-1.6456564507755595e+113) - -2.63"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+          "type": "",
+          "message": "assert np.float64(994406.1362858727) <= ((2 * 1.7763568394002536e-15) * 0.015911820477966507)\n +  where np.float64(994406.1362858727) = abs((np.float64(-994406.1521976931) - -0.015911820477966507))\n +"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+          "type": "",
+          "message": "assert np.float64(1.6456564244428683e-127) <= ((2 * 1.7763568394002536e-15) * 2.633269107927083e-135)\n +  where np.float64(1.6456564244428683e-127) = abs((np.float64(-1.6456564507755594e-127) - -2.633"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+          "type": "",
+          "message": "assert np.float64(1.645656424442869e-211) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270838e-219)\n +  where np.float64(1.645656424442869e-211) = abs((np.float64(-1.6456564507755602e-211) - -2.6332"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+          "type": "",
+          "message": "assert np.float64(994406.1362858727) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(994406.1362858727) = abs((np.float64(-994406.1521976931) - -0.015911820477966507))\n +  and  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+          "type": "",
+          "message": "assert np.float64(994406.1362858727) <= (3.552713678800507e-15 * 0.015911820477966507)\n +  where np.float64(994406.1362858727) = abs((np.float64(-994406.1521976931) - -0.015911820477966507))\n +  and  "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+          "type": "",
+          "message": "assert np.float64(314.28144554220177) <= (3.552713678800507e-15 * 5.0289210399499085e-06)\n +  where np.float64(314.28144554220177) = abs((np.float64(-314.28145057112283) - -5.0289210399499085e-06))\n +"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+          "type": "",
+          "message": "assert np.float64(0.0767288685405766) <= (3.552713678800507e-15 * 1.2277639257690206e-09)\n +  where np.float64(0.0767288685405766) = abs((np.float64(-0.07672886976834054) - -1.2277639257690206e-09))\n "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+          "type": "",
+          "message": "assert np.float64(9.944061362858725e-07) <= (3.552713678800507e-15 * 1.5911820477966508e-14)\n +  where np.float64(9.944061362858725e-07) = abs((np.float64(-9.94406152197693e-07) - -1.5911820477966508e"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 2.43559262e-10,  0.00000000e+00, -1.98881230e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-2.43559262e-10, -0.00000000e+00,  1.98881230e+06]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 2.43559262e-10,  0.00000000e+00, -1.98881230e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (984375.6849328314, 2.7927737492724525), 5.0: (5636774123.754567, 191596.4470946518)}\nassert 5636774123.754567 <= (0.5 * 984375.6849328314)"
+        }
+      ]
+    },
+    {
+      "id": "r1_p2_wrong",
+      "file": "tars/sim/forces.py",
+      "defect": "x/y latitude coefficient 5 -> 3",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.9486360e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-1.9486360e-18, -0.0000000e+00,  3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+          "type": "",
+          "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.9486360e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+          "type": "",
+          "message": "AssertionError: {20.0: (7.994331979822775e-05, 4.210992350793989e-09), 5.0: (7.993458665368043e-05, 4.111889218739368e-12)}\nassert 7.993458665368043e-05 <= (0.5 * 7.994331979822775e-05)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0004688519620167773, 4.1813981961277904e-09), 5.0: (0.00046885993264714427, 4.0896174087740205e-12)}\nassert 0.00046885993264714427 <= (0.5 * 0.0004688519620167773)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+          "type": "",
+          "message": "AssertionError: {20.0: (0.0013682111224979372, 4.142811052487316e-09), 5.0: (0.001368218993817922, 4.06540478611192e-12)}\nassert 0.001368218993817922 <= (0.5 * 0.0013682111224979372)"
+        }
+      ]
+    },
+    {
+      "id": "f1_setattr_allowed",
+      "file": "tars/sim/forces.py",
+      "defect": "attributes can be reassigned",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_parameters_are_immutable_after_construction",
+          "type": "",
+          "message": "Failed: DID NOT RAISE AttributeError"
+        }
+      ]
+    },
+    {
+      "id": "f1_delattr_allowed",
+      "file": "tars/sim/forces.py",
+      "defect": "attributes can be deleted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_parameters_are_immutable_after_construction",
+          "type": "",
+          "message": "Failed: DID NOT RAISE AttributeError"
+        }
+      ]
+    },
+    {
+      "id": "f1_instance_dict",
+      "file": "tars/sim/forces.py",
+      "defect": "instance __dict__ available",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_parameters_are_immutable_after_construction",
+          "type": "",
+          "message": "AssertionError: assert not True\n +  where True = hasattr(<tars.sim.forces.ZonalJ2Gravity object at 0x1121be4e0>, '__dict__')"
+        }
+      ]
+    },
+    {
+      "id": "f2_infinite_parameters_accepted",
+      "file": "tars/sim/forces.py",
+      "defect": "infinite mu or R accepted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'mu and equatorial_radius must be finite and positive'\n  Actual message: '-(3/2) J2 mu R^2 is not a finite normal binary64 number'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'mu and equatorial_radius must be finite and positive'\n  Actual message: '-(3/2) J2 mu R^2 is not a finite normal binary64 number'"
+        }
+      ]
+    },
+    {
+      "id": "f2_coefficient_range_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "overflowing or subnormal -(3/2) J2 mu R^2 accepted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[1e+300-10000000000.0-0.0010826261738522227]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "f2_position_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "non-finite position not rejected",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_position_is_rejected[r0]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'position must be finite'\n  Actual message: 'outside the J2 numerical domain: |r|^5 is not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_position_is_rejected[r1]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'position must be finite'\n  Actual message: 'outside the J2 numerical domain: |r|^5 is not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_position_is_rejected[r2]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'position must be finite'\n  Actual message: 'outside the J2 numerical domain: |r|^5 is not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_non_finite_position_is_rejected[r3]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'position must be finite'\n  Actual message: 'outside the J2 numerical domain: |r|^5 is not a normal binary64'"
+        }
+      ]
+    },
+    {
+      "id": "f2_underflow_reported_as_origin",
+      "file": "tars/sim/forces.py",
+      "defect": "|r|^2 underflow classified as the origin",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-200-underflows to zero]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*underflows to zero'\n  Actual message: 'J2 gravity is singular at the origin'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[5e-324-underflows to zero]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*underflows to zero'\n  Actual message: 'J2 gravity is singular at the origin'"
+        }
+      ]
+    },
+    {
+      "id": "f2_r5_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "r^5 overflow/underflow not reported (silent zero)",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*\\\\|r\\\\|\\\\^5'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*\\\\|r\\\\|\\\\^5'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*\\\\|r\\\\|\\\\^5'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*\\\\|r\\\\|\\\\^5'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-100-\\\\|r\\\\|\\\\^5]",
+          "type": "",
+          "message": "ZeroDivisionError: float division by zero"
+        }
+      ]
+    },
+    {
+      "id": "f2_scaled_coefficient_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "overflowing or subnormal scaled coefficient not reported",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-60-coefficient]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: .*coefficient'\n  Actual message: 'outside the J2 numerical domain: acceleration overflows'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "f2_result_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "overflowing result returned",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_result_overflow_raises",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
     }
   ],
-  "detected": 14,
-  "total": 14
+  "detected": 32,
+  "detected_by_assertion": 32,
+  "total": 32,
+  "surviving": []
 }

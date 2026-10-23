@@ -3,7 +3,14 @@
 Each mutant changes one line of the production code in a temporary copy of ``src``.
 The T1 tests (tests/test_zonal_j2.py, tests/test_constants.py) are then run against the
 copy, which is put first on PYTHONPATH. A mutant is DETECTED when pytest fails. The
-unmutated copy must pass (control).
+unmutated copy must pass (control). For each mutant the failing tests and pytest's
+failure type and message (from pytest's JUnit XML) are recorded; ``by_assertion`` is true
+when at least one failure is an assertion (``AssertionError``, including a ``pytest.raises``
+match failure) or a missing expected exception (``DID NOT RAISE``), rather than an
+unexpected error.
+
+Mutants added after Codex Review 01 (I-19): the reviewer's eight mutants (four of which
+survived the Review 01 tests) and mutants that remove each M3T1-R1-F1/F2 protection.
 
 Usage (from the repository root):
     uv run python docs/science/experiments/m3-t1/t1_mutation_check.py OUT.json
@@ -17,6 +24,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path.cwd()
@@ -26,8 +34,8 @@ TESTS = ["tests/test_zonal_j2.py", "tests/test_constants.py"]
 
 # (id, file, original text, replacement, defect)
 MUTANTS = [
-    ("sign", FORCES, "self._k = -1.5 *", "self._k = 1.5 *", "acceleration sign reversed"),
-    ("magnitude", FORCES, "self._k = -1.5 *", "self._k = -1.4 *", "coefficient 3/2 -> 1.4"),
+    ("sign", FORCES, "k0 = -1.5 *", "k0 = 1.5 *", "acceleration sign reversed"),
+    ("magnitude", FORCES, "k0 = -1.5 *", "k0 = -1.4 *", "coefficient 3/2 -> 1.4"),
     (
         "z_factor",
         FORCES,
@@ -59,8 +67,8 @@ MUTANTS = [
     (
         "power",
         FORCES,
-        "(r2 * r2 * r_norm)",
-        "(r2 * r2 * r_norm * 1.000001)",
+        "r5 = r2 * r2 * r_norm",
+        "r5 = r2 * r2 * r_norm * 1.000001",
         "radial dependence perturbed",
     ),
     (
@@ -73,8 +81,8 @@ MUTANTS = [
     (
         "j2_zero_offset",
         FORCES,
-        "return np.array([k * c * x,",
-        "return np.array([k * c * x + 1e-300,",
+        "a = np.array([k * c * x,",
+        "a = np.array([k * c * x + 1e-300,",
         "J2 = 0 not exactly zero",
     ),
     (
@@ -112,13 +120,168 @@ MUTANTS = [
         "return 1.0826261739e-3 + 0.0 * c20",
         "decimal J2 used as the canonical value",
     ),
+    # ---- Codex Review 01 reviewer mutants (I-19 §6)
+    (
+        "r1_negative_j2_abs",
+        FORCES,
+        "k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius",
+        "k0 = -1.5 * abs(self.j2) * self.mu * self.equatorial_radius * self.equatorial_radius",
+        "sign of J2 ignored (survived Review 01)",
+    ),
+    (
+        "r1_small_coefficient_error",
+        FORCES,
+        "k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius",
+        "k0 = -1.5 * (1 + 2**-51) * self.j2 * self.mu * self.equatorial_radius"
+        " * self.equatorial_radius",
+        "coefficient 4 ulp high (survived Review 01)",
+    ),
+    (
+        "r1_far_field_zero",
+        FORCES,
+        "r_norm = math.sqrt(r2)\n",
+        "r_norm = math.sqrt(r2)\n        if r_norm > 7 * self.equatorial_radius:\n"
+        "            return np.zeros(3)\n",
+        "zero beyond 7 R (survived Review 01)",
+    ),
+    (
+        "r1_high_lat_band",
+        FORCES,
+        "c = 1.0 - 5.0 * s2\n",
+        "c = 1.0 - 5.0 * s2\n        if 0.99 < s2 < 0.9999:\n            c *= 1.01\n",
+        "1 % x/y error for 0.99 < sin^2 lat < 0.9999 (survived Review 01)",
+    ),
+    (
+        "r1_off_axis_band",
+        FORCES,
+        "c = 1.0 - 5.0 * s2\n",
+        "c = 1.0 - 5.0 * s2\n        if 0.36 < s2 < 0.37:\n            c *= 1.01\n",
+        "1 % x/y error for 0.36 < sin^2 lat < 0.37",
+    ),
+    (
+        "r1_unnormalized",
+        FORCES,
+        "k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius",
+        "k0 = -1.5 * (self.j2 / math.sqrt(5)) * self.mu * self.equatorial_radius"
+        " * self.equatorial_radius",
+        "unnormalized C20 scaling used as J2",
+    ),
+    (
+        "r1_mu_radius_swap",
+        FORCES,
+        "k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius",
+        "k0 = -1.5 * self.j2 * self.equatorial_radius * self.mu * self.mu",
+        "mu and R swapped in the coefficient",
+    ),
+    (
+        "r1_p2_wrong",
+        FORCES,
+        "c = 1.0 - 5.0 * s2",
+        "c = 1.0 - 3.0 * s2",
+        "x/y latitude coefficient 5 -> 3",
+    ),
+    # ---- removal of each M3T1-R1-F1 / F2 protection (I-19 §3-§4)
+    (
+        "f1_setattr_allowed",
+        FORCES,
+        'raise AttributeError(f"ZonalJ2Gravity is immutable: cannot set {name!r}")',
+        "object.__setattr__(self, name, value)",
+        "attributes can be reassigned",
+    ),
+    (
+        "f1_delattr_allowed",
+        FORCES,
+        'raise AttributeError(f"ZonalJ2Gravity is immutable: cannot delete {name!r}")',
+        "object.__delattr__(self, name)",
+        "attributes can be deleted",
+    ),
+    (
+        "f1_instance_dict",
+        FORCES,
+        '__slots__ = ("equatorial_radius", "j2", "mu")',
+        '__slots__ = ("equatorial_radius", "j2", "mu", "__dict__")',
+        "instance __dict__ available",
+    ),
+    (
+        "f2_infinite_parameters_accepted",
+        FORCES,
+        "math.isfinite(mu)\n            and mu > 0.0\n"
+        "            and math.isfinite(equatorial_radius)\n            and equatorial_radius > 0.0",
+        "mu > 0.0\n            and equatorial_radius > 0.0",
+        "infinite mu or R accepted",
+    ),
+    (
+        "f2_coefficient_range_unchecked",
+        FORCES,
+        "if not math.isfinite(k) or (j2 != 0.0 and abs(k) < _MIN_NORMAL):",
+        "if False:",
+        "overflowing or subnormal -(3/2) J2 mu R^2 accepted",
+    ),
+    (
+        "f2_position_unchecked",
+        FORCES,
+        "if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):",
+        "if False:",
+        "non-finite position not rejected",
+    ),
+    (
+        "f2_underflow_reported_as_origin",
+        FORCES,
+        "if x == 0.0 and y == 0.0 and z == 0.0:",
+        "if True:",
+        "|r|^2 underflow classified as the origin",
+    ),
+    (
+        "f2_r5_unchecked",
+        FORCES,
+        "if not _MIN_NORMAL <= r5 < math.inf:",
+        "if False:",
+        "r^5 overflow/underflow not reported (silent zero)",
+    ),
+    (
+        "f2_scaled_coefficient_unchecked",
+        FORCES,
+        "if k0 != 0.0 and not _MIN_NORMAL <= abs(k) < math.inf:",
+        "if False:",
+        "overflowing or subnormal scaled coefficient not reported",
+    ),
+    (
+        "f2_result_unchecked",
+        FORCES,
+        "if not np.all(np.isfinite(a)):",
+        "if False:",
+        "overflowing result returned",
+    ),
 ]
 
 
-def run(src: Path) -> int:
+def run(src: Path, junit: Path) -> tuple[int, list[dict]]:
+    junit.unlink(missing_ok=True)
     env = dict(os.environ, PYTHONPATH=str(src))
-    cmd = [sys.executable, "-m", "pytest", "-q", "-x", "-p", "no:cacheprovider", *TESTS]
-    return subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True).returncode
+    cmd = [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={junit}"]
+    proc = subprocess.run([*cmd, *TESTS], cwd=ROOT, env=env, capture_output=True, text=True)
+    failures = []
+    if junit.exists():
+        for case in ET.parse(junit).iter("testcase"):
+            for kind in ("failure", "error"):
+                for node in case.iter(kind):
+                    failures.append(
+                        {
+                            "kind": kind,
+                            "test": f"{case.get('classname')}::{case.get('name')}",
+                            "type": node.get("type") or "",
+                            "message": (node.get("message") or "")[:200],
+                        }
+                    )
+    return proc.returncode, failures
+
+
+def is_assertion(failure: dict) -> bool:
+    """An assertion (incl. a pytest.raises match failure) or a missing expected exception."""
+    return failure["kind"] == "failure" and (
+        failure["type"] in ("AssertionError", "Failed")
+        or failure["message"].startswith(("assert ", "AssertionError", "Failed: DID NOT RAISE"))
+    )
 
 
 def main(out_path: str) -> None:
@@ -126,14 +289,15 @@ def main(out_path: str) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         src = Path(tmp) / "src"
         shutil.copytree(ROOT / "src", src)
-        control = run(src)
+        junit = Path(tmp) / "junit.xml"
+        control, _ = run(src, junit)
         for mid, rel, old, new, defect in MUTANTS:
             path = src / rel
             original = path.read_text()
             if original.count(old) != 1:
                 raise SystemExit(f"{mid}: anchor occurs {original.count(old)} times")
             path.write_text(original.replace(old, new))
-            code = run(src)
+            code, failures = run(src, junit)
             path.write_text(original)
             results.append(
                 {
@@ -142,6 +306,8 @@ def main(out_path: str) -> None:
                     "defect": defect,
                     "pytest_exit": code,
                     "detected": code != 0,
+                    "by_assertion": any(is_assertion(f) for f in failures),
+                    "failures": failures,
                 }
             )
     summary = {
@@ -149,11 +315,16 @@ def main(out_path: str) -> None:
         "control_passes": control == 0,
         "mutants": results,
         "detected": sum(r["detected"] for r in results),
+        "detected_by_assertion": sum(r["by_assertion"] for r in results),
         "total": len(results),
+        "surviving": [r["id"] for r in results if not r["detected"]],
     }
     Path(out_path).write_text(json.dumps(summary, indent=2) + "\n")
-    print(f"control exit {control}; detected {summary['detected']}/{summary['total']}")
-    if control != 0 or summary["detected"] != summary["total"]:
+    print(
+        f"control exit {control}; detected {summary['detected']}/{summary['total']}"
+        f" ({summary['detected_by_assertion']} by assertion); surviving {summary['surviving']}"
+    )
+    if control != 0 or summary["detected_by_assertion"] != summary["total"]:
         raise SystemExit(1)
 
 
