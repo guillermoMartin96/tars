@@ -1151,3 +1151,4 @@ See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, golde
   - This is evidence for these 32 named defects, **not complete coverage** of all possible defects.
 - **Bounds:** the γ₁₆ and γ₆₄ bounds are applied to the new points with the same derivation as above. The operation counts are still by inspection. Review 01's interval certificate covered the original 162 points only.
 - **Status:** corrections implemented; not reviewed (Review 02 pending), not accepted.
+- *Count correction (appended):* the protection-removal mutants number **10** (3 F1, 7 F2), not 11 as written above and in the `b0164fd` commit message: 14 + 8 + 10 = 32. The total of 32 and every per-mutant result are unchanged (`t1_mutation_check_results.json`).

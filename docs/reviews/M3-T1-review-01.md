@@ -156,3 +156,24 @@ Further limitations noted by the reviewer:
 
 - **Not changed (out of I-19 scope):** the force docstring sentence "does not depend on libm or BLAS". Review 01 §3 discussed its qualification but did not register it as a finding.
 - **Correction to a commit message:** `62d3684`'s message says "20 failed, 52 passed" against `97b69ef`. That count was taken before the subnormal-coefficient test was added. The committed tests give **21 failed, 52 passed** (73 cases).
+- **Count correction:** in the corrections table above and in `b0164fd`'s commit message, "11 F1/F2 mutants" should read **10** (3 F1 + 7 F2). The total is unchanged: 14 + 8 + 10 = 32.
+
+## Validation of the correction pass (I-19 §10; recorded 2026-10-23 UTC, append-only)
+Run at `16a8e63b0b209e08df94ed4df0f59c4991e0ac7a`, in fresh clones (M1 and M2 Proofs in separate clean clones), on the reference host:
+
+| Check | Command | Result |
+|---|---|---|
+| M1 Proof | `bash toolbox/scripts/run_m1_proof.sh` | **PASS**, 9/9 steps, `working_tree_clean_excluding_evidence: yes`. Includes the M1 golden comparison and cross-process determinism |
+| M2 Proof | `bash toolbox/scripts/run_m2_proof.sh <scratch evidence dir>` | **PASS**, 20/20 steps, tree clean. `m2_proof` 228/228. pytest **1254 passed**, 3 warnings. M1 golden hash `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4`. Ruff check and format pass |
+| T0 checks | `pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py` | **314 passed** |
+| Mutation | `python docs/science/experiments/m3-t1/t1_mutation_check.py OUT` | control passes; **32/32 detected, 32 by assertion, none surviving**. The summary equals the committed result file |
+| Informational | `python docs/science/experiments/m3-t1/t1_j2_informational.py OUT` | byte-identical to the committed results |
+| Correction check | `python docs/science/experiments/m3-t1/t1_review01_correction_check.py <97b69ef src> OUT` | reproduces the committed file byte for byte. 200 004 states bit-identical |
+| Tree | `git status --porcelain` | clean |
+
+- **pytest count:** 1254 = 1207 at `97b69ef` + 47 new T1 cases (73 T1 cases now, 26 before).
+- **Protected paths:** `git diff 97b69ef..16a8e63 -- proof toolbox scenarios .github uv.lock pyproject.toml src/tars/validation` is empty. `src/` changes are confined to `src/tars/sim/forces.py`: `ZonalJ2Gravity`, its imports and `_MIN_NORMAL`.
+- **CI:**
+  - The correction commits `62d3684`, `a27f288` and `b0164fd` were pushed together; CI run **39894033142** ran on `b0164fd`. `16a8e63`: run **39894176897**.
+  - The results, and the run on the commit that adds this section, are reported at the checkpoint.
+  - Review 02 starts only after the final head's run is green on all four jobs.
