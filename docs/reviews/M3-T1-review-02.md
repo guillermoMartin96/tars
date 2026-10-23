@@ -65,3 +65,53 @@ Proposed dispositions are the implementer's. None is applied; each awaits the Te
 ## Verification limits (from the reviewer, confirmed by the setup)
 - All new numerical observations are from one host (macOS x86_64, CPython 3.12.15). The interval and rational certificates are conditional on the stated arithmetic model.
 - No network, live CI authentication, cross-platform execution, GMAT executable or external physics implementation. The historical Proof wrapper outcomes (9/9, 20/20) are documentary claims to the reviewer.
+
+## Owner disposition (I-20; recorded 2026-10-23 UTC, append-only)
+- **Authority:** "I-20 — M3 T1 Review 02 Corrections and Review 03 Authorization" (Tech Lead). It acknowledges the I-19 checkpoint and accepts Review 02's findings, as reproduced, for correction.
+- **R2-F1 (MINOR): ACCEPTED.** Correct the remaining silent underflow in component products. Distinguish legitimate zeros. Keep valid realistic-orbit results bit-identical. No blanket rejection of subnormal inputs or outputs. No claim of complete IEEE 754 correctness.
+- **R2-F2 (MINOR): ACCEPTED, conversion chosen.** Convert μ, R and J2 to owned built-in `float` values before validation. Define and test the supported numeric types. Reject unsupported or non-convertible inputs with clear errors.
+- **R2-F3 (NOTE): ACCEPTED.** Correct the docstring. No trajectory work is to be added.
+- **R2-O1 (NOTE): ACCEPTED.** An explicit erratum: F1 3, F2 7, total 10.
+- **Mutation coverage (I-20 §3):**
+  - the three exploratory survivors are accepted as a documented verification limitation;
+  - the classifier observation is accepted as a limitation, and the classifier is not to be changed on hypothetical runner behavior.
+- The other observations stand as recorded above.
+
+## Corrections (I-20; recorded 2026-10-23 UTC, append-only)
+| Finding | Correction | Commit | Evidence |
+|---|---|---|---|
+| M3T1-R2-F1 | A product below the normal range that is **inexact** (IEEE underflow) raises `ValueError`: k (1 − 5 s²) and k (3 − 5 s²) in the acceleration, and the coefficient products −(3/2) J2, × μ, × R in the constructor. Exact zeros, exact subnormal products and subnormal final components are returned. Evaluation order is unchanged | `304d796` | 5 new test functions (8 cases); 7 R2-F1 mutants killed; `t1_review02_correction_check_results.json` |
+| (R2-F1, coefficient) | The same defect in the coefficient chain, **found by the implementer** while auditing every multiplication chain. Review 02 did not report it. J2 = 3 × 2⁻¹⁰⁷⁴ with μ = 2¹⁰⁰⁰ gave a normal coefficient 11 % wrong. Included under R2-F1 per I-19 §3 (do not fix only the reproduced example while the same path remains). **The owner may rule it out of scope** | `304d796` | `test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result` (one case per product) |
+| M3T1-R2-F2 | Parameters converted to built-in `float` before validation. Supported: `int` (not `bool`), `float`, NumPy integer and floating scalars, zero-dimensional arrays of those. Others raise `TypeError`; an out-of-range `int` raises `ValueError` | `304d796` | 7 new test functions; 7 R2-F2 mutants killed |
+| M3T1-R2-F3 | Docstring now says 200 000 random states and four axis states, no trajectory. Output unchanged (byte-identical) | `a4dfda1` | `t1_review01_correction_check_results.json` reproduces |
+| M3T1-R2-O1 | Erratum appended to `M3-T1-review-01.md` (F1 3, F2 7, total 10) | records commit | `M3-T1-review-01.md`, "Erratum (M3T1-R2-O1)" |
+
+- **Red-first:** the final tests give **26 failed, 69 passed** (95 T1 cases) against `b1566ae`. The `56ad329` message says 24/69 of 93: two coefficient cases were added in `308f126`.
+- **Before and after** (`t1_review02_correction_check_results.json`):
+
+| Case | Before (`b1566ae`) | After | Exact |
+|---|---|---|---|
+| Review 02 x case | `[-0.0, -0.0, -2.2250738585072012e-268]` | raises "a component product underflows" | x = −4.303918780958246e-284 |
+| y variant | y = −0.0 | raises | y = −4.303918780958246e-284 |
+| (3 − 5 s²) factor | z = −3.025521829374199e-283 | raises | z = −1.3478448085169703e-283 |
+| coefficient chain | x = −1.925929944387236e-34 | raises "an intermediate product underflows" | x = −2.1666711874356403e-34 |
+| μ 0-d array set to −1 after construction | x = +3.99e-17 (outward) | x = −0.01591182047796651 (canonical) | — |
+| float32 parameters | float32 result, x = −0.01591181941330433 | float64, x = −0.015911820615666403 (= the values as floats) | — |
+| `"398600441800000.0"`, `[mu]` | `TypeError` from `math.isfinite` | `TypeError` "mu must be a real number …" | — |
+| J2 = `True` | accepted as J2 = 1 | `TypeError` | — |
+| μ = 10⁴⁰⁰ (int) | `OverflowError` | `ValueError` "not representable as a binary64 number" | — |
+
+- **Legitimate results, unchanged:**
+  - an exact zero factor and coordinate gives `[-0.0, -0.0, -9.891604774494805e-268]`;
+  - J2 = 0 gives zeros;
+  - an exact subnormal intermediate gives x = −1.4444474582904269e-34;
+  - a subnormal final component gives y = −6.2167845e-317.
+  - All equal the exactly rounded values (zeros with a sign bit).
+
+## Mutation coverage after the corrections (I-20 §3; recorded 2026-10-23 UTC, append-only)
+1. **Committed campaign:** 46 mutants, **46 killed by assertion**, none surviving (`t1_mutation_check_results.json`).
+2. **Review 02's exploratory mutants** on the corrected code (`t1_review02_survivors_results.json`):
+   - `near_min_normal_zero`: killed;
+   - `canonical_one_ulp`: survives;
+   - `narrow_band`: survives.
+3. **Limits:** finite sampling and mutation testing do not establish the absence of defects. VAL-0020 correction 2, "Mutation limitations", gives the triggering conditions and why the two survivors do not invalidate the authorized T1 criteria. No survivor is found to violate an explicit required invariant or acceptance gate. Nothing is elevated.

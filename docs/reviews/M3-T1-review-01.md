@@ -177,3 +177,8 @@ Run at `16a8e63b0b209e08df94ed4df0f59c4991e0ac7a`, in fresh clones (M1 and M2 Pr
   - The correction commits `62d3684`, `a27f288` and `b0164fd` were pushed together; CI run **39894033142** ran on `b0164fd`. `16a8e63`: run **39894176897**.
   - The results, and the run on the commit that adds this section, are reported at the checkpoint.
   - Review 02 starts only after the final head's run is green on all four jobs.
+
+## Erratum (M3T1-R2-O1; recorded 2026-10-23 UTC under I-20 §2, append-only)
+- In the "Corrections" table above, the M3T1-R1-F2 row says "8 F2 protection-removal mutants killed". The correct number is **7**. The protection-removal mutants are F1: 3, F2: 7, total 10.
+- The appended "Count correction" corrected "11" to 10 but left this "8" unchanged. Codex Review 02 found it (§11 item 5) and the implementer reproduced it (`raw/M3-T1-review02-reproduction/`).
+- The total of 32 and every per-mutant result are unchanged. The original rows are preserved as written.

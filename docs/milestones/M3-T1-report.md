@@ -156,3 +156,13 @@ Independent T1 review (Codex), which needs separate owner authorization (packet 
 - Codex Review 02 of `1cf0ce9`: **REQUEST_CHANGES**, 2 MINOR (M3T1-R2-F1 component-product underflow with non-physical parameters; M3T1-R2-F2 accepted NumPy parameters stored by reference and not converted to binary64) and 1 NOTE (R2-F3, correction-check docstring), plus a count note (R2-O1). R1-F3 and R1-F4 resolved; R1-F1 and R1-F2 partially resolved. Record: `docs/reviews/M3-T1-review-02.md`.
 - All findings reproduced by the implementer; dispositions proposed, **none applied** (I-19 §12). No Review 03.
 - **Status:** T1 IMPLEMENTED — REVIEWED TWICE — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## Status update (recorded 2026-10-23 UTC, append-only): Review 02 corrections (I-20)
+- Under I-20, M3T1-R2-F1 … F3 and R2-O1 are corrected:
+  - tests `56ad329`, `bbcf40e`, `308f126`;
+  - code `304d796`;
+  - evidence `a4dfda1`;
+  - records: VAL-0020 correction 2, Review 01 erratum, Review 02 record appendices.
+- R2-F1 also covers the same defect in the coefficient chain, found by the implementer; it is flagged for the owner.
+- **Mutation:** 46/46 killed by assertion; two exploratory survivors are documented as a limitation. **Valid outputs:** 200 004 states and three RK4 trajectories bit-identical to `b1566ae`.
+- **Status:** IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. Review 03 follows validation and green CI.

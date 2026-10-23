@@ -1152,3 +1152,49 @@ See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, golde
 - **Bounds:** the γ₁₆ and γ₆₄ bounds are applied to the new points with the same derivation as above. The operation counts are still by inspection. Review 01's interval certificate covered the original 162 points only.
 - **Status:** corrections implemented; not reviewed (Review 02 pending), not accepted.
 - *Count correction (appended):* the protection-removal mutants number **10** (3 F1, 7 F2), not 11 as written above and in the `b0164fd` commit message: 14 + 8 + 10 = 32. The total of 32 and every per-mutant result are unchanged (`t1_mutation_check_results.json`).
+
+### VAL-0020 correction 2 (Codex T1 Review 02; recorded 2026-10-23 UTC, append-only)
+- **Authority:** "I-20 — M3 T1 Review 02 Corrections and Review 03 Authorization" (Tech Lead). The sections above are preserved as written. Where this section differs, this section applies from commit `304d796` on.
+- **Commits:** tests `56ad329`, `bbcf40e`, `308f126` (the final tests give 26 failed, 69 passed of 95 T1 cases against `b1566ae`); code `304d796`; evidence `a4dfda1`.
+- **M3T1-R2-F2 (owned binary64 parameters; extends M3T1-R1-F1):**
+  - μ, R and J2 are converted to built-in `float` at construction, **before** validation, so the instance never holds a caller's object.
+  - Supported types: `int` (not `bool`), `float`, NumPy integer and floating scalars (float16/32/64, longdouble), and zero-dimensional arrays of those. Any other type raises `TypeError` ("… must be a real number …"): strings, bytes, lists, tuples, 1-d arrays, string arrays, `bool`/`numpy.bool_`, complex, `Fraction`, `None`. An `int` beyond the binary64 range raises `ValueError`.
+  - The validation contract for non-finite and physically invalid values is unchanged. It applies to the converted values.
+  - New gates: `test_parameters_are_owned_snapshots_not_caller_references`, `test_supported_numeric_types_are_converted_to_binary64`, `test_float16_parameter_is_supported`, `test_integer_parameters_are_supported`, `test_unsupported_parameter_types_are_rejected`, `test_unrepresentable_integer_parameter_is_rejected`, `test_converted_parameters_keep_the_validation_contract`.
+- **M3T1-R2-F1 (product underflow; extends M3T1-R1-F2, class 3):**
+  - A binary64 product is an **underflow** when it is below the normal range **and inexact** (IEEE 754 tininess with inexactness). It has then lost relative precision, and a later multiplication can carry that loss into a normal-looking result.
+  - The products that are multiplied further must not underflow, otherwise `ValueError`:
+    - in the acceleration, k (1 − 5 s²) and k (3 − 5 s²), with the message "outside the J2 numerical domain: a component product underflows";
+    - in the coefficient, −(3/2) J2, then × μ, then × R, with the message "−(3/2) J2 μ R²: an intermediate product underflows". The defect is the same, found by auditing every multiplication chain. Review 02 did not report it. Example: J2 = 3 × 2⁻¹⁰⁷⁴, μ = 2¹⁰⁰⁰ gave a normal coefficient that was 11 % wrong.
+  - **Not underflow, and returned:** exact zeros (J2 = 0, a zero coordinate, a latitude factor that is exactly 0) and exact subnormal products. A final component may be subnormal; only its last multiplication rounds, with an absolute error of at most half the smallest subnormal. No input or output is rejected for being subnormal as such.
+  - **Limit:** the check cannot tell a latitude factor that is mathematically 0 from one that is computed as a small non-zero value through cancellation. That case raises (conservative); it needs non-physical parameters.
+  - **Accuracy near the factor zeros is unchanged.** Near 1 − 5 s² = 0 or 3 − 5 s² = 0 a component has only absolute accuracy, relative to the |k|·|r| majorant that the gradient gate uses. This is the formula's existing behavior and is not changed here. Example: Review 02's case, which now raises, would give −2.47e-284 without underflow, against an exact −4.30e-284.
+  - **Reach with the canonical constants:** in the accepted domain |k| ≥ |k₀| / (largest binary64) = 1.46e-283, and a non-zero computed latitude factor has magnitude ≥ 2⁻⁵³ (the spacing of binary64 just below 1; just below 3 it is 2⁻⁵¹). So |k × factor| ≥ 1.6e-299 is normal. The coefficient products are −1.62e-3, −6.47e11 and −4.13e18. **The new checks cannot trigger with the authorized constants.**
+  - **Cost:** two multiplications and comparisons per call. The exact-rational comparison runs only for a product below the normal range, which a realistic state never reaches.
+  - New gates:
+    - `test_component_product_underflow_raises_instead_of_a_silent_result` (Review 02's case, its y variant, the (3 − 5 s²) factor; each with an exactly rounded reference shown to be a normal number);
+    - `test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result` (one case per product, with its precondition asserted);
+    - `test_exact_subnormal_intermediates_are_not_underflow`, `test_legitimate_zero_components_are_returned`, `test_subnormal_result_components_are_returned`.
+- **Valid results are unchanged.** The evaluation order is unchanged, since `k * c * x` is `(k * c) * x` = `kc * x`. Checked against `b1566ae` (`t1_review02_correction_check_results.json`):
+  - 200 004 states (the Review 01 state set, seed 20261023): **0 differing**;
+  - three RK4 trajectories (point mass + J2, 300 × 1000 km, 28.5°/51.6°/97°, dt 10 s, 6 001 states each): **bit-identical**;
+  - equatorial domain unchanged: 3.3773820261812166e-57 m … 4.476546622757235e61 m.
+  - The informational results and `t1_review01_correction_check_results.json` reproduce byte for byte.
+- **M3T1-R2-F3:** the `t1_review01_correction_check.py` docstring now states what is checked: 200 000 random states and four axis states, no trajectory. Its output is unchanged.
+- **Mutation campaign:**
+  - **46 committed mutants, 46 killed, all by assertion; no survivors**: the 32 above plus 14 that each remove one R2-F1/F2 protection (7 F1, 7 F2).
+  - Four original mutants are re-anchored on the rewritten component expression, with the same defects: `z_factor`, `xy_asym`, `z_scale_1e9`, `j2_zero_offset`.
+  - Tests that a supported input or a legitimate result is accepted now assert the acceptance, so a wrongly rejecting defect fails an assertion instead of erroring (`r2f1_exactness_ignored` first failed only by `ValueError` errors).
+- **Mutation limitations (I-20 §3):**
+  1. The committed campaign is evidence for its 46 named defects, **not complete coverage**.
+  2. Review 02's three exploratory mutants, re-applied to the corrected code (`t1_review02_survivors_results.json`):
+     - `near_min_normal_zero` (zeros when 0 < |k| < 2 × min normal) is now **killed**, by assertion, by the R2-F1 component tests;
+     - `canonical_one_ulp` (one-ulp coefficient change only for μ > 1e10) **survives** the T1 tests;
+     - `narrow_band` (1e-8 x/y error only for 0.123456 < s² < 0.123457, a latitude band about 9e-5° wide near 20.6°) **survives** the T1 tests.
+  3. Why the two survivors do not invalidate the authorized T1 criteria:
+     - The criteria are finite gates applied to the actual code, which contains neither defect.
+     - `canonical_one_ulp` changes results by 2.2e-16 relative, inside the gates' tolerances by design (2γ₁₆ and γ₆₄). Only the synthetic μ = 1 known answers are exact. The committed bit-identity comparison with `b1566ae` (a correction-pass check, not a pytest gate) would detect it.
+     - `narrow_band` needs a data-dependent branch. Apart from the raising domain checks, the production `acceleration` is straight-line arithmetic with no such branch. That is a code-inspection argument, not a test result. No finite grid or sample excludes a defect confined to a band narrower than its spacing: the 200 004 random states hit this band with probability about 25 %, and the actual set has 0 states in it.
+  4. The mutation classifier accepts a JUnit failure type `Failed` whatever its message, if another runner emitted one. Current kills are established by their messages. Not changed (I-20 §3).
+- **Not claimed:** complete IEEE 754 correctness, or the absence of other underflow or precision paths, from these finite tests and analyses.
+- **Status:** corrections implemented; not reviewed (Review 03 pending); not accepted.

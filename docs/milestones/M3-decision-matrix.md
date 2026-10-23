@@ -257,3 +257,8 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **Review 02 (`1cf0ce9`):** REQUEST_CHANGES; M3T1-R2-F1, F2 (MINOR), F3 (NOTE), O1 (count note). Proposed dispositions in `docs/reviews/M3-T1-review-02.md`; awaiting the Tech Lead.
 - **Unchanged and open:** every other item.
 - **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## T1 Review 02 corrections (recorded 2026-10-23 UTC, append-only)
+- **I-20:** Review 02 findings R2-F1, F2 (MINOR) and F3, O1 (NOTE) ACCEPTED and corrected (`56ad329` … `a4dfda1`). For R2-F2 the owner chose conversion to built-in `float`. The three exploratory survivors and the classifier observation are accepted as documented limitations.
+- **Unchanged and open:** every item preserved by I-19 §9.
+- **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
