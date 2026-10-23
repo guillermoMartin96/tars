@@ -1,0 +1,776 @@
+...F.FFFFFF.FFFFFFFFFFFFF.......................FFFFFF.................. [ 67%]
+...................................                                      [100%]
+=================================== FAILURES ===================================
+__________ test_parameters_are_owned_snapshots_not_caller_references ___________
+
+    def test_parameters_are_owned_snapshots_not_caller_references():
+        """M3T1-R2-F2: parameters are converted to built-in floats at construction, so mutating a
+        caller's zero-dimensional array afterwards changes neither the visible parameters nor the
+        acceleration."""
+        reference = j2_model()
+        r = np.array([RE, 0.0, 0.0])
+        expected = reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+        mu, radius, j2 = np.array(MU), np.array(RE), np.array(J2)
+        model = constructed(mu, radius, j2)
+        assert isinstance(model, ZonalJ2Gravity), model
+        mu[...], radius[...], j2[...] = -1.0, -RE, 0.0
+>       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(<generator object test_parameters_are_owned_snapshots_not_caller_references.<locals>.<genexpr> at 0x10aa8b510>)
+
+tests/test_zonal_j2.py:200: AssertionError
+_______ test_supported_numeric_types_are_converted_to_binary64[float64] ________
+
+convert = <class 'numpy.float64'>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert a.dtype == np.float64
+        assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+>       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x10aad1560>)
+
+tests/test_zonal_j2.py:227: AssertionError
+_______ test_supported_numeric_types_are_converted_to_binary64[float32] ________
+
+convert = <class 'numpy.float32'>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+>       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+E        +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype
+E        +  and   <class 'numpy.float64'> = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError
+______ test_supported_numeric_types_are_converted_to_binary64[longdouble] ______
+
+convert = <class 'numpy.longdouble'>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+>       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float128') == <class 'numpy.float64'>
+E        +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype
+E        +  and   <class 'numpy.float64'> = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError
+______ test_supported_numeric_types_are_converted_to_binary64[<lambda>0] _______
+
+convert = <function <lambda> at 0x10aaa9c60>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+>       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+E        +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype
+E        +  and   <class 'numpy.float64'> = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError
+______ test_supported_numeric_types_are_converted_to_binary64[<lambda>1] _______
+
+convert = <function <lambda> at 0x10aaa9d00>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert a.dtype == np.float64
+        assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+>       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x10aad2670>)
+
+tests/test_zonal_j2.py:227: AssertionError
+_____________________ test_float16_parameter_is_supported ______________________
+
+    def test_float16_parameter_is_supported():
+        """M3T1-R2-F2: float16 is a supported floating type (its range cannot hold mu or R)."""
+        r = np.array([RE, 2.0e6, 3.0e6])
+        model = constructed(MU, RE, np.float16(J2))
+>       assert isinstance(model, ZonalJ2Gravity), model
+E       AssertionError: ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number')
+E       assert False
+E        +  where False = isinstance(ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number'), ZonalJ2Gravity)
+
+tests/test_zonal_j2.py:234: AssertionError
+___________ test_unsupported_parameter_types_are_rejected[6378137.0] ___________
+
+value = '6378137.0'
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'must be real number, not str'
+
+tests/test_zonal_j2.py:271: AssertionError
+_______________ test_unsupported_parameter_types_are_rejected[1] _______________
+
+value = b'1'
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'must be real number, not bytes'
+
+tests/test_zonal_j2.py:271: AssertionError
+____________ test_unsupported_parameter_types_are_rejected[value2] _____________
+
+value = [6378137.0]
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'must be real number, not list'
+
+tests/test_zonal_j2.py:271: AssertionError
+____________ test_unsupported_parameter_types_are_rejected[value3] _____________
+
+value = (6378137.0,)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'must be real number, not tuple'
+
+tests/test_zonal_j2.py:271: AssertionError
+____________ test_unsupported_parameter_types_are_rejected[value4] _____________
+
+value = array([6378137.])
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'only 0-dimensional arrays can be converted to Python scalars'
+
+tests/test_zonal_j2.py:271: AssertionError
+____________ test_unsupported_parameter_types_are_rejected[value5] _____________
+
+value = array('1.0', dtype='<U3')
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: "ufunc 'greater' did not contain a loop with signature matching types (<class 'numpy.dtypes.StrDType'>, <class 'numpy.dtypes._PyFloatDType'>) -> None"
+
+tests/test_zonal_j2.py:271: AssertionError
+_____________ test_unsupported_parameter_types_are_rejected[True] ______________
+
+value = True
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE TypeError
+
+tests/test_zonal_j2.py:271: Failed
+____________ test_unsupported_parameter_types_are_rejected[value7] _____________
+
+value = np.True_
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE TypeError
+
+tests/test_zonal_j2.py:271: Failed
+____________ test_unsupported_parameter_types_are_rejected[(1+0j)0] ____________
+
+value = (1+0j)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'must be real number, not complex'
+
+tests/test_zonal_j2.py:271: AssertionError
+____________ test_unsupported_parameter_types_are_rejected[(1+0j)1] ____________
+
+value = np.complex128(1+0j)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE TypeError
+
+tests/test_zonal_j2.py:271: Failed
+____________ test_unsupported_parameter_types_are_rejected[value10] ____________
+
+value = Fraction(1, 3)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE TypeError
+
+tests/test_zonal_j2.py:271: Failed
+_____________ test_unsupported_parameter_types_are_rejected[None] ______________
+
+value = None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "6378137.0",
+            b"1",
+            [RE],
+            (RE,),
+            np.array([RE]),
+            np.array("1.0"),
+            True,
+            np.bool_(True),
+            1 + 0j,
+            np.complex128(1.0),
+            Fraction(1, 3),
+            None,
+        ],
+    )
+    def test_unsupported_parameter_types_are_rejected(value):
+        """M3T1-R2-F2: only int (not bool), float, NumPy integer and floating scalars, and
+        zero-dimensional arrays of those are accepted; strings, containers, booleans, complex
+        and other numeric types are rejected even where float() could convert them."""
+        for args in ((value, RE, J2), (MU, value, J2), (MU, RE, value)):
+>           with pytest.raises(TypeError, match="must be a real number"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AssertionError: Regex pattern did not match.
+E             Expected regex: 'must be a real number'
+E             Actual message: 'must be real number, not NoneType'
+
+tests/test_zonal_j2.py:271: AssertionError
+______________ test_unrepresentable_integer_parameter_is_rejected ______________
+
+    def test_unrepresentable_integer_parameter_is_rejected():
+        """M3T1-R2-F2: an int beyond the binary64 range is a value error, not an OverflowError."""
+        error = constructed(10**400, RE, J2)
+>       assert type(error) is ValueError and "not representable as a binary64" in str(error)
+E       AssertionError: assert (<class 'OverflowError'> is ValueError)
+E        +  where <class 'OverflowError'> = type(OverflowError('int too large to convert to float'))
+
+tests/test_zonal_j2.py:278: AssertionError
+_ test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0] _
+
+mu = 5.1827254193540115e-108, r = [1e+40, 0.0, 4.9999999999999995e+39]
+component = 0
+
+    @pytest.mark.parametrize(("mu", "r", "component"), COMPONENT_UNDERFLOW_CASES)
+    def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, component):
+        """M3T1-R2-F1: the exact component is a normal binary64 number, but the product of the
+        coefficient and the latitude factor underflows, which before the correction returned it
+        as zero or as an inaccurate subnormal-scaled value without a diagnostic."""
+        exact = exact_acceleration(r, mu, 1.0, 0.5)[component]
+        assert abs(exact) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="numerical domain: a component product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:407: Failed
+_ test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1] _
+
+mu = 5.1827254193540115e-108, r = [0.0, 1e+40, 4.9999999999999995e+39]
+component = 1
+
+    @pytest.mark.parametrize(("mu", "r", "component"), COMPONENT_UNDERFLOW_CASES)
+    def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, component):
+        """M3T1-R2-F1: the exact component is a normal binary64 number, but the product of the
+        coefficient and the latitude factor underflows, which before the correction returned it
+        as zero or as an inaccurate subnormal-scaled value without a diagnostic."""
+        exact = exact_acceleration(r, mu, 1.0, 0.5)[component]
+        assert abs(exact) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="numerical domain: a component product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:407: Failed
+_ test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2] _
+
+mu = 3.8113299006152385e-107, r = [1e+40, 0.0, 1.224744871391589e+40]
+component = 2
+
+    @pytest.mark.parametrize(("mu", "r", "component"), COMPONENT_UNDERFLOW_CASES)
+    def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, component):
+        """M3T1-R2-F1: the exact component is a normal binary64 number, but the product of the
+        coefficient and the latitude factor underflows, which before the correction returned it
+        as zero or as an inaccurate subnormal-scaled value without a diagnostic."""
+        exact = exact_acceleration(r, mu, 1.0, 0.5)[component]
+        assert abs(exact) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="numerical domain: a component product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:407: Failed
+_ test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1] _
+
+mu = 1.0715086071862673e+301, radius = 1.0, j2 = 1.5e-323, product = 1
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed
+_ test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2] _
+
+mu = 9.33263618503219e-302, radius = 4.149515568880993e+180
+j2 = 8.673617379884035e-19, product = 2
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed
+_ test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3] _
+
+mu = 3.4766779039175e-310, radius = 35.2, j2 = 0.5, product = 3
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed
+=============================== warnings summary ===============================
+tests/test_zonal_j2.py::test_float16_parameter_is_supported
+  <SNAP>/review_scratch/reviewed_src_b1566ae/src/tars/sim/forces.py:110: RuntimeWarning: overflow encountered in cast
+    k = -1.5 * j2 * mu * equatorial_radius * equatorial_radius
+
+tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[(1+0j)1]
+  <SNAP>/review_scratch/reviewed_src_b1566ae/src/tars/sim/forces.py:102: ComplexWarning: Casting complex values to real discards the imaginary part
+    math.isfinite(mu)
+
+tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[(1+0j)1]
+  <SNAP>/review_scratch/reviewed_src_b1566ae/src/tars/sim/forces.py:111: ComplexWarning: Casting complex values to real discards the imaginary part
+    if not math.isfinite(k) or (j2 != 0.0 and abs(k) < _MIN_NORMAL):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_parameters_are_owned_snapshots_not_caller_references
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[float64]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[float32]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[longdouble]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]
+FAILED tests/test_zonal_j2.py::test_float16_parameter_is_supported - Assertio...
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[6378137.0]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[1]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[value2]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[value3]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[value4]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[value5]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[True]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[value7]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[(1+0j)0]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[(1+0j)1]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[value10]
+FAILED tests/test_zonal_j2.py::test_unsupported_parameter_types_are_rejected[None]
+FAILED tests/test_zonal_j2.py::test_unrepresentable_integer_parameter_is_rejected
+FAILED tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]
+FAILED tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]
+FAILED tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]
+26 failed, 81 passed, 3 warnings in 5.43s

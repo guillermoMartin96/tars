@@ -1,0 +1,6 @@
+import importlib.util,json,numpy as np
+spec=importlib.util.spec_from_file_location('old','review_scratch/reviewed_src_b1566ae/src/tars/sim/forces.py');old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
+mu=np.array(398600441800000.);m=old.ZonalJ2Gravity(mu,6378137.,.0010826261738522227)
+mu[...]=-1.;value_at_acceleration=float(m.mu);a=m.acceleration(0,[6378137.,0.,0.],[0]*3)
+mu[...]=0.;value_at_reporting=float(m.mu)
+print(json.dumps(dict(mu_at_negative_case=value_at_acceleration,negative_case_ax=float(a[0]),mu_when_original_script_serializes_negative_case=value_at_reporting),indent=2))

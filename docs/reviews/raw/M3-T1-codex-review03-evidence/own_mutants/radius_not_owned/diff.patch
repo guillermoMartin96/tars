@@ -1,0 +1,11 @@
+--- forces.py
++++ radius_not_owned
+@@ -135,7 +135,7 @@
+ 
+     def __init__(self, mu: float, equatorial_radius: float, j2: float) -> None:
+         mu = _owned_float("mu", mu)
+-        equatorial_radius = _owned_float("equatorial_radius", equatorial_radius)
++        _owned_float("equatorial_radius", equatorial_radius)
+         j2 = _owned_float("j2", j2)
+         if not (
+             math.isfinite(mu)

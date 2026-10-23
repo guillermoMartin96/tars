@@ -1,0 +1,181 @@
+...F.FFFFF.............................................................. [ 67%]
+...................................                                      [100%]
+=================================== FAILURES ===================================
+__________ test_parameters_are_owned_snapshots_not_caller_references ___________
+
+    def test_parameters_are_owned_snapshots_not_caller_references():
+        """M3T1-R2-F2: parameters are converted to built-in floats at construction, so mutating a
+        caller's zero-dimensional array afterwards changes neither the visible parameters nor the
+        acceleration."""
+        reference = j2_model()
+        r = np.array([RE, 0.0, 0.0])
+        expected = reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+        mu, radius, j2 = np.array(MU), np.array(RE), np.array(J2)
+        model = constructed(mu, radius, j2)
+        assert isinstance(model, ZonalJ2Gravity), model
+        mu[...], radius[...], j2[...] = -1.0, -RE, 0.0
+>       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(<generator object test_parameters_are_owned_snapshots_not_caller_references.<locals>.<genexpr> at 0x107b49220>)
+
+tests/test_zonal_j2.py:200: AssertionError
+_______ test_supported_numeric_types_are_converted_to_binary64[float64] ________
+
+convert = <class 'numpy.float64'>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert a.dtype == np.float64
+        assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+>       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x107b9da40>)
+
+tests/test_zonal_j2.py:227: AssertionError
+_______ test_supported_numeric_types_are_converted_to_binary64[float32] ________
+
+convert = <class 'numpy.float32'>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+>       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+E        +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype
+E        +  and   <class 'numpy.float64'> = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError
+______ test_supported_numeric_types_are_converted_to_binary64[longdouble] ______
+
+convert = <class 'numpy.longdouble'>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+>       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float128') == <class 'numpy.float64'>
+E        +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype
+E        +  and   <class 'numpy.float64'> = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError
+______ test_supported_numeric_types_are_converted_to_binary64[<lambda>0] _______
+
+convert = <function <lambda> at 0x107b92020>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+>       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float32') == <class 'numpy.float64'>
+E        +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype
+E        +  and   <class 'numpy.float64'> = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError
+______ test_supported_numeric_types_are_converted_to_binary64[<lambda>1] _______
+
+convert = <function <lambda> at 0x107b920c0>
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert a.dtype == np.float64
+        assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+>       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x10835cad0>)
+
+tests/test_zonal_j2.py:227: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_parameters_are_owned_snapshots_not_caller_references
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[float64]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[float32]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[longdouble]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]
+FAILED tests/test_zonal_j2.py::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]
+6 failed, 101 passed in 4.96s

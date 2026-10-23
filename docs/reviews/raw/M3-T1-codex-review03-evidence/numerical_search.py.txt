@@ -1,0 +1,36 @@
+import math,random,sys,json,importlib.util
+from fractions import Fraction as F
+import numpy as np
+from tars.sim.forces import ZonalJ2Gravity,CompositeForceModel,PointMassGravity
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+spec=importlib.util.spec_from_file_location('checks','docs/science/experiments/m3-t1/t1_review02_correction_check.py');checks=importlib.util.module_from_spec(spec);spec.loader.exec_module(checks)
+spec=importlib.util.spec_from_file_location('original','review_scratch/reviewed_src_97b69ef/src/tars/sim/forces.py');old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
+trajectories=[]
+for inc in (28.5,51.6,97.):
+ rp,ra=C.equatorial_radius+300e3,C.equatorial_radius+1000e3
+ r,v=checks.elements_to_rv((rp+ra)/2,(ra-rp)/(ra+rp),math.radians(inc),math.radians(30),math.radians(40),0,C.mu)
+ a=checks.propagate(CompositeForceModel([PointMassGravity(C.mu),ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2)]),r,v,10.,6000)
+ b=checks.propagate(CompositeForceModel([PointMassGravity(C.mu),old.ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2)]),r,v,10.,6000)
+ assert a==b;trajectories.append(dict(inclination=inc,states=6001,identical=True,reference='97b69ef'))
+rng=random.Random(30303);accepted=0;rejected=0;worst=0.;zero=[]
+for i in range(7000):
+ mu=math.ldexp(rng.uniform(1,2),rng.randint(-1000,1000));R=math.ldexp(rng.uniform(1,2),rng.randint(-500,500));j2=math.ldexp(rng.choice([-1,1])*rng.uniform(.5,1),rng.randint(-1070,900))
+ scale=math.ldexp(1.,rng.randint(-200,200));r=[rng.uniform(-1,1)*scale for _ in range(3)]
+ if i%3==0:r=[scale,0.,math.nextafter(scale/2,rng.choice([0.,math.inf]))]
+ try:a=ZonalJ2Gravity(mu,R,j2).acceleration(0,r,[0]*3)
+ except ValueError:rejected+=1;continue
+ accepted+=1
+ x,y,z=map(F,r);q=x*x+y*y+z*z;s=F(math.isqrt(int(q*2**2400)),2**1200)
+ k0=-F(3,2)*F(j2)*F(mu)*F(R)**2
+ # exact real acceleration enclosed by adjacent rational bounds for sqrt(q).
+ for n,coord,factor in zip(range(3),[x,y,z],[1-5*z*z/q,1-5*z*z/q,3-5*z*z/q]):
+  coeff=k0*factor*coord/q**2
+  lo,hi=sorted([coeff/s,coeff/(s+F(1,2**1200))])
+  error=max(abs(F(float(a[n]))-lo),abs(F(float(a[n]))-hi))
+  # absolute expression majorant avoids relative claims near cancellation.
+  majorant=abs(k0)*(1+5*z*z/q if n<2 else 3+5*z*z/q)*abs(coord)/q**2/s
+  bound=F(1,2**1075)+F(64,2**53)*majorant
+  ratio=float(error/bound);worst=max(worst,ratio)
+  assert ratio<1,(mu,R,j2,r,a,ratio)
+  if a[n]==0. and max(abs(lo),abs(hi))>F(1,2**1075):zero.append(dict(r=r,component=n,majorant_relative_error=float(error/majorant)))
+print(json.dumps(dict(trajectories=trajectories,search=dict(seed=30303,accepted=accepted,rejected=rejected,max_error_over_64u_majorant_plus_half_subnormal=worst,representable_nonzero_rounded_to_zero=zero)),indent=2))

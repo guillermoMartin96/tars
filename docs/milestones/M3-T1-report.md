@@ -166,3 +166,9 @@ Independent T1 review (Codex), which needs separate owner authorization (packet 
 - R2-F1 also covers the same defect in the coefficient chain, found by the implementer; it is flagged for the owner.
 - **Mutation:** 46/46 killed by assertion; two exploratory survivors are documented as a limitation. **Valid outputs:** 200 004 states and three RK4 trajectories bit-identical to `b1566ae`.
 - **Status:** IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. Review 03 follows validation and green CI.
+
+## Status update (recorded 2026-10-23 UTC, append-only): Review 03 (I-20 §7–§8)
+- Codex Review 03 of `4b85ded`: **`VERDICT: PASS (unconditional)`**. No BLOCKER, MAJOR or MINOR finding. All earlier findings RESOLVED: M3T1-R1-F1 … F4 and R2-F1, F2, F3, O1. Record: `docs/reviews/M3-T1-review-03.md`.
+- New: M3T1-R3-F1 (NOTE, the exact-rational fallback's reach is described too broadly), M3T1-R3-F2 (NOTE, a Review 02 reproduction row reads μ after a later mutation), and observation R3-O1 (mutant `upper_subnormal_ignored` survives the T1 tests). All three reproduced; dispositions proposed, **none applied**. No Review 04.
+- Acceptance dossier: `docs/reviews/M3-T1-acceptance-dossier.md`.
+- **Status:** T1 IMPLEMENTED — REVIEW PASSED (Review 03) — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

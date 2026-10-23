@@ -1,0 +1,13 @@
+import math,sys,json
+from fractions import Fraction as F
+from tars.sim.forces import ZonalJ2Gravity
+r=[2.,0.,math.nextafter(1.,math.inf)];q=4+r[2]**2;r5=q*q*math.sqrt(q);mu=sys.float_info.min*r5/.75
+out=[]
+for m in [mu,math.nextafter(mu,math.inf),math.nextafter(mu,0.)]:
+ k=-.75*m/r5;c=1-5*(r[2]**2/q)
+ try:a=ZonalJ2Gravity(m,1,.5).acceleration(0,r,[0]*3).tolist()
+ except ValueError as e:a=str(e)
+ out.append(dict(mu=m,r=r,k=k,c=c,kc=k*c,exact_product=F(k)*F(c)==k*c,outcome=a))
+assert out[0]['exact_product'] and isinstance(out[0]['outcome'],list)
+assert isinstance(out[1]['outcome'],str) and 'component product underflows' in out[1]['outcome']
+print(json.dumps(out,indent=2))

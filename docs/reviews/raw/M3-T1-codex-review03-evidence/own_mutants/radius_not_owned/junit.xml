@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="107" time="4.963" timestamp="2026-10-23T13:00:29.994886-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_zonal_j2" name="test_identity_and_version" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_parameters_validated" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_parameters_are_immutable_after_construction" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_parameters_are_owned_snapshots_not_caller_references" time="0.001"><failure message="assert False&#10; +  where False = all(&lt;generator object test_parameters_are_owned_snapshots_not_caller_references.&lt;locals&gt;.&lt;genexpr&gt; at 0x107b49220&gt;)">def test_parameters_are_owned_snapshots_not_caller_references():
+        """M3T1-R2-F2: parameters are converted to built-in floats at construction, so mutating a
+        caller's zero-dimensional array afterwards changes neither the visible parameters nor the
+        acceleration."""
+        reference = j2_model()
+        r = np.array([RE, 0.0, 0.0])
+        expected = reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+        mu, radius, j2 = np.array(MU), np.array(RE), np.array(J2)
+        model = constructed(mu, radius, j2)
+        assert isinstance(model, ZonalJ2Gravity), model
+        mu[...], radius[...], j2[...] = -1.0, -RE, 0.0
+&gt;       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(&lt;generator object test_parameters_are_owned_snapshots_not_caller_references.&lt;locals&gt;.&lt;genexpr&gt; at 0x107b49220&gt;)
+
+tests/test_zonal_j2.py:200: AssertionError</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[float]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[float64]" time="0.001"><failure message="assert False&#10; +  where False = all(&lt;generator object test_supported_numeric_types_are_converted_to_binary64.&lt;locals&gt;.&lt;genexpr&gt; at 0x107b9da40&gt;)">convert = &lt;class 'numpy.float64'&gt;
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert a.dtype == np.float64
+        assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+&gt;       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(&lt;generator object test_supported_numeric_types_are_converted_to_binary64.&lt;locals&gt;.&lt;genexpr&gt; at 0x107b9da40&gt;)
+
+tests/test_zonal_j2.py:227: AssertionError</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[float32]" time="0.001"><failure message="AssertionError: assert dtype('float32') == &lt;class 'numpy.float64'&gt;&#10; +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype&#10; +  and   &lt;class 'numpy.float64'&gt; = np.float64">convert = &lt;class 'numpy.float32'&gt;
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+&gt;       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float32') == &lt;class 'numpy.float64'&gt;
+E        +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype
+E        +  and   &lt;class 'numpy.float64'&gt; = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[longdouble]" time="0.001"><failure message="AssertionError: assert dtype('float128') == &lt;class 'numpy.float64'&gt;&#10; +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype&#10; +  and   &lt;class 'numpy.float64'&gt; = np.float64">convert = &lt;class 'numpy.longdouble'&gt;
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+&gt;       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float128') == &lt;class 'numpy.float64'&gt;
+E        +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype
+E        +  and   &lt;class 'numpy.float64'&gt; = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[&lt;lambda&gt;0]" time="0.001"><failure message="AssertionError: assert dtype('float32') == &lt;class 'numpy.float64'&gt;&#10; +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype&#10; +  and   &lt;class 'numpy.float64'&gt; = np.float64">convert = &lt;function &lt;lambda&gt; at 0x107b92020&gt;
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+&gt;       assert a.dtype == np.float64
+E       AssertionError: assert dtype('float32') == &lt;class 'numpy.float64'&gt;
+E        +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype
+E        +  and   &lt;class 'numpy.float64'&gt; = np.float64
+
+tests/test_zonal_j2.py:225: AssertionError</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[&lt;lambda&gt;1]" time="0.001"><failure message="assert False&#10; +  where False = all(&lt;generator object test_supported_numeric_types_are_converted_to_binary64.&lt;locals&gt;.&lt;genexpr&gt; at 0x10835cad0&gt;)">convert = &lt;function &lt;lambda&gt; at 0x107b920c0&gt;
+
+    @pytest.mark.parametrize(
+        "convert",
+        [
+            float,
+            np.float64,
+            np.float32,
+            np.longdouble,
+            lambda v: np.array(v, dtype=np.float32),
+            lambda v: np.array(v),
+        ],
+    )
+    def test_supported_numeric_types_are_converted_to_binary64(convert):
+        """M3T1-R2-F2: every supported real type gives the model built from the same values as
+        built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
+        values = [convert(v) for v in (MU, RE, J2)]
+        model = constructed(*values)
+        assert isinstance(model, ZonalJ2Gravity), model
+        reference = ZonalJ2Gravity(*(float(v) for v in values))
+        r = np.array([RE, 2.0e6, 3.0e6])
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert a.dtype == np.float64
+        assert a.tobytes() == reference.acceleration(0.0, r, np.zeros(3)).tobytes()
+&gt;       assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
+E       assert False
+E        +  where False = all(&lt;generator object test_supported_numeric_types_are_converted_to_binary64.&lt;locals&gt;.&lt;genexpr&gt; at 0x10835cad0&gt;)
+
+tests/test_zonal_j2.py:227: AssertionError</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_float16_parameter_is_supported" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_integer_parameters_are_supported" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[6378137.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value2]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value3]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value4]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[True]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value7]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[(1+0j)0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[(1+0j)1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value10]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[None]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unrepresentable_integer_parameter_is_rejected" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_converted_parameters_keep_the_validation_contract[mu0-6378137.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_converted_parameters_keep_the_validation_contract[398600441800000.0-radius1-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_converted_parameters_keep_the_validation_contract[398600441800000.0-6378137.0-j22]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[nan-6378137.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-nan-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[1e+300-10000000000.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r1]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r2]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r3]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-60-coefficient]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-100-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-200-underflows to zero]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[5e-324-underflows to zero]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_result_overflow_raises" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_exact_subnormal_intermediates_are_not_underflow" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_legitimate_zero_components_are_returned" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_subnormal_result_components_are_returned" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e-50]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e-20]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[6378137.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e+40]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e+61]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_equator_and_pole" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[1-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[1--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[1-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[10-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[10--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[10-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[50-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[50--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[50-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[100-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[100--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[100-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[200-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[200--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[200-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[1.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[7.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[60.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[1000.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_gradient_holds_at_every_latitude_band[0.0010826261738522227]" time="0.582" /><testcase classname="tests.test_zonal_j2" name="test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]" time="0.587" /><testcase classname="tests.test_zonal_j2" name="test_acceleration_is_the_gradient_of_the_separately_coded_potential" time="0.016" /><testcase classname="tests.test_zonal_j2" name="test_gradient_oracle_detects_a_wrong_coefficient" time="0.017" /><testcase classname="tests.test_zonal_j2" name="test_axisymmetry_is_exact" time="0.004" /><testcase classname="tests.test_zonal_j2" name="test_radial_sign_changes_at_sin2_latitude_one_third" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged" time="0.014" /><testcase classname="tests.test_zonal_j2" name="test_j2_zero_propagation_is_bitwise_point_mass" time="0.102" /><testcase classname="tests.test_zonal_j2" name="test_polar_orbit_plane_is_exactly_invariant" time="0.342" /><testcase classname="tests.test_zonal_j2" name="test_invariant_drift_is_integrator_truncation[28.5]" time="0.994" /><testcase classname="tests.test_zonal_j2" name="test_invariant_drift_is_integrator_truncation[51.6]" time="0.994" /><testcase classname="tests.test_zonal_j2" name="test_invariant_drift_is_integrator_truncation[97.0]" time="0.994" /><testcase classname="tests.test_zonal_j2" name="test_wgs84_set_used_by_point_mass_is_unchanged" time="0.000" /><testcase classname="tests.test_constants" name="test_wgs84_defining_parameters" time="0.000" /><testcase classname="tests.test_constants" name="test_constants_are_immutable_and_validated" time="0.000" /><testcase classname="tests.test_constants" name="test_wgs84_literals_only_in_constants_module" time="0.006" /><testcase classname="tests.test_constants" name="test_standard_gravity_literal_only_in_constants_module" time="0.012" /><testcase classname="tests.test_constants" name="test_c20_is_the_published_nga_value" time="0.000" /><testcase classname="tests.test_constants" name="test_m3_set_reuses_the_wgs84_gm_and_radius" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_is_derived_not_stored" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_derivation_is_correctly_rounded_binary64" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_binary64_value_is_the_p10_recorded_value" time="0.000" /><testcase classname="tests.test_constants" name="test_q1_decimal_is_the_11_digit_display_form_of_derived_j2" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_identity_constants_validated" time="0.000" /><testcase classname="tests.test_constants" name="test_c20_literal_only_in_constants_and_no_j2_literal_anywhere" time="0.008" /></testsuite></testsuites>

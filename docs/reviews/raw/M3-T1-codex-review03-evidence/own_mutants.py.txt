@@ -1,0 +1,31 @@
+import importlib.util,pathlib,shutil,json,os,subprocess,sys,difflib
+root=pathlib.Path.cwd();out=root/'review_scratch/own_mutants';out.mkdir(exist_ok=True)
+spec=importlib.util.spec_from_file_location('harness','docs/science/experiments/m3-t1/t1_mutation_check.py');h=importlib.util.module_from_spec(spec);spec.loader.exec_module(h)
+mutants={
+'upper_subnormal_ignored':('abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product','abs(product) < _MIN_NORMAL / 2 and Fraction(a) * Fraction(b) != product'),
+'zero_only_underflow':('abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product','product == 0.0 and Fraction(a) * Fraction(b) != product'),
+'radius_not_owned':('equatorial_radius = _owned_float("equatorial_radius", equatorial_radius)','_owned_float("equatorial_radius", equatorial_radius)'),
+'j2_not_owned':('j2 = _owned_float("j2", j2)','_owned_float("j2", j2)'),
+'zero_j2_normal_required':('if not math.isfinite(k) or (j2 != 0.0 and abs(k) < _MIN_NORMAL):','if not math.isfinite(k) or abs(k) < _MIN_NORMAL:'),
+'flush_final_subnormal':('a = np.array([kc * x, kc * y, kd * z])','a = np.array([kc * x, kc * y, kd * z])\n        a[np.abs(a) < _MIN_NORMAL] = 0.0'),
+}
+results=[]
+for name,(anchor,replacement) in mutants.items():
+ d=out/name;d.mkdir(exist_ok=True);src=d/'src';shutil.copytree(root/'src',src,dirs_exist_ok=True)
+ f=src/'tars/sim/forces.py';text=f.read_text();assert text.count(anchor)==1
+ changed=text.replace(anchor,replacement);f.write_text(changed)
+ (d/'diff.patch').write_text(''.join(difflib.unified_diff(text.splitlines(True),changed.splitlines(True),fromfile='forces.py',tofile=name)))
+ cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider',f'--junitxml={d}/junit.xml',*h.TESTS]
+ p=subprocess.run(cmd,env=dict(os.environ,PYTHONPATH=str(src)),capture_output=True,text=True)
+ (d/'pytest.log').write_text(p.stdout+p.stderr)
+ import xml.etree.ElementTree as ET
+ failures=[]
+ for case in ET.parse(d/'junit.xml').iter('testcase'):
+  for kind in ['failure','error']:
+   for node in case.findall(kind):failures.append(dict(kind=kind,test=case.get('name'),type=node.get('type') or '',message=node.get('message') or ''))
+ results.append(dict(id=name,exit=p.returncode,by_assertion=any(h.is_assertion(f) for f in failures),failures=failures))
+ print(name,p.returncode,flush=True)
+# Red-first with final 107 tests against Review 02 source.
+p=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider',*h.TESTS],env=dict(os.environ,PYTHONPATH=str(root/'review_scratch/reviewed_src_b1566ae/src')),capture_output=True,text=True)
+(out/'redfirst.log').write_text(p.stdout+p.stderr)
+(out/'results.json').write_text(json.dumps(results,indent=2)+'\n')

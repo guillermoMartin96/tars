@@ -1,0 +1,75 @@
+import sys,math,json,random,importlib.util,subprocess,pathlib,os,shutil,difflib,struct
+from fractions import Fraction as F
+import numpy as np
+from tars.sim.forces import ZonalJ2Gravity,_underflows
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+out={}; rng=random.Random(200303)
+# Independently check product tininess/exactness across raw binary64 encodings.
+n=0
+for i in range(30000):
+ a,b=[struct.unpack('d',rng.randbytes(8))[0] for _ in range(2)]
+ if not(math.isfinite(a) and math.isfinite(b)):continue
+ p=a*b
+ expected=abs(p)<sys.float_info.min and F(a)*F(b)!=F(p)
+ assert _underflows(p,a,b)==expected
+ n+=1
+out['product_exactness_cases']=n
+class IntSubclass(int):pass
+class FloatSubclass(float):pass
+valid=[1,1.,IntSubclass(1),FloatSubclass(1)]
+for dtype in [np.int8,np.int16,np.int32,np.int64,np.uint8,np.uint16,np.uint32,np.uint64,np.float16,np.float32,np.float64,np.longdouble]:
+ valid.extend([dtype(1),np.array(1,dtype=dtype)])
+valid.append(np.array(1.,dtype=object))
+for v in valid:
+ m=ZonalJ2Gravity(v,v,v)
+ assert all(type(x) is float for x in [m.mu,m.equatorial_radius,m.j2])
+ assert m.acceleration(0,[2,0,0],[0]*3).tobytes()==ZonalJ2Gravity(1.,1.,1.).acceleration(0,[2,0,0],[0]*3).tobytes()
+invalid=[True,np.bool_(1),np.array(True),np.array(True,dtype=object),np.array('1'),np.array('1',dtype=object),np.array(F(1),dtype=object),np.array([1]),np.array(1+0j),None,F(1),'1',b'1']
+for v in invalid:
+ try:ZonalJ2Gravity(v,1.,1.)
+ except TypeError:pass
+ else:raise AssertionError(repr(v))
+for v in [10**400,-10**400]:
+ try:ZonalJ2Gravity(v,1.,1.)
+ except ValueError:pass
+ else:raise AssertionError(v)
+out['owned_type_cases']={'accepted':len(valid),'rejected':len(invalid),'object_numeric_0d':'accepted: extracted contained float; immutable snapshot'}
+# Own states, including extreme coordinate imbalance and subnormal coordinates.
+spec=importlib.util.spec_from_file_location('old','review_scratch/reviewed_src_b1566ae/src/tars/sim/forces.py');old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
+spec=importlib.util.spec_from_file_location('original','review_scratch/reviewed_src_97b69ef/src/tars/sim/forces.py');original=importlib.util.module_from_spec(spec);spec.loader.exec_module(original)
+new=ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2);before=old.ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2);first=original.ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2)
+diff=0;accepted=0;rejected=0
+for i in range(12000):
+ r=[rng.uniform(-1,1)*2.**rng.randint(-1074,205) for _ in range(3)] if i<6000 else [rng.uniform(-1,1)*rng.uniform(C.equatorial_radius,1e9) for _ in range(3)]
+ try:a=new.acceleration(0,r,[0]*3)
+ except ValueError:rejected+=1;continue
+ accepted+=1
+ assert a.tobytes()==before.acceleration(0,r,[0]*3).tobytes()==first.acceleration(0,r,[0]*3).tobytes()
+out['own_bit_identity']={'accepted':accepted,'rejected_domain':rejected,'differing':diff,'seed':200303}
+# Final products: use dyadic geometry and parameters so all precursor arithmetic is exact.
+final=[]
+for j in [0.,-0.,.5,-.5]:
+ for y in [0.,-0.,2.**-1074,2.**-50]:
+  r=[2.**200,y,0.]
+  a=ZonalJ2Gravity(1,1,j).acceleration(0,r,[0]*3)
+  exact_y=float(-F(3,2)*F(j)*F(y)/F(2.**200)**5)
+  assert a[1]==exact_y
+  final.append([j,y,a.tolist()])
+out['signed_zero_subnormal_final']=final
+# Exact subnormal factor products with normal k and unit-ish radius: c at neighboring factors.
+# Construct k via coefficient at r=[2^134,0,2^133]; c=0 gives zero without underflow.
+r=[2.**134,0.,2.**133]
+for j in [.5,-.5,0.,-0.]:
+ a=ZonalJ2Gravity(5.1827254193540115e-106,1,j).acceleration(0,r,[0]*3);assert a[0]==a[1]==0
+out['zero_latitude_signed_j2']='accepted all four signs/zeros'
+# Observe rational fallback on a canonical valid state with exactly zero latitude factor.
+import tars.sim.forces as forces
+count=[0]; original_fraction=forces.Fraction
+def counted(*a,**k):count[0]+=1;return original_fraction(*a,**k)
+forces.Fraction=counted
+r=[2.*C.equatorial_radius,0.,C.equatorial_radius]
+a=new.acceleration(0,r,[0]*3)
+forces.Fraction=original_fraction
+out['canonical_zero_factor_fraction_calls']={'r':r,'a':a.tolist(),'calls':count[0]}
+pathlib.Path('review_scratch/adversarial.json').write_text(json.dumps(out,indent=2)+'\n')
+print(json.dumps(out,indent=2))

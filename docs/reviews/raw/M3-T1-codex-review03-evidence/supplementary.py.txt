@@ -1,0 +1,36 @@
+import ast,pathlib,subprocess,json,math,random
+import numpy as np
+from tars.sim.forces import ZonalJ2Gravity
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+out={}
+for ref in ['b1566ae','97b69ef']:
+ out[f'forces_source_{ref}']=len(subprocess.check_output(['git','show',f'{ref}:src/tars/sim/forces.py']))
+a=subprocess.check_output(['git','show','b1566ae:src/tars/sim/forces.py']);b=subprocess.check_output(['git','show','1cf0ce9:src/tars/sim/forces.py']);assert a==b
+out['b1566ae_forces_equals_review02_head']=True
+for p in ['docs/science/experiments/m3-t1/README.md','docs/decisions/requests/DR-0025-m3-validation-methods.md','docs/milestones/M3-T1-authorization-packet.md']:
+ if not pathlib.Path(p).exists():continue
+ old=subprocess.check_output(['git','show',f'b1566ae:{p}']);assert pathlib.Path(p).read_bytes().startswith(old)
+out['additional_record_preservation']=True
+rng=random.Random(20261023);hit=0
+for _ in range(200000):
+ rad=C.equatorial_radius+rng.random()*(1e8-C.equatorial_radius);lat=math.asin(2*rng.random()-1);lon=2*math.pi*rng.random()
+ r=[rad*math.cos(lat)*math.cos(lon),rad*math.cos(lat)*math.sin(lon),rad*math.sin(lat)]
+ q=sum(x*x for x in r);s2=r[2]*r[2]/q;hit+=.123456<s2<.123457
+out['narrow_band_hits_original_random_set']=hit
+# Boundary case and constructor invalid conversions in each parameter position.
+types=[]
+for v in [np.longdouble('inf'),np.longdouble('nan'),np.array(np.nan),np.array(np.inf,dtype=object),0.,-0.,-1.]:
+ for idx in [0,1]:
+  args=[C.mu,C.equatorial_radius,C.j2];args[idx]=v
+  try:ZonalJ2Gravity(*args)
+  except ValueError:types.append([str(v),idx,'ValueError'])
+  else:raise AssertionError(args)
+out['invalid_converted_physical_parameters']=types
+# Adjacent-float accepted-domain checks and reason for lower endpoint.
+m=ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2);bounds=[]
+for x in [3.3773820261812166e-57,math.nextafter(3.3773820261812166e-57,0),4.476546622757235e61,math.nextafter(4.476546622757235e61,math.inf)]:
+ try:r=m.acceleration(0,[x,0,0],[0]*3).tolist()
+ except ValueError as e:r=str(e)
+ bounds.append([x,r])
+out['domain_neighbors']=bounds
+print(json.dumps(out,indent=2))

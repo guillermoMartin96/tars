@@ -1,0 +1,175 @@
+[
+  {
+    "id": "upper_subnormal_ignored",
+    "exit": 0,
+    "by_assertion": false,
+    "failures": []
+  },
+  {
+    "id": "zero_only_underflow",
+    "exit": 1,
+    "by_assertion": true,
+    "failures": [
+      {
+        "kind": "failure",
+        "test": "test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+        "type": "",
+        "message": "Failed: DID NOT RAISE ValueError"
+      },
+      {
+        "kind": "failure",
+        "test": "test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]",
+        "type": "",
+        "message": "Failed: DID NOT RAISE ValueError"
+      },
+      {
+        "kind": "failure",
+        "test": "test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]",
+        "type": "",
+        "message": "Failed: DID NOT RAISE ValueError"
+      },
+      {
+        "kind": "failure",
+        "test": "test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]",
+        "type": "",
+        "message": "Failed: DID NOT RAISE ValueError"
+      }
+    ]
+  },
+  {
+    "id": "radius_not_owned",
+    "exit": 1,
+    "by_assertion": true,
+    "failures": [
+      {
+        "kind": "failure",
+        "test": "test_parameters_are_owned_snapshots_not_caller_references",
+        "type": "",
+        "message": "assert False\n +  where False = all(<generator object test_parameters_are_owned_snapshots_not_caller_references.<locals>.<genexpr> at 0x107b49220>)"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[float64]",
+        "type": "",
+        "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x107b9da40>)"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[float32]",
+        "type": "",
+        "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = np.float64"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[longdouble]",
+        "type": "",
+        "message": "AssertionError: assert dtype('float128') == <class 'numpy.float64'>\n +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype\n +  and   <class 'numpy.float64'> = np.float64"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+        "type": "",
+        "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = np.float64"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[<lambda>1]",
+        "type": "",
+        "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x10835cad0>)"
+      }
+    ]
+  },
+  {
+    "id": "j2_not_owned",
+    "exit": 1,
+    "by_assertion": true,
+    "failures": [
+      {
+        "kind": "failure",
+        "test": "test_parameters_are_owned_snapshots_not_caller_references",
+        "type": "",
+        "message": "assert False\n +  where False = all(<generator object test_parameters_are_owned_snapshots_not_caller_references.<locals>.<genexpr> at 0x107791220>)"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[float64]",
+        "type": "",
+        "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x1077e5a40>)"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[float32]",
+        "type": "",
+        "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = np.float64"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[longdouble]",
+        "type": "",
+        "message": "AssertionError: assert dtype('float128') == <class 'numpy.float64'>\n +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype\n +  and   <class 'numpy.float64'> = np.float64"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+        "type": "",
+        "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = np.float64"
+      },
+      {
+        "kind": "failure",
+        "test": "test_supported_numeric_types_are_converted_to_binary64[<lambda>1]",
+        "type": "",
+        "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x107a60ad0>)"
+      },
+      {
+        "kind": "failure",
+        "test": "test_float16_parameter_is_supported",
+        "type": "",
+        "message": "AssertionError: ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number')\nassert False\n +  where False = isinstance(ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number'), ZonalJ2Gravity)"
+      }
+    ]
+  },
+  {
+    "id": "zero_j2_normal_required",
+    "exit": 1,
+    "by_assertion": true,
+    "failures": [
+      {
+        "kind": "failure",
+        "test": "test_legitimate_zero_components_are_returned",
+        "type": "",
+        "message": "AssertionError: ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number')\nassert False\n +  where False = isinstance(ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number'), <class 'numpy.ndarray'>)\n +    where <class 'numpy.ndarray'> = np.ndarray"
+      },
+      {
+        "kind": "failure",
+        "test": "test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged",
+        "type": "",
+        "message": "ValueError: -(3/2) J2 mu R^2 is not a finite normal binary64 number"
+      },
+      {
+        "kind": "failure",
+        "test": "test_j2_zero_propagation_is_bitwise_point_mass",
+        "type": "",
+        "message": "ValueError: -(3/2) J2 mu R^2 is not a finite normal binary64 number"
+      }
+    ]
+  },
+  {
+    "id": "flush_final_subnormal",
+    "exit": 1,
+    "by_assertion": true,
+    "failures": [
+      {
+        "kind": "failure",
+        "test": "test_subnormal_result_components_are_returned",
+        "type": "",
+        "message": "assert np.float64(6.2167845e-317) <= (2.0 ** -1074)\n +  where np.float64(6.2167845e-317) = abs((np.float64(0.0) - -6.2167845e-317))"
+      },
+      {
+        "kind": "failure",
+        "test": "test_axisymmetry_is_exact",
+        "type": "",
+        "message": "AssertionError: assert b'\\x00\\x00\\x0...oJ20K\\xa0\\xbf' == b'\\x00\\x00\\x0...oJ20K\\xa0\\xbf'\n  \n  At index 7 diff: b'\\x00' != b'\\x80'\n  Use -v to get more diff"
+      }
+    ]
+  }
+]

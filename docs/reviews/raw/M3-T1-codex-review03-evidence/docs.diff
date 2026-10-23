@@ -1,0 +1,1829 @@
+diff --git a/docs/milestones/M3-T1-report.md b/docs/milestones/M3-T1-report.md
+index d652749..257c8c2 100644
+--- a/docs/milestones/M3-T1-report.md
++++ b/docs/milestones/M3-T1-report.md
+@@ -156,3 +156,13 @@ Independent T1 review (Codex), which needs separate owner authorization (packet
+ - Codex Review 02 of `1cf0ce9`: **REQUEST_CHANGES**, 2 MINOR (M3T1-R2-F1 component-product underflow with non-physical parameters; M3T1-R2-F2 accepted NumPy parameters stored by reference and not converted to binary64) and 1 NOTE (R2-F3, correction-check docstring), plus a count note (R2-O1). R1-F3 and R1-F4 resolved; R1-F1 and R1-F2 partially resolved. Record: `docs/reviews/M3-T1-review-02.md`.
+ - All findings reproduced by the implementer; dispositions proposed, **none applied** (I-19 §12). No Review 03.
+ - **Status:** T1 IMPLEMENTED — REVIEWED TWICE — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
++
++## Status update (recorded 2026-10-23 UTC, append-only): Review 02 corrections (I-20)
++- Under I-20, M3T1-R2-F1 … F3 and R2-O1 are corrected:
++  - tests `56ad329`, `bbcf40e`, `308f126`;
++  - code `304d796`;
++  - evidence `a4dfda1`;
++  - records: VAL-0020 correction 2, Review 01 erratum, Review 02 record appendices.
++- R2-F1 also covers the same defect in the coefficient chain, found by the implementer; it is flagged for the owner.
++- **Mutation:** 46/46 killed by assertion; two exploratory survivors are documented as a limitation. **Valid outputs:** 200 004 states and three RK4 trajectories bit-identical to `b1566ae`.
++- **Status:** IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. Review 03 follows validation and green CI.
+diff --git a/docs/milestones/M3-decision-matrix.md b/docs/milestones/M3-decision-matrix.md
+index 26bed15..c0598f9 100644
+--- a/docs/milestones/M3-decision-matrix.md
++++ b/docs/milestones/M3-decision-matrix.md
+@@ -257,3 +257,8 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
+ - **Review 02 (`1cf0ce9`):** REQUEST_CHANGES; M3T1-R2-F1, F2 (MINOR), F3 (NOTE), O1 (count note). Proposed dispositions in `docs/reviews/M3-T1-review-02.md`; awaiting the Tech Lead.
+ - **Unchanged and open:** every other item.
+ - **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
++
++## T1 Review 02 corrections (recorded 2026-10-23 UTC, append-only)
++- **I-20:** Review 02 findings R2-F1, F2 (MINOR) and F3, O1 (NOTE) ACCEPTED and corrected (`56ad329` … `a4dfda1`). For R2-F2 the owner chose conversion to built-in `float`. The three exploratory survivors and the classifier observation are accepted as documented limitations.
++- **Unchanged and open:** every item preserved by I-19 §9.
++- **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+diff --git a/docs/reviews/M3-T1-review-01.md b/docs/reviews/M3-T1-review-01.md
+index c24597e..b10b159 100644
+--- a/docs/reviews/M3-T1-review-01.md
++++ b/docs/reviews/M3-T1-review-01.md
+@@ -177,3 +177,8 @@ Run at `16a8e63b0b209e08df94ed4df0f59c4991e0ac7a`, in fresh clones (M1 and M2 Pr
+   - The correction commits `62d3684`, `a27f288` and `b0164fd` were pushed together; CI run **39894033142** ran on `b0164fd`. `16a8e63`: run **39894176897**.
+   - The results, and the run on the commit that adds this section, are reported at the checkpoint.
+   - Review 02 starts only after the final head's run is green on all four jobs.
++
++## Erratum (M3T1-R2-O1; recorded 2026-10-23 UTC under I-20 §2, append-only)
++- In the "Corrections" table above, the M3T1-R1-F2 row says "8 F2 protection-removal mutants killed". The correct number is **7**. The protection-removal mutants are F1: 3, F2: 7, total 10.
++- The appended "Count correction" corrected "11" to 10 but left this "8" unchanged. Codex Review 02 found it (§11 item 5) and the implementer reproduced it (`raw/M3-T1-review02-reproduction/`).
++- The total of 32 and every per-mutant result are unchanged. The original rows are preserved as written.
+diff --git a/docs/reviews/M3-T1-review-02.md b/docs/reviews/M3-T1-review-02.md
+index fc9ea35..dda7719 100644
+--- a/docs/reviews/M3-T1-review-02.md
++++ b/docs/reviews/M3-T1-review-02.md
+@@ -65,3 +65,77 @@ Proposed dispositions are the implementer's. None is applied; each awaits the Te
+ ## Verification limits (from the reviewer, confirmed by the setup)
+ - All new numerical observations are from one host (macOS x86_64, CPython 3.12.15). The interval and rational certificates are conditional on the stated arithmetic model.
+ - No network, live CI authentication, cross-platform execution, GMAT executable or external physics implementation. The historical Proof wrapper outcomes (9/9, 20/20) are documentary claims to the reviewer.
++
++## Owner disposition (I-20; recorded 2026-10-23 UTC, append-only)
++- **Authority:** "I-20 — M3 T1 Review 02 Corrections and Review 03 Authorization" (Tech Lead). It acknowledges the I-19 checkpoint and accepts Review 02's findings, as reproduced, for correction.
++- **R2-F1 (MINOR): ACCEPTED.** Correct the remaining silent underflow in component products. Distinguish legitimate zeros. Keep valid realistic-orbit results bit-identical. No blanket rejection of subnormal inputs or outputs. No claim of complete IEEE 754 correctness.
++- **R2-F2 (MINOR): ACCEPTED, conversion chosen.** Convert μ, R and J2 to owned built-in `float` values before validation. Define and test the supported numeric types. Reject unsupported or non-convertible inputs with clear errors.
++- **R2-F3 (NOTE): ACCEPTED.** Correct the docstring. No trajectory work is to be added.
++- **R2-O1 (NOTE): ACCEPTED.** An explicit erratum: F1 3, F2 7, total 10.
++- **Mutation coverage (I-20 §3):**
++  - the three exploratory survivors are accepted as a documented verification limitation;
++  - the classifier observation is accepted as a limitation, and the classifier is not to be changed on hypothetical runner behavior.
++- The other observations stand as recorded above.
++
++## Corrections (I-20; recorded 2026-10-23 UTC, append-only)
++| Finding | Correction | Commit | Evidence |
++|---|---|---|---|
++| M3T1-R2-F1 | A product below the normal range that is **inexact** (IEEE underflow) raises `ValueError`: k (1 − 5 s²) and k (3 − 5 s²) in the acceleration, and the coefficient products −(3/2) J2, × μ, × R in the constructor. Exact zeros, exact subnormal products and subnormal final components are returned. Evaluation order is unchanged | `304d796` | 5 new test functions (8 cases); 7 R2-F1 mutants killed; `t1_review02_correction_check_results.json` |
++| (R2-F1, coefficient) | The same defect in the coefficient chain, **found by the implementer** while auditing every multiplication chain. Review 02 did not report it. J2 = 3 × 2⁻¹⁰⁷⁴ with μ = 2¹⁰⁰⁰ gave a normal coefficient 11 % wrong. Included under R2-F1 per I-19 §3 (do not fix only the reproduced example while the same path remains). **The owner may rule it out of scope** | `304d796` | `test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result` (one case per product) |
++| M3T1-R2-F2 | Parameters converted to built-in `float` before validation. Supported: `int` (not `bool`), `float`, NumPy integer and floating scalars, zero-dimensional arrays of those. Others raise `TypeError`; an out-of-range `int` raises `ValueError` | `304d796` | 7 new test functions; 7 R2-F2 mutants killed |
++| M3T1-R2-F3 | Docstring now says 200 000 random states and four axis states, no trajectory. Output unchanged (byte-identical) | `a4dfda1` | `t1_review01_correction_check_results.json` reproduces |
++| M3T1-R2-O1 | Erratum appended to `M3-T1-review-01.md` (F1 3, F2 7, total 10) | records commit | `M3-T1-review-01.md`, "Erratum (M3T1-R2-O1)" |
++
++- **Red-first:** the final tests give **26 failed, 69 passed** (95 T1 cases) against `b1566ae`. The `56ad329` message says 24/69 of 93: two coefficient cases were added in `308f126`.
++- **Before and after** (`t1_review02_correction_check_results.json`):
++
++| Case | Before (`b1566ae`) | After | Exact |
++|---|---|---|---|
++| Review 02 x case | `[-0.0, -0.0, -2.2250738585072012e-268]` | raises "a component product underflows" | x = −4.303918780958246e-284 |
++| y variant | y = −0.0 | raises | y = −4.303918780958246e-284 |
++| (3 − 5 s²) factor | z = −3.025521829374199e-283 | raises | z = −1.3478448085169703e-283 |
++| coefficient chain | x = −1.925929944387236e-34 | raises "an intermediate product underflows" | x = −2.1666711874356403e-34 |
++| μ 0-d array set to −1 after construction | x = +3.99e-17 (outward) | x = −0.01591182047796651 (canonical) | — |
++| float32 parameters | float32 result, x = −0.01591181941330433 | float64, x = −0.015911820615666403 (= the values as floats) | — |
++| `"398600441800000.0"`, `[mu]` | `TypeError` from `math.isfinite` | `TypeError` "mu must be a real number …" | — |
++| J2 = `True` | accepted as J2 = 1 | `TypeError` | — |
++| μ = 10⁴⁰⁰ (int) | `OverflowError` | `ValueError` "not representable as a binary64 number" | — |
++
++- **Legitimate results, unchanged:**
++  - an exact zero factor and coordinate gives `[-0.0, -0.0, -9.891604774494805e-268]`;
++  - J2 = 0 gives zeros;
++  - an exact subnormal intermediate gives x = −1.4444474582904269e-34;
++  - a subnormal final component gives y = −6.2167845e-317.
++  - All equal the exactly rounded values (zeros with a sign bit).
++
++## Mutation coverage after the corrections (I-20 §3; recorded 2026-10-23 UTC, append-only)
++1. **Committed campaign:** 46 mutants, **46 killed by assertion**, none surviving (`t1_mutation_check_results.json`).
++2. **Review 02's exploratory mutants** on the corrected code (`t1_review02_survivors_results.json`):
++   - `near_min_normal_zero`: killed;
++   - `canonical_one_ulp`: survives;
++   - `narrow_band`: survives.
++3. **Limits:** finite sampling and mutation testing do not establish the absence of defects. VAL-0020 correction 2, "Mutation limitations", gives the triggering conditions and why the two survivors do not invalidate the authorized T1 criteria. No survivor is found to violate an explicit required invariant or acceptance gate. Nothing is elevated.
++- *Count correction (appended):*
++  - In the Corrections table, the R2-F1 tests are 5 functions with **9** cases, not 8. The R2-F2 tests are 7 functions with 25 cases.
++  - "95 T1 cases" counts `tests/test_zonal_j2.py` only. With `tests/test_constants.py`, the basis of Review 01's 73, there are **107 T1 cases**: 26 failed and 81 passed against `b1566ae`.
++
++## Validation of the correction pass (I-20 §6; recorded 2026-10-23 UTC, append-only)
++Run at `c456881d7a9f5968739731b89fdc291860b54a76` on the reference host, in three fresh clones with `uv sync --locked`: M1 Proof, M2 Proof, and the remaining checks, each in its own clone.
++
++| Check | Command | Result |
++|---|---|---|
++| M1 Proof | `bash toolbox/scripts/run_m1_proof.sh` | **PASS**, 9/9 steps, `working_tree_clean_excluding_evidence: yes`. Includes the M1 golden comparison, cross-process determinism and cross-platform validator |
++| M2 Proof | `bash toolbox/scripts/run_m2_proof.sh <scratch evidence dir>` | **PASS**, 20/20 steps, tree clean. `m2_proof` **228/228** (6 missions, threshold status approved). pytest **1288 passed**, 3 warnings (= 1254 + 34 new T1 cases). M1 golden hash `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` |
++| T0 checks | `pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py` | **314 passed** |
++| T1 tests | `pytest -q -p no:cacheprovider tests/test_zonal_j2.py tests/test_constants.py` | **107 passed** |
++| Mutation | `python docs/science/experiments/m3-t1/t1_mutation_check.py OUT` | control passes; **46/46 detected, 46 by assertion, none surviving**. Equal to the committed file except for object memory addresses inside six pytest assertion messages, which vary between runs; every verdict, failing test and summary is identical |
++| Review 02 correction check | `python …/t1_review02_correction_check.py <src at b1566ae> OUT` | **byte-identical** to the committed results: before/after of every Review 02 reproduction; 200 004 states and three RK4 trajectories bit-identical to `b1566ae` |
++| Review 01 correction check | `python …/t1_review01_correction_check.py <src at 97b69ef> OUT` | **byte-identical**. 200 004 states bit-identical to `97b69ef` |
++| Survivors | `python …/t1_review02_survivors.py OUT` | byte-identical: `near_min_normal_zero` killed; `canonical_one_ulp`, `narrow_band` survive |
++| Informational | `python …/t1_j2_informational.py OUT` | byte-identical |
++| Ruff | `ruff check .`, `ruff format --check .` | pass |
++| Tree | `git status --porcelain` | clean (T1 and M2 clones). The M1 clone changes only its evidence log, as the Proof records |
++
++- **Protected paths:** `git diff 60648b9..c456881 -- proof toolbox scenarios .github uv.lock pyproject.toml src/tars/validation` is empty. Since `97b69ef`, `src/` changes are confined to `src/tars/sim/forces.py` (`ZonalJ2Gravity`, its two helpers `_owned_float`/`_underflows`, `_MIN_NORMAL` and imports).
++- **Realistic-orbit bit identity (I-20 §6):** no difference anywhere. No stop was needed.
++- **CI:** the I-20 commits were pushed in three groups: `56ad329`…`a4dfda1` together, then `2f82c00`, then `c456881`. The runs and the run on the commit adding this section are reported at the checkpoint. Review 03 starts only once the final head's run is green on all four jobs.
+diff --git a/docs/science/experiments/m3-t1/README.md b/docs/science/experiments/m3-t1/README.md
+index 8e5b0df..cb626b6 100644
+--- a/docs/science/experiments/m3-t1/README.md
++++ b/docs/science/experiments/m3-t1/README.md
+@@ -10,3 +10,12 @@ The gates are in `tests/test_zonal_j2.py` and `tests/test_constants.py` (run by
+ | `t1_mutation_check.py` → `t1_mutation_check_results.json` | 14 one-line mutants of the production code; each must make the T1 tests fail; the unmutated control must pass | `uv run python docs/science/experiments/m3-t1/t1_mutation_check.py docs/science/experiments/m3-t1/t1_mutation_check_results.json` |
+ 
+ Reproducibility: both scripts were run twice on the reference host (macOS x86_64, Python 3.12, `uv sync --locked`); the informational output is byte-identical across the runs. The JSON records the host. Other platforms are not measured for these informational files.
++
++## Files added by the Review 01 and Review 02 corrections (I-19, I-20; append-only)
++| File | What it is | Command (repository root) |
++|---|---|---|
++| `t1_review01_correction_check.py` → `t1_review01_correction_check_results.json` | Review 01 reproductions before/after; bit identity with `97b69ef` on 200 004 states; equatorial numerical domain | `uv run python docs/science/experiments/m3-t1/t1_review01_correction_check.py <src at 97b69ef> OUT.json` |
++| `t1_review02_correction_check.py` → `t1_review02_correction_check_results.json` | Review 02 reproductions before/after, with exactly rounded references; legitimate zeros and subnormals; domain; canonical reach; bit identity with `b1566ae` on 200 004 states and three RK4 trajectories | `uv run python docs/science/experiments/m3-t1/t1_review02_correction_check.py <src at b1566ae> OUT.json` |
++| `t1_review02_survivors.py` → `t1_review02_survivors_results.json` | Status of Review 02's three exploratory mutants on the corrected code (not part of the campaign) | `uv run python docs/science/experiments/m3-t1/t1_review02_survivors.py OUT.json` |
++
++`t1_mutation_check.py` now holds 46 mutants: the original 14, Review 01's 8, and 24 protection-removal mutants (10 for R1-F1/F2, 14 for R2-F1/F2). `<src at SHA>` is `git archive SHA src` extracted to a directory.
+diff --git a/docs/science/experiments/m3-t1/t1_mutation_check.py b/docs/science/experiments/m3-t1/t1_mutation_check.py
+index 4926f5d..2a03ed5 100644
+--- a/docs/science/experiments/m3-t1/t1_mutation_check.py
++++ b/docs/science/experiments/m3-t1/t1_mutation_check.py
+@@ -11,6 +11,9 @@ unexpected error.
+ 
+ Mutants added after Codex Review 01 (I-19): the reviewer's eight mutants (four of which
+ survived the Review 01 tests) and mutants that remove each M3T1-R1-F1/F2 protection.
++Mutants added after Codex Review 02 (I-20): removal of each M3T1-R2-F1/F2 protection. The
++anchors of four original mutants follow the R2-F1 rewrite of the component expression
++(``k * c * x`` -> ``kc * x``, same defects).
+ 
+ Usage (from the repository root):
+     uv run python docs/science/experiments/m3-t1/t1_mutation_check.py OUT.json
+@@ -39,8 +42,8 @@ MUTANTS = [
+     (
+         "z_factor",
+         FORCES,
+-        "k * (3.0 - 5.0 * s2) * z",
+-        "k * (2.0 - 5.0 * s2) * z",
++        "d = 3.0 - 5.0 * s2",
++        "d = 2.0 - 5.0 * s2",
+         "z factor 3 -> 2 (non-conservative)",
+     ),
+     (
+@@ -53,15 +56,15 @@ MUTANTS = [
+     (
+         "xy_asym",
+         FORCES,
+-        "k * c * y,",
+-        "k * c * y * (1.0 + 1e-9),",
++        "kc * y,",
++        "kc * y * (1.0 + 1e-9),",
+         "x/y asymmetry 1e-9 (not axisymmetric)",
+     ),
+     (
+         "z_scale_1e9",
+         FORCES,
+-        "k * (3.0 - 5.0 * s2) * z]",
+-        "k * (3.0 - 5.0 * s2) * z * (1.0 + 1e-9)]",
++        "kd * z]",
++        "kd * z * (1.0 + 1e-9)]",
+         "z component scaled by 1e-9",
+     ),
+     (
+@@ -81,8 +84,8 @@ MUTANTS = [
+     (
+         "j2_zero_offset",
+         FORCES,
+-        "a = np.array([k * c * x,",
+-        "a = np.array([k * c * x + 1e-300,",
++        "a = np.array([kc * x,",
++        "a = np.array([kc * x + 1e-300,",
+         "J2 = 0 not exactly zero",
+     ),
+     (
+@@ -252,6 +255,106 @@ MUTANTS = [
+         "if False:",
+         "overflowing result returned",
+     ),
++    # ---- removal of each M3T1-R2-F1 / F2 protection (I-20 §2)
++    (
++        "r2f1_component_products_unchecked",
++        FORCES,
++        "if _underflows(kc, k, c) or _underflows(kd, k, d):",
++        "if False:",
++        "component-product underflow returned silently",
++    ),
++    (
++        "r2f1_xy_factor_unchecked",
++        FORCES,
++        "if _underflows(kc, k, c) or _underflows(kd, k, d):",
++        "if _underflows(kd, k, d):",
++        "k (1 - 5 s^2) underflow returned silently",
++    ),
++    (
++        "r2f1_z_factor_unchecked",
++        FORCES,
++        "if _underflows(kc, k, c) or _underflows(kd, k, d):",
++        "if _underflows(kc, k, c):",
++        "k (3 - 5 s^2) underflow returned silently",
++    ),
++    (
++        "r2f1_coefficient_p1_unchecked",
++        FORCES,
++        "_underflows(p1, -1.5, j2)\n            or ",
++        "",
++        "-(3/2) J2 underflow accepted",
++    ),
++    (
++        "r2f1_coefficient_p2_unchecked",
++        FORCES,
++        "or _underflows(p2, p1, mu)\n            ",
++        "",
++        "-(3/2) J2 mu underflow accepted",
++    ),
++    (
++        "r2f1_coefficient_p3_unchecked",
++        FORCES,
++        "\n            or _underflows(p3, p2, equatorial_radius)",
++        "",
++        "-(3/2) J2 mu R underflow accepted",
++    ),
++    (
++        "r2f1_exactness_ignored",
++        FORCES,
++        "return abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product",
++        "return abs(product) < _MIN_NORMAL",
++        "exact zeros and exact subnormal products rejected as underflow",
++    ),
++    (
++        "r2f2_parameters_not_converted",
++        FORCES,
++        'mu = _owned_float("mu", mu)',
++        '_owned_float("mu", mu)',
++        "mu stored as the caller's object",
++    ),
++    (
++        "r2f2_type_unchecked",
++        FORCES,
++        "if isinstance(scalar, bool) or not isinstance("
++        "scalar, int | float | np.integer | np.floating):",
++        "if False:",
++        "any float()-convertible input accepted",
++    ),
++    (
++        "r2f2_bool_accepted",
++        FORCES,
++        "if isinstance(scalar, bool) or not isinstance(",
++        "if not isinstance(",
++        "bool accepted as a number",
++    ),
++    (
++        "r2f2_zero_d_array_rejected",
++        FORCES,
++        "value[()] if isinstance(value, np.ndarray) and value.ndim == 0 else value",
++        "value",
++        "zero-dimensional arrays rejected",
++    ),
++    (
++        "r2f2_numpy_integer_rejected",
++        FORCES,
++        "int | float | np.integer | np.floating",
++        "int | float | np.floating",
++        "NumPy integer scalars rejected",
++    ),
++    (
++        "r2f2_numpy_floating_rejected",
++        FORCES,
++        "int | float | np.integer | np.floating",
++        "int | float | np.integer",
++        "NumPy floating scalars (not float64) rejected",
++    ),
++    (
++        "r2f2_overflow_not_converted",
++        FORCES,
++        "except OverflowError:",
++        "except ZeroDivisionError:",
++        "huge int raises OverflowError instead of ValueError",
++    ),
+ ]
+ 
+ 
+diff --git a/docs/science/experiments/m3-t1/t1_mutation_check_results.json b/docs/science/experiments/m3-t1/t1_mutation_check_results.json
+index 3c99800..acd72aa 100644
+--- a/docs/science/experiments/m3-t1/t1_mutation_check_results.json
++++ b/docs/science/experiments/m3-t1/t1_mutation_check_results.json
+@@ -10,6 +10,24 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
++          "type": "",
++          "message": "assert np.float64(2.8888949165808538e-34) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(2.8888949165808538e-34) = abs((np.float64(1.4444474582904269e-34) - -1.4444474"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(1.978320954898961e-267) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(1.978320954898961e-267) = abs((np.float64(9.891604774494805e-268) - -9.8916047"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(1.2433569e-316) <= (2.0 ** -1074)\n +  where np.float64(1.2433569e-316) = abs((np.float64(6.2167845e-317) - -6.2167845e-317))"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+@@ -212,6 +230,30 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(6.59440318299654e-269) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(6.59440318299654e-269) = abs((np.float64(-9.232164456195151e-268) - -9.89160477"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(4.144524e-318) <= (2.0 ** -1074)\n +  where np.float64(4.144524e-318) = abs((np.float64(-5.802332e-317) - -6.2167845e-317))"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+@@ -408,6 +450,18 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(4.945802387247403e-268) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(4.945802387247403e-268) = abs((np.float64(-4.945802387247403e-268) - -9.891604"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+@@ -574,6 +628,12 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "AssertionError: ValueError('outside the J2 numerical domain: a component product underflows')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: a component product"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+@@ -654,6 +714,12 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(9.891606151981937e-277) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(9.891606151981937e-277) = abs((np.float64(-9.891604784386412e-268) - -9.891604"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+@@ -802,6 +868,36 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
++          "type": "",
++          "message": "assert np.float64(1.4444460137026371e-40) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(1.4444460137026371e-40) = abs((np.float64(-1.4444460138444132e-34) - -1.444447"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(9.89159488217061e-274) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(9.89159488217061e-274) = abs((np.float64(-9.891594882899923e-268) - -9.89160477"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(6.4e-323) <= (2.0 ** -1074)\n +  where np.float64(6.4e-323) = abs((np.float64(-6.216778e-317) - -6.2167845e-317))"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+@@ -980,6 +1076,36 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert (np.float64(-9.891604774494805e-268) == 0.0)"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(6.2167845e-317) <= (2.0 ** -1074)\n +  where np.float64(6.2167845e-317) = abs((np.float64(-0.0) - -6.2167845e-317))"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+@@ -1134,7 +1260,7 @@
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_polar_orbit_plane_is_exactly_invariant",
+           "type": "",
+-          "message": "assert (np.False_)\n +  where np.False_ = <function all at 0x1108819b0>(array([ 0.00000000e+00, -2.66047890e-03, -2.12827489e-02, ...,\\n        3.10112986e+05,  3.09674854e+05,  3.09193553e+05], shape="
++          "message": "assert (np.False_)\n +  where np.False_ = <function all at 0x110d49a30>(array([ 0.00000000e+00, -2.66047890e-03, -2.12827489e-02, ...,\\n        3.10112986e+05,  3.09674854e+05,  3.09193553e+05], shape="
+         },
+         {
+           "kind": "failure",
+@@ -1164,6 +1290,12 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert (np.float64(1e-300) == 0.0)"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+@@ -1270,7 +1402,7 @@
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged",
+           "type": "",
+-          "message": "assert np.False_\n +  where np.False_ = <function all at 0x11038ddb0>(array([ 1.e-300,  0.e+000, -0.e+000]) == 0.0)\n +    where <function all at 0x11038ddb0> = np.all"
++          "message": "assert np.False_\n +  where np.False_ = <function all at 0x111df9ef0>(array([ 1.e-300,  0.e+000, -0.e+000]) == 0.0)\n +    where <function all at 0x111df9ef0> = np.all"
+         }
+       ]
+     },
+@@ -1462,6 +1594,12 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(-1.1247726104217237e-241) == -1.1247726104217232e-241"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+@@ -1592,6 +1730,42 @@
+           "type": "",
+           "message": "Failed: DID NOT RAISE ValueError"
+         },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
++          "type": "",
++          "message": "assert np.float64(1.4444474582904269e-34) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(1.4444474582904269e-34) = abs((np.float64(0.0) - -1.4444474582904269e-34))\n + "
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(9.891604774494805e-268) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(9.891604774494805e-268) = abs((np.float64(0.0) - -9.891604774494805e-268))\n + "
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(6.2167845e-317) <= (2.0 ** -1074)\n +  where np.float64(6.2167845e-317) = abs((np.float64(0.0) - -6.2167845e-317))"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+@@ -1766,6 +1940,42 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
++          "type": "",
++          "message": "assert np.float64(4.81482486096809e-35) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(4.81482486096809e-35) = abs((np.float64(-9.62964972193618e-35) - -1.444447458290"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "AssertionError: ValueError('outside the J2 numerical domain: coefficient not a normal binary64')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: coefficient not "
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
++          "type": "",
++          "message": "assert np.float64(3.436554e-317) <= (2.0 ** -1074)\n +  where np.float64(3.436554e-317) = abs((np.float64(-2.7802304e-317) - -6.2167845e-317))"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+@@ -1968,6 +2178,36 @@
+           "type": "",
+           "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'acceleration overflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+         },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
++          "type": "",
++          "message": "assert np.float64(1.5477378841865193e+267) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(1.5477378841865193e+267) = abs((np.float64(-1.5477378841865193e+267) - -1.444"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "AssertionError: ValueError('outside the J2 numerical domain: coefficient not a normal binary64')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: coefficient not "
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+@@ -2062,6 +2302,12 @@
+       "detected": true,
+       "by_assertion": true,
+       "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "AssertionError: ValueError('outside the J2 numerical domain: a component product underflows')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: a component product"
++        },
+         {
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+@@ -2144,7 +2390,7 @@
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_parameters_are_immutable_after_construction",
+           "type": "",
+-          "message": "AssertionError: assert not True\n +  where True = hasattr(<tars.sim.forces.ZonalJ2Gravity object at 0x1121be4e0>, '__dict__')"
++          "message": "AssertionError: assert not True\n +  where True = hasattr(<tars.sim.forces.ZonalJ2Gravity object at 0x110754050>, '__dict__')"
+         }
+       ]
+     },
+@@ -2188,7 +2434,7 @@
+           "kind": "failure",
+           "test": "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]",
+           "type": "",
+-          "message": "Failed: DID NOT RAISE ValueError"
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: '-\\\\(3/2\\\\) J2 mu R\\\\^2 is not a finite normal'\n  Actual message: '-(3/2) J2 mu R^2: an intermediate product underflows'"
+         }
+       ]
+     },
+@@ -2325,10 +2571,414 @@
+           "message": "Failed: DID NOT RAISE ValueError"
+         }
+       ]
++    },
++    {
++      "id": "r2f1_component_products_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "component-product underflow returned silently",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        }
++      ]
++    },
++    {
++      "id": "r2f1_xy_factor_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "k (1 - 5 s^2) underflow returned silently",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        }
++      ]
++    },
++    {
++      "id": "r2f1_z_factor_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "k (3 - 5 s^2) underflow returned silently",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        }
++      ]
++    },
++    {
++      "id": "r2f1_coefficient_p1_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "-(3/2) J2 underflow accepted",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        }
++      ]
++    },
++    {
++      "id": "r2f1_coefficient_p2_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "-(3/2) J2 mu underflow accepted",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        }
++      ]
++    },
++    {
++      "id": "r2f1_coefficient_p3_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "-(3/2) J2 mu R underflow accepted",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE ValueError"
++        }
++      ]
++    },
++    {
++      "id": "r2f1_exactness_ignored",
++      "file": "tars/sim/forces.py",
++      "defect": "exact zeros and exact subnormal products rejected as underflow",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
++          "type": "",
++          "message": "AssertionError: ValueError('-(3/2) J2 mu R^2: an intermediate product underflows')\nassert False\n +  where False = isinstance(ValueError('-(3/2) J2 mu R^2: an intermediate product underflows'), <class "
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
++          "type": "",
++          "message": "AssertionError: ValueError('outside the J2 numerical domain: a component product underflows')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: a component product"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged",
++          "type": "",
++          "message": "ValueError: -(3/2) J2 mu R^2: an intermediate product underflows"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_j2_zero_propagation_is_bitwise_point_mass",
++          "type": "",
++          "message": "ValueError: -(3/2) J2 mu R^2: an intermediate product underflows"
++        }
++      ]
++    },
++    {
++      "id": "r2f2_parameters_not_converted",
++      "file": "tars/sim/forces.py",
++      "defect": "mu stored as the caller's object",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_parameters_are_owned_snapshots_not_caller_references",
++          "type": "",
++          "message": "assert False\n +  where False = all(<generator object test_parameters_are_owned_snapshots_not_caller_references.<locals>.<genexpr> at 0x105130ba0>)"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float64]",
++          "type": "",
++          "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x105130860>)"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float32]",
++          "type": "",
++          "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = "
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[longdouble]",
++          "type": "",
++          "message": "AssertionError: assert dtype('float128') == <class 'numpy.float64'>\n +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype\n +  and   <class 'numpy.float64'>"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
++          "type": "",
++          "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = "
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]",
++          "type": "",
++          "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x1053820c0>)"
++        }
++      ]
++    },
++    {
++      "id": "r2f2_type_unchecked",
++      "file": "tars/sim/forces.py",
++      "defect": "any float()-convertible input accepted",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[6378137.0]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value2]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'list'\""
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value3]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'tuple'\""
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value4]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: 'only 0-dimensional arrays can be converted to Python scalars'"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value5]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[True]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value7]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[(1+0j)0]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'complex'\""
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[(1+0j)1]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value10]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[None]",
++          "type": "",
++          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'NoneType'\""
++        }
++      ]
++    },
++    {
++      "id": "r2f2_bool_accepted",
++      "file": "tars/sim/forces.py",
++      "defect": "bool accepted as a number",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[True]",
++          "type": "",
++          "message": "Failed: DID NOT RAISE TypeError"
++        }
++      ]
++    },
++    {
++      "id": "r2f2_zero_d_array_rejected",
++      "file": "tars/sim/forces.py",
++      "defect": "zero-dimensional arrays rejected",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_parameters_are_owned_snapshots_not_caller_references",
++          "type": "",
++          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
++          "type": "",
++          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]",
++          "type": "",
++          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_converted_parameters_keep_the_validation_contract[mu0-6378137.0-0.0010826261738522227]",
++          "type": "",
++          "message": "TypeError: mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_converted_parameters_keep_the_validation_contract[398600441800000.0-6378137.0-j22]",
++          "type": "",
++          "message": "TypeError: j2 must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray"
++        }
++      ]
++    },
++    {
++      "id": "r2f2_numpy_integer_rejected",
++      "file": "tars/sim/forces.py",
++      "defect": "NumPy integer scalars rejected",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_integer_parameters_are_supported",
++          "type": "",
++          "message": "AssertionError: TypeError('equatorial_radius must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not int64')\nassert False\n +  where False = isinstance("
++        }
++      ]
++    },
++    {
++      "id": "r2f2_numpy_floating_rejected",
++      "file": "tars/sim/forces.py",
++      "defect": "NumPy floating scalars (not float64) rejected",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float32]",
++          "type": "",
++          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not float32')\nassert False\n +  where False = isinstance(TypeError('mu"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[longdouble]",
++          "type": "",
++          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not longdouble')\nassert False\n +  where False = isinstance(TypeError("
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
++          "type": "",
++          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_float16_parameter_is_supported",
++          "type": "",
++          "message": "AssertionError: TypeError('j2 must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not float16')\nassert False\n +  where False = isinstance(TypeError('j2"
++        },
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_converted_parameters_keep_the_validation_contract[398600441800000.0-radius1-0.0010826261738522227]",
++          "type": "",
++          "message": "TypeError: equatorial_radius must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not float32"
++        }
++      ]
++    },
++    {
++      "id": "r2f2_overflow_not_converted",
++      "file": "tars/sim/forces.py",
++      "defect": "huge int raises OverflowError instead of ValueError",
++      "pytest_exit": 1,
++      "detected": true,
++      "by_assertion": true,
++      "failures": [
++        {
++          "kind": "failure",
++          "test": "tests.test_zonal_j2::test_unrepresentable_integer_parameter_is_rejected",
++          "type": "",
++          "message": "AssertionError: assert (<class 'OverflowError'> is ValueError)\n +  where <class 'OverflowError'> = type(OverflowError('int too large to convert to float'))"
++        }
++      ]
+     }
+   ],
+-  "detected": 32,
+-  "detected_by_assertion": 32,
+-  "total": 32,
++  "detected": 46,
++  "detected_by_assertion": 46,
++  "total": 46,
+   "surviving": []
+ }
+diff --git a/docs/science/experiments/m3-t1/t1_review01_correction_check.py b/docs/science/experiments/m3-t1/t1_review01_correction_check.py
+index 1cd3b3d..425747e 100644
+--- a/docs/science/experiments/m3-t1/t1_review01_correction_check.py
++++ b/docs/science/experiments/m3-t1/t1_review01_correction_check.py
+@@ -2,8 +2,9 @@
+ 
+ 1. Re-runs each Review 01 reproduction (M3T1-R1-F1, F2) against the corrected component.
+ 2. Bit-identity: the corrected acceleration equals the reviewed one (``97b69ef``, loaded
+-   from OLD_SRC) bit for bit on deterministic pseudo-random states from 6 378 km to
+-   100 000 km, at every latitude, and on the committed RK4 trajectories' states.
++   from OLD_SRC) bit for bit on 200 000 deterministic pseudo-random states from 6 378 km
++   to 100 000 km, at every latitude, and on four axis states (M3T1-R2-F3: no trajectory
++   is checked here).
+ 3. The numerical domain for the canonical constants: the smallest and largest equatorial
+    radius accepted, found by bisection on binary64 values.
+ 
+diff --git a/docs/science/experiments/m3-t1/t1_review02_correction_check.py b/docs/science/experiments/m3-t1/t1_review02_correction_check.py
+new file mode 100644
+index 0000000..fb04d0a
+--- /dev/null
++++ b/docs/science/experiments/m3-t1/t1_review02_correction_check.py
+@@ -0,0 +1,225 @@
++"""M3 T1: evidence that the Review 02 corrections (I-20) hold and change no valid result.
++
++1. Re-runs each Review 02 reproduction (M3T1-R2-F1, F2) and the coefficient-chain case
++   found while correcting R2-F1, against the pre-correction component (``b1566ae``, loaded
++   from OLD_SRC) and the corrected one, with exactly rounded reference values.
++2. Exact zeros, exact subnormal intermediates and subnormal final components: returned.
++3. The numerical domain for the canonical constants (equatorial bisection, as in
++   ``t1_review01_correction_check.py``), and the smallest coefficient and factor products
++   the canonical constants can produce inside it.
++4. Bit identity with OLD_SRC: the 200 004 states of ``t1_review01_correction_check.py``
++   (same seed and generator) and three RK4 trajectories (point mass + J2, perigee 300 km,
++   apogee 1000 km, inclinations 28.5, 51.6 and 97 deg, dt 10 s, 6 000 steps).
++
++Usage (from the repository root; OLD_SRC is a checkout of src/ at b1566ae):
++    uv run python docs/science/experiments/m3-t1/t1_review02_correction_check.py OLD_SRC OUT.json
++"""
++
++from __future__ import annotations
++
++import importlib.util
++import json
++import math
++import random
++import struct
++import sys
++from fractions import Fraction
++from pathlib import Path
++
++import numpy as np
++
++from tars.astro.elements import elements_to_rv
++from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as K
++from tars.sim.forces import CompositeForceModel, PointMassGravity, ZonalJ2Gravity
++from tars.sim.integrators import RK4
++
++MU, A, J2 = K.mu, K.equatorial_radius, K.j2
++Z3 = np.zeros(3)
++MIN_NORMAL = sys.float_info.min
++
++
++def load_old(old_src: str):
++    spec = importlib.util.spec_from_file_location(
++        "old_forces", Path(old_src) / "tars/sim/forces.py"
++    )
++    mod = importlib.util.module_from_spec(spec)
++    spec.loader.exec_module(mod)
++    return mod
++
++
++def outcome(make, r):
++    try:
++        a = make().acceleration(0.0, np.array(r), Z3)
++        return {"result": [repr(float(c)) for c in a], "dtype": str(a.dtype)}
++    except (ValueError, TypeError, OverflowError) as e:
++        return {"raises": type(e).__name__, "message": str(e)}
++
++
++def exact(r, mu, radius, j2):
++    """Correctly rounded acceleration from exact rationals; |r| bracketed by isqrt."""
++    x, y, z = (Fraction(float(c)) for c in r)
++    r2 = x * x + y * y + z * z
++    scale = 2**1200
++    lo = Fraction(math.isqrt(int(r2 * scale * scale)), scale)
++    k0 = Fraction(-3, 2) * Fraction(j2) * Fraction(mu) * Fraction(radius) ** 2
++    s2 = z * z / r2
++    ends = [
++        [
++            repr(float(k0 / (r2 * r2 * n) * f))
++            for f in (x * (1 - 5 * s2), y * (1 - 5 * s2), z * (3 - 5 * s2))
++        ]
++        for n in (lo, lo + Fraction(1, scale))
++    ]
++    assert ends[0] == ends[1]
++    return ends[0]
++
++
++def before_after(old, params, r):
++    return {
++        "exact": exact(r, *params),
++        "reviewed_b1566ae": outcome(lambda: old.ZonalJ2Gravity(*params), r),
++        "corrected": outcome(lambda: ZonalJ2Gravity(*params), r),
++    }
++
++
++def accepted(x: float) -> bool:
++    return "result" in outcome(lambda: ZonalJ2Gravity(MU, A, J2), [x, 0.0, 0.0])
++
++
++def boundary(good_x: float, bad_x: float) -> float:
++    assert accepted(good_x) and not accepted(bad_x)
++    g, b = (struct.unpack("<q", struct.pack("<d", v))[0] for v in (good_x, bad_x))
++    while abs(b - g) > 1:
++        m = (g + b) // 2
++        if accepted(struct.unpack("<d", struct.pack("<q", m))[0]):
++            g = m
++        else:
++            b = m
++    return struct.unpack("<d", struct.pack("<q", g))[0]
++
++
++def propagate(model, r0, v0, dt: float, steps: int) -> bytes:
++    def f(t, y):
++        return np.concatenate([y[3:], model.acceleration(t, y[:3], y[3:])])
++
++    y = np.concatenate([r0, v0])
++    rk4, out = RK4(), [y]
++    for k in range(steps):
++        y = rk4.step(f, k * dt, y, dt)
++        out.append(y)
++    return np.array(out).tobytes()
++
++
++def main(old_src: str, out_path: str) -> None:
++    old = load_old(old_src)
++    out: dict = {"reference": "OLD_SRC = src/ at b1566ae (forces.py as at a27f288)"}
++
++    # R2-F1: component products (Review 02's case, the y variant, the (3 - 5 s^2) factor)
++    f1 = {
++        "x_factor_review02": (
++            (5.1827254193540115e-108, 1.0, 0.5),
++            [1e40, 0.0, 4.9999999999999995e39],
++        ),
++        "y_factor": ((5.1827254193540115e-108, 1.0, 0.5), [0.0, 1e40, 4.9999999999999995e39]),
++        "z_factor": ((1.3 * 2.931792231242491e-107, 1.0, 0.5), [1e40, 0.0, 1.224744871391589e40]),
++        "coefficient_chain": ((2.0**1000, 1.0, 3 * 2.0**-1074), [2.0**10, 0.0, 0.0]),
++    }
++    out["R2-F1_underflow"] = {k: before_after(old, p, r) for k, (p, r) in f1.items()}
++    legit = {
++        "exact_zero_factor_and_coordinate": (
++            (5.1827254193540115e-106, 1.0, 0.5),
++            [2.0**134, 0.0, 2.0**133],
++        ),
++        "j2_zero": ((5.1827254193540115e-108, 1.0, 0.0), [1e40, 0.0, 5e39]),
++        "exact_subnormal_intermediate": ((2.0**1000, 1.0, 2 * 2.0**-1074), [2.0**10, 0.0, 0.0]),
++        "subnormal_final_component": ((1.0, 1.0, 0.5), [2.0**200, 2.0**-50, 0.0]),
++    }
++    out["R2-F1_legitimate_results"] = {k: before_after(old, p, r) for k, (p, r) in legit.items()}
++
++    # R2-F2: caller-owned arrays, float32, unsupported types
++    pos = [A, 0.0, 0.0]
++    f2: dict = {}
++    for tag, cls in (("reviewed_b1566ae", old.ZonalJ2Gravity), ("corrected", ZonalJ2Gravity)):
++        row = {}
++        mu_arr = np.array(MU)
++        try:
++            m = cls(mu_arr, A, J2)
++            mu_arr[...] = -1.0
++            row["mu_array_set_to_-1_after_construction"] = outcome(lambda m=m: m, pos)
++        except (ValueError, TypeError) as e:
++            row["mu_array_set_to_-1_after_construction"] = {"raises": type(e).__name__}
++        row["float32_parameters"] = outcome(
++            lambda cls=cls: cls(np.float32(MU), np.float32(A), np.float32(J2)), pos
++        )
++        row["str_mu"] = outcome(lambda cls=cls: cls("398600441800000.0", A, J2), pos)
++        row["list_mu"] = outcome(lambda cls=cls: cls([MU], A, J2), pos)
++        row["bool_j2"] = outcome(lambda cls=cls: cls(MU, A, True), pos)
++        row["int_mu_10**400"] = outcome(lambda cls=cls: cls(10**400, A, J2), pos)
++        f2[tag] = row
++    f2["float_conversion_of_float32_values"] = outcome(
++        lambda: ZonalJ2Gravity(*(float(np.float32(v)) for v in (MU, A, J2))), pos
++    )
++    f2["canonical_python_floats"] = outcome(lambda: ZonalJ2Gravity(MU, A, J2), pos)
++    out["R2-F2"] = f2
++
++    # Domain and the canonical constants' smallest products
++    k0 = -1.5 * J2 * MU * A * A
++    out["numerical_domain_equatorial_canonical"] = {
++        "largest_accepted_x_m": boundary(1e61, 1e62),
++        "smallest_accepted_x_m": boundary(1e-50, 1e-60),
++        "review01_values": [4.476546622757235e61, 3.3773820261812166e-57],
++    }
++    out["canonical_reach"] = {
++        "k0": k0,
++        "smallest_abs_k_in_domain": abs(k0) / sys.float_info.max,
++        "times_2^-53": abs(k0) / sys.float_info.max * 2.0**-53,
++        "is_normal": abs(k0) / sys.float_info.max * 2.0**-53 >= MIN_NORMAL,
++        "coefficient_chain": [-1.5 * J2, -1.5 * J2 * MU, -1.5 * J2 * MU * A],
++    }
++
++    # Bit identity: the Review 01 state set
++    new, ref = ZonalJ2Gravity(MU, A, J2), old.ZonalJ2Gravity(MU, A, J2)
++    rng = random.Random(20261023)
++    n, diff = 0, 0
++    for _ in range(200_000):
++        rad = A + rng.random() * (1.0e8 - A)
++        lat = math.asin(2.0 * rng.random() - 1.0)
++        lon = 2.0 * math.pi * rng.random()
++        r = np.array(
++            [
++                rad * math.cos(lat) * math.cos(lon),
++                rad * math.cos(lat) * math.sin(lon),
++                rad * math.sin(lat),
++            ]
++        )
++        n += 1
++        diff += new.acceleration(0.0, r, Z3).tobytes() != ref.acceleration(0.0, r, Z3).tobytes()
++    for pole in ([0.0, 0.0, A], [0.0, 0.0, -A], [A, 0.0, 0.0], [0.0, -A, 0.0]):
++        n += 1
++        diff += (
++            new.acceleration(0.0, np.array(pole), Z3).tobytes()
++            != ref.acceleration(0.0, np.array(pole), Z3).tobytes()
++        )
++    out["bit_identity_valid_states"] = {"states": n, "differing": diff, "seed": 20261023}
++
++    rp, ra = A + 300e3, A + 1000e3
++    trajectories = []
++    for inc in (28.5, 51.6, 97.0):
++        r0, v0 = elements_to_rv(
++            0.5 * (rp + ra),
++            (ra - rp) / (ra + rp),
++            math.radians(inc),
++            math.radians(30.0),
++            math.radians(40.0),
++            0.0,
++            MU,
++        )
++        a = propagate(CompositeForceModel([PointMassGravity(MU), new]), r0, v0, 10.0, 6000)
++        b = propagate(CompositeForceModel([PointMassGravity(MU), ref]), r0, v0, 10.0, 6000)
++        trajectories.append({"inclination_deg": inc, "states": 6001, "bit_identical": a == b})
++    out["bit_identity_rk4_trajectories"] = trajectories
++    Path(out_path).write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
++
++
++if __name__ == "__main__":
++    main(sys.argv[1], sys.argv[2])
+diff --git a/docs/science/experiments/m3-t1/t1_review02_correction_check_results.json b/docs/science/experiments/m3-t1/t1_review02_correction_check_results.json
+new file mode 100644
+index 0000000..7cd9ee6
+--- /dev/null
++++ b/docs/science/experiments/m3-t1/t1_review02_correction_check_results.json
+@@ -0,0 +1,306 @@
++{
++  "R2-F1_legitimate_results": {
++    "exact_subnormal_intermediate": {
++      "corrected": {
++        "dtype": "float64",
++        "result": [
++          "-1.4444474582904269e-34",
++          "-0.0",
++          "-0.0"
++        ]
++      },
++      "exact": [
++        "-1.4444474582904269e-34",
++        "0.0",
++        "0.0"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-1.4444474582904269e-34",
++          "-0.0",
++          "-0.0"
++        ]
++      }
++    },
++    "exact_zero_factor_and_coordinate": {
++      "corrected": {
++        "dtype": "float64",
++        "result": [
++          "-0.0",
++          "-0.0",
++          "-9.891604774494805e-268"
++        ]
++      },
++      "exact": [
++        "0.0",
++        "0.0",
++        "-9.891604774494805e-268"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-0.0",
++          "-0.0",
++          "-9.891604774494805e-268"
++        ]
++      }
++    },
++    "j2_zero": {
++      "corrected": {
++        "dtype": "float64",
++        "result": [
++          "-0.0",
++          "-0.0",
++          "-0.0"
++        ]
++      },
++      "exact": [
++        "0.0",
++        "0.0",
++        "0.0"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-0.0",
++          "-0.0",
++          "-0.0"
++        ]
++      }
++    },
++    "subnormal_final_component": {
++      "corrected": {
++        "dtype": "float64",
++        "result": [
++          "-1.1247726104217232e-241",
++          "-6.2167845e-317",
++          "-0.0"
++        ]
++      },
++      "exact": [
++        "-1.1247726104217232e-241",
++        "-6.2167845e-317",
++        "0.0"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-1.1247726104217232e-241",
++          "-6.2167845e-317",
++          "-0.0"
++        ]
++      }
++    }
++  },
++  "R2-F1_underflow": {
++    "coefficient_chain": {
++      "corrected": {
++        "message": "-(3/2) J2 mu R^2: an intermediate product underflows",
++        "raises": "ValueError"
++      },
++      "exact": [
++        "-2.1666711874356403e-34",
++        "0.0",
++        "0.0"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-1.925929944387236e-34",
++          "-0.0",
++          "-0.0"
++        ]
++      }
++    },
++    "x_factor_review02": {
++      "corrected": {
++        "message": "outside the J2 numerical domain: a component product underflows",
++        "raises": "ValueError"
++      },
++      "exact": [
++        "-4.303918780958246e-284",
++        "0.0",
++        "-2.2250738585072015e-268"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-0.0",
++          "-0.0",
++          "-2.2250738585072012e-268"
++        ]
++      }
++    },
++    "y_factor": {
++      "corrected": {
++        "message": "outside the J2 numerical domain: a component product underflows",
++        "raises": "ValueError"
++      },
++      "exact": [
++        "0.0",
++        "-4.303918780958246e-284",
++        "-2.2250738585072015e-268"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "-0.0",
++          "-0.0",
++          "-2.2250738585072012e-268"
++        ]
++      }
++    },
++    "z_factor": {
++      "corrected": {
++        "message": "outside the J2 numerical domain: a component product underflows",
++        "raises": "ValueError"
++      },
++      "exact": [
++        "5.785192032118724e-268",
++        "0.0",
++        "-1.3478448085169703e-283"
++      ],
++      "reviewed_b1566ae": {
++        "dtype": "float64",
++        "result": [
++          "5.78519203211872e-268",
++          "0.0",
++          "-3.025521829374199e-283"
++        ]
++      }
++    }
++  },
++  "R2-F2": {
++    "canonical_python_floats": {
++      "dtype": "float64",
++      "result": [
++        "-0.01591182047796651",
++        "-0.0",
++        "-0.0"
++      ]
++    },
++    "corrected": {
++      "bool_j2": {
++        "message": "j2 must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not bool",
++        "raises": "TypeError"
++      },
++      "float32_parameters": {
++        "dtype": "float64",
++        "result": [
++          "-0.015911820615666403",
++          "-0.0",
++          "-0.0"
++        ]
++      },
++      "int_mu_10**400": {
++        "message": "mu is not representable as a binary64 number",
++        "raises": "ValueError"
++      },
++      "list_mu": {
++        "message": "mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not list",
++        "raises": "TypeError"
++      },
++      "mu_array_set_to_-1_after_construction": {
++        "dtype": "float64",
++        "result": [
++          "-0.01591182047796651",
++          "-0.0",
++          "-0.0"
++        ]
++      },
++      "str_mu": {
++        "message": "mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not str",
++        "raises": "TypeError"
++      }
++    },
++    "float_conversion_of_float32_values": {
++      "dtype": "float64",
++      "result": [
++        "-0.015911820615666403",
++        "-0.0",
++        "-0.0"
++      ]
++    },
++    "reviewed_b1566ae": {
++      "bool_j2": {
++        "dtype": "float64",
++        "result": [
++          "-14.69742821878095",
++          "-0.0",
++          "-0.0"
++        ]
++      },
++      "float32_parameters": {
++        "dtype": "float32",
++        "result": [
++          "-0.01591181941330433",
++          "-0.0",
++          "-0.0"
++        ]
++      },
++      "int_mu_10**400": {
++        "message": "int too large to convert to float",
++        "raises": "OverflowError"
++      },
++      "list_mu": {
++        "message": "must be real number, not list",
++        "raises": "TypeError"
++      },
++      "mu_array_set_to_-1_after_construction": {
++        "dtype": "float64",
++        "result": [
++          "3.991922438949618e-17",
++          "0.0",
++          "0.0"
++        ]
++      },
++      "str_mu": {
++        "message": "must be real number, not str",
++        "raises": "TypeError"
++      }
++    }
++  },
++  "bit_identity_rk4_trajectories": [
++    {
++      "bit_identical": true,
++      "inclination_deg": 28.5,
++      "states": 6001
++    },
++    {
++      "bit_identical": true,
++      "inclination_deg": 51.6,
++      "states": 6001
++    },
++    {
++      "bit_identical": true,
++      "inclination_deg": 97.0,
++      "states": 6001
++    }
++  ],
++  "bit_identity_valid_states": {
++    "differing": 0,
++    "seed": 20261023,
++    "states": 200004
++  },
++  "canonical_reach": {
++    "coefficient_chain": [
++      -0.001623939260778334,
++      -647302906802.6094,
++      -4.1285866200852746e+18
++    ],
++    "is_normal": true,
++    "k0": -2.6332691079270833e+25,
++    "smallest_abs_k_in_domain": 1.464804563615783e-283,
++    "times_2^-53": 1.6262597531022472e-299
++  },
++  "numerical_domain_equatorial_canonical": {
++    "largest_accepted_x_m": 4.476546622757235e+61,
++    "review01_values": [
++      4.476546622757235e+61,
++      3.3773820261812166e-57
++    ],
++    "smallest_accepted_x_m": 3.3773820261812166e-57
++  },
++  "reference": "OLD_SRC = src/ at b1566ae (forces.py as at a27f288)"
++}
+diff --git a/docs/science/experiments/m3-t1/t1_review02_survivors.py b/docs/science/experiments/m3-t1/t1_review02_survivors.py
+new file mode 100644
+index 0000000..6e91601
+--- /dev/null
++++ b/docs/science/experiments/m3-t1/t1_review02_survivors.py
+@@ -0,0 +1,78 @@
++"""M3 T1: status of Codex Review 02's three exploratory surviving mutants (I-20 §3).
++
++Each mutant is re-applied, with the reviewer's text, to a temporary copy of the corrected
++``src`` and the T1 tests are run against the copy. This is status evidence for the record,
++not part of the committed mutation campaign (``t1_mutation_check.py``), and not a search
++for further survivors.
++
++Usage (from the repository root):
++    uv run python docs/science/experiments/m3-t1/t1_review02_survivors.py OUT.json
++"""
++
++from __future__ import annotations
++
++import json
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++from pathlib import Path
++
++ROOT = Path.cwd()
++TESTS = ["tests/test_zonal_j2.py", "tests/test_constants.py"]
++C = "        c = 1.0 - 5.0 * s2\n"
++
++# id: (anchor, replacement, the reviewer's description)
++MUTANTS = {
++    "canonical_one_ulp": (
++        "        k = k0 / r5\n",
++        "        k = (k0 * (1.0 + 2.0**-52) if self.mu > 1e10 else k0) / r5\n",
++        "one-ulp coefficient perturbation confined to mu > 1e10",
++    ),
++    "narrow_band": (
++        C,
++        C + "        if 0.123456 < s2 < 0.123457:\n            c *= 1.00000001\n",
++        "1e-8 x/y factor error confined to 0.123456 < s^2 < 0.123457",
++    ),
++    "near_min_normal_zero": (
++        C,
++        C + "        if 0.0 < abs(k) < 2 * _MIN_NORMAL:\n            return np.zeros(3)\n",
++        "all zeros whenever 0 < |k| < 2 MIN_NORMAL",
++    ),
++}
++
++
++def main(out_path: str) -> None:
++    results = {}
++    with tempfile.TemporaryDirectory() as tmp:
++        for mid, (old, new, defect) in MUTANTS.items():
++            src = Path(tmp) / mid
++            shutil.copytree(ROOT / "src", src)
++            forces = src / "tars/sim/forces.py"
++            text = forces.read_text()
++            if text.count(old) != 1:
++                raise SystemExit(f"{mid}: anchor occurs {text.count(old)} times")
++            forces.write_text(text.replace(old, new))
++            proc = subprocess.run(
++                [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", *TESTS],
++                cwd=ROOT,
++                env=dict(os.environ, PYTHONPATH=str(src)),
++                capture_output=True,
++                text=True,
++            )
++            lines = proc.stdout.strip().splitlines()
++            results[mid] = {
++                "defect": defect,
++                "pytest_exit": proc.returncode,
++                "survives": proc.returncode == 0,
++                "failed_tests": [ln.split(" ")[1] for ln in lines if ln.startswith("FAILED")],
++            }
++    Path(out_path).write_text(json.dumps(results, indent=2, sort_keys=True) + "\n")
++    print(
++        ", ".join(f"{k}: {'survives' if v['survives'] else 'killed'}" for k, v in results.items())
++    )
++
++
++if __name__ == "__main__":
++    main(sys.argv[1])
+diff --git a/docs/science/experiments/m3-t1/t1_review02_survivors_results.json b/docs/science/experiments/m3-t1/t1_review02_survivors_results.json
+new file mode 100644
+index 0000000..6cc39dc
+--- /dev/null
++++ b/docs/science/experiments/m3-t1/t1_review02_survivors_results.json
+@@ -0,0 +1,24 @@
++{
++  "canonical_one_ulp": {
++    "defect": "one-ulp coefficient perturbation confined to mu > 1e10",
++    "failed_tests": [],
++    "pytest_exit": 0,
++    "survives": true
++  },
++  "narrow_band": {
++    "defect": "1e-8 x/y factor error confined to 0.123456 < s^2 < 0.123457",
++    "failed_tests": [],
++    "pytest_exit": 0,
++    "survives": true
++  },
++  "near_min_normal_zero": {
++    "defect": "all zeros whenever 0 < |k| < 2 MIN_NORMAL",
++    "failed_tests": [
++      "tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
++      "tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
++      "tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]"
++    ],
++    "pytest_exit": 1,
++    "survives": false
++  }
++}
+diff --git a/docs/science/validation.md b/docs/science/validation.md
+index aacc82e..6d3a29e 100644
+--- a/docs/science/validation.md
++++ b/docs/science/validation.md
+@@ -1152,3 +1152,50 @@ See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, golde
+ - **Bounds:** the γ₁₆ and γ₆₄ bounds are applied to the new points with the same derivation as above. The operation counts are still by inspection. Review 01's interval certificate covered the original 162 points only.
+ - **Status:** corrections implemented; not reviewed (Review 02 pending), not accepted.
+ - *Count correction (appended):* the protection-removal mutants number **10** (3 F1, 7 F2), not 11 as written above and in the `b0164fd` commit message: 14 + 8 + 10 = 32. The total of 32 and every per-mutant result are unchanged (`t1_mutation_check_results.json`).
++
++### VAL-0020 correction 2 (Codex T1 Review 02; recorded 2026-10-23 UTC, append-only)
++- **Authority:** "I-20 — M3 T1 Review 02 Corrections and Review 03 Authorization" (Tech Lead). The sections above are preserved as written. Where this section differs, this section applies from commit `304d796` on.
++- **Commits:** tests `56ad329`, `bbcf40e`, `308f126` (the final tests give 26 failed, 69 passed of 95 T1 cases against `b1566ae`); code `304d796`; evidence `a4dfda1`.
++- **M3T1-R2-F2 (owned binary64 parameters; extends M3T1-R1-F1):**
++  - μ, R and J2 are converted to built-in `float` at construction, **before** validation, so the instance never holds a caller's object.
++  - Supported types: `int` (not `bool`), `float`, NumPy integer and floating scalars (float16/32/64, longdouble), and zero-dimensional arrays of those. Any other type raises `TypeError` ("… must be a real number …"): strings, bytes, lists, tuples, 1-d arrays, string arrays, `bool`/`numpy.bool_`, complex, `Fraction`, `None`. An `int` beyond the binary64 range raises `ValueError`.
++  - The validation contract for non-finite and physically invalid values is unchanged. It applies to the converted values.
++  - New gates: `test_parameters_are_owned_snapshots_not_caller_references`, `test_supported_numeric_types_are_converted_to_binary64`, `test_float16_parameter_is_supported`, `test_integer_parameters_are_supported`, `test_unsupported_parameter_types_are_rejected`, `test_unrepresentable_integer_parameter_is_rejected`, `test_converted_parameters_keep_the_validation_contract`.
++- **M3T1-R2-F1 (product underflow; extends M3T1-R1-F2, class 3):**
++  - A binary64 product is an **underflow** when it is below the normal range **and inexact** (IEEE 754 tininess with inexactness). It has then lost relative precision, and a later multiplication can carry that loss into a normal-looking result.
++  - The products that are multiplied further must not underflow, otherwise `ValueError`:
++    - in the acceleration, k (1 − 5 s²) and k (3 − 5 s²), with the message "outside the J2 numerical domain: a component product underflows";
++    - in the coefficient, −(3/2) J2, then × μ, then × R, with the message "−(3/2) J2 μ R²: an intermediate product underflows". The defect is the same, found by auditing every multiplication chain. Review 02 did not report it. Example: J2 = 3 × 2⁻¹⁰⁷⁴, μ = 2¹⁰⁰⁰ gave a normal coefficient that was 11 % wrong.
++  - **Not underflow, and returned:** exact zeros (J2 = 0, a zero coordinate, a latitude factor that is exactly 0) and exact subnormal products. A final component may be subnormal; only its last multiplication rounds, with an absolute error of at most half the smallest subnormal. No input or output is rejected for being subnormal as such.
++  - **Limit:** the check cannot tell a latitude factor that is mathematically 0 from one that is computed as a small non-zero value through cancellation. That case raises (conservative); it needs non-physical parameters.
++  - **Accuracy near the factor zeros is unchanged.** Near 1 − 5 s² = 0 or 3 − 5 s² = 0 a component has only absolute accuracy, relative to the |k|·|r| majorant that the gradient gate uses. This is the formula's existing behavior and is not changed here. Example: Review 02's case, which now raises, would give −2.47e-284 without underflow, against an exact −4.30e-284.
++  - **Reach with the canonical constants:** in the accepted domain |k| ≥ |k₀| / (largest binary64) = 1.46e-283, and a non-zero computed latitude factor has magnitude ≥ 2⁻⁵³ (the spacing of binary64 just below 1; just below 3 it is 2⁻⁵¹). So |k × factor| ≥ 1.6e-299 is normal. The coefficient products are −1.62e-3, −6.47e11 and −4.13e18. **The new checks cannot trigger with the authorized constants.**
++  - **Cost:** two multiplications and comparisons per call. The exact-rational comparison runs only for a product below the normal range, which a realistic state never reaches.
++  - New gates:
++    - `test_component_product_underflow_raises_instead_of_a_silent_result` (Review 02's case, its y variant, the (3 − 5 s²) factor; each with an exactly rounded reference shown to be a normal number);
++    - `test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result` (one case per product, with its precondition asserted);
++    - `test_exact_subnormal_intermediates_are_not_underflow`, `test_legitimate_zero_components_are_returned`, `test_subnormal_result_components_are_returned`.
++- **Valid results are unchanged.** The evaluation order is unchanged, since `k * c * x` is `(k * c) * x` = `kc * x`. Checked against `b1566ae` (`t1_review02_correction_check_results.json`):
++  - 200 004 states (the Review 01 state set, seed 20261023): **0 differing**;
++  - three RK4 trajectories (point mass + J2, 300 × 1000 km, 28.5°/51.6°/97°, dt 10 s, 6 001 states each): **bit-identical**;
++  - equatorial domain unchanged: 3.3773820261812166e-57 m … 4.476546622757235e61 m.
++  - The informational results and `t1_review01_correction_check_results.json` reproduce byte for byte.
++- **M3T1-R2-F3:** the `t1_review01_correction_check.py` docstring now states what is checked: 200 000 random states and four axis states, no trajectory. Its output is unchanged.
++- **Mutation campaign:**
++  - **46 committed mutants, 46 killed, all by assertion; no survivors**: the 32 above plus 14 that each remove one R2-F1/F2 protection (7 F1, 7 F2).
++  - Four original mutants are re-anchored on the rewritten component expression, with the same defects: `z_factor`, `xy_asym`, `z_scale_1e9`, `j2_zero_offset`.
++  - Tests that a supported input or a legitimate result is accepted now assert the acceptance, so a wrongly rejecting defect fails an assertion instead of erroring (`r2f1_exactness_ignored` first failed only by `ValueError` errors).
++- **Mutation limitations (I-20 §3):**
++  1. The committed campaign is evidence for its 46 named defects, **not complete coverage**.
++  2. Review 02's three exploratory mutants, re-applied to the corrected code (`t1_review02_survivors_results.json`):
++     - `near_min_normal_zero` (zeros when 0 < |k| < 2 × min normal) is now **killed**, by assertion, by the R2-F1 component tests;
++     - `canonical_one_ulp` (one-ulp coefficient change only for μ > 1e10) **survives** the T1 tests;
++     - `narrow_band` (1e-8 x/y error only for 0.123456 < s² < 0.123457, a latitude band about 9e-5° wide near 20.6°) **survives** the T1 tests.
++  3. Why the two survivors do not invalidate the authorized T1 criteria:
++     - The criteria are finite gates applied to the actual code, which contains neither defect.
++     - `canonical_one_ulp` changes results by 2.2e-16 relative, inside the gates' tolerances by design (2γ₁₆ and γ₆₄). Only the synthetic μ = 1 known answers are exact. The committed bit-identity comparison with `b1566ae` (a correction-pass check, not a pytest gate) would detect it.
++     - `narrow_band` needs a data-dependent branch. Apart from the raising domain checks, the production `acceleration` is straight-line arithmetic with no such branch. That is a code-inspection argument, not a test result. No finite grid or sample excludes a defect confined to a band narrower than its spacing: the 200 004 random states hit this band with probability about 25 %, and the actual set has 0 states in it.
++  4. The mutation classifier accepts a JUnit failure type `Failed` whatever its message, if another runner emitted one. Current kills are established by their messages. Not changed (I-20 §3).
++- **Not claimed:** complete IEEE 754 correctness, or the absence of other underflow or precision paths, from these finite tests and analyses.
++- **Status:** corrections implemented; not reviewed (Review 03 pending); not accepted.
++- *Count correction (appended):* "95 T1 cases" above counts `tests/test_zonal_j2.py` only. On the basis used in the Review 01 correction (both T1 files, `tests/test_zonal_j2.py` and `tests/test_constants.py`), there are now **107 T1 cases** (73 + 9 for R2-F1 + 25 for R2-F2). Against `b1566ae` they give **26 failed, 81 passed**. The `56ad329` message's "93 T1 cases" also counts the first file only.

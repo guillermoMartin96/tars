@@ -1,0 +1,112 @@
+.......................................................F................ [ 67%]
+................FF.................                                      [100%]
+=================================== FAILURES ===================================
+_________________ test_legitimate_zero_components_are_returned _________________
+
+    def test_legitimate_zero_components_are_returned():
+        """M3T1-R2-F1: exact zeros are not arithmetic underflow. With the coefficient at the edge
+        of the normal range (Review 02's parameters): at z^2/r^2 = 1/5 the factor 1 - 5 s^2 is
+        exactly 0 (power-of-two coordinates, so the computed factor is exactly 0 too) and the x
+        component is an exact zero although k (1 - 5 s^2) is below the normal range; y = 0 gives
+        an exact zero. The z component is the formula. J2 = 0 gives exact zeros everywhere."""
+        mu = 5.1827254193540115e-106
+        r = np.array([2.0**134, 0.0, 2.0**133])
+        a = evaluated((mu, 1.0, 0.5), r)
+        assert isinstance(a, np.ndarray), a
+        expected = exact_acceleration(r, mu, 1.0, 0.5)
+        assert expected[0] == 0.0 and expected[1] == 0.0
+        assert a[0] == 0.0 and a[1] == 0.0
+        assert abs(a[2] - expected[2]) <= 2 * gamma(16) * abs(expected[2])
+        zero = evaluated((5.1827254193540115e-108, 1.0, 0.0), [1e40, 0.0, 5e39])
+>       assert isinstance(zero, np.ndarray), zero
+E       AssertionError: ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number')
+E       assert False
+E        +  where False = isinstance(ValueError('-(3/2) J2 mu R^2 is not a finite normal binary64 number'), <class 'numpy.ndarray'>)
+E        +    where <class 'numpy.ndarray'> = np.ndarray
+
+tests/test_zonal_j2.py:474: AssertionError
+_________ test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged _________
+
+    def test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged():
+        """DR-0025 Q11: J2 = 0 contributes exactly zero, so point mass + J2(0) is bitwise point mass."""
+        pm = PointMassGravity(MU)
+>       both = CompositeForceModel([pm, j2_model(0.0)])
+                                        ^^^^^^^^^^^^^
+
+tests/test_zonal_j2.py:667: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_zonal_j2.py:38: in j2_model
+    return ZonalJ2Gravity(MU, RE, j2)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ZonalJ2Gravity object at 0x108591800>
+mu = 398600441800000.0, equatorial_radius = 6378137.0, j2 = 0.0
+
+    def __init__(self, mu: float, equatorial_radius: float, j2: float) -> None:
+        mu = _owned_float("mu", mu)
+        equatorial_radius = _owned_float("equatorial_radius", equatorial_radius)
+        j2 = _owned_float("j2", j2)
+        if not (
+            math.isfinite(mu)
+            and mu > 0.0
+            and math.isfinite(equatorial_radius)
+            and equatorial_radius > 0.0
+        ):
+            raise ValueError("mu and equatorial_radius must be finite and positive")
+        if not math.isfinite(j2):
+            raise ValueError("j2 must be finite")
+        p1 = -1.5 * j2
+        p2 = p1 * mu
+        p3 = p2 * equatorial_radius
+        k = p3 * equatorial_radius  # -1.5 * j2 * mu * R * R, evaluated left to right
+        if not math.isfinite(k) or abs(k) < _MIN_NORMAL:
+>           raise ValueError("-(3/2) J2 mu R^2 is not a finite normal binary64 number")
+E           ValueError: -(3/2) J2 mu R^2 is not a finite normal binary64 number
+
+review_scratch/own_mutants/zero_j2_normal_required/src/tars/sim/forces.py:154: ValueError
+________________ test_j2_zero_propagation_is_bitwise_point_mass ________________
+
+    def test_j2_zero_propagation_is_bitwise_point_mass():
+        r0, v0 = eccentric_state(51.6)
+        pm = PointMassGravity(MU)
+>       a = propagate(CompositeForceModel([pm, j2_model(0.0)]), r0, v0, 10.0, 600)
+                                               ^^^^^^^^^^^^^
+
+tests/test_zonal_j2.py:702: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_zonal_j2.py:38: in j2_model
+    return ZonalJ2Gravity(MU, RE, j2)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ZonalJ2Gravity object at 0x1084f3d40>
+mu = 398600441800000.0, equatorial_radius = 6378137.0, j2 = 0.0
+
+    def __init__(self, mu: float, equatorial_radius: float, j2: float) -> None:
+        mu = _owned_float("mu", mu)
+        equatorial_radius = _owned_float("equatorial_radius", equatorial_radius)
+        j2 = _owned_float("j2", j2)
+        if not (
+            math.isfinite(mu)
+            and mu > 0.0
+            and math.isfinite(equatorial_radius)
+            and equatorial_radius > 0.0
+        ):
+            raise ValueError("mu and equatorial_radius must be finite and positive")
+        if not math.isfinite(j2):
+            raise ValueError("j2 must be finite")
+        p1 = -1.5 * j2
+        p2 = p1 * mu
+        p3 = p2 * equatorial_radius
+        k = p3 * equatorial_radius  # -1.5 * j2 * mu * R * R, evaluated left to right
+        if not math.isfinite(k) or abs(k) < _MIN_NORMAL:
+>           raise ValueError("-(3/2) J2 mu R^2 is not a finite normal binary64 number")
+E           ValueError: -(3/2) J2 mu R^2 is not a finite normal binary64 number
+
+review_scratch/own_mutants/zero_j2_normal_required/src/tars/sim/forces.py:154: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_legitimate_zero_components_are_returned
+FAILED tests/test_zonal_j2.py::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged
+FAILED tests/test_zonal_j2.py::test_j2_zero_propagation_is_bitwise_point_mass
+3 failed, 104 passed in 4.99s

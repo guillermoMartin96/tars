@@ -1,0 +1,62 @@
+import pathlib,json,subprocess,hashlib,math,ast,re
+root=pathlib.Path.cwd();out={}
+def git(*a):return subprocess.check_output(['git',*a],text=True)
+refs={'40002590550':'a4dfda1','40002789138':'2f82c00','40002897696':'c456881','40008016629':'4b85ded','39906870674':'b1566ae'}
+ci=[]
+expected={'check (ubuntu-latest)','check (macos-latest)','check (macos-15-intel)','m2-cross-platform'}
+for run,ref in refs.items():
+ f=pathlib.Path(f'review_scratch/ci/run-{run}.json');d=json.loads(f.read_text())
+ assert d['databaseId']==int(run) and d['headSha']==git('rev-parse',ref).strip()
+ assert d['headBranch']=='milestone-3-t1-j2-force-model' and d['conclusion']=='success' and d['status']=='completed'
+ assert set(j['name'] for j in d['jobs'])==expected
+ assert all(j['conclusion']=='success' and j['status']=='completed' for j in d['jobs'])
+ for j in d['jobs']:
+  assert d['createdAt']<=j['startedAt']<=j['completedAt']<=d['updatedAt']
+  for s in j['steps']:assert s['conclusion']=='success' and s['status']=='completed'
+ ci.append({'file':str(f),'headSha':d['headSha'],'jobs':'4/4 success; run/job endpoints ordered; see ci_consistency.json for step clock anomaly'})
+out['CI_internal_consistency']=ci
+names=git('diff','--name-only','b1566ae..HEAD','--','docs').splitlines()
+prefix=[]
+for name in names:
+ if '/experiments/' in name:continue
+ old=git('show',f'b1566ae:{name}');new=pathlib.Path(name).read_text();assert new.startswith(old)
+ prefix.append(name)
+out['append_only_record_files']=prefix
+out['protected_diff_empty']=not git('diff','60648b9..HEAD','--','proof','toolbox','scenarios','.github','uv.lock','pyproject.toml','src/tars/validation')
+assert out['protected_diff_empty']
+out['src_changed_paths']=git('diff','--name-only','60648b9..HEAD','--','src').splitlines()
+old=ast.parse(git('show','60648b9:src/tars/sim/forces.py'));new=ast.parse(pathlib.Path('src/tars/sim/forces.py').read_text())
+for node in old.body:
+ if isinstance(node,(ast.ClassDef,ast.FunctionDef)):
+  assert ast.dump(node)==ast.dump(next(x for x in new.body if isinstance(x,type(node)) and x.name==node.name))
+out['preexisting_forces_definitions_unchanged']=True
+old=ast.parse(git('show','b1566ae:docs/science/experiments/m3-t1/t1_review01_correction_check.py'));new=ast.parse(pathlib.Path('docs/science/experiments/m3-t1/t1_review01_correction_check.py').read_text())
+assert ast.dump(ast.Module(body=old.body[1:],type_ignores=[]))==ast.dump(ast.Module(body=new.body[1:],type_ignores=[]))
+out['R2F3_only_module_docstring_changed']=True
+pairs={'review01.json':'t1_review01_correction_check_results.json','review02.json':'t1_review02_correction_check_results.json','informational.json':'t1_j2_informational_results.json','survivors.json':'t1_review02_survivors_results.json'}
+out['results']={}
+for a,b in pairs.items():
+ f=pathlib.Path('review_scratch')/a
+ if f.exists():
+  ref=pathlib.Path('docs/science/experiments/m3-t1')/b
+  out['results'][a]={'committed':str(ref),'byte_identical':f.read_bytes()==ref.read_bytes()};assert out['results'][a]['byte_identical']
+if pathlib.Path('review_scratch/mutation.json').exists():
+ new=json.loads(pathlib.Path('review_scratch/mutation.json').read_text());old=json.loads(pathlib.Path('docs/science/experiments/m3-t1/t1_mutation_check_results.json').read_text())
+ assert new['total']==new['detected']==new['detected_by_assertion']==46 and new['control_passes']
+ messages=[]
+ for m in new['mutants']:
+  meaningful=[f for f in m['failures'] if f['kind']=='failure' and (f['message'].startswith(('assert ','AssertionError','Failed: DID NOT RAISE','Regex pattern did not match')) or 'DID NOT RAISE' in f['message'])]
+  assert meaningful,(m['id'],m['failures'])
+  messages.append({'id':m['id'],'assertion_tests':[f['test'] for f in meaningful]})
+ (pathlib.Path('review_scratch/mutation_assertions.json')).write_text(json.dumps(messages,indent=2))
+ def normalize(x):
+  if isinstance(x,str):return re.sub(r'0x[0-9a-f]+','<address>',x)
+  if isinstance(x,list):return list(map(normalize,x))
+  if isinstance(x,dict):return {k:normalize(v) for k,v in x.items()}
+  return x
+ assert normalize(old)==normalize(new)
+ out['mutation']='46/46 meaningful assertion failures; committed file identical after memory-address normalization'
+prob=1-(1-(math.sqrt(.123457)-math.sqrt(.123456)))**200000
+out['narrow_band_probability']=prob
+pathlib.Path('review_scratch/records_audit.json').write_text(json.dumps(out,indent=2)+'\n')
+print(json.dumps(out,indent=2))

@@ -1,0 +1,39 @@
+........................................................F............... [ 67%]
+..............F....................                                      [100%]
+=================================== FAILURES ===================================
+________________ test_subnormal_result_components_are_returned _________________
+
+    def test_subnormal_result_components_are_returned():
+        """M3T1-R2-F1: a final component may be subnormal; the coefficient and both factor
+        products are normal, so only the last multiplication rounds into the subnormal range
+        (absolute error at most half the smallest subnormal). mu = R = 1, J2 = 1/2,
+        r = (2^200, 2^-50, 0)."""
+        r = np.array([2.0**200, 2.0**-50, 0.0])
+        a = evaluated((1.0, 1.0, 0.5), r)
+        assert isinstance(a, np.ndarray), a
+        expected = exact_acceleration(r, 1.0, 1.0, 0.5)
+        assert 0.0 < abs(expected[1]) < sys.float_info.min
+>       assert abs(a[1] - expected[1]) <= 2.0**-1074
+E       assert np.float64(6.2167845e-317) <= (2.0 ** -1074)
+E        +  where np.float64(6.2167845e-317) = abs((np.float64(0.0) - -6.2167845e-317))
+
+tests/test_zonal_j2.py:488: AssertionError
+__________________________ test_axisymmetry_is_exact ___________________________
+
+    def test_axisymmetry_is_exact():
+        """Rotating r by 90 deg about +Z rotates a exactly; reflecting z reflects a_z exactly."""
+        model = j2_model()
+        for r in sample_points():
+            a = model.acceleration(0.0, r, np.zeros(3))
+            a_rot = model.acceleration(0.0, np.array([-r[1], r[0], r[2]]), np.zeros(3))
+>           assert a_rot.tobytes() == np.array([-a[1], a[0], a[2]]).tobytes()
+E           AssertionError: assert b'\x00\x00\x0...oJ20K\xa0\xbf' == b'\x00\x00\x0...oJ20K\xa0\xbf'
+E             
+E             At index 7 diff: b'\x00' != b'\x80'
+E             Use -v to get more diff
+
+tests/test_zonal_j2.py:649: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_subnormal_result_components_are_returned
+FAILED tests/test_zonal_j2.py::test_axisymmetry_is_exact - AssertionError: as...
+2 failed, 105 passed in 5.80s

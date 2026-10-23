@@ -1,0 +1,11 @@
+--- forces.py
++++ upper_subnormal_ignored
+@@ -40,7 +40,7 @@
+     below the normal range and inexact, so it has lost relative precision. An exact result,
+     including an exact zero, is not an underflow. The exact comparison runs only for results
+     below the normal range."""
+-    return abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product
++    return abs(product) < _MIN_NORMAL / 2 and Fraction(a) * Fraction(b) != product
+ 
+ 
+ class ForceModel(Protocol):

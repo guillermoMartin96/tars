@@ -1,0 +1,9 @@
+import pathlib,json
+rows=[]
+for p in sorted(pathlib.Path('review_scratch/ci').glob('*.json')):
+ d=json.loads(p.read_text())
+ for j in d['jobs']:
+  for s in j['steps']:
+   if s['startedAt']<j['startedAt'] or s['startedAt']<d['createdAt']:
+    rows.append(dict(file=str(p),job=j['name'],step=s['name'],step_started=s['startedAt'],job_started=j['startedAt'],run_created=d['createdAt']))
+print(json.dumps({'step_timestamp_anomalies':rows,'interpretation':'Supplied metadata only; clock skew is possible. These data do not independently authenticate CI.'},indent=2))

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="107" time="4.993" timestamp="2026-10-23T13:00:24.533189-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_zonal_j2" name="test_identity_and_version" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_parameters_validated" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_parameters_are_immutable_after_construction" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_parameters_are_owned_snapshots_not_caller_references" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[float]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[float64]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[float32]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[longdouble]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[&lt;lambda&gt;0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_supported_numeric_types_are_converted_to_binary64[&lt;lambda&gt;1]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_float16_parameter_is_supported" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_integer_parameters_are_supported" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[6378137.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value2]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value3]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value4]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[True]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value7]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[(1+0j)0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[(1+0j)1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[value10]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_unsupported_parameter_types_are_rejected[None]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_unrepresentable_integer_parameter_is_rejected" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_converted_parameters_keep_the_validation_contract[mu0-6378137.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_converted_parameters_keep_the_validation_contract[398600441800000.0-radius1-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_converted_parameters_keep_the_validation_contract[398600441800000.0-6378137.0-j22]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[nan-6378137.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-nan-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[1e+300-10000000000.0-0.0010826261738522227]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r1]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r2]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_non_finite_position_is_rejected[r3]" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-60-coefficient]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-100-\\|r\\|\\^5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-200-underflows to zero]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[5e-324-underflows to zero]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_result_overflow_raises" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mu = 3.8113299006152385e-107, r = [1e+40, 0.0, 1.224744871391589e+40]
+component = 2
+
+    @pytest.mark.parametrize(("mu", "r", "component"), COMPONENT_UNDERFLOW_CASES)
+    def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, component):
+        """M3T1-R2-F1: the exact component is a normal binary64 number, but the product of the
+        coefficient and the latitude factor underflows, which before the correction returned it
+        as zero or as an inaccurate subnormal-scaled value without a diagnostic."""
+        exact = exact_acceleration(r, mu, 1.0, 0.5)[component]
+        assert abs(exact) &gt;= sys.float_info.min
+&gt;       with pytest.raises(ValueError, match="numerical domain: a component product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:407: Failed</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mu = 1.0715086071862673e+301, radius = 1.0, j2 = 1.5e-323, product = 1
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) &lt; sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) &gt;= sys.float_info.min
+&gt;       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mu = 9.33263618503219e-302, radius = 4.149515568880993e+180
+j2 = 8.673617379884035e-19, product = 2
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) &lt; sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) &gt;= sys.float_info.min
+&gt;       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mu = 3.4766779039175e-310, radius = 35.2, j2 = 0.5, product = 3
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) &lt; sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) &gt;= sys.float_info.min
+&gt;       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed</failure></testcase><testcase classname="tests.test_zonal_j2" name="test_exact_subnormal_intermediates_are_not_underflow" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_legitimate_zero_components_are_returned" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_subnormal_result_components_are_returned" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e-50]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e-20]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[6378137.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e+40]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_inside_the_numerical_domain_results_are_the_formula[1e+61]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_equator_and_pole" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[1-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[1--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[1-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[10-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[10--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[10-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[50-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[50--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[50-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[100-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[100--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[100-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[200-0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[200--0.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_are_exact_in_power_of_two_units[200-0.375]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[1.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[7.5]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[60.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_known_answers_at_far_field_radii[1000.0]" time="0.001" /><testcase classname="tests.test_zonal_j2" name="test_gradient_holds_at_every_latitude_band[0.0010826261738522227]" time="0.606" /><testcase classname="tests.test_zonal_j2" name="test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]" time="0.602" /><testcase classname="tests.test_zonal_j2" name="test_acceleration_is_the_gradient_of_the_separately_coded_potential" time="0.017" /><testcase classname="tests.test_zonal_j2" name="test_gradient_oracle_detects_a_wrong_coefficient" time="0.018" /><testcase classname="tests.test_zonal_j2" name="test_axisymmetry_is_exact" time="0.004" /><testcase classname="tests.test_zonal_j2" name="test_radial_sign_changes_at_sin2_latitude_one_third" time="0.000" /><testcase classname="tests.test_zonal_j2" name="test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged" time="0.015" /><testcase classname="tests.test_zonal_j2" name="test_j2_zero_propagation_is_bitwise_point_mass" time="0.103" /><testcase classname="tests.test_zonal_j2" name="test_polar_orbit_plane_is_exactly_invariant" time="0.339" /><testcase classname="tests.test_zonal_j2" name="test_invariant_drift_is_integrator_truncation[28.5]" time="1.004" /><testcase classname="tests.test_zonal_j2" name="test_invariant_drift_is_integrator_truncation[51.6]" time="0.994" /><testcase classname="tests.test_zonal_j2" name="test_invariant_drift_is_integrator_truncation[97.0]" time="1.010" /><testcase classname="tests.test_zonal_j2" name="test_wgs84_set_used_by_point_mass_is_unchanged" time="0.000" /><testcase classname="tests.test_constants" name="test_wgs84_defining_parameters" time="0.000" /><testcase classname="tests.test_constants" name="test_constants_are_immutable_and_validated" time="0.000" /><testcase classname="tests.test_constants" name="test_wgs84_literals_only_in_constants_module" time="0.006" /><testcase classname="tests.test_constants" name="test_standard_gravity_literal_only_in_constants_module" time="0.012" /><testcase classname="tests.test_constants" name="test_c20_is_the_published_nga_value" time="0.000" /><testcase classname="tests.test_constants" name="test_m3_set_reuses_the_wgs84_gm_and_radius" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_is_derived_not_stored" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_derivation_is_correctly_rounded_binary64" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_binary64_value_is_the_p10_recorded_value" time="0.000" /><testcase classname="tests.test_constants" name="test_q1_decimal_is_the_11_digit_display_form_of_derived_j2" time="0.000" /><testcase classname="tests.test_constants" name="test_j2_identity_constants_validated" time="0.000" /><testcase classname="tests.test_constants" name="test_c20_literal_only_in_constants_and_no_j2_literal_anywhere" time="0.008" /></testsuite></testsuites>

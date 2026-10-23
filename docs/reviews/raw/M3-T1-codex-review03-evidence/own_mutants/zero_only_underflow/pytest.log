@@ -1,0 +1,126 @@
+..................................................FFFF.................. [ 67%]
+...................................                                      [100%]
+=================================== FAILURES ===================================
+_ test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2] _
+
+mu = 3.8113299006152385e-107, r = [1e+40, 0.0, 1.224744871391589e+40]
+component = 2
+
+    @pytest.mark.parametrize(("mu", "r", "component"), COMPONENT_UNDERFLOW_CASES)
+    def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, component):
+        """M3T1-R2-F1: the exact component is a normal binary64 number, but the product of the
+        coefficient and the latitude factor underflows, which before the correction returned it
+        as zero or as an inaccurate subnormal-scaled value without a diagnostic."""
+        exact = exact_acceleration(r, mu, 1.0, 0.5)[component]
+        assert abs(exact) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="numerical domain: a component product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:407: Failed
+_ test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1] _
+
+mu = 1.0715086071862673e+301, radius = 1.0, j2 = 1.5e-323, product = 1
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed
+_ test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2] _
+
+mu = 9.33263618503219e-302, radius = 4.149515568880993e+180
+j2 = 8.673617379884035e-19, product = 2
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed
+_ test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3] _
+
+mu = 3.4766779039175e-310, radius = 35.2, j2 = 0.5, product = 3
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2", "product"),
+        [
+            (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+            (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+            (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+        ],
+    )
+    def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+        mu, radius, j2, product
+    ):
+        """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+        ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+        inexactly below the normal range while the coefficient is normal, so the coefficient is
+        inaccurate (11 % in the first case): construction is rejected."""
+        p = [-1.5 * j2]
+        p += [p[0] * mu, p[0] * mu * radius]
+        factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+        inexact = [
+            abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+            for q, (a, b) in zip(p, factors, strict=True)
+        ]
+        assert inexact == [i == product - 1 for i in range(3)]
+        assert abs(p[2] * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:435: Failed
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]
+4 failed, 103 passed in 4.99s

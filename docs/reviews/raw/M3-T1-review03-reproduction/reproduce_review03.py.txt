@@ -1,0 +1,97 @@
+"""Implementer's independent reproduction of Codex Review 03's findings (M3 T1).
+
+M3T1-R3-F1: an exact-zero factor product enters the exact-rational fallback at a realistic
+state (canonical constants), though it does not raise.
+M3T1-R3-F2: in Review 02's raw reproduction, the ``mu_alias_set_-1`` row reads ``m.mu`` after
+the later mutation to 0, so it is not a snapshot taken at acceleration time.
+Reviewer observation: the mutant ``upper_subnormal_ignored`` (threshold MIN_NORMAL / 2) is
+not exercised by the T1 tests; the production code rejects its triggering case.
+
+Usage: uv run python reproduce_review03.py OLD_SRC OUT.json   (OLD_SRC = src/ at b1566ae)
+"""
+
+from __future__ import annotations
+
+import fractions
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+import tars.sim.forces as forces
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as K
+
+Z3 = np.zeros(3)
+MIN_NORMAL = sys.float_info.min
+
+
+def main(old_src: str, out_path: str) -> None:
+    out: dict = {}
+
+    # R3-F1: count Fraction constructions during one acceleration at c = 0 exactly
+    model = forces.ZonalJ2Gravity(K.mu, K.equatorial_radius, K.j2)
+    r = np.array([12756274.0, 0.0, 6378137.0])
+    calls = 0
+    real = fractions.Fraction
+
+    class Counting(real):
+        def __new__(cls, *a, **kw):
+            nonlocal calls
+            calls += 1
+            return real.__new__(real, *a, **kw)
+
+    forces.Fraction = Counting
+    try:
+        a = model.acceleration(0.0, r, Z3)
+    finally:
+        forces.Fraction = real
+    s2 = r[2] ** 2 / float(r @ r)
+    out["R3-F1"] = {
+        "r_m": r.tolist(),
+        "c_computed": 1.0 - 5.0 * s2,
+        "fraction_constructions": calls,
+        "acceleration": [repr(float(v)) for v in a],
+        "raises": False,
+    }
+
+    # R3-F2: archived code, the raw script's sequence, with mu read at each step
+    spec = importlib.util.spec_from_file_location("old", Path(old_src) / "tars/sim/forces.py")
+    old = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(old)
+    pos = np.array([K.equatorial_radius, 0.0, 0.0])
+    mu_arr = np.array(398600441800000.0)
+    m2 = old.ZonalJ2Gravity(mu_arr, K.equatorial_radius, K.j2)
+    mu_arr[...] = -1.0
+    mu_at_neg = float(m2.mu)
+    a_neg = m2.acceleration(0.0, pos, Z3)
+    mu_arr[...] = 0.0
+    out["R3-F2"] = {
+        "mu_when_a_neg_computed": mu_at_neg,
+        "x_a_neg": float(a_neg[0]),
+        "mu_when_row_written": float(m2.mu),
+        "raw_record_row": {"m.mu": 0.0, "x": 3.991922438949618e-17},
+    }
+
+    # Reviewer observation: case that only the [MIN_NORMAL/2, MIN_NORMAL) band protects
+    j2, mu = 2.0**-1023 + 2.0**-1074, 2.0**1000
+    p1 = -1.5 * j2
+    try:
+        forces.ZonalJ2Gravity(mu, 1.0, j2)
+        production = "accepted"
+    except ValueError as e:
+        production = f"ValueError: {e}"
+    out["upper_subnormal_band"] = {
+        "p1": repr(p1),
+        "p1_over_min_normal": p1 / MIN_NORMAL,
+        "p1_inexact": fractions.Fraction(-1.5) * fractions.Fraction(j2) != p1,
+        "in_upper_band": MIN_NORMAL / 2 <= abs(p1) < MIN_NORMAL,
+        "production": production,
+    }
+    Path(out_path).write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
+    print(json.dumps(out, indent=2))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1], sys.argv[2])

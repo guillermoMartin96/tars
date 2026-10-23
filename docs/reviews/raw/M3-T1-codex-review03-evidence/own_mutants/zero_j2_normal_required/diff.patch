@@ -1,0 +1,11 @@
+--- forces.py
++++ zero_j2_normal_required
+@@ -150,7 +150,7 @@
+         p2 = p1 * mu
+         p3 = p2 * equatorial_radius
+         k = p3 * equatorial_radius  # -1.5 * j2 * mu * R * R, evaluated left to right
+-        if not math.isfinite(k) or (j2 != 0.0 and abs(k) < _MIN_NORMAL):
++        if not math.isfinite(k) or abs(k) < _MIN_NORMAL:
+             raise ValueError("-(3/2) J2 mu R^2 is not a finite normal binary64 number")
+         if (
+             _underflows(p1, -1.5, j2)

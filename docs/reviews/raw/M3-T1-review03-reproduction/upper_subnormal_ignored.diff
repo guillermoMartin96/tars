@@ -1,0 +1,4 @@
+43c43
+<     return abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product
+---
+>     return abs(product) < _MIN_NORMAL / 2 and Fraction(a) * Fraction(b) != product

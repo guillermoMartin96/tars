@@ -1,0 +1,10 @@
+--- forces.py
++++ flush_final_subnormal
+@@ -193,6 +193,7 @@
+         if _underflows(kc, k, c) or _underflows(kd, k, d):
+             raise ValueError("outside the J2 numerical domain: a component product underflows")
+         a = np.array([kc * x, kc * y, kd * z])
++        a[np.abs(a) < _MIN_NORMAL] = 0.0
+         if not np.all(np.isfinite(a)):
+             raise ValueError("outside the J2 numerical domain: acceleration overflows")
+         return a

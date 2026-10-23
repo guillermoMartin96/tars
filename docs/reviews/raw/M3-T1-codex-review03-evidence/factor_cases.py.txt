@@ -1,0 +1,23 @@
+from fractions import Fraction as F
+import math,sys,json
+import numpy as np
+from tars.sim.forces import ZonalJ2Gravity
+out=[]
+# Pick a dyadic radius with c=1-5*(1/16)=11/16, r=[sqrt(15),0,1] not exact radius.
+# Simpler equator c=1,d=3 cannot make subnormal with normal k. Near zero factor: r=[2,0,1] adjusted by nextafter.
+for z in [math.nextafter(1.,0.),math.nextafter(1.,math.inf),1.]:
+ for i in range(-20,21):
+  mu=math.ldexp(1.+i*2.**-51,-1017)
+  try:m=ZonalJ2Gravity(mu,1.,.5)
+  except ValueError:continue
+  r=[2.,0.,z];q=4+z*z;r5=q*q*math.sqrt(q);k=-.75*mu/r5;c=1-5*(z*z/q);kc=k*c
+  if 0<abs(kc)<sys.float_info.min and F(k)*F(c)==kc:
+   try:a=m.acceleration(0,r,[0]*3).tolist()
+   except ValueError:continue
+   out.append(dict(mu=mu,r=r,k=k,c=c,kc=kc,a=a))
+# Upper-subnormal inexact coefficient.
+j2=math.ldexp(1.,-1023)+math.ldexp(1.,-1074)
+p=-1.5*j2
+try:ZonalJ2Gravity(2.**1000,1.,j2)
+except ValueError as e:upper=dict(j2=j2,p1=p,p1_over_min_normal=p/sys.float_info.min,exact=F(-1.5)*F(j2)==p,rejected=str(e))
+print(json.dumps(dict(exact_subnormal_factor_cases=out,upper_half_coefficient=upper),indent=2))

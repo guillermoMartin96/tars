@@ -1,0 +1,63 @@
+{
+  "CI_internal_consistency": [
+    {
+      "file": "review_scratch/ci/run-40002590550.json",
+      "headSha": "a4dfda10647f355e4b37b69c43a5e67b577afd9f",
+      "jobs": "4/4 success; run/job endpoints ordered; see ci_consistency.json for step clock anomaly"
+    },
+    {
+      "file": "review_scratch/ci/run-40002789138.json",
+      "headSha": "2f82c0051eaf2457617334edcf9cbf968340ae10",
+      "jobs": "4/4 success; run/job endpoints ordered; see ci_consistency.json for step clock anomaly"
+    },
+    {
+      "file": "review_scratch/ci/run-40002897696.json",
+      "headSha": "c456881d7a9f5968739731b89fdc291860b54a76",
+      "jobs": "4/4 success; run/job endpoints ordered; see ci_consistency.json for step clock anomaly"
+    },
+    {
+      "file": "review_scratch/ci/run-40008016629.json",
+      "headSha": "4b85ded298e521f5c72b606cd012dec8b56e9c5e",
+      "jobs": "4/4 success; run/job endpoints ordered; see ci_consistency.json for step clock anomaly"
+    },
+    {
+      "file": "review_scratch/ci/run-39906870674.json",
+      "headSha": "b1566aea7d4b74ea785d6433a3bc6da37c67e23a",
+      "jobs": "4/4 success; run/job endpoints ordered; see ci_consistency.json for step clock anomaly"
+    }
+  ],
+  "append_only_record_files": [
+    "docs/milestones/M3-T1-report.md",
+    "docs/milestones/M3-decision-matrix.md",
+    "docs/reviews/M3-T1-review-01.md",
+    "docs/reviews/M3-T1-review-02.md",
+    "docs/science/validation.md"
+  ],
+  "protected_diff_empty": true,
+  "src_changed_paths": [
+    "src/tars/sim/constants.py",
+    "src/tars/sim/forces.py"
+  ],
+  "preexisting_forces_definitions_unchanged": true,
+  "R2F3_only_module_docstring_changed": true,
+  "results": {
+    "review01.json": {
+      "committed": "docs/science/experiments/m3-t1/t1_review01_correction_check_results.json",
+      "byte_identical": true
+    },
+    "review02.json": {
+      "committed": "docs/science/experiments/m3-t1/t1_review02_correction_check_results.json",
+      "byte_identical": true
+    },
+    "informational.json": {
+      "committed": "docs/science/experiments/m3-t1/t1_j2_informational_results.json",
+      "byte_identical": true
+    },
+    "survivors.json": {
+      "committed": "docs/science/experiments/m3-t1/t1_review02_survivors_results.json",
+      "byte_identical": true
+    }
+  },
+  "mutation": "46/46 meaningful assertion failures; committed file identical after memory-address normalization",
+  "narrow_band_probability": 0.2476890373489714
+}

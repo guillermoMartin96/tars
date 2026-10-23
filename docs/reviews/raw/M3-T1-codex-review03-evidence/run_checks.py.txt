@@ -1,0 +1,33 @@
+import subprocess, pathlib, time, shlex, json, platform, sys, importlib.metadata
+root=pathlib.Path.cwd(); out=root/'review_scratch'; p=str(root/'.venv/bin/python')
+env={'platform':platform.platform(),'machine':platform.machine(),'processor':platform.processor(),'python':sys.version,'libraries':{x:importlib.metadata.version(x) for x in ['numpy','scipy','pydantic','pytest','ruff']}}
+(out/'environment.json').write_text(json.dumps(env,indent=2))
+commands=[
+['git','archive','--format=tar','--output=review_scratch/b1566ae.tar','b1566ae','src'],
+['git','archive','--format=tar','--output=review_scratch/97b69ef.tar','97b69ef','src'],
+]
+for ref in ['b1566ae','97b69ef']:
+ d=out/f'reviewed_src_{ref}';d.mkdir(exist_ok=True)
+ commands.append(['tar','-xf',f'review_scratch/{ref}.tar','-C',str(d)])
+commands += [
+[p,'-m','pytest','-q','-p','no:cacheprovider','tests/test_constants.py','tests/test_zonal_j2.py'],
+[p,'docs/science/experiments/m3-t1/t1_review02_correction_check.py','review_scratch/reviewed_src_b1566ae/src','review_scratch/review02.json'],
+[p,'docs/science/experiments/m3-t1/t1_review01_correction_check.py','review_scratch/reviewed_src_97b69ef/src','review_scratch/review01.json'],
+[p,'docs/science/experiments/m3-t1/t1_j2_informational.py','review_scratch/informational.json'],
+[p,'docs/science/experiments/m3-t1/t1_mutation_check.py','review_scratch/mutation.json'],
+[p,'docs/science/experiments/m3-t1/t1_review02_survivors.py','review_scratch/survivors.json'],
+[p,'-m','pytest','-q','-p','no:cacheprovider',*map(str,sorted(pathlib.Path('docs/science/experiments/m3-t0').glob('check_review0*.py')))],
+[p,'toolbox/validators/m1_proof.py','--out','review_scratch/m1.json'],
+[p,'toolbox/validators/cross_platform.py'],
+[p,'toolbox/validators/determinism.py'],
+*[ [p,'toolbox/validators/determinism.py','--scenario',str(s)] for s in sorted(pathlib.Path('scenarios').glob('m2_*.json'))],
+[p,'toolbox/validators/m2_proof.py','--out','review_scratch/m2.json'],
+[p,'toolbox/validators/m2_cross_platform.py','collect','--out','review_scratch/m2_platform.json'],
+[str(root/'.venv/bin/ruff'),'check','.'],[str(root/'.venv/bin/ruff'),'format','--check','.']]
+with (out/'COMMANDS.md').open('a') as ledger:
+ for i,cmd in enumerate(commands):
+  log=out/f'check_{i:02d}.log'; start=time.monotonic()
+  ledger.write('\n- `'+shlex.join(cmd)+'` → '+str(log.relative_to(root))+'\n');ledger.flush()
+  with log.open('w') as f: result=subprocess.run(cmd,stdout=f,stderr=subprocess.STDOUT)
+  ledger.write(f'  - exit {result.returncode}; elapsed {time.monotonic()-start:.2f} s\n');ledger.flush()
+  print(i,result.returncode,flush=True)

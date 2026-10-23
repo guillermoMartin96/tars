@@ -1,0 +1,645 @@
+[
+  {
+    "id": "sign",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_radial_sign_changes_at_sin2_latitude_one_third",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "magnitude",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "z_factor",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "s2_coeff",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "xy_asym",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_axisymmetry_is_exact"
+    ]
+  },
+  {
+    "id": "z_scale_1e9",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential"
+    ]
+  },
+  {
+    "id": "power",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential"
+    ]
+  },
+  {
+    "id": "axis",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_axisymmetry_is_exact",
+      "tests.test_zonal_j2::test_radial_sign_changes_at_sin2_latitude_one_third",
+      "tests.test_zonal_j2::test_polar_orbit_plane_is_exactly_invariant",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "j2_zero_offset",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_axisymmetry_is_exact",
+      "tests.test_zonal_j2::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged"
+    ]
+  },
+  {
+    "id": "sqrt5_decimal",
+    "assertion_tests": [
+      "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+      "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value"
+    ]
+  },
+  {
+    "id": "sqrt5_ulp",
+    "assertion_tests": [
+      "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+      "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value"
+    ]
+  },
+  {
+    "id": "j2_sign",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_radial_sign_changes_at_sin2_latitude_one_third",
+      "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+      "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+      "tests.test_constants::test_q1_decimal_is_the_11_digit_display_form_of_derived_j2"
+    ]
+  },
+  {
+    "id": "c20_digit",
+    "assertion_tests": [
+      "tests.test_constants::test_c20_is_the_published_nga_value",
+      "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value"
+    ]
+  },
+  {
+    "id": "decimal_j2",
+    "assertion_tests": [
+      "tests.test_constants::test_j2_derivation_is_correctly_rounded_binary64",
+      "tests.test_constants::test_j2_binary64_value_is_the_p10_recorded_value",
+      "tests.test_constants::test_q1_decimal_is_the_11_digit_display_form_of_derived_j2"
+    ]
+  },
+  {
+    "id": "r1_negative_j2_abs",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]"
+    ]
+  },
+  {
+    "id": "r1_small_coefficient_error",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]"
+    ]
+  },
+  {
+    "id": "r1_far_field_zero",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+      "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]"
+    ]
+  },
+  {
+    "id": "r1_high_lat_band",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]"
+    ]
+  },
+  {
+    "id": "r1_off_axis_band",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "r1_unnormalized",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+      "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "r1_mu_radius_swap",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_result_overflow_raises",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+      "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]"
+    ]
+  },
+  {
+    "id": "r1_p2_wrong",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ]
+  },
+  {
+    "id": "f1_setattr_allowed",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_parameters_are_immutable_after_construction"
+    ]
+  },
+  {
+    "id": "f1_delattr_allowed",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_parameters_are_immutable_after_construction"
+    ]
+  },
+  {
+    "id": "f1_instance_dict",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_parameters_are_immutable_after_construction"
+    ]
+  },
+  {
+    "id": "f2_infinite_parameters_accepted",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227]"
+    ]
+  },
+  {
+    "id": "f2_coefficient_range_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[1e+300-10000000000.0-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]"
+    ]
+  },
+  {
+    "id": "f2_position_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_non_finite_position_is_rejected[r0]",
+      "tests.test_zonal_j2::test_non_finite_position_is_rejected[r1]",
+      "tests.test_zonal_j2::test_non_finite_position_is_rejected[r2]",
+      "tests.test_zonal_j2::test_non_finite_position_is_rejected[r3]"
+    ]
+  },
+  {
+    "id": "f2_underflow_reported_as_origin",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-200-underflows to zero]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[5e-324-underflows to zero]"
+    ]
+  },
+  {
+    "id": "f2_r5_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\\\|r\\\\|\\\\^5]"
+    ]
+  },
+  {
+    "id": "f2_scaled_coefficient_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-60-coefficient]",
+      "tests.test_zonal_j2::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result"
+    ]
+  },
+  {
+    "id": "f2_result_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_result_overflow_raises"
+    ]
+  },
+  {
+    "id": "r2f1_component_products_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]"
+    ]
+  },
+  {
+    "id": "r2f1_xy_factor_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]"
+    ]
+  },
+  {
+    "id": "r2f1_z_factor_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]"
+    ]
+  },
+  {
+    "id": "r2f1_coefficient_p1_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]"
+    ]
+  },
+  {
+    "id": "r2f1_coefficient_p2_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]"
+    ]
+  },
+  {
+    "id": "r2f1_coefficient_p3_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]"
+    ]
+  },
+  {
+    "id": "r2f1_exactness_ignored",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+      "tests.test_zonal_j2::test_legitimate_zero_components_are_returned"
+    ]
+  },
+  {
+    "id": "r2f2_parameters_not_converted",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_parameters_are_owned_snapshots_not_caller_references",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float64]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float32]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[longdouble]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]"
+    ]
+  },
+  {
+    "id": "r2f2_type_unchecked",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[6378137.0]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[1]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value2]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value3]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value4]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value5]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[True]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value7]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[(1+0j)0]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[(1+0j)1]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value10]",
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[None]"
+    ]
+  },
+  {
+    "id": "r2f2_bool_accepted",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[True]"
+    ]
+  },
+  {
+    "id": "r2f2_zero_d_array_rejected",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_parameters_are_owned_snapshots_not_caller_references",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]"
+    ]
+  },
+  {
+    "id": "r2f2_numpy_integer_rejected",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_integer_parameters_are_supported"
+    ]
+  },
+  {
+    "id": "r2f2_numpy_floating_rejected",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float32]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[longdouble]",
+      "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+      "tests.test_zonal_j2::test_float16_parameter_is_supported"
+    ]
+  },
+  {
+    "id": "r2f2_overflow_not_converted",
+    "assertion_tests": [
+      "tests.test_zonal_j2::test_unrepresentable_integer_parameter_is_rejected"
+    ]
+  }
+]

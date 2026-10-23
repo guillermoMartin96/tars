@@ -1,0 +1,20 @@
+from pathlib import Path
+import subprocess,json,re,hashlib
+r=Path('review_scratch');log=(r/'full_pytest.log').read_text()
+m=re.search(r'1288 passed(?:, \d+ warnings)? in [^\n]+',log)
+assert m,'Full suite has not completed successfully; do not finalize'
+assert not re.search(r'^FAILED |^ERROR ',log,re.M)
+state={'head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'status_porcelain':subprocess.check_output(['git','status','--porcelain'],text=True),'diff_stat':subprocess.check_output(['git','diff','--stat'],text=True)}
+assert state['head']=='4b85ded298e521f5c72b606cd012dec8b56e9c5e' and not state['status_porcelain'] and not state['diff_stat']
+(r/'final_state.json').write_text(json.dumps(state,indent=2)+'\n')
+text=(r/'report_draft.md').read_text().replace('FULL_RESULT_PENDING',m[0])
+# Add artifact links before the single final verdict line.
+base=Path.cwd()/'review_scratch'
+links=f'[Saved review]({base}/M3-T1-codex-review03.md) · [Command ledger]({base}/COMMANDS.md) · [Inspection ledger]({base}/INSPECTION_COMMANDS.md)\n\n'
+text=text.replace('VERDICT: PASS (unconditional)\n',links+'VERDICT: PASS (unconditional)\n')
+(r/'M3-T1-codex-review03.md').write_text(text)
+with (r/'COMMANDS.md').open('a') as f:
+ f.write('\n## Final results\n\n- Full-suite command: exit 0; '+m[0]+'.\n- `python review_scratch/finalize_review.py`: generated final review from retained draft after asserting successful full-suite summary, pinned HEAD and clean tracked tree. Saved final_state.json and refreshed result inventory.\n- `git status --porcelain` and `git diff --stat`: empty throughout; no tracked files needed restoration.\n- `git rev-parse 60648b9`: 60648b93385a9954194730006aeac29ea14875ad.\n- `git diff --name-only b1566ae..HEAD -- src tests`: forces.py and test_zonal_j2.py only.\n- `sed -n 861,870p review_scratch/collected_tests.log`: remaining long reference-snapshot rejection tests; no failures inferred from duration.\n')
+files=sorted(r.glob('*.json'))+sorted(r.glob('*.log'))
+(r/'RESULTS_INSPECTED.md').write_text('# Scratch result inventory\n\n'+''.join(f'- `{p}` ({p.stat().st_size} bytes; SHA256 `{hashlib.sha256(p.read_bytes()).hexdigest()}`)\n' for p in files)+'\nCommitted inputs/results and nested mutant artifacts are itemized in the review and inspection ledger.\n')
+print(m[0]);print(json.dumps(state));print('review words',len(text.split()))
