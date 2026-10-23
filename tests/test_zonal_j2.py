@@ -177,6 +177,15 @@ def test_parameters_are_immutable_after_construction():
     assert model.acceleration(0.0, r, np.zeros(3)).tobytes() == before
 
 
+def constructed(*args):
+    """The model, or the exception its construction raised, so that a wrongly rejected
+    supported input fails an assertion rather than erroring."""
+    try:
+        return ZonalJ2Gravity(*args)
+    except (TypeError, ValueError, OverflowError) as e:
+        return e
+
+
 def test_parameters_are_owned_snapshots_not_caller_references():
     """M3T1-R2-F2: parameters are converted to built-in floats at construction, so mutating a
     caller's zero-dimensional array afterwards changes neither the visible parameters nor the
@@ -185,7 +194,8 @@ def test_parameters_are_owned_snapshots_not_caller_references():
     r = np.array([RE, 0.0, 0.0])
     expected = reference.acceleration(0.0, r, np.zeros(3)).tobytes()
     mu, radius, j2 = np.array(MU), np.array(RE), np.array(J2)
-    model = ZonalJ2Gravity(mu, radius, j2)
+    model = constructed(mu, radius, j2)
+    assert isinstance(model, ZonalJ2Gravity), model
     mu[...], radius[...], j2[...] = -1.0, -RE, 0.0
     assert all(type(p) is float for p in (model.mu, model.equatorial_radius, model.j2))
     assert (model.mu, model.equatorial_radius, model.j2) == (MU, RE, J2)
@@ -207,7 +217,8 @@ def test_supported_numeric_types_are_converted_to_binary64(convert):
     """M3T1-R2-F2: every supported real type gives the model built from the same values as
     built-in floats (float32 values widen exactly), with binary64 arithmetic and result."""
     values = [convert(v) for v in (MU, RE, J2)]
-    model = ZonalJ2Gravity(*values)
+    model = constructed(*values)
+    assert isinstance(model, ZonalJ2Gravity), model
     reference = ZonalJ2Gravity(*(float(v) for v in values))
     r = np.array([RE, 2.0e6, 3.0e6])
     a = model.acceleration(0.0, r, np.zeros(3))
@@ -219,14 +230,18 @@ def test_supported_numeric_types_are_converted_to_binary64(convert):
 def test_float16_parameter_is_supported():
     """M3T1-R2-F2: float16 is a supported floating type (its range cannot hold mu or R)."""
     r = np.array([RE, 2.0e6, 3.0e6])
-    a = ZonalJ2Gravity(MU, RE, np.float16(J2)).acceleration(0.0, r, np.zeros(3))
+    model = constructed(MU, RE, np.float16(J2))
+    assert isinstance(model, ZonalJ2Gravity), model
+    a = model.acceleration(0.0, r, np.zeros(3))
     b = ZonalJ2Gravity(MU, RE, float(np.float16(J2))).acceleration(0.0, r, np.zeros(3))
     assert a.dtype == np.float64 and a.tobytes() == b.tobytes()
 
 
 def test_integer_parameters_are_supported():
     """M3T1-R2-F2: int and NumPy integer scalars are real numbers and are converted."""
-    a = ZonalJ2Gravity(1, np.int64(1), 0.5).acceleration(0.0, np.array([2.0, 0, 0]), np.zeros(3))
+    model = constructed(1, np.int64(1), 0.5)
+    assert isinstance(model, ZonalJ2Gravity), model
+    a = model.acceleration(0.0, np.array([2.0, 0, 0]), np.zeros(3))
     b = ZonalJ2Gravity(1.0, 1.0, 0.5).acceleration(0.0, np.array([2.0, 0, 0]), np.zeros(3))
     assert a.tobytes() == b.tobytes()
 
@@ -259,8 +274,8 @@ def test_unsupported_parameter_types_are_rejected(value):
 
 def test_unrepresentable_integer_parameter_is_rejected():
     """M3T1-R2-F2: an int beyond the binary64 range is a value error, not an OverflowError."""
-    with pytest.raises(ValueError, match="not representable as a binary64"):
-        ZonalJ2Gravity(10**400, RE, J2)
+    error = constructed(10**400, RE, J2)
+    assert type(error) is ValueError and "not representable as a binary64" in str(error)
 
 
 @pytest.mark.parametrize(
@@ -393,20 +408,49 @@ def test_component_product_underflow_raises_instead_of_a_silent_result(mu, r, co
         ZonalJ2Gravity(mu, 1.0, 0.5).acceleration(0.0, np.array(r), np.zeros(3))
 
 
-def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result():
-    """M3T1-R2-F1 (same defect in the coefficient): with J2 = 3 * 2^-1074 the first product
-    -(3/2) J2 rounds inexactly in the subnormal range and the normal-looking coefficient
-    -(3/2) J2 mu R^2 (mu = 2^1000) is 11 % wrong, so construction is rejected."""
+@pytest.mark.parametrize(
+    ("mu", "radius", "j2", "product"),
+    [
+        (2.0**1000, 1.0, 3 * 2.0**-1074, 1),  # -(3/2) J2 = -4.5 * 2^-1074
+        (2.0**-1000 * (1 + 2.0**-52), 2.0**600, 2.0**-60, 2),  # ... * mu
+        (2.0**-1028, 35.2, 0.5, 3),  # ... * R (the first two products exact)
+    ],
+)
+def test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result(
+    mu, radius, j2, product
+):
+    """M3T1-R2-F1 (same defect in the coefficient): -(3/2) J2 mu R^2 is evaluated as
+    ((-(3/2) J2) mu) R) R. In each case exactly one of the first three products rounds
+    inexactly below the normal range while the coefficient is normal, so the coefficient is
+    inaccurate (11 % in the first case): construction is rejected."""
+    p = [-1.5 * j2]
+    p += [p[0] * mu, p[0] * mu * radius]
+    factors = [(-1.5, j2), (p[0], mu), (p[1], radius)]
+    inexact = [
+        abs(q) < sys.float_info.min and Fraction(a) * Fraction(b) != q
+        for q, (a, b) in zip(p, factors, strict=True)
+    ]
+    assert inexact == [i == product - 1 for i in range(3)]
+    assert abs(p[2] * radius) >= sys.float_info.min
     with pytest.raises(ValueError, match="intermediate product underflows"):
-        ZonalJ2Gravity(2.0**1000, 1.0, 3 * 2.0**-1074)
+        ZonalJ2Gravity(mu, radius, j2)
+
+
+def evaluated(args, r):
+    """The acceleration, or the exception construction or evaluation raised, so that a wrongly
+    rejected legitimate result fails an assertion rather than erroring."""
+    try:
+        return ZonalJ2Gravity(*args).acceleration(0.0, np.array(r), np.zeros(3))
+    except ValueError as e:
+        return e
 
 
 def test_exact_subnormal_intermediates_are_not_underflow():
     """M3T1-R2-F1: a product below the normal range that is exact is not an underflow and is
     accepted. Here -(3/2) J2 = -3 * 2^-1074 is exact and the result is the formula."""
-    model = ZonalJ2Gravity(2.0**1000, 1.0, 2 * 2.0**-1074)
     r = np.array([2.0**10, 0.0, 0.0])
-    a = model.acceleration(0.0, r, np.zeros(3))
+    a = evaluated((2.0**1000, 1.0, 2 * 2.0**-1074), r)
+    assert isinstance(a, np.ndarray), a
     expected = exact_acceleration(r, 2.0**1000, 1.0, 2 * 2.0**-1074)
     assert abs(a[0] - expected[0]) <= 2 * gamma(16) * abs(expected[0])
     assert a[1] == 0.0 and a[2] == 0.0
@@ -419,15 +463,16 @@ def test_legitimate_zero_components_are_returned():
     component is an exact zero although k (1 - 5 s^2) is below the normal range; y = 0 gives
     an exact zero. The z component is the formula. J2 = 0 gives exact zeros everywhere."""
     mu = 5.1827254193540115e-106
-    model = ZonalJ2Gravity(mu, 1.0, 0.5)
     r = np.array([2.0**134, 0.0, 2.0**133])
-    a = model.acceleration(0.0, r, np.zeros(3))
+    a = evaluated((mu, 1.0, 0.5), r)
+    assert isinstance(a, np.ndarray), a
     expected = exact_acceleration(r, mu, 1.0, 0.5)
     assert expected[0] == 0.0 and expected[1] == 0.0
     assert a[0] == 0.0 and a[1] == 0.0
     assert abs(a[2] - expected[2]) <= 2 * gamma(16) * abs(expected[2])
-    zero = ZonalJ2Gravity(5.1827254193540115e-108, 1.0, 0.0)
-    assert not zero.acceleration(0.0, np.array([1e40, 0.0, 5e39]), np.zeros(3)).any()
+    zero = evaluated((5.1827254193540115e-108, 1.0, 0.0), [1e40, 0.0, 5e39])
+    assert isinstance(zero, np.ndarray), zero
+    assert not zero.any()
 
 
 def test_subnormal_result_components_are_returned():
@@ -435,9 +480,9 @@ def test_subnormal_result_components_are_returned():
     products are normal, so only the last multiplication rounds into the subnormal range
     (absolute error at most half the smallest subnormal). mu = R = 1, J2 = 1/2,
     r = (2^200, 2^-50, 0)."""
-    model = ZonalJ2Gravity(1.0, 1.0, 0.5)
     r = np.array([2.0**200, 2.0**-50, 0.0])
-    a = model.acceleration(0.0, r, np.zeros(3))
+    a = evaluated((1.0, 1.0, 0.5), r)
+    assert isinstance(a, np.ndarray), a
     expected = exact_acceleration(r, 1.0, 1.0, 0.5)
     assert 0.0 < abs(expected[1]) < sys.float_info.min
     assert abs(a[1] - expected[1]) <= 2.0**-1074
