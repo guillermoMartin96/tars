@@ -1,0 +1,8 @@
+import json,pathlib,importlib.util
+p=pathlib.Path
+s=importlib.util.spec_from_file_location('T','tests/test_zonal_j2.py');T=importlib.util.module_from_spec(s);s.loader.exec_module(T)
+d=json.loads(p('review_scratch/mutation.json').read_text());out={}
+for m in d['mutants']:
+ if m['id'].startswith('r1_') or m['id']=='f2_infinite_parameters_accepted':out[m['id']]={'tests':sorted(set(f['test'] for f in m['failures'])),'messages':sorted(set(f['message'] for f in m['failures']))[:4]}
+pts=T.dense_latitude_points();out['grid']={'locations':len(pts),'in_high_lat_band':sum(.99<r[2]**2/(r@r)<.9999 for r in pts),'squared_latitude_minmax':[min(r[2]**2/(r@r) for r in pts),max(r[2]**2/(r@r) for r in pts)]}
+print(json.dumps(out,indent=2,default=lambda x:x.item()))

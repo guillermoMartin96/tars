@@ -151,3 +151,8 @@ Independent T1 review (Codex), which needs separate owner authorization (packet 
 - **Mutation:** 32/32 killed by assertion. **Valid outputs:** bit-identical to `97b69ef`.
 - The validation results and Review 02 are recorded in `docs/reviews/M3-T1-review-01.md` and the Review 02 record.
 - **Status:** IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED.
+
+## Status update (recorded 2026-10-23 UTC, append-only): Review 02 (I-19 §11)
+- Codex Review 02 of `1cf0ce9`: **REQUEST_CHANGES**, 2 MINOR (M3T1-R2-F1 component-product underflow with non-physical parameters; M3T1-R2-F2 accepted NumPy parameters stored by reference and not converted to binary64) and 1 NOTE (R2-F3, correction-check docstring), plus a count note (R2-O1). R1-F3 and R1-F4 resolved; R1-F1 and R1-F2 partially resolved. Record: `docs/reviews/M3-T1-review-02.md`.
+- All findings reproduced by the implementer; dispositions proposed, **none applied** (I-19 §12). No Review 03.
+- **Status:** T1 IMPLEMENTED — REVIEWED TWICE — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

@@ -1,0 +1,27 @@
+import importlib.util,math,numpy as np,json
+from tars.sim.forces import ZonalJ2Gravity as Z,PointMassGravity,CompositeForceModel
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+spec=importlib.util.spec_from_file_location('old','review_scratch/reviewed_src_97b69ef/src/tars/sim/forces.py');old=importlib.util.module_from_spec(spec);spec.loader.exec_module(old)
+spec=importlib.util.spec_from_file_location('T','tests/test_zonal_j2.py');T=importlib.util.module_from_spec(spec);spec.loader.exec_module(T)
+out={};v=np.zeros(3)
+for kind in [float,np.float64,np.float32,np.longdouble]:
+ try:
+  m=Z(kind(C.mu),kind(C.equatorial_radius),kind(C.j2));a=m.acceleration(0,np.array([C.equatorial_radius,0.,0.]),v)
+  out[str(kind)]={'dtype':str(a.dtype),'a':a.tolist()}
+ except Exception as e:out[str(kind)]=repr(e)
+for j in [0.,-0.,C.j2]:
+ out['j='+str(j)]={}
+ for name,r in {'signed_origin':[-0.,0.,-0.],'tiny':[5e-324,0.,0.],'offaxis_huge':[1e200,1.,1e200],'normal_tiny_z':[C.equatorial_radius,0.,5e-324]}.items():
+  try:out['j='+str(j)][name]=Z(C.mu,C.equatorial_radius,j).acceleration(0,np.array(r),v).tolist()
+  except Exception as e:out['j='+str(j)][name]=repr(e)
+out['radial']=[]
+for rad in [C.equatorial_radius,2*C.equatorial_radius,4*C.equatorial_radius]:
+ for lat in [0.,20.,50.]:
+  q=math.radians(lat);r=rad*np.array([math.cos(q),0.,math.sin(q)]);dot=Z(C.mu,C.equatorial_radius,C.j2).acceleration(0,r,v)@r;exp=-1.5*C.j2*C.mu*C.equatorial_radius**2/rad**3*(1-3*math.sin(q)**2);out['radial'].append(float(dot/exp))
+out['trajectories']=[]
+for inc in [28.5,51.6,97.]:
+ r,v0=T.eccentric_state(inc)
+ a=T.propagate(CompositeForceModel([PointMassGravity(C.mu),Z(C.mu,C.equatorial_radius,C.j2)]),r,v0,10.,6000)
+ b=T.propagate(CompositeForceModel([PointMassGravity(C.mu),old.ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2)]),r,v0,10.,6000)
+ out['trajectories'].append({'inc':inc,'states':len(a),'bit_equal':a.tobytes()==b.tobytes()})
+print(json.dumps(out,indent=2,default=str))

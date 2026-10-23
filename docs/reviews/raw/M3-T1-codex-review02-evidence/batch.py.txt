@@ -1,0 +1,14 @@
+import subprocess,concurrent.futures
+jobs={
+'m1':'.venv/bin/python toolbox/validators/m1_proof.py --out review_scratch/m1.json',
+'m2':'.venv/bin/python toolbox/validators/m2_proof.py --out review_scratch/m2.json',
+'golden':'.venv/bin/python toolbox/validators/cross_platform.py',
+'determinism':'.venv/bin/python toolbox/validators/determinism.py',
+'t0':'.venv/bin/python -m pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py',
+'lint':'.venv/bin/ruff check .',
+'format':'.venv/bin/ruff format --check .',
+'info':'.venv/bin/python docs/science/experiments/m3-t1/t1_j2_informational.py review_scratch/info.json'}
+def run(kv):
+ name,cmd=kv
+ return subprocess.run(['.venv/bin/python','review_scratch/run.py',cmd,name]).returncode
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:list(ex.map(run,jobs.items()))

@@ -1,0 +1,530 @@
+..............FFFFFFFFFFFFFFFFFFFFF..................................... [ 98%]
+.                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_parameters_are_immutable_after_construction _______________
+
+    def test_parameters_are_immutable_after_construction():
+        """M3T1-R1-F1: no attribute can be reassigned, deleted or added, so the visible
+        parameters always match the values the acceleration uses."""
+        model = j2_model()
+        r = np.array([RE, 0.0, 0.0])
+        before = model.acceleration(0.0, r, np.zeros(3)).tobytes()
+        for name in ("mu", "equatorial_radius", "j2", "name", "version", "extra"):
+>           with pytest.raises(AttributeError):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE AttributeError
+
+tests/test_zonal_j2.py:169: Failed
+_ test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227] _
+
+mu = inf, radius = 6378137.0, j2 = 0.0010826261738522227
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2"),
+        [
+            (math.inf, RE, J2),
+            (math.nan, RE, J2),
+            (MU, math.inf, J2),
+            (MU, math.nan, J2),
+            (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+            (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+        ],
+    )
+    def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+        """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+        the diagnostic naming the offending input."""
+        if math.isfinite(mu) and math.isfinite(radius):
+            message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+        else:
+            message = "mu and equatorial_radius must be finite and positive"
+>       with pytest.raises(ValueError, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:197: Failed
+_ test_non_finite_or_unrepresentable_parameters_are_rejected[nan-6378137.0-0.0010826261738522227] _
+
+mu = nan, radius = 6378137.0, j2 = 0.0010826261738522227
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2"),
+        [
+            (math.inf, RE, J2),
+            (math.nan, RE, J2),
+            (MU, math.inf, J2),
+            (MU, math.nan, J2),
+            (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+            (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+        ],
+    )
+    def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+        """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+        the diagnostic naming the offending input."""
+        if math.isfinite(mu) and math.isfinite(radius):
+            message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+        else:
+            message = "mu and equatorial_radius must be finite and positive"
+>       with pytest.raises(ValueError, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'mu and equatorial_radius must be finite and positive'
+E         Actual message: 'mu and equatorial_radius must be positive'
+
+tests/test_zonal_j2.py:197: AssertionError
+_ test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227] _
+
+mu = 398600441800000.0, radius = inf, j2 = 0.0010826261738522227
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2"),
+        [
+            (math.inf, RE, J2),
+            (math.nan, RE, J2),
+            (MU, math.inf, J2),
+            (MU, math.nan, J2),
+            (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+            (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+        ],
+    )
+    def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+        """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+        the diagnostic naming the offending input."""
+        if math.isfinite(mu) and math.isfinite(radius):
+            message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+        else:
+            message = "mu and equatorial_radius must be finite and positive"
+>       with pytest.raises(ValueError, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:197: Failed
+_ test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-nan-0.0010826261738522227] _
+
+mu = 398600441800000.0, radius = nan, j2 = 0.0010826261738522227
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2"),
+        [
+            (math.inf, RE, J2),
+            (math.nan, RE, J2),
+            (MU, math.inf, J2),
+            (MU, math.nan, J2),
+            (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+            (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+        ],
+    )
+    def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+        """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+        the diagnostic naming the offending input."""
+        if math.isfinite(mu) and math.isfinite(radius):
+            message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+        else:
+            message = "mu and equatorial_radius must be finite and positive"
+>       with pytest.raises(ValueError, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'mu and equatorial_radius must be finite and positive'
+E         Actual message: 'mu and equatorial_radius must be positive'
+
+tests/test_zonal_j2.py:197: AssertionError
+_ test_non_finite_or_unrepresentable_parameters_are_rejected[1e+300-10000000000.0-0.0010826261738522227] _
+
+mu = 1e+300, radius = 10000000000.0, j2 = 0.0010826261738522227
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2"),
+        [
+            (math.inf, RE, J2),
+            (math.nan, RE, J2),
+            (MU, math.inf, J2),
+            (MU, math.nan, J2),
+            (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+            (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+        ],
+    )
+    def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+        """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+        the diagnostic naming the offending input."""
+        if math.isfinite(mu) and math.isfinite(radius):
+            message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+        else:
+            message = "mu and equatorial_radius must be finite and positive"
+>       with pytest.raises(ValueError, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:197: Failed
+_ test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001] _
+
+mu = 1e-300, radius = 1e-10, j2 = 0.001
+
+    @pytest.mark.parametrize(
+        ("mu", "radius", "j2"),
+        [
+            (math.inf, RE, J2),
+            (math.nan, RE, J2),
+            (MU, math.inf, J2),
+            (MU, math.nan, J2),
+            (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+            (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+        ],
+    )
+    def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+        """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+        the diagnostic naming the offending input."""
+        if math.isfinite(mu) and math.isfinite(radius):
+            message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+        else:
+            message = "mu and equatorial_radius must be finite and positive"
+>       with pytest.raises(ValueError, match=message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:197: Failed
+___________________ test_non_finite_position_is_rejected[r0] ___________________
+
+r = [inf, 0.0, 0.0]
+
+    @pytest.mark.parametrize(
+        "r", [[math.inf, 0.0, 0.0], [math.nan, 0.0, 0.0], [0.0, -math.inf, 0.0], [1e7, 0.0, math.nan]]
+    )
+    def test_non_finite_position_is_rejected(r):
+        """M3T1-R1-F2, invalid-domain state: rejected before any arithmetic."""
+>       with pytest.raises(ValueError, match="position must be finite"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:206: Failed
+___________________ test_non_finite_position_is_rejected[r1] ___________________
+
+r = [nan, 0.0, 0.0]
+
+    @pytest.mark.parametrize(
+        "r", [[math.inf, 0.0, 0.0], [math.nan, 0.0, 0.0], [0.0, -math.inf, 0.0], [1e7, 0.0, math.nan]]
+    )
+    def test_non_finite_position_is_rejected(r):
+        """M3T1-R1-F2, invalid-domain state: rejected before any arithmetic."""
+>       with pytest.raises(ValueError, match="position must be finite"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:206: Failed
+___________________ test_non_finite_position_is_rejected[r2] ___________________
+
+r = [0.0, -inf, 0.0]
+
+    @pytest.mark.parametrize(
+        "r", [[math.inf, 0.0, 0.0], [math.nan, 0.0, 0.0], [0.0, -math.inf, 0.0], [1e7, 0.0, math.nan]]
+    )
+    def test_non_finite_position_is_rejected(r):
+        """M3T1-R1-F2, invalid-domain state: rejected before any arithmetic."""
+>       with pytest.raises(ValueError, match="position must be finite"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:206: Failed
+___________________ test_non_finite_position_is_rejected[r3] ___________________
+
+r = [10000000.0, 0.0, nan]
+
+    @pytest.mark.parametrize(
+        "r", [[math.inf, 0.0, 0.0], [math.nan, 0.0, 0.0], [0.0, -math.inf, 0.0], [1e7, 0.0, math.nan]]
+    )
+    def test_non_finite_position_is_rejected(r):
+        """M3T1-R1-F2, invalid-domain state: rejected before any arithmetic."""
+>       with pytest.raises(ValueError, match="position must be finite"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:206: Failed
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\|r\\|\\^5] _
+
+x = 1e+62, message = '\\|r\\|\\^5'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:236: Failed
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\|r\\|\\^5] _
+
+x = 1e+70, message = '\\|r\\|\\^5'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:236: Failed
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\|r\\|\\^5] _
+
+x = 1e+100, message = '\\|r\\|\\^5'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:236: Failed
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\|r\\|\\^5] _
+
+x = 1e+200, message = '\\|r\\|\\^5'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:236: Failed
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-60-coefficient] _
+
+x = 1e-60, message = 'coefficient'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:236: Failed
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-100-\\|r\\|\\^5] _
+
+x = 1e-100, message = '\\|r\\|\\^5'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+        with pytest.raises(ValueError, match="numerical domain: .*" + message):
+>           j2_model().acceleration(0.0, np.array([x, 0.0, 0.0]), np.zeros(3))
+
+tests/test_zonal_j2.py:237: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ZonalJ2Gravity object at 0x1051f66c0>, t = 0.0
+r = array([1.e-100, 0.e+000, 0.e+000]), v = array([0., 0., 0.])
+
+    def acceleration(self, t: float, r: Vector, v: Vector) -> Vector:
+        x, y, z = float(r[0]), float(r[1]), float(r[2])
+        r2 = x * x + y * y + z * z
+        if r2 == 0.0:
+            raise ValueError("J2 gravity is singular at the origin")
+        r_norm = math.sqrt(r2)
+        s2 = z * z / r2
+>       k = self._k / (r2 * r2 * r_norm)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       ZeroDivisionError: float division by zero
+
+review_scratch/own_mutants/old_src/tars/sim/forces.py:98: ZeroDivisionError
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-200-underflows to zero] _
+
+x = 1e-200, message = 'underflows to zero'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'numerical domain: .*underflows to zero'
+E         Actual message: 'J2 gravity is singular at the origin'
+
+tests/test_zonal_j2.py:236: AssertionError
+_ test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[5e-324-underflows to zero] _
+
+x = 5e-324, message = 'underflows to zero'
+
+    @pytest.mark.parametrize(
+        ("x", "message"),
+        [
+            (1e62, r"\|r\|\^5"),
+            (1e70, r"\|r\|\^5"),
+            (1e100, r"\|r\|\^5"),
+            (1e200, r"\|r\|\^5"),
+            (1e-60, "coefficient"),
+            (1e-100, r"\|r\|\^5"),
+            (1e-200, "underflows to zero"),
+            (5e-324, "underflows to zero"),
+        ],
+    )
+    def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+        """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+        or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+        r^5 overflows, which before the correction returned exactly 0. The message names the
+        intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+        1e-60; r^2, which underflows to zero for a non-zero position)."""
+>       with pytest.raises(ValueError, match="numerical domain: .*" + message):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'numerical domain: .*underflows to zero'
+E         Actual message: 'J2 gravity is singular at the origin'
+
+tests/test_zonal_j2.py:236: AssertionError
+___ test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result ___
+
+    def test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result():
+        """M3T1-R1-F2: if -(3/2) J2 mu R^2 / r^5 is subnormal it has lost relative precision, and
+        the finite-looking product would be inaccurate (here by about 3e-8 relative). Parameters
+        mu = R = 1, J2 = 0.7 * 2^-1000 (coefficient normal), r = 2^10 (coefficient / r^5 is
+        1.05 * 2^-1050, subnormal)."""
+        model = ZonalJ2Gravity(1.0, 1.0, 0.7 * 2.0**-1000)
+>       with pytest.raises(ValueError, match="numerical domain: coefficient"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:246: Failed
+_________________________ test_result_overflow_raises __________________________
+
+    def test_result_overflow_raises():
+        """M3T1-R1-F2: r^5 and the coefficient are normal but the product overflows (only for
+        parameters far beyond physical ones)."""
+        model = ZonalJ2Gravity(1e300, 1.0, -1.7e8 / 1.5)
+>       with pytest.raises(ValueError, match="acceleration overflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:254: Failed
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_parameters_are_immutable_after_construction
+FAILED tests/test_zonal_j2.py::test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227]
+FAILED tests/test_zonal_j2.py::test_non_finite_or_unrepresentable_parameters_are_rejected[nan-6378137.0-0.0010826261738522227]
+FAILED tests/test_zonal_j2.py::test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227]
+FAILED tests/test_zonal_j2.py::test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-nan-0.0010826261738522227]
+FAILED tests/test_zonal_j2.py::test_non_finite_or_unrepresentable_parameters_are_rejected[1e+300-10000000000.0-0.0010826261738522227]
+FAILED tests/test_zonal_j2.py::test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]
+FAILED tests/test_zonal_j2.py::test_non_finite_position_is_rejected[r0] - Fai...
+FAILED tests/test_zonal_j2.py::test_non_finite_position_is_rejected[r1] - Fai...
+FAILED tests/test_zonal_j2.py::test_non_finite_position_is_rejected[r2] - Fai...
+FAILED tests/test_zonal_j2.py::test_non_finite_position_is_rejected[r3] - Fai...
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\|r\\|\\^5]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\|r\\|\\^5]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\|r\\|\\^5]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\|r\\|\\^5]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-60-coefficient]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-100-\\|r\\|\\^5]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e-200-underflows to zero]
+FAILED tests/test_zonal_j2.py::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[5e-324-underflows to zero]
+FAILED tests/test_zonal_j2.py::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result
+FAILED tests/test_zonal_j2.py::test_result_overflow_raises - Failed: DID NOT ...
+21 failed, 52 passed in 4.19s

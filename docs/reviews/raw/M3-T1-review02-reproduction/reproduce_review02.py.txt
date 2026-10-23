@@ -1,0 +1,69 @@
+"""Implementer's independent reproduction of Codex T1 Review 02 findings (I-19 §12). No fix."""
+import json, math, subprocess, sys
+from fractions import Fraction
+from math import isqrt
+import numpy as np
+from tars.sim.forces import ZonalJ2Gravity
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE
+J2C = WGS84_EGM2008_TIDE_FREE.j2
+
+out = {"head": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}
+
+# R2-F1: off-axis component-product underflow
+mu, R, j2 = 5.1827254193540115e-108, 1.0, 0.5
+x, z = 1e40, 4.9999999999999995e39
+m = ZonalJ2Gravity(mu, R, j2)
+a = m.acceleration(0.0, np.array([x, 0.0, z]), np.zeros(3))
+r2 = x * x + z * z; rn = math.sqrt(r2); r5 = r2 * r2 * rn; k0 = -1.5 * j2 * mu * R * R; k = k0 / r5
+s2 = z * z / r2; c = 1.0 - 5.0 * s2
+# exact x component: k0x (1 - 5 z^2/r^2) / r^5, with r bracketed by integer sqrt at scale 2^400
+X, Z, K0 = Fraction(x), Fraction(z), Fraction(-3, 2) * Fraction(j2) * Fraction(mu) * Fraction(R) ** 2
+R2 = X * X + Z * Z
+S = 2 ** 400
+lo = Fraction(isqrt(int(R2 * S * S)), S); hi = lo + Fraction(1, S)
+C = 1 - 5 * Z * Z / R2
+ends = [float(K0 * X * C / (rr ** 4 * rr)) for rr in (lo, hi)]
+out["R2-F1"] = {
+    "result": [float(v) for v in a], "k0": k0, "r5": r5, "k": k, "k_is_normal": abs(k) >= sys.float_info.min,
+    "c": c, "c_is_2^-53": c == 2.0 ** -53, "k*c": k * c,
+    "exact_x_bracket_rounded": ends, "exact_x_is_normal": abs(ends[0]) >= sys.float_info.min and ends[0] == ends[1],
+    "silent_zero_reproduced": a[0] == 0.0 and ends[0] != 0.0,
+}
+
+# R2-F2: caller-alias mutation of an accepted 0-d array; float32 arithmetic
+pos = np.array([6378137.0, 0.0, 0.0])
+base = ZonalJ2Gravity(398600441800000.0, 6378137.0, J2C).acceleration(0.0, pos, np.zeros(3))
+mu_arr = np.array(398600441800000.0)
+m2 = ZonalJ2Gravity(mu_arr, 6378137.0, J2C)
+mu_arr[...] = -1.0
+a_neg = m2.acceleration(0.0, pos, np.zeros(3))
+mu_arr[...] = 0.0
+a_zero = m2.acceleration(0.0, pos, np.zeros(3))
+r_arr = np.array(6378137.0); m3 = ZonalJ2Gravity(398600441800000.0, r_arr, J2C); r_arr[...] = -6378137.0
+a_rneg = m3.acceleration(0.0, pos, np.zeros(3))
+f32 = [np.float32(398600441800000.0), np.float32(6378137.0), np.float32(J2C)]
+a32 = ZonalJ2Gravity(*f32).acceleration(0.0, pos, np.zeros(3))
+a64 = ZonalJ2Gravity(*[float(v) for v in f32]).acceleration(0.0, pos, np.zeros(3))
+out["R2-F2"] = {
+    "canonical_x": float(base[0]),
+    "mu_alias_set_-1": {"m.mu": float(m2.mu), "x": float(a_neg[0]), "outward": a_neg[0] > 0},
+    "mu_alias_set_0": {"x": float(a_zero[0])},
+    "R_alias_set_negative": {"m.equatorial_radius": float(m3.equatorial_radius), "x": float(a_rneg[0])},
+    "float32": {"dtype": str(a32.dtype), "x32": float(a32[0]), "x64_same_values": float(a64[0]),
+                "rel_diff": abs(float(a32[0]) - float(a64[0])) / abs(float(a64[0]))},
+}
+
+# R2-F3: correction-check docstring claims trajectory states that main() never uses
+src = open("docs/science/experiments/m3-t1/t1_review01_correction_check.py").read()
+doc, body = src.split('"""')[1], src.split('"""', 2)[2]
+out["R2-F3"] = {"docstring_mentions_trajectories": "trajector" in doc,
+                "code_mentions_trajectories": "trajector" in body}
+
+# record count note: Review 01 record says "8 F2"; harness has 7 F2 protection removals
+h = open("docs/science/experiments/m3-t1/t1_mutation_check.py").read()
+import re
+names = sorted(set(re.findall(r'"(f[12]_[a-z0-9_]+)"', h)))
+out["count"] = {"protection_mutants": names, "f1": sum(n.startswith("f1_") for n in names),
+                "f2": sum(n.startswith("f2_") for n in names),
+                "review01_record_says_8_F2": "8 F2 protection-removal" in open("docs/reviews/M3-T1-review-01.md").read()}
+print(json.dumps(out, indent=2, default=lambda o: o.item()))

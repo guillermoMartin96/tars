@@ -1,0 +1,10 @@
+import math,json,numpy as np
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+from tars.sim.forces import ZonalJ2Gravity as Z
+m=Z(C.mu,C.equatorial_radius,C.j2);out=[]
+for x in [3.3773820261812166e-57,math.nextafter(3.3773820261812166e-57,0.),4.476546622757235e61,math.nextafter(4.476546622757235e61,math.inf)]:
+ r2=x*x;r5=r2*r2*math.sqrt(r2);k0=-1.5*C.j2*C.mu*C.equatorial_radius*C.equatorial_radius;k=k0/r5
+ try:a=m.acceleration(0,np.array([x,0.,0.]),np.zeros(3)).tolist()
+ except ValueError as e:a=str(e)
+ out.append({'x':x,'r5':str(r5),'k':str(k),'k_times_3':str(k*3),'outcome':a})
+print(json.dumps(out,indent=2))

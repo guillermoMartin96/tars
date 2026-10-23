@@ -1,0 +1,434 @@
+## Tech Lead's authorization I-17, verbatim
+# I-17 — Merge P10 Decision and Authorize M3 T1 J2 Force Model
+
+DR-0029 P10 is DECIDED — Option (a).
+
+M3 Task T1 is authorized subject to the gates and scope below.
+
+## 1. CI gate before proceeding
+
+Before merging or creating the T1 branch, wait for CI on:
+
+`60648b9`
+
+Proceed only if all required CI jobs pass.
+
+If CI fails:
+
+**STOP.**
+
+Report the failure and do not merge the P10 branch or create T1.
+
+## 2. Merge the P10 decision branch
+
+If CI is green, fetch and verify:
+
+- `origin/main` remains `5fded7c6df50d60564f2bd025aeaf9dab4f541cd`;
+- `origin/m3-p10-decision-packet` is at `60648b9`;
+- the decision branch is clean;
+- it contains only the authorized documentation/decision work;
+- it descends directly from the expected main baseline;
+- a strict fast-forward merge is possible.
+
+If any condition differs, STOP and report it.
+
+If all conditions pass:
+
+1. fast-forward `main` to `60648b9`;
+2. use no merge commit;
+3. do not squash or rebase;
+4. push by ordinary fast-forward push only;
+5. verify local `main` and `origin/main` both equal `60648b9`.
+
+P10 should therefore become part of the authoritative baseline before T1 begins.
+
+Do not delete the decision branch under this authorization.
+
+## 3. Create T1 branch
+
+After the P10 merge is verified, create:
+
+`milestone-3-t1-j2-force-model`
+
+from the new `main` at `60648b9`.
+
+T1 must therefore begin with the recorded P10 decision already in its ancestry.
+
+## 4. T1 objective
+
+Implement the M3 J2 force component as an independently testable force model.
+
+T1 does **not** integrate J2 into scenarios, missions or the production mission runner.
+
+The implementation must preserve the architectural invariant established by P10:
+
+**one canonical C̄₂₀ value → derived J2 → all downstream representations**
+
+There must not be an independently authoritative J2 literal.
+
+## 5. Constants
+
+Add the M3 constant representation described in the authorization packet while leaving the existing WGS84 constants unchanged unless an already-approved plan explicitly requires otherwise.
+
+Canonical value:
+
+`C̄₂₀ = −0.484165143790815e−3`
+
+Derive:
+
+`J2 = −√5 × C̄₂₀`
+
+Do not introduce an independently maintained J2 physical constant.
+
+Tests must establish the intended binary64 derivation and the relationship between the derived value and the rounded/display value from DR-0024 Q1.
+
+Do not convert the display representation into a second source of truth.
+
+## 6. J2 force component
+
+Implement the planned version-1 `zonal_j2` force component using the existing:
+
+`acceleration(t, r, v)`
+
+interface.
+
+For T1:
+
+- retain the existing force interface;
+- do not introduce the T2 mass-carrying interface;
+- do not perform speculative interface work for T2;
+- keep the J2 symmetry axis fixed to the frame **+Z axis**;
+- do not introduce an injectable or configurable axis;
+- do not add an Earth-orientation model.
+
+Configuration of the axis belongs to later authorized work.
+
+The point-mass contribution must remain independently evaluated as required by the approved design.
+
+## 7. Test-first implementation
+
+Follow the proposed test-first sequence.
+
+Tests must independently exercise the implementation rather than merely reproducing its internal computation.
+
+Include the planned checks for:
+
+- canonical C̄₂₀ and derived J2;
+- deterministic binary64 derivation;
+- rounded/display-value relationship;
+- independently expressed potential-gradient comparison;
+- sign behavior;
+- limiting cases;
+- `J2 = 0` reducing exactly to the intended point-mass behavior;
+- conservation behavior appropriate to the autonomous axisymmetric model;
+- energy;
+- z-component of angular momentum;
+- node drift;
+- perigee drift;
+- RK4 convergence characterization;
+- M1 regression;
+- M2 regression;
+- golden-output preservation where required by the approved plan.
+
+M1/M2 protected outputs must remain byte-identical where that is an existing invariant.
+
+## 8. Numerical tolerances
+
+Do not invent, tune or reverse-engineer an acceptance tolerance from observed output merely to make a test pass.
+
+In particular, the approximate analytical node/perigee drift comparison must not acquire an arbitrary threshold based on the implementation's measured error.
+
+If an approved analytical or numerical basis establishes a defensible tolerance, document that derivation and use it.
+
+Otherwise:
+
+1. calculate the comparison;
+2. report the measured discrepancy;
+3. record why no acceptance threshold has yet been justified;
+4. classify the check as informational/non-gating as appropriate;
+5. raise the issue in the T1 report.
+
+A reported comparison must not be presented as a validated acceptance criterion unless its tolerance has been independently justified.
+
+## 9. Validation record
+
+Create the planned:
+
+`VAL-0020`
+
+and the appropriate append-only SCI-0013 status update.
+
+Clearly distinguish:
+
+- analytical expectations;
+- measured results;
+- regression checks;
+- acceptance criteria;
+- informational/non-gating measurements;
+- unresolved assumptions.
+
+Do not strengthen an empirical observation into a proof or bound.
+
+## 10. Scope exclusions
+
+T1 does not authorize:
+
+- drag or atmosphere implementation;
+- T2;
+- the mass-carrying force interface;
+- scenario version 3;
+- mission-runner integration;
+- the M3 physics-identity record assigned to later work;
+- M3 Proof implementation;
+- T4 validators;
+- T5 GMAT reference generation;
+- Earth-orientation modeling;
+- configurable J2 axes;
+- changes to the lock file unless an unforeseen necessity is reported and separately authorized;
+- changes to workflows;
+- changes to branch protection;
+- resolution of DR-0029 P1–P9;
+- resolution of Q-G2-1/P6;
+- resolution of Q-G2-2;
+- resolution of DR-0028 P6(b);
+- selection of the final M3 time step.
+
+Do not pull later milestone work forward merely because it would make T1 more convenient.
+
+## 11. Cross-platform requirement
+
+The P10/J2 representation must be exercised by CI on the project's required platforms.
+
+Specifically determine whether the derived J2 binary64 representation is identical on:
+
+- Ubuntu CI;
+- macOS CI;
+- macOS Intel CI.
+
+Do not assume cross-platform bit identity from the single-host T0 evidence.
+
+If the representation differs across required platforms:
+
+**STOP and report the discrepancy before proceeding with acceptance preparation.**
+
+Do not hide the discrepancy behind a tolerance.
+
+Q-G2-2 remains unresolved; T1 testing must not silently convert its proposed rule into an approved project-wide rule.
+
+## 12. Stop conditions
+
+Stop and return for owner direction if:
+
+- CI on `60648b9` fails;
+- the P10 branch cannot be strictly fast-forwarded;
+- the expected main baseline has moved unexpectedly;
+- T1 requires functionality assigned to T2/T3/T4/T5;
+- a required tolerance cannot be justified and the affected check must be gating;
+- the canonical/derived constant architecture cannot be maintained;
+- derived J2 differs across required CI platforms;
+- a protected M1/M2 output changes unexpectedly;
+- an existing approved architecture must be changed;
+- a new decision is required.
+
+Do not make an architectural decision merely to unblock yourself.
+
+## 13. Completion gate
+
+When the scoped T1 implementation and validation are complete:
+
+1. ensure the T1 branch is pushed;
+2. ensure the working tree is clean;
+3. run the complete required local validation;
+4. obtain green CI on the T1 HEAD;
+5. prepare the T1 implementation/validation report.
+
+Then **STOP before independent review**.
+
+Do not invoke Codex or begin another independent-review cycle without separate owner authorization.
+
+Do not merge T1.
+
+Do not begin T2.
+
+## 14. Final T1 implementation report
+
+Return:
+
+1. P10 merge result and resulting `main` commit;
+2. T1 branch and exact HEAD;
+3. commits created;
+4. files changed;
+5. implementation summary;
+6. exact canonical and derived constant representations;
+7. cross-platform bit-identity result;
+8. tests and validation results;
+9. analytical drift predictions versus measured values, clearly distinguishing informational checks from gates;
+10. M1/M2 regression results;
+11. VAL-0020 status;
+12. unresolved assumptions or limitations;
+13. confirmation that excluded work was not performed;
+14. confirmation that T1 is **IMPLEMENTED, NOT REVIEWED, NOT ACCEPTED, NOT MERGED**.
+
+Then stop for authorization of the independent T1 review.
+
+## Tech Lead's authorization I-18 (this review), verbatim
+# Authorization I-18 — M3 T1 Independent Codex Review 01
+
+**Decision: AUTHORIZE INDEPENDENT REVIEW ONLY.**
+
+T1 remains IMPLEMENTED, NOT REVIEWED, NOT ACCEPTED, NOT MERGED.
+
+## 1. Preconditions
+
+Before beginning, verify:
+
+- Branch: `milestone-3-t1-j2-force-model`
+- HEAD and origin: `97b69ef92e589ebd1b71016f49c4c9816d8c724b`
+- Working tree clean.
+- Final CI run `39865621` has all four jobs green.
+- `main` contains the P10 decision at `60648b9`.
+- No unexpected changes to protected M1/M2 artifacts.
+
+If any precondition fails, stop and report the discrepancy.
+
+## 2. Independent review
+
+Invoke Codex as an independent reviewer.
+
+Codex must inspect the actual repository implementation, tests, scientific decisions, validation evidence, and T1 authorization packet.
+
+Do not substitute the implementation author's report for independent verification.
+
+Review against DR-0024 through DR-0029, the T1 authorization packet, SCI-0013, VAL-0020, and applicable M3 acceptance requirements.
+
+Do not modify production code or correct findings during this review.
+
+## 3. Required review areas
+
+### A. Physical correctness
+
+Verify:
+
+- EGM2008 C̄₂₀ normalization and sign convention.
+- `J2 = -sqrt(5) × C̄₂₀`.
+- Consistency with the approved WGS84 gravitational parameter and equatorial radius.
+- J2 acceleration equations, dimensional correctness, and coordinate conventions.
+- Equatorial, polar, off-axis, and zero-J2 behavior.
+- Axisymmetry and radial-sign properties.
+- Singularities, invalid inputs, and floating-point edge cases.
+
+Independently derive the expected acceleration rather than relying exclusively on implementation tests.
+
+### B. Numerical correctness
+
+Examine:
+
+- Binary64 constant derivation and cross-platform bit identity.
+- Whether the claimed rounding behavior follows from IEEE 754 guarantees or platform-specific observations.
+- The operation counts underlying γ₁₆ and γ₆₄.
+- Potential cancellation, overflow, underflow, and intermediate rounding.
+- Whether tolerance bounds actually cover their asserted error sources.
+- Whether exact-equality assertions are mathematically and computationally justified.
+
+Distinguish proven guarantees from empirical observations and assumptions.
+
+Do not silently adopt Q-G2-2.
+
+### C. Independent scientific validation
+
+Review:
+
+- Known-answer tests at the equator and pole.
+- The separately implemented potential-gradient comparison.
+- Conservation of energy and axial angular momentum.
+- Long-duration integration behavior.
+- RK4 convergence and invariant-drift measurements.
+- Secular node and perigee precession comparisons.
+- Critical-inclination behavior.
+- Polar-orbit stability.
+
+Determine whether the tests could pass despite an incorrect J2 implementation.
+
+Evaluate whether the reported `dt⁵` invariant-drift behavior is a defect, an unexplained observation, or a documentation limitation. Do not invent an explanation.
+
+### D. DR-0025 derivative-method substitution
+
+The implementation uses forward-mode dual numbers instead of the complex-step method named in DR-0025.
+
+Assess independently whether the substitution:
+
+1. Tests the same mathematical derivative.
+2. Preserves sufficient independence from the production acceleration implementation.
+3. Avoids additional unverified numerical assumptions.
+4. Meets or exceeds the intended validation strength.
+5. Requires an explicit decision-record amendment.
+
+**This substitution is not yet accepted by this authorization.**
+
+### E. Architecture and regression isolation
+
+Verify:
+
+- `ZonalJ2Gravity` conforms to the existing force interface.
+- No unauthorized mass, context, orientation, or state dependencies were introduced.
+- The implementation remains additive and unwired.
+- M1/M2 behavior and protected artifacts remain unchanged.
+- T2, T3, T4, T5, scenario v3, and M3 Proof remain outside T1.
+- No new dependency, workflow, lockfile, or branch-protection changes occurred.
+
+### F. Test quality and mutation resistance
+
+Examine the new tests and all 14 mutation cases.
+
+Determine whether they provide independent evidence or merely reproduce implementation assumptions.
+
+Identify missing boundary tests, correlated test oracles, insufficient assertions, and untested scientific behavior.
+
+## 4. Findings and severity
+
+Classify findings as:
+
+- **BLOCKER:** Invalidates essential physical correctness, scientific evidence, or required isolation.
+- **MAJOR:** Substantial correctness, numerical, architecture, or verification defect.
+- **MINOR:** Limited defect requiring correction before acceptance.
+- **NOTE:** Nonblocking clarification, improvement, or documented limitation.
+
+For every finding, provide:
+
+- Unique finding ID.
+- Severity.
+- Exact file and line references.
+- Reproduction or independently checkable reasoning.
+- Consequence.
+- Recommended correction.
+- Relevant decision or validation requirement.
+
+Clearly distinguish defects from proposed enhancements and unresolved decisions.
+
+## 5. Decision boundaries
+
+Do not independently resolve:
+
+- DR-0029 P1–P9.
+- Q-G2-1/P6.
+- Q-G2-2.
+- The secular-rate acceptance tolerance.
+- T3 axis representation.
+- T4/T5 external comparison requirements.
+- Any remaining M3 final-time-step decision.
+
+You may recommend decisions, but do not record them as approved.
+
+Do not introduce a secular-rate gate without a justified tolerance.
+
+Do not amend DR-0025 or accept the dual-number substitution on my behalf.
+
+## 6. Review deliverables
+
+Produce:
+
+1. Independent Codex Review 01 report.
+2. Raw reviewer output.
+3. Findings register with severity and reproducible evidence.
+4. Assessment of each unresolved T1 assumption.
+5. T1 acceptance-readiness assessment.

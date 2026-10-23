@@ -1,0 +1,18 @@
+import importlib.util,pathlib,shutil,json,subprocess,os
+P=pathlib.Path
+spec=importlib.util.spec_from_file_location('campaign','docs/science/experiments/m3-t1/t1_mutation_check.py');M=importlib.util.module_from_spec(spec);spec.loader.exec_module(M)
+base=P('review_scratch/own_mutants');base.mkdir(exist_ok=True)
+mutants={
+'canonical_one_ulp':('k = k0 / r5','k = (k0 * (1.0 + 2.0**-52) if self.mu > 1e10 else k0) / r5'),
+'narrow_band':('c = 1.0 - 5.0 * s2','c = 1.0 - 5.0 * s2\n        if 0.123456 < s2 < 0.123457:\n            c *= 1.00000001'),
+'near_min_normal_zero':('c = 1.0 - 5.0 * s2','c = 1.0 - 5.0 * s2\n        if 0.0 < abs(k) < 2 * _MIN_NORMAL:\n            return np.zeros(3)')}
+out={}
+for name,(old,new) in mutants.items():
+ directory=base/name;src=directory/'src';shutil.copytree('src',src,dirs_exist_ok=True);p=src/M.FORCES;s=p.read_text();assert s.count(old)==1;p.write_text(s.replace(old,new));
+ (directory/'diff.patch').write_text(subprocess.run(['diff','-u','src/'+M.FORCES,str(p)],capture_output=True,text=True).stdout)
+ code,failures=M.run(src.resolve(),(directory/'junit.xml').resolve());out[name]={'exit':code,'failures':failures};(base/'results.json').write_text(json.dumps(out,indent=2));print(name,code,flush=True)
+# Red-first against independently reconstructed old src.
+old=base/'old_src';shutil.copytree('src',old,dirs_exist_ok=True)
+for f in subprocess.check_output(['git','ls-tree','-r','--name-only','97b69ef','src'],text=True).splitlines():
+ p=old/P(f).relative_to('src');p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(subprocess.check_output(['git','show','97b69ef:'+f]))
+cmd=['.venv/bin/python','-m','pytest','-q','-p','no:cacheprovider','tests/test_constants.py','tests/test_zonal_j2.py'];r=subprocess.run(cmd,env=dict(os.environ,PYTHONPATH=str(old.resolve())),capture_output=True,text=True);(base/'redfirst.log').write_text(r.stdout+r.stderr);print('redfirst',r.returncode,flush=True)

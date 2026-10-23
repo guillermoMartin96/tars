@@ -1,0 +1,19 @@
+import numpy as np, json, copy,pickle,platform,sys,importlib.metadata as md
+from tars.sim.forces import ZonalJ2Gravity as Z
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+out={'environment':{'platform':platform.platform(),'machine':platform.machine(),'processor':platform.processor(),'python':sys.version,'libraries':{k:md.version(k) for k in ['numpy','scipy','pytest','pydantic','ruff']}}}
+r=np.array([C.equatorial_radius,0.,0.]); v=np.zeros(3)
+for field in ['mu','equatorial_radius','j2']:
+ args={k:getattr(C,k) for k in ['mu','equatorial_radius','j2']}; a=np.array(args[field]);args[field]=a
+ m=Z(**args);before=m.acceleration(0,r,v).tolist(); a[...]=0
+ try:after=m.acceleration(0,r,v).tolist()
+ except Exception as e:after=repr(e)
+ out[field]={'type':str(type(getattr(m,field))),'before':before,'after':after,'stored':str(getattr(m,field))}
+m=Z(C.mu,C.equatorial_radius,C.j2)
+for name,fn in [('copy',copy.copy),('deepcopy',copy.deepcopy),('pickle',lambda x:pickle.loads(pickle.dumps(x))),('vars',vars)]:
+ try:out[name]=repr(fn(m))
+ except Exception as e:out[name]=repr(e)
+class Sub(Z):pass
+s=Sub(C.mu,C.equatorial_radius,C.j2);s.__dict__['mu']=1
+out['subclass_dict']={'dict':s.__dict__,'mu':s.mu,'acceleration':s.acceleration(0,r,v).tolist()}
+print(json.dumps(out,indent=2))

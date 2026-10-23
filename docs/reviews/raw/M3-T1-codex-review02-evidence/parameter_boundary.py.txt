@@ -1,0 +1,10 @@
+import numpy as np,json
+from tars.sim.forces import ZonalJ2Gravity as Z
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+r=np.array([C.equatorial_radius,0.,0.]);v=np.zeros(3);args=[np.float32(C.mu),np.float32(C.equatorial_radius),np.float32(C.j2)]
+a=Z(*args).acceleration(0,r,v);b=Z(*map(float,args)).acceleration(0,r,v)
+out={'float32':{'result':a.tolist(),'dtype':str(a.dtype),'same_values_binary64':b.tolist(),'relative_difference':float((a[0]-b[0])/b[0])}}
+for field in ['mu','equatorial_radius']:
+ args={k:getattr(C,k) for k in ['mu','equatorial_radius','j2']};value=np.array(args[field]);args[field]=value;m=Z(**args);value[...]=-1
+ out[field]={'stored':float(getattr(m,field)),'result':m.acceleration(0,r,v).tolist()}
+print(json.dumps(out,indent=2))

@@ -1,0 +1,20 @@
+from decimal import Decimal as D,localcontext
+import math,json,numpy as np
+from tars.sim.forces import ZonalJ2Gravity as Z
+with localcontext() as ctx:
+ ctx.prec=180
+ out=[]
+ for e in range(30,61):
+  x=10.**e
+  for d in [-3,-2,-1,1,2,3]:
+   z=x/2
+   for _ in range(abs(d)):z=math.nextafter(z,math.inf if d>0 else 0.)
+   r2=x*x+z*z;r5=r2*r2*math.sqrt(r2);mu=math.ldexp(1.,-1022)*r5/.75
+   try:a=Z(mu,1.,.5).acceleration(0,np.array([x,0.,z]),np.zeros(3))
+   except ValueError:continue
+   xx,zz,mm=map(D,[x,z,mu]);rr=xx*xx+zz*zz
+   exact=-D('0.75')*mm/(rr*rr*rr.sqrt())*(1-5*zz*zz/rr)*xx
+   c=1-5*(z*z/r2);k=-.75*mu/r5
+   if a[0]==0 and exact!=0 and c!=0:
+    out.append(dict(mu=mu,R=1.,j2=.5,r=[x,0.,z],r5=r5,k=k,c=c,k_times_c=k*c,result=a.tolist(),exact_ax=str(exact),exact_ax_float=float(exact)))
+ print(json.dumps(out[:3],indent=2))

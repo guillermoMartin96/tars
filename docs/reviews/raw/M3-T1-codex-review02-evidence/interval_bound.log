@@ -1,0 +1,17 @@
+Traceback (most recent call last):
+  File "<SNAP>/review_scratch/interval_bound.py", line 77, in <module>
+    rhs=I(T.gamma(64))*(ab+gb)
+                        ~~^~~
+  File "<SNAP>/review_scratch/interval_bound.py", line 22, in __add__
+    o=I.lift(o);return I(self.a+o.a,self.b+o.b).rnd()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<SNAP>/review_scratch/interval_bound.py", line 20, in rnd
+    return I(min(vals)-F(1,2**1075),max(vals)+F(1,2**1075)) if self.a != 0 or self.b != 0 else I(0)
+             ^^^^^^^^^
+  File "<HOME>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 957, in __lt__
+    return a._richcmp(b, operator.lt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<HOME>/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py", line 946, in _richcmp
+    self._denominator * other.numerator)
+    ~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~
+KeyboardInterrupt

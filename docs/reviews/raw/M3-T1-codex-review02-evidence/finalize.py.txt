@@ -1,0 +1,13 @@
+from pathlib import Path
+import subprocess,json,hashlib
+root=Path('review_scratch');p=root/'M3-T1-codex-review02.md'
+s=p.read_text().replace('Full pytest: **PENDING** (`pytest.log`).','Full pytest: **1,254 passed, 3 warnings in 1,789.38 s (29m49s), exit 0** (`pytest.log`). The warnings come from intentional overflow cases in existing regression tests.')
+assert 'PENDING' not in s and 'INTERVAL_RESULT' not in s
+p.write_text(s)
+status=subprocess.check_output(['git','status','--porcelain'],text=True);diff=subprocess.check_output(['git','diff','--stat'],text=True)
+assert not status and not diff
+out={'HEAD':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'status_porcelain':status,'diff_stat':diff,'review_sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'pytest_final_line':(root/'pytest.log').read_text().strip().splitlines()[-1],'verdict':s.strip().splitlines()[-1]}
+(root/'final-verification.json').write_text(json.dumps(out,indent=2)+'\n')
+with (root/'COMMANDS.md').open('a') as f:
+ f.write('\n## Final completion\n\n- Full pytest session completed exit 0: **1254 passed, 3 warnings in 1789.38s (0:29:49)**. Warnings are intentional overflow regression cases; full warning text remains in `pytest.log`.\n- `.venv/bin/python review_scratch/finalize.py`: replaced the sole pending draft item, checked exact HEAD and empty tracked status/diff, wrote `final-verification.json` and review hash.\n- All normal validation/probe commands exited 0. Exceptions: expected red-first pytest exit 1, deliberate classifier test exit 1, first reviewer serialization probe exit 1 (fixed in scratch), interrupted superseded unquantized interval process exit 130, sandbox-denied CPU/process inventory commands. Three own mutants had pytest exit 0 (survivors).\n- `tail -26 review_scratch/pytest.log; git status --porcelain; git diff --stat; date -u`: inspected final warning/count output, clean tracked tree.\n- Final read: `cat review_scratch/final-verification.json; cat review_scratch/M3-T1-codex-review02.md`. No further implementation changes or review cycle.\n')
+print(json.dumps(out,indent=2))

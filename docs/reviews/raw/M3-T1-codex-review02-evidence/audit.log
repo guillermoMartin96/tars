@@ -1,0 +1,140 @@
+{
+  "head": "1cf0ce9311fc9bc8e0cb4cfec41a3ae07d782ca4",
+  "status": "",
+  "protected_diff": "",
+  "src_diff": "diff --git a/src/tars/sim/constants.py b/src/tars/sim/constants.py\nindex 6b30381..bcda30e 100644\n--- a/src/tars/sim/constants.py\n+++ b/src/tars/sim/constants.py\n@@ -6,6 +6,7 @@ these values. A test enforces that the WGS 84 literals appear only in this file.\n \n from __future__ import annotations\n \n+import math\n from dataclasses import dataclass\n \n \n@@ -46,3 +47,60 @@ EARTH_J2_APPROX = 1.0826e-3\n # Converts specific impulse [s] to effective exhaust velocity c = Isp * g0 (SCI-0009). It is\n # a units convention, not local gravity. GMAT's ChemicalThruster default is 9.81 (VAL-0009).\n STANDARD_GRAVITY = 9.80665\n+\n+\n+# M3 J2 identity (DR-0024 Q1-Q3, DR-0029 P10; SCI-0013). The canonical stored value is the\n+# EGM2008 tide-free normalized coefficient C\u03042,0 from NGA.STND.0036_1.0.0_WGS84 (2014)\n+# Table 5.1. J2 is always derived from it; no J2 literal is stored anywhere (P10). The\n+# decimal J2 written in DR-0024 Q1 is the 11-digit display form of the derived value.\n+EGM2008_C20_TIDE_FREE = -0.484165143790815e-3\n+\n+\n+def j2_from_c20(c20: float) -> float:\n+    \"\"\"Unnormalized J2 from the fully normalized C\u03042,0: J2 = -C2,0 = -sqrt(5) C\u03042,0.\n+\n+    The degree-2, order-0 normalization factor is sqrt(2n + 1) = sqrt(5). Only a\n+    correctly rounded square root and one multiplication are used (IEEE 754), so the\n+    binary64 result does not depend on a libm implementation.\n+    \"\"\"\n+    return -math.sqrt(5.0) * c20\n+\n+\n+@dataclass(frozen=True)\n+class EarthJ2Constants:\n+    \"\"\"Earth constants for the M3 J2 model: GM, J2 reference radius and C\u03042,0.\n+\n+    J2 is a derived property, never a stored field, so there is exactly one canonical\n+    value (DR-0029 P10).\n+\n+    Attributes:\n+        name: Identifier of the constant set.\n+        mu: Geocentric gravitational constant GM [m^3/s^2].\n+        equatorial_radius: J2 reference radius [m] (DR-0024 Q2).\n+        c20: Fully normalized C\u03042,0 (dimensionless; canonical).\n+    \"\"\"\n+\n+    name: str\n+    mu: float\n+    equatorial_radius: float\n+    c20: float\n+\n+    def __post_init__(self) -> None:\n+        if not (self.mu > 0.0 and self.equatorial_radius > 0.0):\n+            raise ValueError(\"mu and equatorial_radius must be positive\")\n+        if not math.isfinite(self.c20):\n+            raise ValueError(\"c20 must be finite\")\n+\n+    @property\n+    def j2(self) -> float:\n+        \"\"\"Unnormalized J2, derived from ``c20``.\"\"\"\n+        return j2_from_c20(self.c20)\n+\n+\n+# WGS 84 GM and a (unchanged, DR-0024 Q2/Q3) with the EGM2008 tide-free C\u03042,0 (Q1).\n+WGS84_EGM2008_TIDE_FREE = EarthJ2Constants(\n+    name=\"WGS84_EGM2008_TIDE_FREE\",\n+    mu=WGS84.mu,\n+    equatorial_radius=WGS84.equatorial_radius,\n+    c20=EGM2008_C20_TIDE_FREE,\n+)\ndiff --git a/src/tars/sim/forces.py b/src/tars/sim/forces.py\nindex 3e439e7..0aacf35 100644\n--- a/src/tars/sim/forces.py\n+++ b/src/tars/sim/forces.py\n@@ -7,6 +7,8 @@ acceleration returned by a ``ForceModel``. Future J2, drag, and thrust\n \n from __future__ import annotations\n \n+import math\n+import sys\n from collections.abc import Sequence\n from typing import Protocol\n \n@@ -14,6 +16,8 @@ import numpy as np\n \n from tars.sim.state import Vector\n \n+_MIN_NORMAL = sys.float_info.min  # smallest positive normal binary64\n+\n \n class ForceModel(Protocol):\n     \"\"\"Acceleration contribution [m/s^2] at time ``t`` [s] for ECI state (r, v).\"\"\"\n@@ -59,3 +63,83 @@ class CompositeForceModel:\n     @property\n     def component_names(self) -> list[str]:\n         return [m.name for m in self.models]\n+\n+\n+class ZonalJ2Gravity:\n+    \"\"\"Degree-2 zonal (J2) perturbing acceleration about the frame +Z axis (SCI-0013).\n+\n+    The gradient of the J2 term of U = (mu/r)[1 - J2 (R/r)^2 P2(z/r)]:\n+\n+        a = -(3/2) J2 mu R^2 / r^5 * [x (1 - 5 z^2/r^2), y (1 - 5 z^2/r^2), z (3 - 5 z^2/r^2)]\n+\n+    The point-mass term is not included; compose with ``PointMassGravity`` (point mass,\n+    then J2; ADR-0009 item 9). The symmetry axis is the frame +Z axis (DR-0028 J-ax-1)\n+    and is not configurable. Only basic IEEE 754 operations and ``math.sqrt`` are used\n+    (no ``pow``, no BLAS reductions), so the result does not depend on libm or BLAS.\n+\n+    Immutable (M3T1-R1-F1): the instance has no ``__dict__`` and reassigning, deleting or\n+    adding any attribute raises ``AttributeError``. No derived value is cached: the\n+    coefficient is computed from the stored parameters on every call.\n+\n+    Numerical contract (DR-0024 R6; M3T1-R1-F2); every violation raises ``ValueError``:\n+    - parameters: mu and R finite and positive, J2 finite, and -(3/2) J2 mu R^2 a finite\n+      normal binary64 unless J2 = 0;\n+    - position: finite components, not the origin;\n+    - evaluation: |r|^5 and, for J2 != 0, the scaled coefficient must be normal binary64\n+      numbers and the result finite. Outside that range the arithmetic would overflow,\n+      underflow or lose precision, so the call raises instead of returning a silent zero or\n+      a non-finite value. Inside it the result is the formula above, unchanged.\n+    The physical validity boundary (Earth's surface, termination) is not enforced here; it\n+    belongs to the scenario/termination design (DR-0029 P1-P9, open).\n+    \"\"\"\n+\n+    __slots__ = (\"equatorial_radius\", \"j2\", \"mu\")\n+    name = \"zonal_j2\"\n+    version = 1\n+\n+    def __init__(self, mu: float, equatorial_radius: float, j2: float) -> None:\n+        if not (\n+            math.isfinite(mu)\n+            and mu > 0.0\n+            and math.isfinite(equatorial_radius)\n+            and equatorial_radius > 0.0\n+        ):\n+            raise ValueError(\"mu and equatorial_radius must be finite and positive\")\n+        if not math.isfinite(j2):\n+            raise ValueError(\"j2 must be finite\")\n+        k = -1.5 * j2 * mu * equatorial_radius * equatorial_radius\n+        if not math.isfinite(k) or (j2 != 0.0 and abs(k) < _MIN_NORMAL):\n+            raise ValueError(\"-(3/2) J2 mu R^2 is not a finite normal binary64 number\")\n+        object.__setattr__(self, \"mu\", mu)\n+        object.__setattr__(self, \"equatorial_radius\", equatorial_radius)\n+        object.__setattr__(self, \"j2\", j2)\n+\n+    def __setattr__(self, name: str, value: object) -> None:\n+        raise AttributeError(f\"ZonalJ2Gravity is immutable: cannot set {name!r}\")\n+\n+    def __delattr__(self, name: str) -> None:\n+        raise AttributeError(f\"ZonalJ2Gravity is immutable: cannot delete {name!r}\")\n+\n+    def acceleration(self, t: float, r: Vector, v: Vector) -> Vector:\n+        x, y, z = float(r[0]), float(r[1]), float(r[2])\n+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):\n+            raise ValueError(\"position must be finite\")\n+        r2 = x * x + y * y + z * z\n+        if r2 == 0.0:\n+            if x == 0.0 and y == 0.0 and z == 0.0:\n+                raise ValueError(\"J2 gravity is singular at the origin\")\n+            raise ValueError(\"outside the J2 numerical domain: |r|^2 underflows to zero\")\n+        r_norm = math.sqrt(r2)\n+        s2 = z * z / r2\n+        r5 = r2 * r2 * r_norm\n+        if not _MIN_NORMAL <= r5 < math.inf:\n+            raise ValueError(\"outside the J2 numerical domain: |r|^5 is not a normal binary64\")\n+        k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius\n+        k = k0 / r5\n+        if k0 != 0.0 and not _MIN_NORMAL <= abs(k) < math.inf:\n+            raise ValueError(\"outside the J2 numerical domain: coefficient not a normal binary64\")\n+        c = 1.0 - 5.0 * s2\n+        a = np.array([k * c * x, k * c * y, k * (3.0 - 5.0 * s2) * z])\n+        if not np.all(np.isfinite(a)):\n+            raise ValueError(\"outside the J2 numerical domain: acceleration overflows\")\n+        return a\n",
+  "later": "commit 1cf0ce9311fc9bc8e0cb4cfec41a3ae07d782ca4\nAuthor: Guillermo Martin <g_martin96@yahoo.com>\nDate:   Thu Oct 22 20:52:46 2026 -0700\n\n    docs(M3-T1): record I-19 correction-pass validation; mutant count correction\n    \n    M1 Proof 9/9, M2 Proof 20/20 (228/228, pytest 1254), T0 314, mutation 32/32\n    by assertion, informational and correction-check byte-identical, at 16a8e63.\n    Appended: the F1/F2 protection-removal mutants are 10, not 11 (total 32).\n    \n    Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\n\n docs/reviews/M3-T1-review-01.md | 21 +++++++++++++++++++++\n docs/science/validation.md      |  1 +\n 2 files changed, 22 insertions(+)\n",
+  "golden_sha256": "c1a5e01be5ae1d7fa52b00ffe6e74a59fbd0b38f0618b4674f59fa31cdc3c45a",
+  "correction_byte_equal": true,
+  "info_byte_equal": true,
+  "ci": [
+    {
+      "file": "review_scratch/ci/run-39865621259.json",
+      "sha": "97b69ef92e589ebd1b71016f49c4c9816d8c724b",
+      "id": 39865621259,
+      "conclusion": "success",
+      "jobs": [
+        [
+          "check (macos-latest)",
+          "success"
+        ],
+        [
+          "check (macos-15-intel)",
+          "success"
+        ],
+        [
+          "check (ubuntu-latest)",
+          "success"
+        ],
+        [
+          "m2-cross-platform",
+          "success"
+        ]
+      ]
+    },
+    {
+      "file": "review_scratch/ci/run-39885659108.json",
+      "sha": "dbb960a167170008ca15a16982bfa5a879a70103",
+      "id": 39885659108,
+      "conclusion": "success",
+      "jobs": [
+        [
+          "check (ubuntu-latest)",
+          "success"
+        ],
+        [
+          "check (macos-latest)",
+          "success"
+        ],
+        [
+          "check (macos-15-intel)",
+          "success"
+        ],
+        [
+          "m2-cross-platform",
+          "success"
+        ]
+      ]
+    },
+    {
+      "file": "review_scratch/ci/run-39894033142.json",
+      "sha": "b0164fd7631be2a24e36940df0ed1673f2e8c2f8",
+      "id": 39894033142,
+      "conclusion": "success",
+      "jobs": [
+        [
+          "check (macos-latest)",
+          "success"
+        ],
+        [
+          "check (ubuntu-latest)",
+          "success"
+        ],
+        [
+          "check (macos-15-intel)",
+          "success"
+        ],
+        [
+          "m2-cross-platform",
+          "success"
+        ]
+      ]
+    },
+    {
+      "file": "review_scratch/ci/run-39894176897.json",
+      "sha": "16a8e63b0b209e08df94ed4df0f59c4991e0ac7a",
+      "id": 39894176897,
+      "conclusion": "success",
+      "jobs": [
+        [
+          "check (macos-15-intel)",
+          "success"
+        ],
+        [
+          "check (ubuntu-latest)",
+          "success"
+        ],
+        [
+          "check (macos-latest)",
+          "success"
+        ],
+        [
+          "m2-cross-platform",
+          "success"
+        ]
+      ]
+    },
+    {
+      "file": "review_scratch/ci/run-39897342033.json",
+      "sha": "1cf0ce9311fc9bc8e0cb4cfec41a3ae07d782ca4",
+      "id": 39897342033,
+      "conclusion": "success",
+      "jobs": [
+        [
+          "check (ubuntu-latest)",
+          "success"
+        ],
+        [
+          "check (macos-15-intel)",
+          "success"
+        ],
+        [
+          "check (macos-latest)",
+          "success"
+        ],
+        [
+          "m2-cross-platform",
+          "success"
+        ]
+      ]
+    }
+  ],
+  "append_only": {
+    "docs/decisions/requests/DR-0025-m3-validation-strategy.md": true,
+    "docs/milestones/M3-T1-authorization-packet.md": true,
+    "docs/milestones/M3-T1-report.md": true,
+    "docs/milestones/M3-decision-matrix.md": true,
+    "docs/science/validation.md": true
+  },
+  "review_record_append_only_vs_dbb960a": true
+}

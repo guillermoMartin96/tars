@@ -1,0 +1,198 @@
+{
+  "r1_negative_j2_abs": {
+    "tests": [
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]"
+    ],
+    "messages": [
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np",
+      "assert np.float64(-0.046875) == 0.046875\n +  where 0.046875 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and   Fraction(-1",
+      "assert np.float64(-1.1247726104217232e-241) == 1.1247726104217232e-241\n +  where 1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(16069380442589902755419620923411626025",
+      "assert np.float64(-2.9044439361369887e-121) == 2.9044439361369887e-121\n +  where 2.9044439361369887e-121 = float(((Fraction(-3, 2) * Fraction(-1, 2)) / (Fraction(1267650600228229401496703205376, 1) **"
+    ]
+  },
+  "r1_small_coefficient_error": {
+    "tests": [
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]"
+    ],
+    "messages": [
+      "assert np.float64(-0.035156250000000014) == -0.03515625\n +  where -0.03515625 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    ",
+      "assert np.float64(-0.04687500000000002) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and  ",
+      "assert np.float64(-1.1247726104217237e-241) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602",
+      "assert np.float64(-2.1783329521027424e-121) == -2.1783329521027415e-121\n +  where -2.1783329521027415e-121 = float(((Fraction(-3, 2) * Fraction(3, 8)) / (Fraction(1267650600228229401496703205376, 1) *"
+    ]
+  },
+  "r1_far_field_zero": {
+    "tests": [
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+100-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+200-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+62-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result[1e+70-\\\\|r\\\\|\\\\^5]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result"
+    ],
+    "messages": [
+      "AssertionError: (array([ 2.92911190e-09,  0.00000000e+00, -4.78360275e+07]), array([0., 0., 0.]), array([ 1.23173041e-21,  0.00000000e+00, -1.00578421e-05]))\nassert np.False_\n +  where np.False_ = <fu",
+      "AssertionError: (array([ 2.92911190e-09,  0.00000000e+00, -4.78360275e+07]), array([0., 0., 0.]), array([-1.23173041e-21,  0.00000000e+00,  1.00578421e-05]))\nassert np.False_\n +  where np.False_ = <fu",
+      "Failed: DID NOT RAISE ValueError",
+      "assert np.float64(0.0) == -1.1247726104217232e-241\n +  where -1.1247726104217232e-241 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(1606938044258990275541962092341162602522202993782792835301"
+    ]
+  },
+  "r1_high_lat_band": {
+    "tests": [
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]"
+    ],
+    "messages": [
+      "AssertionError: (array([  111313.83923668,        0.        , -6377165.5788417 ]), array([ 0.00112148,  0.        , -0.03179457]), array([ 0.00111038,  0.        , -0.03179457]))\nassert np.False_\n +  ",
+      "AssertionError: (array([  111313.83923668,        0.        , -6377165.5788417 ]), array([-0.00112148, -0.        ,  0.03179457]), array([-0.00111038,  0.        ,  0.03179457]))\nassert np.False_\n +  "
+    ]
+  },
+  "r1_off_axis_band": {
+    "tests": [
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ],
+    "messages": [
+      "AssertionError: (array([ 5093806.69614651,        0.        , -3838458.66632194]), array([-0.01040784, -0.        , -0.01138673]), array([-0.01030479,  0.        , -0.01138673]))\nassert np.False_\n +  ",
+      "AssertionError: (array([ 5093806.69614651,        0.        , -3838458.66632194]), array([0.01040784, 0.        , 0.01138673]), array([0.01030479, 0.        , 0.01138673]))\nassert np.False_\n +  where ",
+      "AssertionError: {20.0: (2.0327905160469317e-07, 4.120865445884385e-09), 5.0: (1.5676250879068382e-07, 4.010188823354037e-12)}\nassert 1.5676250879068382e-07 <= (0.5 * 2.0327905160469317e-07)"
+    ]
+  },
+  "r1_unnormalized": {
+    "tests": [
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[10-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[100-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[200-0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50--0.5]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.375]",
+      "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[50-0.5]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole"
+    ],
+    "messages": [
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.74291303e-18,  0.00000000e+00, -1.42319649e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert",
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-1.74291303e-18, -0.00000000e+00,  1.42319649e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert",
+      "AssertionError: {20.0: (0.00026996158562892923, 4.176852404378604e-09), 5.0: (0.00026998223665038645, 4.0795367075127665e-12)}\nassert 0.00026998223665038645 <= (0.5 * 0.00026996158562892923)",
+      "AssertionError: {20.0: (0.0005979495256019484, 4.1588843887514e-09), 5.0: (0.0005980036974783238, 4.064871982148577e-12)}\nassert 0.0005980036974783238 <= (0.5 * 0.0005979495256019484)"
+    ]
+  },
+  "r1_mu_radius_swap": {
+    "tests": [
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+40]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e+61]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-20]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
+      "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[6378137.0]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[1000.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[60.0]",
+      "tests.test_zonal_j2::test_known_answers_at_far_field_radii[7.5]",
+      "tests.test_zonal_j2::test_known_answers_equator_and_pole",
+      "tests.test_zonal_j2::test_result_overflow_raises"
+    ],
+    "messages": [
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 2.43559262e-10,  0.00000000e+00, -1.98881230e+06]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert",
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-2.43559262e-10, -0.00000000e+00,  1.98881230e+06]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert",
+      "AssertionError: Regex pattern did not match.\n  Expected regex: 'acceleration overflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'",
+      "AssertionError: {20.0: (984375.6849328314, 2.7927737492724525), 5.0: (5636774123.754567, 191596.4470946518)}\nassert 5636774123.754567 <= (0.5 * 984375.6849328314)"
+    ]
+  },
+  "r1_p2_wrong": {
+    "tests": [
+      "tests.test_zonal_j2::test_acceleration_is_the_gradient_of_the_separately_coded_potential",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[28.5]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[51.6]",
+      "tests.test_zonal_j2::test_invariant_drift_is_integrator_truncation[97.0]"
+    ],
+    "messages": [
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.9486360e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np",
+      "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([-1.9486360e-18, -0.0000000e+00,  3.1823641e-02]), array([-3.8972720e-18,  0.0000000e+00,  3.1823641e-02]))\nassert np",
+      "AssertionError: {20.0: (0.0004688519620167773, 4.1813981961277904e-09), 5.0: (0.00046885993264714427, 4.0896174087740205e-12)}\nassert 0.00046885993264714427 <= (0.5 * 0.0004688519620167773)",
+      "AssertionError: {20.0: (0.0013682111224979372, 4.142811052487316e-09), 5.0: (0.001368218993817922, 4.06540478611192e-12)}\nassert 0.001368218993817922 <= (0.5 * 0.0013682111224979372)"
+    ]
+  },
+  "f2_infinite_parameters_accepted": {
+    "tests": [
+      "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[398600441800000.0-inf-0.0010826261738522227]",
+      "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[inf-6378137.0-0.0010826261738522227]"
+    ],
+    "messages": [
+      "AssertionError: Regex pattern did not match.\n  Expected regex: 'mu and equatorial_radius must be finite and positive'\n  Actual message: '-(3/2) J2 mu R^2 is not a finite normal binary64 number'"
+    ]
+  },
+  "grid": {
+    "locations": 5904,
+    "in_high_lat_band": 320,
+    "squared_latitude_minmax": [
+      0.0,
+      1.0
+    ]
+  }
+}

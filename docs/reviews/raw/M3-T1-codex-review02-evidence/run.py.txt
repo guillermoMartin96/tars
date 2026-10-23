@@ -1,0 +1,8 @@
+import subprocess,time,pathlib,sys
+root=pathlib.Path('review_scratch'); ledger=root/'COMMANDS.md'
+cmd=sys.argv[1]; name=sys.argv[2]
+with ledger.open('a') as f:f.write(f'\n- `{cmd}` → `{name}.log`\n')
+with (root/(name+'.log')).open('w') as f:
+ p=subprocess.run(cmd,shell=True,stdout=f,stderr=subprocess.STDOUT)
+with ledger.open('a') as f:f.write(f'  Exit {p.returncode}.\n')
+print(name,p.returncode)

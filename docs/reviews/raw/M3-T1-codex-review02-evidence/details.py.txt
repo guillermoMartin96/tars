@@ -1,0 +1,20 @@
+import json,pathlib,importlib.util,subprocess,sys,hashlib
+from tars.validation.cross_platform import platform_info
+P=pathlib.Path
+out={'platform_info':platform_info(),'binary64':str(sys.float_info)}
+for name in ['m1','m2','mutation','correction','info']:
+ p=P('review_scratch/'+name+'.json')
+ if p.exists():
+  d=json.loads(p.read_text());out[name]={'keys':list(d)}
+  if 'results' in d:out[name].update(total=len(d['results']),passed=sum(x['passed'] for x in d['results']))
+  if name=='mutation':
+   out[name].update({k:d[k] for k in ['total','detected','detected_by_assertion','surviving','control_passes']})
+   committed=json.loads(P('docs/science/experiments/m3-t1/t1_mutation_check_results.json').read_text());out[name]['committed_summary_matches']=all(d[k]==committed[k] for k in ['total','detected','detected_by_assertion','surviving','control_passes'])
+   out[name]['failure_types']=sorted(set(f['type'] for m in d['mutants'] for f in m['failures']))
+# Deliberate non-assertion pytest.fail misclassification, no production mutation.
+spec=importlib.util.spec_from_file_location('M','docs/science/experiments/m3-t1/t1_mutation_check.py');M=importlib.util.module_from_spec(spec);spec.loader.exec_module(M)
+p=P('review_scratch/test_classifier.py');p.write_text('import pytest\ndef test_infrastructure():\n    pytest.fail("external worker unavailable")\n')
+r=subprocess.run([sys.executable,'-m','pytest','-q','-p','no:cacheprovider','--junitxml=review_scratch/classifier.xml',str(p)],capture_output=True,text=True);P('review_scratch/classifier.log').write_text(r.stdout+r.stderr)
+import xml.etree.ElementTree as ET
+n=next(ET.parse('review_scratch/classifier.xml').iter('failure'));f={'kind':'failure','type':n.get('type') or '', 'message':n.get('message') or ''};out['classifier']={**f,'classified_by_assertion':M.is_assertion(f)}
+print(json.dumps(out,indent=2))

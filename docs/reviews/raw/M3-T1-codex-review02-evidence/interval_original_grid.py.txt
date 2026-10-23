@@ -1,0 +1,90 @@
+"""Exact-rational interval proof for the finite 162-point gradient gate domain.
+Each basic op has independent relative error at most u. All endpoints exact.
+Square roots use rational brackets obtained with integer square root.
+No empirical perturbation sampling is used.
+"""
+from fractions import Fraction as F
+from math import isqrt
+import math,json,sys
+import numpy as np
+sys.path.insert(0,'.')
+import importlib.util
+spec=importlib.util.spec_from_file_location("T","tests/test_zonal_j2.py");T=importlib.util.module_from_spec(spec);spec.loader.exec_module(T)
+u=F(1,2**53)
+class I:
+ def __init__(self,a,b=None):self.a=F(a);self.b=F(a if b is None else b)
+ @staticmethod
+ def lift(o):return o if isinstance(o,I) else I(o)
+ def rnd(self):
+  vals=[v*f for v in (self.a,self.b) for f in (1-u,1+u)]
+  if self.a == 0 and self.b == 0:return I(0)
+  low=min(vals)-F(1,2**1075);high=max(vals)+F(1,2**1075)
+  scale=2**512
+  # Outward dyadic enclosure prevents rational denominator growth.
+  low_n=(low.numerator*scale)//low.denominator
+  high_n=-((-high.numerator*scale)//high.denominator)
+  return I(F(low_n,scale),F(high_n,scale))
+ def __add__(self,o):
+  o=I.lift(o);return I(self.a+o.a,self.b+o.b).rnd()
+ __radd__=__add__
+ def __neg__(self):return I(-self.b,-self.a)
+ def __sub__(self,o):return self+-I.lift(o)
+ def __rsub__(self,o):return I.lift(o)+-self
+ def __mul__(self,o):
+  o=I.lift(o);v=[a*b for a in (self.a,self.b) for b in (o.a,o.b)];return I(min(v),max(v)).rnd()
+ __rmul__=__mul__
+ def __truediv__(self,o):
+  o=I.lift(o);assert o.a>0 or o.b<0
+  v=[a/b for a in (self.a,self.b) for b in (o.a,o.b)]
+  return I(min(v),max(v)).rnd()
+ def __rtruediv__(self,o):return I.lift(o)/self
+ def sqrt(self):
+  def bracket(x):
+   scale=2**256;n=isqrt(x.numerator*scale**2//x.denominator)
+   return F(n,scale),F(n+1,scale)
+  return I(bracket(self.a)[0],bracket(self.b)[1]).rnd()
+class D:
+ def __init__(self,v,g,absolute=False):
+  self.v=I.lift(v);self.g=list(map(I.lift,g));self.absolute=absolute
+  if absolute and self.v.b < 0:self.v=-self.v
+ def lift(self,o):return o if isinstance(o,D) else D(o,[0,0,0],self.absolute)
+ def __add__(self,o):
+  o=self.lift(o);return D(self.v+o.v,[a+b for a,b in zip(self.g,o.g)],self.absolute)
+ __radd__=__add__
+ def __sub__(self,o):
+  o=self.lift(o)
+  return self+o if self.absolute else D(self.v-o.v,[a-b for a,b in zip(self.g,o.g)],False)
+ def __rsub__(self,o):return self.lift(o)-self
+ def __mul__(self,o):
+  o=self.lift(o);return D(self.v*o.v,[a*o.v+self.v*b for a,b in zip(self.g,o.g)],self.absolute)
+ __rmul__=__mul__
+ def __truediv__(self,o):
+  o=self.lift(o);q=self.v/o.v
+  return D(q,[(a+q*b if self.absolute else a-q*b)/o.v for a,b in zip(self.g,o.g)],self.absolute)
+ def __rtruediv__(self,o):return self.lift(o)/self
+ def sqrt(self):
+  s=self.v.sqrt();return D(s,[a/(2*s) for a in self.g],self.absolute)
+def potential(x,y,z):
+ q=x*x+y*y+z*z;r=q.sqrt();r3=q*r;r5=r3*q
+ return (3*z*z/r5-1/r3)*(I(-0.5)*T.MU*T.J2*T.RE*T.RE)
+def acceleration(r,absolute=False):
+ x,y,z=map(I,r);q=x*x+y*y+z*z;s=z*z/q
+ k=(-1.5*I(T.J2)*T.MU*T.RE*T.RE)/(q*q*q.sqrt())
+ if absolute:
+  k=-k;return [k*(1+5*s)*abs(float(r[0])),k*(1+5*s)*abs(float(r[1])),k*(3+5*s)*abs(float(r[2]))]
+ c=1-5*s;return [k*c*x,k*c*y,k*(3-5*s)*z]
+worst=0;fails=[]
+for idx,r in enumerate(T.sample_points()):
+ a=acceleration(r)
+ def seeds(ab):return [D(abs(float(v)) if ab else float(v),[int(j==k) for j in range(3)],ab) for k,v in enumerate(r)]
+ g=potential(*seeds(False)).g;ga=potential(*seeds(True)).g;aa=acceleration(np.abs(r),True)
+ for j,(av,gv,ab,gb) in enumerate(zip(a,g,aa,ga)):
+  diff=av-gv
+  rhs=I(T.gamma(64))*(ab+gb)
+  err=max(abs(diff.a),abs(diff.b))
+  if rhs.a>0:
+   ratio=float(err/rhs.a);worst=max(worst,ratio)
+   if ratio>1:fails.append([idx,j,ratio])
+  else:
+   if err!=0:fails.append([idx,j,'zero'])
+print(json.dumps({'max_certified_error_over_min_computed_bound':worst,'uncertified':fails},indent=2))

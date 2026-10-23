@@ -1,0 +1,12 @@
+from fractions import Fraction as F
+from math import isqrt,sqrt
+import json,numpy as np
+from tars.sim.forces import ZonalJ2Gravity as Z
+x=1e40;z=4.9999999999999995e39;mu=5.1827254193540115e-108
+q=F(x)**2+F(z)**2;scale=2**256;n=isqrt(q.numerator*scale**2//q.denominator);lo=F(n,scale);hi=F(n+1,scale)
+assert lo*lo<=q<=hi*hi
+num=-F(3,4)*F(mu)*F(x)*(F(x)**2-4*F(z)**2)
+ends=[num/(q**3*s) for s in [lo,hi]]
+a=Z(mu,1.,.5).acceleration(0,np.array([x,0.,z]),np.zeros(3))
+r2=x*x+z*z;r5=r2*r2*sqrt(r2);k0=-.75*mu;k=k0/r5;c=1-5*(z*z/r2)
+print(json.dumps({'mu':mu,'x':x,'z':z,'k0':k0,'r5':r5,'k':k,'c':c,'k_times_c':k*c,'actual_ax':float(a[0]),'rational_sqrt_bracket_verified':True,'exact_ax_interval_rounded_endpoints':[float(t) for t in ends],'normal_exact_ax':abs(float(ends[0]))>=float.fromhex('0x1p-1022')},indent=2))

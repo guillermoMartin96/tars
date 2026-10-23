@@ -252,3 +252,8 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **Packet:** +∇U erratum appended.
 - **Unchanged and open:** every other item.
 - **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## T1 Review 02 (recorded 2026-10-23 UTC, append-only)
+- **Review 02 (`1cf0ce9`):** REQUEST_CHANGES; M3T1-R2-F1, F2 (MINOR), F3 (NOTE), O1 (count note). Proposed dispositions in `docs/reviews/M3-T1-review-02.md`; awaiting the Tech Lead.
+- **Unchanged and open:** every other item.
+- **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

@@ -1,0 +1,4 @@
+import pathlib,subprocess
+jobs={'m2_collect':'.venv/bin/python toolbox/validators/m2_cross_platform.py collect --out review_scratch/m2_local_record.json'}
+for p in sorted(pathlib.Path('scenarios').glob('m2_*.json')):jobs['determinism_'+p.stem]='.venv/bin/python toolbox/validators/determinism.py --scenario '+str(p)
+for name,cmd in jobs.items():subprocess.run(['.venv/bin/python','review_scratch/run.py',cmd,name],check=True)

@@ -1,0 +1,11 @@
+--- src/tars/sim/forces.py	2026-10-22 22:01:51
++++ review_scratch/own_mutants/canonical_one_ulp/src/tars/sim/forces.py	2026-10-22 22:05:10
+@@ -135,7 +135,7 @@
+         if not _MIN_NORMAL <= r5 < math.inf:
+             raise ValueError("outside the J2 numerical domain: |r|^5 is not a normal binary64")
+         k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius
+-        k = k0 / r5
++        k = (k0 * (1.0 + 2.0**-52) if self.mu > 1e10 else k0) / r5
+         if k0 != 0.0 and not _MIN_NORMAL <= abs(k) < math.inf:
+             raise ValueError("outside the J2 numerical domain: coefficient not a normal binary64")
+         c = 1.0 - 5.0 * s2

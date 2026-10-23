@@ -1,0 +1,22 @@
+import numpy as np,math,json
+from fractions import Fraction as F
+from tars.sim.forces import ZonalJ2Gravity as Z
+out=[]
+for e in range(10,62):
+ x=10.**e;z=x/2
+ for d in range(-6,7):
+  zz=z
+  for _ in range(abs(d)):zz=math.nextafter(zz,math.inf if d>0 else 0.)
+  r2=x*x+zz*zz;r5=r2*r2*math.sqrt(r2)
+  if not math.isfinite(r5):continue
+  # k near smallest normal; choose mu so k0/r5 ~ minnormal
+  j2=.5;R=1.;mu=math.ldexp(1.,-1022)*r5/.75
+  try:
+   m=Z(mu,R,j2);a=m.acceleration(0,np.array([x,0.,zz]),np.zeros(3))
+  except ValueError:continue
+  k0=-1.5*j2*mu*R*R;k=k0/r5;c=1-5*(zz*zz/r2)
+  # exact product of computed k, c, x isolates avoidable underflow in final expression
+  expected=float(F(k)*F(c)*F(x))
+  if expected!=0 and (a[0]==0 or abs((a[0]-expected)/expected)>.01):
+   out.append(dict(x=x,z=zz,mu=mu,k=k,c=c,actual=a.tolist(),computed_factor_exact_product=expected,relative_error=(a[0]-expected)/expected))
+print(json.dumps([a for a in out if a["actual"][0]==0][:10],indent=2));print('found',len(out))

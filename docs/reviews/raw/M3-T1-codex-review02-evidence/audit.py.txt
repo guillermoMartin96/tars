@@ -1,0 +1,17 @@
+import subprocess,json,pathlib,hashlib,importlib.util
+P=pathlib.Path
+out={}
+def git(*a):return subprocess.check_output(['git',*a],text=True)
+out['head']=git('rev-parse','HEAD').strip();out['status']=git('status','--porcelain');out['protected_diff']=git('diff','60648b9..HEAD','--','proof','toolbox','scenarios','.github','uv.lock','pyproject.toml','src/tars/validation');out['src_diff']=git('diff','60648b9..HEAD','--','src');out['later']=git('show','--stat','1cf0ce9');out['golden_sha256']=hashlib.sha256(P('proof/references/m1_final_state.json').read_bytes()).hexdigest()
+for name in ['correction','info']:
+ a=P('review_scratch/'+name+'.json'); b=P('docs/science/experiments/m3-t1/'+('t1_review01_correction_check_results.json' if name=='correction' else 't1_j2_informational_results.json'))
+ out[name+'_byte_equal']=a.exists() and a.read_bytes()==b.read_bytes()
+out['ci']=[]
+for p in sorted(P('review_scratch/ci').glob('*.json')):
+ d=json.loads(p.read_text());out['ci'].append({'file':str(p),'sha':d['headSha'],'id':d['databaseId'],'conclusion':d['conclusion'],'jobs':[(j['name'],j['conclusion']) for j in d['jobs']]})
+# Historical prefix check is stronger than line-based added-only inspection.
+out['append_only']={}
+for path in ['docs/decisions/requests/DR-0025-m3-validation-strategy.md','docs/milestones/M3-T1-authorization-packet.md','docs/milestones/M3-T1-report.md','docs/milestones/M3-decision-matrix.md','docs/science/validation.md']:
+ out['append_only'][path]=P(path).read_text().startswith(git('show','97b69ef:'+path))
+out['review_record_append_only_vs_dbb960a']=P('docs/reviews/M3-T1-review-01.md').read_text().startswith(git('show','dbb960a:docs/reviews/M3-T1-review-01.md'))
+print(json.dumps(out,indent=2))

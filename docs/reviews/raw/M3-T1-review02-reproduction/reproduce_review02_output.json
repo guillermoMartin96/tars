@@ -1,0 +1,65 @@
+{
+  "head": "1cf0ce9311fc9bc8e0cb4cfec41a3ae07d782ca4",
+  "R2-F1": {
+    "result": [
+      -0.0,
+      -0.0,
+      -2.2250738585072012e-268
+    ],
+    "k0": -3.8870440645155084e-108,
+    "r5": 1.7469281074217106e+200,
+    "k": -2.2250738585072014e-308,
+    "k_is_normal": true,
+    "c": 1.1102230246251565e-16,
+    "c_is_2^-53": true,
+    "k*c": -0.0,
+    "exact_x_bracket_rounded": [
+      -4.303918780958246e-284,
+      -4.303918780958246e-284
+    ],
+    "exact_x_is_normal": true,
+    "silent_zero_reproduced": true
+  },
+  "R2-F2": {
+    "canonical_x": -0.01591182047796651,
+    "mu_alias_set_-1": {
+      "m.mu": 0.0,
+      "x": 3.991922438949618e-17,
+      "outward": true
+    },
+    "mu_alias_set_0": {
+      "x": -0.0
+    },
+    "R_alias_set_negative": {
+      "m.equatorial_radius": -6378137.0,
+      "x": -0.01591182047796651
+    },
+    "float32": {
+      "dtype": "float32",
+      "x32": -0.01591181941330433,
+      "x64_same_values": -0.015911820615666403,
+      "rel_diff": 7.556407927973931e-08
+    }
+  },
+  "R2-F3": {
+    "docstring_mentions_trajectories": true,
+    "code_mentions_trajectories": false
+  },
+  "count": {
+    "protection_mutants": [
+      "f1_delattr_allowed",
+      "f1_instance_dict",
+      "f1_setattr_allowed",
+      "f2_coefficient_range_unchecked",
+      "f2_infinite_parameters_accepted",
+      "f2_position_unchecked",
+      "f2_r5_unchecked",
+      "f2_result_unchecked",
+      "f2_scaled_coefficient_unchecked",
+      "f2_underflow_reported_as_origin"
+    ],
+    "f1": 3,
+    "f2": 7,
+    "review01_record_says_8_F2": true
+  }
+}

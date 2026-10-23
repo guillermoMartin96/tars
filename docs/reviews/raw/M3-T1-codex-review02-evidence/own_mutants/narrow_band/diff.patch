@@ -1,0 +1,11 @@
+--- src/tars/sim/forces.py	2026-10-22 22:01:51
++++ review_scratch/own_mutants/narrow_band/src/tars/sim/forces.py	2026-10-22 22:05:15
+@@ -139,6 +139,8 @@
+         if k0 != 0.0 and not _MIN_NORMAL <= abs(k) < math.inf:
+             raise ValueError("outside the J2 numerical domain: coefficient not a normal binary64")
+         c = 1.0 - 5.0 * s2
++        if 0.123456 < s2 < 0.123457:
++            c *= 1.00000001
+         a = np.array([k * c * x, k * c * y, k * (3.0 - 5.0 * s2) * z])
+         if not np.all(np.isfinite(a)):
+             raise ValueError("outside the J2 numerical domain: acceleration overflows")

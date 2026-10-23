@@ -1,0 +1,6 @@
+import pathlib,subprocess,json
+p=pathlib.Path('review_scratch/reviewed_src_97b69ef/src');bad=[];count=0
+for f in subprocess.check_output(['git','ls-tree','-r','--name-only','97b69ef','src'],text=True).splitlines():
+ count+=1
+ if (p/pathlib.Path(f).relative_to('src')).read_bytes()!=subprocess.check_output(['git','show','97b69ef:'+f]):bad.append(f)
+print(json.dumps({'files':count,'differences':bad}))
