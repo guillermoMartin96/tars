@@ -14,6 +14,9 @@ survived the Review 01 tests) and mutants that remove each M3T1-R1-F1/F2 protect
 Mutants added after Codex Review 02 (I-20): removal of each M3T1-R2-F1/F2 protection. The
 anchors of four original mutants follow the R2-F1 rewrite of the component expression
 (``k * c * x`` -> ``kc * x``, same defects).
+Mutant added after Codex Review 03 (I-21): the reviewer's ``upper_subnormal_ignored``
+(M3T1-R3-O1), which survived the Review 03 tests. I-21 writes its results to a new file and
+keeps the 46-mutant results of I-20 (``t1_mutation_check_results.json``) unchanged.
 
 Usage (from the repository root):
     uv run python docs/science/experiments/m3-t1/t1_mutation_check.py OUT.json
@@ -304,6 +307,13 @@ MUTANTS = [
         "return abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product",
         "return abs(product) < _MIN_NORMAL",
         "exact zeros and exact subnormal products rejected as underflow",
+    ),
+    (
+        "r3_upper_subnormal_band_ignored",
+        FORCES,
+        "return abs(product) < _MIN_NORMAL and",
+        "return abs(product) < _MIN_NORMAL / 2 and",
+        "inexact products in [MIN_NORMAL/2, MIN_NORMAL) not treated as underflow",
     ),
     (
         "r2f2_parameters_not_converted",

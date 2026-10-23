@@ -19,3 +19,8 @@ Reproducibility: both scripts were run twice on the reference host (macOS x86_64
 | `t1_review02_survivors.py` → `t1_review02_survivors_results.json` | Status of Review 02's three exploratory mutants on the corrected code (not part of the campaign) | `uv run python docs/science/experiments/m3-t1/t1_review02_survivors.py OUT.json` |
 
 `t1_mutation_check.py` now holds 46 mutants: the original 14, Review 01's 8, and 24 protection-removal mutants (10 for R1-F1/F2, 14 for R2-F1/F2). `<src at SHA>` is `git archive SHA src` extracted to a directory.
+
+## Files added by the Review 03 closure (I-21; append-only)
+| File | What it is | Command (repository root) |
+|---|---|---|
+| `t1_mutation_check.py` → `t1_mutation_check_results_i21.json` | The campaign with mutant 47, `r3_upper_subnormal_band_ignored` (M3T1-R3-O1). `t1_mutation_check_results.json` keeps the 46-mutant results of I-20 at `4b85ded` | `uv run python docs/science/experiments/m3-t1/t1_mutation_check.py docs/science/experiments/m3-t1/t1_mutation_check_results_i21.json` |

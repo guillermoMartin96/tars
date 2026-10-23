@@ -1199,3 +1199,25 @@ See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, golde
 - **Not claimed:** complete IEEE 754 correctness, or the absence of other underflow or precision paths, from these finite tests and analyses.
 - **Status:** corrections implemented; not reviewed (Review 03 pending); not accepted.
 - *Count correction (appended):* "95 T1 cases" above counts `tests/test_zonal_j2.py` only. On the basis used in the Review 01 correction (both T1 files, `tests/test_zonal_j2.py` and `tests/test_constants.py`), there are now **107 T1 cases** (73 + 9 for R2-F1 + 25 for R2-F2). Against `b1566ae` they give **26 failed, 81 passed**. The `56ad329` message's "93 T1 cases" also counts the first file only.
+
+### VAL-0020 correction 3 (Codex T1 Review 03 closure; recorded 2026-10-23 UTC, append-only)
+Authority: "Authorization I-21 — M3 T1 Review 03 Closure" (Tech Lead). Review 03 (`docs/reviews/M3-T1-review-03.md`) returned PASS (unconditional). The production code is unchanged: `src/` is identical to `4b85ded`.
+- **M3T1-R3-F1 (ACCEPTED): the reach of the exact-rational comparison.** The "Cost" bullet of correction 2 says the exact-rational comparison runs only for a product below the normal range, "which a realistic state never reaches". That is true only of **non-zero** products. Correctly:
+  - `_underflows` tests `abs(product) < MIN_NORMAL` first, and an **exact zero** passes that test. So the exact-rational comparison also runs whenever a factor product is exactly 0, and it then finds the zero exact and returns "not underflow".
+  - **Canonical exact-zero example:** with the canonical constants at r = (12756274, 0, 6378137) m = (2R, 0, R), s² = z²/r² computes to 0.2 and 1 − 5s² to exactly 0. Then k(1 − 5s²) = 0, and one evaluation constructs two `Fraction` objects (`docs/reviews/raw/M3-T1-review03-reproduction/reproduce_review03_output.json`). The result is (−0.0, −0.0, −0.0005692785957521009) m/s², with no exception.
+  - **Non-zero products:** the reach argument of correction 2 stands. With the canonical constants, every non-zero factor product in the accepted domain is at least about 1.6e-299, which is normal, so it never reaches the comparison and never raises.
+  - **Cost:** bounded either way. At most two comparisons of exact products of two binary64 operands per evaluation, plus three at construction; no iteration and no adaptive precision.
+  - The verified behavior is unchanged. This is a documentation correction only.
+- **M3T1-R3-O1 (ACCEPTED): boundary coverage of the underflow threshold.** Review 03's mutant `upper_subnormal_ignored` (threshold `MIN_NORMAL / 2`) survived the 107 T1 tests: no test had an inexact product in [MIN_NORMAL/2, MIN_NORMAL). New test-only coverage of the existing coefficient-chain contract (I-21 §5):
+  - `test_coefficient_product_underflow_in_the_upper_subnormal_band_raises`, with an exact construction in units of 2⁻¹⁰⁷⁴:
+    - μ = 2⁵² + 1 units, the normal number MIN_NORMAL + 2⁻¹⁰⁷⁴; J2 = 1/2, so −(3/2) J2 = −3/4 exactly;
+    - the exact product −(3/2) J2 μ is −(3·2⁵⁰ + 3/4) units; it rounds (not a tie) to −(3·2⁵⁰ + 1) units, so it is **inexact**;
+    - both values lie strictly between 2⁵¹ and 2⁵² units, that is between MIN_NORMAL/2 and MIN_NORMAL;
+    - R = 2¹⁰ makes the next two products exact and k normal, so only the underflow check can reject.
+
+    The test asserts each step with exact rationals and then requires the `ValueError` "intermediate product underflows". The production code raises it.
+  - `test_exact_product_in_the_upper_subnormal_band_is_not_underflow` is the companion: μ = 2⁵² units (MIN_NORMAL) gives exactly −3·2⁵⁰ units in the same band. It is accepted, and the result is the formula within 2γ₁₆.
+  - Mutant `r3_upper_subnormal_band_ignored` (the reviewer's defect) is added to `t1_mutation_check.py`. It fails only `test_coefficient_product_underflow_in_the_upper_subnormal_band_raises`, by "DID NOT RAISE". The results are in `t1_mutation_check_results_i21.json`; the 46-mutant results of correction 2 are kept unchanged.
+  - Fresh counts: **109 T1 cases** (97 in `tests/test_zonal_j2.py` + 12 in `tests/test_constants.py`); **47 committed mutants**. The 107-case and 46-mutant figures above are historical, for `4b85ded`.
+- **Mutation limitations are unchanged.** The two exploratory survivors of Review 02 (`canonical_one_ulp`, `narrow_band`) still survive and remain the documented, owner-accepted limitation (I-20 §3). The campaign covers its 47 named defects; it is not complete coverage.
+- **Status:** closure changes implemented; focused independent verification follows (I-21 §7); not accepted.

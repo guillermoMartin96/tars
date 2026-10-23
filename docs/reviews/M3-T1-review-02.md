@@ -139,3 +139,18 @@ Run at `c456881d7a9f5968739731b89fdc291860b54a76` on the reference host, in thre
 - **Protected paths:** `git diff 60648b9..c456881 -- proof toolbox scenarios .github uv.lock pyproject.toml src/tars/validation` is empty. Since `97b69ef`, `src/` changes are confined to `src/tars/sim/forces.py` (`ZonalJ2Gravity`, its two helpers `_owned_float`/`_underflows`, `_MIN_NORMAL` and imports).
 - **Realistic-orbit bit identity (I-20 §6):** no difference anywhere. No stop was needed.
 - **CI:** the I-20 commits were pushed in three groups: `56ad329`…`a4dfda1` together, then `2f82c00`, then `c456881`. The runs and the run on the commit adding this section are reported at the checkpoint. Review 03 starts only once the final head's run is green on all four jobs.
+
+## Provenance note on the implementer's reproduction (M3T1-R3-F2; I-21; recorded 2026-10-23 UTC, append-only)
+- **Authority:** "Authorization I-21 — M3 T1 Review 03 Closure" (Tech Lead), §3: M3T1-R3-F2 ACCEPTED.
+- **Affected row:** `mu_alias_set_-1` in `raw/M3-T1-review02-reproduction/reproduce_review02_output.json`, cited above in the R2-F2 row of "Findings and dispositions" as "μ alias set to −1: x = +3.991922438949618e-17 (outward)". The row records `"m.mu": 0.0`.
+- **What it shows.** That value is **not** μ at the time the acceleration was computed. `reproduce_review02.py.txt` (lines 38–49):
+  1. sets the caller's array to −1 and computes `a_neg`;
+  2. sets the array to 0 and computes `a_zero`;
+  3. only then builds the row, reading `m2.mu`, which by then follows the array to 0.0.
+
+  When `a_neg` was computed, μ was −1.0. Re-running the same sequence on the archived `b1566ae` code confirms this (`raw/M3-T1-review03-reproduction/reproduce_review03_output.json`, key `R3-F2`): μ = −1.0 at acceleration time, x = 3.991922438949618e-17, and μ = 0.0 when the row is written.
+- **What is unaffected:**
+  - the row's `x` and `outward: true`, and the `mu_alias_set_0` row;
+  - the R2-F2 defect, which is the aliasing itself (the row's 0.0 is a further instance of it);
+  - the R2-F2 correction and its before/after evidence (`t1_review02_correction_check_results.json`).
+- The raw script and output are preserved unchanged.
