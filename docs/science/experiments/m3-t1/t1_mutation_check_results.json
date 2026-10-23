@@ -12,6 +12,24 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+          "type": "",
+          "message": "assert np.float64(2.8888949165808538e-34) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(2.8888949165808538e-34) = abs((np.float64(1.4444474582904269e-34) - -1.4444474"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(1.978320954898961e-267) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(1.978320954898961e-267) = abs((np.float64(9.891604774494805e-268) - -9.8916047"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(1.2433569e-316) <= (2.0 ** -1074)\n +  where np.float64(1.2433569e-316) = abs((np.float64(6.2167845e-317) - -6.2167845e-317))"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
           "type": "",
           "message": "assert np.float64(5.2665382158541664e+225) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(5.2665382158541664e+225) = abs((np.float64(2.6332691079270832e+225) - -2.633"
@@ -214,6 +232,30 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(6.59440318299654e-269) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(6.59440318299654e-269) = abs((np.float64(-9.232164456195151e-268) - -9.89160477"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(4.144524e-318) <= (2.0 ** -1074)\n +  where np.float64(4.144524e-318) = abs((np.float64(-5.802332e-317) - -6.2167845e-317))"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
           "type": "",
           "message": "assert np.float64(1.7555127386180596e+224) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(1.7555127386180596e+224) = abs((np.float64(-2.4577178340652772e+225) - -2.63"
@@ -410,6 +452,18 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(4.945802387247403e-268) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(4.945802387247403e-268) = abs((np.float64(-4.945802387247403e-268) - -9.891604"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
           "type": "",
           "message": "assert np.float64(0.015911820477966514) <= (3.552713678800507e-15 * 0.031823640955933014)\n +  where np.float64(0.015911820477966514) = abs((np.float64(0.04773546143389953) - 0.031823640955933014))\n + "
@@ -576,6 +630,12 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "AssertionError: ValueError('outside the J2 numerical domain: a component product underflows')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: a component product"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
           "type": "",
           "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 2.9229540e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
@@ -654,6 +714,12 @@
       "detected": true,
       "by_assertion": true,
       "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(9.891606151981937e-277) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(9.891606151981937e-277) = abs((np.float64(-9.891604784386412e-268) - -9.891604"
+        },
         {
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
@@ -802,6 +868,36 @@
       "detected": true,
       "by_assertion": true,
       "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+          "type": "",
+          "message": "assert np.float64(1.4444460137026371e-40) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(1.4444460137026371e-40) = abs((np.float64(-1.4444460138444132e-34) - -1.444447"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(9.89159488217061e-274) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(9.89159488217061e-274) = abs((np.float64(-9.891594882899923e-268) - -9.89160477"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(6.4e-323) <= (2.0 ** -1074)\n +  where np.float64(6.4e-323) = abs((np.float64(-6.216778e-317) - -6.2167845e-317))"
+        },
         {
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
@@ -982,6 +1078,36 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert (np.float64(-9.891604774494805e-268) == 0.0)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(6.2167845e-317) <= (2.0 ** -1074)\n +  where np.float64(6.2167845e-317) = abs((np.float64(-0.0) - -6.2167845e-317))"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
           "type": "",
           "message": "assert np.float64(-0.0) > 0.0"
@@ -1134,7 +1260,7 @@
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_polar_orbit_plane_is_exactly_invariant",
           "type": "",
-          "message": "assert (np.False_)\n +  where np.False_ = <function all at 0x1108819b0>(array([ 0.00000000e+00, -2.66047890e-03, -2.12827489e-02, ...,\\n        3.10112986e+05,  3.09674854e+05,  3.09193553e+05], shape="
+          "message": "assert (np.False_)\n +  where np.False_ = <function all at 0x110d49a30>(array([ 0.00000000e+00, -2.66047890e-03, -2.12827489e-02, ...,\\n        3.10112986e+05,  3.09674854e+05,  3.09193553e+05], shape="
         },
         {
           "kind": "failure",
@@ -1164,6 +1290,12 @@
       "detected": true,
       "by_assertion": true,
       "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert (np.float64(1e-300) == 0.0)"
+        },
         {
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_known_answers_equator_and_pole",
@@ -1270,7 +1402,7 @@
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged",
           "type": "",
-          "message": "assert np.False_\n +  where np.False_ = <function all at 0x11038ddb0>(array([ 1.e-300,  0.e+000, -0.e+000]) == 0.0)\n +    where <function all at 0x11038ddb0> = np.all"
+          "message": "assert np.False_\n +  where np.False_ = <function all at 0x111df9ef0>(array([ 1.e-300,  0.e+000, -0.e+000]) == 0.0)\n +    where <function all at 0x111df9ef0> = np.all"
         }
       ]
     },
@@ -1464,6 +1596,12 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(-1.1247726104217237e-241) == -1.1247726104217232e-241"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_known_answers_are_exact_in_power_of_two_units[1-0.5]",
           "type": "",
           "message": "assert np.float64(-0.04687500000000002) == -0.046875\n +  where -0.046875 = float(((Fraction(-3, 2) * Fraction(1, 2)) / (Fraction(2, 1) ** 4)))\n +    where Fraction(-3, 2) = Fraction(-3, 2)\n +    and  "
@@ -1591,6 +1729,42 @@
           "test": "tests.test_zonal_j2::test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result",
           "type": "",
           "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+          "type": "",
+          "message": "assert np.float64(1.4444474582904269e-34) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(1.4444474582904269e-34) = abs((np.float64(0.0) - -1.4444474582904269e-34))\n + "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(9.891604774494805e-268) <= ((2 * 1.7763568394002536e-15) * 9.891604774494805e-268)\n +  where np.float64(9.891604774494805e-268) = abs((np.float64(0.0) - -9.891604774494805e-268))\n + "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(6.2167845e-317) <= (2.0 ** -1074)\n +  where np.float64(6.2167845e-317) = abs((np.float64(0.0) - -6.2167845e-317))"
         },
         {
           "kind": "failure",
@@ -1766,6 +1940,42 @@
       "detected": true,
       "by_assertion": true,
       "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+          "type": "",
+          "message": "assert np.float64(4.81482486096809e-35) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(4.81482486096809e-35) = abs((np.float64(-9.62964972193618e-35) - -1.444447458290"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "AssertionError: ValueError('outside the J2 numerical domain: coefficient not a normal binary64')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: coefficient not "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_subnormal_result_components_are_returned",
+          "type": "",
+          "message": "assert np.float64(3.436554e-317) <= (2.0 ** -1074)\n +  where np.float64(3.436554e-317) = abs((np.float64(-2.7802304e-317) - -6.2167845e-317))"
+        },
         {
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
@@ -1970,6 +2180,36 @@
         },
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'numerical domain: a component product underflows'\n  Actual message: 'outside the J2 numerical domain: coefficient not a normal binary64'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+          "type": "",
+          "message": "assert np.float64(1.5477378841865193e+267) <= ((2 * 1.7763568394002536e-15) * 1.4444474582904269e-34)\n +  where np.float64(1.5477378841865193e+267) = abs((np.float64(-1.5477378841865193e+267) - -1.444"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "AssertionError: ValueError('outside the J2 numerical domain: coefficient not a normal binary64')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: coefficient not "
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_inside_the_numerical_domain_results_are_the_formula[1e-50]",
           "type": "",
           "message": "assert np.float64(1.645656424442868e+233) <= ((2 * 1.7763568394002536e-15) * 2.6332691079270832e+225)\n +  where np.float64(1.645656424442868e+233) = abs((np.float64(-1.645656450775559e+233) - -2.63326"
@@ -2064,6 +2304,12 @@
       "failures": [
         {
           "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "AssertionError: ValueError('outside the J2 numerical domain: a component product underflows')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: a component product"
+        },
+        {
+          "kind": "failure",
           "test": "tests.test_zonal_j2::test_gradient_holds_at_every_latitude_band[0.0010826261738522227]",
           "type": "",
           "message": "AssertionError: (array([ 3.90548253e-10,  0.00000000e+00, -6.37813700e+06]), array([ 1.9486360e-18,  0.0000000e+00, -3.1823641e-02]), array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02]))\nassert np"
@@ -2144,7 +2390,7 @@
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_parameters_are_immutable_after_construction",
           "type": "",
-          "message": "AssertionError: assert not True\n +  where True = hasattr(<tars.sim.forces.ZonalJ2Gravity object at 0x1121be4e0>, '__dict__')"
+          "message": "AssertionError: assert not True\n +  where True = hasattr(<tars.sim.forces.ZonalJ2Gravity object at 0x110754050>, '__dict__')"
         }
       ]
     },
@@ -2188,7 +2434,7 @@
           "kind": "failure",
           "test": "tests.test_zonal_j2::test_non_finite_or_unrepresentable_parameters_are_rejected[1e-300-1e-10-0.001]",
           "type": "",
-          "message": "Failed: DID NOT RAISE ValueError"
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: '-\\\\(3/2\\\\) J2 mu R\\\\^2 is not a finite normal'\n  Actual message: '-(3/2) J2 mu R^2: an intermediate product underflows'"
         }
       ]
     },
@@ -2325,10 +2571,414 @@
           "message": "Failed: DID NOT RAISE ValueError"
         }
       ]
+    },
+    {
+      "id": "r2f1_component_products_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "component-product underflow returned silently",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "r2f1_xy_factor_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "k (1 - 5 s^2) underflow returned silently",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "r2f1_z_factor_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "k (3 - 5 s^2) underflow returned silently",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "r2f1_coefficient_p1_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "-(3/2) J2 underflow accepted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[1.0715086071862673e+301-1.0-1.5e-323-1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "r2f1_coefficient_p2_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "-(3/2) J2 mu underflow accepted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[9.33263618503219e-302-4.149515568880993e+180-8.673617379884035e-19-2]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "r2f1_coefficient_p3_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "-(3/2) J2 mu R underflow accepted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_coefficient_product_underflow_raises_instead_of_an_inaccurate_result[3.4766779039175e-310-35.2-0.5-3]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE ValueError"
+        }
+      ]
+    },
+    {
+      "id": "r2f1_exactness_ignored",
+      "file": "tars/sim/forces.py",
+      "defect": "exact zeros and exact subnormal products rejected as underflow",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_exact_subnormal_intermediates_are_not_underflow",
+          "type": "",
+          "message": "AssertionError: ValueError('-(3/2) J2 mu R^2: an intermediate product underflows')\nassert False\n +  where False = isinstance(ValueError('-(3/2) J2 mu R^2: an intermediate product underflows'), <class "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_legitimate_zero_components_are_returned",
+          "type": "",
+          "message": "AssertionError: ValueError('outside the J2 numerical domain: a component product underflows')\nassert False\n +  where False = isinstance(ValueError('outside the J2 numerical domain: a component product"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_j2_zero_is_exactly_zero_and_leaves_point_mass_unchanged",
+          "type": "",
+          "message": "ValueError: -(3/2) J2 mu R^2: an intermediate product underflows"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_j2_zero_propagation_is_bitwise_point_mass",
+          "type": "",
+          "message": "ValueError: -(3/2) J2 mu R^2: an intermediate product underflows"
+        }
+      ]
+    },
+    {
+      "id": "r2f2_parameters_not_converted",
+      "file": "tars/sim/forces.py",
+      "defect": "mu stored as the caller's object",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_parameters_are_owned_snapshots_not_caller_references",
+          "type": "",
+          "message": "assert False\n +  where False = all(<generator object test_parameters_are_owned_snapshots_not_caller_references.<locals>.<genexpr> at 0x105130ba0>)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float64]",
+          "type": "",
+          "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x105130860>)"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float32]",
+          "type": "",
+          "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[longdouble]",
+          "type": "",
+          "message": "AssertionError: assert dtype('float128') == <class 'numpy.float64'>\n +  where dtype('float128') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float128).dtype\n +  and   <class 'numpy.float64'>"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+          "type": "",
+          "message": "AssertionError: assert dtype('float32') == <class 'numpy.float64'>\n +  where dtype('float32') = array([-0.00128641, -0.00040338, -0.00808853], dtype=float32).dtype\n +  and   <class 'numpy.float64'> = "
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]",
+          "type": "",
+          "message": "assert False\n +  where False = all(<generator object test_supported_numeric_types_are_converted_to_binary64.<locals>.<genexpr> at 0x1053820c0>)"
+        }
+      ]
+    },
+    {
+      "id": "r2f2_type_unchecked",
+      "file": "tars/sim/forces.py",
+      "defect": "any float()-convertible input accepted",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[6378137.0]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value2]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'list'\""
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value3]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'tuple'\""
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value4]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: 'only 0-dimensional arrays can be converted to Python scalars'"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value5]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[True]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value7]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[(1+0j)0]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'complex'\""
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[(1+0j)1]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[value10]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[None]",
+          "type": "",
+          "message": "AssertionError: Regex pattern did not match.\n  Expected regex: 'must be a real number'\n  Actual message: \"float() argument must be a string or a real number, not 'NoneType'\""
+        }
+      ]
+    },
+    {
+      "id": "r2f2_bool_accepted",
+      "file": "tars/sim/forces.py",
+      "defect": "bool accepted as a number",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unsupported_parameter_types_are_rejected[True]",
+          "type": "",
+          "message": "Failed: DID NOT RAISE TypeError"
+        }
+      ]
+    },
+    {
+      "id": "r2f2_zero_d_array_rejected",
+      "file": "tars/sim/forces.py",
+      "defect": "zero-dimensional arrays rejected",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_parameters_are_owned_snapshots_not_caller_references",
+          "type": "",
+          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+          "type": "",
+          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>1]",
+          "type": "",
+          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_converted_parameters_keep_the_validation_contract[mu0-6378137.0-0.0010826261738522227]",
+          "type": "",
+          "message": "TypeError: mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_converted_parameters_keep_the_validation_contract[398600441800000.0-6378137.0-j22]",
+          "type": "",
+          "message": "TypeError: j2 must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray"
+        }
+      ]
+    },
+    {
+      "id": "r2f2_numpy_integer_rejected",
+      "file": "tars/sim/forces.py",
+      "defect": "NumPy integer scalars rejected",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_integer_parameters_are_supported",
+          "type": "",
+          "message": "AssertionError: TypeError('equatorial_radius must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not int64')\nassert False\n +  where False = isinstance("
+        }
+      ]
+    },
+    {
+      "id": "r2f2_numpy_floating_rejected",
+      "file": "tars/sim/forces.py",
+      "defect": "NumPy floating scalars (not float64) rejected",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[float32]",
+          "type": "",
+          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not float32')\nassert False\n +  where False = isinstance(TypeError('mu"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[longdouble]",
+          "type": "",
+          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not longdouble')\nassert False\n +  where False = isinstance(TypeError("
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_supported_numeric_types_are_converted_to_binary64[<lambda>0]",
+          "type": "",
+          "message": "AssertionError: TypeError('mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not ndarray')\nassert False\n +  where False = isinstance(TypeError('mu"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_float16_parameter_is_supported",
+          "type": "",
+          "message": "AssertionError: TypeError('j2 must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not float16')\nassert False\n +  where False = isinstance(TypeError('j2"
+        },
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_converted_parameters_keep_the_validation_contract[398600441800000.0-radius1-0.0010826261738522227]",
+          "type": "",
+          "message": "TypeError: equatorial_radius must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not float32"
+        }
+      ]
+    },
+    {
+      "id": "r2f2_overflow_not_converted",
+      "file": "tars/sim/forces.py",
+      "defect": "huge int raises OverflowError instead of ValueError",
+      "pytest_exit": 1,
+      "detected": true,
+      "by_assertion": true,
+      "failures": [
+        {
+          "kind": "failure",
+          "test": "tests.test_zonal_j2::test_unrepresentable_integer_parameter_is_rejected",
+          "type": "",
+          "message": "AssertionError: assert (<class 'OverflowError'> is ValueError)\n +  where <class 'OverflowError'> = type(OverflowError('int too large to convert to float'))"
+        }
+      ]
     }
   ],
-  "detected": 32,
-  "detected_by_assertion": 32,
-  "total": 32,
+  "detected": 46,
+  "detected_by_assertion": 46,
+  "total": 46,
   "surviving": []
 }

@@ -2,8 +2,9 @@
 
 1. Re-runs each Review 01 reproduction (M3T1-R1-F1, F2) against the corrected component.
 2. Bit-identity: the corrected acceleration equals the reviewed one (``97b69ef``, loaded
-   from OLD_SRC) bit for bit on deterministic pseudo-random states from 6 378 km to
-   100 000 km, at every latitude, and on the committed RK4 trajectories' states.
+   from OLD_SRC) bit for bit on 200 000 deterministic pseudo-random states from 6 378 km
+   to 100 000 km, at every latitude, and on four axis states (M3T1-R2-F3: no trajectory
+   is checked here).
 3. The numerical domain for the canonical constants: the smallest and largest equatorial
    radius accepted, found by bisection on binary64 values.
 

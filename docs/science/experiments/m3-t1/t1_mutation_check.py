@@ -11,6 +11,9 @@ unexpected error.
 
 Mutants added after Codex Review 01 (I-19): the reviewer's eight mutants (four of which
 survived the Review 01 tests) and mutants that remove each M3T1-R1-F1/F2 protection.
+Mutants added after Codex Review 02 (I-20): removal of each M3T1-R2-F1/F2 protection. The
+anchors of four original mutants follow the R2-F1 rewrite of the component expression
+(``k * c * x`` -> ``kc * x``, same defects).
 
 Usage (from the repository root):
     uv run python docs/science/experiments/m3-t1/t1_mutation_check.py OUT.json
@@ -39,8 +42,8 @@ MUTANTS = [
     (
         "z_factor",
         FORCES,
-        "k * (3.0 - 5.0 * s2) * z",
-        "k * (2.0 - 5.0 * s2) * z",
+        "d = 3.0 - 5.0 * s2",
+        "d = 2.0 - 5.0 * s2",
         "z factor 3 -> 2 (non-conservative)",
     ),
     (
@@ -53,15 +56,15 @@ MUTANTS = [
     (
         "xy_asym",
         FORCES,
-        "k * c * y,",
-        "k * c * y * (1.0 + 1e-9),",
+        "kc * y,",
+        "kc * y * (1.0 + 1e-9),",
         "x/y asymmetry 1e-9 (not axisymmetric)",
     ),
     (
         "z_scale_1e9",
         FORCES,
-        "k * (3.0 - 5.0 * s2) * z]",
-        "k * (3.0 - 5.0 * s2) * z * (1.0 + 1e-9)]",
+        "kd * z]",
+        "kd * z * (1.0 + 1e-9)]",
         "z component scaled by 1e-9",
     ),
     (
@@ -81,8 +84,8 @@ MUTANTS = [
     (
         "j2_zero_offset",
         FORCES,
-        "a = np.array([k * c * x,",
-        "a = np.array([k * c * x + 1e-300,",
+        "a = np.array([kc * x,",
+        "a = np.array([kc * x + 1e-300,",
         "J2 = 0 not exactly zero",
     ),
     (
@@ -251,6 +254,106 @@ MUTANTS = [
         "if not np.all(np.isfinite(a)):",
         "if False:",
         "overflowing result returned",
+    ),
+    # ---- removal of each M3T1-R2-F1 / F2 protection (I-20 §2)
+    (
+        "r2f1_component_products_unchecked",
+        FORCES,
+        "if _underflows(kc, k, c) or _underflows(kd, k, d):",
+        "if False:",
+        "component-product underflow returned silently",
+    ),
+    (
+        "r2f1_xy_factor_unchecked",
+        FORCES,
+        "if _underflows(kc, k, c) or _underflows(kd, k, d):",
+        "if _underflows(kd, k, d):",
+        "k (1 - 5 s^2) underflow returned silently",
+    ),
+    (
+        "r2f1_z_factor_unchecked",
+        FORCES,
+        "if _underflows(kc, k, c) or _underflows(kd, k, d):",
+        "if _underflows(kc, k, c):",
+        "k (3 - 5 s^2) underflow returned silently",
+    ),
+    (
+        "r2f1_coefficient_p1_unchecked",
+        FORCES,
+        "_underflows(p1, -1.5, j2)\n            or ",
+        "",
+        "-(3/2) J2 underflow accepted",
+    ),
+    (
+        "r2f1_coefficient_p2_unchecked",
+        FORCES,
+        "or _underflows(p2, p1, mu)\n            ",
+        "",
+        "-(3/2) J2 mu underflow accepted",
+    ),
+    (
+        "r2f1_coefficient_p3_unchecked",
+        FORCES,
+        "\n            or _underflows(p3, p2, equatorial_radius)",
+        "",
+        "-(3/2) J2 mu R underflow accepted",
+    ),
+    (
+        "r2f1_exactness_ignored",
+        FORCES,
+        "return abs(product) < _MIN_NORMAL and Fraction(a) * Fraction(b) != product",
+        "return abs(product) < _MIN_NORMAL",
+        "exact zeros and exact subnormal products rejected as underflow",
+    ),
+    (
+        "r2f2_parameters_not_converted",
+        FORCES,
+        'mu = _owned_float("mu", mu)',
+        '_owned_float("mu", mu)',
+        "mu stored as the caller's object",
+    ),
+    (
+        "r2f2_type_unchecked",
+        FORCES,
+        "if isinstance(scalar, bool) or not isinstance("
+        "scalar, int | float | np.integer | np.floating):",
+        "if False:",
+        "any float()-convertible input accepted",
+    ),
+    (
+        "r2f2_bool_accepted",
+        FORCES,
+        "if isinstance(scalar, bool) or not isinstance(",
+        "if not isinstance(",
+        "bool accepted as a number",
+    ),
+    (
+        "r2f2_zero_d_array_rejected",
+        FORCES,
+        "value[()] if isinstance(value, np.ndarray) and value.ndim == 0 else value",
+        "value",
+        "zero-dimensional arrays rejected",
+    ),
+    (
+        "r2f2_numpy_integer_rejected",
+        FORCES,
+        "int | float | np.integer | np.floating",
+        "int | float | np.floating",
+        "NumPy integer scalars rejected",
+    ),
+    (
+        "r2f2_numpy_floating_rejected",
+        FORCES,
+        "int | float | np.integer | np.floating",
+        "int | float | np.integer",
+        "NumPy floating scalars (not float64) rejected",
+    ),
+    (
+        "r2f2_overflow_not_converted",
+        FORCES,
+        "except OverflowError:",
+        "except ZeroDivisionError:",
+        "huge int raises OverflowError instead of ValueError",
     ),
 ]
 
