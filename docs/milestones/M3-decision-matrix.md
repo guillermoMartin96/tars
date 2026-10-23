@@ -237,3 +237,11 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **T2 and later:** NOT AUTHORIZED.
 - **Unchanged and undecided:** DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2 (PROPOSED), DR-0028 P6(b) and Q-G2-4 (PROVISIONAL).
 - **Gate table, update 2026-10-22:** "T1 and later" now reads: T1 AUTHORIZED (I-17), implemented, not reviewed; T2 and later NOT AUTHORIZED.
+
+## T1 Review 01 (recorded 2026-10-23 UTC, append-only)
+- **Codex T1 Review 01** was run under I-18 at `97b69ef`: **REQUEST_CHANGES**. It found 2 MINOR (M3T1-R1-F1 mutable parameters; F2 silent numerical-domain loss) and 2 NOTE (F3, F4), all ACCEPTED and not applied. Record: `docs/reviews/M3-T1-review-01.md`.
+- **Open for the owner:**
+  - authorization of corrections and Review 02;
+  - a disposition of the DR-0025 Q3 dual-number substitution, which is not accepted.
+- **Unchanged and undecided:** every other open item listed in the "P10 merge and T1" note.
+- **Status:** T1 is IMPLEMENTED — REVIEWED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

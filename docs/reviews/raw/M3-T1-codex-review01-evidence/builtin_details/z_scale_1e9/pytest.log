@@ -1,0 +1,27 @@
+..F
+=================================== FAILURES ===================================
+_____________________ test_known_answers_equator_and_pole ______________________
+
+    def test_known_answers_equator_and_pole():
+        """FC-6: at r = R x-hat, a = -(3/2) J2 mu / R^2 x-hat (inward);
+        at r = R z-hat, a = +3 J2 mu / R^2 z-hat (outward along +Z).
+        Tolerance: each side has at most 16 roundings, so 2 gamma_16 relative (VAL-0020)."""
+        tol = 2 * gamma(16)
+        a_eq = j2_model().acceleration(0.0, np.array([RE, 0.0, 0.0]), np.zeros(3))
+        expected_eq = -1.5 * J2 * MU / (RE * RE)
+        assert a_eq[0] < 0.0
+        assert abs(a_eq[0] - expected_eq) <= tol * abs(expected_eq)
+        assert a_eq[1] == 0.0 and a_eq[2] == 0.0
+        a_pole = j2_model().acceleration(0.0, np.array([0.0, 0.0, RE]), np.zeros(3))
+        expected_pole = 3.0 * J2 * MU / (RE * RE)
+        assert a_pole[2] > 0.0
+>       assert abs(a_pole[2] - expected_pole) <= tol * abs(expected_pole)
+E       assert np.float64(3.182364788356651e-11) <= (3.552713678800507e-15 * 0.031823640955933014)
+E        +  where np.float64(3.182364788356651e-11) = abs((np.float64(0.03182364098775666) - 0.031823640955933014))
+E        +  and   0.031823640955933014 = abs(0.031823640955933014)
+
+tests/test_zonal_j2.py:174: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed in 0.12s

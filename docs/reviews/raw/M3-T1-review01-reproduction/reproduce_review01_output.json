@@ -1,0 +1,159 @@
+{
+  "F1": {
+    "acceleration_unchanged_after_assignment": true,
+    "after_assignment": [
+      -0.01591182047796651,
+      -0.0,
+      -0.0
+    ],
+    "assignment_succeeded": true,
+    "fresh_j2_zero": [
+      -0.0,
+      -0.0,
+      -0.0
+    ],
+    "reproduced": true
+  },
+  "F2": {
+    "equatorial": {
+      "1e+100": {
+        "computed": -0.0,
+        "exact_rounded": -0.0,
+        "silent_zero": false
+      },
+      "1e+60": {
+        "computed": -2.633269107927084e-215,
+        "exact_rounded": -2.6332691079270837e-215,
+        "silent_zero": false
+      },
+      "1e+61": {
+        "computed": -2.6332691079270847e-219,
+        "exact_rounded": -2.6332691079270838e-219,
+        "silent_zero": false
+      },
+      "1e+62": {
+        "computed": -0.0,
+        "exact_rounded": -2.633269107927083e-223,
+        "silent_zero": true
+      },
+      "1e+70": {
+        "computed": -0.0,
+        "exact_rounded": -2.6332691079270824e-255,
+        "silent_zero": true
+      },
+      "1e+76": {
+        "computed": -0.0,
+        "exact_rounded": -2.633269107927083e-279,
+        "silent_zero": true
+      },
+      "1e+77": {
+        "computed": -0.0,
+        "exact_rounded": -2.6332691079270833e-283,
+        "silent_zero": true
+      }
+    },
+    "exact_at_first_silent_zero": -6.557265922253616e-222,
+    "first_silent_zero_x_m": 4.476546622757236e+61,
+    "first_silent_zero_x_over_a": 7.018580226102443e+54,
+    "interior_tiny_radius": {
+      "1e-100": {
+        "message": "float division by zero",
+        "raises": "ZeroDivisionError"
+      },
+      "5e-324": {
+        "message": "J2 gravity is singular at the origin",
+        "raises": "ValueError"
+      }
+    },
+    "non_finite_parameters": {
+      "a=inf": {
+        "acceleration": [
+          "-inf",
+          "nan",
+          "nan"
+        ],
+        "accepted": true
+      },
+      "mu=inf": {
+        "acceleration": [
+          "-inf",
+          "nan",
+          "nan"
+        ],
+        "accepted": true
+      }
+    },
+    "reproduced": true
+  },
+  "F3": {
+    "reproduced": true,
+    "rows": [
+      {
+        "dot_over_r_minus3_form": 1.0000000000000002,
+        "dot_over_r_minus4_form": 6378137.000000002,
+        "lat": 0.0,
+        "r_over_a": 1.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000004,
+        "dot_over_r_minus4_form": 6378137.000000004,
+        "lat": 20.0,
+        "r_over_a": 1.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000007,
+        "dot_over_r_minus4_form": 6378137.000000004,
+        "lat": 50.0,
+        "r_over_a": 1.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000002,
+        "dot_over_r_minus4_form": 12756274.000000004,
+        "lat": 0.0,
+        "r_over_a": 2.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000004,
+        "dot_over_r_minus4_form": 12756274.000000007,
+        "lat": 20.0,
+        "r_over_a": 2.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000007,
+        "dot_over_r_minus4_form": 12756274.000000007,
+        "lat": 50.0,
+        "r_over_a": 2.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000002,
+        "dot_over_r_minus4_form": 25512548.000000007,
+        "lat": 0.0,
+        "r_over_a": 4.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000004,
+        "dot_over_r_minus4_form": 25512548.000000015,
+        "lat": 20.0,
+        "r_over_a": 4.0
+      },
+      {
+        "dot_over_r_minus3_form": 1.0000000000000007,
+        "dot_over_r_minus4_form": 25512548.000000015,
+        "lat": 50.0,
+        "r_over_a": 4.0
+      }
+    ]
+  },
+  "F4_high_latitude_band": {
+    "reproduced": true,
+    "sample_points": 162,
+    "sample_points_with_0.99<s2<0.9999": 0
+  },
+  "F4_literal_scan": {
+    "hex_source_line": "J2 = float.fromhex('0x1.1bcdd00abd9aap-10')",
+    "regex_matches_hex": false,
+    "regex_matches_packed_bytes": false,
+    "reproduced": true
+  },
+  "implementer_observation_packet_gradient_sign": "Packet section 7 table says 'acceleration = -grad U'. With U = (mu/r)[1 - J2 (a/r)^2 P2] (positive potential, the packet's own section 3 convention) the acceleration is +grad U; tests/test_zonal_j2.py and VAL-0020 use +grad U. Packet wording only."
+}

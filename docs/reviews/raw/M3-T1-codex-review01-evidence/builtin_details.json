@@ -1,0 +1,86 @@
+[
+  {
+    "name": "sign",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "eleration(0.0, np.array([RE, 0.0, 0.0]), np.zeros(3))\n        expected_eq = -1.5 * J2 * MU / (RE * RE)\n>       assert a_eq[0] < 0.0\nE       assert np.float64(0.01591182047796651) < 0.0\n\ntests/test_zonal_j2.py:168: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.12s\n"
+  },
+  {
+    "name": "magnitude",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "        +  where np.float64(0.001060788031864433) = abs((np.float64(-0.014851032446102074) - -0.015911820477966507))\nE        +  and   0.015911820477966507 = abs(-0.015911820477966507)\n\ntests/test_zonal_j2.py:169: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.13s\n"
+  },
+  {
+    "name": "z_factor",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "4)\nE        +  where np.float64(0.015911820477966514) = abs((np.float64(0.04773546143389953) - 0.031823640955933014))\nE        +  and   0.031823640955933014 = abs(0.031823640955933014)\n\ntests/test_zonal_j2.py:174: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.13s\n"
+  },
+  {
+    "name": "s2_coeff",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "ay([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02])))\nE            +      where <ufunc 'absolute'> = np.abs\nE            +    and   7.105427357601052e-15 = gamma(64)\n\ntests/test_zonal_j2.py:192: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_acceleration_is_the_gradient_of_the_separately_coded_potential\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 3 passed in 0.12s\n"
+  },
+  {
+    "name": "xy_asym",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "[ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02])))\nE            +      where <ufunc 'absolute'> = np.abs\nE            +    and   7.105427357601052e-15 = gamma(64)\n\ntests/test_zonal_j2.py:192: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_acceleration_is_the_gradient_of_the_separately_coded_potential\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 3 passed in 0.12s\n"
+  },
+  {
+    "name": "z_scale_1e9",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": ")\nE        +  where np.float64(3.182364788356651e-11) = abs((np.float64(0.03182364098775666) - 0.031823640955933014))\nE        +  and   0.031823640955933014 = abs(0.031823640955933014)\n\ntests/test_zonal_j2.py:174: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.12s\n"
+  },
+  {
+    "name": "power",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "       +  where np.float64(1.591180456145258e-08) = abs((np.float64(-0.015911804566161945) - -0.015911820477966507))\nE        +  and   0.015911820477966507 = abs(-0.015911820477966507)\n\ntests/test_zonal_j2.py:169: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.12s\n"
+  },
+  {
+    "name": "axis",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "_model().acceleration(0.0, np.array([0.0, 0.0, RE]), np.zeros(3))\n        expected_pole = 3.0 * J2 * MU / (RE * RE)\n>       assert a_pole[2] > 0.0\nE       assert np.float64(-0.0) > 0.0\n\ntests/test_zonal_j2.py:173: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.12s\n"
+  },
+  {
+    "name": "j2_zero_offset",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "_pole[2] > 0.0\n        assert abs(a_pole[2] - expected_pole) <= tol * abs(expected_pole)\n>       assert a_pole[0] == 0.0 and a_pole[1] == 0.0\nE       assert (np.float64(1e-300) == 0.0)\n\ntests/test_zonal_j2.py:175: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert (...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.10s\n"
+  },
+  {
+    "name": "sqrt5_decimal",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "   where Fraction(629397181890197, 281474976710656) = Fraction(2.23606797749979)\nE        +    and   Fraction(-4465635248459975, 9223372036854775808) = Fraction(-0.000484165143790815)\n\ntests/test_constants.py:98: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_constants.py::test_j2_derivation_is_correctly_rounded_binary64\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 21 passed in 2.80s\n"
+  },
+  {
+    "name": "sqrt5_ulp",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "   where Fraction(629397181890197, 281474976710656) = Fraction(2.23606797749979)\nE        +    and   Fraction(-4465635248459975, 9223372036854775808) = Fraction(-0.000484165143790815)\n\ntests/test_constants.py:98: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_constants.py::test_j2_derivation_is_correctly_rounded_binary64\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 21 passed in 2.68s\n"
+  },
+  {
+    "name": "j2_sign",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "eleration(0.0, np.array([RE, 0.0, 0.0]), np.zeros(3))\n        expected_eq = -1.5 * J2 * MU / (RE * RE)\n>       assert a_eq[0] < 0.0\nE       assert np.float64(0.01591182047796651) < 0.0\n\ntests/test_zonal_j2.py:168: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 2 passed in 0.10s\n"
+  },
+  {
+    "name": "c20_digit",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "15e-3\") == EGM2008_C20_TIDE_FREE\nE       AssertionError: assert -0.000484165143790815 == -0.000484165143790816\nE        +  where -0.000484165143790815 = float('-0.484165143790815e-3')\n\ntests/test_constants.py:67: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_constants.py::test_c20_is_the_published_nga_value - Asserti...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 18 passed in 2.69s\n"
+  },
+  {
+    "name": "decimal_j2",
+    "exit": 1,
+    "assertion_failure": true,
+    "summary": "   where Fraction(629397181890197, 281474976710656) = Fraction(2.23606797749979)\nE        +    and   Fraction(-4465635248459975, 9223372036854775808) = Fraction(-0.000484165143790815)\n\ntests/test_constants.py:98: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_constants.py::test_j2_derivation_is_correctly_rounded_binary64\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 21 passed in 2.64s\n"
+  }
+]

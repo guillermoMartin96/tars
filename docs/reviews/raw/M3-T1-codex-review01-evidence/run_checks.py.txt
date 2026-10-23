@@ -1,0 +1,18 @@
+import subprocess, concurrent.futures, pathlib, time
+root=pathlib.Path('review_scratch')
+commands={
+'pytest':'.venv/bin/python -m pytest -q -p no:cacheprovider',
+'ruff':'.venv/bin/ruff check . && .venv/bin/ruff format --check .',
+'t0':'.venv/bin/python -m pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py',
+'m1':'.venv/bin/python toolbox/validators/m1_proof.py --out review_scratch/m1.json',
+'m2':'.venv/bin/python toolbox/validators/m2_proof.py --out review_scratch/m2.json',
+'info':'.venv/bin/python docs/science/experiments/m3-t1/t1_j2_informational.py review_scratch/info.json',
+'mutation':'.venv/bin/python docs/science/experiments/m3-t1/t1_mutation_check.py review_scratch/mutation.json'}
+def run(item):
+ name,cmd=item
+ with (root/(name+'.log')).open('w') as f:
+  p=subprocess.run(cmd,shell=True,stdout=f,stderr=subprocess.STDOUT)
+ with (root/'checks-ledger.txt').open('a') as f:f.write(f'{cmd}\nexit={p.returncode}; log={name}.log\n')
+ return name,p.returncode
+with concurrent.futures.ThreadPoolExecutor(max_workers=7) as ex:
+ for result in ex.map(run,commands.items()):print(result,flush=True)

@@ -1,0 +1,32 @@
+...F
+=================================== FAILURES ===================================
+_____ test_acceleration_is_the_gradient_of_the_separately_coded_potential ______
+
+    def test_acceleration_is_the_gradient_of_the_separately_coded_potential():
+        """DR-0025 Q3 (gradient oracle). Forward-mode dual numbers replace the complex step:
+        the same exact-derivative idea, using only correctly rounded operations, so the bound
+        rests on no libm assumption. Bound (VAL-0020), per component:
+            |a - grad U2| <= gamma_64 * (|a|_abs + |grad U2|_abs),
+        where |.|_abs is the same expression evaluated in absolute values and 64 bounds the
+        roundings along any path of either evaluation (counted by inspection: at most 13 for
+        the acceleration, at most 40 for the dual-number gradient)."""
+        model = j2_model()
+        for r in sample_points():
+            grad = np.array(j2_potential(*seeds(r)).grad)
+            grad_abs = np.array(j2_potential(*seeds(r, absolute=True)).grad)
+            a = model.acceleration(0.0, r, np.zeros(3))
+            a_abs = acceleration_abs(r)
+>           assert np.all(np.abs(a - grad) <= gamma(64) * (a_abs + grad_abs)), (r, a, grad)
+E           AssertionError: (array([ 3.11905703e-10,  2.35037806e-10, -6.37813700e+06]), array([ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02]), array([ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02]))
+E           assert np.False_
+E            +  where np.False_ = <function all at 0x105645b70>(array([7.70371978e-34, 2.34543755e-27, 6.93889390e-18]) <= (7.105427357601052e-15 * (array([4.66874972e-18, 3.51815526e-18, 1.27294564e-01]) + array([4.66874972e-18, 3.51815526e-18, 1.27294564e-01]))))
+E            +    where <function all at 0x105645b70> = np.all
+E            +    and   array([7.70371978e-34, 2.34543755e-27, 6.93889390e-18]) = <ufunc 'absolute'>((array([ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02]) - array([ 3.11249981e-18,  2.34543684e-18, -3.18236410e-02])))
+E            +      where <ufunc 'absolute'> = np.abs
+E            +    and   7.105427357601052e-15 = gamma(64)
+
+tests/test_zonal_j2.py:192: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_acceleration_is_the_gradient_of_the_separately_coded_potential
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 3 passed in 0.12s

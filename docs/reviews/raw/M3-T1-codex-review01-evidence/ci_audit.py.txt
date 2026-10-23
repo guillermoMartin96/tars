@@ -1,0 +1,10 @@
+import json,pathlib
+out=[]
+for p in sorted(pathlib.Path('review_scratch/ci').glob('*.json')):
+ d=json.loads(p.read_text());anomalies=[]
+ for j in d['jobs']:
+  for s in j['steps']:
+   if s.get('startedAt') and j.get('startedAt') and s['startedAt'] < j['startedAt']:anomalies.append({'job':j['name'],'step':s['name'],'step_started':s['startedAt'],'job_started':j['startedAt']})
+  if j['startedAt']<d['createdAt']:anomalies.append({'job':j['name'],'before_run_created':True})
+ out.append({'file':p.name,'id':d['databaseId'],'branch':d['headBranch'],'sha':d['headSha'],'conclusion':d['conclusion'],'jobs':[(j['name'],j['databaseId'],j['conclusion']) for j in d['jobs']],'timestamp_anomalies':anomalies})
+pathlib.Path('review_scratch/ci_audit.json').write_text(json.dumps(out,indent=2)+'\n');print(json.dumps(out,indent=2))

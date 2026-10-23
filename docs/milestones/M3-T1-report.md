@@ -129,3 +129,15 @@ Nothing else changed either:
 
 ## 12. Next gate
 Independent T1 review (Codex), which needs separate owner authorization (packet §11).
+
+## Status update (recorded 2026-10-23 UTC, append-only)
+- **Independent Codex Review 01** was run under "Authorization I-18 — M3 T1 Independent Codex Review 01" (Tech Lead) at `97b69ef92e589ebd1b71016f49c4c9816d8c724b`. Verdict: **`REQUEST_CHANGES`**. Record: `docs/reviews/M3-T1-review-01.md`.
+- **Findings:** 2 MINOR and 2 NOTE, all reproduced independently and **ACCEPTED, not applied**:
+  - M3T1-R1-F1: mutable parameters;
+  - M3T1-R1-F2: silent overflow and non-finite parameters;
+  - M3T1-R1-F3: radial docstring power;
+  - M3T1-R1-F4: finite mutation coverage.
+- **The sections above remain as written.**
+  - §9 item 4 (the dual-number substitution) awaits an owner disposition. The reviewer recommends an explicit DR-0025 amendment or disposition.
+  - §8's regression results were reproduced by the reviewer with the validators (not the wrappers).
+- **Status:** T1 **IMPLEMENTED — REVIEWED — NOT ACCEPTED — NOT MERGED**. Corrections and Review 02 need separate authorization.

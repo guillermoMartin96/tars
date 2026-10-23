@@ -1,0 +1,13 @@
+import runpy,pathlib,shutil,os,subprocess,json,concurrent.futures
+ns=runpy.run_path('docs/science/experiments/m3-t1/t1_mutation_check.py')
+def run(item):
+ name,rel,old,new,defect=item
+ dst=pathlib.Path('review_scratch/builtin_details')/name
+ shutil.copytree('src',dst/'src',dirs_exist_ok=True);p=dst/'src'/rel;s=p.read_text();assert s.count(old)==1;p.write_text(s.replace(old,new))
+ cmd=['.venv/bin/python','-m','pytest','-q','-x','-p','no:cacheprovider','tests/test_zonal_j2.py','tests/test_constants.py']
+ r=subprocess.run(cmd,env=dict(os.environ,PYTHONPATH=str((dst/'src').resolve())),capture_output=True,text=True)
+ (dst/'pytest.log').write_text(r.stdout+r.stderr)
+ return {'name':name,'exit':r.returncode,'assertion_failure':'AssertionError' in r.stdout,'summary':r.stdout[-500:]}
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:out=list(ex.map(run,ns['MUTANTS']))
+pathlib.Path('review_scratch/builtin_details.json').write_text(json.dumps(out,indent=2)+'\n')
+print([(d['name'],d['exit'],d['assertion_failure']) for d in out])

@@ -1,0 +1,16 @@
+import json,pathlib,subprocess,platform,sys
+root=pathlib.Path('review_scratch');out={}
+for n,filename in [('info','t1_j2_informational_results.json'),('mutation','t1_mutation_check_results.json')]:
+ a=json.loads((root/(n+'.json')).read_text());b=json.loads((pathlib.Path('docs/science/experiments/m3-t1')/filename).read_text());out[n+'_json_identical']=a==b
+ if a!=b:out[n+'_differing_top_keys']=[k for k in a if a[k]!=b[k]]
+out['info']=json.loads((root/'info.json').read_text())
+for name in ('m1','m2'):
+ d=json.loads((root/(name+'.json')).read_text());out[name+'_summary']={k:v for k,v in d.items() if k not in ('results','checks')}
+out['git_diff_protected']=subprocess.run('git diff 60648b9..HEAD -- proof toolbox scenarios .github uv.lock pyproject.toml src/tars/validation',shell=True,capture_output=True,text=True).stdout
+out['tracked_status']=subprocess.run(['git','status','--porcelain'],capture_output=True,text=True).stdout
+out['cpu_sysctl']=subprocess.run(['/usr/sbin/sysctl','-n','machdep.cpu.brand_string'],capture_output=True,text=True).__dict__.get('stdout')
+out['cpu_system_profiler']=subprocess.run(['/usr/sbin/system_profiler','SPHardwareDataType'],capture_output=True,text=True).stdout
+(root/'records_audit.json').write_text(json.dumps(out,indent=2)+'\n')
+print('info identical:',out['info_json_identical'],'mutation identical:',out['mutation_json_identical'])
+print('cpu:',out['cpu_sysctl'],out['cpu_system_profiler'])
+print('m1 and m2 summary:',out['m1_summary'].keys(),out['m2_summary'].keys())

@@ -1,0 +1,12 @@
+diff -ru -x __pycache__ src/tars/sim/constants.py <clone>/review_scratch/builtin_details/c20_digit//src/tars/sim/constants.py
+--- src/tars/sim/constants.py	2026-10-22 18:08:02
++++ <clone>/review_scratch/builtin_details/c20_digit//src/tars/sim/constants.py	2026-10-22 18:15:45
+@@ -53,7 +53,7 @@
+ # EGM2008 tide-free normalized coefficient C̄2,0 from NGA.STND.0036_1.0.0_WGS84 (2014)
+ # Table 5.1. J2 is always derived from it; no J2 literal is stored anywhere (P10). The
+ # decimal J2 written in DR-0024 Q1 is the 11-digit display form of the derived value.
+-EGM2008_C20_TIDE_FREE = -0.484165143790815e-3
++EGM2008_C20_TIDE_FREE = -0.484165143790816e-3
+ 
+ 
+ def j2_from_c20(c20: float) -> float:

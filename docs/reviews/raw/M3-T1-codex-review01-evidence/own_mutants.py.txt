@@ -1,0 +1,24 @@
+import pathlib, shutil, subprocess, os, json, concurrent.futures
+base=pathlib.Path('review_scratch')
+source=pathlib.Path('src/tars/sim/forces.py').read_text()
+mutants={
+ 'high_lat_band':('c = 1.0 - 5.0 * s2','c = 1.0 - 5.0 * s2\n        if 0.99 < s2 < 0.9999:\n            c *= 1.01'),
+ 'negative_j2_abs':('self._k = -1.5 * j2 *','self._k = -1.5 * abs(j2) *'),
+ 'small_coefficient_error':('self._k = -1.5 * j2 *','self._k = -1.5 * (1 + 2**-51) * j2 *'),
+ 'off_axis_band':('c = 1.0 - 5.0 * s2','c = 1.0 - 5.0 * s2\n        if 0.36 < s2 < 0.37:\n            c *= 1.01'),
+ 'far_field_zero':('r_norm = math.sqrt(r2)','r_norm = math.sqrt(r2)\n        if r_norm > 7 * self.equatorial_radius:\n            return np.zeros(3)'),
+ 'unnormalized':('self._k = -1.5 * j2 *','self._k = -1.5 * (j2 / math.sqrt(5)) *'),
+ 'mu_radius_swap':('self._k = -1.5 * j2 * mu * equatorial_radius * equatorial_radius','self._k = -1.5 * j2 * equatorial_radius * mu * mu'),
+ 'p2_wrong':('c = 1.0 - 5.0 * s2','c = 1.0 - 3.0 * s2'),
+}
+def run(item):
+ name,(old,new)=item
+ dst=base/name;shutil.copytree('src',dst/'src',dirs_exist_ok=True)
+ p=dst/'src/tars/sim/forces.py';assert source.count(old)==1;p.write_text(source.replace(old,new))
+ cmd=['.venv/bin/python','-m','pytest','-q','-x','-p','no:cacheprovider','tests/test_constants.py','tests/test_zonal_j2.py']
+ r=subprocess.run(cmd,env=dict(os.environ,PYTHONPATH=str((dst/'src').resolve())),capture_output=True,text=True)
+ (dst/'pytest.log').write_text(r.stdout+r.stderr)
+ return {'mutant':name,'exit':r.returncode,'command':cmd,'tail':r.stdout[-700:]}
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:r=list(ex.map(run,mutants.items()))
+(base/'own_mutants.json').write_text(json.dumps(r,indent=2)+'\n')
+print(json.dumps(r,indent=2))

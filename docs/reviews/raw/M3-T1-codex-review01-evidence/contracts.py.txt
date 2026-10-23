@@ -1,0 +1,11 @@
+import json,sys,math,pathlib
+import numpy as np
+sys.path.insert(0,'.')
+from tars.sim.forces import ZonalJ2Gravity
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+m=ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2);r=np.array([C.equatorial_radius,0,0]);v=np.zeros(3)
+before=m.acceleration(0,r,v);m.j2=0.;after=m.acceleration(0,r,v)
+m.mu=1.;m.equatorial_radius=1.
+p=pathlib.Path('review_scratch/contracts.json')
+p.write_text(json.dumps({'initial':before.tolist(),'after_setting_j2_zero':after.tolist(),'public_parameters_mutable':[m.mu,m.equatorial_radius,m.j2],'acceleration_after_all_mutations':m.acceleration(0,r,v).tolist(),'fresh_zero_model':ZonalJ2Gravity(C.mu,C.equatorial_radius,0).acceleration(0,r,v).tolist(),'literal_guard_bypass':{'hex_literal':C.j2.hex(),'float_fromhex_matches':float.fromhex(C.j2.hex())==C.j2}},indent=2)+'\n')
+print(p.read_text())

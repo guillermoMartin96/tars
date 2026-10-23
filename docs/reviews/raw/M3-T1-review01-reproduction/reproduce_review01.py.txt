@@ -1,0 +1,140 @@
+"""Implementer's independent reproduction of Codex M3 T1 Review 01 findings (no fixes).
+
+Run from the repository root at 97b69ef: uv run python docs/reviews/raw/M3-T1-review01-reproduction/reproduce_review01.py
+Prints one JSON object. The reference values use exact rationals (fractions), not the
+reviewer's Decimal scripts.
+"""
+
+from __future__ import annotations
+
+import json
+import math
+import re
+import struct
+from fractions import Fraction
+from pathlib import Path
+
+import numpy as np
+
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as K
+from tars.sim.forces import ZonalJ2Gravity
+
+MU, A, J2 = K.mu, K.equatorial_radius, K.j2
+Z3 = np.zeros(3)
+out: dict = {}
+
+# F1: parameters are plain mutable attributes; the cached coefficient is not updated.
+m = ZonalJ2Gravity(MU, A, J2)
+before = m.acceleration(0.0, np.array([A, 0.0, 0.0]), Z3)
+m.j2 = 0.0
+m.mu = 1.0
+m.equatorial_radius = 1.0
+after = m.acceleration(0.0, np.array([A, 0.0, 0.0]), Z3)
+fresh = ZonalJ2Gravity(MU, A, 0.0).acceleration(0.0, np.array([A, 0.0, 0.0]), Z3)
+out["F1"] = {
+    "assignment_succeeded": (m.j2, m.mu, m.equatorial_radius) == (0.0, 1.0, 1.0),
+    "acceleration_unchanged_after_assignment": before.tobytes() == after.tobytes(),
+    "after_assignment": after.tolist(),
+    "fresh_j2_zero": fresh.tolist(),
+    "reproduced": before.tobytes() == after.tobytes() and fresh.tolist() == [0.0, 0.0, 0.0],
+}
+
+
+# F2: intermediate overflow of r2*r2*r_norm returns zero where the true value is representable.
+def exact_equatorial_ax(x: float) -> Fraction:
+    # On the equator (y = z = 0): a_x = -(3/2) J2 mu a^2 / x^4 exactly (sign of x > 0).
+    return Fraction(-3, 2) * Fraction(J2) * Fraction(MU) * Fraction(A) ** 2 / Fraction(x) ** 4
+
+
+f2 = {}
+for x in (1e60, 1e61, 1e62, 1e70, 1e76, 1e77, 1e100):
+    got = float(ZonalJ2Gravity(MU, A, J2).acceleration(0.0, np.array([x, 0.0, 0.0]), Z3)[0])
+    ref = float(exact_equatorial_ax(x))  # correctly rounded binary64 of the exact value
+    f2[f"{x:.0e}"] = {"computed": got, "exact_rounded": ref, "silent_zero": got == 0.0 and ref != 0.0}
+# Smallest x at which the result is a silent zero although the exact value is a normal/subnormal double.
+lo, hi = 1e40, 1e80
+for _ in range(200):
+    mid = math.sqrt(lo * hi)
+    g = float(ZonalJ2Gravity(MU, A, J2).acceleration(0.0, np.array([mid, 0.0, 0.0]), Z3)[0])
+    lo, hi = (mid, hi) if g != 0.0 else (lo, mid)
+non_finite_params = {}
+for name, args in (("mu=inf", (math.inf, A, J2)), ("a=inf", (MU, math.inf, J2))):
+    try:
+        acc = ZonalJ2Gravity(*args).acceleration(0.0, np.array([A, 0.0, 0.0]), Z3)
+        non_finite_params[name] = {"accepted": True, "acceleration": [repr(float(c)) for c in acc]}
+    except ValueError as e:
+        non_finite_params[name] = {"accepted": False, "error": str(e)}
+tiny = {}
+for x in (1e-100, 5e-324):
+    try:
+        acc = ZonalJ2Gravity(MU, A, J2).acceleration(0.0, np.array([x, 0.0, 0.0]), Z3)
+        tiny[repr(x)] = {"result": [repr(float(c)) for c in acc]}
+    except (ValueError, ZeroDivisionError) as e:
+        tiny[repr(x)] = {"raises": type(e).__name__, "message": str(e)}
+out["F2"] = {
+    "equatorial": f2,
+    "first_silent_zero_x_m": hi,
+    "first_silent_zero_x_over_a": hi / A,
+    "exact_at_first_silent_zero": float(exact_equatorial_ax(hi)),
+    "non_finite_parameters": non_finite_params,
+    "interior_tiny_radius": tiny,
+    "reproduced": f2["1e+70"]["silent_zero"] and non_finite_params["mu=inf"]["accepted"],
+}
+
+# F3: dimension of a.r vs a.rhat. Exact: a.r = -(3/2) J2 mu a^2 / r^3 (1 - 3 s^2).
+mm = ZonalJ2Gravity(MU, A, J2)
+rows = []
+for r in (A, 2 * A, 4 * A):
+    for lat in (0.0, 20.0, 50.0):
+        la = math.radians(lat)
+        rv = np.array([r * math.cos(la), 0.0, r * math.sin(la)])
+        acc = mm.acceleration(0.0, rv, Z3)
+        dot = float(acc @ rv)
+        s2 = (rv[2] / r) ** 2
+        rows.append(
+            {
+                "r_over_a": r / A,
+                "lat": lat,
+                "dot_over_r_minus3_form": dot / (-1.5 * J2 * MU * A * A / r**3 * (1 - 3 * s2)),
+                "dot_over_r_minus4_form": dot / (-1.5 * J2 * MU * A * A / r**4 * (1 - 3 * s2)),
+            }
+        )
+out["F3"] = {"rows": rows, "reproduced": all(abs(x["dot_over_r_minus3_form"] - 1) < 1e-12 for x in rows)}
+
+# F4 (a): the no-J2-literal regex does not see a hex encoding of the same double.
+pattern = re.compile(r"1\.08262617|0\.00108262617")
+hex_src = f"J2 = float.fromhex('{J2.hex()}')"
+packed = repr(struct.pack('<d', J2))
+out["F4_literal_scan"] = {
+    "hex_source_line": hex_src,
+    "regex_matches_hex": bool(pattern.search(hex_src)),
+    "regex_matches_packed_bytes": bool(pattern.search(packed)),
+    "reproduced": not pattern.search(hex_src),
+}
+
+
+# F4 (b): two reviewer-type wrong implementations survive the sampled checks; reproduced by
+# evaluating the test file's own sample set against a high-latitude-only 1 % error.
+def sample_points():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("t", Path("tests/test_zonal_j2.py"))
+    t = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(t)
+    return t.sample_points()
+
+
+pts = sample_points()
+band = [p for p in pts if 0.99 < (p[2] ** 2) / float(p @ p) < 0.9999]
+out["F4_high_latitude_band"] = {
+    "sample_points": len(pts),
+    "sample_points_with_0.99<s2<0.9999": len(band),
+    "reproduced": len(band) == 0,
+}
+
+out["implementer_observation_packet_gradient_sign"] = (
+    "Packet section 7 table says 'acceleration = -grad U'. With U = (mu/r)[1 - J2 (a/r)^2 P2] (positive "
+    "potential, the packet's own section 3 convention) the acceleration is +grad U; tests/test_zonal_j2.py "
+    "and VAL-0020 use +grad U. Packet wording only."
+)
+print(json.dumps(out, indent=2, sort_keys=True))

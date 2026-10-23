@@ -1,0 +1,12 @@
+diff -ru -x __pycache__ src/tars/sim/constants.py <clone>/review_scratch/builtin_details/sqrt5_decimal//src/tars/sim/constants.py
+--- src/tars/sim/constants.py	2026-10-22 18:08:02
++++ <clone>/review_scratch/builtin_details/sqrt5_decimal//src/tars/sim/constants.py	2026-10-22 18:15:45
+@@ -63,7 +63,7 @@
+     correctly rounded square root and one multiplication are used (IEEE 754), so the
+     binary64 result does not depend on a libm implementation.
+     """
+-    return -math.sqrt(5.0) * c20
++    return -2.2360679775 * c20
+ 
+ 
+ @dataclass(frozen=True)

@@ -1,0 +1,101 @@
+{
+  "environment": {
+    "platform": "macOS-26.2-x86_64-i386-64bit",
+    "machine": "x86_64",
+    "python": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1",
+    "pydantic": "2.13.5"
+  },
+  "cpu": "",
+  "edges": [
+    {
+      "r": [
+        1e+70,
+        0,
+        0
+      ],
+      "result": [
+        -0.0,
+        -0.0,
+        -0.0
+      ]
+    },
+    {
+      "r": [
+        1e-100,
+        0,
+        0
+      ],
+      "result": "ZeroDivisionError('float division by zero')"
+    },
+    {
+      "r": [
+        5e-324,
+        0,
+        0
+      ],
+      "result": "ValueError('J2 gravity is singular at the origin')"
+    },
+    {
+      "r": [
+        1e+200,
+        0,
+        0
+      ],
+      "result": [
+        -0.0,
+        -0.0,
+        -0.0
+      ]
+    },
+    {
+      "r": [
+        Infinity,
+        0,
+        0
+      ],
+      "result": [
+        NaN,
+        -0.0,
+        -0.0
+      ]
+    },
+    {
+      "r": [
+        NaN,
+        0,
+        0
+      ],
+      "result": [
+        NaN,
+        NaN,
+        NaN
+      ]
+    },
+    {
+      "r": [
+        0,
+        0,
+        0
+      ],
+      "result": "ValueError('J2 gravity is singular at the origin')"
+    }
+  ],
+  "parameter_inf": {
+    "mu": [
+      -Infinity,
+      NaN,
+      NaN
+    ],
+    "equatorial_radius": [
+      -Infinity,
+      NaN,
+      NaN
+    ]
+  },
+  "exact_equator_1e70": "-2.633269107927082492812952010960965723074493980852190120986662714539899735743800787765902900544321253E-255",
+  "decimal_accel_max_fraction_comparison_bound": 0.03328002330408174,
+  "display_ulp_gap": 220334.0,
+  "display_relative_gap": 4.413094884310988e-11
+}

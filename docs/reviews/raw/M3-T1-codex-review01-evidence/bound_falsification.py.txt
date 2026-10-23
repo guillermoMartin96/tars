@@ -1,0 +1,19 @@
+import sys,json,math,pathlib
+import numpy as np
+sys.path.insert(0,'.')
+import tests.test_zonal_j2 as T
+rng=np.random.default_rng(30101);points=[]
+for _ in range(5000):
+ r=rng.normal(size=3);r*=rng.uniform(T.RE,6.6*T.RE)/np.linalg.norm(r);points.append(r)
+for z in [T.RE,2*T.RE,3*T.RE]:
+ for x in [2*z,math.nextafter(2*z,0),math.nextafter(2*z,math.inf)]:points.append(np.array([x,0.,z]))
+worst=0;fail=[]
+for idx,r in enumerate(points):
+ a=T.j2_model().acceleration(0,r,np.zeros(3));g=np.array(T.j2_potential(*T.seeds(r)).grad)
+ b=T.gamma(64)*(T.acceleration_abs(r)+np.array(T.j2_potential(*T.seeds(r,True)).grad))
+ err=np.abs(a-g)
+ if not np.all(err<=b):fail.append(idx)
+ for e,bb in zip(err,b):
+  if bb:worst=max(worst,float(e/bb))
+out={'seed':30101,'points':len(points),'failures':fail,'max_error_over_bound':worst,'scope':'supplementary measurements, not a mathematical proof'}
+pathlib.Path('review_scratch/bound_falsification.json').write_text(json.dumps(out,indent=2)+'\n');print(out)

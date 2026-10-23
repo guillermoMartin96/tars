@@ -1,0 +1,5219 @@
+{
+  "milestone": "M2",
+  "task": "T5",
+  "software_version": "0.1.0",
+  "platform": {
+    "system": "Darwin",
+    "machine": "x86_64",
+    "cpu": "i386",
+    "python": "3.12.15",
+    "numpy": "2.5.3"
+  },
+  "threshold_status": "approved",
+  "quick": false,
+  "missions": {
+    "m2_prograde_burn": {
+      "scenario_hash": "f7816ee7b0c2a139e386aea2c0ecde90dc1b53ecda8be003213c751601673c19",
+      "events_sha256": "42316356a4c2b093b5f7c96e49b764357110462078064e663d60c40811dd4ce0",
+      "events": 1814,
+      "status": "success",
+      "final_state": {
+        "t": 53700.0,
+        "r": [
+          5009922.076517316,
+          -2738091.0684680957,
+          -3454611.163480795
+        ],
+        "v": [
+          5063.692568044208,
+          3629.3549491747854,
+          4579.106322664524
+        ]
+      },
+      "final_propellant_kg": 287.62057980802416,
+      "receipts": [
+        {
+          "command_id": "slice-prograde-001",
+          "status": "accepted",
+          "reason": null
+        }
+      ],
+      "burns": [
+        {
+          "burn_id": "burn#000001",
+          "command_id": "slice-prograde-001",
+          "direction": "prograde",
+          "commanded_ignition_t_s": 600.0,
+          "commanded_duration_s": 77.3,
+          "dr0017_timing_delta_v_error_mps": 1.6223689461736918e-14,
+          "end_cause": "completed",
+          "cutoff_t_s": 677.3,
+          "executed_duration_s": 77.29999999999995,
+          "propellant_used_kg": 12.37942019197584,
+          "sensed_delta_v_mps": 29.275767297715042
+        }
+      ],
+      "impulsive_family": [
+        {
+          "burn_duration_s": 77.3,
+          "sma_finite_minus_impulsive_m": -0.1306562079116702,
+          "sma_change_finite_m": 50521.032438023016,
+          "sma_change_impulsive_m": 50521.16309423093
+        },
+        {
+          "burn_duration_s": 38.65,
+          "sma_finite_minus_impulsive_m": -0.032699630595743656,
+          "sma_change_finite_m": 50521.13039459847,
+          "sma_change_impulsive_m": 50521.163094229065
+        },
+        {
+          "burn_duration_s": 19.325,
+          "sma_finite_minus_impulsive_m": -0.008198182098567486,
+          "sma_change_finite_m": 50521.15489604138,
+          "sma_change_impulsive_m": 50521.16309422348
+        },
+        {
+          "burn_duration_s": 9.6625,
+          "sma_finite_minus_impulsive_m": -0.0020454516634345055,
+          "sma_change_finite_m": 50521.16104877181,
+          "sma_change_impulsive_m": 50521.16309422348
+        },
+        {
+          "burn_duration_s": 4.83125,
+          "sma_finite_minus_impulsive_m": -0.0005100639536976814,
+          "sma_change_finite_m": 50521.16258415673,
+          "sma_change_impulsive_m": 50521.16309422068
+        }
+      ]
+    },
+    "m2_retrograde_burn": {
+      "scenario_hash": "fb88efdc5da06edc8ebc120fff1dd83e7ff0514c092249a029be19516de68d84",
+      "events_sha256": "1c0037c202bb1d8663a5b9d6affe1ecfbc94b400c2db494cf3d3d636db1b5848",
+      "events": 1815,
+      "status": "success",
+      "final_state": {
+        "t": 53700.0,
+        "r": [
+          5067949.1828530235,
+          2653335.7589851934,
+          3347676.5762145896
+        ],
+        "v": [
+          -4976.937167317734,
+          3670.3390473080176,
+          4630.81538543699
+        ]
+      },
+      "final_propellant_kg": 287.62057980802416,
+      "receipts": [
+        {
+          "command_id": "retro-001",
+          "status": "accepted",
+          "reason": null
+        }
+      ],
+      "burns": [
+        {
+          "burn_id": "burn#000001",
+          "command_id": "retro-001",
+          "direction": "retrograde",
+          "commanded_ignition_t_s": 600.0,
+          "commanded_duration_s": 77.3,
+          "dr0017_timing_delta_v_error_mps": 1.6223689461736918e-14,
+          "end_cause": "completed",
+          "cutoff_t_s": 677.3,
+          "executed_duration_s": 77.29999999999995,
+          "propellant_used_kg": 12.37942019197584,
+          "sensed_delta_v_mps": 29.275767297715042
+        }
+      ],
+      "impulsive_family": [
+        {
+          "burn_duration_s": 77.3,
+          "sma_finite_minus_impulsive_m": -0.12688109371811152,
+          "sma_change_finite_m": -49576.581850005314,
+          "sma_change_impulsive_m": -49576.454968911596
+        },
+        {
+          "burn_duration_s": 38.65,
+          "sma_finite_minus_impulsive_m": -0.03170032426714897,
+          "sma_change_finite_m": -49576.48666923307,
+          "sma_change_impulsive_m": -49576.4549689088
+        },
+        {
+          "burn_duration_s": 19.325,
+          "sma_finite_minus_impulsive_m": -0.007903959602117538,
+          "sma_change_finite_m": -49576.46287286468,
+          "sma_change_impulsive_m": -49576.45496890508
+        },
+        {
+          "burn_duration_s": 9.6625,
+          "sma_finite_minus_impulsive_m": -0.001979733817279339,
+          "sma_change_finite_m": -49576.456948632374,
+          "sma_change_impulsive_m": -49576.45496889856
+        },
+        {
+          "burn_duration_s": 4.83125,
+          "sma_finite_minus_impulsive_m": -0.00049617700278759,
+          "sma_change_finite_m": -49576.455465079285,
+          "sma_change_impulsive_m": -49576.45496890228
+        }
+      ]
+    },
+    "m2_burn_to_depletion": {
+      "scenario_hash": "6d83fbd3252f998eb435c9bcbf73f8148732c32ca1f69b85240a1cec76422b95",
+      "events_sha256": "6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12",
+      "events": 1821,
+      "status": "success",
+      "final_state": {
+        "t": 53700.0,
+        "r": [
+          601014.503925784,
+          -4207076.699992377,
+          -5308009.76665286
+        ],
+        "v": [
+          7580.203466601922,
+          475.96741723515566,
+          600.5214260289866
+        ]
+      },
+      "final_propellant_kg": 1.1102230246251565e-14,
+      "receipts": [
+        {
+          "command_id": "deplete-001",
+          "status": "accepted",
+          "reason": null
+        },
+        {
+          "command_id": "after-empty-001",
+          "status": "rejected",
+          "reason": "insufficient_propellant"
+        },
+        {
+          "command_id": "after-empty-002",
+          "status": "rejected",
+          "reason": "burn_unschedulable"
+        }
+      ],
+      "burns": [
+        {
+          "burn_id": "burn#000001",
+          "command_id": "deplete-001",
+          "direction": "prograde",
+          "commanded_ignition_t_s": 600.0,
+          "commanded_duration_s": 200.0,
+          "dr0017_timing_delta_v_error_mps": 3.481659405224504e-14,
+          "end_cause": "propellant_depleted",
+          "cutoff_t_s": 724.8846857142856,
+          "executed_duration_s": 124.88468571428564,
+          "propellant_used_kg": 19.99999999999999,
+          "sensed_delta_v_mps": 60.58959971191625
+        }
+      ]
+    },
+    "m2_invalid_commands": {
+      "scenario_hash": "ed70e91e6899ce9ea41b1735d6d482ff9fbab1ffcac45cd78632aed585b093dd",
+      "events_sha256": "7e52dd1d276b309c8e50951461b1164435617c75674ef9cfe21e854a451cd56e",
+      "events": 1828,
+      "status": "success",
+      "final_state": {
+        "t": 53700.0,
+        "r": [
+          6613493.0368328625,
+          -39084.882781229164,
+          -49312.84935492169
+        ],
+        "v": [
+          63.71316740317762,
+          4827.160474174665,
+          6090.3607823850925
+        ]
+      },
+      "final_propellant_kg": 290.3911356854004,
+      "receipts": [
+        {
+          "command_id": "inv-schema-001",
+          "status": "rejected",
+          "reason": "schema_invalid"
+        },
+        {
+          "command_id": "inv-schema-002",
+          "status": "rejected",
+          "reason": "schema_invalid"
+        },
+        {
+          "command_id": "inv-burn-A",
+          "status": "accepted",
+          "reason": null
+        },
+        {
+          "command_id": "inv-burn-A",
+          "status": "rejected",
+          "reason": "duplicate_command_id"
+        },
+        {
+          "command_id": "inv-retry-001",
+          "status": "rejected",
+          "reason": "non_positive_duration"
+        },
+        {
+          "command_id": "inv-overlap-001",
+          "status": "rejected",
+          "reason": "overlaps_scheduled_burn"
+        },
+        {
+          "command_id": "inv-greedy-001",
+          "status": "rejected",
+          "reason": "insufficient_propellant"
+        },
+        {
+          "command_id": "inv-unschedulable-001",
+          "status": "rejected",
+          "reason": "burn_unschedulable"
+        },
+        {
+          "command_id": "inv-adjacent-001",
+          "status": "accepted",
+          "reason": null
+        },
+        {
+          "command_id": "inv-retry-001",
+          "status": "accepted",
+          "reason": null
+        },
+        {
+          "command_id": "inv-past-001",
+          "status": "rejected",
+          "reason": "ignition_in_past"
+        },
+        {
+          "command_id": "inv-busy-001",
+          "status": "rejected",
+          "reason": "engine_busy"
+        }
+      ],
+      "burns": [
+        {
+          "burn_id": "burn#000001",
+          "command_id": "inv-burn-A",
+          "direction": "prograde",
+          "commanded_ignition_t_s": 1200.0,
+          "commanded_duration_s": 30.0,
+          "dr0017_timing_delta_v_error_mps": 0.0,
+          "end_cause": "completed",
+          "cutoff_t_s": 1230.0,
+          "executed_duration_s": 30.0,
+          "propellant_used_kg": 4.8044321572998,
+          "sensed_delta_v_mps": 11.328638947783377
+        },
+        {
+          "burn_id": "burn#000002",
+          "command_id": "inv-adjacent-001",
+          "direction": "retrograde",
+          "commanded_ignition_t_s": 1230.0,
+          "commanded_duration_s": 10.0,
+          "dr0017_timing_delta_v_error_mps": 0.0,
+          "end_cause": "completed",
+          "cutoff_t_s": 1240.0,
+          "executed_duration_s": 10.0,
+          "propellant_used_kg": 1.6014773857666,
+          "sensed_delta_v_mps": 3.7855533062353093
+        },
+        {
+          "burn_id": "burn#000003",
+          "command_id": "inv-retry-001",
+          "direction": "retrograde",
+          "commanded_ignition_t_s": 2400.0,
+          "commanded_duration_s": 20.0,
+          "dr0017_timing_delta_v_error_mps": 0.0,
+          "end_cause": "completed",
+          "cutoff_t_s": 2420.0,
+          "executed_duration_s": 20.0,
+          "propellant_used_kg": 3.2029547715332,
+          "sensed_delta_v_mps": 7.585186571473962
+        }
+      ]
+    },
+    "m2_invalid_commands_empty_tank": {
+      "scenario_hash": "a5d95aa2f11d922f1105d2c052de4e39d423cf3f0c02be2883e423267bcc5761",
+      "events_sha256": "916a561b53cdf22ab3cb301c039d46e025f2e3c2c139a3e18b3ffc2e8bfbca11",
+      "events": 1816,
+      "status": "success",
+      "final_state": {
+        "t": 53700.0,
+        "r": [
+          6628097.346109269,
+          -14240.788544749514,
+          -17967.403513366306
+        ],
+        "v": [
+          26.823829121168046,
+          4816.876251953346,
+          6077.385323203841
+        ]
+      },
+      "final_propellant_kg": 0.0,
+      "receipts": [
+        {
+          "command_id": "inv-schema-001",
+          "status": "rejected",
+          "reason": "schema_invalid"
+        },
+        {
+          "command_id": "inv-schema-002",
+          "status": "rejected",
+          "reason": "schema_invalid"
+        },
+        {
+          "command_id": "inv-burn-A",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-burn-A",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-retry-001",
+          "status": "rejected",
+          "reason": "non_positive_duration"
+        },
+        {
+          "command_id": "inv-overlap-001",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-greedy-001",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-unschedulable-001",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-adjacent-001",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-retry-001",
+          "status": "rejected",
+          "reason": "no_propellant"
+        },
+        {
+          "command_id": "inv-past-001",
+          "status": "rejected",
+          "reason": "ignition_in_past"
+        },
+        {
+          "command_id": "inv-busy-001",
+          "status": "rejected",
+          "reason": "no_propellant"
+        }
+      ],
+      "burns": []
+    },
+    "m2_invalid_commands_no_propulsion": {
+      "scenario_hash": "04c401c763ecd5656af2993881542701d67ea85cfdc6be28a5508cdc67c7b1b2",
+      "events_sha256": "d87dffe82190c3910eba471357d1877164ecde26d031203ea5928ac7fed09d6f",
+      "events": 919,
+      "status": "success",
+      "final_state": {
+        "t": 53700.0,
+        "r": [
+          6628097.346109269,
+          -14240.788544749514,
+          -17967.403513366306
+        ],
+        "v": [
+          26.823829121168046,
+          4816.876251953346,
+          6077.385323203841
+        ]
+      },
+      "final_propellant_kg": null,
+      "receipts": [
+        {
+          "command_id": "inv-schema-001",
+          "status": "rejected",
+          "reason": "schema_invalid"
+        },
+        {
+          "command_id": "inv-schema-002",
+          "status": "rejected",
+          "reason": "schema_invalid"
+        },
+        {
+          "command_id": "inv-burn-A",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-burn-A",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-retry-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-overlap-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-greedy-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-unschedulable-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-adjacent-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-retry-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-past-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        },
+        {
+          "command_id": "inv-busy-001",
+          "status": "rejected",
+          "reason": "no_propulsion_configured"
+        }
+      ],
+      "burns": []
+    }
+  },
+  "dr0018_boundary": {
+    "stop_inside_burn": {
+      "stop_s": 660.0,
+      "burn_events": [
+        "BurnStarted"
+      ],
+      "final_engine_state": "burning",
+      "active_burn_id": "burn#000001",
+      "pending_burn_ids": []
+    },
+    "stop_before_ignition": {
+      "stop_s": 300.0,
+      "burn_events": [],
+      "final_engine_state": "scheduled",
+      "active_burn_id": null,
+      "pending_burn_ids": [
+        "burn#000001"
+      ]
+    },
+    "stop_at_ignition": {
+      "stop_s": 600.0,
+      "burn_events": [
+        "BurnStarted"
+      ],
+      "final_engine_state": "burning",
+      "active_burn_id": "burn#000001",
+      "pending_burn_ids": []
+    },
+    "stop_at_cutoff": {
+      "stop_s": 720.0,
+      "burn_events": [
+        "BurnStarted",
+        "BurnEnded"
+      ],
+      "final_engine_state": "idle",
+      "active_burn_id": null,
+      "pending_burn_ids": []
+    },
+    "same_tick_submission": {
+      "submitted_tick": 60,
+      "ignition_t_s": 600.0,
+      "reported_tick": 61
+    }
+  },
+  "reference_snapshot": {
+    "mode": "verify",
+    "entrypoint": "m2_proof",
+    "artifact_sha256": "a2cddf4bc4b643a164d63191578923787acbd0de8ca0a1ddbe46e1a1f241448b",
+    "records_consumed": 48310,
+    "records_verified": 48310,
+    "values_verified": 982324,
+    "max_deviation_by_class": {
+      "gmat:m": 0.0,
+      "gmat:mps": 0.0,
+      "gmat:s": 0.0,
+      "ref:1": 0.0,
+      "ref:kg": 0.0,
+      "ref:m": 0.0,
+      "ref:mps": 0.0,
+      "ref:s": 0.0,
+      "sim:m": 0.0,
+      "sim:mps": 0.0,
+      "sim:s": 0.0
+    }
+  },
+  "results": [
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0006902363293106118,
+        "ignition_velocity_error_max_mps": 1.0279129345061598e-06,
+        "thrust_direction_vs_reference_max": 1.3129120872574735e-10,
+        "cutoff_position_error_max_m": 0.0007652967012072134,
+        "cutoff_velocity_error_max_mps": 1.2090118606800087e-06,
+        "sample_position_error_max_m": 0.2905732859828327,
+        "sample_velocity_error_max_mps": 0.0003349276011921987,
+        "final_position_error_m": 0.2903433979987896,
+        "final_velocity_error_mps": 0.0003349276011921987
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.2828083951314608,
+        "coast_velocity_error_max_mps": 0.0003255082734393368,
+        "post_burn_coast_position_error_max_m": 0.2828083951314608
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 3.219482459826395e-05,
+        "min_altitude_error_m": 0.0004676021635532379,
+        "max_altitude_error_m": 0.004306526854634285
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.465487697698291e-16,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 287.62057980802416,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 8.745141363201233e-17,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 8.745141363201233e-17,
+        "sample_delta_v_rel_error_max": 2.269308439227668e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.542259526266871e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 8.608498529401213e-17,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 1.1407218892374374e-14,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 1.1285865499902306e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.3956138125019076e-19,
+        "inclination_change_max_rad": 0.0,
+        "burn000001_sma_change_m": 50521.032438023016,
+        "burn000001_apoapsis_alt_km": 351.0250436143149,
+        "burn000001_periapsis_alt_km": 250.01702120506576
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cli_summary[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'i386', 'python': '3.12.15', 'numpy': '2.5.3'}"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o9_reference_integrity[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o9_gmat[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "step_spacing_error_max_s": 2.337619662284851e-07,
+        "burn_duration_from_mass_error_max_s": 1.4090062450122787e-10,
+        "coast_vs_kepler_position_error_max_m": 4.0105683859652e-06,
+        "coast_vs_kepler_velocity_error_max_mps": 4.629152115610264e-09,
+        "gmat_vs_dop853_position_error_max_m": 4.659190270227383e-06,
+        "gmat_vs_dop853_velocity_error_max_mps": 5.391714875914484e-09,
+        "gmat_vs_dop853_final_position_error_m": 4.659190270227383e-06,
+        "gmat_mass_vs_analytic_error_max_kg": 2.2509993868879974e-11,
+        "ours_vs_gmat_sample_position_error_max_m": 0.29057176416477204,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.00033492585202971796,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.0007652929075397812,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 1.209002084322598e-06,
+        "ours_vs_gmat_final_position_error_m": 0.2903418996076463,
+        "ours_vs_gmat_final_velocity_error_mps": 0.00033492585202971796,
+        "ours_vs_gmat_mass_error_max_kg": 2.2509993868879974e-11,
+        "ours_vs_gmat_node_crossing_error_max_s": 3.219472273485735e-05,
+        "gmat_rows": 973.0,
+        "mass_samples_compared": 902.0
+      },
+      "thresholds": {
+        "step_spacing_error_max_s": 1e-06,
+        "burn_duration_from_mass_error_max_s": 1e-09,
+        "coast_vs_kepler_position_error_max_m": 0.0001,
+        "coast_vs_kepler_velocity_error_max_mps": 1e-07,
+        "gmat_vs_dop853_position_error_max_m": 3e-05,
+        "gmat_vs_dop853_velocity_error_max_mps": 3.5e-08,
+        "gmat_vs_dop853_final_position_error_m": 3e-05,
+        "gmat_mass_vs_analytic_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_sample_position_error_max_m": 0.6,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.0007,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.002,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 3e-06,
+        "ours_vs_gmat_final_position_error_m": 0.6,
+        "ours_vs_gmat_final_velocity_error_mps": 0.0007,
+        "ours_vs_gmat_mass_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_node_crossing_error_max_s": 8e-05
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o8_convergence[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "position_error_dt10_m": 0.2903433979987896,
+        "position_error_dt5_m": 0.014658374353523866,
+        "position_error_dt2.5_m": 0.0008090490916006923,
+        "order_10_to_5": 4.307963210202534,
+        "order_5_to_2.5": 4.179354058638759,
+        "order_deviation_from_4_max": 0.3079632102025336
+      },
+      "thresholds": {
+        "order_deviation_from_4_max": 0.5
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 4.2964925271689146e-05,
+        "ignition_velocity_error_max_mps": 6.411420606167368e-08,
+        "thrust_direction_vs_reference_max": 8.244045458879842e-12,
+        "cutoff_position_error_max_m": 4.774067920124654e-05,
+        "cutoff_velocity_error_max_mps": 7.551914540677984e-08,
+        "sample_position_error_max_m": 0.014750553335073793,
+        "sample_velocity_error_max_mps": 1.690108951564151e-05,
+        "final_position_error_m": 0.01466062009357468,
+        "final_velocity_error_mps": 1.690108951564151e-05
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.014277175093771991,
+        "coast_velocity_error_max_mps": 1.6406100264391223e-05,
+        "post_burn_coast_position_error_max_m": 0.014277175093771991
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 1.6386620700359344e-06,
+        "min_altitude_error_m": 2.895202487707138e-05,
+        "max_altitude_error_m": 0.00024005025625228882
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 2.9454896571687825e-16,
+        "thrust_direction_error_max": 1.9229626863835638e-16,
+        "final_propellant_kg": 287.62057980802376,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 2.1862853408003084e-16,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 2.1862853408003084e-16,
+        "sample_delta_v_rel_error_max": 1.7838948693393968e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 1.7767322907392998e-14
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 2.19994962418031e-16,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 6.6744365859637295e-15,
+        "sensed_delta_v_excess_over_simpson_rel_max": 6.598614719932595e-15,
+        "reported_rocket_equation_rel_error_max": 2.5726919204078374e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_prograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 2.702685567068043e-16,
+        "inclination_change_max_rad": 3.3306690738754696e-16,
+        "burn000001_sma_change_m": 50521.0324796075,
+        "burn000001_apoapsis_alt_km": 351.0250432655597,
+        "burn000001_periapsis_alt_km": 250.0170217167698
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o6_impulsive_limit[m2_prograde_burn]",
+      "passed": true,
+      "metrics": {
+        "order_deviation_from_2_max": 0.004101602837031981,
+        "slice_sma_change_ratio_deviation": 2.5861678534244703e-06,
+        "slice_finite_minus_impulsive_sma_m": -0.1306562079116702,
+        "order_pair_0": 1.998429430578338,
+        "order_pair_1": 1.995898397162968,
+        "order_pair_2": 2.0028845906154915,
+        "order_pair_3": 2.0036693909941126
+      },
+      "thresholds": {
+        "order_deviation_from_2_max": 0.05,
+        "slice_sma_change_ratio_deviation": 1e-05
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0007259783956332938,
+        "ignition_velocity_error_max_mps": 1.1154394401726203e-06,
+        "thrust_direction_vs_reference_max": 1.3129120872574735e-10,
+        "cutoff_position_error_max_m": 0.0007652967012072134,
+        "cutoff_velocity_error_max_mps": 1.2090118606800087e-06,
+        "sample_position_error_max_m": 0.0008157641774288863,
+        "sample_velocity_error_max_mps": 1.341409235130395e-06,
+        "final_position_error_m": 0.0008157641774288863,
+        "final_velocity_error_mps": 1.341409235130395e-06
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0006902372750396486,
+        "coast_velocity_error_max_mps": 1.0279123979988508e-06,
+        "post_burn_coast_position_error_max_m": 9.299338772140405e-05
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 0.0,
+        "min_altitude_error_m": 0.0005131056532263756,
+        "max_altitude_error_m": 0.000657370314002037
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.4724999004169855e-16,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 287.62057980802416,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 8.745141363201233e-17,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 8.745141363201233e-17,
+        "sample_delta_v_rel_error_max": 2.0008019230439708e-11,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.542259526266871e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 8.608498529401213e-17,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 2.0008019230439708e-11,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 1.1285865499902306e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_prograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 9.884944297318562e-17,
+        "inclination_change_max_rad": 1.1102230246251565e-16,
+        "burn000001_sma_change_m": 50521.16258415673,
+        "burn000001_apoapsis_alt_km": 351.0422591367988,
+        "burn000001_periapsis_alt_km": 250.01702120506576
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0006902363293106118,
+        "ignition_velocity_error_max_mps": 1.0279129345061598e-06,
+        "thrust_direction_vs_reference_max": 1.3098702817171879e-10,
+        "cutoff_position_error_max_m": 0.000780462447224949,
+        "cutoff_velocity_error_max_mps": 1.2416774812859978e-06,
+        "sample_position_error_max_m": 0.31274425145983265,
+        "sample_velocity_error_max_mps": 0.00036423320463630627,
+        "final_position_error_m": 0.31274425145983265,
+        "final_velocity_error_mps": 0.00036423320463630627
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.3138207240536775,
+        "coast_velocity_error_max_mps": 0.00036383392248449416,
+        "post_burn_coast_position_error_max_m": 0.3138207240536775
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 3.989102697232738e-05,
+        "min_altitude_error_m": 0.003551444038748741,
+        "max_altitude_error_m": 9.313225746154785e-10
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.469116263141341e-16,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 287.62057980802416,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 8.745141363201233e-17,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 8.745141363201233e-17,
+        "sample_delta_v_rel_error_max": 2.269308439227668e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.542259526266871e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 8.608498529401213e-17,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 1.1407218892374374e-14,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 1.1285865499902306e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 7.463749771351425e-17,
+        "inclination_change_max_rad": 0.0,
+        "burn000001_sma_change_m": -49576.581850005314,
+        "burn000001_apoapsis_alt_km": 249.98291336156709,
+        "burn000001_periapsis_alt_km": 150.86392288175784
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cli_summary[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'i386', 'python': '3.12.15', 'numpy': '2.5.3'}"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o9_reference_integrity[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o9_gmat[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "step_spacing_error_max_s": 2.337619662284851e-07,
+        "burn_duration_from_mass_error_max_s": 1.4090062450122787e-10,
+        "coast_vs_kepler_position_error_max_m": 1.5697834300551986e-06,
+        "coast_vs_kepler_velocity_error_max_mps": 1.8181947863614202e-09,
+        "gmat_vs_dop853_position_error_max_m": 3.6412536290932215e-06,
+        "gmat_vs_dop853_velocity_error_max_mps": 4.2527266447313176e-09,
+        "gmat_vs_dop853_final_position_error_m": 3.3612997111059213e-06,
+        "gmat_mass_vs_analytic_error_max_kg": 2.2509993868879974e-11,
+        "ours_vs_gmat_sample_position_error_max_m": 0.31274351045023285,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.00036423230476578117,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.0007804649791815788,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 1.2416751659315386e-06,
+        "ours_vs_gmat_final_position_error_m": 0.31274351045023285,
+        "ours_vs_gmat_final_velocity_error_mps": 0.00036423230476578117,
+        "ours_vs_gmat_mass_error_max_kg": 2.2509993868879974e-11,
+        "ours_vs_gmat_node_crossing_error_max_s": 3.989093966083601e-05,
+        "gmat_rows": 973.0,
+        "mass_samples_compared": 902.0
+      },
+      "thresholds": {
+        "step_spacing_error_max_s": 1e-06,
+        "burn_duration_from_mass_error_max_s": 1e-09,
+        "coast_vs_kepler_position_error_max_m": 0.0001,
+        "coast_vs_kepler_velocity_error_max_mps": 1e-07,
+        "gmat_vs_dop853_position_error_max_m": 3e-05,
+        "gmat_vs_dop853_velocity_error_max_mps": 3.5e-08,
+        "gmat_vs_dop853_final_position_error_m": 3e-05,
+        "gmat_mass_vs_analytic_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_sample_position_error_max_m": 0.6,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.0007,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.002,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 3e-06,
+        "ours_vs_gmat_final_position_error_m": 0.6,
+        "ours_vs_gmat_final_velocity_error_mps": 0.0007,
+        "ours_vs_gmat_mass_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_node_crossing_error_max_s": 8e-05
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o8_convergence[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "position_error_dt10_m": 0.31274425145983265,
+        "position_error_dt5_m": 0.015551438001303755,
+        "position_error_dt2.5_m": 0.0008493070171322345,
+        "order_10_to_5": 4.329863472591608,
+        "order_5_to_2.5": 4.194618008754423,
+        "order_deviation_from_4_max": 0.3298634725916081
+      },
+      "thresholds": {
+        "order_deviation_from_4_max": 0.5
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 4.2964925271689146e-05,
+        "ignition_velocity_error_max_mps": 6.411420606167368e-08,
+        "thrust_direction_vs_reference_max": 8.221138014424194e-12,
+        "cutoff_position_error_max_m": 4.8720823467996544e-05,
+        "cutoff_velocity_error_max_mps": 7.766993399505185e-08,
+        "sample_position_error_max_m": 0.015548877390829583,
+        "sample_velocity_error_max_mps": 1.8070100345313034e-05,
+        "final_position_error_m": 0.015548877390829583,
+        "final_velocity_error_mps": 1.8070100345313034e-05
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.015719653323627118,
+        "coast_velocity_error_max_mps": 1.8166407800456945e-05,
+        "post_burn_coast_position_error_max_m": 0.015719653323627118
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 1.9878425518982112e-06,
+        "min_altitude_error_m": 0.0002791406586766243,
+        "max_altitude_error_m": 9.313225746154785e-10
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 2.9454896571687825e-16,
+        "thrust_direction_error_max": 1.9229626863835638e-16,
+        "final_propellant_kg": 287.62057980802376,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 2.1862853408003084e-16,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 2.1862853408003084e-16,
+        "sample_delta_v_rel_error_max": 1.7838948693393968e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 1.7767322907392998e-14
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 2.19994962418031e-16,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 6.6744365859637295e-15,
+        "sensed_delta_v_excess_over_simpson_rel_max": 6.598614719932595e-15,
+        "reported_rocket_equation_rel_error_max": 2.5726919204078374e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_retrograde_burn/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.2395727945665895e-16,
+        "inclination_change_max_rad": 1.1102230246251565e-16,
+        "burn000001_sma_change_m": -49576.58188120928,
+        "burn000001_apoapsis_alt_km": 249.9829138970403,
+        "burn000001_periapsis_alt_km": 150.86392236998955
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o6_impulsive_limit[m2_retrograde_burn]",
+      "passed": true,
+      "metrics": {
+        "order_deviation_from_2_max": 0.0038501196702434015,
+        "slice_sma_change_ratio_deviation": 2.5593014627567356e-06,
+        "slice_finite_minus_impulsive_sma_m": -0.12688109371811152,
+        "order_pair_0": 2.0009076091878164,
+        "order_pair_1": 2.0038501196702434,
+        "order_pair_2": 1.9972691056672427,
+        "order_pair_3": 1.9963796928261202
+      },
+      "thresholds": {
+        "order_deviation_from_2_max": 0.05,
+        "slice_sma_change_ratio_deviation": 1e-05
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0007259783956332938,
+        "ignition_velocity_error_max_mps": 1.1154394401726203e-06,
+        "thrust_direction_vs_reference_max": 1.3098702817171879e-10,
+        "cutoff_position_error_max_m": 0.000780462447224949,
+        "cutoff_velocity_error_max_mps": 1.2416774812859978e-06,
+        "sample_position_error_max_m": 0.0008262973114422987,
+        "sample_velocity_error_max_mps": 1.3583089434903066e-06,
+        "final_position_error_m": 0.0008262973114422987,
+        "final_velocity_error_mps": 1.3583089434903066e-06
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0006902372750396486,
+        "coast_velocity_error_max_mps": 1.0279123979988508e-06,
+        "post_burn_coast_position_error_max_m": 9.024050604324988e-05
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 0.0,
+        "min_altitude_error_m": 0.0006701191887259483,
+        "max_altitude_error_m": 9.313225746154785e-10
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.469116263141341e-16,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 287.62057980802416,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 8.745141363201233e-17,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 8.745141363201233e-17,
+        "sample_delta_v_rel_error_max": 2.0008019230439708e-11,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.542259526266871e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 8.608498529401213e-17,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 2.0008019230439708e-11,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 1.1285865499902306e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_retrograde_burn/o6_aux]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.9919728068916078e-16,
+        "inclination_change_max_rad": 1.1102230246251565e-16,
+        "burn000001_sma_change_m": -49576.455465079285,
+        "burn000001_apoapsis_alt_km": 249.99993272385373,
+        "burn000001_periapsis_alt_km": 150.86392288175784
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0006902363293106118,
+        "ignition_velocity_error_max_mps": 1.0279129345061598e-06,
+        "thrust_direction_vs_reference_max": 1.449301070042607e-10,
+        "cutoff_position_error_max_m": 0.000814025865226482,
+        "cutoff_velocity_error_max_mps": 1.3263056431278481e-06,
+        "sample_position_error_max_m": 0.2891450967590966,
+        "sample_velocity_error_max_mps": 0.0003198008514622342,
+        "final_position_error_m": 0.2890993779242115,
+        "final_velocity_error_mps": 0.0003198008514622342
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.2748113454340876,
+        "coast_velocity_error_max_mps": 0.00030434868804798563,
+        "post_burn_coast_position_error_max_m": 0.2748113454340876
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 3.1334697268903255e-05,
+        "min_altitude_error_m": 0.0004676021635532379,
+        "max_altitude_error_m": 0.0042929574847221375
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.1519096846770107e-16,
+        "thrust_direction_error_max": 1.1102230246251565e-16,
+        "final_propellant_kg": 1.1102230246251565e-14,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 4.353815782843751e-19,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 2.6122894697062506e-18,
+        "sample_delta_v_rel_error_max": 4.9488532011510445e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 5.008444229445863e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 0.0,
+        "depletion_residual_over_bound_max": 0.30489425223214284
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 4.9488532011510445e-14,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 9.381712229670226e-16
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.4699286307877958e-16,
+        "inclination_change_max_rad": 1.1102230246251565e-16,
+        "burn000001_sma_change_m": 105633.21935796179,
+        "burn000001_apoapsis_alt_km": 461.17468992860614,
+        "burn000001_periapsis_alt_km": 250.09174873065203
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cli_summary[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'i386', 'python': '3.12.15', 'numpy': '2.5.3'}"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "rejections_change_nothing[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o8_convergence[m2_burn_to_depletion]",
+      "passed": true,
+      "metrics": {
+        "position_error_dt10_m": 0.2890993779242115,
+        "position_error_dt5_m": 0.014861263434011394,
+        "position_error_dt2.5_m": 0.0008433523502343583,
+        "order_10_to_5": 4.281936827187108,
+        "order_5_to_2.5": 4.1392774509055394,
+        "order_deviation_from_4_max": 0.2819368271871081
+      },
+      "thresholds": {
+        "order_deviation_from_4_max": 0.5
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 4.2964925271689146e-05,
+        "ignition_velocity_error_max_mps": 6.411420606167368e-08,
+        "thrust_direction_vs_reference_max": 9.007715746343507e-12,
+        "cutoff_position_error_max_m": 5.078115219347359e-05,
+        "cutoff_velocity_error_max_mps": 8.284522542785575e-08,
+        "sample_position_error_max_m": 0.01488873689907175,
+        "sample_velocity_error_max_mps": 1.6354926538276593e-05,
+        "final_position_error_m": 0.014855039948823043,
+        "final_velocity_error_mps": 1.6354926538276593e-05
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0140478249427694,
+        "coast_velocity_error_max_mps": 1.5483549155096543e-05,
+        "post_burn_coast_position_error_max_m": 0.0140478249427694
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 1.5995610738173127e-06,
+        "min_altitude_error_m": 2.895202487707138e-05,
+        "max_altitude_error_m": 0.0002869758754968643
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.1550846794396797e-16,
+        "thrust_direction_error_max": 1.1102230246251565e-16,
+        "final_propellant_kg": 6.106226635438361e-15,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 5.877651306839064e-18,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 1.0449157878825003e-17,
+        "sample_delta_v_rel_error_max": 7.153555575123548e-15,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.04057136716622e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 6.966105252550002e-18,
+        "depletion_residual_over_bound_max": 0.16769183872767857
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 2.110885251675801e-15,
+        "sensed_delta_v_excess_over_simpson_rel_max": 1.201902133650625e-15,
+        "reported_rocket_equation_rel_error_max": 9.381712229670226e-16
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_burn_to_depletion/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 2.705494942679055e-16,
+        "inclination_change_max_rad": 1.1102230246251565e-16,
+        "burn000001_sma_change_m": 105633.21944695711,
+        "burn000001_apoapsis_alt_km": 461.17468964854817,
+        "burn000001_periapsis_alt_km": 250.09174926408846
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.00786758897893751,
+        "ignition_velocity_error_max_mps": 9.880943601893428e-06,
+        "thrust_direction_vs_reference_max": 1.1461676502973012e-09,
+        "cutoff_position_error_max_m": 0.00801361936850748,
+        "cutoff_velocity_error_max_mps": 1.0003329765732662e-05,
+        "sample_position_error_max_m": 0.2972946055921593,
+        "sample_velocity_error_max_mps": 0.0003497272141661142,
+        "final_position_error_m": 0.2972946055921593,
+        "final_velocity_error_mps": 0.0003497272141661142
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.016,
+        "ignition_velocity_error_max_mps": 2e-05,
+        "thrust_direction_vs_reference_max": 2.6e-09,
+        "cutoff_position_error_max_m": 0.016,
+        "cutoff_velocity_error_max_mps": 2e-05,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.278780355538961,
+        "coast_velocity_error_max_mps": 0.000327400596486986,
+        "post_burn_coast_position_error_max_m": 0.278780355538961
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 3.304185520391911e-05,
+        "min_altitude_error_m": 0.0025301435962319374,
+        "max_altitude_error_m": 0.0037807729095220566
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.4673019804198162e-16,
+        "thrust_direction_error_max": 1.1527756336890508e-16,
+        "final_propellant_kg": 290.3911356854004,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 8.745141363201233e-17,
+        "thrust_unit_vector_error_max": 1.1274368112207335e-16,
+        "sample_propellant_rel_error_max": 8.745141363201233e-17,
+        "sample_delta_v_rel_error_max": 1.7451031511989482e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.886157620426666e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 4.1676064309005875e-17,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 5.5605685203851e-14,
+        "sensed_delta_v_excess_over_simpson_rel_max": 3.6018203893608894e-14,
+        "reported_rocket_equation_rel_error_max": 6.709475497967566e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.0079518766437589e-16,
+        "inclination_change_max_rad": 1.1102230246251565e-16,
+        "burn000001_sma_change_m": 19436.352084396407,
+        "burn000001_apoapsis_alt_km": 288.87171239227337,
+        "burn000001_periapsis_alt_km": 250.0009916631775,
+        "burn000002_sma_change_m": -6510.632088318467,
+        "burn000002_apoapsis_alt_km": 275.8531404405842,
+        "burn000002_periapsis_alt_km": 249.99829943822883,
+        "burn000003_sma_change_m": -12976.543719967827,
+        "burn000003_apoapsis_alt_km": 266.69373339413477,
+        "burn000003_periapsis_alt_km": 233.20461892272718
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cli_summary[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'i386', 'python': '3.12.15', 'numpy': '2.5.3'}"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "rejections_change_nothing[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o9_reference_integrity[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o9_gmat[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "step_spacing_error_max_s": 2.337619662284851e-07,
+        "burn_duration_from_mass_error_max_s": 5.4644289093630505e-11,
+        "coast_vs_kepler_position_error_max_m": 3.840410532538128e-06,
+        "coast_vs_kepler_velocity_error_max_mps": 4.48605588900304e-09,
+        "gmat_vs_dop853_position_error_max_m": 6.242793966218444e-07,
+        "gmat_vs_dop853_velocity_error_max_mps": 6.86936477443967e-10,
+        "gmat_vs_dop853_final_position_error_m": 2.9052028185637863e-07,
+        "gmat_mass_vs_analytic_error_max_kg": 1.750777300912887e-11,
+        "ours_vs_gmat_sample_position_error_max_m": 0.29729182253382486,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.0003497239772669603,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.008013638267306777,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 1.0003351945502542e-05,
+        "ours_vs_gmat_final_position_error_m": 0.29729182253382486,
+        "ours_vs_gmat_final_velocity_error_mps": 0.0003497239772669603,
+        "ours_vs_gmat_mass_error_max_kg": 1.7280399333685637e-11,
+        "ours_vs_gmat_node_crossing_error_max_s": 3.304154961369932e-05,
+        "gmat_rows": 956.0,
+        "mass_samples_compared": 902.0
+      },
+      "thresholds": {
+        "step_spacing_error_max_s": 1e-06,
+        "burn_duration_from_mass_error_max_s": 1e-09,
+        "coast_vs_kepler_position_error_max_m": 0.0001,
+        "coast_vs_kepler_velocity_error_max_mps": 1e-07,
+        "gmat_vs_dop853_position_error_max_m": 3e-05,
+        "gmat_vs_dop853_velocity_error_max_mps": 3.5e-08,
+        "gmat_vs_dop853_final_position_error_m": 3e-05,
+        "gmat_mass_vs_analytic_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_sample_position_error_max_m": 0.6,
+        "ours_vs_gmat_sample_velocity_error_max_mps": 0.0007,
+        "ours_vs_gmat_burn_boundary_position_error_max_m": 0.016,
+        "ours_vs_gmat_burn_boundary_velocity_error_max_mps": 2e-05,
+        "ours_vs_gmat_final_position_error_m": 0.6,
+        "ours_vs_gmat_final_velocity_error_mps": 0.0007,
+        "ours_vs_gmat_mass_error_max_kg": 1.3e-09,
+        "ours_vs_gmat_node_crossing_error_max_s": 8e-05
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o8_convergence[m2_invalid_commands]",
+      "passed": true,
+      "metrics": {
+        "position_error_dt10_m": 0.2972946055921593,
+        "position_error_dt5_m": 0.014838903184480253,
+        "position_error_dt2.5_m": 0.0007967673458322654,
+        "order_10_to_5": 4.324436921391451,
+        "order_5_to_2.5": 4.219082126874521,
+        "order_deviation_from_4_max": 0.32443692139145064
+      },
+      "thresholds": {
+        "order_deviation_from_4_max": 0.5
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0004868846393654938,
+        "ignition_velocity_error_max_mps": 6.1097328541022e-07,
+        "thrust_direction_vs_reference_max": 7.104525211841662e-11,
+        "cutoff_position_error_max_m": 0.0004958991524375608,
+        "cutoff_velocity_error_max_mps": 6.1847986796377e-07,
+        "sample_position_error_max_m": 0.014849586727721327,
+        "sample_velocity_error_max_mps": 1.7472567759092217e-05,
+        "final_position_error_m": 0.014839975643370636,
+        "final_velocity_error_mps": 1.7472567759092217e-05
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.016,
+        "ignition_velocity_error_max_mps": 2e-05,
+        "thrust_direction_vs_reference_max": 2.6e-09,
+        "cutoff_position_error_max_m": 0.016,
+        "cutoff_velocity_error_max_mps": 2e-05,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.014017158950223214,
+        "coast_velocity_error_max_mps": 1.6467440214885005e-05,
+        "post_burn_coast_position_error_max_m": 0.014017158950223214
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 1.6751655493862927e-06,
+        "min_altitude_error_m": 2.5029294192790985e-05,
+        "max_altitude_error_m": 0.00023113656789064407
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.4727448285843912e-16,
+        "thrust_direction_error_max": 1.1775693440128312e-16,
+        "final_propellant_kg": 290.39113568540006,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 1.7490282726402466e-16,
+        "thrust_unit_vector_error_max": 1.1274368112207335e-16,
+        "sample_propellant_rel_error_max": 1.7490282726402466e-16,
+        "sample_delta_v_rel_error_max": 2.75460228350686e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 2.7479544770947e-14
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 8.950105613901261e-17,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 7.48447830380948e-14,
+        "sensed_delta_v_excess_over_simpson_rel_max": 7.476844666321795e-14,
+        "reported_rocket_equation_rel_error_max": 5.0678599173130026e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[m2_invalid_commands/o8_aux]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.0588318569616437e-16,
+        "inclination_change_max_rad": 2.220446049250313e-16,
+        "burn000001_sma_change_m": 19436.35209838394,
+        "burn000001_apoapsis_alt_km": 288.87171095793786,
+        "burn000001_periapsis_alt_km": 250.00099333107565,
+        "burn000002_sma_change_m": -6510.632091790438,
+        "burn000002_apoapsis_alt_km": 275.8531390202595,
+        "burn000002_periapsis_alt_km": 249.99830108387116,
+        "burn000003_sma_change_m": -12976.543722933158,
+        "burn000003_apoapsis_alt_km": 266.6937364992853,
+        "burn000003_periapsis_alt_km": 233.20461623706203
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0,
+        "ignition_velocity_error_max_mps": 0.0,
+        "thrust_direction_vs_reference_max": 0.0,
+        "cutoff_position_error_max_m": 0.0,
+        "cutoff_velocity_error_max_mps": 0.0,
+        "sample_position_error_max_m": 0.29833224274323994,
+        "sample_velocity_error_max_mps": 0.0003490280494731476,
+        "final_position_error_m": 0.29833224274323994,
+        "final_velocity_error_mps": 0.0003490280494731476
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.29833164577041166,
+        "coast_velocity_error_max_mps": 0.0003490273504841738,
+        "post_burn_coast_position_error_max_m": 0.0
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 3.3236268791370094e-05,
+        "min_altitude_error_m": 0.006291631609201431,
+        "max_altitude_error_m": 3.91155481338501e-08
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 0.0,
+        "thrust_direction_error_max": 0.0,
+        "final_propellant_kg": 0.0,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 0.0,
+        "thrust_unit_vector_error_max": 0.0,
+        "sample_propellant_rel_error_max": 0.0,
+        "sample_delta_v_rel_error_max": 0.0,
+        "sample_delta_v_excess_over_simpson_rel_max": 0.0
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cli_summary[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'i386', 'python': '3.12.15', 'numpy': '2.5.3'}"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "rejections_change_nothing[m2_invalid_commands_empty_tank]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0,
+        "ignition_velocity_error_max_mps": 0.0,
+        "thrust_direction_vs_reference_max": 0.0,
+        "cutoff_position_error_max_m": 0.0,
+        "cutoff_velocity_error_max_mps": 0.0,
+        "sample_position_error_max_m": 0.29833224274323994,
+        "sample_velocity_error_max_mps": 0.0003490280494731476,
+        "final_position_error_m": 0.29833224274323994,
+        "final_velocity_error_mps": 0.0003490280494731476
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.29833164577041166,
+        "coast_velocity_error_max_mps": 0.0003490273504841738,
+        "post_burn_coast_position_error_max_m": 0.0
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 3.3236268791370094e-05,
+        "min_altitude_error_m": 0.006291631609201431,
+        "max_altitude_error_m": 3.91155481338501e-08
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cli_summary[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "determinism[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform_golden[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "cross_platform[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "final_position_difference_m": 0.0,
+        "final_velocity_difference_mps": 0.0
+      },
+      "thresholds": {
+        "final_position_difference_m": 0.0001,
+        "final_velocity_difference_mps": 1e-07
+      },
+      "threshold_status": "approved",
+      "notes": "this platform: {'system': 'Darwin', 'machine': 'x86_64', 'cpu': 'i386', 'python': '3.12.15', 'numpy': '2.5.3'}"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "rejections_change_nothing[m2_invalid_commands_no_propulsion]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "dr0018_boundary[stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0006902363293106118,
+        "ignition_velocity_error_max_mps": 1.0279129345061598e-06,
+        "thrust_direction_vs_reference_max": 1.286531582982623e-10,
+        "cutoff_position_error_max_m": 0.0,
+        "cutoff_velocity_error_max_mps": 0.0,
+        "sample_position_error_max_m": 0.0007508768418862794,
+        "sample_velocity_error_max_mps": 1.169800597895611e-06,
+        "final_position_error_m": 0.0007508768418862794,
+        "final_velocity_error_mps": 1.169800597895611e-06
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0006902372750396486,
+        "coast_velocity_error_max_mps": 1.0279123979988508e-06,
+        "post_burn_coast_position_error_max_m": 0.0
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 0.0,
+        "min_altitude_error_m": 0.0004676021635532379,
+        "max_altitude_error_m": 0.0005506835877895355
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[dr0018/stop_inside_burn]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 2.926764926226101e-14,
+        "thrust_acceleration_rel_error_max": 1.465487697698291e-16,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 290.3911356854004,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 0.0,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 8.745141363201233e-17,
+        "sample_delta_v_rel_error_max": 2.269308439227668e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 7.542259526266871e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "dr0018_boundary[stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0,
+        "ignition_velocity_error_max_mps": 0.0,
+        "thrust_direction_vs_reference_max": 0.0,
+        "cutoff_position_error_max_m": 0.0,
+        "cutoff_velocity_error_max_mps": 0.0,
+        "sample_position_error_max_m": 0.00035699740148826734,
+        "sample_velocity_error_max_mps": 4.1282176107203925e-07,
+        "final_position_error_m": 0.00035699740148826734,
+        "final_velocity_error_mps": 4.1282176107203925e-07
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0003569969968201462,
+        "coast_velocity_error_max_mps": 4.128203863224058e-07,
+        "post_burn_coast_position_error_max_m": 0.0
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 0.0,
+        "min_altitude_error_m": 0.00012206751853227615,
+        "max_altitude_error_m": 9.313225746154785e-10
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[dr0018/stop_before_ignition]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 0.0,
+        "thrust_direction_error_max": 0.0,
+        "final_propellant_kg": 300.0,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 0.0,
+        "thrust_unit_vector_error_max": 0.0,
+        "sample_propellant_rel_error_max": 0.0,
+        "sample_delta_v_rel_error_max": 0.0,
+        "sample_delta_v_excess_over_simpson_rel_max": 0.0
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "dr0018_boundary[stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0006902363293106118,
+        "ignition_velocity_error_max_mps": 1.0279129345061598e-06,
+        "thrust_direction_vs_reference_max": 1.1353258677647128e-10,
+        "cutoff_position_error_max_m": 0.0,
+        "cutoff_velocity_error_max_mps": 0.0,
+        "sample_position_error_max_m": 0.0006902363293106118,
+        "sample_velocity_error_max_mps": 1.0279129345061598e-06,
+        "final_position_error_m": 0.0006902363293106118,
+        "final_velocity_error_mps": 1.0279129345061598e-06
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0006902372750396486,
+        "coast_velocity_error_max_mps": 1.0279123979988508e-06,
+        "post_burn_coast_position_error_max_m": 0.0
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 0.0,
+        "min_altitude_error_m": 0.0004676021635532379,
+        "max_altitude_error_m": 9.313225746154785e-10
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[dr0018/stop_at_ignition]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 0.0,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 300.0,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 0.0,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 0.0,
+        "sample_delta_v_rel_error_max": 0.0,
+        "sample_delta_v_excess_over_simpson_rel_max": 0.0
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "dr0018_boundary[stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "event_order[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "traceability[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "outcomes[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "identities[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events_contract[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o4_reference[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "initial_position_rel_error": 0.0,
+        "initial_velocity_rel_error": 0.0,
+        "ignition_position_error_max_m": 0.0006902363293106118,
+        "ignition_velocity_error_max_mps": 1.0279129345061598e-06,
+        "thrust_direction_vs_reference_max": 1.4219402630837706e-10,
+        "cutoff_position_error_max_m": 0.0008149558104516608,
+        "cutoff_velocity_error_max_mps": 1.3247281906377427e-06,
+        "sample_position_error_max_m": 0.0008149558104516608,
+        "sample_velocity_error_max_mps": 1.3247281906377427e-06,
+        "final_position_error_m": 0.0008149558104516608,
+        "final_velocity_error_mps": 1.3247281906377427e-06
+      },
+      "thresholds": {
+        "initial_position_rel_error": 1e-12,
+        "initial_velocity_rel_error": 1e-12,
+        "ignition_position_error_max_m": 0.002,
+        "ignition_velocity_error_max_mps": 3e-06,
+        "thrust_direction_vs_reference_max": 4e-10,
+        "cutoff_position_error_max_m": 0.002,
+        "cutoff_velocity_error_max_mps": 3e-06,
+        "sample_position_error_max_m": 0.6,
+        "sample_velocity_error_max_mps": 0.0007,
+        "final_position_error_m": 0.6,
+        "final_velocity_error_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o5_coast_kepler[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "coast_position_error_max_m": 0.0006902372750396486,
+        "coast_velocity_error_max_mps": 1.0279123979988508e-06,
+        "post_burn_coast_position_error_max_m": 0.0
+      },
+      "thresholds": {
+        "coast_position_error_max_m": 0.6,
+        "coast_velocity_error_max_mps": 0.0007
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "orbit_events[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "node_crossing_time_error_max_s": 0.0,
+        "min_altitude_error_m": 0.0004676021635532379,
+        "max_altitude_error_m": 0.000641203485429287
+      },
+      "thresholds": {
+        "node_crossing_time_error_max_s": 8e-05,
+        "min_altitude_error_m": 0.013,
+        "max_altitude_error_m": 0.013
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "accounting[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "propellant_accounting_rel_error": 0.0,
+        "delta_v_accounting_rel_error": 0.0,
+        "thrust_acceleration_rel_error_max": 1.465487697698291e-16,
+        "thrust_direction_error_max": 1.6653345369377348e-16,
+        "final_propellant_kg": 280.7822713708008,
+        "plan_propellant_rel_error_max": 0.0,
+        "transition_propellant_rel_error_max": 1.7490282726402466e-16,
+        "thrust_unit_vector_error_max": 1.6653345369377348e-16,
+        "sample_propellant_rel_error_max": 1.7490282726402466e-16,
+        "sample_delta_v_rel_error_max": 2.1362239927640125e-14,
+        "sample_delta_v_excess_over_simpson_rel_max": 4.935066188723783e-15
+      },
+      "thresholds": {
+        "propellant_accounting_rel_error": 1e-12,
+        "delta_v_accounting_rel_error": 1e-12,
+        "thrust_acceleration_rel_error_max": 1e-12,
+        "thrust_direction_error_max": 1e-12,
+        "plan_propellant_rel_error_max": 1e-12,
+        "transition_propellant_rel_error_max": 1e-12,
+        "thrust_unit_vector_error_max": 1e-12,
+        "sample_propellant_rel_error_max": 1e-12,
+        "sample_delta_v_excess_over_simpson_rel_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o1_mass_law[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "propellant_used_rel_error_max": 1.667042572360235e-16,
+        "depletion_residual_over_bound_max": 0.0
+      },
+      "thresholds": {
+        "propellant_used_rel_error_max": 1e-12,
+        "depletion_residual_over_bound_max": 1.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o2_rocket_equation[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "sensed_delta_v_rel_error_max": 1.3253944480652631e-14,
+        "sensed_delta_v_excess_over_simpson_rel_max": 0.0,
+        "reported_rocket_equation_rel_error_max": 1.7931807238530032e-14
+      },
+      "thresholds": {
+        "sensed_delta_v_excess_over_simpson_rel_max": 1e-12,
+        "reported_rocket_equation_rel_error_max": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o7_direction[dr0018/stop_at_cutoff]",
+      "passed": true,
+      "metrics": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1.0523990455438207e-16,
+        "inclination_change_max_rad": 2.220446049250313e-16,
+        "burn000001_sma_change_m": 79055.39874623809,
+        "burn000001_apoapsis_alt_km": 408.04702419116813,
+        "burn000001_periapsis_alt_km": 250.0637732446417
+      },
+      "thresholds": {
+        "sign_violations": 0.0,
+        "plane_rotation_max_rad": 1e-12,
+        "inclination_change_max_rad": 1e-12
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "same_tick_submission_reporting",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "o3_free_space",
+      "passed": true,
+      "metrics": {
+        "velocity_rel_error_max": 1.8338961671134937e-14,
+        "propellant_rel_error_max": 2.14800322451252e-16,
+        "timing_violations": 0.0,
+        "prograde_position_error_dt10_m": 4.258435080543143e-09,
+        "prograde_position_order": 3.804908694234983,
+        "retrograde_position_error_dt10_m": 4.245425077290129e-09,
+        "retrograde_position_order": 3.8829400227275133,
+        "position_order_deviation_from_4_max": 0.195091305765017
+      },
+      "thresholds": {
+        "velocity_rel_error_max": 1e-12,
+        "propellant_rel_error_max": 1e-12,
+        "position_order_deviation_from_4_max": 0.5,
+        "timing_violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": "production Simulator, zero force, velocity tracking along v0"
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "reference_snapshot",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "reference_snapshot_margins",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "thresholds_all_consumed",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "thresholds_cover_all_metrics",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    },
+    {
+      "schema_version": 1,
+      "tick": 0,
+      "t": 0.0,
+      "type": "ValidationResult",
+      "validator": "report_only_metrics_finite",
+      "passed": true,
+      "metrics": {
+        "violations": 0.0
+      },
+      "thresholds": {
+        "violations": 0.0
+      },
+      "threshold_status": "approved",
+      "notes": ""
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,14 @@
+import sys,json,math,pathlib
+import numpy as np
+sys.path.insert(0,'.')
+import tests.test_zonal_j2 as T
+from tars.sim.forces import PointMassGravity,CompositeForceModel
+r,v=T.eccentric_state(51.6);period=2*math.pi*math.sqrt((T.RE+650e3)**3/T.MU)
+e0=T.specific_energy(r,v,0);h0=T.h_z(r,v);out=[]
+for dt in [20.,10.,5.]:
+ ys=T.propagate(CompositeForceModel([PointMassGravity(T.MU)]),r,v,dt,round(10*period/dt))
+ e=max(abs(T.specific_energy(y[:3],y[3:],0)-e0) for y in ys)/abs(e0)
+ h=max(abs(T.h_z(y[:3],y[3:])-h0) for y in ys)/abs(h0)
+ out.append({'dt':dt,'energy':e,'hz':h})
+for a,b in zip(out,out[1:]):b['energy_order']=math.log2(a['energy']/b['energy']);b['hz_order']=math.log2(a['hz']/b['hz'])
+pathlib.Path('review_scratch/pm_drift.json').write_text(json.dumps(out,indent=2)+'\n');print(out)

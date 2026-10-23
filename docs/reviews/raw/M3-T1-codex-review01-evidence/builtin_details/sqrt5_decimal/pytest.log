@@ -1,0 +1,27 @@
+.....................F
+=================================== FAILURES ===================================
+_______________ test_j2_derivation_is_correctly_rounded_binary64 _______________
+
+    def test_j2_derivation_is_correctly_rounded_binary64():
+        """J2 = fl(-fl(sqrt(5)) * C̄2,0): both operations correctly rounded (IEEE 754).
+    
+        Checked with exact rational arithmetic, independently of the implementation's
+        expression: sqrt(5) is a nearest double to sqrt(5), and the product is a nearest
+        double to the exact product of the two doubles.
+        """
+        s = math.sqrt(5.0)
+        lo, hi = math.nextafter(s, 0.0), math.nextafter(s, math.inf)
+        # s is nearest to sqrt(5) iff 5 lies between the squares of the midpoints around s.
+        assert ((Fraction(lo) + Fraction(s)) / 2) ** 2 < 5 < ((Fraction(s) + Fraction(hi)) / 2) ** 2
+        j2 = WGS84_EGM2008_TIDE_FREE.j2
+>       assert _is_nearest(j2, -Fraction(s) * Fraction(EGM2008_C20_TIDE_FREE))
+E       assert False
+E        +  where False = _is_nearest(0.0010826261738523244, (-Fraction(629397181890197, 281474976710656) * Fraction(-4465635248459975, 9223372036854775808)))
+E        +    where Fraction(629397181890197, 281474976710656) = Fraction(2.23606797749979)
+E        +    and   Fraction(-4465635248459975, 9223372036854775808) = Fraction(-0.000484165143790815)
+
+tests/test_constants.py:98: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_constants.py::test_j2_derivation_is_correctly_rounded_binary64
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 21 passed in 2.80s

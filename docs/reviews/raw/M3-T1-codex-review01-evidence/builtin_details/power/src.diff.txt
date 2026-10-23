@@ -1,0 +1,11 @@
+diff -ru -x __pycache__ src/tars/sim/forces.py <clone>/review_scratch/builtin_details/power//src/tars/sim/forces.py
+--- src/tars/sim/forces.py	2026-10-22 18:08:02
++++ <clone>/review_scratch/builtin_details/power//src/tars/sim/forces.py	2026-10-22 18:15:44
+@@ -95,6 +95,6 @@
+             raise ValueError("J2 gravity is singular at the origin")
+         r_norm = math.sqrt(r2)
+         s2 = z * z / r2
+-        k = self._k / (r2 * r2 * r_norm)
++        k = self._k / (r2 * r2 * r_norm * 1.000001)
+         c = 1.0 - 5.0 * s2
+         return np.array([k * c * x, k * c * y, k * (3.0 - 5.0 * s2) * z])

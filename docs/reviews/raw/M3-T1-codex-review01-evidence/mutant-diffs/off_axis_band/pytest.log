@@ -1,0 +1,35 @@
+........................F
+=================================== FAILURES ===================================
+_____________ test_invariant_drift_is_integrator_truncation[97.0] ______________
+
+inc_deg = 97.0
+
+    @pytest.mark.parametrize("inc_deg", [28.5, 51.6, 97.0])
+    def test_invariant_drift_is_integrator_truncation(inc_deg):
+        """DR-0025 Q2: E and h_z are exact invariants of point mass + J2. RK4 does not conserve
+        them, so the check is structural (VAL-0020): RK4's global error is O(dt^4) (ADR-0004),
+        so a correct model's drift falls by about 4^4 = 256 when dt goes from 20 s to 5 s,
+        while a non-conservative or non-axisymmetric force drifts independently of dt (ratio
+        about 1). The decision boundary 1/2 was fixed before measuring and separates the two
+        hypotheses by more than two orders of magnitude on each side. Ten orbits."""
+        r0, v0 = eccentric_state(inc_deg)
+        model = CompositeForceModel([PointMassGravity(MU), j2_model()])
+        period = 2.0 * math.pi * math.sqrt((0.5 * (2 * RE + 1300e3)) ** 3 / MU)
+        drift = {}
+        for dt in (20.0, 5.0):
+            ys = propagate(model, r0, v0, dt, round(10 * period / dt))
+            e0, hz0 = specific_energy(r0, v0), h_z(r0, v0)
+            drift[dt] = (
+                max(abs(specific_energy(y[:3], y[3:]) - e0) for y in ys) / abs(e0),
+                max(abs(h_z(y[:3], y[3:]) - hz0) for y in ys) / abs(hz0),
+            )
+        for k in range(2):
+>           assert drift[5.0][k] <= 0.5 * drift[20.0][k], drift
+E           AssertionError: {20.0: (2.0327905160469317e-07, 4.120865445884385e-09), 5.0: (1.5676250879068382e-07, 4.010188823354037e-12)}
+E           assert 1.5676250879068382e-07 <= (0.5 * 2.0327905160469317e-07)
+
+tests/test_zonal_j2.py:317: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_invariant_drift_is_integrator_truncation[97.0]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 24 passed in 2.74s

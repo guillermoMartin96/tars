@@ -1,0 +1,16 @@
+..................F
+=================================== FAILURES ===================================
+_____________________ test_c20_is_the_published_nga_value ______________________
+
+    def test_c20_is_the_published_nga_value():
+        # NGA.STND.0036_1.0.0_WGS84 Table 5.1, EGM2008 tide-free: -0.484165143790815e-3.
+        # The shortest repr reproduces the published 15 digits, so the double carries them.
+>       assert float("-0.484165143790815e-3") == EGM2008_C20_TIDE_FREE
+E       AssertionError: assert -0.000484165143790815 == -0.000484165143790816
+E        +  where -0.000484165143790815 = float('-0.484165143790815e-3')
+
+tests/test_constants.py:67: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_constants.py::test_c20_is_the_published_nga_value - Asserti...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 18 passed in 2.69s

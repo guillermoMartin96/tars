@@ -1,0 +1,39 @@
+import sys, platform, json, math, subprocess, pathlib, shutil, os
+from decimal import Decimal, localcontext
+import numpy as np
+sys.path.insert(0,'.')
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+from tars.sim.forces import ZonalJ2Gravity
+import tests.test_zonal_j2 as T
+out={'environment':{'platform':platform.platform(),'machine':platform.machine(),'python':sys.version,'numpy':np.__version__}}
+import scipy, pydantic
+out['environment'].update(scipy=scipy.__version__,pydantic=pydantic.__version__)
+out['cpu']=subprocess.run(['sysctl','-n','machdep.cpu.brand_string'],capture_output=True,text=True).stdout.strip()
+m=ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2)
+out['edges']=[]
+for r in ([1e70,0,0],[1e-100,0,0],[5e-324,0,0],[1e200,0,0],[math.inf,0,0],[math.nan,0,0],[0,0,0]):
+ try: val=m.acceleration(0,np.array(r),np.zeros(3)).tolist()
+ except Exception as e:val=repr(e)
+ out['edges'].append({'r':r,'result':val})
+out['parameter_inf']={}
+for param in ('mu','equatorial_radius'):
+ args={'mu':C.mu,'equatorial_radius':C.equatorial_radius,'j2':C.j2};args[param]=math.inf
+ try: model=ZonalJ2Gravity(**args); val=model.acceleration(0,np.array([C.equatorial_radius,0,0]),np.zeros(3)).tolist()
+ except Exception as e:val=repr(e)
+ out['parameter_inf'][param]=val
+with localcontext() as ctx:
+ ctx.prec=100
+ k=-Decimal(3)/2*Decimal(C.j2)*Decimal(C.mu)*Decimal(C.equatorial_radius)**2
+ out['exact_equator_1e70']=str(k/Decimal(1e70)**4)
+ errors=[]
+ for r in T.sample_points():
+  x,y,z=map(lambda f:Decimal(float(f)),r);q=x*x+y*y+z*z
+  exact=[k*x*(1-5*z*z/q)/q**Decimal('2.5'),k*y*(1-5*z*z/q)/q**Decimal('2.5'),k*z*(3-5*z*z/q)/q**Decimal('2.5')]
+  a=m.acceleration(0,r,np.zeros(3));g=T.j2_potential(*T.seeds(r)).grad
+  b=T.gamma(64)*(T.acceleration_abs(r)+np.array(T.j2_potential(*T.seeds(r,True)).grad))
+  errors.extend(float(abs(Decimal(float(av))-ev)/Decimal(float(bv))) for av,ev,bv in zip(a,exact,b) if bv)
+ out['decimal_accel_max_fraction_comparison_bound']=max(errors)
+ out['display_ulp_gap']=(1.0826261739e-3-C.j2)/math.ulp(C.j2)
+ out['display_relative_gap']=(1.0826261739e-3-C.j2)/C.j2
+pathlib.Path('review_scratch/adversarial.json').write_text(json.dumps(out,indent=2)+'\n')
+print(json.dumps(out,indent=2))

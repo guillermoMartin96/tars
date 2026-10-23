@@ -1,0 +1,10 @@
+diff -ru -x __pycache__ src/tars/sim/forces.py <clone>/review_scratch/high_lat_band//src/tars/sim/forces.py
+--- src/tars/sim/forces.py	2026-10-22 18:08:02
++++ <clone>/review_scratch/high_lat_band//src/tars/sim/forces.py	2026-10-22 18:17:49
+@@ -97,4 +97,6 @@
+         s2 = z * z / r2
+         k = self._k / (r2 * r2 * r_norm)
+         c = 1.0 - 5.0 * s2
++        if 0.99 < s2 < 0.9999:
++            c *= 1.01
+         return np.array([k * c * x, k * c * y, k * (3.0 - 5.0 * s2) * z])

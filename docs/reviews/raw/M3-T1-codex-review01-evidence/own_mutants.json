@@ -1,0 +1,130 @@
+[
+  {
+    "mutant": "high_lat_band",
+    "exit": 0,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "..........................                                               [100%]\n26 passed in 2.64s\n"
+  },
+  {
+    "mutant": "negative_j2_abs",
+    "exit": 0,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "..........................                                               [100%]\n26 passed in 2.64s\n"
+  },
+  {
+    "mutant": "small_coefficient_error",
+    "exit": 0,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "..........................                                               [100%]\n26 passed in 2.61s\n"
+  },
+  {
+    "mutant": "off_axis_band",
+    "exit": 1,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "     max(abs(h_z(y[:3], y[3:]) - hz0) for y in ys) / abs(hz0),\n            )\n        for k in range(2):\n>           assert drift[5.0][k] <= 0.5 * drift[20.0][k], drift\nE           AssertionError: {20.0: (2.0327905160469317e-07, 4.120865445884385e-09), 5.0: (1.5676250879068382e-07, 4.010188823354037e-12)}\nE           assert 1.5676250879068382e-07 <= (0.5 * 2.0327905160469317e-07)\n\ntests/test_zonal_j2.py:317: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_invariant_drift_is_integrator_truncation[97.0]\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 24 passed in 2.74s\n"
+  },
+  {
+    "mutant": "far_field_zero",
+    "exit": 0,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "..........................                                               [100%]\n26 passed in 2.42s\n"
+  },
+  {
+    "mutant": "unnormalized",
+    "exit": 1,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "E)\n        assert a_eq[0] < 0.0\n>       assert abs(a_eq[0] - expected_eq) <= tol * abs(expected_eq)\nE       assert np.float64(0.008795838031065248) <= (3.552713678800507e-15 * 0.015911820477966507)\nE        +  where np.float64(0.008795838031065248) = abs((np.float64(-0.007115982446901259) - -0.015911820477966507))\nE        +  and   0.015911820477966507 = abs(-0.015911820477966507)\n\ntests/test_zonal_j2.py:169: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 14 passed in 0.15s\n"
+  },
+  {
+    "mutant": "mu_radius_swap",
+    "exit": 1,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "/ (RE * RE)\n        assert a_eq[0] < 0.0\n>       assert abs(a_eq[0] - expected_eq) <= tol * abs(expected_eq)\nE       assert np.float64(994406.1362858727) <= (3.552713678800507e-15 * 0.015911820477966507)\nE        +  where np.float64(994406.1362858727) = abs((np.float64(-994406.1521976931) - -0.015911820477966507))\nE        +  and   0.015911820477966507 = abs(-0.015911820477966507)\n\ntests/test_zonal_j2.py:169: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_known_answers_equator_and_pole - assert n...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 14 passed in 0.15s\n"
+  },
+  {
+    "mutant": "p2_wrong",
+    "exit": 1,
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "-x",
+      "-p",
+      "no:cacheprovider",
+      "tests/test_constants.py",
+      "tests/test_zonal_j2.py"
+    ],
+    "tail": "<function all at 0x1092821f0> = np.all\nE            +    and   array([1.9486360e-18, 0.0000000e+00, 6.9388939e-18]) = <ufunc 'absolute'>((array([ 1.9486360e-18,  0.0000000e+00, -3.1823641e-02]) - array([ 3.8972720e-18,  0.0000000e+00, -3.1823641e-02])))\nE            +      where <ufunc 'absolute'> = np.abs\nE            +    and   7.105427357601052e-15 = gamma(64)\n\ntests/test_zonal_j2.py:192: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_zonal_j2.py::test_acceleration_is_the_gradient_of_the_separately_coded_potential\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 15 passed in 0.14s\n"
+  }
+]

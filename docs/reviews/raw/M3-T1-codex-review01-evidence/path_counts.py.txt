@@ -1,0 +1,25 @@
+exec(open('review_scratch/interval_bound.py').read().split('worst=0;fails=[]')[0])
+class Count:
+ total=0
+ def __init__(self,a,b=None,depth=0):self.a=float(a);self.b=self.a;self.depth=depth
+ @staticmethod
+ def lift(o):return o if isinstance(o,Count) else Count(o)
+ def op(self,o,fn):
+  o=self.lift(o);Count.total+=1;return Count(fn(self.a,o.a),depth=max(self.depth,o.depth)+1)
+ def __add__(self,o):return self.op(o,lambda a,b:a+b)
+ __radd__=__add__
+ def __neg__(self):return Count(-self.a,depth=self.depth)
+ def __sub__(self,o):return self.op(o,lambda a,b:a-b)
+ def __rsub__(self,o):return self.lift(o)-self
+ def __mul__(self,o):return self.op(o,lambda a,b:a*b)
+ __rmul__=__mul__
+ def __truediv__(self,o):return self.op(o,lambda a,b:a/b)
+ def __rtruediv__(self,o):return self.lift(o)/self
+ def sqrt(self):Count.total+=1;return Count(math.sqrt(self.a),depth=self.depth+1)
+I=Count
+r=[4.1e6,-2.7e6,5e6]
+Count.total=0;a=acceleration(r);print('acceleration total',Count.total,'paths',[x.depth for x in a])
+for ab in [False,True]:
+ Count.total=0;s=[D(abs(v) if ab else v,[int(j==k) for j in range(3)],ab) for k,v in enumerate(r)]
+ out=potential(*s);print('dual absolute',ab,'total',Count.total,'value path',out.v.depth,'gradient paths',[v.depth for v in out.g])
+Count.total=0;a=acceleration(list(map(abs,r)),True);print('absolute acceleration total',Count.total,'paths',[x.depth for x in a])
