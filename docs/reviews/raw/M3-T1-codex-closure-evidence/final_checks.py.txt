@@ -1,0 +1,13 @@
+import json,subprocess
+from pathlib import Path
+p=Path('review_scratch');lines=(p/'collection.log').read_text().splitlines()
+print('collection split',*[sum(x.startswith('tests/'+n+'::') for x in lines) for n in ['test_zonal_j2.py','test_constants.py']])
+for filename in ['mutations.json','survivors.json']:
+ q=p/filename
+ if q.exists():
+  d=json.loads(q.read_text());print(filename, {k:v for k,v in d.items() if k!='mutants'})
+  if filename=='mutations.json':
+   committed=json.loads(Path('docs/science/experiments/m3-t1/t1_mutation_check_results_i21.json').read_text())
+   assert [(m['id'],m['pytest_exit'],{f['test'] for f in m['failures']}) for m in d['mutants']]==[(m['id'],m['pytest_exit'],{f['test'] for f in m['failures']}) for m in committed['mutants']]
+   print('fresh/committed mutant exits and failure sets identical')
+print('tracked status',repr(subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],text=True)))

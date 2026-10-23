@@ -267,3 +267,8 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **Review 03 (`4b85ded`):** PASS (unconditional); all Review 01 and 02 findings RESOLVED. Two NOTEs (M3T1-R3-F1, F2) and one observation (R3-O1), proposed dispositions in `docs/reviews/M3-T1-review-03.md`, not applied. Acceptance dossier `docs/reviews/M3-T1-acceptance-dossier.md`; awaiting the Tech Lead's acceptance decision.
 - **Unchanged and open:** every item preserved by I-19 §9 and I-20 §9.
 - **Status:** T1 IMPLEMENTED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## T1 Review 03 closure (recorded 2026-10-23 UTC, append-only)
+- **I-21:** R3-F1, R3-F2 and R3-O1 ACCEPTED and closed (`481a62e`, `e404b0f`). The coefficient chain gets test-only coverage of the existing contract. Closure verification: CLOSURE VERIFIED. Dossier updated; awaiting the Tech Lead's acceptance decision.
+- **Unchanged and open:** every item preserved by I-19 §9 and I-20 §9.
+- **Status:** T1 IMPLEMENTED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

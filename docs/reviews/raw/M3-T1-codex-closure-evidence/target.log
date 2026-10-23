@@ -1,0 +1,33 @@
+......................................................F................. [ 66%]
+.....................................                                    [100%]
+=================================== FAILURES ===================================
+____ test_coefficient_product_underflow_in_the_upper_subnormal_band_raises _____
+
+    def test_coefficient_product_underflow_in_the_upper_subnormal_band_raises():
+        """M3T1-R3-O1: an inexact product strictly between MIN_NORMAL/2 and MIN_NORMAL (2^51 and
+        2^52 units of 2^-1074) is an underflow, not only one below MIN_NORMAL/2. Construction,
+        in those units: mu = 2^52 + 1 (the normal MIN_NORMAL + 2^-1074) and J2 = 1/2, so
+        -(3/2) J2 = -3/4 exactly and -(3/2) J2 mu is exactly -(3 * 2^50 + 3/4) units, which
+        rounds (not a tie) to -(3 * 2^50 + 1) units. R = 2^10 makes the last two products exact
+        and k normal, so only the underflow check can reject the construction."""
+        mu, radius, j2 = (2**52 + 1) * 2.0**-1074, 2.0**10, 0.5
+        assert Fraction(mu) == (2**52 + 1) * SUBNORMAL_UNIT and mu >= sys.float_info.min
+        p1 = -1.5 * j2
+        p2 = p1 * mu
+        assert Fraction(p1) == Fraction(-3, 4)
+        exact = Fraction(p1) * Fraction(mu)
+        assert exact == -(3 * 2**50 + Fraction(3, 4)) * SUBNORMAL_UNIT
+        assert Fraction(p2) == -(3 * 2**50 + 1) * SUBNORMAL_UNIT != exact  # inexact
+        for q in (exact, Fraction(p2)):
+            assert 2**51 * SUBNORMAL_UNIT < abs(q) < 2**52 * SUBNORMAL_UNIT
+        assert sys.float_info.min / 2 < abs(p2) < sys.float_info.min
+        assert Fraction(p2 * radius) == Fraction(p2) * Fraction(radius)
+        assert abs(p2 * radius * radius) >= sys.float_info.min
+>       with pytest.raises(ValueError, match="intermediate product underflows"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_zonal_j2.py:462: Failed
+=========================== short test summary info ============================
+FAILED tests/test_zonal_j2.py::test_coefficient_product_underflow_in_the_upper_subnormal_band_raises
+1 failed, 108 passed in 4.90s

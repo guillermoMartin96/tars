@@ -1,0 +1,5 @@
+collection split 97 12
+mutations.json {'control_pytest_exit': 0, 'control_passes': True, 'detected': 47, 'detected_by_assertion': 47, 'total': 47, 'surviving': []}
+fresh/committed mutant exits and failure sets identical
+survivors.json {'canonical_one_ulp': {'defect': 'one-ulp coefficient perturbation confined to mu > 1e10', 'failed_tests': [], 'pytest_exit': 0, 'survives': True}, 'narrow_band': {'defect': '1e-8 x/y factor error confined to 0.123456 < s^2 < 0.123457', 'failed_tests': [], 'pytest_exit': 0, 'survives': True}, 'near_min_normal_zero': {'defect': 'all zeros whenever 0 < |k| < 2 MIN_NORMAL', 'failed_tests': ['tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r0-0]', 'tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[5.1827254193540115e-108-r1-1]', 'tests/test_zonal_j2.py::test_component_product_underflow_raises_instead_of_a_silent_result[3.8113299006152385e-107-r2-2]'], 'pytest_exit': 1, 'survives': False}}
+tracked status ''

@@ -172,3 +172,8 @@ Independent T1 review (Codex), which needs separate owner authorization (packet 
 - New: M3T1-R3-F1 (NOTE, the exact-rational fallback's reach is described too broadly), M3T1-R3-F2 (NOTE, a Review 02 reproduction row reads μ after a later mutation), and observation R3-O1 (mutant `upper_subnormal_ignored` survives the T1 tests). All three reproduced; dispositions proposed, **none applied**. No Review 04.
 - Acceptance dossier: `docs/reviews/M3-T1-acceptance-dossier.md`.
 - **Status:** T1 IMPLEMENTED — REVIEW PASSED (Review 03) — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## Status update (recorded 2026-10-23 UTC, append-only): Review 03 closure (I-21)
+- R3-F1, R3-F2 and R3-O1 ACCEPTED and closed under I-21: `481a62e` (tests only), `e404b0f` (records, mutant 47). Production code unchanged since `4b85ded`.
+- Focused Codex closure verification at `e404b0f`: **CLOSURE VERIFIED**, no new findings (`docs/reviews/M3-T1-closure-verification.md`). Closure evidence appended to `docs/reviews/M3-T1-acceptance-dossier.md`.
+- **Status:** T1 IMPLEMENTED — REVIEW PASSED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

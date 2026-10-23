@@ -1,0 +1,12 @@
+from pathlib import Path
+import subprocess,os,tarfile,json
+S=Path('review_scratch').resolve(); py=str(Path.cwd()/'.venv/bin/python')
+for sha in ['97b69ef','b1566ae']:
+ tar=S/(sha+'.tar');tar.write_bytes(subprocess.check_output(['git','archive',sha,'src']))
+ out=S/sha;out.mkdir(exist_ok=True)
+ with tarfile.open(tar) as t:t.extractall(out,filter='data')
+for script,args,out in [('t1_review01_correction_check.py',[str(S/'97b69ef/src')],'review01'),('t1_review02_correction_check.py',[str(S/'b1566ae/src')],'review02'),('t1_j2_informational.py',[],'informational')]:
+ p=S/(out+'.json');res=subprocess.run([py,'docs/science/experiments/m3-t1/'+script,*args,str(p)],capture_output=True,text=True);(S/(out+'.log')).write_text(res.stdout+res.stderr)
+ committed=Path('docs/science/experiments/m3-t1')/(script.replace('.py','_results.json'))
+ print(script,res.returncode,'byte-identical',p.read_bytes()==committed.read_bytes(),flush=True)
+print('survivors byte-identical', (S/'survivors.json').read_bytes()==Path('docs/science/experiments/m3-t1/t1_review02_survivors_results.json').read_bytes())

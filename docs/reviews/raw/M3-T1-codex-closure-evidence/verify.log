@@ -1,0 +1,36 @@
+ENV macOS-26.2-x86_64-i386-64bit 3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]
+UNCHANGED 4b85ded ['src']
+UNCHANGED 60648b9 ['proof', 'toolbox', 'scenarios', '.github', 'uv.lock', 'pyproject.toml', 'src/tars/validation']
+UNCHANGED d01d6aa ['docs/reviews/M3-T1-review-03.md', 'docs/reviews/M3-T1-acceptance-dossier.md', 'docs/reviews/raw', 'docs/science/experiments/m3-t1/t1_mutation_check_results.json']
+APPENDED docs/reviews/M3-T1-review-02.md
+APPENDED docs/science/validation.md
+APPENDED docs/science/experiments/m3-t1/README.md
+construction Fraction calls 0
+canonical [-0.0, -0.0, -0.0005692785957521009] Fraction calls 2
+reach bound 1.6262597531022472e-299
+band 4503599627370497 exact/u -13510798882111491/4 rounded/u -3377699720527873 error/u -1/4 k -1.749869284693536e-302
+rejection -(3/2) J2 mu R^2: an intermediate product underflows
+band 4503599627370496 exact/u -3377699720527872 rounded/u -3377699720527872 error/u 0 k -1.7498692846935354e-302
+constructed [-1.74986928e-302 -0.00000000e+000 -0.00000000e+000]
+alias at acceleration -1.0 [3.991922438949618e-17, 0.0, 0.0]
+alias at row 0.0
+target 1 1 failed, 108 passed in 4.90s
+historical target 0 107 passed in 4.80s
+alternative 1 1 failed, 108 passed in 4.68s
+46 old failure sets preserved; additions only new tests; committed summary 47 47 47 []
+CI run-40020290720-attempt1.json d01d6aaf008dc63b8b509fa1b0855bbac626a718 1 failure
+check (macos-15-intel) failure [('Upload Proof report', 'failure')]
+check (macos-latest) success []
+check (ubuntu-latest) success []
+m2-cross-platform success []
+CI run-40020290720-attempt2.json d01d6aaf008dc63b8b509fa1b0855bbac626a718 2 success
+check (macos-15-intel) success []
+check (ubuntu-latest) success []
+check (macos-latest) success []
+m2-cross-platform success []
+CI run-40034728330.json e404b0f40a3a46c0a71041636e0f87eb5fa247f3 1 success
+check (ubuntu-latest) success []
+check (macos-15-intel) success []
+check (macos-latest) success []
+m2-cross-platform success []
+FINAL STATUS 

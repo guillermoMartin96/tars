@@ -1,0 +1,48 @@
+import json,sys,platform,subprocess,shutil,os,importlib.util
+from pathlib import Path
+from fractions import Fraction as F
+import numpy as np
+import tars.sim.forces as f
+from tars.sim.constants import WGS84_EGM2008_TIDE_FREE as C
+R=Path.cwd(); S=R/'review_scratch'
+def git(*a): return subprocess.check_output(['git',*a],text=True)
+print('ENV',platform.platform(),sys.version)
+for base,paths in [('4b85ded',['src']),('60648b9',['proof','toolbox','scenarios','.github','uv.lock','pyproject.toml','src/tars/validation']),('d01d6aa',['docs/reviews/M3-T1-review-03.md','docs/reviews/M3-T1-acceptance-dossier.md','docs/reviews/raw','docs/science/experiments/m3-t1/t1_mutation_check_results.json'])]:
+ assert not git('diff',base,'HEAD','--',*paths);print('UNCHANGED',base,paths)
+for p in ['docs/reviews/M3-T1-review-02.md','docs/science/validation.md','docs/science/experiments/m3-t1/README.md']:
+ assert Path(p).read_bytes().startswith(subprocess.check_output(['git','show',f'd01d6aa:{p}']));print('APPENDED',p)
+count=[]
+def counted(x):count.append(x);return F(x)
+f.Fraction=counted
+m=f.ZonalJ2Gravity(C.mu,C.equatorial_radius,C.j2);print('construction Fraction calls',len(count));count.clear()
+a=m.acceleration(0,np.array([12756274.,0.,6378137.]),np.zeros(3));print('canonical',a.tolist(),'Fraction calls',len(count));f.Fraction=F
+print('reach bound',abs(-1.5*C.j2*C.mu*C.equatorial_radius**2)/sys.float_info.max*2**-53)
+u=F(1,2**1074)
+for n in [2**52+1,2**52]:
+ mu=n*2.**-1074;p=-.75*mu;exact=-F(3,4)*F(mu);p3=p*1024;k=p3*1024
+ assert F(mu)==n*u and 2**51*u<abs(exact)<2**52*u and 2**51*u<abs(F(p))<2**52*u
+ assert F(p3)==F(p)*1024 and F(k)==F(p3)*1024 and abs(k)>=sys.float_info.min
+ print('band',n,'exact/u',exact/u,'rounded/u',F(p)/u,'error/u',(F(p)-exact)/u,'k',k)
+ try: print('constructed',f.ZonalJ2Gravity(mu,1024.,.5).acceleration(0,np.array([1.,0.,0.]),np.zeros(3)))
+ except ValueError as e: print('rejection',str(e))
+# Archived alias reproduction, loading only archived force module.
+old=S/'archived_forces.py';old.write_text(git('show','b1566ae:src/tars/sim/forces.py'))
+spec=importlib.util.spec_from_file_location('archived',old);mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+mu=np.array(C.mu);m=mod.ZonalJ2Gravity(mu,C.equatorial_radius,C.j2);mu[...]=-1.;print('alias at acceleration',float(m.mu),m.acceleration(0,np.array([C.equatorial_radius,0.,0.]),np.zeros(3)).tolist());mu[...]=0.;print('alias at row',float(m.mu))
+# Independent copies, never mutate tracked files.
+for name,replacement in [('target','return abs(product) < _MIN_NORMAL / 2 and'),('alternative','return abs(product) < _MIN_NORMAL and product != -float.fromhex("0x0.c000000000001p-1022") and')]:
+ src=S/name/'src';shutil.copytree(R/'src',src,dirs_exist_ok=True);p=src/'tars/sim/forces.py';p.write_text(p.read_text().replace('return abs(product) < _MIN_NORMAL and',replacement))
+ env=dict(os.environ,PYTHONPATH=str(src));cmd=[sys.executable,'-m','pytest','-q','-p','no:cacheprovider','tests/test_zonal_j2.py','tests/test_constants.py'];res=subprocess.run(cmd,env=env,capture_output=True,text=True);(S/f'{name}.log').write_text(res.stdout+res.stderr);print(name,res.returncode,res.stdout.splitlines()[-1])
+ if name=='target':
+  t=S/'historical_tests';t.mkdir(exist_ok=True)
+  for fn in ['test_zonal_j2.py','test_constants.py']:(t/fn).write_text(git('show','4b85ded:tests/'+fn))
+  res=subprocess.run(cmd[:6]+[str(t)],env=env,capture_output=True,text=True);(S/'historical.log').write_text(res.stdout+res.stderr);print('historical target',res.returncode,res.stdout.splitlines()[-1])
+old=json.loads(Path('docs/science/experiments/m3-t1/t1_mutation_check_results.json').read_text());new=json.loads(Path('docs/science/experiments/m3-t1/t1_mutation_check_results_i21.json').read_text());lookup={m['id']:m for m in new['mutants']}
+for m in old['mutants']:
+ a={x['test'] for x in m['failures']};b={x['test'] for x in lookup[m['id']]['failures']};assert a<=b
+ assert all('upper_subnormal_band' in x for x in b-a)
+print('46 old failure sets preserved; additions only new tests; committed summary',new['detected'],new['detected_by_assertion'],new['total'],new['surviving'])
+for p in sorted((S/'ci').glob('*.json')):
+ d=json.loads(p.read_text());print('CI',p.name,d.get('headSha'),d.get('attempt'),d.get('conclusion'))
+ for j in d.get('jobs',[]):print(j['name'],j['conclusion'],[(s['name'],s['conclusion']) for s in j['steps'] if s['conclusion'] not in ['success','skipped']])
+print('FINAL STATUS',git('status','--short'))
