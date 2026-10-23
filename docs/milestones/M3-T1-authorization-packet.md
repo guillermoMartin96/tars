@@ -133,3 +133,15 @@ Stop and report, without working around the problem, if:
 - **Result:** T1 is **IMPLEMENTED; NOT REVIEWED, NOT ACCEPTED, NOT MERGED**. See `docs/milestones/M3-T1-report.md` and VAL-0020.
   - The derived J2 is bit-identical on the three CI platforms (CI run 39852509134).
 - The independent T1 review (§11) needs separate owner authorization.
+
+## Erratum (recorded 2026-10-23 UTC, append-only)
+- **Authority:** I-19 §8 ("I-19 — M3 T1 Review 01 Corrections and Review 02 Authorization", Tech Lead).
+- **Statement corrected:** the §7 table row "Q3 gradient" reads "acceleration = −∇U of the separately coded potential". **This is a sign-convention error in this packet's wording.** The correct relation is **acceleration = +∇U**. The original text above is preserved.
+- **Basis:**
+  - §3 item 2 of this packet uses the positive potential convention: U = (μ/r)[1 − J2 (a/r)² P₂(z/r)], P₂(s) = (3s² − 1)/2.
+  - For that convention the acceleration is +∇U. The point-mass term checks this: ∇(μ/r) = −μ r/r³, which is the attraction.
+  - The J2 term is U₂ = −(μ J2 a²/2)(3z²/r⁵ − 1/r³). Its gradient is (μ J2 a²/2)(−3x/r⁵ + 15xz²/r⁷, −3y/r⁵ + 15yz²/r⁷, −9z/r⁵ + 15z³/r⁷) = −(3/2) J2 μ a²/r⁵ · (x(1 − 5z²/r²), y(1 − 5z²/r²), z(3 − 5z²/r²)). That is the implemented acceleration (`src/tars/sim/forces.py`).
+  - Codex T1 Review 01 derived the same result independently ("With positive potential U, acceleration is +∇U"; `docs/reviews/raw/M3-T1-codex-review01.md` §2).
+  - The T1 tests check it numerically: `test_acceleration_is_the_gradient_of_the_separately_coded_potential` and `test_gradient_holds_at_every_latitude_band` compare the acceleration with **+∇U₂**, computed by dual numbers.
+  - VAL-0020 states "a = ∇U₂".
+- **Effect:** none on the implemented J2 physics, the tests or the evidence, which already use +∇U. Only this packet's wording was wrong.

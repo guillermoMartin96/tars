@@ -245,3 +245,10 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
   - a disposition of the DR-0025 Q3 dual-number substitution, which is not accepted.
 - **Unchanged and undecided:** every other open item listed in the "P10 merge and T1" note.
 - **Status:** T1 is IMPLEMENTED — REVIEWED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## T1 Review 01 corrections (recorded 2026-10-23 UTC, append-only)
+- **I-19 accepted:** the I-18 checkpoint and Review 01 (both attempts, as one Review 01). F1–F4 are accepted for correction and corrected (`62d3684`, `a27f288`, `b0164fd`).
+- **DR-0025 Q3 (T1):** dual numbers ACCEPTED for T1, with limitations (DR-0025 Resolution note).
+- **Packet:** +∇U erratum appended.
+- **Unchanged and open:** every other item.
+- **Status:** T1 IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.

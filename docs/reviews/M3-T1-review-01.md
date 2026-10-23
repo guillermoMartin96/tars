@@ -127,3 +127,32 @@ Further limitations noted by the reviewer:
   Raise `ValueError`, not `ZeroDivisionError`, for interior underflow. Add boundary tests (overflow onset, ∞ parameters, tiny radius). The choice of domain rule is an implementation decision within T1 scope, with no new physics.
 - **F3:** correct the docstring to r⁻³, or state a·r̂.
 - **F4:** add a negative-J2 case and a parameter-scaling case. Add deterministic samples at high latitude (s² up to 1 − 1e-4) and at more radii. Describe the literal scan as a heuristic in VAL-0020 (append-only). Optionally, add the reviewer's surviving mutants to `t1_mutation_check.py` as expected detections.
+
+## Owner disposition (I-19; recorded 2026-10-23 UTC, append-only)
+- **Authority:** "I-19 — M3 T1 Review 01 Corrections and Review 02 Authorization" (Tech Lead).
+- **Checkpoint:** the I-18 checkpoint and the Review 01 result are accepted. The `REQUEST_CHANGES` verdict stands. **M3T1-R1-F1 … F4 are accepted for correction.** T1 status: IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED.
+- **Review 01 execution (I-19 §1):** the attempt-1/attempt-2 handling is **ACCEPTED**. Both sessions together are **Review 01**; they are not Review 01 and Review 02. Both raw sessions are preserved unchanged.
+  - The owner's rationale:
+    - attempt 1 performed no substantive review;
+    - its stop came from a prompt/environment mismatch;
+    - attempt 2 reviewed the same implementation SHA from a fresh clone;
+    - the added paragraph supplied established precondition and CI facts without changing the implementation or steering the conclusion.
+  - I-19 writes the SHA as `97b69ef92e524b`. The reviewed SHA is `97b69ef92e589ebd1b71016f49c4c9816d8c724b`; the two agree in their first seven characters, `97b69ef`.
+- **Dual-number substitution (I-19 §7):** ACCEPTED for T1. It is recorded in DR-0025 (Resolution, owner-disposition note) with the owner's stated rationale and limitations.
+- **Packet sign wording (I-19 §8):** recorded as an erratum, appended to `docs/milestones/M3-T1-authorization-packet.md`. The relation is +∇U for the positive potential, checked against the potential convention, Review 01's derivation and the gradient tests.
+- **Unchanged and open (I-19 §9):**
+  - DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2, DR-0028 P6(b);
+  - the secular-rate tolerance and its presentation; T4/T5 comparison requirements; the M3 final time step; the axis representation (T3);
+  - the lack of external corroboration; the broader IEEE 754 rounding-model assumption.
+  - The dt⁵ drift remains an observation. The CI metadata timestamp oddity was not investigated: it does not affect reproducibility, correctness or review integrity.
+
+## Corrections (I-19 §2–§6; recorded 2026-10-23 UTC, append-only)
+| Finding | Correction | Commit | Evidence |
+|---|---|---|---|
+| M3T1-R1-F1 | `ZonalJ2Gravity`: `__slots__` (no `__dict__`); `__setattr__`/`__delattr__` raise `AttributeError` for every name; no cached derived value (the coefficient is computed from the stored parameters on each call, with the same arithmetic) | `a27f288` | `test_parameters_are_immutable_after_construction`; mutants `f1_setattr_allowed`, `f1_delattr_allowed`, `f1_instance_dict` killed |
+| M3T1-R1-F2 | Explicit numerical contract with three classes: valid; invalid-domain (rejected before the arithmetic); arithmetic outside the binary64 normal range ("outside the J2 numerical domain …"). `ValueError` throughout, with the message naming the cause (VAL-0020 correction). Valid results are bit-identical to `97b69ef` | `a27f288` | Six new tests; 8 F2 protection-removal mutants killed; `t1_review01_correction_check_results.json` (before/after for every Review 01 reproduction; 200 004 states bit-identical; domain 3.38e-57 … 4.48e61 m on the equator) |
+| M3T1-R1-F3 | Docstring corrected to r⁻³; assertion unchanged | `62d3684` | The Review 01 reproduction (`reproduce_review01_output.json`, F3 rows) |
+| M3T1-R1-F4 | Exact power-of-two known answers (±J2, last-bit coefficient, out to 2²⁰⁰ R); far-field known answers to 1000 R; dense latitude gradient for ±J2 (5 904 points, including 0.99 < s² < 0.9999); literal scan labelled a heuristic and extended to the hex spelling. Mutation harness: anchors updated, the reviewer's 8 and 11 F1/F2 mutants added, kills classified from JUnit XML, and detection by assertion required | `62d3684`, `b0164fd` | **32/32 killed, all by assertion; no survivors** (`t1_mutation_check_results.json`) |
+
+- **Not changed (out of I-19 scope):** the force docstring sentence "does not depend on libm or BLAS". Review 01 §3 discussed its qualification but did not register it as a finding.
+- **Correction to a commit message:** `62d3684`'s message says "20 failed, 52 passed" against `97b69ef`. That count was taken before the subnormal-coefficient test was added. The committed tests give **21 failed, 52 passed** (73 cases).

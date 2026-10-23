@@ -1112,3 +1112,42 @@ See the T1 report (`docs/milestones/M3-T1-report.md`): M1 Proof, M2 Proof, golde
   - no tolerance exists for the secular-rate comparison;
   - no external (GMAT) or DOP853 comparison is part of T1 (T4/T5).
 - **Related:** SCI-0013; DR-0024 Q1–Q4; DR-0025 VO-1, Q1–Q3, Q10, Q11; DR-0028; DR-0029 P10; ADR-0004; ADR-0009.
+
+### VAL-0020 correction (Codex T1 Review 01; recorded 2026-10-23 UTC, append-only)
+- **Authority:** "I-19 — M3 T1 Review 01 Corrections and Review 02 Authorization" (Tech Lead). The entry above is preserved as written. Where this section differs, this section applies from commit `a27f288` on.
+- **Commits:** tests `62d3684` (21 of 73 cases fail against the reviewed `97b69ef`, 52 pass; the commit message's "20 failed, 52 passed" predates the subnormal-coefficient test); code `a27f288`; evidence `b0164fd`.
+- **M3T1-R1-F1 (immutability):**
+  - `ZonalJ2Gravity` has `__slots__` (no instance `__dict__`), and `__setattr__`/`__delattr__` raise `AttributeError` for every name.
+  - No derived value is cached: the coefficient −(3/2) J2 μ R² is computed from the stored parameters on each call, with the same operations in the same order.
+  - New gate: `test_parameters_are_immutable_after_construction`.
+- **M3T1-R1-F2 (numerical domain; DR-0024 R6).** The contract is in the class docstring. Every violation raises `ValueError`, and the message names the class of input:
+  1. *Valid inputs* return the formula. The outputs are bit-identical to `97b69ef` on 200 004 states (`t1_review01_correction_check_results.json`). The informational results file reproduces byte for byte.
+  2. *Invalid-domain inputs* are rejected before any arithmetic on the state: μ or R non-finite or ≤ 0; J2 non-finite; −(3/2) J2 μ R² not a finite normal binary64 (unless J2 = 0); a non-finite position; the origin.
+  3. *Arithmetic outside the binary64 normal range*, with a message starting "outside the J2 numerical domain": |r|² underflowing to zero for a non-zero position; |r|⁵ not normal; the scaled coefficient not normal (overflow, or subnormal and so imprecise); a non-finite result.
+  - For the canonical constants on the equator, the accepted range is 3.3773820261812166e-57 m ≤ x ≤ 4.476546622757235e61 m.
+  - The physical validity boundary (Earth's surface, termination) is not enforced by the component. It belongs to DR-0029 P1–P9, which are open.
+  - The Review 01 reproductions now raise. x = 1e62/1e70/1e200 previously returned a silent zero; x = 1e-100 previously raised `ZeroDivisionError`; x = ±∞/NaN previously returned non-finite values; μ or R = ∞ was previously accepted.
+  - New gates:
+    - `test_non_finite_or_unrepresentable_parameters_are_rejected`;
+    - `test_non_finite_position_is_rejected`;
+    - `test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result`;
+    - `test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result`;
+    - `test_result_overflow_raises`;
+    - `test_inside_the_numerical_domain_results_are_the_formula` (2γ₁₆ against exact rationals, from x = 1e-50 to 1e61).
+- **M3T1-R1-F3:** the radial-sign test docstring now reads a·r ∝ r⁻³. The assertion is unchanged.
+- **M3T1-R1-F4 (coverage).** New gates:
+  - `test_known_answers_are_exact_in_power_of_two_units`: μ = R = 1, J2 ∈ {1/2, −1/2, 3/8}, r = 2^e for e ∈ {1, 10, 50, 100, 200}, on the equator and the pole. **Exact equality** with the rational closed form. Every operation is exact there: powers of two times 3/2, 3, 5 and J2, with r⁵ and the coefficient normal.
+  - `test_known_answers_at_far_field_radii`: canonical constants, 1–1000 R, 2γ₁₆.
+  - `test_gradient_holds_at_every_latitude_band`: the γ₆₄ gradient bound for +J2 and −J2 on 5 904 points. The grid covers every 0.5° of latitude, plus 1e-1 … 1e-4° from either pole, at 4 longitudes and at radii R, 1.3 R, 7.5 R and 60 R.
+  - The source-literal scan is **a heuristic**. It now also matches the hexadecimal spelling. The functional protection of the constant is the identity tests.
+- **Mutation campaign** (`t1_mutation_check.py`, `t1_mutation_check_results.json`):
+  - **32 committed mutants, 32 killed, all by assertion** (an `assert` or a missing expected exception, read from pytest's JUnit XML). **No survivors.** The unmutated control passes.
+  - The 32 are the original 14, the reviewer's 8 and 11 that each remove one F1/F2 protection. The four Review 01 survivors are killed by:
+    - `r1_negative_j2_abs`: the exact power-of-two answers with J2 < 0, and the −J2 dense gradient;
+    - `r1_small_coefficient_error` (4 ulp): the exact power-of-two answers only;
+    - `r1_far_field_zero`: the far-field and exact answers, the dense gradient (60 R), and the domain tests;
+    - `r1_high_lat_band`: the dense gradient only.
+  - `f2_infinite_parameters_accepted` is killed only through the diagnostic message. Without the explicit check, an infinite μ or R still raises, through the coefficient check, but with a different message.
+  - This is evidence for these 32 named defects, **not complete coverage** of all possible defects.
+- **Bounds:** the γ₁₆ and γ₆₄ bounds are applied to the new points with the same derivation as above. The operation counts are still by inspection. Review 01's interval certificate covered the original 162 points only.
+- **Status:** corrections implemented; not reviewed (Review 02 pending), not accepted.

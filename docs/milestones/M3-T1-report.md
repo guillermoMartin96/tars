@@ -141,3 +141,13 @@ Independent T1 review (Codex), which needs separate owner authorization (packet 
   - §9 item 4 (the dual-number substitution) awaits an owner disposition. The reviewer recommends an explicit DR-0025 amendment or disposition.
   - §8's regression results were reproduced by the reviewer with the validators (not the wrappers).
 - **Status:** T1 **IMPLEMENTED — REVIEWED — NOT ACCEPTED — NOT MERGED**. Corrections and Review 02 need separate authorization.
+
+## Status update (recorded 2026-10-23 UTC, append-only): Review 01 corrections (I-19)
+- Under I-19, the attempt-1/attempt-2 handling of Review 01 is accepted, and M3T1-R1-F1 … F4 are corrected:
+  - tests `62d3684`;
+  - code `a27f288`;
+  - evidence `b0164fd`;
+  - records: VAL-0020 correction, DR-0025 owner disposition (dual numbers accepted for T1), packet erratum (+∇U), Review 01 record.
+- **Mutation:** 32/32 killed by assertion. **Valid outputs:** bit-identical to `97b69ef`.
+- The validation results and Review 02 are recorded in `docs/reviews/M3-T1-review-01.md` and the Review 02 record.
+- **Status:** IMPLEMENTED — NOT REVIEW-ACCEPTED — NOT MERGED.

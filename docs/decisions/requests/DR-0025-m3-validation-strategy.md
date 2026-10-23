@@ -246,3 +246,12 @@ Answers to Q-G2-1 to Q-G2-8, or `discuss`.
 - T0 checkpoint: Q-G2-1 method, Q-G2-5 reference missions, Q-G2-7 geodetic source, and candidate C_d/A (DR-0024 Q9).
 - T4: Q-G2-6. Later: the threshold DR (G4).
 - *(T0 note, 2026-10-18, append-only.)* The T0 proposals for Q-G2-1, Q-G2-5 and Q-G2-7 are in **DR-0029** (P6, P7, P8), status OPEN. Evidence: VAL-0019. Every closure above is unchanged: Q-G2-1, Q-G2-5 and Q-G2-7 stay DEFERRED to the T0 checkpoint until the owner decides.
+- *(Owner disposition, 2026-10-23 UTC, append-only.)* **Q3 derivative method for T1: dual numbers ACCEPTED for T1** ("I-19 — M3 T1 Review 01 Corrections and Review 02 Authorization", Tech Lead, §7).
+  - **What it accepts:** forward-mode dual-number differentiation of the separately coded potential (`tests/test_zonal_j2.py`) is the independent unit-level derivative check for T1, in place of the complex step named in Q3 above. The limitations identified by Codex T1 Review 01 (`docs/reviews/M3-T1-review-01.md`, §5 of the raw review) apply.
+  - **Rationale, as stated by the owner:**
+    - it checks the same required derivative;
+    - it is sufficiently independent for the intended unit-level verification purpose;
+    - it removes the complex-square-root and finite-step-size assumptions of the previous approach;
+    - it still shares ordinary floating-point arithmetic and scalar-square-root assumptions, and is therefore not an independent external physics implementation;
+    - its acceptance does not elevate it into external corroboration or a proof of IEEE 754 rounding behaviour.
+  - **Scope:** T1 only. The Q3 row above is unchanged, and no other Q item or evidence class changes. No other derivative oracle is to be built unless Review 02 shows that this disposition is insufficient (I-19 §7).
