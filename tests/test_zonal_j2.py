@@ -12,6 +12,7 @@ comparisons with first-order secular theory are informational and live in
 """
 
 import math
+from fractions import Fraction
 
 import numpy as np
 import pytest
@@ -158,6 +159,115 @@ def test_parameters_validated():
         j2_model().acceleration(0.0, np.zeros(3), np.zeros(3))
 
 
+def test_parameters_are_immutable_after_construction():
+    """M3T1-R1-F1: no attribute can be reassigned, deleted or added, so the visible
+    parameters always match the values the acceleration uses."""
+    model = j2_model()
+    r = np.array([RE, 0.0, 0.0])
+    before = model.acceleration(0.0, r, np.zeros(3)).tobytes()
+    for name in ("mu", "equatorial_radius", "j2", "name", "version", "extra"):
+        with pytest.raises(AttributeError):
+            setattr(model, name, 0.0)
+        with pytest.raises(AttributeError):
+            delattr(model, name)
+    assert not hasattr(model, "__dict__")
+    assert (model.mu, model.equatorial_radius, model.j2) == (MU, RE, J2)
+    assert (model.name, model.version) == ("zonal_j2", 1)
+    assert model.acceleration(0.0, r, np.zeros(3)).tobytes() == before
+
+
+@pytest.mark.parametrize(
+    ("mu", "radius", "j2"),
+    [
+        (math.inf, RE, J2),
+        (math.nan, RE, J2),
+        (MU, math.inf, J2),
+        (MU, math.nan, J2),
+        (1e300, 1e10, J2),  # -(3/2) J2 mu R^2 overflows
+        (1e-300, 1e-10, 1e-3),  # -(3/2) J2 mu R^2 is subnormal
+    ],
+)
+def test_non_finite_or_unrepresentable_parameters_are_rejected(mu, radius, j2):
+    """M3T1-R1-F2, invalid-domain parameters: rejected at construction (DR-0024 R6), with
+    the diagnostic naming the offending input."""
+    if math.isfinite(mu) and math.isfinite(radius):
+        message = r"-\(3/2\) J2 mu R\^2 is not a finite normal"
+    else:
+        message = "mu and equatorial_radius must be finite and positive"
+    with pytest.raises(ValueError, match=message):
+        ZonalJ2Gravity(mu, radius, j2)
+
+
+@pytest.mark.parametrize(
+    "r", [[math.inf, 0.0, 0.0], [math.nan, 0.0, 0.0], [0.0, -math.inf, 0.0], [1e7, 0.0, math.nan]]
+)
+def test_non_finite_position_is_rejected(r):
+    """M3T1-R1-F2, invalid-domain state: rejected before any arithmetic."""
+    with pytest.raises(ValueError, match="position must be finite"):
+        j2_model().acceleration(0.0, np.array(r), np.zeros(3))
+
+
+def exact_equatorial_x(x: float, mu: float = MU, radius: float = RE, j2: float = J2) -> float:
+    """Correctly rounded a_x on the equator, y = z = 0: -(3/2) J2 mu R^2 / x^4 (exact rationals)."""
+    return float(
+        Fraction(-3, 2) * Fraction(j2) * Fraction(mu) * Fraction(radius) ** 2 / Fraction(x) ** 4
+    )
+
+
+@pytest.mark.parametrize(
+    ("x", "message"),
+    [
+        (1e62, r"\|r\|\^5"),
+        (1e70, r"\|r\|\^5"),
+        (1e100, r"\|r\|\^5"),
+        (1e200, r"\|r\|\^5"),
+        (1e-60, "coefficient"),
+        (1e-100, r"\|r\|\^5"),
+        (1e-200, "underflows to zero"),
+        (5e-324, "underflows to zero"),
+    ],
+)
+def test_arithmetic_outside_the_numerical_domain_raises_instead_of_a_silent_result(x, message):
+    """M3T1-R1-F2: intermediate overflow or underflow is reported, never returned as a zero
+    or non-finite acceleration. At x = 1e62 the exact answer (-2.6e-223) is representable but
+    r^5 overflows, which before the correction returned exactly 0. The message names the
+    intermediate that left the normal range (r^5; the scaled coefficient, which overflows at
+    1e-60; r^2, which underflows to zero for a non-zero position)."""
+    with pytest.raises(ValueError, match="numerical domain: .*" + message):
+        j2_model().acceleration(0.0, np.array([x, 0.0, 0.0]), np.zeros(3))
+
+
+def test_subnormal_scaled_coefficient_raises_instead_of_an_inaccurate_result():
+    """M3T1-R1-F2: if -(3/2) J2 mu R^2 / r^5 is subnormal it has lost relative precision, and
+    the finite-looking product would be inaccurate (here by about 3e-8 relative). Parameters
+    mu = R = 1, J2 = 0.7 * 2^-1000 (coefficient normal), r = 2^10 (coefficient / r^5 is
+    1.05 * 2^-1050, subnormal)."""
+    model = ZonalJ2Gravity(1.0, 1.0, 0.7 * 2.0**-1000)
+    with pytest.raises(ValueError, match="numerical domain: coefficient"):
+        model.acceleration(0.0, np.array([2.0**10, 0.0, 0.0]), np.zeros(3))
+
+
+def test_result_overflow_raises():
+    """M3T1-R1-F2: r^5 and the coefficient are normal but the product overflows (only for
+    parameters far beyond physical ones)."""
+    model = ZonalJ2Gravity(1e300, 1.0, -1.7e8 / 1.5)
+    with pytest.raises(ValueError, match="acceleration overflows"):
+        model.acceleration(0.0, np.array([0.0, 0.0, 1.1]), np.zeros(3))
+
+
+@pytest.mark.parametrize("x", [1e-50, 1e-20, RE, 1e40, 1e61])
+def test_inside_the_numerical_domain_results_are_the_formula(x):
+    """The domain checks change nothing inside the numerical domain: the result is within
+    2 gamma_16 of the exactly rounded closed form, including just below the r^5 overflow
+    onset (about 4.5e61 m) and far inside the Earth (the physical boundary is not the
+    component's: DR-0029 P1-P9)."""
+    a = j2_model().acceleration(0.0, np.array([x, 0.0, 0.0]), np.zeros(3))
+    expected = exact_equatorial_x(x)
+    assert expected != 0.0
+    assert abs(a[0] - expected) <= 2 * gamma(16) * abs(expected)
+    assert a[1] == 0.0 and a[2] == 0.0
+
+
 def test_known_answers_equator_and_pole():
     """FC-6: at r = R x-hat, a = -(3/2) J2 mu / R^2 x-hat (inward);
     at r = R z-hat, a = +3 J2 mu / R^2 z-hat (outward along +Z).
@@ -173,6 +283,80 @@ def test_known_answers_equator_and_pole():
     assert a_pole[2] > 0.0
     assert abs(a_pole[2] - expected_pole) <= tol * abs(expected_pole)
     assert a_pole[0] == 0.0 and a_pole[1] == 0.0
+
+
+@pytest.mark.parametrize("j2", [0.5, -0.5, 0.375])
+@pytest.mark.parametrize("e", [1, 10, 50, 100, 200])
+def test_known_answers_are_exact_in_power_of_two_units(j2, e):
+    """M3T1-R1-F4. With mu = R = 1 and r = 2^e on the equator and the pole, every operation
+    of the closed form and of the formula is exact in binary64 (powers of two times 3/2, 3,
+    5 and J2 = +-1/2 or 3/8), so the result must equal the exact rational value bit for bit:
+    a_x = -(3/2) J2 / r^4 at r x-hat, a_z = +3 J2 / r^4 at r z-hat. This pins the coefficient
+    to the last bit, the sign of J2 (prolate J2 < 0 reverses the field) and the radial law
+    out to 2^200 reference radii."""
+    model = ZonalJ2Gravity(1.0, 1.0, j2)
+    r = 2.0**e
+    a_eq = model.acceleration(0.0, np.array([r, 0.0, 0.0]), np.zeros(3))
+    a_pole = model.acceleration(0.0, np.array([0.0, 0.0, r]), np.zeros(3))
+    assert a_eq[0] == float(Fraction(-3, 2) * Fraction(j2) / Fraction(r) ** 4)
+    assert a_pole[2] == float(3 * Fraction(j2) / Fraction(r) ** 4)
+    assert a_eq[1] == a_eq[2] == a_pole[0] == a_pole[1] == 0.0
+
+
+@pytest.mark.parametrize("factor", [1.0, 7.5, 60.0, 1000.0])
+def test_known_answers_at_far_field_radii(factor):
+    """M3T1-R1-F4: the equator and pole known answers of test_known_answers_equator_and_pole
+    for the canonical constants at radii out to 1000 R (same 2 gamma_16 derivation)."""
+    tol = 2 * gamma(16)
+    model = j2_model()
+    radius = factor * RE
+    a_eq = model.acceleration(0.0, np.array([radius, 0.0, 0.0]), np.zeros(3))
+    a_pole = model.acceleration(0.0, np.array([0.0, 0.0, radius]), np.zeros(3))
+    expected_eq = exact_equatorial_x(radius)
+    expected_pole = float(
+        3 * Fraction(J2) * Fraction(MU) * Fraction(RE) ** 2 / Fraction(radius) ** 4
+    )
+    assert abs(a_eq[0] - expected_eq) <= tol * abs(expected_eq)
+    assert abs(a_pole[2] - expected_pole) <= tol * abs(expected_pole)
+
+
+def dense_latitude_points():
+    """Deterministic coverage of every latitude band (M3T1-R1-F4): every 0.5 deg, plus
+    latitudes within 1e-1 ... 1e-4 deg of either pole (sin^2 lat up to 1 - 3e-12), at four
+    longitudes and radii from R to 60 R."""
+    lats = [-90.0 + 0.5 * k for k in range(361)]
+    for d in (1e-1, 1e-2, 1e-3, 1e-4):
+        lats += [90.0 - d, -90.0 + d]
+    pts = []
+    for radius in (RE, 1.3 * RE, 7.5 * RE, 60.0 * RE):
+        for lat in lats:
+            for lon in (0.0, 45.0, 101.0, 213.0):
+                la, lo = math.radians(lat), math.radians(lon)
+                pts.append(
+                    radius
+                    * np.array(
+                        [math.cos(la) * math.cos(lo), math.cos(la) * math.sin(lo), math.sin(la)]
+                    )
+                )
+    return pts
+
+
+@pytest.mark.parametrize("j2", [J2, -J2])
+def test_gradient_holds_at_every_latitude_band(j2):
+    """M3T1-R1-F4: the gradient check of the test below on a dense latitude grid, for J2 and
+    for -J2 (the oracle's potential takes J2 as a parameter, so a sign-insensitive
+    implementation fails). A 1 % error confined to any latitude band wider than 0.5 deg, or to
+    0.99 < sin^2 lat < 0.9999 (84.3 ... 89.4 deg), falls on grid points."""
+    model = j2_model(j2)
+    for r in dense_latitude_points():
+        grad = np.array(j2_potential(*seeds(r), j2=j2).grad)
+        grad_abs = np.array(j2_potential(*seeds(r, absolute=True), j2=j2).grad)
+        a = model.acceleration(0.0, r, np.zeros(3))
+        assert np.all(np.abs(a - grad) <= gamma(64) * (acceleration_abs(r, j2) + grad_abs)), (
+            r,
+            a,
+            grad,
+        )
 
 
 def test_acceleration_is_the_gradient_of_the_separately_coded_potential():
@@ -192,12 +376,12 @@ def test_acceleration_is_the_gradient_of_the_separately_coded_potential():
         assert np.all(np.abs(a - grad) <= gamma(64) * (a_abs + grad_abs)), (r, a, grad)
 
 
-def acceleration_abs(r) -> np.ndarray:
+def acceleration_abs(r, j2: float = J2) -> np.ndarray:
     """The acceleration expression of SCI-0013 evaluated with every term non-negative."""
     x, y, z = (abs(float(c)) for c in r)
     r2 = x * x + y * y + z * z
     s2 = z * z / r2
-    k = 1.5 * abs(J2) * MU * RE * RE / (r2 * r2 * math.sqrt(r2))
+    k = 1.5 * abs(j2) * MU * RE * RE / (r2 * r2 * math.sqrt(r2))
     return np.array([k * (1 + 5 * s2) * x, k * (1 + 5 * s2) * y, k * (3 + 5 * s2) * z])
 
 
@@ -209,7 +393,8 @@ def test_gradient_oracle_detects_a_wrong_coefficient():
             a = super().acceleration(t, r, v)
             x, y, z = (float(c) for c in r)
             r2 = x * x + y * y + z * z
-            return a - np.array([0.0, 0.0, self._k / (r2 * r2 * math.sqrt(r2)) * z])
+            k0 = -1.5 * self.j2 * self.mu * self.equatorial_radius * self.equatorial_radius
+            return a - np.array([0.0, 0.0, k0 / (r2 * r2 * math.sqrt(r2)) * z])
 
     model = Wrong(MU, RE, J2)
     failures = 0
@@ -233,7 +418,7 @@ def test_axisymmetry_is_exact():
 
 
 def test_radial_sign_changes_at_sin2_latitude_one_third():
-    """a_J2 . r = -(3/2) J2 mu R^2 / r^4 (1 - 3 sin^2 lat): inward below |lat| = 35.26 deg,
+    """a_J2 . r = -(3/2) J2 mu R^2 / r^3 (1 - 3 sin^2 lat): inward below |lat| = 35.26 deg,
     outward above (exact sign of a closed form; margins far above roundoff)."""
     model = j2_model()
     for lat, sign in ((0.0, -1), (20.0, -1), (-20.0, -1), (50.0, +1), (-50.0, +1), (90.0, +1)):

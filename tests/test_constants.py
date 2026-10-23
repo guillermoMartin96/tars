@@ -125,9 +125,12 @@ def test_j2_identity_constants_validated():
 
 
 def test_c20_literal_only_in_constants_and_no_j2_literal_anywhere():
-    """P10: C̄2,0 is written once (constants.py); no derived-J2 literal exists in src."""
+    """P10: C̄2,0 is written once (constants.py); no derived-J2 literal exists in src.
+
+    A source-text heuristic (M3T1-R1-F4): it catches the decimal and hexadecimal spellings,
+    not every possible encoding. The functional protection is the identity tests above."""
     c20 = re.compile(r"0\.484165143790815|4\.84165143790815")
-    j2 = re.compile(r"1\.08262617|0\.00108262617")
+    j2 = re.compile(r"1\.08262617|0\.00108262617|1\.?1bcdd00abd9aa", re.IGNORECASE)
     c20_offenders, j2_offenders = [], []
     for path in (REPO_ROOT / "src").rglob("*.py"):
         text = path.read_text()
