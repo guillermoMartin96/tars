@@ -1,0 +1,38 @@
+import math
+import sys
+from decimal import Decimal, localcontext
+from pathlib import Path
+import numpy as np
+from scipy.optimize import brentq
+sys.path.insert(0, str(Path('docs/science/experiments/m3-t0').resolve()))
+import t0_model as m
+R = lambda z: 1 + z + z*z/2 + z**3/6 + z**4/24
+print('RK4 negative real boundary:', brentq(lambda z: R(z)-1, -3, -2))
+with localcontext() as ctx:
+    ctx.prec = 60
+    for s in ('-0.01', '-0.1'):
+        z = Decimal(s)
+        poly = sum(z**i/Decimal(math.factorial(i)) for i in range(5))
+        print('z, exp(z)-R(z), leading:', s, z.exp()-poly, z**5/120)
+a=6378137.0
+f=1/298.257223563
+e2=f*(2-f)
+lat=math.radians(53+48/60+33.82/3600)
+lon=math.radians(2+7/60+46.38/3600)
+n=a/math.sqrt(1-e2*math.sin(lat)**2)
+p=np.array([(n+73)*math.cos(lat)*math.cos(lon),(n+73)*math.cos(lat)*math.sin(lon),(n*(1-e2)+73)*math.sin(lat)])
+print('a-b:',a-a*(1-f))
+print('C5 xyz:', [float(x) for x in p])
+print('C5 differences mm:', (p-np.array([3771793.97,140253.34,5124304.35]))*1000)
+v=np.array([7000.,-2000.,500.]);rho=1e-10;B=25.8
+jac=-rho/(2*B)*(np.linalg.norm(v)*np.eye(3)+np.outer(v,v)/np.linalg.norm(v))
+print('drag eigenvalues:',np.linalg.eigvalsh(jac))
+print('expected longitudinal:',-rho*np.linalg.norm(v)/B)
+b=m.TABLE[-2]
+left=b.rho0*math.exp(-(1000-b.base_km)/b.scale_km)
+right=m.TABLE[-1].rho0
+print('1000km left limit, value, relative jump:',left,right,right/left-1)
+for h in (1.,math.nextafter(1.,math.inf),192000000.,192000001.,-math.ulp(0.)):
+    print('h, h/1000, spike density:',repr(h),repr(h/1000),repr(m.density(h)))
+print('all 28 base densities exact:',all(m.density(b.base_km*1000)==b.rho0 for b in m.TABLE))
+print('dry mass plus clamped negative prop:',1000.+max(-1e-17,0.))

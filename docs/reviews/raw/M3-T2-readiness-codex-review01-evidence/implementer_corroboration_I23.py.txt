@@ -1,0 +1,23 @@
+import math
+from fractions import Fraction
+import numpy as np
+from scipy.optimize import brentq
+a=6378137.0; f=1/298.257223563; e2=f*(2-f); b=a*(1-f)
+# 1. EPSG GN7-2 forward example
+def dms(d,m,s): return math.radians(d+m/60+s/3600)
+lat,lon,h=dms(53,48,33.82),dms(2,7,46.38),73.0
+N=a/math.sqrt(1-e2*math.sin(lat)**2)
+X=(N+h)*math.cos(lat)*math.cos(lon);Y=(N+h)*math.cos(lat)*math.sin(lon);Z=(N*(1-e2)+h)*math.sin(lat)
+print("GN7-2 forward:",f"{X:.3f} {Y:.3f} {Z:.3f}","printed 3771793.97 140253.34 5124304.35")
+print(" diffs:",X-3771793.97,Y-140253.34,Z-5124304.35)
+# 2. RK4 real-axis stability limit: R(z)=1+z+z^2/2+z^3/6+z^4/24, |R|=1 at z<0
+R=lambda z:1+z+z*z/2+z**3/6+z**4/24
+z=brentq(lambda z:R(z)-1,-3,-2); print("RK4 real stability limit:",z)
+# local error constant: e^z - R(z) ~ z^5/120
+for zz in (1e-2,1e-1):print(" z=",zz,(math.exp(-zz)-R(-zz))/(-zz)**5*120 if False else (math.exp(-zz)-R(-zz)), "vs z^5/120", -zz**5/120)
+# 3. a-b
+print("a-b:",a-b)
+# 4. drag Jacobian eigenvalues: a=-(rho/2B)|v|v
+rho,B=1e-10,25.8; v=np.array([7000.,1000.,300.]); n=np.linalg.norm(v)
+J=-(rho/(2*B))*(n*np.eye(3)+np.outer(v,v)/n)
+print("eig:",sorted(np.linalg.eigvals(J).real)," rho|v|/B=",rho*n/B," rho|v|/2B=",rho*n/(2*B))

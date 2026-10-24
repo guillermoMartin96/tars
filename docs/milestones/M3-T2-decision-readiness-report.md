@@ -169,3 +169,8 @@ Checked on 2026-10-24 before any file was created.
 - No DR decision, and no change to any Resolution.
 - No T2 or T3 work.
 - No merge, and no PR.
+
+## Status update (2026-10-24, append-only): independent Review 01
+- Codex Review 01 (at `5ee6a6a`): **REQUEST_CHANGES**, with 2 MAJOR (M3T2R-R1-F1: 1000 km continuity; F2: E1 reused beyond h ≥ 0), 3 MINOR (F3 strict monotonicity; F4 lower-edge typo and the −5e-324 guard; F5 C² across band edges) and 1 NOTE (F6). All are reproduced and ACCEPTED, **not applied** (I-23 §10).
+- No P1–P9 classification changes. The text above is as reviewed.
+- Record: `docs/reviews/M3-T2-readiness-review-01.md`.

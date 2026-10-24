@@ -161,3 +161,8 @@ Each mutant must be killed by a designated assertion, for its declared reason. D
 - Trajectory thresholds (T6/G4).
 - Long-duration decay to the end condition (VO-9; T4).
 - Full VO-3/VO-4 (T4).
+
+## Status update (2026-10-24, append-only): independent Review 01
+- Codex Review 01 (at `5ee6a6a`): **REQUEST_CHANGES**, with 2 MAJOR (M3T2R-R1-F1: 1000 km continuity; F2: E1 reused beyond h ≥ 0), 3 MINOR (F3 strict monotonicity; F4 lower-edge typo and the −5e-324 guard; F5 C² across band edges) and 1 NOTE (F6). All are reproduced and ACCEPTED, **not applied** (I-23 §10).
+- No P1–P9 classification changes. The text above is as reviewed.
+- Record: `docs/reviews/M3-T2-readiness-review-01.md`.
