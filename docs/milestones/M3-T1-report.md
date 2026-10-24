@@ -177,3 +177,8 @@ Independent T1 review (Codex), which needs separate owner authorization (packet 
 - R3-F1, R3-F2 and R3-O1 ACCEPTED and closed under I-21: `481a62e` (tests only), `e404b0f` (records, mutant 47). Production code unchanged since `4b85ded`.
 - Focused Codex closure verification at `e404b0f`: **CLOSURE VERIFIED**, no new findings (`docs/reviews/M3-T1-closure-verification.md`). Closure evidence appended to `docs/reviews/M3-T1-acceptance-dossier.md`.
 - **Status:** T1 IMPLEMENTED — REVIEW PASSED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## Status update (recorded 2026-10-24 UTC, append-only): acceptance (I-22)
+- **T1 ACCEPTED** by the Tech Lead under "Authorization I-22 — M3 T1 Acceptance and Conditional Merge", at `65de33ffce72bb504dc28a3d17dbb0ae57b7a36b`. The acceptance covers the implementation, its documented numerical contract, tests, validation evidence and explicitly retained limitations; it is not acceptance of T2, T3 or any unresolved DR decision. Record: `docs/reviews/M3-T1-acceptance-dossier.md`, "Owner acceptance (I-22)".
+- Retained limitations: the exploratory survivors `canonical_one_ulp` and `narrow_band`; no claim of complete mutation coverage; the numerical limitations in the dossier.
+- **Status:** T1 IMPLEMENTED — REVIEWED — ACCEPTED — NOT MERGED. A fast-forward merge is authorized, conditionally, under I-22 §2–§3. T2 and later are NOT AUTHORIZED.

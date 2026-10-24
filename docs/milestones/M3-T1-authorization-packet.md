@@ -145,3 +145,6 @@ Stop and report, without working around the problem, if:
   - The T1 tests check it numerically: `test_acceleration_is_the_gradient_of_the_separately_coded_potential` and `test_gradient_holds_at_every_latitude_band` compare the acceleration with **+∇U₂**, computed by dual numbers.
   - VAL-0020 states "a = ∇U₂".
 - **Effect:** none on the implemented J2 physics, the tests or the evidence, which already use +∇U. Only this packet's wording was wrong.
+
+## Status update (recorded 2026-10-24 UTC, append-only)
+- T1, authorized by this packet under I-17, was **ACCEPTED** by the Tech Lead under I-22 at `65de33ffce72bb504dc28a3d17dbb0ae57b7a36b`, after Reviews 01–03 and the I-21 closure verification. Record: `docs/reviews/M3-T1-acceptance-dossier.md`. A fast-forward merge is conditionally authorized. T2 and later are not authorized.

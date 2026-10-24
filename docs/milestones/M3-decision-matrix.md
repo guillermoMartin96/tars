@@ -272,3 +272,8 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **I-21:** R3-F1, R3-F2 and R3-O1 ACCEPTED and closed (`481a62e`, `e404b0f`). The coefficient chain gets test-only coverage of the existing contract. Closure verification: CLOSURE VERIFIED. Dossier updated; awaiting the Tech Lead's acceptance decision.
 - **Unchanged and open:** every item preserved by I-19 §9 and I-20 §9.
 - **Status:** T1 IMPLEMENTED — NOT ACCEPTED — NOT MERGED. T2 and later are NOT AUTHORIZED.
+
+## T1 acceptance (recorded 2026-10-24 UTC, append-only)
+- **I-22:** T1 ACCEPTED at `65de33f`; a conditional fast-forward merge is authorized. Accepted with its retained limitations: the two exploratory mutation survivors and the documented numerical limitations.
+- **Unchanged and open:** DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2, DR-0028 P6(b), the secular-rate tolerance and presentation, T4/T5 comparison requirements, the M3 final time step, the T3 axis representation, external corroboration.
+- **Status:** T1 ACCEPTED — NOT MERGED (at this record). T2 and later are NOT AUTHORIZED.

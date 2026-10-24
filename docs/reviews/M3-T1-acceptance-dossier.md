@@ -239,3 +239,30 @@ Codex, session `01a16b20…`, at `e404b0f`: **`VERDICT: CLOSURE VERIFIED`**, wit
   - the M3 final time step;
   - the T3 axis representation;
   - external corroboration.
+
+## Owner acceptance (I-22) (appended 2026-10-24 UTC)
+- **Authority:** "Authorization I-22 — M3 T1 Acceptance and Conditional Merge" (Tech Lead). Decision, verbatim: "**T1 ACCEPTED. Conditional fast-forward merge AUTHORIZED.**"
+- **Accepted commit:** **`65de33ffce72bb504dc28a3d17dbb0ae57b7a36b`**, accepted "based on the I-21 acceptance dossier and closure evidence".
+- **Scope of the acceptance, verbatim:** "This acceptance applies to the implementation and its documented numerical contract, tests, validation evidence, and explicitly retained limitations. It does not constitute acceptance of T2, T3, or any unresolved DR decision."
+- **Checked before this record (I-22 §1):**
+  - branch `milestone-3-t1-j2-force-model`, HEAD = origin = `65de33f`, tree clean;
+  - `origin/main` = `60648b9`;
+  - this dossier, `M3-T1-closure-verification.md`, the raw closure prompt and output are present;
+  - the closure and Review 03 evidence checksums all verify.
+- **Retained limitations, accepted with T1 and not resolved:**
+  - Review 02's exploratory mutation survivors `canonical_one_ulp` and `narrow_band` still survive (I-20 §3). Complete mutation coverage is not claimed: the committed campaign covers its 47 named defects. The classifier fallback limitation remains.
+  - The documented numerical limitations remain, as listed in "Unresolved assumptions and limitations":
+    - the IEEE 754 binary64 assumption, without a claim of complete correctness;
+    - only absolute accuracy near the latitude-factor zeros;
+    - conservative rejection of a cancelled factor with a tiny k;
+    - the γ-bound operation counts, which are by inspection;
+    - the dual-number oracle, which is not external corroboration;
+    - the scope of the immutability promise;
+    - finite, one-host numerical evidence;
+    - the unexplained dt⁵ invariant drift;
+    - no external (GMAT or DOP853) comparison, which is T4/T5 scope.
+- **Unchanged by this record:** production code, tests, scientific constants, Proof artifacts and validation thresholds. All earlier review and validation records are preserved.
+- **Status: T1 IMPLEMENTED — REVIEWED — ACCEPTED — NOT MERGED.**
+  - The fast-forward of `main` to the head that carries this record is authorized under I-22 §2–§3, subject to its pre-merge checks.
+  - As with T0, the merge outcome is not recorded on this branch, because `main` must equal the verified source head. It is reported in the closure report and will be recorded in the next authorized branch.
+- **Not authorized:** T2 and T3. Every item preserved by I-19 §9 and I-20 §9 remains open.
