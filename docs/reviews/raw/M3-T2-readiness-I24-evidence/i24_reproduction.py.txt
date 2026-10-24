@@ -1,0 +1,82 @@
+"""I-24 implementer reproduction for the Review 01 corrections (read-only use of the T0 spike).
+
+Usage: python -I i24_reproduction.py <path to docs/science/experiments/m3-t0>
+Reproduces F1 (1000 km jump), F3 (equal adjacent outputs, zero tail), F4 (km-route guard trap
+interval, -0.0), and the facts used in the F2/F6 corrections (model-ellipsoid polar radius,
+axis normal not exactly +-Z, km-route band selection at base - 1 ulp, libm symmetry spot check).
+Writes nothing; prints results.
+"""
+import math
+import random
+import sys
+from decimal import Decimal, getcontext
+from fractions import Fraction as Fr
+
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+
+import t0_model as m  # noqa: E402
+
+T = m.TABLE
+print("== F1: left limit vs row value at the bases with downward jumps, 25, 900, 1000 km")
+print("rows", len(T))
+for i in range(1, len(T)):
+    lo, hi = T[i - 1], T[i]
+    left = lo.rho0 * math.exp(-(hi.base_km - lo.base_km) / lo.scale_km)
+    rel = (hi.rho0 - left) / left
+    if hi.base_km in (25, 900, 1000) or rel < 0:
+        print(f"base {hi.base_km:6g} km  left {left!r}  row {hi.rho0!r}  rel {rel:+.15e}")
+for units in ("km", "m"):
+    h = 1_000_000.0
+    vals = [m.density(math.nextafter(h, -math.inf), units=units), m.density(h, units=units),
+            m.density(math.nextafter(h, math.inf), units=units)]
+    print(units, "1000 km -1ulp, exact, +1ulp:", [repr(v) for v in vals])
+
+print("== F3")
+print("rho(1.0) == rho(nextafter(1.0))", m.density(1.0) == m.density(math.nextafter(1.0, math.inf)))
+print("tail rho(192000000), rho(192000001):", m.density(192_000_000.0), m.density(192_000_001.0))
+xs = [1.0 + k for k in range(0, 20000, 7)]
+eq = sum(m.density(x) == m.density(math.nextafter(x, math.inf)) for x in xs)
+print(f"equal adjacent pairs among {len(xs)} samples in band 0:", eq)
+
+print("== F4")
+for h in (-5e-324, -2.47e-321, -2.475e-321, -3e-321, -1e-300, -0.0, 0.0, 5e-324):
+    for units in ("km", "m"):
+        try:
+            out = repr(m.density(h, units=units))
+        except Exception as e:  # noqa: BLE001
+            out = type(e).__name__
+        print(f"units={units:2} h={h!r:>11}: {out}")
+x = -5e-324
+while (x / 1000.0) == 0.0:
+    x = math.nextafter(x, -math.inf)
+print("first negative h with h/1000 != -0:", repr(x), "(h/1000 =", repr(x / 1000.0), ")")
+print("nextafter(-2.475e-321, 0) =", repr(math.nextafter(-2.475e-321, 0.0)))
+print("-0.0 < 0:", -0.0 < 0.0)
+
+print("== F6 / U-12: km route, bases where base - 1 ulp does not select the lower band")
+bad = [T[i].base_km for i in range(1, len(T))
+       if m.band_index(math.nextafter(T[i].base_km * 1000.0, -math.inf) / 1000.0, T) != i - 1]
+print(bad)
+print("== F6 / U-21: axis and equator")
+lat, h = m.geodetic_iterative(np.array([0.0, 0.0, 6_400_000.0]))
+print("axis lat", repr(lat), "cos(lat)", repr(math.cos(lat)), "h", repr(h))
+lat, h = m.geodetic_iterative(np.array([6_400_000.0, 0.0, 0.0]))
+print("equator lat", repr(lat), "h", repr(h))
+print("== F6 / A-LM-1 spot check (not a proof)")
+random.seed(1)
+pairs = [(random.uniform(-7e6, 7e6), random.uniform(-7e6, 7e6)) for _ in range(100000)]
+print("hypot(x,y) != hypot(y,x):", sum(math.hypot(a, b) != math.hypot(b, a) for a, b in pairs))
+pairs = [(random.uniform(0, 7e6), random.uniform(0, 7e6)) for _ in range(100000)]
+print("atan2(-z,p) != -atan2(z,p):", sum(math.atan2(-z, p) != -math.atan2(z, p) for z, p in pairs))
+
+print("== F2: model ellipsoid vs WGS 84 exact 1/f")
+getcontext().prec = 60
+a = Fr(m.A_WGS84)
+f = 1 / Fr("298.257223563")
+e2x, e2m = f * (2 - f), Fr(m.E2_WGS84)
+def dec(q):
+    return Decimal(q.numerator) / Decimal(q.denominator)
+bx, bm = dec(a) * dec(1 - e2x).sqrt(), dec(a) * dec(1 - e2m).sqrt()
+print("e2 binary64", repr(m.E2_WGS84), "relative error", float((e2m - e2x) / e2x))
+print("b_model - b_WGS84 [m]", bm - bx)

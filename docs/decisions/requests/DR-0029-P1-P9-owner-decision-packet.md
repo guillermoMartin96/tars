@@ -28,7 +28,7 @@ Classification (I-23 §9 B): **READY FOR OWNER DECISION**, **NEEDS ADDITIONAL EV
 | P5 | Behaviour at unsupported altitudes (DR-0027 B-4; DR-0029 P5) | Per region; alternatives for ≥ 1000 km: fail closed, ρ = 0 (rejected in DR-0024 §12) | As tabulated in DR-0029 P5 | **BLOCKED BY ANOTHER DECISION (P4, P1)** | Row h < 0 is P4; row 0–25 km relies on P1 | The density component's behaviour in every region |
 | P6 | GMAT exact-configuration method (DR-0025 Q-G2-1; DR-0029 P6) | (a), (b), (c), (d) | (d) with the pinned settings list; (b) for the J2 link only if the owner rules it inside DR-0028 | **NEEDS ADDITIONAL EVIDENCE** (escalated geodetic-drag discrepancy), plus an owner **ruling** on DR-0028 scope for (b) | DR-0028 P6(b) scope ruling; Q-G2-2 | **Nothing.** T2 has no GMAT dependency (T5) |
 | P7 | Reference missions (DR-0025 Q-G2-5; DR-0029 P7) | RM-0 … RM-8 (RM-3b a candidate) | RM-0 … RM-8, RM-8 floor per P1, RM-3b measured in T4 | **BLOCKED BY ANOTHER DECISION (P1, P9)** | P1 (RM-8 floor), P9 (vehicles), T3 orbit kinds (RM-6) | **Nothing.** T2 unit tests use their own documented states |
-| P8 | Source of geodetic-height test points (DR-0025 Q-G2-7; DR-0029 P8) | (a), (a′), (b), (c), (d) | (a) + (a′) as the gate source; (b), (c) and the I-23 IOGP example (§2) as corroboration; domain stated | **READY FOR OWNER DECISION** | T2 geodetic algorithm choice (§3, N-1) | The geodetic component's test oracle and domain contract |
+| P8 | Source of geodetic-height test points (DR-0025 Q-G2-7; DR-0029 P8) | (a), (a′), (b), (c), (d) | (a) + (a′) as the gate source; (b), (c) and the I-23 IOGP example (§2) as corroboration; domain stated. *(I-24, F2: (a′) and negative heights are reported until their terms are derived; item 14)* | **READY FOR OWNER DECISION** | T2 geodetic algorithm choice (§3, N-1) | The geodetic component's test oracle and domain contract |
 | P9 | C_d, A, mass and initial-state values for validation scenarios (DR-0024 Q9; DR-0029 P9) | (i), (ii), (iii) | (i), every value labelled "illustrative, validation only" | **READY FOR OWNER DECISION** | P7 (missions) | T2 unit-test vehicle values, if the owner wants them aligned with the scenario values |
 
 ### 1.1 Suggested order for one owner response
@@ -70,7 +70,7 @@ Each one is classified as an implementer finding, not a review finding. None cha
 
 | ID | Finding | Evidence | Affects | Proposed handling |
 |---|---|---|---|---|
-| **N-1** | **P1/P4's derived stage-domain floors (111 511.97 / 118 633.51 / 124 456.69 m at dt 10 s) are specific to the T0 spike's arithmetic.** ε_h (E1) is derived for `t0_model.geodetic_iterative`: its starting latitude, its stopping rule (\|Δφ\| ≤ 1e-15 or 60 iterations) and its final height formula. E2 is the kilometre route of the density evaluation, and F_D, F_g, F_J are the spike's operation sequences. A T2 implementation with a different algorithm (Vermeille, a fixed iteration count as DR-0026 §5.8 suggests, the metre route of DR-0024 §9) or a different operation order **does not inherit those floors**. | `docs/science/experiments/m3-t0/t0_termination.py` `rounding_allowances` (E1 docstring: "With the stopping rule \|dlat\| <= 1e-15 or 60 iterations"; `LAT_TOL`); `t0_model.density(units="km")` | P1 (evidence only), P4 (the "options agree above the sufficient condition" statement), T2 design | **No P1/P4 option changes:** A4-b is a necessary screen that does not rely on these floors. Before T2, the owner chooses one of two design paths (draft T2 packet §5 DQ-1/DQ-2): **(α)** T2 reproduces the spike's height algorithm and density route operation for operation, verified by inspection and by bitwise comparison over the T0 sample sets; or **(β)** T2 uses another algorithm, and every statement that cites the floors is marked as applying to the spike only, until a new derivation is authorized |
+| **N-1** | **P1/P4's derived stage-domain floors (111 511.97 / 118 633.51 / 124 456.69 m at dt 10 s) are specific to the T0 spike's arithmetic.** ε_h (E1) is derived for `t0_model.geodetic_iterative`: its starting latitude, its stopping rule (\|Δφ\| ≤ 1e-15 or 60 iterations) and its final height formula. E2 is the kilometre route of the density evaluation, and F_D, F_g, F_J are the spike's operation sequences. A T2 implementation with a different algorithm (Vermeille, a fixed iteration count as DR-0026 §5.8 suggests, the metre route of DR-0024 §9) or a different operation order **does not inherit those floors**. | `docs/science/experiments/m3-t0/t0_termination.py` `rounding_allowances` (E1 docstring: "With the stopping rule \|dlat\| <= 1e-15 or 60 iterations"; `LAT_TOL`); `t0_model.density(units="km")` | P1 (evidence only), P4 (the "options agree above the sufficient condition" statement), T2 design | **No P1/P4 option changes:** A4-b is a necessary screen that does not rely on these floors. Before T2, the owner chooses one of two design paths (draft T2 packet §5 DQ-1/DQ-2): **(α)** T2 reproduces the spike's height algorithm and density route operation for operation, verified by inspection and by bitwise comparison over the T0 sample sets; or **(β)** T2 uses another algorithm, and every statement that cites the floors is marked as applying to the spike only, until a new derivation is authorized. **Qualification (I-24, M3T2R-R1-F4):** "operation for operation" applies to the **exterior arithmetic** the floors cover: the height, the km conversion and band selection, the density formula, drag, gravity and the stage positions. It does **not** apply to the spike's domain guard, which T2 must not copy. That guard tests h after the km conversion and accepts −2.475e-321 < h_m < 0 (P4 item 8). The corrected guard (finite h_m < 0 in metres, before conversion) changes only which inputs raise. On every input with h_m ≥ 0 it lets through the same arithmetic as the spike, so no floor and no E1–E6 term changes. Bitwise agreement on samples supports path (α) but does not prove it; the inspection of the complete operation sequence is the primary evidence (Review 01, claim 4) |
 | **N-2** | **P4 option (ii) contradicts text in DR-0026.** DR-0026 AR-8 says "runtime functions are total". §5.8 says "density is total (extrapolated bands, DR-0024 §4.6)". Option (ii) makes density raise below 0 m. DR-0024 Q8's Resolution ("No indefinite extrapolation below the modelled domain") already outranks DR-0024 §4.6's candidate, and DR-0026's Resolution does not adopt AR-8 or §5.8 verbatim. Still, the text is unreconciled. | DR-0026 §3 AR-8, §5.8; DR-0024 Resolution Q8; DR-0029 P4 | P4 | If (ii) is chosen, the decision should state that AR-8's "total" and §5.8's "density is total" do not apply below the table's lower edge. The domain error is defined behaviour, mapped to a run outcome at T3 |
 | **N-3** | **P2 (A5-b) needs dh/dt = n̂·v.** n̂ is the geodetic normal at the committed state. Unless T3 is to re-derive the normal, T2's geodetic component must expose it, or the latitude it is computed from, and not only h. | DR-0029 P2 table ("dh/dt = n̂·v at both ends") | P2, T2 interface | The T2 interface returns (h, n̂) or (h, φ). This is a design consequence, not an owner decision, recorded so that T2 does not ship a height-only API |
 | **N-4** | **Gate breadth.** The governing P1–P10 rule makes T2 wait for P6. P6 needs evidence from GMAT runs (escalated item) that T2 does not use. | §1.2 | T2 schedule | Q-GATE (§1.2): owner's choice |
@@ -123,7 +123,7 @@ Each subsection follows I-23 §5 items 1–15. "DR-0029 Px" means the section of
 14. **Proposed acceptance criteria (for T3).**
     - Scenario validation rejects h_f ≤ a − b, h_f ≥ h_geod(initial), and any h_f with ρ(h_f)·v̂·dt/B_min > κ.
     - Each clause is proven at its boundary on both sides.
-    - The thresholds are recomputed and match the T0 values at dt 10 s, within the root-finder's stated xtol.
+    - The thresholds are recomputed and match the T0 values at dt 10 s. **Bound (clarified under I-24, M3T2R-R1-F6 audit):** two root brackets of the same function must overlap, and two root estimates differ by at most the sum of the two bracket widths. That needs the same density arithmetic: the T0 thresholds were root-found on the spike's evaluation of the pinned table, "to 0.01 m". If T2's density arithmetic differs (path (β), or route (m)), the comparison is reported, not gated, until the difference is bounded.
 15. **Ready?** **READY FOR OWNER DECISION** (κ and v̂ required).
 
 ### P2 — Event-crossing behaviour (DR-0027 A-5)
@@ -135,9 +135,13 @@ Each subsection follows I-23 §5 items 1–15. "DR-0029 Px" means the section of
    - DR-0026 Q-G3-7 (no per-sample telemetry; NOT AUTHORIZED).
    - Field names are T3 contract proposals.
 5. **Assumptions.**
-   - h(t) along a step is C² (true for the integrated trajectory outside the ellipsoid).
-   - The chord inequality: dip ≤ (dt²/8)·sup max(ḧ, 0) [derived].
-   - No certified bound exists for J2 + drag [recorded: DR-0029 P2, Review 02 R2-F1].
+   - **Regularity (corrected under I-24, M3T2R-R1-F5).** h(t) is **not** C² along a drag trajectory in general. The pinned density jumps at band bases (12 downward jumps and the +1.36e-3 upward jump at 25 km; DR-0029 P1, DR-0025 Resolution principle 5), so the drag acceleration, and with it ḧ = n̂·r̈ + (curvature term), jumps wherever the trajectory crosses a base with a nonzero normal component of the jump. What holds, for a trajectory outside the ellipsoid and outside the evolute region, with finitely many base crossings per step [assumption, stated]:
+     - h is C¹, and ḣ = n̂·v is continuous (r is C¹; the height function is smooth there);
+     - ḧ exists and is continuous except at the crossing times, where it has one-sided limits;
+     - so ḣ is absolutely continuous and ḧ is bounded and piecewise continuous.
+   - The chord inequality holds under exactly that regularity: dip ≤ (dt²/8)·ess sup max(ḧ, 0), with the supremum taken almost everywhere (it ignores the finitely many crossing instants) [derived: for g = h − chord, g(t0) = g(t1) = 0 and g'' ≤ M a.e. with g' absolutely continuous give g(t) ≥ −M(t − t0)(t1 − t)/2 ≥ −M dt²/8]. It does not need C².
+   - **The certified numbers are unaffected:** DR-0029 P2's certified table is two-body only, where there is no drag, h is smooth, and the C² statement was true.
+   - No certified bound exists for J2 + drag [recorded: DR-0029 P2, Review 02 R2-F1]. This correction does not create one.
 6. **Numerical consequences.**
    - Hermite − DOP853: −0.07 … −0.41 s, which is RK4's own timing error [measured].
    - Committed-state-only: up to +9.26 s and 3.06 km low [measured].
@@ -207,20 +211,25 @@ Each subsection follows I-23 §5 items 1–15. "DR-0029 Px" means the section of
    - The density component raises a typed domain error (for example a `ValueError` subclass). The error leaves the step uncommitted, which the existing atomic step already guarantees for any exception.
    - The mapping to a run outcome (`outside_atmosphere_domain` or similar) is T3.
    - `Simulator.step` catches only `OverflowError` and `ZeroDivisionError`, so a domain error propagates unchanged. That is acceptable for T2 and must be handled in T3.
-8. **Verification.**
-   - Tests at 0 m, one ulp below, −1e-9 m, −1 m and −100 km raise.
-   - 0 m and one ulp above evaluate band 0.
+8. **Verification (corrected under I-24, M3T2R-R1-F4).**
+   - **Raise:** the largest negative binary64 (−5e-324, i.e. −2^-1074), −2.475e-321, −1e-300, −1e-9 m, −1 m and −100 km.
+   - **Evaluate band 0:** +0.0, −0.0, +5e-324 and one ulp above any interior point. **0 m is in the domain and does not raise** (the I-23 text listed it in both groups; that was a typo).
+   - **−0.0** is not "below the lower edge": IEEE 754 compares −0.0 equal to 0, and `-0.0 < 0` is false. The specification says so explicitly, so that an implementation testing the sign bit (for example `math.copysign`) is not mistaken for a correct one.
    - A step whose k3 stage would go below 0 raises, and the state, tick and engine schedule are unchanged (the atomicity test pattern of REV-T2-01).
+   - **Recorded T0 behaviour, which a T2 implementation must not copy (I-24 reproduction; Review 01 F4).** The spike's kilometre route (`t0_model.density(units="km")`) divides by 1000 **before** its domain check, `h_km = h_m / 1000.0; if h_km < 0: raise`. For every binary64 h_m with −2.475e-321 < h_m < 0 (from −5e-324 down to −2.47e-321, its binary64 neighbour), h_m/1000 rounds to −0.0, so the check passes and the spike returns band 0's ρ₀ = 1.225 kg/m³. The first negative input that raises is h_m = −2.475e-321, the largest-magnitude negative h whose quotient is the smallest subnormal, −5e-324. The spike's metre route (`units="m"`) compares h_m with 0 directly and raises for −5e-324. Evidence: `docs/reviews/raw/M3-T2-readiness-I24-evidence/i24_reproduction.out`.
+   - This is a defect of the spike's **test-code guard**, outside every derived T0 floor (all of which assume a true height ≥ 0 and a computed stage height > 0). No T0 result changes, and no T0 file is edited. Recording it in VAL-0019 is optional and for the owner (open-issues register OI-21).
 9. **Compatibility.** M1/M2 have no density, so they are unaffected.
 10. **Existing evidence.** GMAT R2026a fails closed below the ellipsoid [measured]; the decay measurements; the stress input.
 11. **Missing evidence.** None for the choice. The guarantee of non-occurrence is conditional (N-1, A-FP-2).
 12. **Recommendation.** (ii) fail closed, with the N-2 supersession stated in the decision.
 13. **Confidence.** High. It matches DR-0024 Q8 and GMAT.
-14. **Acceptance criteria (T2).**
-    - The density component raises for every finite h < 0 and returns band 0 for 0 ≤ h < 25 km.
-    - Non-finite h raises a distinct error.
-    - The raise is tested at the exact edge and one ulp either side.
+14. **Acceptance criteria (T2) (corrected under I-24, M3T2R-R1-F4).** These are **proposed T2 requirements under option (ii)**, not a description of the T0 spike.
+    - **The guard is applied to the height in metres, before any unit conversion:** the component raises the typed domain error for every finite h_m with h_m < 0 (IEEE comparison, so −0.0 is in the domain).
+    - It returns band 0's formula for 0 ≤ h_m < 25 000 m, including h_m = −0.0.
+    - Non-finite h raises a distinct error, before the domain check.
+    - The raise is tested across the T0 trap interval (−5e-324, −2.47e-321 and values between, all of which the spike's km route accepts) and at −2.475e-321, and the non-raise at ±0.0 and +5e-324.
     - The atomicity of a raising step is tested.
+    - Under option (i) the criteria differ (no raise; the lowest band's formula below 0), and these tests would be replaced, not loosened.
 15. **Ready?** **READY FOR OWNER DECISION.**
 
 ### P5 — Unsupported altitudes (DR-0027 B-4)
@@ -239,10 +248,11 @@ Each subsection follows I-23 §5 items 1–15. "DR-0029 Px" means the section of
 7. **Architecture.**
    - One density function, total above 0 m, with a documented label "above 1000 km: unverified".
    - Underflow: the top-band density becomes subnormal above ≈ 181 890 km and exactly 0 above ≈ 191 735 km [measured/derived in T0]. The component must return those values, not raise.
-8. **Verification.**
+8. **Verification (corrected under I-24, M3T2R-R1-F1).**
    - Every one of the 27 bases, exactly and one ulp either side (DR-0025 principle 5; DR-0024 Q5a).
    - The disputed cells evaluated as published.
-   - Continuity of the top-band extrapolation at 1000 km (GMAT-identical).
+   - **At 1000 km the table is discontinuous, and the test checks that discontinuity, not continuity.** The 900 km band's left limit at 1000 km is 3.0190482489066533e-15 kg/m³ against the 1000 km row's 3.019e-15, a relative jump of −1.5981e-5 (Review 01 F1; reproduced under I-24, where two evaluation orders agree to 12 digits). 1000 km is one of DR-0029 P1's 12 downward jumps. DR-0024 Q5a ("No value is altered to force continuity") forbids removing it. The spike returns 3.0190482489066557e-15 at 1000 km − 1 ulp (900 km band), 3.019e-15 exactly at 1000 km and 3.0189999999999988e-15 at + 1 ulp, on both routes.
+   - **Above 1000 km** the top band's formula is a single exponential, continuous and smooth for h > 1000 km. That smoothness *within* the band is what can be tested, by the region and value checks below.
    - Subnormal and zero densities are returned without exception.
 9. **Compatibility.** None with M1/M2.
 10. **Existing evidence.** VAL-0019 (`atmosphere`, `gmat` → `density_probes`).
@@ -252,11 +262,14 @@ Each subsection follows I-23 §5 items 1–15. "DR-0029 Px" means the section of
     - Neither blocks the decision.
 12. **Recommendation.** As tabulated in DR-0029 P5.
 13. **Confidence.** High for the mechanism. Above 1000 km the density is explicitly unverified.
-14. **Acceptance criteria (T2).**
+14. **Acceptance criteria (T2) (corrected under I-24, M3T2R-R1-F1).**
     - The density component's region behaviour matches the decided table exactly.
     - Band selection follows GMAT's rule (h < base[i+1]).
-    - Each base is tested on both sides.
+    - Each base, **including 1000 km**, is tested exactly and one ulp either side. The value on each side is the formula of the band GMAT's rule selects, with the published discontinuity intact.
+    - Above 1000 km, values equal the top band's formula.
     - Records label > 1000 km as unverified.
+    - **No criterion requires continuity at any band base.**
+    - **Wording in DR-0029 P5 (documented, not changed).** P5's proposal cell for ≥ 1000 km reads "Extrapolate the top band (continuous, GMAT-identical)". Read as "continuous at 1000 km", it contradicts DR-0029 P1's list of 12 downward jumps (which includes 1000 km) and DR-0024 Q5a. Read as "continuous within the top band above its base", in contrast to the ρ = 0 cutoff DR-0024 §12 rejected for introducing a discontinuity, it is correct. I-23 used the first reading. P5 is OPEN, so this is unapproved proposal text, but it is the text the owner would approve. **Proposed amendment, for the owner to adopt with the P5 decision or reject:** replace "(continuous, GMAT-identical)" with "(the top band's formula, continuous for h > 1000 km; the 1000 km base keeps the published −1.598e-5 relative jump, like every other base; GMAT-identical)". DR-0029 carries an append-only note of this, and its P5 table is unchanged.
 15. **Ready?** **BLOCKED BY ANOTHER DECISION (P4 for its first row, P1 for its second).** It can be decided in the same response, after them.
 
 ### P6 — GMAT exact-configuration method (DR-0025 Q-G2-1)
@@ -351,13 +364,25 @@ Each subsection follows I-23 §5 items 1–15. "DR-0029 Px" means the section of
 11. **Missing evidence.**
     - A mm-resolution printed point set (GN 7-2's own printed values were not read).
     - Not needed for the gate source recommended.
-12. **Recommendation.** (a) + (a′) as the gate source. (b), (c) and C-5 as recorded corroboration with their limits. Domain stated; on-axis points tested.
+12. **Recommendation.** (a) + (a′) as the gate source. (b), (c) and C-5 as recorded corroboration with their limits. Domain stated; on-axis points tested. *(Qualified under I-24, F2: as a gate, (a) applies at h ≥ 0 now; (a′) applies once its forward-construction term is derived; negative heights are reported. Item 14.)*
 13. **Confidence.** High for the gate source. The external corroboration is coarse (mm to cm).
-14. **Acceptance criteria (T2).**
-    - Exact-answer points agree to a derived round-off bound, not a chosen number. If path (α) of N-1 is chosen, ε_h (E1, 9.02e-9 m at 120 km) is that bound.
-    - (a′) points over latitudes −90…90° and heights −10 km…2000 km agree within the same bound.
+14. **Acceptance criteria (T2) (corrected under I-24, M3T2R-R1-F2).**
+    - **What E1 covers.** ε_h(h) = αh + β (α = 1.22e-15, β = 8.88e-9 m; 9.02e-9 m at 120 km) bounds |ĥ(r) − h_true(r)|. Here ĥ is the computed height of `t0_model.geodetic_iterative` for a **given binary64 input r**, and h_true is the exact geodetic height of that same r on the model's ellipsoid (a and e2 as the binary64 values the code uses).
+      - **Domain:** points outside the ellipsoid (true height ≥ 0), no overflow. The derivation uses "the distance to a convex body is the maximum over supporting planes", which holds only outside, and the committed record says "true geodetic height >= 0" (`t0_termination_results.json` → `floating_point_enclosure` → `assumptions` → `domain`; `t0_termination.rounding_allowances` docstring, E1).
+      - **Algorithm:** the spike's iteration and stopping rule (N-1). Under path (β) E1 does not apply at all.
+      - **Error covered:** the inverse's evaluation error only. It covers neither the rounding of a forward-constructed input nor the error of a reference value.
+    - **Exact-answer points (option (a)), h ≥ 0, path (α): gated with ε_h** (E1 itself rests on A-FP-2; validation strategy §3.9 B-12), provided the reference has no error of its own. It must be evaluated in exact rational arithmetic on the model's ellipsoid. Equator: r = (x, 0, 0) with binary64 x ≥ a, reference x − a. Axis: r = (0, 0, z) with |z| ≥ b_model, reference |z| − a√(1 − e2_model), using a 60-digit or exact evaluation with outward rounding, as T0's oracle does.
+      - The difference between the model's ellipsoid and WGS 84's exact 1/f is a constant-definition term, reported separately and not absorbed into ε_h: b_model − b_WGS84 = +1.71e-12 m (I-24 reproduction, `i24_reproduction.out`).
+    - **Forward-constructed points (option (a′)), h ≥ 0, path (α): gated only after two further terms are derived and reviewed in T2.**
+      - (1) δ_f, the rounding of the forward construction r̂ = fl(forward(φ, λ, h_nom)). Then |h_true(r̂) − h_nom| ≤ |r̂ − r_exact| ≤ δ_f, because exterior geodetic height is the distance to a set, and so 1-Lipschitz. This needs both r̂ and r_exact outside the ellipsoid, for example h_nom > δ_f.
+      - (2) Or, instead of δ_f, an oracle evaluation of h_true(r̂) with its own stated error.
+      - The gate would then be ε_h + δ_f (or ε_h + the oracle error).
+      - **Until a term is derived and reviewed, these points are reported, not gated.** No replacement number is proposed here.
+    - **Negative heights (−10 km … 0) are reported, not gated**, for both (a) and (a′), until a bound is derived for points inside the ellipsoid. E1 does not apply there.
+    - Path (β): every geodetic comparison is reported, not gated, until its own derivation exists.
     - Evolute-region points are rejected.
     - (b)/(c)/C-5 are reported, not gated.
+    - The T0 measurements (≤ 1.9e-9 m on 640 (a′) points, ≤ 2.06e-9 m on 13 050 sampled points) are observations, not bounds, and are not proposed as thresholds.
 15. **Ready?** **READY FOR OWNER DECISION.**
 
 ### P9 — Validation-scenario parameters (DR-0024 Q9)
@@ -410,3 +435,26 @@ None of these is required to decide P1–P5, P8 or P9.
 - Codex Review 01 (at `5ee6a6a`): **REQUEST_CHANGES**, with 2 MAJOR (M3T2R-R1-F1: 1000 km continuity; F2: E1 reused beyond h ≥ 0), 3 MINOR (F3 strict monotonicity; F4 lower-edge typo and the −5e-324 guard; F5 C² across band edges) and 1 NOTE (F6). All are reproduced and ACCEPTED, **not applied** (I-23 §10).
 - No P1–P9 classification changes. The text above is as reviewed.
 - Record: `docs/reviews/M3-T2-readiness-review-01.md`.
+
+## Correction log (I-24, 2026-10-24): Review 01 findings F1–F6
+Made under "Authorization I-24 — M3 T2 Readiness: Review 01 Corrections and Independent Review 02" (Tech Lead, 2026-10-24). This is documentation only. The wording as Review 01 reviewed it is preserved at commit `5ee6a6a`, and the Review 01 record is unchanged. **No P1–P9 option, classification or recommendation changes, and nothing is decided.** Q-GATE, DQ-1 … DQ-6 and the P6 investigation stay open. The finding-by-finding matrix is in `docs/reviews/M3-T2-readiness-review-01-corrections.md`.
+
+- **F1 (P5 items 8, 14):**
+  - The continuity requirement at 1000 km is removed.
+  - The 1000 km base is tested like every other base, with its published −1.598e-5 jump.
+  - Smoothness is claimed only within the top band, above 1000 km.
+  - The ambiguous "(continuous, GMAT-identical)" wording in DR-0029 P5 is documented, and an amendment is proposed for the owner. DR-0029's P5 table is not changed.
+- **F2 (P8 item 14):** E1 is restricted to its derived domain: exterior points, the inverse's evaluation error, the spike's algorithm. Negative heights and forward-constructed points are reported until their terms are derived. The reference must be exact on the model's ellipsoid.
+- **F3:** affects the validation strategy only (PM-4); no packet text claimed strict monotonicity.
+- **F4 (P4 items 8, 14; N-1):**
+  - The "0 m raises" typo is removed.
+  - The guard is specified in metres, before conversion, with −0.0 inside the domain.
+  - The spike's trap interval (−2.475e-321, 0) is recorded as T0 behaviour that T2 must not copy.
+  - Path (α) is qualified so that it excludes the guard.
+- **F5 (P2 item 5):** the C² claim is replaced by piecewise regularity. The chord bound is restated with an essential supremum, and the certified two-body numbers are unaffected.
+- **F6 (P1 item 14):** the threshold-agreement bound is stated as the sum of the bracket widths, valid for identical density arithmetic only. The strategy's bound audit is in `M3-T2-validation-strategy.md` §3.9.
+- **Classification:** unchanged.
+  - READY FOR OWNER DECISION: P1 (κ, v̂), P2, P4, P8, P9.
+  - BLOCKED BY ANOTHER DECISION: P3 (P1), P5 (P4, P1), P7 (P1, P9).
+  - NEEDS ADDITIONAL EVIDENCE: P6.
+- **Owner briefing:** `DR-0029-P1-P9-owner-briefing.md`.

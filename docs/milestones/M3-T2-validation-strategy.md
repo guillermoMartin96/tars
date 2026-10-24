@@ -13,6 +13,12 @@
    - **(D)** a derived round-off bound γₙ = nu/(1 − nu), u = 2⁻⁵³, with the operation count stated. Counts by inspection are labelled so (T1 precedent);
    - **(T)** a bound from the cited theory's own error;
    - **(M)** a measurement, which is **reported, not gated**, unless the owner approves a threshold in a DR (DR-0025 principle 7).
+
+   **Added under I-24 (M3T2R-R1-F6):**
+   - A (D) or (T) bound whose derivation is not written down and reviewed is **not** a gate. It is listed in §3.9 as a T2 derivation deliverable, and the check is reported until the derivation passes review.
+   - A bound that holds only under an unproved platform assumption is labelled with that assumption, and gates only if the T2 authorization accepts the assumption explicitly; otherwise it is reported. Examples: A-FP-2 (libm accuracy), or A-LM (§3.9: libm symmetry, oddness and monotonicity, which IEEE 754 does not require).
+   - Every exact-sign or exact-equality row states its admissible sample domain, including the zero cases.
+   - Wherever possible, the test side of a relation is evaluated in **exact rational arithmetic on the component's binary64 inputs and outputs**, so that the only rounding to bound is the component's own.
 2. **Evidence class stated per check:** I, P, C or R (DR-0025 principle 1). Agreement with the T0 spike is **P**: same team, same equations and constants (principle 3).
 3. **Boundaries on both sides.** Exact value, one ulp inside and one ulp outside, for several values (playbook `testing.md`).
 4. **Sampled results are estimates, not bounds** (T0 lesson R2-F1). A finite test set proves nothing beyond its samples.
@@ -48,37 +54,37 @@ Kind: E exact, D derived round-off, T theory, M measured and reported. Class: I 
 | U-1 | Context is frozen: assignment and deletion raise; mass is converted to owned binary64 (T1 R2-F2 pattern); non-finite or non-positive mass rejected | R-CTX-1 | E | C | — |
 | U-2 | The adapter calls an old-protocol model with identical arguments and returns its result **bitwise**; `FreeSpace` and test doubles run unchanged | R-CTX-2 | E | R | — |
 | U-3 | Stage mass: for a stage y with m_prop = −1e-17 the context carries the dry mass exactly; the context mass equals the thrust term's mass in every stage | R-CTX-3 | E | C | Guards against committed-state mass (a DR-0025 §8 mutation) |
-| U-4 | Drag direction: a_d × v_rel = 0 to a γ-bound, and a_d · v_rel < 0 | R-DRAG | D, E | C | DR-0025 Q4 |
-| U-5 | Scaling: doubling ρ, C_d, A or 1/m doubles a_d exactly (power-of-two scaling is exact in binary64 barring underflow or overflow); \|v_rel\|² scaling within γ | R-DRAG | E, D | C | Power-of-two factors make the check exact |
-| U-6 | ω_E = 0 ⇒ v_rel = v bitwise; a point at rest in I off the axis has v_rel = −ω×r ≠ 0 | R-DRAG | E | C | FC-2 (a), (b) |
-| U-7 | Signs: air velocity at r = a X̂ is +ω_E a Ŷ; prograde equatorial \|v_rel\| = \|v\| − ω_E r, retrograde \|v\| + ω_E r | R-DRAG | E/D | I (signs) | FC-5 |
+| U-4 | Drag direction (corrected under I-24, F6). Both relations are evaluated in exact rationals on the binary64 a_d and v_rel. (a) Parallelism: \|(a_d × v_rel)_i\| ≤ (2u/(1 − u))·\|a_j\|·\|v_k\| for each cyclic (i, j, k), with u = 2⁻⁵³. (b) Sign: a_d · v_rel < 0. **Domain:** ρ̂ > 0, the scalar coefficient c ≠ 0 (it can underflow to 0 even when ρ̂ > 0), v_rel ≠ 0, and every nonzero product c·v_rel,i normal (no underflow). **Zero cases, tested separately:** ρ̂ = 0, c = 0 or v_rel = 0 ⇒ a_d = 0 exactly (E). | R-DRAG | D (§3.9 B-1), E | C | DR-0025 Q4. The derivation assumes the T0 structure a_i = fl(c·v_rel,i), one scalar c for all components, and that the test sees the component's own v_rel (exposed, or recomputed by the identical operation sequence). Otherwise re-derive |
+| U-5 | Scaling (corrected under I-24, F6): multiplying C_d, A or (through m → m/2) 1/m by 2 doubles a_d exactly. If the component accepts an injected density, the same holds for ρ. **Domain:** the scaled parameter enters only through multiplications and divisions, and every intermediate stays normal and finite at both scales. The "\|v_rel\|² scaling within γ" clause is **removed**: v_rel cannot be scaled independently of r and v, and no bound was derived | R-DRAG | E (§3.9 B-2) | C | Exact: in the normal range, multiplying by 2 commutes with every rounding |
+| U-6 | ω_E = 0 ⇒ v_rel == v under IEEE equality (±0 compare equal; a component v_i = −0.0 may come back as +0.0, so the check is not bitwise on the sign of zero). A point at rest in I, off the axis, has v_rel = −ω×r ≠ 0 | R-DRAG | E | C | FC-2 (a), (b). Needs ω as a component parameter in tests (the pinned constant is unchanged) |
+| U-7 | Signs: air velocity at r = a X̂ has the sign of +Ŷ (fl(ω_E·a) > 0, exact sign). The prograde/retrograde equatorial magnitudes \|v_rel\| = \|v\| ∓ ω_E r are **reported, not gated**, until their rounding bound is derived (§3.9 B-3) | R-DRAG | E (sign); M (magnitude) | I (signs) | FC-5 |
 | U-8 | Cross-track: v_rel not parallel to v on an inclined orbit, **sampled away from the highest-latitude point** | R-DRAG | E | C | FC-8; DR-0024 T0 note |
 | U-9 | One shared axis and ω_E: J2, ellipsoid and atmosphere read the same pinned constants (identity) | R-CONST | E | C | FC-7. Not presented as adopting Q-G2-2 |
 | U-10 | Constants: ω_E and 1/f literals equal the NGA strings; each literal exists once (the existing literal-location test extended); `WGS84`, `WGS84_EGM2008_TIDE_FREE` and J2 hex unchanged | R-CONST, R-REG | E | C | — |
 | U-11 | Table load: the file's sha256 equals the pinned digest before parsing; a tampered copy is rejected before any physics; 28 rows; parsed values equal the file's decimal strings | R-DENS-1 | E | C | DR-0025 §8 "Datasets" |
-| U-12 | Densities at every one of the 27 bases equal the table's ρ₀ exactly. At base − 1 ulp the lower band is selected, at base + 1 ulp the upper band | R-DENS-2 | E | C | DR-0024 Q5a; DR-0025 principle 5. Route per DQ-2 |
-| U-13 | Inside a band: ρ(h) against the formula evaluated in exact rationals, with exp bounded by the A-FP-2 allowance, documented as an assumption | R-DENS-2 | D | C | No libm guarantee is claimed |
-| U-14 | Below the edge: h = −1 ulp, −1e-9, −1, −1e5 m raise the typed error; h = 0 and +1 ulp return band 0; non-finite h raises a distinct error | R-DENS-3 | E | C | **Depends on P4** |
-| U-15 | Regions: the 0–25 km cell evaluated as published (GMAT ÷ author 0.13785 % recorded, not repaired); 900–1000 km; top band continuous through 1000 km; values at 1100/1500/2000 km equal the top-band formula | R-DENS-4 | E/D | C | **Depends on P5** |
-| U-16 | Far range: subnormal densities above ≈ 181 890 km and exact 0 above h_zero ≈ 191 735 430.72 m are returned without exception; drag 0 when ρ = 0 | R-DENS-4 | E | C | T0 R4-F1 transition points |
-| U-17 | Geodetic exact answers: equator h = √(x²+y²) − a; axis h = \|z\| − b, both signs of z | R-GEOD-1 | D (ε_h if path (α)) | I (analytic) | **P8 (a)** |
-| U-18 | Geodetic forward-constructed points: latitudes −90…90°, heights −10 km…2000 km; the inverse agrees within the derived bound | R-GEOD-1 | D | P | **P8 (a′)**. The forward formula is coded separately in the tests |
-| U-19 | Axisymmetry: h(Q_z r) = h(r) for rotations about +Z (exact for quarter turns; γ-bound otherwise); z-reflection symmetry | R-GEOD-1 | E/D | C | FC-4 |
+| U-12 | Densities at every one of the 27 bases equal the table's ρ₀ exactly. At base − 1 ulp the lower band is selected, at base + 1 ulp the upper band | R-DENS-2 | E | C | DR-0024 Q5a; DR-0025 principle 5. Route per DQ-2. **Justification (I-24, F6):** at an exact base the exponent is exactly 0 on both routes (the bases are integers in km and in m, and h/1000 is exact for them), and exp(±0) = 1 exactly (A-LM-0, §3.9). Lower-band selection at base − 1 ulp on the km route was checked at all 27 bases (Review 01 claim 8; I-24 reproduction): exhaustive for these 27 inputs, not a general property |
+| U-13 | Inside a band: ρ̂(h) against the formula evaluated by an oracle with stated error. The allowance is E3 (`t0_termination.rounding_allowances`), which holds for the spike's operation sequence (path (α), route (km)) **under A-FP-2** | R-DENS-2 | D, conditional on A-FP-2 | C | **Gates only if the T2 authorization accepts A-FP-2 for test purposes; otherwise reported** (I-24, F6). No libm guarantee is claimed. Under path (β) or route (m), E3 must be re-derived |
+| U-14 | Below the edge (corrected under I-24, F4). **Raise:** h = −5e-324, −2.47e-321 (the spike's km-route trap interval, which the spike accepts), −2.475e-321, −1e-300, −1e-9, −1 and −1e5 m. **Band 0:** h = +0.0, −0.0, +5e-324. **Non-finite h:** a distinct error, checked first. The guard compares h in metres with 0 **before** any unit conversion | R-DENS-3 | E | C | **Depends on P4.** Proposed T2 requirement under (ii), not T0 behaviour (packet P4 items 8, 14) |
+| U-15 | Regions (corrected under I-24, F1): the 0–25 km cell evaluated as published (GMAT ÷ author 0.13785 % recorded, not repaired); 900–1000 km. **At 1000 km: the published discontinuity is tested, not continuity.** 1000 km − 1 ulp gives the 900 km band (spike: 3.0190482489066557e-15); exactly 1000 km gives the row ρ₀ 3.019e-15; + 1 ulp gives the top band. The relative jump −1.598e-5 is recorded. Above 1000 km: values at 1001/1100/1500/2000 km equal the top-band formula | R-DENS-4 | E | C | **Depends on P5.** DR-0024 Q5a forbids forcing continuity. The top band is smooth only for h > 1000 km |
+| U-16 | Far range: densities are returned without exception wherever they are subnormal or exactly 0, and drag is exactly 0 when ρ̂ = 0. The transition points (≈ 181 890 km; h_zero ≈ 191 735 430.72 m) are T0's for the spike's km-route sequence (E3) | R-DENS-4 | E | C | T0 R4-F1. **Under path (β) or route (m) the transition points are recomputed for T2's sequence**; "no exception" is required either way (I-24, F6) |
+| U-17 | Geodetic exact answers (corrected under I-24, F2). Equator: r = (x, 0, 0) with binary64 x ≥ a, reference x − a. Axis: r = (0, 0, z) with \|z\| ≥ b, both signs of z, reference \|z\| − a√(1 − e2). Both references are evaluated exactly, or by a 60-digit oracle with outward rounding, **on the model's ellipsoid**. Gate: \|ĥ − h_ref\| ≤ ε_h(h) | R-GEOD-1 | D (E1, §3.9 B-12) **only for h ≥ 0 and path (α); conditional on A-FP-2** | I (analytic) | **P8 (a)**. Points with x < a or \|z\| < b (negative height) are **reported**. Under path (β): reported until derived. The model/WGS 84 ellipsoid difference (b +1.71e-12 m) is reported separately |
+| U-18 | Geodetic forward-constructed points (corrected under I-24, F2): latitudes −90…90°, heights −10 km…2000 km | R-GEOD-1 | **Reported**; D only after §3.9 B-4 | P | **P8 (a′)**. The forward formula is coded separately in the tests. Gate for h_nom ≥ 0 (and h_nom > δ_f) under path (α) **only once** δ_f (forward-construction rounding) or an oracle-error term is derived and reviewed: bound ε_h + δ_f. Negative heights stay reported. No number is proposed now |
+| U-19 | Axisymmetry: h(Q_z r) = h(r) for quarter turns about +Z, and z-reflection symmetry | R-GEOD-1 | E, **conditional on A-LM-1** | C | FC-4. Path (α) uses hypot(x, y), sin and atan2. Exact only if hypot is symmetric and even, and sin and atan2 are odd in their first argument (A-LM-1, §3.9): not required by IEEE 754; 0 failures in 10⁵ random pairs on the I-24 host [measured; not a proof]. **Gates only if the T2 authorization accepts A-LM-1; otherwise reported.** General rotations are reported until a γ-bound is derived (§3.9 B-5) |
 | U-20 | Domain: points inside the evolute region, and the origin, are rejected; the published reverse example (30 km, 30 km, 0) is rejected | R-GEOD-1 | E | C | DR-0029 P8 "Domain" |
-| U-21 | Normal: n̂ is a unit vector to a γ-bound; n̂ is ±Ẑ on the axis and radial on the equator; dh/dt = n̂·v against a central difference of h along a straight line (truncation bound stated) | R-GEOD-2 | D/T | C | **P2-dependent interface** |
+| U-21 | Normal (corrected under I-24, F6). **Reported, not gated** until §3.9 B-6 is derived: \|n̂\| − 1; n̂ against ±Ẑ on the axis and against the radial direction on the equator; dh/dt = n̂·v against a central difference of h. **The I-23 "±Ẑ on the axis" was stated as exact and is not:** on the axis the spike's latitude is fl(π/2) = 1.5707963267948966 and cos of it is 6.12e-17 (I-24 reproduction). An n̂ built from φ therefore has a nonzero x component there. Exact on the equator only: φ = 0 and n̂_z = 0 exactly (atan2(+0, p > 0) = +0, A-LM-0) | R-GEOD-2 | M until derived | C | **P2-dependent interface** |
 | U-22 | Composition: point mass + J2 + drag summed in that order regardless of input order; point-mass-only composition bitwise equal to `CompositeForceModel` today | R-ORD, R-REG | E | R | — |
-| U-23 | Limits: no drag component ⇒ bitwise point mass (+ J2); C_d·A = 0 or ρ = 0 ⇒ exact zero drag | R-REG | E | R | DR-0025 Q11 |
+| U-23 | Limits (corrected under I-24, F6): no drag component ⇒ bitwise point mass (+ J2); ρ̂ = 0 ⇒ exactly zero drag; positive C_d and A with C_d·A ≤ 2⁻¹⁰⁷⁵ ⇒ exactly zero drag (T0 E4b, derived for the spike's coefficient sequence under A-FP-1 and A-FP-2; re-derive for another sequence). **C_d·A = 0 from a zero parameter is outside the parameter domain** (§3.5: C_d, A positive and finite) **and must raise**, not return zero. I-23 listed it as a zero-drag case, contradicting §3.5 | R-REG | E | R | DR-0025 Q11; T1 R1-F2 domain pattern |
 | U-24 | Purity: static-guard scan covers the new modules; repeated evaluation is bitwise identical; no attribute changes after evaluation | R-PURE | E | C | Architecture scan, as in the T2 gate |
 
 ### 3.2 Property-based and metamorphic tests (seeded and recorded; sampled, so not proofs)
 | # | Relation | Kind |
 |---|---|---|
-| PM-1 | Drag power a_d · v < 0 whenever \|ω×r\| < \|v\| (DR-0024 §10 precondition), over seeded bound states | E (sign) |
-| PM-2 | Rotation about +Z commutes with drag: a_d(Q r, Q v) = Q a_d(r, v) | D |
-| PM-3 | Mass homogeneity: a_d(m) · m is invariant under m → 2m | E |
-| PM-4 | Density monotonic inside each band (strictly decreasing in h) | E (sign) |
-| PM-5 | Geodetic height is 1-Lipschitz in r: \|h(r₁) − h(r₂)\| ≤ \|r₁ − r₂\| + 2ε_h | D |
-| PM-6 | Spherical and geodetic heights: \|r\| − a ≤ h ≤ \|r\| − b outside the ellipsoid | D (DR-0029 P3) |
+| PM-1 | Drag power a_d · v < 0 (corrected under I-24, F6). The I-23 precondition \|ω×r\| < \|v\| makes the **exact** v_rel·v positive, but not the computed one. Domain: states whose **computed** v_rel satisfies v_rel·v > u·Σ\|v_rel,i v_i\|, checked in exact rationals, plus U-4's domain (ρ̂ > 0, no underflow). On that domain the sign is exact (§3.9 B-1). States outside it are reported | E (sign) on the stated domain |
+| PM-2 | Rotation about +Z commutes with drag: a_d(Q r, Q v) = Q a_d(r, v) | **Reported** until §3.9 B-5 is derived (I-24, F6). Even quarter turns are not claimed exact: a dot product evaluated with FMA (allowed by A-FP-3) is not symmetric under x ↔ y |
+| PM-3 | Mass homogeneity: fl(a_d,i(2m)·2m) = fl(a_d,i(m)·m) exactly | E (§3.9 B-2). Domain: no underflow or overflow at m and 2m (I-24, F6) |
+| PM-4 | Density inside one band (corrected under I-24, F3). (a) **Non-increasing:** h₁ < h₂ in the same band ⇒ ρ̂(h₁) ≥ ρ̂(h₂). Equal outputs from neighbouring inputs are expected: ρ̂(1.0) = ρ̂(next(1.0)) in the spike, 800 of 2 858 sampled adjacent pairs in band 0 are equal (I-24), and on the km route distinct h_m can share fl(h_m/1000). Conditional on exp being monotone (A-LM-2); every other operation is a correctly rounded monotone operation. (b) **Strictly decreasing** only for pairs with exp(−(h₂ − h₁)/H) < (1 − ε)/(1 + ε), ε the E3 relative allowance, both densities normal; conditional on A-FP-2. (c) In the zero tail (above h_zero): ρ̂ = 0 for both, so only (a) applies | E (sign), **conditional on A-LM-2 (a) and A-FP-2 (b)**: gates only if the T2 authorization accepts them; otherwise reported |
+| PM-5 | Geodetic height: \|ĥ(r₁) − ĥ(r₂)\| ≤ \|r₁ − r₂\| + ε_h(h₁) + ε_h(h₂), both sides in exact rationals (compare squares for the norm). **Domain (I-24, F2):** both points outside the ellipsoid (exterior height is a distance, hence 1-Lipschitz), path (α). ε_h is evaluated at the upper bound (ĥ + β)/(1 − α) of the true height | D (E1, §3.9 B-12), exterior and path (α) only; **conditional on A-FP-2**; otherwise reported |
+| PM-6 | \|r\| − a − ε_h ≤ ĥ ≤ \|r\| − b + ε_h, \|r\| in exact rationals (DR-0029 P3's exact inequality, plus E1 for the computed height). **Domain (I-24, F2):** outside the ellipsoid, path (α). Negative heights reported | D (E1, §3.9 B-12), exterior and path (α) only; **conditional on A-FP-2** |
 
 The seeds and the number of samples are recorded. A property passing on N samples is reported as such.
 
@@ -86,12 +92,12 @@ The seeds and the number of samples are recorded. A property passing on N sample
 | # | Check | Kind | Class |
 |---|---|---|---|
 | I-1 | Dissipation: on drag-only and J2 + drag, E(t) − E(0) against ∫ a_d · v dt from dense outputs (DR-0025 Q5) | M → reported; a gate only with an owner-approved threshold | P |
-| I-2 | Energy strictly decreases per committed step on a stated configuration (one-band, B 25.8, dt 10 s) | E (sign) on the stated configuration; measured margin recorded | P |
+| I-2 | Energy change per committed step on a stated configuration (one-band, B 25.8, dt 10 s) | **M, reported** (corrected under I-24, F6). Not derived: RK4's per-step energy truncation error has no fixed sign, and no derivation shows that the drag dissipation dominates it and the rounding of the energy evaluation. Gate only after §3.9 B-7 | P |
 | I-3 | Semi-analytic decay oracle (DR-0025 Q6): one-band, spherical-height configuration, mean SMA history | T/M: **informational**. DR-0025 §10 has no derived value; T1 Q1 precedent | I (theory, approximate) |
 | I-4 | RK4 order on the smooth one-band configuration (dt, dt/2, dt/4) | M, reported (principle 4; the M2 rule is not borrowed) | C |
 | I-5 | Band-crossing step behaviour: error ratios across a crossing reported, not gated as an order (principle 5) | M | C |
 | I-6 | Atomicity: a step whose stage raises the density domain error leaves the state, tick and engine schedule unchanged | E | C (REV-T2-01 pattern) |
-| I-7 | Mass coupling during a burn: drag uses the decreasing stage mass; comparison against a run with frozen mass shows the expected sign of difference | E (sign) | C. VO-4 at unit level; full VO-4 is T4 |
+| I-7 | Mass coupling during a burn: (a) **E:** at each derivative evaluation, the drag term's mass equals the stage mass (the U-3 identity, observed through the context); (b) the trajectory difference against a frozen-mass run is **reported** (corrected under I-24, F6): its sign over a coupled trajectory is not derived (§3.9 B-8) | (a) E; (b) M | C. VO-4 at unit level; full VO-4 is T4 |
 
 ### 3.4 Independent reference comparisons
 | # | Reference | Use in T2 | Class |
@@ -107,8 +113,8 @@ GMAT and DOP853 trajectory comparisons are T4/T5 and are not part of T2.
 
 ### 3.5 Numerical boundary tests (summary)
 - Every band base ±1 ulp (U-12).
-- The lower edge ±1 ulp and the negative range (U-14).
-- 1000 km continuity (U-15).
+- The lower edge (corrected under I-24, F4): ±0.0, +5e-324, −5e-324, the spike's km-route trap interval down to −2.475e-321, and the negative range (U-14). The guard acts in metres, before conversion.
+- The 1000 km base (corrected under I-24, F1): the published −1.598e-5 discontinuity and the band selection at −1 ulp, exactly and +1 ulp, like every other base (U-15). **No continuity requirement at any base** (DR-0024 Q5a).
 - The normal → subnormal → zero transition of the top band (U-16).
 - The axis, the equator and the evolute boundary (U-17, U-20).
 - Mass at depletion with negative round-off (U-3).
@@ -142,12 +148,53 @@ Each mutant must be killed by a designated assertion, for its declared reason. D
 
 **Expected limitation:** finite coverage. Survivors are documented, not hidden (T1 precedent).
 
+### 3.9 Bound audit (added under I-24, M3T2R-R1-F6)
+Every (D) or (T) bound in §3.1–§3.3, and every exact claim that rests on more than correctly rounded IEEE 754 operations. **Status:**
+- **Gate:** derived here or in an accepted record, on its stated domain.
+- **Conditional:** derived, but only under a named unproved assumption. It gates only if the T2 authorization accepts that assumption; otherwise it is reported.
+- **Deliverable:** no derivation yet. Reported, not gated. The derivation is a T2 deliverable, reviewed before the check may gate. No placeholder number is proposed.
+
+**Assumptions used** (beyond A-FP-1, IEEE 754 binary64 with round-to-nearest-even and gradual underflow, checked at run time by X-P4):
+- **A-FP-2:** T0's libm accuracy assumption (DR-0029 P1). Unproved; measured on one host.
+- **A-LM-0:** exp(±0) = 1, sin(±0) = ±0 and atan2(±0, x > 0) = ±0 exactly. These are special values that the C standard's Annex F specifies; I-24 recalled this and did not re-read it. They are also measured on the I-24 host (U-12, U-21).
+- **A-LM-1:** hypot is symmetric and even in each argument; sin and atan2 are odd in their first argument. IEEE 754 does not require these. 0 failures in 10⁵ random pairs on the I-24 host [measured; not a proof]. Note that CPython's `math.hypot` is CPython's own code, not the platform libm.
+- **A-LM-2:** exp is monotone non-decreasing. This does not follow from an error bound such as A-FP-2, and IEEE 754 does not require it of a non-correctly-rounded exp.
+
+| ID | Row(s) | Bound or exact claim | Derivation and evidence | Assumptions | Valid domain | Status |
+|---|---|---|---|---|---|---|
+| B-1 | U-4, PM-1 | (a) \|(a × v_rel)_i\| ≤ (2u/(1 − u))·\|a_j\|·\|v_k\|; (b) a·v_rel and (PM-1, on its margin domain) a·v have the sign of the coefficient | [derived, I-24] a_i = fl(c·v_i) = c·v_i(1 + δ_i), \|δ_i\| ≤ u. Then (a × v)_x = c·v_y·v_z(δ_y − δ_z), and \|c·v_y\| ≤ \|a_y\|/(1 − u). For (b), a·v_rel = c·Σv_i²(1 + δ_i) and (1 − u)Σv_i² > 0. PM-1: a·v = c(v_rel·v + Σδ_i v_rel,i v_i) | A-FP-1. Structure a_i = fl(c·v_rel,i) with one scalar c (the T0 E4 sequence). The test uses the component's own v_rel. The test side is evaluated in exact rationals | c ≠ 0, v_rel ≠ 0, every nonzero c·v_rel,i normal; PM-1 also needs v_rel·v > u·Σ\|v_rel,i v_i\| | **Gate** (path (α) structure; re-derive otherwise) |
+| B-2 | U-5, PM-3 | Exact doubling and halving | [derived, I-24] In the normal range, fl(2x) = 2fl(x) and fl(x/2) = fl(x)/2 for every rounding, so a factor of 2 entering only through × and ÷ passes through every rounding exactly | A-FP-1 | Every intermediate normal and finite at both scales | **Gate** |
+| B-3 | U-7 | \|v_rel\| = \|v\| ∓ ω_E r on equatorial states, to a rounding bound | Not derived | — | — | **Deliverable** |
+| B-4 | U-18 | ε_h + δ_f for forward-constructed points | E1 is derived (T0, exterior, path (α)); δ_f, the forward construction's rounding, is not. Alternative: an oracle for h_true(r̂) with a stated error | A-FP-1, A-FP-2 (E1 uses libm sin, cos, atan2, hypot) | h_nom ≥ 0 with h_nom > δ_f; path (α) | **Deliverable** (δ_f); reported until then |
+| B-5 | U-19 (general rotations), PM-2 | Rotation equivariance to a γ-bound | Not derived. The rotation itself is rounded, and FMA in a dot product breaks x ↔ y symmetry | — | — | **Deliverable** |
+| B-6 | U-21 | \|n̂\| − 1; n̂ vs ±Ẑ and radial; central-difference truncation of dh/dt | Not derived. I-24 measured that the axis normal is not exactly ±Ẑ (cos(fl(π/2)) = 6.12e-17) | — | — | **Deliverable** |
+| B-7 | I-2 | Per-step energy decrease | Not derived (RK4's energy truncation error has no fixed sign) | — | — | **Deliverable**; reported |
+| B-8 | I-7 (b) | Sign of the frozen-mass trajectory difference | Not derived over a coupled trajectory | — | — | **Deliverable**; reported |
+| B-9 | U-13, PM-4 (b) | E3 density allowance; strict decrease for separated inputs | [derived, T0 E3 in `t0_termination.rounding_allowances`] for the spike's km-route sequence | **A-FP-2** | Inside one band; normal densities; path (α), route (km) | **Conditional** (A-FP-2) |
+| B-10 | PM-4 (a) | Non-increase inside a band | [derived, I-24] fl(h/1000), the subtraction, the division by the scale height and the multiplication by ρ₀ > 0 are correctly rounded, hence monotone; the negation reverses order exactly | **A-LM-2** | Inside one band | **Conditional** (A-LM-2) |
+| B-11 | U-19 (quarter turns, z-reflection) | Exact symmetry | [derived, I-24] Under A-LM-1, the spike's height sequence sees identical operands up to sign | **A-LM-1** | Path (α) | **Conditional** (A-LM-1) |
+| B-12 | U-17, PM-5, PM-6 | ε_h(h) = αh + β | [derived, T0 E1] Reviewed in T0 Reviews 03–10 | A-FP-1, A-FP-2 | **True height ≥ 0** (exterior), no overflow, path (α); the inverse's evaluation error only | **Conditional** (A-FP-2), on that domain only. T0's floors rest on the same assumption |
+| B-13 | U-12 | ρ̂(base) = ρ₀ exactly | [derived, I-24] The exponent is exactly 0 at an integer base on both routes; then A-LM-0. Lower-band selection at −1 ulp is checked exhaustively for the 27 bases on the km route | A-LM-0 | The 27 bases and the lower edge | **Gate** (A-LM-0 is a special value the standard fixes, and is checked directly by the test) |
+| B-14 | U-16 | Transition points (subnormal onset, h_zero) | [derived, T0 E3] for the spike's sequence | A-FP-1, A-FP-2 | Path (α), route (km) | Positions **reported**; "no exception and ρ̂ = 0 ⇒ zero drag" is a **Gate** (E) |
+| B-15 | packet P1 item 14 | Two threshold estimates differ by ≤ the sum of their bracket widths | [derived] two brackets of the same root of the same function overlap | Same density arithmetic | Path (α), route (km) | **Gate** on that domain; otherwise reported |
+
+**Rows with no bound, checked for the other F6 risk, zero cases:**
+- U-1, U-2, U-3, U-9, U-10, U-11, U-14, U-15, U-20, U-22, U-24, I-6 and the X-P rows are exact (E) with no hidden bound.
+- U-8: the non-parallel check is the exact rational cross product of the binary64 v and the component's own v_rel, which must be nonzero. That makes it exact, with the same v_rel access assumption as B-1.
+- U-3: dry + max(prop, 0) is exact for finite positive owned dry mass (Review 01, claim 8).
+- U-6 has a signed-zero caveat (stated in the row).
+- U-23: a zero parameter is a domain error (stated in the row).
+- U-20: its boundary classification is defined by the component's own predicate; test points are taken on both sides of it, as computed.
+
+**Effect:** gates G-T2-1 … G-T2-3 (§4) cover the **Gate** rows only. **Conditional** rows gate only if the T2 authorization explicitly accepts the named assumption. **Deliverable** rows are reported, and become gates only after their derivation has been reviewed.
+
 ## 4. Proposed acceptance gates for T2 (to be confirmed in the T2 authorization)
 | Gate | Content |
 |---|---|
-| G-T2-1 | U-1 … U-24 pass; the decision-dependent rows match the owner's decisions |
-| G-T2-2 | PM-1 … PM-6 pass on the recorded seeds and samples |
-| G-T2-3 | I-2, I-6 and I-7 pass. I-1, I-3, I-4 and I-5 are reported in the VAL record as non-gating |
+| G-T2-1 | U-1 … U-24 pass, in their **Gate** parts (§3.9), plus their **Conditional** parts if the T2 authorization accepts the named assumption. The decision-dependent rows match the owner's decisions. Reported parts are recorded *(corrected under I-24, F6)* |
+| G-T2-2 | PM-1 and PM-3 pass on their stated domains; PM-4, PM-5 and PM-6 also, if the T2 authorization accepts their assumptions (A-LM-2, A-FP-2); all on the recorded seeds and samples. PM-2 is reported *(corrected under I-24, F2, F3, F6)* |
+| G-T2-3 | I-6 and I-7 (a) pass. I-1, I-2, I-3, I-4, I-5 and I-7 (b) are reported in the VAL record as non-gating *(corrected under I-24, F6)* |
+| G-T2-3a | Every **Deliverable** derivation in §3.9 that T2 produces is written down with its operation count, domain and assumptions, and reviewed in the T2 review before its row may gate *(added under I-24, F6)* |
 | G-T2-4 | X-G1 gated; X-G2 … X-G4 and X-D1 reported with their classes |
 | G-T2-5 | X-P1, X-P2 and X-P4 pass on the three CI platforms; X-P3 measured and recorded |
 | G-T2-6 | R-1 … R-6 pass |
@@ -166,3 +213,23 @@ Each mutant must be killed by a designated assertion, for its declared reason. D
 - Codex Review 01 (at `5ee6a6a`): **REQUEST_CHANGES**, with 2 MAJOR (M3T2R-R1-F1: 1000 km continuity; F2: E1 reused beyond h ≥ 0), 3 MINOR (F3 strict monotonicity; F4 lower-edge typo and the −5e-324 guard; F5 C² across band edges) and 1 NOTE (F6). All are reproduced and ACCEPTED, **not applied** (I-23 §10).
 - No P1–P9 classification changes. The text above is as reviewed.
 - Record: `docs/reviews/M3-T2-readiness-review-01.md`.
+
+## Correction log (I-24, 2026-10-24): Review 01 findings F1–F6
+Made under Authorization I-24 (Tech Lead, 2026-10-24); documentation only. The wording Review 01 reviewed is preserved at commit `5ee6a6a`. **This is still a proposal, not an authorization to implement tests.** No decision is assumed beyond what the header states. The finding-by-finding matrix is in `docs/reviews/M3-T2-readiness-review-01-corrections.md`.
+- **F1:** U-15 and §3.5 test the published 1000 km discontinuity (−1.598e-5) and the band selection at ±1 ulp. They no longer require continuity; the top band is claimed smooth only above its base.
+- **F2:** U-17, PM-5 and PM-6 use E1 only for exterior points (true height ≥ 0), under path (α), with exact references on the model's ellipsoid. U-18 is reported until a forward-construction (or oracle) term is derived (B-4). Negative heights are reported.
+- **F3:** PM-4 tests non-increase (conditional on A-LM-2). Strict decrease is tested only for inputs separated by the E3 allowance (conditional on A-FP-2), and equal outputs are expected.
+- **F4:** U-14 and §3.5 put the guard in metres before conversion. They test −5e-324, the spike's trap interval and ±0.0.
+- **F5:** no strategy row claimed C². The P2 correction is in the decision packet.
+- **F6:**
+  - New: principle 1 additions and the §3.9 bound audit (B-1 … B-15, assumptions A-LM-0 … A-LM-2).
+  - U-4, U-5, PM-1 and PM-3 are given derivations and domains.
+  - U-7 (magnitudes), U-21, PM-2, I-2 and I-7 (b) are reported until derived.
+  - U-13, U-19 and PM-4 are made conditional.
+  - Gates G-T2-1 … G-T2-3 are restricted accordingly, and G-T2-3a is added.
+- **Related defects found during the I-24 audit:**
+  - U-21's "±Ẑ on the axis" was not exact.
+  - U-23's "C_d·A = 0 ⇒ zero drag" contradicted §3.5's parameter domain.
+  - U-6's "bitwise" ignored the sign of zero.
+  - U-16's transition points are specific to the spike's arithmetic.
+  - All four are corrected in their rows.

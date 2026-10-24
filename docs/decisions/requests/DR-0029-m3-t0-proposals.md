@@ -537,3 +537,8 @@ Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 1
   - Classification: READY FOR OWNER DECISION P1, P2, P4, P8, P9; BLOCKED BY ANOTHER DECISION P3 (P1), P5 (P4, P1), P7 (P1, P9); NEEDS ADDITIONAL EVIDENCE P6.
   - It adds implementer findings N-1 … N-7 and corroboration C-1 … C-7. No option, number or recommendation in this DR changes.
   - **P1–P9 stay OPEN.**
+- **P5 wording note (2026-10-24, append-only; I-24):** P5's cell for ≥ 1000 km, "Extrapolate the top band (continuous, GMAT-identical)", is ambiguous.
+  - Read as continuity *at* the 1000 km base, it contradicts P1's list of 12 downward jumps (which includes 1000 km; relative jump −1.598e-5) and DR-0024 Q5a.
+  - Read as continuity *within* the top band above its base, it is correct.
+  - **Proposed amendment, not applied, for the owner to adopt or reject with the P5 decision:** "(the top band's formula, continuous for h > 1000 km; the 1000 km base keeps the published −1.598e-5 relative jump, like every other base; GMAT-identical)". Details: `DR-0029-P1-P9-owner-decision-packet.md`, P5 item 14.
+  - The P5 table above is unchanged. **P1–P9 stay OPEN.**

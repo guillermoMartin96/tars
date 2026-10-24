@@ -1,0 +1,52 @@
+== F1: left limit vs row value at the bases with downward jumps, 25, 900, 1000 km
+rows 28
+base     25 km  left 0.038936985035224865  row 0.03899  rel +1.361558033503908e-03
+base     50 km  left 0.0010570349662101367  row 0.001057  rel -3.307952078643843e-05
+base     90 km  left 3.3961140588410054e-06  row 3.396e-06  rel -3.358510315879764e-05
+base    110 km  left 9.661774301910217e-08  row 9.661e-08  rel -8.014075738283699e-05
+base    120 km  left 2.43818921061352e-08  row 2.438e-08  rel -7.760292461969345e-05
+base    140 km  left 3.8450721077539006e-09  row 3.845e-09  rel -1.875329041432294e-05
+base    200 km  left 2.7890085269212124e-10  row 2.789e-10  rel -3.057330635673786e-06
+base    250 km  left 7.248111224828284e-11  row 7.248e-11  rel -1.534535340768360e-05
+base    450 km  left 1.5850010899855172e-12  row 1.585e-12  rel -6.876875505641708e-07
+base    600 km  left 1.4540123788496935e-13  row 1.454e-13  rel -8.513579302082912e-06
+base    700 km  left 3.614033284530049e-14  row 3.614e-14  rel -9.209801744684715e-06
+base    900 km  left 5.245015447963667e-15  row 5.245e-15  rel -2.945265618459505e-06
+base   1000 km  left 3.0190482489066533e-15  row 3.019e-15  rel -1.598149571502976e-05
+km 1000 km -1ulp, exact, +1ulp: ['3.0190482489066557e-15', '3.019e-15', '3.0189999999999988e-15']
+m 1000 km -1ulp, exact, +1ulp: ['3.0190482489066557e-15', '3.019e-15', '3.0189999999999988e-15']
+== F3
+rho(1.0) == rho(nextafter(1.0)) True
+tail rho(192000000), rho(192000001): 0.0 0.0
+equal adjacent pairs among 2858 samples in band 0: 800
+== F4
+units=km h=    -5e-324: 1.225
+units=m  h=    -5e-324: OutsideDomainError
+units=km h= -2.47e-321: 1.225
+units=m  h= -2.47e-321: OutsideDomainError
+units=km h=-2.475e-321: OutsideDomainError
+units=m  h=-2.475e-321: OutsideDomainError
+units=km h=    -3e-321: OutsideDomainError
+units=m  h=    -3e-321: OutsideDomainError
+units=km h=    -1e-300: OutsideDomainError
+units=m  h=    -1e-300: OutsideDomainError
+units=km h=       -0.0: 1.225
+units=m  h=       -0.0: 1.225
+units=km h=        0.0: 1.225
+units=m  h=        0.0: 1.225
+units=km h=     5e-324: 1.225
+units=m  h=     5e-324: 1.225
+first negative h with h/1000 != -0: -2.475e-321 (h/1000 = -5e-324 )
+nextafter(-2.475e-321, 0) = -2.47e-321
+-0.0 < 0: False
+== F6 / U-12: km route, bases where base - 1 ulp does not select the lower band
+[]
+== F6 / U-21: axis and equator
+axis lat 1.5707963267948966 cos(lat) 6.123233995736766e-17 h 43247.685754820704
+equator lat 0.0 h 21863.0
+== F6 / A-LM-1 spot check (not a proof)
+hypot(x,y) != hypot(y,x): 0
+atan2(-z,p) != -atan2(z,p): 0
+== F2: model ellipsoid vs WGS 84 exact 1/f
+e2 binary64 0.0066943799901413165 relative error -7.993416736133154e-17
+b_model - b_WGS84 [m] 1.71224228224207367573372805666857618764652E-12

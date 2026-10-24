@@ -64,8 +64,8 @@ From `M3-proposal.md` §4 (T2 row) and the approved decisions (readiness report 
 ## 5. Design questions for the owner (answer before T2 branches)
 | ID | Question | Options | Implementer's recommendation and reason |
 |---|---|---|---|
-| **DQ-1** | Geodetic algorithm | **(α)** reproduce `t0_model.geodetic_iterative` operation for operation (start latitude, stopping rule \|Δφ\| ≤ 1e-15 or 60 iterations, pole-safe height). **(β)** another algorithm: Vermeille closed form, or a fixed iteration count as DR-0026 §5.8's body text suggests | **(α)** [judgment]. It is the only algorithm with a derived height-error bound ε_h (E1), on which the P1/P4 sufficient-floor statements rest (packet N-1). It is deterministic and total on its domain (the early exit is a data-dependent branch, not non-determinism). The owner should state that this satisfies DR-0026 §5.8's intent |
-| **DQ-2** | Density evaluation route | **(km)** convert h to km and apply the table formula, as GMAT and the T0 envelope (E2) do. **(m)** convert the table to SI once at load, as DR-0024 §9's body text says | **(km)** [judgment]. GMAT-identical arithmetic (T5 exact configuration) and coverage by the T0 derivation. T0 shows identical band selection on both routes at, and one ulp either side of, all 27 bases [measured]; the density bits can differ. (km) departs from DR-0024 §9's "converted once, at dataset load". §9 is request-body text, not a Resolution item, but the owner should accept the departure explicitly |
+| **DQ-1** | Geodetic algorithm | **(α)** reproduce `t0_model.geodetic_iterative` operation for operation (start latitude, stopping rule \|Δφ\| ≤ 1e-15 or 60 iterations, pole-safe height). **(β)** another algorithm: Vermeille closed form, or a fixed iteration count as DR-0026 §5.8's body text suggests | **(α)** [judgment]. It is the only algorithm with a derived height-error bound ε_h (E1), on which the P1/P4 sufficient-floor statements rest (packet N-1). It is deterministic and total on its domain (the early exit is a data-dependent branch, not non-determinism). The owner should state that this satisfies DR-0026 §5.8's intent. **Qualified under I-24 (M3T2R-R1-F2, F4):** E1 covers exterior points (true height ≥ 0) and the inverse's own evaluation error only, under A-FP-2; negative heights are outside it. "Operation for operation" excludes the spike's domain guard (see DQ-2). |
+| **DQ-2** | Density evaluation route | **(km)** convert h to km and apply the table formula, as GMAT and the T0 envelope (E2) do. **(m)** convert the table to SI once at load, as DR-0024 §9's body text says | **(km)** [judgment]. GMAT-identical arithmetic (T5 exact configuration) and coverage by the T0 derivation. T0 shows identical band selection on both routes at, and one ulp either side of, all 27 bases [measured]; the density bits can differ. (km) departs from DR-0024 §9's "converted once, at dataset load". §9 is request-body text, not a Resolution item, but the owner should accept the departure explicitly. **Domain guard (I-24, M3T2R-R1-F4):** on either route, the lower-edge guard compares the height **in metres** with 0, **before** the km conversion; −0.0 is in the domain. The spike converts first, so it accepts −2.475e-321 < h_m < 0 and returns 1.225 kg/m³ for −5e-324; T2 must not copy that. The corrected guard changes only which inputs raise, all of them below the edge. Every input with h_m ≥ 0 reaches the same arithmetic, so no T0 floor or E1–E6 term changes |
 | **DQ-3** | Does T2 wire the context into `Simulator`? | **(a)** yes: derivatives build `ForceContext` from the stage state; M1/M2 byte identity gated. **(b)** no: protocol and adapter only; the simulator change moves to T3 | **(a)**. The M3 proposal's T2 gate lists "M1/M2 byte-identity", and VO-4's mass coupling needs the stage mass. The change is confined to the three derivative closures |
 | **DQ-4** | Where the dataset and its digest live | Data file under `src/tars/sim/data/`, read with `Path(__file__)`. `importlib.resources` is forbidden by the static guard. The digest pinned in `tars.sim` (packet N-5). Alternative: the file's bytes embedded as a Python literal plus its digest | Data file plus a `tars.sim` digest. **Stop condition** if the wheel build needs a `pyproject.toml` change (protected) to include it. The embedded-bytes form is the fallback, with the owner's approval |
 | **DQ-5** | J2 under the context protocol | **(a)** wrapped by the legacy adapter, with T1's class untouched. **(b)** a new context-aware J2 version | **(a)**. It preserves T1's accepted contract and its evidence; a new version would need a new identity and re-validation |
@@ -75,6 +75,10 @@ From `M3-proposal.md` §4 (T2 row) and the approved decisions (readiness report 
 - `M3-T2-validation-strategy.md` gates G-T2-1 … G-T2-9.
 - Red-first tests, committed before the code (T1 precedent).
 - Every tolerance is exact, derived with its operation count, or measured and reported. **No invented tolerance; no M3 threshold** (DR-0025 principle 7).
+- *(Added under I-24, M3T2R-R1-F6.)* The strategy's §3.9 bound audit governs which rows gate:
+  - **Gate** rows gate.
+  - **Conditional** rows gate only if this authorization, once issued, explicitly accepts the named assumption (A-FP-2, A-LM-1, A-LM-2). This draft does not assume that it will.
+  - **Deliverable** rows are reported until their derivation has been reviewed (G-T2-3a).
 - The M1 Proof and the M2 Proof run in separate fresh clones, with `uv` on PATH; the T0 314 checks; the T1 109 tests; CI green on three platforms plus `m2-cross-platform` for every pushed commit.
 - Determinism: same-platform byte identity; cross-platform differences measured and recorded, not bounded.
 
@@ -124,3 +128,11 @@ Stop and report, without working around the problem, if:
 - Codex Review 01 (at `5ee6a6a`): **REQUEST_CHANGES**, with 2 MAJOR (M3T2R-R1-F1: 1000 km continuity; F2: E1 reused beyond h ≥ 0), 3 MINOR (F3 strict monotonicity; F4 lower-edge typo and the −5e-324 guard; F5 C² across band edges) and 1 NOTE (F6). All are reproduced and ACCEPTED, **not applied** (I-23 §10).
 - No P1–P9 classification changes. The text above is as reviewed.
 - Record: `docs/reviews/M3-T2-readiness-review-01.md`.
+
+## Correction log (I-24, 2026-10-24): Review 01 findings
+Made under Authorization I-24; documentation only. The reviewed wording is preserved at `5ee6a6a`. **Still DRAFT — NOT AUTHORIZED.**
+- DQ-1 is qualified with E1's domain (F2).
+- DQ-2 now specifies the metres-first guard and records the spike's trap interval (F4).
+- §6 refers to the strategy's bound audit (F6).
+- DQ-1 … DQ-6 are **unanswered and unchanged in substance**.
+- Preconditions PC-1 … PC-7 are unchanged, and none is met.

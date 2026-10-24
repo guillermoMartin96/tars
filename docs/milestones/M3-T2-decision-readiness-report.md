@@ -174,3 +174,20 @@ Checked on 2026-10-24 before any file was created.
 - Codex Review 01 (at `5ee6a6a`): **REQUEST_CHANGES**, with 2 MAJOR (M3T2R-R1-F1: 1000 km continuity; F2: E1 reused beyond h ≥ 0), 3 MINOR (F3 strict monotonicity; F4 lower-edge typo and the −5e-324 guard; F5 C² across band edges) and 1 NOTE (F6). All are reproduced and ACCEPTED, **not applied** (I-23 §10).
 - No P1–P9 classification changes. The text above is as reviewed.
 - Record: `docs/reviews/M3-T2-readiness-review-01.md`.
+
+## Status update (2026-10-24, append-only): I-24 corrections of Review 01
+- Under Authorization I-24, M3T2R-R1-F1 … F6 are corrected in the decision packet, the validation strategy and the draft T2 packet. The matrix is in `docs/reviews/M3-T2-readiness-review-01-corrections.md`; the reviewed wording is preserved at `5ee6a6a`.
+- **Unchanged:**
+  - §1 … §10 of this report;
+  - the P1–P9 classification;
+  - the governing gate (P1–P10; Q-GATE open);
+  - DQ-1 … DQ-6 (open);
+  - the P6 investigation (open, X-1 not authorized).
+- **Additions to §6 (evidence gaps), from the F6 audit:**
+  - Derivations B-3 … B-8 (strategy §3.9) do not exist. They are T2 deliverables; until they are reviewed, their checks are reported, not gated.
+  - Rows resting on A-FP-2, A-LM-1 or A-LM-2 gate only if the T2 authorization accepts those assumptions.
+  - Neither gap blocks a P1–P9 decision.
+- **Additions to §6, from F1 and F4:**
+  - DR-0029 P5's "(continuous, GMAT-identical)" wording is ambiguous; an amendment is proposed for the owner (packet P5 item 14; DR-0029 append-only note).
+  - The T0 spike's km-route guard accepts −2.475e-321 < h_m < 0 (packet P4 item 8). It affects no T0 result.
+- Owner briefing: `docs/decisions/requests/DR-0029-P1-P9-owner-briefing.md`.
