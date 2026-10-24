@@ -266,3 +266,12 @@ Codex, session `01a16b20…`, at `e404b0f`: **`VERDICT: CLOSURE VERIFIED`**, wit
   - The fast-forward of `main` to the head that carries this record is authorized under I-22 §2–§3, subject to its pre-merge checks.
   - As with T0, the merge outcome is not recorded on this branch, because `main` must equal the verified source head. It is reported in the closure report and will be recorded in the next authorized branch.
 - **Not authorized:** T2 and T3. Every item preserved by I-19 §9 and I-20 §9 remains open.
+
+## Merge status (I-22) (appended 2026-10-24 UTC)
+- **Recorded under:** "Authorization I-23 — M3 T2 Decision Readiness and DR-0029 P1–P9 Resolution Preparation" (Tech Lead). The merge is recorded here, in the next authorized branch, by repository convention.
+- **Merge:** `main` fast-forwarded from `60648b93385a9954194730006aeac29ea14875ad` to **`fc50aed5136ba9ac013b4b09f32cbbbf2e0b4942`** (the head carrying "Owner acceptance (I-22)"), under I-22 §2–§3.
+  - 24 commits; no merge commit (`git rev-list --merges 60648b9..fc50aed` is empty).
+  - `origin/milestone-3-t1-j2-force-model` = `fc50aed`; the branch is kept.
+- **CI on `main` at `fc50aed`:** run 40053187537 (push), all four jobs success: `check (ubuntu-latest)`, `check (macos-latest)`, `check (macos-15-intel)`, `m2-cross-platform`.
+- **Verified 2026-10-24** with `git fetch origin`, `git rev-parse origin/main`, `git merge-base --is-ancestor 60648b9 fc50aed` and `gh run view 40053187537`.
+- **Status: T1 ACCEPTED — MERGED.** Its retained limitations stand. T2 and T3 are NOT AUTHORIZED.

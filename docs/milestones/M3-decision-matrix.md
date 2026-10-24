@@ -277,3 +277,14 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
 - **I-22:** T1 ACCEPTED at `65de33f`; a conditional fast-forward merge is authorized. Accepted with its retained limitations: the two exploratory mutation survivors and the documented numerical limitations.
 - **Unchanged and open:** DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2, DR-0028 P6(b), the secular-rate tolerance and presentation, T4/T5 comparison requirements, the M3 final time step, the T3 axis representation, external corroboration.
 - **Status:** T1 ACCEPTED — NOT MERGED (at this record). T2 and later are NOT AUTHORIZED.
+
+## T1 merge and T2 decision readiness (recorded 2026-10-24 UTC, append-only)
+- **T1 MERGED:** `main` fast-forwarded `60648b9` → `fc50aed` under I-22 (CI run 40053187537 green on all four jobs). Record: T1 dossier, "Merge status (I-22)".
+- **I-23 (Tech Lead, 2026-10-24):** research and planning only. Prepared on `milestone-3-t2-decision-readiness`:
+  - `docs/decisions/requests/DR-0029-P1-P9-owner-decision-packet.md` (classification of P1–P9; new findings N-1 … N-7; corroboration C-1 … C-7);
+  - `docs/milestones/M3-T2-decision-readiness-report.md`;
+  - `M3-T2-validation-strategy.md`;
+  - `M3-T2-authorization-packet.md` (DRAFT — NOT AUTHORIZED);
+  - `M3-open-issues-register.md`.
+- **No decision changed.** DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2, DR-0028 P6(b) and Q-G2-4 are unchanged. The governing T2 gate (P1–P10) is unchanged.
+- **Status:** T2 and later are NOT AUTHORIZED.

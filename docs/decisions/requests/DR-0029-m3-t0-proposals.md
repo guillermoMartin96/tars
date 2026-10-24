@@ -533,3 +533,7 @@ Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 1
 - **Review 10 (2026-10-21):** independent Review 10 (Codex, at `3c565e6`) returned PASS (unconditional) with no new findings (`docs/reviews/M3-T0-review-10.md`). This DR's status is unchanged: OPEN, P1–P10 undecided, Q-G2-1 escalated.
 <!-- /review09-correction-log -->
 - **P10 decision packet (2026-10-22, append-only):** under "I-15 — M3 Transition: Resolve DR-0029 P10 Before T1" (not the 2026-10-18 T0 authorization of the same number), an owner decision packet for P10 is prepared in `DR-0029-P10-owner-decision-packet.md`. Classification: CONDITIONALLY INDEPENDENT. Recommendation unchanged: (a). New, unreviewed scratch evidence (`docs/science/experiments/m3-p10/`): trajectory effect (a) vs (b) 3.2e-5 m on the M1 orbit (one host, not a bound); under (b) the T0 `.cof` format `.14e` does not round-trip J2. **P10 stays OPEN**; this DR's status is unchanged. T0 was fast-forward merged into `main` (`5fded7c`) under I-14.
+- **P1–P9 decision packet (2026-10-24, append-only):** under "Authorization I-23 — M3 T2 Decision Readiness and DR-0029 P1–P9 Resolution Preparation", a readiness packet is in `DR-0029-P1-P9-owner-decision-packet.md`.
+  - Classification: READY FOR OWNER DECISION P1, P2, P4, P8, P9; BLOCKED BY ANOTHER DECISION P3 (P1), P5 (P4, P1), P7 (P1, P9); NEEDS ADDITIONAL EVIDENCE P6.
+  - It adds implementer findings N-1 … N-7 and corroboration C-1 … C-7. No option, number or recommendation in this DR changes.
+  - **P1–P9 stay OPEN.**
