@@ -52,3 +52,13 @@ These are not Review 01 findings. Each is corrected in its row.
 - [x] Corrections are documentation-only (`git diff --name-only d8270c2`: `docs/` only)
 - [x] No invented tolerance: every new gate bound is derived in §3.9; everything else is reported
 - [ ] Independent Review 02: see `docs/reviews/M3-T2-readiness-review-02.md`
+
+
+## Status update (2026-10-24, append-only): independent Review 02
+- Codex Review 02 (at `f44a94f`): **REQUEST_CHANGES**, with 2 MAJOR and 1 MINOR. All three are reproduced and ACCEPTED, **not applied** (I-24 §6 stop rule):
+  - M3T2R-R2-F1: z-reflection exactness also needs cos to be even, which A-LM-1 omits (U-19, B-11).
+  - R2-F2: PM-4 (b) cites a two-sided E3 allowance, but E3 is one-sided (PM-4 (b), B-9).
+  - R2-F3: extremum wording in packet P4 item 8.
+- Review 01: F1, F2, F4 and F5 are RESOLVED; F3 and F6 are PARTIALLY RESOLVED (through R2-F1 and R2-F2).
+- No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
+- Record: `docs/reviews/M3-T2-readiness-review-02.md`.

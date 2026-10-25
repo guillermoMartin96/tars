@@ -1,0 +1,42 @@
+import sys, math, subprocess, json
+from pathlib import Path
+from fractions import Fraction as F
+from decimal import Decimal as D, localcontext
+sys.dont_write_bytecode=True
+sys.path.insert(0,str(Path('docs/science/experiments/m3-t0').resolve()))
+import t0_model as m
+base='d8270c2'
+paths=subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines()
+print('changed_files',len(paths),'docs_only',all(p.startswith('docs/') for p in paths))
+for p in ['docs/milestones/M3-T2-decision-readiness-report.md','docs/milestones/M3-open-issues-register.md','docs/decisions/requests/DR-0029-m3-t0-proposals.md']:
+ old=subprocess.check_output(['git','show',base+':'+p]); print('prefix',p,Path(p).read_bytes().startswith(old))
+print('historical_review_diff',subprocess.check_output(['git','diff','--name-only',base,'HEAD','--','docs/reviews/M3-T2-readiness-review-01.md','docs/reviews/raw/M3-T2-readiness-codex-review01*'],text=True).strip() or 'NONE')
+b=m.TABLE[-1]; lo=m.TABLE[-2]; left=lo.rho0*math.exp(-(b.base_km-lo.base_km)/lo.scale_km)
+print('1000_left_row_relative',left,b.rho0,(b.rho0-left)/left)
+for route in ['km','m']:
+ print('1000_ulp',route,[m.density(x,units=route) for x in [math.nextafter(1e6,-math.inf),1e6,math.nextafter(1e6,math.inf)]])
+small=math.ulp(0.0)
+print('trap_accepted_count',sum(m.density(-i*small)==1.225 for i in range(1,501)))
+print('trap_first_raise',-501*small,(-500*small)/1000,(-501*small)/1000)
+print('larger_input_same_quotient',-1000*small,(-1000*small)/1000)
+print('signed_zero_density',m.density(-0.0))
+print('equal_adjacent',m.density(1.)==m.density(math.nextafter(1.,math.inf)))
+print('zero_tail',m.density(192000000.),m.density(192000001.))
+print('base_minus_ulp_failures',[i for i in range(1,len(m.TABLE)) if m.band_index(math.nextafter(m.TABLE[i].base_km*1000,-math.inf)/1000)!=i-1])
+with localcontext() as c:
+ c.prec=70
+ def dec(f): return D(f.numerator)/D(f.denominator)
+ a=F(m.A_WGS84); f=1/F('298.257223563')
+ print('polar_delta_m',dec(a)*(dec(1-F(m.E2_WGS84)).sqrt()-dec(1-f*(2-f)).sqrt()))
+lat,h=m.geodetic_iterative([0.,0.,6400000.]);print('axis_lat_cos',lat,math.cos(lat))
+r=json.loads(Path('docs/science/experiments/m3-t0/t0_termination_results.json').read_text())
+print('E1_record_domain',r['floating_point_enclosure']['assumptions']['domain'])
+# Exact rational audit of B-1 on 1000 independently chosen normal triples.
+u=F(1,2**53); failures=0
+for k in range(1,1001):
+ v=[F(float(k/7)),F(float(-k/11)),F(float((k+1)/13))]; c=F(-0.123456789)
+ a=[F(float(c*x)) for x in v]
+ failures+=any(abs(a[j]*v[l]-a[l]*v[j])>2*u/(1-u)*abs(a[j])*abs(v[l]) for j,l in [(1,2),(2,0),(0,1)])
+ failures+=sum(a[i]*v[i] for i in range(3))>=0
+print('B1_sample_failures',failures)
+print('tracked_status',subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],text=True).strip() or 'CLEAN')

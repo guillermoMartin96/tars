@@ -136,3 +136,13 @@ Made under Authorization I-24; documentation only. The reviewed wording is prese
 - §6 refers to the strategy's bound audit (F6).
 - DQ-1 … DQ-6 are **unanswered and unchanged in substance**.
 - Preconditions PC-1 … PC-7 are unchanged, and none is met.
+
+
+## Status update (2026-10-24, append-only): independent Review 02
+- Codex Review 02 (at `f44a94f`): **REQUEST_CHANGES**, with 2 MAJOR and 1 MINOR. All three are reproduced and ACCEPTED, **not applied** (I-24 §6 stop rule):
+  - M3T2R-R2-F1: z-reflection exactness also needs cos to be even, which A-LM-1 omits (U-19, B-11).
+  - R2-F2: PM-4 (b) cites a two-sided E3 allowance, but E3 is one-sided (PM-4 (b), B-9).
+  - R2-F3: extremum wording in packet P4 item 8.
+- Review 01: F1, F2, F4 and F5 are RESOLVED; F3 and F6 are PARTIALLY RESOLVED (through R2-F1 and R2-F2).
+- No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
+- Record: `docs/reviews/M3-T2-readiness-review-02.md`.

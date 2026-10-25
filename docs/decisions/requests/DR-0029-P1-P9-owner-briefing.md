@@ -98,3 +98,13 @@ The governing rule (I-15 T0 series §6) is "P1–P10 as prerequisites for T2". P
 12. **Optional:** record the T0 spike's guard behaviour (OI-21) in VAL-0019.
 
 Not a DR-0029 question, but raised by the I-24 bound audit and to be settled in the T2 authorization itself: whether rows conditional on A-FP-2, A-LM-1 or A-LM-2 may gate (validation strategy §3.9). If they are not accepted, those rows are reported only.
+
+
+## Status update (2026-10-24, append-only): independent Review 02
+- Codex Review 02 (at `f44a94f`): **REQUEST_CHANGES**, with 2 MAJOR and 1 MINOR. All three are reproduced and ACCEPTED, **not applied** (I-24 §6 stop rule):
+  - M3T2R-R2-F1: z-reflection exactness also needs cos to be even, which A-LM-1 omits (U-19, B-11).
+  - R2-F2: PM-4 (b) cites a two-sided E3 allowance, but E3 is one-sided (PM-4 (b), B-9).
+  - R2-F3: extremum wording in packet P4 item 8.
+- Review 01: F1, F2, F4 and F5 are RESOLVED; F3 and F6 are PARTIALLY RESOLVED (through R2-F1 and R2-F2).
+- No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
+- Record: `docs/reviews/M3-T2-readiness-review-02.md`.

@@ -1,0 +1,11 @@
+== R2-F1: spike final height uses cos(lat); reflection maps lat -> -lat
+['s, c = math.sin(lat), math.cos(lat)']
+lat, -lat2: 0.7332718026883142 0.7332718026883142  h == h2: True (this host; not a proof)
+h(cos), h(cos+2ulp), diff: np.float64(120000.0) np.float64(120000.00000000093) 9.313225746154785e-10
+== R2-F2: E3 enclosure in rounding_allowances docstring is one-sided
+['rho^ <= F_rho e^eta0 rho(h_s) exp(theta_x X) + N_rho,', '0. c0 = fl(0.5 rho^) <= 5/8 (rho^ <= F_rho e^eta0 rho0_max + N_rho, E3).']
+== R2-F3: quotient -5e-324 is reached by many negative inputs
+-2.475e-321 -5e-324
+-4.94e-321 -5e-324
+-7.41e-321 -1e-323
+-7.42e-321 -1e-323

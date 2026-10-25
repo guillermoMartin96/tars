@@ -1,0 +1,21 @@
+import sys,math,json,hashlib
+from pathlib import Path
+sys.dont_write_bytecode=True
+sys.path.insert(0,str(Path('docs/science/experiments/m3-t0').resolve()))
+import t0_model as m
+from scipy.optimize import brentq
+record=json.loads(Path('docs/science/experiments/m3-t0/t0_termination_results.json').read_text())['stiffness_thresholds']['bound_speed']
+for k in [2.785293563405282,1.,.1,.01]:
+ vals=[]
+ for name,B in [('B25.8',850/(2.2*15)),('B100',100.)]:
+  def residual(h):
+   speed=math.sqrt(2*m.MU/(m.B_WGS84+h))+m.OMEGA_E*(m.A_WGS84+h)
+   return m.density(h)*speed*10/B-k
+  root=brentq(residual,30000,110000,xtol=1e-9,rtol=1e-15)
+  vals.append((round(root,2),root-record[name][repr(k)]['threshold_m']))
+ print('kappa',k,'(root_m,delta_record_m)',vals)
+p=Path('docs/reviews/raw/M3-T2-readiness-I24-evidence')
+for line in (p/'SHA256SUMS').read_text().splitlines():
+ digest,name=line.split(maxsplit=1)
+ f=p/Path(name).name
+ print('sha256',f.name,hashlib.sha256(f.read_bytes()).hexdigest()==digest)

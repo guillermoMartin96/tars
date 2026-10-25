@@ -1,0 +1,27 @@
+"""I-24 implementer reproduction of Review 02 findings R2-F1..F3 (read-only use of the T0 spike)."""
+import inspect, math, sys
+sys.path.insert(0, sys.argv[1])
+import numpy as np
+import t0_model as m
+import t0_termination as t
+print("== R2-F1: spike final height uses cos(lat); reflection maps lat -> -lat")
+src = inspect.getsource(m.geodetic_iterative)
+print([l.strip() for l in src.splitlines() if "math.cos" in l])
+lat, h = m.geodetic_iterative(np.array([4.0e6, 2.0e6, 4.0e6]))
+lat2, h2 = m.geodetic_iterative(np.array([4.0e6, 2.0e6, -4.0e6]))
+print("lat, -lat2:", lat, -lat2, " h == h2:", h == h2, "(this host; not a proof)")
+# effect of an A-FP-2-admissible 2-ulp error in cos only, at phi = 0.6, h = 120 km
+phi = 0.6
+r = m.geodetic_to_cartesian(phi, 0.0, 120000.0)
+p, z = math.hypot(r[0], r[1]), r[2]
+la, _ = m.geodetic_iterative(r)
+s, c = math.sin(la), math.cos(la)
+c2 = math.nextafter(math.nextafter(c, 1), 1)
+f = lambda cc: p * cc + z * s - m.A_WGS84 * math.sqrt(1.0 - m.E2_WGS84 * s * s)
+print("h(cos), h(cos+2ulp), diff:", repr(f(c)), repr(f(c2)), f(c2) - f(c))
+print("== R2-F2: E3 enclosure in rounding_allowances docstring is one-sided")
+doc = t.rounding_allowances.__doc__
+print([l.strip() for l in doc.splitlines() if "rho^ <=" in l or "rho^ >=" in l])
+print("== R2-F3: quotient -5e-324 is reached by many negative inputs")
+for x in (-2.475e-321, -4.94e-321, -7.41e-321, -7.42e-321):
+    print(repr(x), repr(x / 1000.0))
