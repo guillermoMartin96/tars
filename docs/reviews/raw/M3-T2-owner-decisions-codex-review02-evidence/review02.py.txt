@@ -1,0 +1,35 @@
+import subprocess, pathlib, hashlib, re
+root=pathlib.Path.cwd()
+def git(*a): return subprocess.check_output(['git',*a],text=True)
+base='a22297d1ec719a58aeb7209f3d34256fa7b0756a'
+files=git('diff','--name-only',base,'HEAD').splitlines()
+print('HEAD:',git('rev-parse','HEAD').strip())
+print('Parent:',git('rev-parse','HEAD^').strip())
+print('Changed files:',len(files)); print('Outside docs:',[f for f in files if not f.startswith('docs/')])
+oldfiles=set(git('ls-tree','-r','--name-only',base).splitlines())
+print('Historical review/evidence modified:',[f for f in files if f in oldfiles and f.startswith('docs/reviews/')])
+violations=[]
+for f in files:
+ if f not in oldfiles: continue
+ old=git('show',base+':'+f).splitlines(); new=pathlib.Path(f).read_text().splitlines(); j=0
+ for line in old:
+  prefix=line.rstrip()
+  if prefix.endswith('|'): prefix=prefix[:-1].rstrip()
+  while j<len(new) and not new[j].startswith(prefix): j+=1
+  if j==len(new): violations.append(f); break
+  j+=1
+print('Append-preservation violations:',violations)
+f='docs/decisions/requests/DR-0029-m3-t0-proposals.md'
+old=git('show',base+':'+f); new=pathlib.Path(f).read_text()
+quotes=lambda t: [l for l in t.splitlines() if l.startswith('>')]
+print('All DR-0029 owner blockquotes identical:',quotes(old)==quotes(new))
+print('Resolution P1-P10 status rows identical:',[l for l in old.splitlines() if re.match(r'\| P\d+ \|',l) and '**DECIDED**' in l or l.startswith('| P6 | **NOT FULLY')]==[l for l in new.splitlines() if re.match(r'\| P\d+ \|',l) and '**DECIDED**' in l or l.startswith('| P6 | **NOT FULLY')])
+for f in ['docs/milestones/M3-T2-authorization-packet-r1.md','docs/milestones/M3-T2-validation-strategy.md','docs/decisions/0009-m3-force-context-and-physics-identity.md']:
+ print('Entire file byte-identical:',f,subprocess.check_output(['git','show',base+':'+f])==pathlib.Path(f).read_bytes())
+f='docs/decisions/requests/DR-0025-m3-validation-strategy.md'; a='**Owner policy on conditional floating-point gates'; b='  - **Application:**'
+x=git('show',base+':'+f); y=pathlib.Path(f).read_text()
+print('DR-0025 floating-point policy identical:', x[x.index(a):x.index(b,x.index(a))]==y[y.index(a):y.index(b,y.index(a))])
+p=pathlib.Path('docs/reviews/raw/M3-T2-owner-decisions-I27-evidence')
+for l in (p/'SHA256SUMS').read_text().splitlines():
+ digest,name=l.split(); print('SHA256',name,hashlib.sha256((p/name).read_bytes()).hexdigest()==digest)
+print('Tracked tree status:',repr(git('status','--short','--untracked-files=no')))

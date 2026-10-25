@@ -50,3 +50,5 @@ Results are in `docs/reviews/raw/M3-T2-owner-decisions-I27-evidence/self_validat
 6. docs only, with no protected path changed;
 7. links resolve;
 8. `git diff --check` reports only the Markdown hard breaks.
+
+- *(2026-10-25, append-only)* **Independent Review 02 (Codex, at `f3ae387`): PASS**, with no BLOCKER or MAJOR finding. Two MINOR findings are ACCEPTED and **not applied** (I-27 §11): M3T2OD-R2-F1, two pre-I-26 cells in `M3-T0-decision-matrix.md` (lines 14 and 27) still call `reentry` a proposal without an in-place marker; M3T2OD-R2-F2, the `git diff --check` description in the I-27 correction record omits a trailing space in `self_validation.out:31`. Record: `docs/reviews/M3-T2-owner-decisions-review-02.md`. Nothing is approved by the PASS.
