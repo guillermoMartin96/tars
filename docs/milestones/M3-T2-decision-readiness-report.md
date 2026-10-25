@@ -209,3 +209,39 @@ Checked on 2026-10-24 before any file was created.
   - A-LM-1 is narrowed;
   - the P4 wording is fixed.
 - No classification, gate, DQ or P6 status changes.
+
+## Final readiness report (2026-10-24, append-only; I-25 §5, after Review 03 PASS)
+**The planning package is ready for owner decision review.** It approves nothing, and **T2 is still NOT AUTHORIZED.**
+
+**Review history:**
+
+| Review | Reviewed revision | Verdict | Findings | Disposition |
+|---|---|---|---|---|
+| 01 | `5ee6a6a` | REQUEST_CHANGES | F1, F2 (MAJOR); F3, F4, F5 (MINOR); F6 (NOTE) | All ACCEPTED; corrected under I-24 (`f44a94f`) |
+| 02 | `f44a94f` | REQUEST_CHANGES | R2-F1, R2-F2 (MAJOR); R2-F3 (MINOR) | All ACCEPTED; corrected under I-25 (`628623b`) |
+| 03 | `628623b` | **PASS** | none | — |
+
+Every finding from Reviews 01 and 02 is confirmed resolved by a later independent review. Records: `docs/reviews/M3-T2-readiness-review-0{1,2,3}.md` and `-review-0{1,2}-corrections.md`.
+
+**State of the decisions (unchanged since I-23):**
+- **READY FOR OWNER DECISION:** P1 (owner supplies κ and v̂), P2, P4, P8, P9.
+- **BLOCKED BY ANOTHER DECISION**, decidable in the same response: P3 (on P1), P5 (on P4 and P1), P7 (on P1 and P9).
+- **NEEDS ADDITIONAL EVIDENCE:** P6, for the geodetic-drag attribution, X-1, which is not authorized.
+- **Open:** Q-GATE (governing gate P1–P10, not narrowed), DQ-1 … DQ-6, the proposed DR-0029 P5 wording amendment, and the DR-0028 P6(b) ruling.
+- The owner questions are listed in `docs/decisions/requests/DR-0029-P1-P9-owner-briefing.md` §7.
+
+**What the T2 authorization itself will have to settle**, beyond the DR decisions:
+- Whether the **Conditional** validation rows may gate. They rest on A-FP-2 (libm accuracy, measured on one host), A-LM-1 (hypot symmetry and evenness) and A-LM-2 (exp monotone). If not, those rows are reported only.
+- Exact z-reflection symmetry and strict density decrease are reported only in every case.
+- The **Deliverable** derivations (strategy §3.9 B-3 … B-8, B-9 (ii)) are T2 work, reviewed before any of them gates (G-T2-3a).
+
+**Remaining scientific uncertainties:**
+- P6's geodetic-drag residual (0.137 m and above) is unexplained.
+- The T0 floors are tied to the spike's arithmetic, and are conditional on A-FP-1 … A-FP-3.
+- No perturbed-motion missed-dip bound exists.
+- No ∂a/∂r stiffness quantification exists (N-7).
+- Two sources are unread: the IOGP GN 7-2 PDF (C-5's input is recalled) and the C_d primary source (C-6).
+- The printed Vallado table is unread (DR-0027 B-5).
+- There is no independent validation of atmosphere realism.
+
+**Recommended next authorization (implementer's view):** an owner decision response. It would decide P1–P5, P8 and P9 (and P7) in the order of the briefing's §2; rule on Q-GATE and DQ-1 … DQ-6; and adopt or reject the P5 wording amendment. The decisions would be recorded append-only in their home DRs. T2 implementation would then be authorized separately, from the draft packet revised with those answers.

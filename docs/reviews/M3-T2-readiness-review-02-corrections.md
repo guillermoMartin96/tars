@@ -51,3 +51,5 @@ No precondition failed.
 - [x] Documentation-only; no protected path; no new experiment; the existing reproduction was re-run read-only, writing nothing
 - [x] No invented tolerance: the one new bound (B-11 (c)) is derived from the reviewed E1
 - [ ] Independent Review 03: see `docs/reviews/M3-T2-readiness-review-03.md`
+
+- *(2026-10-24, append-only)* **Independent Review 03 (at `628623b`): PASS, no findings.** R2-F1 … R2-F3 resolved; Review 01 findings remain closed. Record: `docs/reviews/M3-T2-readiness-review-03.md`. Nothing is approved by the PASS.

@@ -109,3 +109,5 @@ Not a DR-0029 question, but raised by the I-24 bound audit and to be settled in 
 - No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
 - Record: `docs/reviews/M3-T2-readiness-review-02.md`.
 - *(I-25, append-only)* The closing note on conditional rows is updated for R2-F1/R2-F2. The decision content of §1–§7 is unchanged.
+
+- *(2026-10-24, append-only)* **Independent Review 03 (at `628623b`): PASS, no findings.** R2-F1 … R2-F3 resolved; Review 01 findings remain closed. Record: `docs/reviews/M3-T2-readiness-review-03.md`. Nothing is approved by the PASS.

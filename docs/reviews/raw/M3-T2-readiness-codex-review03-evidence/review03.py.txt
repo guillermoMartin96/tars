@@ -1,0 +1,34 @@
+import sys, math, subprocess, random
+from pathlib import Path
+from fractions import Fraction as F
+sys.dont_write_bytecode=True
+root=Path.cwd(); sys.path.insert(0,str(root/'docs/science/experiments/m3-t0'))
+import t0_model as m
+import t0_termination as t
+base='e769f9e'
+def git(*a): return subprocess.check_output(['git',*a],text=True)
+files=git('diff','--name-only',base,'HEAD').splitlines()
+print('changed_files',len(files),'docs_only',all(x.startswith('docs/') for x in files))
+for p in ['docs/milestones/M3-T2-authorization-packet.md','docs/milestones/M3-T2-decision-readiness-report.md']:
+ old=subprocess.check_output(['git','show',base+':'+p]); print('prefix',p,Path(p).read_bytes().startswith(old))
+print('historical_diff',git('diff','--name-only',base,'HEAD','--','docs/reviews/raw','docs/reviews/M3-T2-readiness-review-01.md','docs/reviews/M3-T2-readiness-review-02.md').strip() or 'NONE')
+a,b=t.FPA['alpha'],t.FPA['beta_m']; print('alpha_beta',float(a),float(b),'valid',0<a<1 and b>0)
+rng=random.Random(3003); qfail=bfail=0; maxdiff=0
+for _ in range(2000):
+ r=m.geodetic_to_cartesian(rng.uniform(-1.57,1.57),rng.uniform(-math.pi,math.pi),rng.uniform(1,2e6))
+ x,y,z=map(float,r); h=m.geodetic_iterative(r)[1]; upper=(F(h)+b)/(1-a); bound=2*(a*upper+b)
+ for s in [(-y,x,z),(-x,-y,z),(y,-x,z),(x,y,-z)]:
+  hs=m.geodetic_iterative(s)[1]; diff=abs(F(h)-F(hs)); bfail+=diff>bound; maxdiff=max(maxdiff,float(diff))
+  if s!=(x,y,-z): qfail+=h!=hs
+print('samples quarter_fail bounded_fail max_reflection_difference',2000,qfail,bfail,maxdiff)
+print('2eps_120km',float(2*(a*120000+b)))
+table=m.load_table(); accepted=0
+for k in range(1,502):
+ try: m.density(-k*math.ulp(0.0),table); accepted+=1
+ except m.OutsideDomainError: print('first_raise',k,-k*math.ulp(0.0)); break
+print('trap_accepted',accepted)
+print('quotients',[v/1000 for v in [-2.475e-321,-4.94e-321,-7.41e-321]])
+print('signed_zeros',[m.density(v,table) for v in [0.,-0.]])
+print('adjacent_equal',m.density(1.,table)==m.density(math.nextafter(1.,math.inf),table))
+print('1000_boundary',[m.density(v,table) for v in [math.nextafter(1e6,-math.inf),1e6,math.nextafter(1e6,math.inf)]])
+print('tracked_status',git('status','--short','--untracked-files=no').strip() or 'CLEAN')

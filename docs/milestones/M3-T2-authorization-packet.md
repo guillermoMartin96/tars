@@ -147,3 +147,5 @@ Made under Authorization I-24; documentation only. The reviewed wording is prese
 - No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
 - Record: `docs/reviews/M3-T2-readiness-review-02.md`.
 - *(I-25, append-only)* After the R2-F1/R2-F2 corrections, §6's list of conditional assumptions (A-FP-2, A-LM-1, A-LM-2) is still accurate. A-LM-1 is now narrower (hypot only), and exact z-reflection and strict density decrease are reported only. No change is needed in this draft. **Still DRAFT — NOT AUTHORIZED.**
+
+- *(2026-10-24, append-only)* **Independent Review 03 (at `628623b`): PASS, no findings.** R2-F1 … R2-F3 resolved; Review 01 findings remain closed. Record: `docs/reviews/M3-T2-readiness-review-03.md`. Nothing is approved by the PASS.
