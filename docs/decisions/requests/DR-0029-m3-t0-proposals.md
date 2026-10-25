@@ -820,3 +820,5 @@ Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 1
   - Read as continuity *within* the top band above its base, it is correct.
   - **Proposed amendment, not applied, for the owner to adopt or reject with the P5 decision:** "(the top band's formula, continuous for h > 1000 km; the 1000 km base keeps the published −1.598e-5 relative jump, like every other base; GMAT-identical)". Details: `DR-0029-P1-P9-owner-decision-packet.md`, P5 item 14.
   - The P5 table above is unchanged. **P1–P9 stay OPEN.**
+
+- *(2026-10-25, append-only)* **Independent Review 01 of the I-26 recording (Codex, at `2cd1e6e`): REQUEST_CHANGES.** M3T2OD-R1-F1 (MAJOR): the `reentry` outcome identifier was left open although I-26 P3 decides it. M3T2OD-R1-F2 (MINOR): RM-3b was called "measured". Both are reproduced and ACCEPTED, **not applied** (I-26 §7 stop). Record: `docs/reviews/M3-T2-owner-decisions-review-01.md`.

@@ -1,0 +1,69 @@
+from pathlib import Path
+import subprocess, difflib, hashlib, sys, math, struct, random
+ROOT=Path.cwd()
+def git(*args): return subprocess.check_output(['git',*args],text=True)
+files=git('diff','--name-only','a57de3f','2cd1e6e').splitlines()
+print('changed_files',len(files),'docs_only',all(f.startswith('docs/') for f in files))
+print('protected_or_prior_evidence_changes',[f for f in files if not f.startswith('docs/') or '/m3-t0/' in f or '/m3-t1/' in f or 'readiness-review' in f])
+violations=[]; changes=0
+for f in files:
+    try: old=git('show','a57de3f:'+f).splitlines()
+    except subprocess.CalledProcessError: continue
+    new=Path(f).read_text().splitlines()
+    for tag,i,j,k,l in difflib.SequenceMatcher(None,old,new,autojunk=False).get_opcodes():
+        if tag not in ('replace','delete'): continue
+        changes+=j-i
+        if j-i!=l-k: violations.append((f,i+1,'unequal replacement'));continue
+        for a,b in zip(old[i:j],new[k:l]):
+            if b.startswith(a.rstrip()): continue
+            if a.rstrip().endswith('|') and b.startswith(a.rstrip()[:-1].rstrip()): continue
+            violations.append((f,i+1,a))
+print('preexisting_lines_with_appends',changes,'nonappend_violations',violations)
+probe=Path('docs/reviews/raw/M3-T2-owner-decisions-I26-evidence/dq4_packaging_probe.out')
+print('probe_sha256',hashlib.sha256(probe.read_bytes()).hexdigest())
+print('pyproject_sha256',hashlib.sha256(Path('pyproject.toml').read_bytes()).hexdigest())
+sys.dont_write_bytecode=True
+sys.path.insert(0,str(ROOT/'docs/science/experiments/m3-t0'))
+import t0_model as m
+import t0_termination as t
+print('B_V1',850/(2.2*15),'B_V2_initial',1300/33,'B_V2_final',1287.62/33)
+print('V1_threshold',t.threshold(.01,t.B_V1,t.vrel_bound))
+print('B100_threshold',t.threshold(.01,100,t.vrel_bound))
+print('F_hex',m.F_WGS84.hex(),'e2_hex',m.E2_WGS84.hex())
+def packet_density(h):
+    if not math.isfinite(h): raise ValueError('nonfinite')
+    if h<0: raise m.OutsideDomainError()
+    h=h/1000.; b=m.TABLE[m.band_index(h)]
+    return b.rho0*math.exp(-(h-b.base_km)/b.scale_km)
+def packet_geod(r):
+    x,y,z=(float(v) for v in r);p=math.hypot(x,y)
+    lat=math.atan2(z,p*(1.-m.E2_WGS84))
+    for _ in range(60):
+        s=math.sin(lat);n=m.A_WGS84/math.sqrt(1.-m.E2_WGS84*s*s)
+        new=math.atan2(z+m.E2_WGS84*n*s,p)
+        done=abs(new-lat)<=1e-15;lat=new
+        if done: break
+    s,c=math.sin(lat),math.cos(lat)
+    return lat,p*c+z*s-m.A_WGS84*math.sqrt(1.-m.E2_WGS84*s*s)
+heights=[-0.,0.,5e-324,1.,1e6,1e308]
+for b in m.TABLE:
+    h=b.base_km*1000
+    heights.extend([h,math.nextafter(h,math.inf)])
+    if h: heights.append(math.nextafter(h,0))
+print('density_conformance_samples',len(heights),'bitwise_equal',all(packet_density(h).hex()==m.density(h).hex() for h in heights))
+print('negative_zero',(-0./1000).hex(),m.density(-0.).hex(),packet_density(-0.).hex())
+for h in [-5e-324,-2.47e-321,-2.475e-321]:
+    try: v=m.density(h);old=v.hex()
+    except ValueError: old='raises'
+    try: v=packet_density(h);new=v.hex()
+    except ValueError: new='raises'
+    print('guard',repr(h),'T0',old,'packet',new)
+rng=random.Random(26)
+points=[(0,0,m.B_WGS84+1e5),(0,0,-m.B_WGS84-1e5),(m.A_WGS84,0,0)]
+points += [m.geodetic_to_cartesian(rng.uniform(-math.pi/2,math.pi/2),rng.uniform(-math.pi,math.pi),rng.uniform(0,2e6)) for _ in range(1000)]
+print('geodetic_conformance_samples',len(points),'bitwise_equal',all(tuple(x.hex() for x in packet_geod(r))==tuple(x.hex() for x in m.geodetic_iterative(r)) for r in points))
+low=m.TABLE[-2];top=m.TABLE[-1]
+below=low.rho0*math.exp(-(top.base_km-low.base_km)/low.scale_km)
+print('1000km_relative_jump',top.rho0/below-1)
+print('E4b_c0_max',float(t.FP['zero_force_c0_max']))
+print('tracked_status',repr(git('status','--porcelain','--untracked-files=no')))

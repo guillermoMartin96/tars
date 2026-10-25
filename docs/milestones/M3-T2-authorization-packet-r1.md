@@ -292,3 +292,5 @@ Unchanged from the I-23 draft §9:
 3. That the §6.2 register applies: every conditional row is reported.
 4. The review and stop rules of §7 and §8.
 5. That T3, T4 and T5 remain NOT AUTHORIZED.
+
+- *(2026-10-25, append-only)* **Independent Review 01 of the I-26 recording (Codex, at `2cd1e6e`): REQUEST_CHANGES.** M3T2OD-R1-F1 (MAJOR): the `reentry` outcome identifier was left open although I-26 P3 decides it. M3T2OD-R1-F2 (MINOR): RM-3b was called "measured". Both are reproduced and ACCEPTED, **not applied** (I-26 §7 stop). Record: `docs/reviews/M3-T2-owner-decisions-review-01.md`.
