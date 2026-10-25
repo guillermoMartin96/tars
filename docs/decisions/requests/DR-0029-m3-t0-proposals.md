@@ -1,6 +1,6 @@
 # Decision Request: M3 T0 proposals: termination and atmosphere domain, GMAT method, reference missions, geodetic test points, validation-scenario parameters
 
-**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). **Corrected after Review 04** (M3T0-R4-F1; fourth log at the end; authorized by "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05", 2026-10-19). **Corrected after Review 05** (M3T0-R5-F1, R5-F2; fifth log at the end; authorized by "Authorization I-6 — M3 T0 Review 05 corrections only", 2026-10-19). **Update (2026-10-22, append-only): P10 DECIDED — Option (a)** under "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22) (P10 section and Resolution). P1–P9 remain OPEN. Every other item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request.  
+**Status:** OPEN. Nothing here is decided. **Corrected after Review 01** (M3T0-F1 … F4; log at the end; authorized by "TARS M3 T0 — Review 01 Correction Authorization", 2026-10-18). **Corrected after Review 02** (M3T0-R2-F1 … F3 and IM-1; second log at the end; authorized by "Authorization: M3 T0 — Review 02 Corrections and Independent Review 03", 2026-10-18). **Corrected after Review 03** (M3T0-R3-F1; third log at the end; authorized by "Authorization I-4: M3 T0 — R3-F1 Correction and Independent Review 04", 2026-10-19). **Corrected after Review 04** (M3T0-R4-F1; fourth log at the end; authorized by "Authorization I-5 — M3 T0 R4-F1 Correction and Independent Review 05", 2026-10-19). **Corrected after Review 05** (M3T0-R5-F1, R5-F2; fifth log at the end; authorized by "Authorization I-6 — M3 T0 Review 05 corrections only", 2026-10-19). **Update (2026-10-22, append-only): P10 DECIDED — Option (a)** under "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22) (P10 section and Resolution). P1–P9 remain OPEN. Every other item is a proposal for the Tech Lead; no OPEN, DEFERRED or T0 → owner item elsewhere changes status because of this request. **Update (2026-10-25, append-only): P1–P5 and P7–P9 DECIDED; P6 NOT FULLY DECIDED (method (d) PROVISIONALLY SELECTED; geodetic-drag item ESCALATED_FOR_INVESTIGATION); the T2 dependency gate amended (Q-GATE)**, under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). Each decision is recorded verbatim in its section; see also the Resolution. The proposal text above each decision is preserved as written.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-18  
 **Related milestone/issue:**
@@ -16,21 +16,21 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 ## Summary of proposals
 | # | Item | Recommendation | Needs |
 |---|---|---|---|
-| P1 | DR-0027 A-4: permitted termination altitudes | Rule-based admissibility, not a numerical range: h_f below the initial height, above a − b, and satisfying a stiffness bound ρ(h_f)·v̂·dt/B_min ≤ κ, with κ and the speed term v̂ chosen by the owner. A necessary numerical screen, not sufficient for the stage-domain or same-tick properties | Owner: rule, v̂ and κ |
-| P2 | DR-0027 A-5: crossing behaviour | End at the first committed state with h ≤ h_f (as `impact` does); report a cubic-Hermite crossing time; outcome `reentry`; missed dips documented | Owner |
-| P3 | DR-0027 A-6: domain edges and `impact` | `impact` unchanged and kept as a backstop; whenever `impact` holds, `reentry` holds too, and the same-tick precedence reports `reentry`; both can hold on one tick | Owner |
-| P4 | DR-0027 A-s: density for RK4 stages below the lower edge | (ii) fail closed | Owner |
-| P5 | DR-0027 B-4: unsupported altitudes | h < 0: fail closed (P4). 0–25 km: excluded by P1. 900–1000 km: accepted with documentation. Above 1000 km: top band extrapolated (GMAT-identical), labelled unverified; reference missions kept below 900 km | Owner |
-| P6 | DR-0025 Q-G2-1: GMAT method | A decomposed exact configuration with a pinned setting list. Option (b) is feasible for J2 (0.076 mm), but adopting it in a validator needs a DR-0028 scope ruling. The geodetic-drag GMAT path is **escalated for investigation** | Owner, plus a DR-0028 scope ruling |
-| P7 | DR-0025 Q-G2-5: reference missions | RM-0 … RM-8 (table in P7), all exercised except RM-3b | Owner |
-| P8 | DR-0025 Q-G2-7: geodetic test points | Exact answers and forward-constructed points as the gate source; GeographicLib examples and GMAT as corroboration; the algorithm's domain stated | Owner |
-| P9 | DR-0024 Q9: C_d, A, mass, initial states | C_d 2.2 (illustrative). Vehicle V1: 850 kg, 15 m² (B 25.8 kg/m²). Vehicle V2: the M2 vehicle with A 15 m². Initial states per P7 | Owner |
+| P1 | DR-0027 A-4: permitted termination altitudes | Rule-based admissibility, not a numerical range: h_f below the initial height, above a − b, and satisfying a stiffness bound ρ(h_f)·v̂·dt/B_min ≤ κ, with κ and the speed term v̂ chosen by the owner. A necessary numerical screen, not sufficient for the stage-domain or same-tick properties | Owner: rule, v̂ and κ. **DECIDED — A4-b, v̂ = V_b, κ = 0.01, I-26 (2026-10-25)** |
+| P2 | DR-0027 A-5: crossing behaviour | End at the first committed state with h ≤ h_f (as `impact` does); report a cubic-Hermite crossing time; outcome `reentry`; missed dips documented | Owner. **DECIDED — A5-b, I-26** |
+| P3 | DR-0027 A-6: domain edges and `impact` | `impact` unchanged and kept as a backstop; whenever `impact` holds, `reentry` holds too, and the same-tick precedence reports `reentry`; both can hold on one tick | Owner. **DECIDED — as proposed, I-26** |
+| P4 | DR-0027 A-s: density for RK4 stages below the lower edge | (ii) fail closed | Owner. **DECIDED — (ii) fail closed, I-26** |
+| P5 | DR-0027 B-4: unsupported altitudes | h < 0: fail closed (P4). 0–25 km: excluded by P1. 900–1000 km: accepted with documentation. Above 1000 km: top band extrapolated (GMAT-identical), labelled unverified; reference missions kept below 900 km | Owner. **DECIDED — region table with the wording amendment, I-26** |
+| P6 | DR-0025 Q-G2-1: GMAT method | A decomposed exact configuration with a pinned setting list. Option (b) is feasible for J2 (0.076 mm), but adopting it in a validator needs a DR-0028 scope ruling. The geodetic-drag GMAT path is **escalated for investigation** | Owner, plus a DR-0028 scope ruling. **NOT FULLY DECIDED — (d) PROVISIONALLY SELECTED; geodetic drag ESCALATED; P6(b) ruling OPEN, I-26** |
+| P7 | DR-0025 Q-G2-5: reference missions | RM-0 … RM-8 (table in P7), all exercised except RM-3b | Owner. **DECIDED — RM-0 … RM-8, I-26** |
+| P8 | DR-0025 Q-G2-7: geodetic test points | Exact answers and forward-constructed points as the gate source; GeographicLib examples and GMAT as corroboration; the algorithm's domain stated | Owner. **DECIDED — (a) + (a′) with the reviewed gating restrictions, I-26** |
+| P9 | DR-0024 Q9: C_d, A, mass, initial states | C_d 2.2 (illustrative). Vehicle V1: 850 kg, 15 m² (B 25.8 kg/m²). Vehicle V2: the M2 vehicle with A 15 m². Initial states per P7 | Owner. **DECIDED — Option (i), I-26** |
 | P10 | New: J2 identity (decimal or C̄20) | Pin C̄20 as the source value, with J2 = −√5 C̄20 derived | Owner (before T1). **DECIDED — Option (a), I-16 (2026-10-22)** |
 
 **T1/T2 readiness (recommendation, not authorization):**
 - **T1 (J2):** no T0 item blocks it, once P10 is decided. *(2026-10-22: P10 decided, I-16; T1 still needs its own authorization.)*
-- **T2 (drag):** BLOCKED until P1–P5, P8 and P9 are decided.
-- **T4/T5:** need P6 and P7.
+- **T2 (drag):** BLOCKED until P1–P5, P8 and P9 are decided. *(2026-10-25: decided under I-26, and the governing T2 gate is amended to this list plus DQ-1 … DQ-6 (Resolution, Q-GATE). T2 still needs its own explicit authorization.)*
+- **T4/T5:** need P6 and P7. *(2026-10-25: P7 DECIDED; P6 PROVISIONALLY SELECTED only, and its open items block geodetic GMAT acceptance in T5.)*
 
 ---
 
@@ -150,6 +150,33 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 
 **Recommendation.** A4-b with v̂ = V_b, stated as a necessary screen whose residual cases end by P3 and P4. The owner chooses κ and v̂. The implementer's suggestion is κ = 0.01, because it keeps RK4's local relative error from drag stiffness near 1e-12; that figure is a derived estimate, not a measurement. Clause 1 is kept explicitly even though κ = 0.01 already implies it at these B values.
 
+**Owner decision (2026-10-25, append-only): DECIDED — A4-b, v̂ = V_b, κ = 0.01.** Authority: "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25), §2 P1. Recorded verbatim:
+
+> **DECIDED: A4-b.**
+>
+> Use:
+>
+> - v̂ = V_b, the derived bound for bound-state relative velocity.
+> - κ = 0.01.
+> - Clause 1: a − b < h_f < h_geod(initial).
+> - Clause 2: ρ(h_f) × V_b × dt / B_min ≤ 0.01.
+>
+> The ballistic coefficient uses dry mass.
+>
+> Record that this is a necessary admissibility screen, not a sufficient numerical stability or trajectory-accuracy guarantee.
+>
+> The derivation bounds the drag velocity-Jacobian contribution only. It does not bound the full coupled dynamics or ∂a/∂r.
+>
+> κ is an owner-selected engineering constant, not a physically established universal threshold.
+>
+> The final M3 timestep remains a separate decision.
+
+**Implementer notes on the record (no change to the decision):**
+- V_b is evaluated at h_f, as defined in the Evidence above: V_b(h_f) = √(2μ/(b + h_f)) + ω_E(a + h_f). B_min = m_dry/(C_d A).
+- **Consequences, not decided values.** At the provisional dt = 10 s, clause 2 admits h_f ≥ 92 282.07 m (B 25.8) and ≥ 84 596.12 m (B 100) [measured, `termination` → `stiffness_thresholds`]. They move with dt (DR-0025 Q-G2-4, PROVISIONAL) and with each scenario's B_min. No altitude is approved (DR-0027 A-3 stands).
+- The derived sufficient stage-domain floors (111 511.97 / 118 633.51 / 124 456.69 m) are **not** part of the rule. They remain evidence, conditional on A-FP-1 … A-FP-3 and specific to the spike's arithmetic (decision packet N-1).
+- Implementation: scenario validation at T3. Where κ is pinned is a T3 design detail. **Not authorized by I-26.**
+
 ## P2 — DR-0027 A-5: event-crossing behaviour
 **Problem.** How is a crossing of h_f detected and located between committed states, and what does the run report?
 
@@ -205,6 +232,27 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 
 **Recommendation.** A5-b, with missed dips documented as a known limitation and not detected. In a decaying orbit the next pass crosses lower. The recommendation does not rely on a perturbed-motion bound. Any use that needs a guaranteed missed-dip magnitude for J2 + drag (for example a contract field or a gate) has no supporting bound in T0 and stays blocked until one is derived.
 
+**Owner decision (2026-10-25, append-only): DECIDED — A5-b.** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P2. Recorded verbatim:
+
+> **DECIDED: A5-b.**
+>
+> Detect termination from committed states and report an additional scalar cubic-Hermite estimate of the crossing time.
+>
+> The simulation ends at the committed state, not the interpolated crossing.
+>
+> The reported crossing time is not a propagated state.
+>
+> No final-step splitting is authorized.
+>
+> Missed crossings or dips between committed states remain a documented limitation. Do not claim a certified perturbed-motion missed-dip bound.
+>
+> T2 must expose the geodetic normal or latitude required for T3 to compute dh/dt.
+
+**Implementer notes on the record (no change to the decision):**
+- The field names proposed above (`termination_altitude_m`, `crossing_t_s`, the method identifier) remain T3 contract proposals (DR-0027 A, "Names").
+- The certified two-body missed-dip table stays as recorded. No J2 + drag bound exists (Review 02 R2-F1); any use needing one stays blocked.
+- The last sentence is a **T2 interface requirement** (decision packet N-3). Implementation needs the separate T2 authorization.
+
 ## P3 — DR-0027 A-6: interaction with domain edges and `impact`
 **Evidence**
 - a − b = 21 384.69 m [derived]. At the 25 km spike floor, the spherical altitude at the crossing was 22.3 km at latitude −15.8° (`decay`), consistent with the inequality in P1.
@@ -219,6 +267,30 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 2. Same-tick precedence, deterministic: `non_finite` → `reentry` → `impact` → `escape`. **P1 does not prevent `reentry` and `impact` from holding on the same tick** (Review 01 F2 stress input: the committed state at −78 392.7 m satisfies both); the precedence decides the outcome.
 3. Termination uses height only. It never depends on which band a base height selects.
 4. The round-off ambiguity at an exact base is a property of the published model (DR-0024 Q5a), not a defect. Reference-mission design should treat it explicitly (P7).
+
+**Owner decision (2026-10-25, append-only): DECIDED — the proposal above (items 1–4).** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P3. Recorded verbatim:
+
+> **DECIDED: Adopt the DR-0029 proposal.**
+>
+> Precedence:
+>
+> 1. `non_finite`
+> 2. `reentry`
+> 3. `impact`
+> 4. `escape`
+>
+> Preserve `impact` as the legacy backstop.
+>
+> Termination is determined from geodetic height, independently of atmospheric band selection.
+>
+> Preserve the published density discontinuities.
+>
+> This decision specifies future T3 behavior; do not implement it under I-26.
+
+**Implementer notes on the record (no change to the decision):**
+- Item 1's implication (`impact` ⇒ `reentry`) holds because P1 clause 1 is decided (h_f > a − b).
+- The decision text names the outcome `reentry`. DR-0027 A's row "the outcome name `reentry` remain[s a] proposal until the v3 schema is designed" is not explicitly superseded by I-26. T3 contract design confirms the identifier (open-issues register OI-23). The precedence order itself is decided.
+- T2 consequence: the geodetic-height function never branches on band selection.
 
 ## P4 — DR-0027 A-s: density for an RK4 stage below the lower edge
 **Evidence**
@@ -243,6 +315,32 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 
 **Recommendation.** (ii) fail closed. The cause name is designed at T3; a candidate is a new additive `failure_cause` value such as `outside_atmosphere_domain`.
 
+**Owner decision (2026-10-25, append-only): DECIDED — Option (ii), fail closed.** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P4. Recorded verbatim:
+
+> **DECIDED: Option (ii), fail closed.**
+>
+> Any finite geodetic height below 0 m must cause a typed atmosphere-domain error.
+>
+> The domain guard must compare height in metres before conversion to kilometres.
+>
+> Negative zero is in range.
+>
+> Non-finite heights receive a distinct error classification.
+>
+> A failing RK4 stage must not commit a partial simulator state.
+>
+> Explicitly reconcile DR-0026 AR-8 and §5.8: statements that density is total do not apply below the atmospheric table's lower edge.
+>
+> T3 will define the versioned run-outcome mapping. Do not implement that mapping now.
+>
+> Do not reproduce the T0 spike's negative-subnormal guard defect.
+
+**Implementer notes on the record (no change to the decision):**
+- **Reconciliation recorded:** DR-0026 "I-26 note" states that AR-8's "runtime functions are total" and §5.8's "density is total" do not apply below the table's lower edge (0 m geodetic). DR-0024 §4.6's candidate "extrapolate the lowest band" is not adopted (DR-0024 "I-26 note").
+- **Guard, as specified** (decision packet P4 items 8 and 14, Review 03 PASS): finite h_m < 0 raises, by IEEE comparison of the metres value before any conversion. h_m = −0.0, +0.0 and +5e-324 are evaluated in band 0. Non-finite h raises a distinct error first. The T0 spike's km-route trap interval (−2.475e-321 < h_m < 0, open-issues register OI-21) is the defect not to be reproduced. No T0 file or result changes.
+- **Atomicity:** the existing atomic step leaves state, tick and engine schedule unchanged when a stage raises (validation strategy I-6). `Simulator.step` does not catch the new error; the T3 mapping is not implemented now.
+- Error class names are a T2 design detail.
+
 ## P5 — DR-0027 B-4: domain behaviour at unsupported altitudes
 | Region | Evidence | Proposal |
 |---|---|---|
@@ -257,6 +355,33 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - **ρ = 0 above a cutoff:** rejected already (DR-0024 §12) because it introduces a discontinuity.
 
 **Numerical implication [derived].** At 1000 km and B 25.8 the drag acceleration is about 3e-9 m/s². A ±500 % density error there changes a 10-orbit trajectory by metres only if the spacecraft stays above 1000 km for the whole run.
+
+**Owner decision (2026-10-25, append-only): DECIDED — the P5 region table, with the wording amendment.** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P5. Recorded verbatim:
+
+> **DECIDED: Adopt the DR-0029 P5 region table**, consistently with P1 and P4.
+>
+> For heights above the 1000 km base, extrapolate the pinned top atmospheric band. Do not introduce a zero-density cutoff or a new upper-domain failure.
+>
+> Preserve the pinned density table exactly.
+>
+> Adopt the proposed wording amendment:
+>
+> The top band's formula is continuous for h > 1000 km, but the 1000 km base retains its published relative density jump of approximately −1.598 × 10^-5.
+>
+> Do not impose continuity across band boundaries.
+>
+> Retain the published GMAT band-selection rule and exact-base behavior.
+>
+> Explicitly label extrapolated densities above 1000 km as unverified.
+
+**Governing reading of the table (append-only; the table text above is unchanged):**
+- **h < 0:** fail closed (P4).
+- **0 ≤ h < 25 km:** evaluated as published, no repair (DR-0027 B-3). Not an admissible h_f under P1 (κ = 0.01; thresholds ≥ 84 596.12 m at dt 10 s for B ≤ 100). Stages and committed states can still reach it.
+- **25–900 km:** normal domain.
+- **900–1000 km:** accepted and documented.
+- **≥ 1000 km:** the top band's formula, extrapolated, labelled **unverified** in every record. No zero-density cutoff and no upper-domain failure. Subnormal densities and exact zeros far above the table (T0 R4-F1) are returned, not raised.
+- **The ≥ 1000 km cell's "(continuous, GMAT-identical)" is read as amended by the owner:** the top band's formula is continuous for h > 1000 km; the 1000 km base keeps its published relative jump (≈ −1.598e-5), as every base keeps its own. GMAT's band rule (h < base[i+1] selects band i; an exact base belongs to the band above) applies unchanged.
+- No M3 reference mission goes above 900 km (P7).
 
 ## P6 — DR-0025 Q-G2-1: GMAT exact-configuration method
 **Evidence** (`gmat`; 53 700 s from the M1 state unless noted; spike = DOP853 rtol 1e-13, converged to µm; GMAT = PrinceDormand78, accuracy 1e-13, maximum step 60 s)
@@ -322,6 +447,46 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 
 **Recommendation.** (d), with the pinned setting list above. Option (b) for the J2 link only if the owner rules that it is inside DR-0028; otherwise the (a) bound for J2. The escalated item is resolved before T5 proposes any geodetic GMAT gate.
 
+**Owner decision (2026-10-25, append-only): NOT FULLY DECIDED — method (d) PROVISIONALLY SELECTED.** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P6. Recorded verbatim:
+
+> **NOT FULLY DECIDED.**
+>
+> Approve decomposed exact-configuration method (d) as the preferred direction for subsequent validation planning, subject to its authoritative configuration requirements.
+>
+> Do not mark P6 fully resolved.
+>
+> The geodetic-drag discrepancy of approximately 0.14–0.38 m remains escalated.
+>
+> Do not approve an independent geodetic GMAT acceptance gate.
+>
+> Do not silently decide DR-0028 P6(b). Prepare a separate, explicit owner ruling on whether driving the validator with GMAT's reported axis is within the previously approved Earth-orientation scope.
+>
+> The proposed X-1 investigation remains unexecuted and requires separate authorization.
+>
+> Record the provisional method selection without converting unresolved evidence into a PASS.
+
+**Status of P6 and DR-0025 Q-G2-1: PROVISIONALLY SELECTED (method (d)); not decided; the geodetic-drag item stays ESCALATED_FOR_INVESTIGATION.** P6 is not a T2 prerequisite (Q-GATE amendment, Resolution). Its open questions block geodetic GMAT acceptance in T5.
+
+**"Authoritative configuration requirements" of method (d)**, as recorded (no new requirement is added):
+- DR-0025 Resolution principle 2: every GMAT comparison records the force model (degree/order, `.cof` file with its GM/R/C̄20, tide model), state-exchange frame and axes, constants, atmosphere model and table file with digest, drag model (C_d, area, mass, `DragModel`), propagator, step and error-control settings, and every other setting needed to reproduce it.
+- The seven configuration findings above: `Earth.NutationUpdateInterval` pinned explicitly; C_d set explicitly (GMAT's default is 2.2000000000000002); the `.cof` generated from the pinned constants (GMAT applies the `.cof` GM); GMAT's geodetic height rule (1e-7 rad, ≤ 1.4 mm) in the error budget, and its failure on the axis; the EOP file recorded (sha256 `52c95d68…`); states exchanged in TOEEq fixed at the epoch; the `Propagate` segmentation recorded.
+- The setting list relies on DR-0025 Q-G2-2's identity-check sub-rule, which stays **PROPOSED**.
+
+**Unresolved investigation register (P6).** Every row stays open until a separate authorization resolves it.
+
+| # | Item | Status | Blocks |
+|---|---|---|---|
+| P6-U1 | Geodetic-drag residual 0.137 m at `NutationUpdateInterval` = 0 (0.175 m without GMAT's height rule), not attributed | **ESCALATED_FOR_INVESTIGATION** | Any geodetic GMAT gate (T5) |
+| P6-U2 | Dependence of the geodetic-drag residual on `Propagate` segmentation and interval: 0.383 / 0.186 / 0.327 m | **ESCALATED_FOR_INVESTIGATION** | Same |
+| P6-U3 | Combined J2 + drag geodetic residuals with GMAT's axis (0.18, 0.23, 0.095 m), not attributed; they contain the geodetic path | ESCALATED (with P6-U1) | Geodetic J2 + drag GMAT comparisons |
+| P6-U4 | DR-0028 P6(b) scope ruling: is driving a validator reference with GMAT's reported axis inside the approved Earth-orientation scope? | **OPEN**; ruling packet prepared (`DR-0028-P6b-owner-ruling-packet.md`); not decided by I-26 | Choosing (b) for the J2 link (T5) |
+| P6-U5 | J2-link method: (b) GMAT axis (0.076 mm) or (a) derived Earth-orientation bound | OPEN; depends on P6-U4 | T5 J2 GMAT link |
+| P6-U6 | Investigation X-1 (decision packet §5) | **NOT AUTHORIZED**; unexecuted | P6-U1, P6-U2 attribution |
+| P6-U7 | An independent geodetic GMAT acceptance gate | **NOT AUTHORIZED** | — |
+| P6-U8 | DR-0025 Q-G2-2 identity-check sub-rule | PROPOSED | The setting list's reliance on it |
+
+The attributed links are unchanged evidence, not a PASS: J2 0.076 mm with GMAT's axis at interval 0; spherical-height drag 2.0 mm, axis-independent; M3-form GMAT passes every M1 gate (6.95e-6 m).
+
 ## P7 — DR-0025 Q-G2-5: reference missions
 All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the M1/M2 horizon) unless noted.
 
@@ -345,6 +510,25 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 
 **Recommendation.** RM-0 … RM-8, with the RM-8 floor set by each scenario under P1 and RM-3b to be measured in T4. All apogees are below 900 km (P5).
 
+**Owner decision (2026-10-25, append-only): DECIDED — RM-0 through RM-8.** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P7. Recorded verbatim:
+
+> **DECIDED: RM-0 through RM-8.**
+>
+> Use the P1 admissibility rule for RM-8.
+>
+> Use the P9 illustrative vehicle definitions.
+>
+> RM-3b is a candidate to be measured during T4, not a new mandatory gate without subsequent approval.
+>
+> Preserve all previously accepted M1/M2 requirements.
+
+**Implementer notes on the record (no change to the decision):**
+- The missions are RM-0, RM-1, RM-2, RM-3, RM-4 (primary), RM-5, RM-6, RM-7 and RM-8, as tabulated. RM-3b is a measured candidate only.
+- Vehicles (P9 option (i)): V2 for RM-7; V1 for the other drag missions (RM-2 … RM-6, RM-8). RM-0 and RM-1 have no drag.
+- RM-8's h_f is chosen by its scenario and must pass P1 (clause 2 at dt 10 s with V1 admits h_f ≥ 92 282.07 m [measured]); no value is chosen here.
+- RM-6 needs an elliptic or Cartesian v3 orbit kind (T3 schema decision, unchanged).
+- The obligations are implemented in T3/T4/T5, each under its own authorization. **Not authorized by I-26.**
+
 ## P8 — DR-0025 Q-G2-7: source of geodetic-height test points
 **Evidence** (`geodetic`; `gmat` → `geodetic_points`)
 
@@ -362,6 +546,27 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 - Every M3 state is far outside this region, but the production function must state its domain and reject points outside it.
 
 **Recommendation.** (a) and (a′) as the gate source (exact to round-off), with (b) and (c) recorded as external corroboration. The production height function's domain is stated, and on-axis points are tested explicitly.
+
+**Owner decision (2026-10-25, append-only): DECIDED — options (a) and (a′), with the reviewed gating restrictions.** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P8. Recorded verbatim:
+
+> **DECIDED: Options (a) and (a′), with the reviewed gating restrictions.**
+>
+> Use exact mathematical answers as the primary gate source within their justified domain.
+>
+> Use forward-constructed points as additional reference evidence.
+>
+> Forward-constructed points become gating only after their numerical construction-error contribution has been derived and reviewed.
+>
+> Negative-height cases remain report-only until appropriate bounds exist.
+>
+> GeographicLib, GMAT and the identified IOGP/EPSG example are corroboration sources, not automatically authoritative inverse-height gates.
+>
+> Do not claim independent verification from a reference that shares the same unexamined assumptions.
+
+**Implementer notes on the record (no change to the decision):**
+- "The reviewed gating restrictions" are those of decision packet P8 item 14 (I-24 correction, Review 03 PASS): exact references evaluated exactly on the model's ellipsoid; true height ≥ 0; path (α) (DQ-1, decided); the inverse's own evaluation error only; evolute-region points rejected.
+- **Consequence under the owner's floating-point policy (I-26 §5; validation strategy §6):** the tolerance for exact-answer points is ε_h (T0 E1), which rests on A-FP-2. A-FP-2 is not accepted as a universal guarantee, so **exact-answer comparisons are report-only in T2 until A-FP-2 is independently justified for the supported environment and the criterion reviewed.** The source is decided; the tolerance's gating status is conditional. The exact domain checks (evolute and origin rejection) are unconditional.
+- Corroboration sources: GeographicLib CartConvert(1) examples, GMAT R2026a `Earth.Altitude`, and IOGP GN 7-2 / EPSG 9602 (decision packet C-5: input recalled, PDF unread, forward only, cm print). C-5 uses the same closed-form forward formula as (a′), so it does not independently verify (a′).
 
 ## P9 — DR-0024 Q9: validation-scenario parameters
 **Evidence and basis**
@@ -386,6 +591,34 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 - RM-6 needs an elliptic state (perigee/apogee construction, `t0_model.perigee_state`) or a Cartesian state. Which v3 orbit kinds exist is a T3 schema decision.
 
 **Recommendation.** (i), with every value labelled "illustrative, validation only" in the scenarios and records, as DR-0010 did for the engine. Option (ii) only if the owner wants a low-drag case gated.
+
+**Owner decision (2026-10-25, append-only): DECIDED — Option (i).** Authority: I-26 (owner/Tech Lead, 2026-10-25), §2 P9. Recorded verbatim:
+
+> **DECIDED: Option (i).**
+>
+> Use the specified illustrative V1 and V2 vehicles from DR-0029.
+>
+> V1:
+>
+> - Mass: 850 kg
+> - Area: 15 m²
+> - C_d: 2.2
+> - Ballistic coefficient: approximately 25.8 kg/m²
+>
+> V2 uses the accepted M2 vehicle mass configuration with area 15 m², as specified in DR-0029.
+>
+> Every scenario and record must label these values:
+>
+> **ILLUSTRATIVE — VALIDATION ONLY**
+>
+> Do not claim they are validated representations of a real spacecraft.
+
+**Implementer notes on the record (no change to the decision):**
+- V1: B = 850/(2.2 × 15) = 25.7575… kg/m² [derived]; "25.8" is its rounded display.
+- V2, as specified in this DR (Evidence, "M2 vehicle"): 1000 kg dry + 300 kg propellant (DR-0010), A = 15 m², C_d = 2.2 (the summary row's "C_d 2.2 (illustrative)"). B ≈ 39.4 kg/m² before the RM-7 burn and ≈ 39.0 after it [measured in GMAT]. V2 is used for RM-7. No M2 scenario changes.
+- Option (ii) is not adopted: no B 100 mission is gated. B 100 remains in the evidence (thresholds, T0 floors).
+- Initial states follow this DR's "Initial states" paragraph. Which v3 orbit kinds exist (RM-6) is a T3 schema decision.
+- The required label is **ILLUSTRATIVE — VALIDATION ONLY**. It replaces the lower-case wording of the recommendation above in every scenario and record.
 
 ## P10 — New: identity of the pinned J2 value
 **Evidence.** DR-0024 Q1 records "J2 = 1.0826261739e-3 (= −√5 × −0.484165143790815e-3)". The two are not the same double: −√5 C̄20 = 1.0826261738522227e-3, a relative difference of −4.4e-11 (`t0_model.J2_FROM_C20`). A generated `.cof` carries C̄20.
@@ -442,6 +675,10 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 - **T1:** P10. *(2026-10-22: P10 DECIDED, I-16; this block is lifted. T1 still needs its own authorization.)*
 - **T4/T5:** P6 and P7. Choosing P6 (b) additionally needs the DR-0028 scope ruling. The escalated geodetic-drag investigation blocks only geodetic GMAT gates.
 - **Any use that needs a guaranteed missed-dip magnitude for J2 + drag** (P2): no perturbed-motion bound exists in T0 (Review 02 R2-F1). A5-b as recommended does not need one.
+- *(2026-10-25, append-only, I-26.)* The list above is superseded for T2 by the Q-GATE amendment (Resolution):
+  - **T2:** P1–P5, P8, P9 and DQ-1 … DQ-6 are decided and recorded. It needs the reconciliation reviewed and a separate explicit authorization. It is **not** blocked by P6.
+  - **T3/T4:** P1–P3 and P7 are decided, and each task needs its own authorization.
+  - **T5:** geodetic GMAT acceptance stays blocked by P6-U1 … P6-U3, and the J2 link method by the DR-0028 P6(b) ruling (P6-U4).
 
 ## Work continuing independently
 - None of the implementation. T1 and later are not authorized.
@@ -454,6 +691,47 @@ For each of P1–P10: accept, choose an option, or `discuss`. P1 needs κ. P6 ne
 **Decision:** (pending)
 
 *(2026-10-22, append-only)* **P10: DECIDED — Option (a)** ("I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22)): C̄20 = −0.484165143790815e-3 (EGM2008 tide-free, NGA.STND.0036 Table 5.1) is the single canonical value; J2 = −√5·C̄20 is derived (binary64 1.0826261738522227e-3); 1.0826261739e-3 is a display rounding. DR-0024 Q1 is not reopened. Decision text verbatim in the P10 section. **P1–P9: still pending.** DR-0028's scope ruling for P6 (b) remains undecided; Q-G2-1 remains escalated.
+
+*(2026-10-25, append-only)* **Owner decisions under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation"** (owner/Tech Lead, 2026-10-25). The text of each decision is recorded verbatim in its section above.
+
+| # | Status | Summary |
+|---|---|---|
+| P1 | **DECIDED** | A4-b; v̂ = V_b; κ = 0.01; clauses 1 and 2; dry-mass B_min; a necessary screen only (velocity-Jacobian block; not ∂a/∂r; not the coupled dynamics); κ an engineering constant; final dt separate |
+| P2 | **DECIDED** | A5-b; run ends at the committed state; Hermite time is not a state; no step splitting; missed dips a documented limitation; T2 exposes n̂ or φ |
+| P3 | **DECIDED** | Precedence `non_finite` → `reentry` → `impact` → `escape`; `impact` kept as backstop; height-only termination; discontinuities preserved; T3 behaviour, not implemented now |
+| P4 | **DECIDED** | (ii) fail closed; finite h < 0 m raises a typed domain error; guard in metres before conversion; −0.0 in range; non-finite a distinct error; no partial commit; DR-0026 AR-8/§5.8 reconciled; T3 outcome mapping not implemented now; the T0 guard defect not reproduced |
+| P5 | **DECIDED** | Region table; top band extrapolated above 1000 km, labelled unverified; no cutoff, no upper failure; table preserved; wording amendment adopted; no continuity imposed; GMAT band rule and exact-base behaviour kept |
+| P6 | **NOT FULLY DECIDED** | Method (d) **PROVISIONALLY SELECTED**; geodetic-drag 0.14–0.38 m **ESCALATED_FOR_INVESTIGATION**; no independent geodetic GMAT gate (**NOT AUTHORIZED**); DR-0028 P6(b) ruling **OPEN** (separate packet); X-1 **NOT AUTHORIZED**. Register P6-U1 … P6-U8 |
+| P7 | **DECIDED** | RM-0 … RM-8; RM-8 under P1; P9 vehicles; RM-3b a T4 candidate, not a gate; M1/M2 requirements preserved |
+| P8 | **DECIDED** | (a) primary gate source within its justified domain; (a′) evidence, gating only after its construction-error term is derived and reviewed; negative heights report-only; GeographicLib, GMAT and IOGP/EPSG corroboration only |
+| P9 | **DECIDED** | Option (i): V1 850 kg, 15 m², C_d 2.2 (B ≈ 25.8 kg/m²); V2 the M2 vehicle with 15 m²; label **ILLUSTRATIVE — VALIDATION ONLY** |
+| P10 | DECIDED (I-16, unchanged) | Binding for T1 |
+
+**Q-GATE — amendment of the T2 dependency gate (APPROVED).** Recorded verbatim from I-26 §3:
+
+> The owner explicitly approves narrowing the original I-15 prerequisite for T2.
+>
+> The replacement rule is:
+>
+> **Before T2 implementation may be authorized:**
+>
+> - P1–P5 must be decided.
+> - P8 and P9 must be decided.
+> - DQ-1 through DQ-6 must be decided.
+> - The resulting contracts must be recorded and reconciled.
+> - An explicit, separate T2 implementation authorization is required.
+>
+> P10 remains previously decided and binding for T1.
+>
+> P6 is not a T2 implementation prerequisite. Its unresolved scientific questions remain blockers for geodetic GMAT acceptance in T5.
+>
+> P7 must be decided before its reference-mission obligations are implemented in T3/T4; it is already approved in this authorization.
+>
+> This amendment supersedes only the broader T2 dependency statement from I-15. It does not waive any scientific, review, numerical or acceptance gate.
+
+- **Superseded text (preserved where it stands):** "Explicitly identify P10 as a prerequisite for T1 and P1–P10 as prerequisites for T2" (I-15 T0 series, review instruction §6; `docs/milestones/M3-T0-decision-matrix.md`, "Dependency statement"; decision packet §1.2). Only its T2 clause is superseded. The T1 clause is unchanged.
+- **DQ-1 … DQ-6** are decided under I-26 §4 and recorded in `docs/milestones/M3-T2-authorization-packet-r1.md` §5, with their reconciliations in DR-0024 and DR-0026 ("I-26 note").
+- **Not decided by I-26:** P6 in full; DR-0028 P6(b); X-1; the final M3 time step (Q-G2-4); DR-0025 Q-G2-2; A-FP-2, A-LM-1 and A-LM-2 as universal guarantees (I-26 §5); any T2, T3, T4 or T5 authorization.
 
 <!-- review01-correction-log -->
 ## Correction log (Review 01, 2026-10-18)

@@ -1,6 +1,6 @@
 # M3 T2 — Proposed validation strategy (drag, density, geodetic height, force context)
 
-**Status:** PROPOSAL. **Not authorization to implement tests.** It assumes the implementer's recommendations in `docs/decisions/requests/DR-0029-P1-P9-owner-decision-packet.md`. Every row that depends on an undecided item names that item, and changes if the owner decides differently.  
+**Status:** PROPOSAL. **Not authorization to implement tests.** It assumes the implementer's recommendations in `docs/decisions/requests/DR-0029-P1-P9-owner-decision-packet.md`. Every row that depends on an undecided item names that item, and changes if the owner decides differently. **Update (2026-10-25, append-only): revised under I-26 (§6). The owner's decisions replace the recommendations; rows that depend on A-FP-2, A-LM-1 or A-LM-2 are report-only until promoted (register: `M3-T2-authorization-packet-r1.md` §6.2). Still not authorization to implement tests.**  
 **Prepared under:** I-23 §9 C.  
 **Method sources:**
 - DR-0025 (Resolution principles 1–9; Q-oracles; §8 mutations; §10 threshold classes);
@@ -259,3 +259,49 @@ Made under "Authorization I-25 — M3 T2 Decision Readiness: Review 02 Correctio
 - The I-24 F3 entry above describes the state at `f44a94f` and is superseded by this entry for PM-4 (b).
 
 - *(2026-10-24, append-only)* **Independent Review 03 (at `628623b`): PASS, no findings.** R2-F1 … R2-F3 resolved; Review 01 findings remain closed. Record: `docs/reviews/M3-T2-readiness-review-03.md`. Nothing is approved by the PASS.
+
+## 6. Revision under I-26 (2026-10-25): owner decisions and the conditional floating-point policy
+Made under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). Documentation only. **This section governs where it differs from §1–§5.** The text above is preserved as reviewed at `628623b` (Review 03 PASS). **This is still not authorization to implement tests; T2 is NOT AUTHORIZED.**
+
+### 6.1 Decision-dependent rows are now fixed
+| Item | Was | Now |
+|---|---|---|
+| Header assumption ("assumes the implementer's recommendations") | Recommendations | **Owner decisions.** P1–P5, P7–P9 DECIDED; P6 PROVISIONALLY SELECTED; DQ-1 (α), DQ-2 (km), DQ-3 (a), DQ-4, DQ-5 (a), DQ-6 DECIDED |
+| R-DENS-3 (U-14) | P4 (ii), undecided | **DECIDED** as written: guard in metres before conversion; −0.0, +0.0, +5e-324 evaluated in band 0; non-finite a distinct error checked first; the T0 km-route trap interval raises |
+| R-DENS-4 (U-15, U-16) | P5, undecided | **DECIDED** as written: the 1000 km base keeps its −1.598e-5 jump; no continuity requirement at any base; the top band extrapolated above 1000 km, values labelled unverified in records; subnormal and zero densities returned |
+| R-GEOD-1 (U-17 … U-20) | P8, undecided | **DECIDED**: (a) the primary gate source within its justified domain; (a′) reported until δ_f is derived and reviewed; negative heights reported; X-G2 … X-G4 corroboration only. **The gate status of the tolerance follows §6.2** |
+| R-GEOD-2 (U-21) | P2 (A5-b), undecided | **DECIDED**: the component exposes φ or n̂. U-21's accuracy checks stay reported until B-6 is derived |
+| "Path (α)", "route (km)" qualifiers (U-4, U-13, U-16, U-17, U-19, PM-5, PM-6, B-1, B-9 … B-15, X-D1) | Conditional on DQ-1/DQ-2 | **Apply**: DQ-1 (α) and DQ-2 (km) are decided. The operation sequences are specified in `M3-T2-authorization-packet-r1.md` §5. Every "under path (β) or route (m)" alternative is **void** |
+| Test vehicles | P9, undecided | **V1/V2**, labelled **ILLUSTRATIVE — VALIDATION ONLY** |
+
+### 6.2 Owner policy on conditional floating-point gates (DR-0025 "I-26 note", verbatim there)
+- **A-FP-2, A-LM-1 and A-LM-2 are not accepted as universal guarantees.**
+- Every row that depends on them is **report-only** until the precise assumption is independently justified for the supported execution environment, the resulting criterion is reviewed, and the owner promotes the row.
+- **Exact z-reflection symmetry (U-19 (b)) and strict density decrease (PM-4 (b)) are report-only regardless.**
+- **The conditional-row register is `M3-T2-authorization-packet-r1.md` §6.2.** It lists every conditional row, its assumption and the evidence required to promote it, and it governs row status.
+- **Consequences for §3 and §4:**
+  - The "gates only if the T2 authorization accepts" wording in U-13, U-17, U-19, PM-4 (a), PM-5, PM-6 and B-9 … B-12 now reads: *report-only until promoted under the policy* (register conditions P-i … P-iii). A T2 authorization does **not** promote a row by accepting an assumption in general terms.
+  - **G-T2-1 and G-T2-2:** their "plus their Conditional parts if the T2 authorization accepts the named assumption" clauses are replaced by "plus the Conditional parts promoted under the policy". Today none is promoted, so the gates cover the Gate rows only.
+  - **G-T2-4:** X-G1 (exact geodetic answers) is the decided gate *source*. The comparison's tolerance ε_h rests on A-FP-2, so X-G1 is **reported until promoted**. Its domain checks (U-20) gate unconditionally.
+
+### 6.3 Classification correction found during the I-26 reconciliation
+- **U-23, third clause** ("positive C_d and A with C_d·A ≤ 2⁻¹⁰⁷⁵ ⇒ exactly zero drag") is labelled **E** in §3.1, but it rests on T0 E4b, which the row itself says is "derived … under A-FP-1 and A-FP-2". §3.9 did not list it.
+- **Corrected classification: Conditional (A-FP-2), report-only until promoted.** It is also specific to the spike's coefficient sequence; T2 must use that sequence or re-derive.
+- U-23's other clauses are unchanged:
+  - no drag component ⇒ bitwise point mass (+ J2);
+  - ρ̂ = 0 ⇒ exactly zero drag;
+  - a zero parameter raises.
+- Recorded in the open-issues register (OI-24).
+
+### 6.4 Gates kept unconditional (I-26 §5: "Preserve all unconditional, independently justified gates")
+- **B-1, B-2:** A-FP-1, which is IEEE 754 itself, checked by X-P4.
+- **B-13:** an exact check of the 27 base inputs, run on every CI platform, so the test observes A-LM-0 directly on each platform.
+- **B-14's behaviour part.**
+- Every row §3.9 lists as exact with no hidden bound, except U-23's third clause (§6.3).
+- **The regression guarantees R-1 … R-6.**
+- **B-15 (T3, not T2):** its premise "same density arithmetic" includes the same `exp` results, so it holds on the platform that produced the T0 thresholds (macOS x86_64) or wherever identical density bits are shown. This is recorded for T3, and no T2 row changes.
+
+### 6.5 Not changed
+- Every derivation (B-1 … B-15), domain, sample set, evidence class and mutation in §3.
+- §5 (not covered by T2).
+- No tolerance is added and no threshold is proposed.

@@ -111,3 +111,22 @@ Not a DR-0029 question, but raised by the I-24 bound audit and to be settled in 
 - *(I-25, append-only)* The closing note on conditional rows is updated for R2-F1/R2-F2. The decision content of §1–§7 is unchanged.
 
 - *(2026-10-24, append-only)* **Independent Review 03 (at `628623b`): PASS, no findings.** R2-F1 … R2-F3 resolved; Review 01 findings remain closed. Record: `docs/reviews/M3-T2-readiness-review-03.md`. Nothing is approved by the PASS.
+
+## Owner answers (2026-10-25, append-only): I-26
+Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). DR-0029 holds the verbatim decisions. This briefing is preserved as written.
+
+| §7 question | Answer |
+|---|---|
+| 1. P1 | **A4-b; κ = 0.01; v̂ = V_b** |
+| 2. P2 | **A5-b** |
+| 3. P3 | **Proposal accepted** (precedence `non_finite` → `reentry` → `impact` → `escape`) |
+| 4. P4 | **(ii)**, with the AR-8/§5.8 statement |
+| 5. P5 | **Table accepted; extrapolate above 1000 km; wording amendment adopted** |
+| 6. P6 | **(d) PROVISIONALLY SELECTED only.** DR-0028 scope ruling **not made**; a separate ruling packet is prepared. X-1 **not authorized** |
+| 7. P7 | **RM-0 … RM-8; RM-3b measured in T4 as a candidate, not a gate** |
+| 8. P8 | **(a) and (a′), with the reviewed gating restrictions** |
+| 9. P9 | **(i); label ILLUSTRATIVE — VALIDATION ONLY** |
+| 10. Q-GATE | **Narrowed** (DR-0029 Resolution, verbatim) |
+| 11. DQ-1 … DQ-6 | **(α); km route; (a); data file + `tars.sim` digest; (a); immutable drag-component parameters** (`docs/milestones/M3-T2-authorization-packet-r1.md` §5) |
+| 12. OI-21 VAL-0019 note (optional) | **Not answered**; stays optional and open (open-issues register) |
+| Conditional rows | **Report-only until the precise assumption is independently justified for the supported environment and the criterion reviewed.** Z-reflection exactness and strict decrease are report-only regardless (DR-0025 "I-26 note") |

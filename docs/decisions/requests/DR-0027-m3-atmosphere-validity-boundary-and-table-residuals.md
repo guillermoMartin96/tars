@@ -1,6 +1,6 @@
 # Decision Request: M3 atmosphere validity boundary, decay termination, and the Q10 table residuals
 
-**Status:** RESOLVED WITH CONDITIONS (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation", section 2). A: termination altitude APPROVED WITH CONDITIONS. B: atmosphere table CONDITIONAL APPROVAL. Open sub-items and T0 obligations are listed in the Resolution; no numerical altitude is approved. Where the body below differs from the Resolution, the Resolution governs.  
+**Status:** RESOLVED WITH CONDITIONS (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation", section 2). A: termination altitude APPROVED WITH CONDITIONS. B: atmosphere table CONDITIONAL APPROVAL. Open sub-items and T0 obligations are listed in the Resolution; no numerical altitude is approved. Where the body below differs from the Resolution, the Resolution governs. **Update (2026-10-25, append-only): A-4, A-5, A-6, A-s and B-4 DECIDED by the owner under I-26** (DR-0029 P1–P5; Resolution, "I-26 note"). No numerical altitude is approved.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -132,3 +132,18 @@ The last row shows why B-4 matters: above 1000 km the pinned table and the compa
 - Before T2: owner decisions on those proposals.
 - Any check of a printed edition: recorded as a new finding; a difference creates a new dataset identity (B-3).
 - *(T0 note, 2026-10-18, append-only.)* The T0 proposals for A-4, A-5, A-6, A-s and B-4 are in **DR-0029** (P1–P5), status OPEN. Evidence: VAL-0019. Every item above keeps its status (T0 → owner, OPEN, CONDITION); no termination altitude or domain behaviour is decided.
+
+### I-26 note (2026-10-25, append-only): owner decisions on A-4, A-5, A-6, A-s and B-4
+Authority: "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25), §2. The owner's text is recorded verbatim in DR-0029 (P1–P5), which this note points to. The tables above are kept as written; where they say "T0 → owner" or "OPEN" for these items, this note governs.
+
+| # | Was | Now | Decision (DR-0029 section) |
+|---|---|---|---|
+| A-4 | T0 → owner | **DECIDED** | P1: A4-b. Clause 1, a − b < h_f < h_geod(initial). Clause 2, ρ(h_f)·V_b·dt/B_min ≤ κ, with κ = 0.01, v̂ = V_b and B_min from the dry mass. A necessary admissibility screen, not a sufficient stability or accuracy guarantee; it bounds the drag velocity-Jacobian contribution only. κ is an owner-selected engineering constant. **A-3 stands: no numerical altitude is approved**; the admitted values follow each scenario's B_min and dt |
+| A-5 | T0 → owner | **DECIDED** | P2: A5-b. Committed-state detection, plus a scalar cubic-Hermite crossing time that is not a state; the run ends at the committed state; no step splitting; missed dips a documented limitation, with no perturbed-motion bound claimed |
+| A-6 | T0 → owner | **DECIDED** | P3: precedence `non_finite` → `reentry` → `impact` → `escape`; `impact` kept as the legacy backstop; termination from geodetic height, independent of band selection; published discontinuities preserved |
+| A-s | OPEN (T0 → owner) | **DECIDED** | P4: option (ii), fail closed. Every finite geodetic height below 0 m raises a typed atmosphere-domain error, guarded in metres before any conversion; −0.0 in range; non-finite heights a distinct error; no partial commit |
+| B-4 | CONDITION; behaviour OPEN | **DECIDED** (the behaviour is now defined, as the condition requires; its implementation is still T2's) | P5: the DR-0029 region table with the owner's wording amendment. Above 1000 km the top band is extrapolated and labelled unverified; no zero-density cutoff and no upper-domain failure; no continuity imposed at any base (the 1000 km base keeps its ≈ −1.598e-5 jump) |
+| Names | Proposals only | Unchanged for field names | The owner's P3 text uses the outcome `reentry`. Whether that fixes the contract identifier is confirmed at T3 contract design (open-issues register OI-23). `altitude_floor_m` stays a proposal |
+
+- **Unchanged:** A-1, A-2, A-3; B-1 (CONDITIONALLY APPROVED), B-2, B-3 and B-5. The pinned table and its digest are unchanged.
+- **Implementation:** A-4 … A-6 are T3 work; A-s and B-4 are T2 component behaviour. **Neither is authorized by I-26.**

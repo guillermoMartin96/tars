@@ -245,3 +245,9 @@ Every finding from Reviews 01 and 02 is confirmed resolved by a later independen
 - There is no independent validation of atmosphere realism.
 
 **Recommended next authorization (implementer's view):** an owner decision response. It would decide P1–P5, P8 and P9 (and P7) in the order of the briefing's §2; rule on Q-GATE and DQ-1 … DQ-6; and adopt or reject the P5 wording amendment. The decisions would be recorded append-only in their home DRs. T2 implementation would then be authorized separately, from the draft packet revised with those answers.
+
+- *(2026-10-25, append-only)* **Owner decisions (I-26).**
+  - P1–P5 and P7–P9 are DECIDED. P6 is PROVISIONALLY SELECTED (d), with the geodetic-drag item ESCALATED.
+  - The T2 gate is amended (DR-0029 Resolution, Q-GATE), and DQ-1 … DQ-6 are decided.
+  - The revised draft is `M3-T2-authorization-packet-r1.md` (DRAFT — NOT AUTHORIZED). The dependency matrix is updated in `M3-T0-decision-matrix.md` ("I-26").
+  - This report's §1–§7 are preserved as I-23 evidence. **T2 is NOT AUTHORIZED.**

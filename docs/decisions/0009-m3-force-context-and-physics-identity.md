@@ -44,6 +44,15 @@ DR-0026 §4: D1 (inject mutable mass into forces), D2 (an immutable context argu
     - **Extension point:** a future Earth-orientation model is a new versioned, injected, immutable orientation component. It needs its own DR, uses the general velocity relation v_B = R v_A + Ṙ r_A, and satisfies FC-9/FC-10 (DR-0024 revision 2).
     - Not implemented; not authorized.
 
+**I-26 note (2026-10-25, append-only; owner decisions, nothing implemented):**
+- Item 12's numerical definition and item 16's domain behaviour, both OPEN above, are now **DECIDED** in DR-0027 A-4 … A-6, A-s and B-4 (DR-0029 P1–P5). The rule is A4-b with κ = 0.01 and v̂ = V_b; there is still no default altitude. Density fails closed below 0 m, and the top band is extrapolated above 1000 km, labelled unverified.
+- The T2 design decisions DQ-1 … DQ-6 refine items 1, 2, 3, 9 and 10 (DR-0026 "I-26 note"):
+  - stage-mass `ForceContext` built in the derivative closures, with the legacy adapter;
+  - J2 wrapped in that adapter, unchanged;
+  - drag C_d and A as immutable component parameters;
+  - the dataset digest pinned in `tars.sim`.
+- None of this is implemented or authorized.
+
 ## Reasoning
 - D2/D3 keep forces pure and state ownership with the simulator (ADR-0002), which D1 would break and which future isolated mission forks need.
 - An identity that includes values and dataset digests makes physics changes visible, instead of relying on file names or schema versions alone.

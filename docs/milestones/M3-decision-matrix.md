@@ -288,3 +288,47 @@ I-13 does not authorize the merge, T0, T1, T2, the resolution of any deferred de
   - `M3-open-issues-register.md`.
 - **No decision changed.** DR-0029 P1–P9, Q-G2-1/P6, Q-G2-2, DR-0028 P6(b) and Q-G2-4 are unchanged. The governing T2 gate (P1–P10) is unchanged.
 - **Status:** T2 and later are NOT AUTHORIZED.
+
+## Owner decisions, gate amendment and T2 design decisions (recorded 2026-10-25 UTC, append-only)
+**I-26:** "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). It records decisions only; **it authorizes no implementation.** Recorded on `milestone-3-t2-owner-decisions`, branched from the reviewed planning HEAD `a57de3f`; not merged. The tables above are kept as written, and where they differ this section governs.
+
+**Status labels added:**
+- **DECIDED:** owner decision.
+- **PROVISIONALLY SELECTED:** the owner's preferred direction, explicitly not a decision.
+- **ESCALATED_FOR_INVESTIGATION:** unexplained evidence; blocks what depends on it.
+
+The existing labels (APPROVED, OPEN, DEFERRED, NOT AUTHORIZED) are unchanged.
+
+| DR item | Was | Now | Record |
+|---|---|---|---|
+| DR-0024 Q8 (domain behaviour) | OPEN | **DECIDED** via DR-0027 A-s, B-4 | DR-0024 "I-26 note" |
+| DR-0024 Q9 (values) | DEFERRED (T0 checkpoint) | **DECIDED:** V1, V2, ILLUSTRATIVE — VALIDATION ONLY | DR-0029 P9 |
+| DR-0024 §9 convert-once wording | Request text | **Departed from** by DQ-2 (km route) | DR-0024 "I-26 note" |
+| DR-0025 Q-G2-1 | DEFERRED (T0 checkpoint) | **PROVISIONALLY SELECTED: (d)**; not decided; geodetic drag **ESCALATED_FOR_INVESTIGATION**; independent geodetic GMAT gate **NOT AUTHORIZED**; X-1 **NOT AUTHORIZED** | DR-0029 P6 (register P6-U1 … U8) |
+| DR-0025 Q-G2-5 | DEFERRED (T0 checkpoint) | **DECIDED:** RM-0 … RM-8 | DR-0029 P7 |
+| DR-0025 Q-G2-7 | DEFERRED (T0 checkpoint) | **DECIDED:** (a) + (a′), with the reviewed gating restrictions | DR-0029 P8 |
+| DR-0025 conditional floating-point gates | — | **APPROVED policy:** A-FP-2, A-LM-1, A-LM-2 not universal; dependent rows report-only until justified and reviewed | DR-0025 "I-26 note" |
+| DR-0026 AR-8, §5.8 "total density" | Body text | **Reconciled:** not applicable below the table's lower edge | DR-0026 "I-26 note" |
+| DR-0027 A-4 | T0 → owner | **DECIDED:** A4-b, κ = 0.01, v̂ = V_b | DR-0029 P1 |
+| DR-0027 A-5 | T0 → owner | **DECIDED:** A5-b | DR-0029 P2 |
+| DR-0027 A-6 | T0 → owner | **DECIDED:** proposal (precedence) | DR-0029 P3 |
+| DR-0027 A-s | OPEN (T0 → owner) | **DECIDED:** (ii) fail closed | DR-0029 P4 |
+| DR-0027 B-4 | CONDITION; behaviour OPEN | **DECIDED** (region table, amendment) | DR-0029 P5 |
+| DR-0028 P6(b) scope ruling | Requested | **OPEN**; ruling packet prepared | `DR-0028-P6b-owner-ruling-packet.md` |
+| DQ-1 … DQ-6 (T2 design) | New (I-23) | **DECIDED:** (α); km; (a); data file + `tars.sim` digest; (a); component parameters | `M3-T2-authorization-packet-r1.md` §5 |
+| Q-GATE (T2 dependency gate) | I-15 rule: P1–P10 before T2 | **AMENDED (APPROVED):** P1–P5, P8, P9, DQ-1 … DQ-6, contracts recorded and reconciled, plus a separate authorization | DR-0029 Resolution |
+
+**Unchanged:**
+- Q-G2-2 (PROPOSED), Q-G2-4 (dt PROVISIONAL), Q-G2-6 (DEFERRED (T4)) and the thresholds (not approved);
+- Q-G3-7 (NOT AUTHORIZED);
+- DR-0028 J-ax-1 and its prohibition;
+- every M1/M2 and T1 decision.
+
+**Gates, update 2026-10-25:**
+
+| Gate | State |
+|---|---|
+| T2 | Decision prerequisites met under the amended gate. Still needs: an independent review of the I-26 reconciliation; the owner's checkpoint; the base-branch choice (`M3-T2-authorization-packet-r1.md` PC-5); and **an explicit, separate T2 implementation authorization**. **NOT AUTHORIZED** |
+| T3 | P1–P3, P7, P9 decided. **NOT AUTHORIZED** |
+| T4 | P7 decided. **NOT AUTHORIZED** |
+| T5 | Geodetic GMAT acceptance blocked by P6-U1 … U3; the J2 link method by the DR-0028 P6(b) ruling. **NOT AUTHORIZED** |

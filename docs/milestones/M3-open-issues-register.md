@@ -27,3 +27,34 @@
 | OI-20 | **DR-0029 P5 "(continuous, GMAT-identical)"** for ≥ 1000 km. It is ambiguous: at the 1000 km base the pinned table jumps by −1.598e-5 (Review 01 F1) | DR-0029 P5; decision packet P5 item 14 | New (I-24); amendment proposed, not applied | The P5 record's wording | Strategy U-15 tests the jump |
 | OI-21 | **T0 spike's km-route domain guard** accepts −2.475e-321 < h_m < 0 and returns 1.225 kg/m³ (Review 01 F4) | Decision packet P4 item 8; `docs/reviews/raw/M3-T2-readiness-I24-evidence/` | New (I-24); T0 files not edited; a VAL-0019 note is optional, for the owner | Nothing (outside every derived floor) | T2 guard in metres, before conversion (U-14; DQ-2) |
 | OI-22 | **Bound derivations not yet written** (strategy §3.9 B-3 … B-8) and **unproved libm assumptions** A-FP-2, A-LM-1, A-LM-2 used by conditional rows | Validation strategy §3.9 | New (I-24); T2 deliverables | Those rows as gates | Reported until derived, or until the T2 authorization accepts the assumption |
+
+## Status update (2026-10-25, append-only): I-26 owner decisions
+Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). The rows above are kept as written. Each authoritative record governs.
+
+| # | Was | Now |
+|---|---|---|
+| OI-1 | DEFERRED; ESCALATED | Q-G2-1/P6 **PROVISIONALLY SELECTED (d)**, not decided. The geodetic-drag item stays **ESCALATED_FOR_INVESTIGATION**. **No longer a T2 blocker** (Q-GATE). It blocks geodetic GMAT acceptance in T5. Register: DR-0029 P6, P6-U1 … P6-U8. X-1 **NOT AUTHORIZED** |
+| OI-2 | Ruling requested | **OPEN.** Not decided by I-26; ruling packet `DR-0028-P6b-owner-ruling-packet.md` prepared |
+| OI-3 | PROPOSED | Unchanged (P6-U8) |
+| OI-7 | PROVISIONAL | Unchanged. The P1 rule is dt-parametric, and "the final M3 timestep remains a separate decision" (P1) |
+| OI-9 | Open | P7 **DECIDED**. RM-3b is a T4 candidate, not a gate; RM-6's orbit kind is T3 |
+| OI-10 | Assumption | **Owner policy (DR-0025 "I-26 note"):** not accepted as universal. Dependent rows are report-only until justified for the supported environment and reviewed (packet r1 §6.2, J-FP2) |
+| OI-11 | None derived | Unchanged. P2 forbids claiming a certified perturbed-motion bound |
+| OI-15 | New, unreconciled | **RESOLVED** by the P4 decision: DR-0026 "I-26 note" |
+| OI-16 | New | **RESOLVED for T2 design** by DQ-1 (α) and DQ-2 (km). The floors still apply only to the spike's sequence, and T2 reproduces it |
+| OI-17 | Governing; narrowing a question | **RESOLVED:** Q-GATE amended (DR-0029 Resolution) |
+| OI-20 | Amendment proposed | **RESOLVED:** amendment adopted with P5 (DR-0029 P5) |
+| OI-21 | New; VAL-0019 note optional | Behaviour decided (P4: "do not reproduce"). **The optional VAL-0019 note was not answered and stays open** |
+| OI-22 | New | **Policy decided:** A-FP-2, A-LM-1, A-LM-2 rows are report-only until promoted (packet r1 §6.2). B-3 … B-8 stay T2 deliverables |
+| Others (OI-4 … OI-6, OI-8, OI-12 … OI-14, OI-18, OI-19) | — | Unchanged |
+
+**New items found during the I-26 reconciliation (implementer's; for the owner):**
+
+| # | Item | Authoritative record | Status | Blocks |
+|---|---|---|---|---|
+| OI-23 | **Outcome identifier `reentry`.** The owner's P3 precedence names it. DR-0027 A's row ("names remain proposals until the v3 schema is designed") is not explicitly superseded | DR-0029 P3; DR-0027 "I-26 note" | Open; confirmed at T3 contract design | T3 contract only |
+| OI-24 | **U-23's third clause** (C_d·A ≤ 2⁻¹⁰⁷⁵ ⇒ zero drag) rests on T0 E4b, which depends on A-FP-2. It was labelled exact in strategy §3.1 and missing from the §3.9 audit | Strategy §6.3; packet r1 §6.2 | **Reclassified Conditional**; report-only | That clause as a gate |
+| OI-25 | **P8 (a)'s tolerance is conditional.** Exact answers are the decided gate source, but their tolerance ε_h rests on A-FP-2. So, under the policy, no geodetic accuracy comparison gates in T2 until A-FP-2 is promoted. Domain rejection (U-20) gates unconditionally | DR-0029 P8 notes; strategy §6.2 | Consequence of two decisions; recorded | A geodetic accuracy gate in T2 |
+| OI-26 | **T2 base branch.** `milestone-3-t2-decision-readiness` (`a57de3f`) and `milestone-3-t2-owner-decisions` are not merged to `main` (`fc50aed`) | Packet r1 PC-5 | Owner choice | T2 start |
+| OI-27 | **DR-0026 §5.8 "the height conversion … is total"** against DR-0029 P8's requirement that the height function reject evolute-region points and the origin. It follows from P8 and is recorded as such; the owner did not word it explicitly | DR-0026 "I-26 note" | Flagged for the owner's confirmation | Nothing; T2 implements P8's domain |
+| OI-28 | **DQ-6 and DR-0026 AR-7/§5.3:** the component holds C_d and A at run time; the v3 scenario remains their source (T3). This is the implementer's reading of "Scenario v3 schema and serialization remain T3 responsibilities" | DR-0026 "I-26 note" | Recorded reading; for the owner to confirm or correct | T3 design only |

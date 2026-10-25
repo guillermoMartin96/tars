@@ -1,0 +1,23 @@
+# DQ-4 packaging probe (I-26, pre-authorization; NOT T2 evidence)
+# Date: 2026-10-25T16:15:20Z  Host: Darwin x86_64  uv: uv 0.12.23 (46b84fd0b 2026-10-03 x86_64-apple-darwin)
+# Procedure (scratch directory outside the repository; nothing in the repository was changed):
+#   git archive a57de3f | tar -x -C $SCRATCH/src
+#   mkdir -p $SCRATCH/src/src/tars/sim/data && printf 'probe\n' > $SCRATCH/src/src/tars/sim/data/probe_dataset.txt
+#   (cd $SCRATCH/src && uv build --wheel --sdist --offline --out-dir $SCRATCH/dist)
+# Backend: uv's bundled uv_build (uv -v: 'Using bundled `uv_build` backend'); pyproject requires uv_build>=0.12,<0.13
+## wheel contents matching data/ or probe:
+Archive:  $SCRATCH/dist/tars-0.1.0-py3-none-any.whl
+        0  01-01-1980 00:00   tars/sim/data/
+        6  01-01-1980 00:00   tars/sim/data/probe_dataset.txt
+## wheel WHEEL metadata:
+Wheel-Version: 1.0
+Generator: uv 0.12.23
+Root-Is-Purelib: true
+Tag: py3-none-any
+## sdist contents matching data/ or probe:
+tars-0.1.0/src/tars/sim/data/probe_dataset.txt
+## pyproject.toml sha256, scratch copy then a57de3f:
+9b53279ca1dc690b18162923cee17b017d3560d871e9e6670b3c0ca07ac96fbf
+9b53279ca1dc690b18162923cee17b017d3560d871e9e6670b3c0ca07ac96fbf
+## Result: the data file is included in the wheel and the sdist with pyproject.toml unchanged.
+## Limits: one host; bundled backend of uv 0.12.23; a probe file, not the pinned dataset. T2 must re-verify.

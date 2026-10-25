@@ -39,3 +39,36 @@
 | DR-0026 Q-G3-6 | APPROVED (principle); value via DR-0027 A | P1–P3 | Through DR-0027 |
 | DR-0026 Q-G3-7 | NOT AUTHORIZED (per-sample telemetry) | Constrains P2's event fields | Unchanged |
 | DR-0026 contract (failure cause names) | Design at T3 | P2, P4 name candidates | At T3 |
+
+## I-26 (2026-10-25, append-only): decisions and the amended dependency statement
+Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). The rows above are kept as written. Decisions are verbatim in DR-0029.
+
+**Dependency statement, amended (Q-GATE; supersedes only the T2 clause of the I-15 statement at the top of this file):**
+- P10 is a prerequisite for T1: unchanged, DECIDED (I-16).
+- **Before T2 implementation may be authorized:**
+  - P1–P5, P8 and P9 decided;
+  - DQ-1 … DQ-6 decided;
+  - the resulting contracts recorded and reconciled;
+  - an explicit, separate T2 implementation authorization.
+- P6 is not a T2 prerequisite. Its unresolved questions block geodetic GMAT acceptance in T5.
+- P7 is decided before its T3/T4 obligations are implemented. It is DECIDED.
+- No scientific, review, numerical or acceptance gate is waived.
+
+**T2 dependency matrix (after I-26):**
+
+| Item | Status | T2 consequence | Later tasks |
+|---|---|---|---|
+| P1 | DECIDED (A4-b, κ 0.01, V_b) | Seam: ρ(h) evaluable outside the force path | T3 scenario validation |
+| P2 | DECIDED (A5-b) | Geodetic component returns φ or n̂ | T3 crossing event |
+| P3 | DECIDED (proposal) | Height never depends on band selection | T3 precedence |
+| P4 | DECIDED ((ii)) | Typed domain error for finite h < 0 m (guard in metres); distinct non-finite error | T3 outcome mapping |
+| P5 | DECIDED (table, amendment) | Region behaviour of the density component | — |
+| P6 | **PROVISIONALLY SELECTED (d)**; geodetic drag **ESCALATED** | None | T5 (blocked: P6-U1 … U5) |
+| P7 | DECIDED (RM-0 … RM-8) | None | T3–T5 |
+| P8 | DECIDED ((a) + (a′), restrictions) | Test oracle and domain contract. The ε_h tolerance is report-only until A-FP-2 is promoted | — |
+| P9 | DECIDED ((i)) | Test vehicle values, labelled | T3 scenarios |
+| P10 | DECIDED ((a), I-16) | No new J2 literal | — |
+| DQ-1 … DQ-6 | DECIDED | Design (`M3-T2-authorization-packet-r1.md` §5) | — |
+| Conditional rows (A-FP-2, A-LM-1, A-LM-2) | Report-only (policy) | Register: packet r1 §6.2 | — |
+
+**T2 state:** NOT AUTHORIZED.

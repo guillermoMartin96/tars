@@ -477,3 +477,30 @@ Made under "Authorization I-24 — M3 T2 Readiness: Review 01 Corrections and In
 - **No P1–P9 option, classification or recommendation changes; nothing is decided.**
 
 - *(2026-10-24, append-only)* **Independent Review 03 (at `628623b`): PASS, no findings.** R2-F1 … R2-F3 resolved; Review 01 findings remain closed. Record: `docs/reviews/M3-T2-readiness-review-03.md`. Nothing is approved by the PASS.
+
+## Owner decisions (2026-10-25, append-only): I-26
+Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). **The authoritative record is DR-0029** (verbatim decision text in each P section, and the Resolution). This packet's assessments above are preserved as reviewed (Review 03 PASS at `628623b`).
+
+| # | Implementer's recommendation (§1) | Owner decision | Differs from recommendation? |
+|---|---|---|---|
+| P1 | A4-b, v̂ = V_b; κ suggested 0.01 | **DECIDED:** A4-b, v̂ = V_b, κ = 0.01, B_min from dry mass; a necessary screen; velocity-Jacobian block only (N-7 named); κ an engineering constant; final dt separate | No |
+| P2 | A5-b | **DECIDED:** A5-b; T2 exposes n̂ or φ (N-3 adopted) | No |
+| P3 | As proposed | **DECIDED:** as proposed; T3 behaviour, not implemented now | No |
+| P4 | (ii), with the N-2 supersession | **DECIDED:** (ii); guard in metres; −0.0 in range; non-finite distinct; no partial commit; AR-8/§5.8 reconciled (N-2 adopted); T0 guard defect not reproduced | No |
+| P5 | As tabulated, with the item-14 wording amendment | **DECIDED:** as tabulated; amendment adopted; no cutoff or upper failure; unverified above 1000 km | No |
+| P6 | (d); (b) for J2 only if ruled inside DR-0028 | **NOT FULLY DECIDED:** (d) PROVISIONALLY SELECTED; geodetic drag ESCALATED; no independent geodetic GMAT gate; DR-0028 P6(b) ruling to be prepared separately (`DR-0028-P6b-owner-ruling-packet.md`); X-1 NOT AUTHORIZED | Partly: method (d) is selected only provisionally |
+| P7 | RM-0 … RM-8 | **DECIDED:** RM-0 … RM-8; RM-3b a T4 candidate, not a gate | No |
+| P8 | (a) + (a′), with item 14's restrictions | **DECIDED:** (a) and (a′) with the reviewed gating restrictions; corroboration sources not authoritative inverse-height gates | No |
+| P9 | (i), labelled illustrative | **DECIDED:** (i); label **ILLUSTRATIVE — VALIDATION ONLY** | No |
+| Q-GATE (§1.2) | Narrow (implementer's view) | **APPROVED amendment:** before T2 may be authorized, P1–P5, P8, P9 and DQ-1 … DQ-6 decided, the contracts recorded and reconciled, plus an explicit separate authorization. P6 not a T2 prerequisite; P7 before T3/T4 obligations | No |
+
+- **§1.2 "Gate statement (governing)"** is superseded for T2 by the Q-GATE amendment (DR-0029 Resolution). The rest of §1.2 is kept as written.
+- **Findings N-1 … N-7, as dispositioned by the decisions:**
+  - N-1: closed by DQ-1 (α) and DQ-2 (km).
+  - N-2: closed by the P4 reconciliation (DR-0026 "I-26 note").
+  - N-3: adopted in P2.
+  - N-4: closed by Q-GATE.
+  - N-5: closed by DQ-4.
+  - N-6: recorded in P8 as corroboration.
+  - N-7: named in P1; X-4 stays NOT AUTHORIZED.
+- **X-1 … X-4 stay NOT AUTHORIZED.** X-3's specification note is provided as a record of the decided sequence (`M3-T2-authorization-packet-r1.md` §5), not as an executed experiment.

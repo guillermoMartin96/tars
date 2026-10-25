@@ -1,6 +1,6 @@
 # Decision Request: M3 validation strategy for J2 and drag (gate G2)
 
-**Status:** RESOLVED — principles APPROVED (Tech Lead, 2026-10-15); several items explicitly DEFERRED to T0 or later evidence, see "Resolution". No numerical threshold is approved. Where the request body differs from the Resolution, the Resolution governs.  
+**Status:** RESOLVED — principles APPROVED (Tech Lead, 2026-10-15); several items explicitly DEFERRED to T0 or later evidence, see "Resolution". No numerical threshold is approved. Where the request body differs from the Resolution, the Resolution governs. **Update (2026-10-25, append-only): Q-G2-5 and Q-G2-7 DECIDED; Q-G2-1 PROVISIONALLY SELECTED (method (d)), not decided, with the geodetic-drag item ESCALATED; owner policy on conditional floating-point gates recorded, under I-26** (Resolution, "I-26 note"). No numerical threshold is approved.  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -255,3 +255,26 @@ Answers to Q-G2-1 to Q-G2-8, or `discuss`.
     - it still shares ordinary floating-point arithmetic and scalar-square-root assumptions, and is therefore not an independent external physics implementation;
     - its acceptance does not elevate it into external corroboration or a proof of IEEE 754 rounding behaviour.
   - **Scope:** T1 only. The Q3 row above is unchanged, and no other Q item or evidence class changes. No other derivative oracle is to be built unless Review 02 shows that this disposition is insufficient (I-19 §7).
+- *(I-26 note, 2026-10-25, append-only.)* Owner decisions under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25). The owner's text is verbatim in DR-0029 (P6, P7, P8) and below (§5 policy). The table above is kept as written; this note governs the items it names.
+
+  | # | Was | Now |
+  |---|---|---|
+  | Q-G2-1 | DEFERRED to the T0 checkpoint | **PROVISIONALLY SELECTED — method (d)**, decomposed exact configuration, as the preferred direction for later validation planning, subject to its configuration requirements (principle 2 and DR-0029 P6's setting list). **Not decided.** The geodetic-drag discrepancy (≈ 0.14–0.38 m) stays **ESCALATED_FOR_INVESTIGATION**. An independent geodetic GMAT acceptance gate is **NOT AUTHORIZED**. The DR-0028 P6(b) scope ruling is **OPEN**, in a separate packet (`DR-0028-P6b-owner-ruling-packet.md`). X-1 is **NOT AUTHORIZED**. Register: DR-0029 P6, P6-U1 … P6-U8 |
+  | Q-G2-5 | DEFERRED to the T0 checkpoint | **DECIDED — RM-0 … RM-8** (DR-0029 P7). RM-8 under the P1 rule; P9 vehicles; RM-3b a candidate measured in T4, not a gate without later approval; all M1/M2 requirements preserved |
+  | Q-G2-7 | DEFERRED to the T0 checkpoint | **DECIDED — (a) exact answers as the primary gate source within their justified domain, and (a′) forward-constructed points as additional evidence** (DR-0029 P8). (a′) gates only after its construction-error term is derived and reviewed. Negative heights are report-only. GeographicLib, GMAT and IOGP/EPSG are corroboration only |
+  | Q-G2-2, Q-G2-4, Q-G2-6, thresholds | — | **Unchanged** (PROPOSED, PROVISIONAL, DEFERRED (T4), not approved) |
+
+  **Owner policy on conditional floating-point gates (APPROVED; I-26 §5), recorded verbatim:**
+
+  > - A-FP-2, A-LM-1 and A-LM-2 are not accepted as universal IEEE-754 guarantees.
+  > - Tests depending on these assumptions may gate only when the precise assumption has been independently justified for the supported execution environment and the resulting criterion has been reviewed.
+  > - Until then, those tests are report-only.
+  > - Exact z-reflection symmetry and strict density decrease remain report-only regardless of the above assumptions.
+  > - Do not promote an unproved numerical bound into a mandatory acceptance criterion.
+  > - Do not invent tolerances.
+  > - Preserve all unconditional, independently justified gates.
+  >
+  > The revised T2 authorization must identify every conditional row and the evidence required to promote it.
+
+  - **Application:** the conditional-row register is in `docs/milestones/M3-T2-authorization-packet-r1.md` §6, and the strategy's revision is in `docs/milestones/M3-T2-validation-strategy.md` §6.
+  - **Consistency with the principles above:** principle 7 (no M3 threshold during planning) and §10 are unchanged. The policy restricts which derived bounds may gate; it approves no threshold.

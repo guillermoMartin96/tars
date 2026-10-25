@@ -1127,3 +1127,9 @@ Every control now also declares the reason its observed outcome must show (`CONT
   - The T0 spike did this only as a labelled diagnostic.
   - No production or validator code does it.
   - Choosing option (b) for T5 is blocked on the ruling.
+
+## I-26 note (2026-10-25, append-only; no decision changed)
+- Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25), §2 P6, the owner **did not decide** the P6(b) scope ruling, and directed that it not be decided silently.
+- A separate ruling packet is prepared: `DR-0028-P6b-owner-ruling-packet.md`. Status: **OPEN**.
+- DR-0029 P6 is **NOT FULLY DECIDED**: method (d) is PROVISIONALLY SELECTED, and the geodetic-drag item stays ESCALATED_FOR_INVESTIGATION.
+- This DR's Resolution (J-ax-1, B1, R-1 … R-4, and "No additional Earth-orientation implementation is authorized") is unchanged.

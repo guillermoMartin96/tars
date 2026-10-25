@@ -1,6 +1,6 @@
 # Decision Request: M3 physical models and constants: J2 and atmospheric drag (gate G1)
 
-**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). Q4 APPROVED with constraints in a second decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation"); its realization in the inertial frame is OPEN in DR-0028. *(Update 2026-10-15: DR-0028 APPROVED J-ax-1, a non-rotating Earth-axis-aligned model; see "Q4 coordinate conventions, revision 2".)* DR-0027 is resolved with conditions; its open sub-items are listed there. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution.  
+**Status:** RESOLVED — APPROVED with conditions (Tech Lead, 2026-10-15). Q4 APPROVED with constraints in a second decision (Tech Lead, 2026-10-15, "M3 planning checkpoint continuation"); its realization in the inertial frame is OPEN in DR-0028. *(Update 2026-10-15: DR-0028 APPROVED J-ax-1, a non-rotating Earth-axis-aligned model; see "Q4 coordinate conventions, revision 2".)* DR-0027 is resolved with conditions; its open sub-items are listed there. See "Resolution"; where the request body below differs from the Resolution, the Resolution governs. M3 implementation is not authorized by this resolution. **Update (2026-10-25, append-only): Q9 values and Q8 domain behaviour DECIDED, and the §9 convert-once wording departed from by owner decision DQ-2, under I-26** (Resolution, "I-26 note").  
 **Requested from:** Guillermo / Tech Lead  
 **Date:** 2026-10-15  
 **Related milestone/issue:**
@@ -471,3 +471,23 @@ Under DR-0028 A1 the first two equal their direct inertial evaluations identical
 - **DR-0029 P10 DECIDED — Option (a)** under "I-16 — Decide DR-0029 P10 and Prepare T1 Authorization" (Tech Lead, 2026-10-22). The canonical stored value for Q1 is the EGM2008 tide-free C̄2,0 = −0.484165143790815e-3 ([NGA] Table 5.1). J2 = −√5·C̄2,0 is derived; in binary64 it is 1.0826261738522227e-3.
 - The Q1 decimal 1.0826261739e-3 is a rounded display representation, not an independent canonical constant. The Q1 row above is kept as written; its parenthetical "=" is exact only for the derived value.
 - **Q1's physical value and tide-system decision are not reopened.** Decision text: DR-0029 P10.
+
+### I-26 note (2026-10-25, append-only)
+Authority: "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment, and T2 Authorization Preparation" (owner/Tech Lead, 2026-10-25), §2 and §4. The Resolution table above is kept as written; this note governs the items it names.
+- **Q9 values: DECIDED** (DR-0029 P9, option (i)).
+  - V1: 850 kg, 15 m², C_d 2.2 (B ≈ 25.8 kg/m²).
+  - V2: the M2 vehicle (1000 kg dry + 300 kg propellant, DR-0010) with A = 15 m² and C_d 2.2, for RM-7.
+  - Every scenario and record labels them **ILLUSTRATIVE — VALIDATION ONLY**. They are not validated representations of a real spacecraft.
+  - Q9's principle (explicit scenario inputs, never hidden constants) is unchanged.
+- **Q8 domain behaviour: DECIDED** through DR-0027 A-s and B-4 (DR-0029 P4, P5).
+  - Finite geodetic height below 0 m: a typed domain error (fail closed).
+  - Above 1000 km: the top band extrapolated, labelled unverified.
+  - **§4.6's candidate "extrapolate the lowest band" below 0 km is not adopted.** Neither is its statement that the model "must be total" below the lower edge. §4.6 is request text and is kept as written.
+- **Q5a is reaffirmed** by the P5 decision: no continuity is imposed at any band base. The 1000 km base keeps its published relative jump (≈ −1.598e-5).
+- **§9 "Table altitudes and scale heights in km are converted once, at dataset load": departed from by owner decision DQ-2 (kilometre route).**
+  - The density formula is evaluated as GMAT and the T0 spike do: h_km = h_m/1000, then ρ₀·exp(−(h_km − base_km)/H_km), with the pinned table's kilometre values as parsed.
+  - The lower-domain guard still compares the height **in metres** with 0, before the conversion (DR-0029 P4).
+  - No mathematically equivalent but numerically different expression may replace it. The pinned table and its digest are unchanged.
+  - §9 is request-body text, not a Resolution item. Its other statements (SI throughout, the dataset digest covering the original file, density in kg/m³) stand.
+- **Q6 (geodetic height): algorithm DECIDED** by DQ-1 (α): the T0 iterative algorithm, reproduced operation for operation within its applicable domain (record: `docs/milestones/M3-T2-authorization-packet-r1.md` §5). Q6's definition (geodetic height on WGS 84 a, 1/f about +Z) is unchanged.
+- **Not changed:** Q1–Q5, Q7, Q10, the pinned constants and the dataset identity. Nothing is implemented, and T2 is not authorized by this note.
