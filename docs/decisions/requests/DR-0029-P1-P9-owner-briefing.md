@@ -97,7 +97,7 @@ The governing rule (I-15 T0 series §6) is "P1–P10 as prerequisites for T2". P
 11. **DQ-1 … DQ-6** (draft T2 packet §5): geodetic algorithm (α)/(β); density route (km)/(m); simulator wiring; data file and digest location; J2 under the adapter; drag parameter ownership.
 12. **Optional:** record the T0 spike's guard behaviour (OI-21) in VAL-0019.
 
-Not a DR-0029 question, but raised by the I-24 bound audit and to be settled in the T2 authorization itself: whether rows conditional on A-FP-2, A-LM-1 or A-LM-2 may gate (validation strategy §3.9). If they are not accepted, those rows are reported only.
+Not a DR-0029 question, but raised by the I-24 bound audit and to be settled in the T2 authorization itself: whether rows conditional on A-FP-2, A-LM-1 or A-LM-2 may gate (validation strategy §3.9). If they are not accepted, those rows are reported only. *(Updated under I-25:)* A-LM-1 is now hypot symmetry and evenness only. Exact z-reflection symmetry and strict density decrease are reported only, whatever is accepted (Review 02 R2-F1, R2-F2).
 
 
 ## Status update (2026-10-24, append-only): independent Review 02
@@ -108,3 +108,4 @@ Not a DR-0029 question, but raised by the I-24 bound audit and to be settled in 
 - Review 01: F1, F2, F4 and F5 are RESOLVED; F3 and F6 are PARTIALLY RESOLVED (through R2-F1 and R2-F2).
 - No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
 - Record: `docs/reviews/M3-T2-readiness-review-02.md`.
+- *(I-25, append-only)* The closing note on conditional rows is updated for R2-F1/R2-F2. The decision content of §1–§7 is unchanged.

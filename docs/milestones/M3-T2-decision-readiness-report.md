@@ -201,3 +201,11 @@ Checked on 2026-10-24 before any file was created.
 - Review 01: F1, F2, F4 and F5 are RESOLVED; F3 and F6 are PARTIALLY RESOLVED (through R2-F1 and R2-F2).
 - No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
 - Record: `docs/reviews/M3-T2-readiness-review-02.md`.
+
+## Status update (2026-10-24, append-only): I-25 corrections of Review 02
+- R2-F1, R2-F2 and R2-F3 are corrected (`docs/reviews/M3-T2-readiness-review-02-corrections.md`):
+  - exact z-reflection is diagnostic;
+  - strict density decrease is reported;
+  - A-LM-1 is narrowed;
+  - the P4 wording is fixed.
+- No classification, gate, DQ or P6 status changes.

@@ -146,3 +146,4 @@ Made under Authorization I-24; documentation only. The reviewed wording is prese
 - Review 01: F1, F2, F4 and F5 are RESOLVED; F3 and F6 are PARTIALLY RESOLVED (through R2-F1 and R2-F2).
 - No P1–P9 classification changes. The text above is as reviewed at `f44a94f`.
 - Record: `docs/reviews/M3-T2-readiness-review-02.md`.
+- *(I-25, append-only)* After the R2-F1/R2-F2 corrections, §6's list of conditional assumptions (A-FP-2, A-LM-1, A-LM-2) is still accurate. A-LM-1 is now narrower (hypot only), and exact z-reflection and strict density decrease are reported only. No change is needed in this draft. **Still DRAFT — NOT AUTHORIZED.**
