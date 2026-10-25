@@ -72,3 +72,5 @@ Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment,
 | Conditional rows (A-FP-2, A-LM-1, A-LM-2) | Report-only (policy) | Register: packet r1 §6.2 | — |
 
 **T2 state:** NOT AUTHORIZED.
+
+**I-27 (2026-10-25, append-only).** P3's row above ("DECIDED (proposal)") includes the outcome name `reentry`, which is DECIDED. "Later tasks: T3 precedence" means T3 **implements** the decided precedence; it does not reconfirm it (M3T2OD-R1-F1). For P7, RM-3b is an unmeasured T4 candidate (M3T2OD-R1-F2). The amended dependency statement is unchanged.

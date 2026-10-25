@@ -260,7 +260,7 @@ Answers to Q-G2-1 to Q-G2-8, or `discuss`.
   | # | Was | Now |
   |---|---|---|
   | Q-G2-1 | DEFERRED to the T0 checkpoint | **PROVISIONALLY SELECTED — method (d)**, decomposed exact configuration, as the preferred direction for later validation planning, subject to its configuration requirements (principle 2 and DR-0029 P6's setting list). **Not decided.** The geodetic-drag discrepancy (≈ 0.14–0.38 m) stays **ESCALATED_FOR_INVESTIGATION**. An independent geodetic GMAT acceptance gate is **NOT AUTHORIZED**. The DR-0028 P6(b) scope ruling is **OPEN**, in a separate packet (`DR-0028-P6b-owner-ruling-packet.md`). X-1 is **NOT AUTHORIZED**. Register: DR-0029 P6, P6-U1 … P6-U8 |
-  | Q-G2-5 | DEFERRED to the T0 checkpoint | **DECIDED — RM-0 … RM-8** (DR-0029 P7). RM-8 under the P1 rule; P9 vehicles; RM-3b a candidate measured in T4, not a gate without later approval; all M1/M2 requirements preserved |
+  | Q-G2-5 | DEFERRED to the T0 checkpoint | **DECIDED — RM-0 … RM-8** (DR-0029 P7). RM-8 under the P1 rule; P9 vehicles; RM-3b a candidate measured in T4, not a gate without later approval; all M1/M2 requirements preserved *(I-27 clarification, M3T2OD-R1-F2: RM-3b is an unmeasured candidate for evaluation during T4; no measurement has been made.)* |
   | Q-G2-7 | DEFERRED to the T0 checkpoint | **DECIDED — (a) exact answers as the primary gate source within their justified domain, and (a′) forward-constructed points as additional evidence** (DR-0029 P8). (a′) gates only after its construction-error term is derived and reviewed. Negative heights are report-only. GeographicLib, GMAT and IOGP/EPSG are corroboration only |
   | Q-G2-2, Q-G2-4, Q-G2-6, thresholds | — | **Unchanged** (PROPOSED, PROVISIONAL, DEFERRED (T4), not approved) |
 

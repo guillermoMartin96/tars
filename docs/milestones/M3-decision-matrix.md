@@ -332,3 +332,8 @@ The existing labels (APPROVED, OPEN, DEFERRED, NOT AUTHORIZED) are unchanged.
 | T3 | P1–P3, P7, P9 decided. **NOT AUTHORIZED** |
 | T4 | P7 decided. **NOT AUTHORIZED** |
 | T5 | Geodetic GMAT acceptance blocked by P6-U1 … U3; the J2 link method by the DR-0028 P6(b) ruling. **NOT AUTHORIZED** |
+
+**I-27 corrections (2026-10-25, append-only).**
+- DR-0027 A-6 / DR-0029 P3: the outcome name `reentry` is DECIDED together with the precedence. T3 implements them; it does not reconfirm them (M3T2OD-R1-F1).
+- DR-0025 Q-G2-5 / DR-0029 P7: RM-3b is an unmeasured T4 candidate (M3T2OD-R1-F2).
+- No status in the table above changes.

@@ -289,8 +289,17 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 
 **Implementer notes on the record (no change to the decision):**
 - Item 1's implication (`impact` ⇒ `reentry`) holds because P1 clause 1 is decided (h_f > a − b).
-- The decision text names the outcome `reentry`. DR-0027 A's row "the outcome name `reentry` remain[s a] proposal until the v3 schema is designed" is not explicitly superseded by I-26. T3 contract design confirms the identifier (open-issues register OI-23). The precedence order itself is decided.
+- The decision text names the outcome `reentry`. DR-0027 A's row "the outcome name `reentry` remain[s a] proposal until the v3 schema is designed" is not explicitly superseded by I-26. T3 contract design confirms the identifier (open-issues register OI-23). The precedence order itself is decided. *(Superseded by the I-27 correction below (M3T2OD-R1-F1): the outcome name `reentry` is DECIDED and is not reconfirmed at T3. The sentence is kept as originally written.)*
 - T2 consequence: the geodetic-height function never branches on band selection.
+
+**I-27 correction (2026-10-25, append-only; Review 01 M3T2OD-R1-F1).** Authority: "TARS — Authorization I-27: M3 Owner Decisions: Review 01 Corrections and Independent Review 02" (owner/Tech Lead, 2026-10-25), §2. It records no new decision; it removes a qualification that weakened the I-26 decision above.
+1. **The outcome name `reentry` is DECIDED** (I-26 §2 P3, precedence item 2).
+2. **The P3 precedence `non_finite` → `reentry` → `impact` → `escape` is DECIDED.**
+3. **T3 implements these decisions; it does not approve or reconfirm them.**
+4. T3 may define implementation-specific fields and serialization details (for example `termination_altitude_m`, `crossing_t_s`, the method identifier) **only within this already approved contract.**
+5. **Any future change to the outcome name or the precedence requires a separate owner decision.**
+
+The implementer note above ("… not explicitly superseded by I-26. T3 contract design confirms the identifier …") is superseded to that extent and kept as written. DR-0027 A's "Names" row is superseded for the **outcome name only**: field names remain T3 design within the contract. No other P3 behaviour changes, and nothing is implemented.
 
 ## P4 — DR-0027 A-s: density for an RK4 stage below the lower edge
 **Evidence**
@@ -523,11 +532,18 @@ All are exercised in `gmat` (GMAT vs spike) unless noted. Horizon 53 700 s (the 
 > Preserve all previously accepted M1/M2 requirements.
 
 **Implementer notes on the record (no change to the decision):**
-- The missions are RM-0, RM-1, RM-2, RM-3, RM-4 (primary), RM-5, RM-6, RM-7 and RM-8, as tabulated. RM-3b is a measured candidate only.
+- The missions are RM-0, RM-1, RM-2, RM-3, RM-4 (primary), RM-5, RM-6, RM-7 and RM-8, as tabulated. RM-3b is a measured candidate only. *(Corrected by I-27 (M3T2OD-R1-F2): RM-3b is an **unmeasured** candidate for evaluation during T4; see the I-27 correction below. The sentence is kept as originally written.)*
 - Vehicles (P9 option (i)): V2 for RM-7; V1 for the other drag missions (RM-2 … RM-6, RM-8). RM-0 and RM-1 have no drag.
 - RM-8's h_f is chosen by its scenario and must pass P1 (clause 2 at dt 10 s with V1 admits h_f ≥ 92 282.07 m [measured]); no value is chosen here.
 - RM-6 needs an elliptic or Cartesian v3 orbit kind (T3 schema decision, unchanged).
 - The obligations are implemented in T3/T4/T5, each under its own authorization. **Not authorized by I-26.**
+
+**I-27 correction (2026-10-25, append-only; Review 01 M3T2OD-R1-F2).** Authority: "TARS — Authorization I-27: M3 Owner Decisions: Review 01 Corrections and Independent Review 02" (owner/Tech Lead, 2026-10-25), §3. **RM-3b is an unmeasured candidate for evaluation during T4.**
+- It is **not** an accepted reference result. **No measurement has been completed:** the table above says "Not run", and X-2 (decision packet §5) is not authorized.
+- It is **not** a mandatory acceptance gate.
+- Any future promotion requires evidence and the applicable review and authorization.
+
+The P7 decision (RM-0 … RM-8) is unchanged. No RM-3b experiment is created or run.
 
 ## P8 — DR-0025 Q-G2-7: source of geodetic-height test points
 **Evidence** (`geodetic`; `gmat` → `geodetic_points`)
@@ -822,3 +838,4 @@ Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 1
   - The P5 table above is unchanged. **P1–P9 stay OPEN.**
 
 - *(2026-10-25, append-only)* **Independent Review 01 of the I-26 recording (Codex, at `2cd1e6e`): REQUEST_CHANGES.** M3T2OD-R1-F1 (MAJOR): the `reentry` outcome identifier was left open although I-26 P3 decides it. M3T2OD-R1-F2 (MINOR): RM-3b was called "measured". Both are reproduced and ACCEPTED, **not applied** (I-26 §7 stop). Record: `docs/reviews/M3-T2-owner-decisions-review-01.md`.
+- *(2026-10-25, append-only)* **I-27 corrections (Review 01 findings).** M3T2OD-R1-F1 is corrected in P3 ("I-27 correction"): `reentry` and the precedence are DECIDED, and T3 implements them without reconfirming them. M3T2OD-R1-F2 is corrected in P7 ("I-27 correction"): RM-3b is an unmeasured T4 candidate. The superseded sentences are kept, each marked in place. **No decision is added or changed.** P1–P5 and P7–P9 stay DECIDED; P6 stays NOT FULLY DECIDED. Q-GATE, DQ-1 … DQ-6 and the floating-point policy are unchanged. Matrix: `docs/reviews/M3-T2-owner-decisions-review-01-corrections.md`.

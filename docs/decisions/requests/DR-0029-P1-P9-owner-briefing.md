@@ -123,7 +123,7 @@ Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment,
 | 4. P4 | **(ii)**, with the AR-8/§5.8 statement |
 | 5. P5 | **Table accepted; extrapolate above 1000 km; wording amendment adopted** |
 | 6. P6 | **(d) PROVISIONALLY SELECTED only.** DR-0028 scope ruling **not made**; a separate ruling packet is prepared. X-1 **not authorized** |
-| 7. P7 | **RM-0 … RM-8; RM-3b measured in T4 as a candidate, not a gate** |
+| 7. P7 | **RM-0 … RM-8; RM-3b measured in T4 as a candidate, not a gate** *(I-27 clarification, M3T2OD-R1-F2: RM-3b is unmeasured; it is a candidate to be measured during T4.)* |
 | 8. P8 | **(a) and (a′), with the reviewed gating restrictions** |
 | 9. P9 | **(i); label ILLUSTRATIVE — VALIDATION ONLY** |
 | 10. Q-GATE | **Narrowed** (DR-0029 Resolution, verbatim) |

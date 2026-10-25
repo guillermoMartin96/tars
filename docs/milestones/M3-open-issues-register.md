@@ -52,7 +52,7 @@ Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment,
 
 | # | Item | Authoritative record | Status | Blocks |
 |---|---|---|---|---|
-| OI-23 | **Outcome identifier `reentry`.** The owner's P3 precedence names it. DR-0027 A's row ("names remain proposals until the v3 schema is designed") is not explicitly superseded | DR-0029 P3; DR-0027 "I-26 note" | Open; confirmed at T3 contract design | T3 contract only |
+| OI-23 | **Outcome identifier `reentry`.** The owner's P3 precedence names it. DR-0027 A's row ("names remain proposals until the v3 schema is designed") is not explicitly superseded | DR-0029 P3; DR-0027 "I-26 note" | Open; confirmed at T3 contract design | T3 contract only *(I-27: **RESOLVED**; see the I-27 status update below.)* |
 | OI-24 | **U-23's third clause** (C_d·A ≤ 2⁻¹⁰⁷⁵ ⇒ zero drag) rests on T0 E4b, which depends on A-FP-2. It was labelled exact in strategy §3.1 and missing from the §3.9 audit | Strategy §6.3; packet r1 §6.2 | **Reclassified Conditional**; report-only | That clause as a gate |
 | OI-25 | **P8 (a)'s tolerance is conditional.** Exact answers are the decided gate source, but their tolerance ε_h rests on A-FP-2. So, under the policy, no geodetic accuracy comparison gates in T2 until A-FP-2 is promoted. Domain rejection (U-20) gates unconditionally | DR-0029 P8 notes; strategy §6.2 | Consequence of two decisions; recorded | A geodetic accuracy gate in T2 |
 | OI-26 | **T2 base branch.** `milestone-3-t2-decision-readiness` (`a57de3f`) and `milestone-3-t2-owner-decisions` are not merged to `main` (`fc50aed`) | Packet r1 PC-5 | Owner choice | T2 start |
@@ -60,3 +60,9 @@ Under "TARS — Authorization I-26: M3 Owner Decision Recording, Gate Amendment,
 | OI-28 | **DQ-6 and DR-0026 AR-7/§5.3:** the component holds C_d and A at run time; the v3 scenario remains their source (T3). This is the implementer's reading of "Scenario v3 schema and serialization remain T3 responsibilities" | DR-0026 "I-26 note" | Recorded reading; for the owner to confirm or correct | T3 design only |
 
 - *(2026-10-25, append-only)* **Independent Review 01 of the I-26 recording (Codex, at `2cd1e6e`): REQUEST_CHANGES.** M3T2OD-R1-F1 (MAJOR): the `reentry` outcome identifier was left open although I-26 P3 decides it. M3T2OD-R1-F2 (MINOR): RM-3b was called "measured". Both are reproduced and ACCEPTED, **not applied** (I-26 §7 stop). Record: `docs/reviews/M3-T2-owner-decisions-review-01.md`.
+
+## Status update (2026-10-25, append-only): I-27 corrections
+| # | Was | Now |
+|---|---|---|
+| OI-23 | Open; confirmed at T3 contract design | **RESOLVED** (M3T2OD-R1-F1). The outcome name `reentry` and the P3 precedence are DECIDED (I-26 P3; DR-0029 P3, "I-27 correction"). T3 implements them and may define fields and serialization only within the approved contract. Any change needs a separate owner decision. OI-23's whole scope was the outcome identifier, so nothing remains open under it. Field names were never in OI-23's scope, and remain T3 design |
+| OI-9 | P7 DECIDED; RM-3b a T4 candidate | Clarified (M3T2OD-R1-F2): RM-3b is an **unmeasured** candidate for evaluation during T4. It is not an accepted reference result and not a mandatory gate |

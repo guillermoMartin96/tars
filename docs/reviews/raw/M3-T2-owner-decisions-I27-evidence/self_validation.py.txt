@@ -1,0 +1,75 @@
+"""I-27 self-validation (run: python3 -I self_validation.py <repo>). Documentation checks only."""
+import re, subprocess, sys, pathlib
+repo = pathlib.Path(sys.argv[1]); BASE = "a22297d"; ORIG = "a57de3f"
+git = lambda *a: subprocess.run(["git", "-C", str(repo), *a], capture_output=True, text=True).stdout
+fails = 0
+def bad(msg):
+    global fails; fails += 1; print("FAIL:", msg)
+changed = git("diff", "--name-only", BASE).split() + git("ls-files", "--others", "--exclude-standard").split()
+added_since_orig = {}
+for f in set(git("diff", "--name-only", ORIG).split() + changed):
+    if f.endswith(".md") and not f.startswith("docs/reviews/"):
+        d = git("diff", "-U0", ORIG, "--", f)
+        added_since_orig[f] = [l[1:] for l in d.splitlines() if l.startswith("+") and not l.startswith("+++")]
+# 1. reentry: no I-26/I-27 line leaves it open unless superseded in place
+n = 0
+for f, lines in added_since_orig.items():
+    for l in lines:
+        if "reentry" in l and re.search(r"confirm|remain[s]? (a )?proposal|not explicitly superseded|\bOpen\b", l):
+            n += 1
+            ok = "I-27" in l or "Superseded" in l or "is DECIDED" in l  # a line asserting the decision is not "leaving it open"
+            print(f"[1] {'ok ' if ok else 'BAD'} {f}: ...{l[-160:]}")
+            if not ok: bad(f"reentry left open: {f}")
+print(f"[1] reentry open/confirm statements (I-26/I-27 text): {n}, each superseded in place")
+# 2. RM-3b: no I-26/I-27 text claims a measurement/acceptance/gate without a qualifier
+for f, lines in added_since_orig.items():
+    for l in lines:
+        if "RM-3b" in l:
+            claims = re.search(r"measured candidate|is measured|certified|accepted reference|mandatory", l)
+            qualified = re.search(r"unmeasured|not a mandatory|not a new mandatory|not a gate|not an accepted|No measurement|Corrected by I-27|I-27 clarification", l)
+            st = "ok " if (not claims or qualified) else "BAD"
+            print(f"[2] {st} {f}: ...{l[-150:]}")
+            if st == "BAD": bad(f"RM-3b unsupported: {f}")
+# 3/4. decided blocks byte-identical to a22297d
+def block(text, start, end):
+    i = text.index(start); j = text.index(end, i); return text[i:j]
+pairs = [
+ ("docs/decisions/requests/DR-0029-m3-t0-proposals.md", "| P1 | **DECIDED** |", "**Q-GATE"),
+ ("docs/decisions/requests/DR-0029-m3-t0-proposals.md", "**Q-GATE — amendment", "- **Superseded text"),
+ ("docs/milestones/M3-T2-authorization-packet-r1.md", "## 5. Decided design", "## 6. Validation"),
+ ("docs/milestones/M3-T2-authorization-packet-r1.md", "### 6.2 Conditional-row register", "### 6.3"),
+ ("docs/decisions/requests/DR-0025-m3-validation-strategy.md", "**Owner policy on conditional floating-point gates", "  - **Application:**"),
+]
+for f, a, b in pairs:
+    old = block(git("show", f"{BASE}:{f}"), a, b); new = block((repo / f).read_text(), a, b)
+    same = old == new
+    print(f"[3] {'identical' if same else 'CHANGED  '} {f} :: {a[:45]}")
+    if not same: bad(f"decided block changed: {f} {a}")
+for P in ["P1", "P2", "P3", "P4", "P5", "P7", "P8", "P9"]:
+    if f"| {P} | **DECIDED** |" not in (repo / pairs[0][0]).read_text(): bad(f"{P} not DECIDED")
+if "| P6 | **NOT FULLY DECIDED** |" not in (repo / pairs[0][0]).read_text(): bad("P6 status")
+print("[3] Resolution rows: P1-P5, P7-P9 DECIDED; P6 NOT FULLY DECIDED")
+# 5. append-only against a22297d (in-cell append before the closing pipe allowed)
+for f in changed:
+    d = git("diff", "-U0", BASE, "--", f)
+    for hunk in re.split(r"\n(?=@@)", d):
+        rem = [l[1:].rstrip() for l in hunk.splitlines() if l.startswith("-") and not l.startswith("---")]
+        add = [l[1:] for l in hunk.splitlines() if l.startswith("+") and not l.startswith("+++")]
+        for r in rem:
+            cell = r[:-1].rstrip() if r.endswith("|") else None
+            if not any(a.startswith(r) or (cell and a.startswith(cell) and a.rstrip().endswith("|")) for a in add):
+                bad(f"non-append change in {f}: {r[:100]}")
+print(f"[5] changed files vs {BASE}: {len(changed)}; append-only checked")
+# 6. scope
+outside = [f for f in changed if not f.startswith("docs/")]
+hist = [f for f in changed if f.startswith("docs/reviews/") and f in git("ls-tree", "-r", "--name-only", BASE).split()]
+print(f"[6] outside docs/: {outside}; pre-existing review records modified: {hist}")
+if outside or hist: bad("scope")
+# 7. links in changed markdown
+for f in changed:
+    if f.endswith(".md") and "/raw/" not in f:
+        p = repo / f
+        for t in re.findall(r"\]\(([^)#\s]+)(?:#[^)]*)?\)", p.read_text()):
+            if not t.startswith("http") and not (p.parent / t).exists(): bad(f"link {f} -> {t}")
+print("[7] links checked")
+print("RESULT:", "PASS" if fails == 0 else f"FAIL ({fails})")
