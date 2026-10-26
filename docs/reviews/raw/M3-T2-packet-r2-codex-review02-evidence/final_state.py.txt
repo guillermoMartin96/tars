@@ -1,0 +1,18 @@
+from pathlib import Path
+import hashlib,subprocess
+root=Path.cwd()
+for base in [root/'docs/reviews/raw/M3-T2-authorization-I31-evidence',root/'docs/reviews/raw/M3-T2-packet-r2-codex-review01-evidence']:
+ p=base/'SHA256SUMS'
+ if not p.exists():
+  print('manifest unavailable at',base); continue
+ ok=0; total=0
+ for line in p.read_text().splitlines():
+  if not line.strip(): continue
+  h,n=line.split(maxsplit=1); total+=1; ok+= hashlib.sha256((base/n.lstrip('*')).read_bytes()).hexdigest()==h
+ print(base.name,ok,total)
+for name in ['pog_lib','witness']:
+ (root/'review_scratch'/f'{name}.out').write_text('Helper module imported by preserved evidence and independent checks; no standalone output.\n')
+for args in [['git','rev-parse','HEAD'],['git','status','--short','--untracked-files=no'],['git','diff','--check','43a6c29','HEAD'],['git','diff','--name-only','43a6c29','HEAD']]:
+ r=subprocess.run(args,capture_output=True,text=True); print('COMMAND', ' '.join(args),'EXIT',r.returncode); print(r.stdout,end=''); print(r.stderr,end='')
+print('scratch files')
+for p in sorted((root/'review_scratch').iterdir()): print(p.name)

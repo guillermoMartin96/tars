@@ -1,0 +1,15 @@
+exact f=1.5, output=f+3 ulps: PASS f>1.5: False
+least normal +3 ulps: PASS ratio f/2^e: 1
+Traceback (most recent call last):
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-cliff-tarsier-2d0cbac0/13fee5d3-8f4b-4074-8c17-5b993d6398a2/scratchpad/r02/snap/review_scratch/boundaries.py", line 13, in <module>
+    try: L.true_height_enc(*(2.**1020,)*3)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-cliff-tarsier-2d0cbac0/13fee5d3-8f4b-4074-8c17-5b993d6398a2/scratchpad/r02/snap/review_scratch/pog_lib.py", line 353, in true_height_enc
+    zz = sqrt_enc(B2 * (1 - pq_ * pq_ / (A_M * A_M)))
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-cliff-tarsier-2d0cbac0/13fee5d3-8f4b-4074-8c17-5b993d6398a2/scratchpad/r02/snap/review_scratch/pog_lib.py", line 66, in sqrt_enc
+    raise ValueError("sqrt of a negative number")
+ValueError: sqrt of a negative number
+refusal sin ValueError
+refusal atan2 ValueError
+refusal hypot ValueError

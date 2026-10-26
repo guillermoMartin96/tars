@@ -1,0 +1,15 @@
+alpha beta eps120 eps2000 1.2212453270876738e-15 8.877691069434736e-09 9.024240508685258e-09 1.1320181723610084e-08
+hidden identical trace True height delta 64.98137000016868 SEQUENCE-NONCONFORMANT
+sin1 shifted 3 relative units interval 1.773082884660813 1.773082884660813 decision PASS
+sin1 shifted 5 relative units interval 2.9614779904389343 2.9614779904389343 decision FAIL
+sqrt boundary old accepts True exact rejects True host 0x1.fffffffffffffp-1
+shared faulty equal True height delta 55.99864490889013 PREMISE-NOT-OBSERVED (FAIL)
+scale mutant decreasing True relative defect 0.14791822419153378
+independent decimal enclosure crosschecks 200
+adversarial input (6378137.0, 0.0, -0.0) => E1-PASS
+adversarial input (6378136.999999999, 0.0, 0.0) => E1-NOT-CERTIFIED-EXTERIOR
+adversarial input (6378137.0, 5e-324, 5e-324) => E1-NOT-CERTIFIED-EXTERIOR
+adversarial input (0.0, 0.0, 6356753.314245179) => E1-PASS
+adversarial input (1.1235582092889474e+307, 1.1235582092889474e+307, 1.1235582092889474e+307) => EXCEPTION ValueError
+adversarial input (1.7976931348623157e+308, 1.7976931348623157e+308, 0.0) => OUT-OF-DOMAIN (non-finite intermediate)
+adversarial counts {'E1-PASS': 2, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'EXCEPTION ValueError': 1, 'OUT-OF-DOMAIN (non-finite intermediate)': 1}

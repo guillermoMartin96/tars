@@ -1,0 +1,5 @@
+R2-F2: the stated rule '3 ulps passes iff f > 1.5 x 2^e'
+  f = 1.5 (exact, = 1.5 x 2^0): allowance = 3.0 ulps; f > 1.5 x 2^e: False; f + 3 ulps decision PASS
+  f = 2^-1022 (least normal): allowance = 4.0 ulps; f > 1.5 x 2^e: False; f + 3 ulps decision PASS
+R2-F3: DL-2 draft on a finite-intermediate point
+  true_height_enc(1020.0, 1020.0, 1020.0) (log2 coords) raises ValueError: sqrt of a negative number -> fails closed

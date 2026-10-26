@@ -1,0 +1,18 @@
+import sys,math,traceback
+from pathlib import Path
+from fractions import Fraction as Q
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+import pog_lib as L, witness as W
+f=1.5; shifted=f
+for _ in range(3): shifted=math.nextafter(shifted,math.inf)
+print('exact f=1.5, output=f+3 ulps:',L.premise(shifted,Q(f),Q(f)),'f>1.5:',f>1.5)
+# Near the least normal value the absolute NU term supplies additional ulps.
+f=2.**-1022; shifted=f
+for _ in range(3): shifted=math.nextafter(shifted,math.inf)
+print('least normal +3 ulps:',L.premise(shifted,Q(f),Q(f)),'ratio f/2^e:',1)
+try: L.true_height_enc(*(2.**1020,)*3)
+except Exception: traceback.print_exc(file=sys.stdout)
+# Explicit bounded-oracle fail-closed checks.
+for name,args in [('sin',(3.,)),('atan2',(1.,-1.)),('hypot',(math.inf,1.))]:
+ try: print('refusal',name,L.ENC[name](*args))
+ except Exception as e: print('refusal',name,type(e).__name__)

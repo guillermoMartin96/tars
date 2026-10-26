@@ -1,0 +1,62 @@
+import sys, math, struct, inspect, random
+from pathlib import Path
+from fractions import Fraction as Q
+from decimal import Decimal as D, localcontext
+sys.path.insert(0,str(Path(__file__).resolve().parent)); sys.path.insert(0,str(Path.cwd()/'docs/science/experiments/m3-t0'))
+import pog_lib as L, witness as W, t0_model as m, t0_termination as tt
+b=tt.rounding_allowances(); a,beta=b['alpha'],b['beta_m']
+print('alpha beta eps120 eps2000',*[float(v) for v in (a,beta,a*120000+beta,a*2000000+beta)])
+class Trace:
+ def __init__(self): self.calls=[]
+ def __getattr__(self,n):
+  def f(*args):
+   v=getattr(math,n)(*args); self.calls.append((n,args,v)); return v
+  return f
+src=inspect.getsource(m.geodetic_iterative)
+def make(s,lib):
+ env=dict(m.__dict__,math=lib,hidden=math); exec(s,env); return env['geodetic_iterative']
+tr1,tr2=Trace(),Trace(); good=make(src,tr1)
+mut=make(src.replace('s, c = math.sin(lat), math.cos(lat)','s, c = math.sin(lat), math.cos(lat)\n    c = hidden.cos(lat) + 1e-5'),tr2)
+r=(m.A_WGS84+120000,0.,0.); g=good(r); bad=mut(r)
+print('hidden identical trace',tr1.calls==tr2.calls,'height delta',bad[1]-g[1],W.witness_geodetic(mut,r,a,beta)[0])
+lo,hi=L.sin_enc(1.); v=math.sin(1.)
+for n in (3,5):
+ w=v
+ for _ in range(n): w=math.nextafter(w,math.inf)
+ print('sin1 shifted',n,'relative units interval',float(abs(Q(w)-hi)/hi*2**52),float(abs(Q(w)-lo)/lo*2**52),'decision',L.premise(w,lo,hi))
+x=math.nextafter(1.,0.); print('sqrt boundary old accepts', (Q(1)-L.sqrt_enc(Q(x))[0]) <= Q(math.ulp(1.))/2,'exact rejects',not L.sqrt_is_rn(x,1.),'host',math.sqrt(x).hex())
+class Fault:
+ def __getattr__(self,n):
+  if n=='cos': return lambda t:math.cos(t)+1e-5
+  return getattr(math,n)
+fault=Fault(); shared=make(src,fault); r=tuple(m.geodetic_to_cartesian(.6,.4,400000.))
+print('shared faulty equal',W.bits(*shared(r))==W.bits(*W.twin_geodetic(*r,fault)[:2]),'height delta',shared(r)[1]-m.geodetic_iterative(r)[1],W.witness_geodetic(shared,r,a,beta,base=fault)[0])
+row=m.TABLE[0]
+def density(h,scale): return row.rho0*math.exp(-(h/1000-row.base_km)/(row.scale_km*scale))
+print('scale mutant decreasing',density(1000,2)>density(2000,2),'relative defect',density(2000,2)/density(2000,1)-1)
+# independent decimal Taylor cross-check (not a rigorous reference bound)
+rng=random.Random(20261027); checks=0
+with localcontext() as c:
+ c.prec=160
+ def dec(q): return D(q.numerator)/D(q.denominator)
+ for x in [-2.,-math.pi/2,-5e-324,0.,5e-324,math.pi/2,2.]+[rng.uniform(-2,2) for _ in range(80)]:
+  X=D(x)
+  for name,first,start in [('sin',X,1),('cos',D(1),0)]:
+   term=first; total=term
+   for k in range(1,500):
+    term *= -X*X/D((2*k+start-1)*(2*k+start)); total+=term
+    if abs(term)<D('1e-150')*max(abs(total),D('1e-400')): break
+   l,u=L.ENC[name](x); assert dec(l)<=total<=dec(u),(name,x); checks+=1
+ for x in [-800.,-744.,-1.,0.,1.,100.]+[rng.uniform(-800,100) for _ in range(20)]:
+  l,u=L.exp_enc(x); assert dec(l)<=D(x).exp()<=dec(u); checks+=1
+print('independent decimal enclosure crosschecks',checks)
+# Adversarial signed, subnormal, huge and just-inside/exterior points; never silently skip.
+counts={}
+for r in [(m.A_WGS84,0.,-0.),(math.nextafter(m.A_WGS84,0.),0.,0.),(m.A_WGS84,5e-324,5e-324),(0.,0.,m.B_WGS84+1),(2.**1020,)*3,(sys.float_info.max,sys.float_info.max,0.)]:
+ try:
+  state,info=W.witness_geodetic(m.geodetic_iterative,r,a,beta)
+  if state=='E1-PASS': assert L.e1_strict(m.geodetic_iterative(r)[1],info['L'],info['U'],a,beta)=='PASS'
+ except Exception as e: state='EXCEPTION '+type(e).__name__
+ counts[state]=counts.get(state,0)+1
+ print('adversarial input',r,'=>',state)
+print('adversarial counts',counts)

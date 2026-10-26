@@ -1,0 +1,26 @@
+"""Implementer reproduction of Review 02 findings R2-F2 and R2-F3 (I-33 §12)."""
+import math, sys
+from fractions import Fraction as Q
+sys.dont_write_bytecode = True
+sys.path.insert(0, '.')
+import pog_lib as L
+
+print("R2-F2: the stated rule '3 ulps passes iff f > 1.5 x 2^e'")
+for label, f in (("f = 1.5 (exact, = 1.5 x 2^0)", 1.5), ("f = 2^-1022 (least normal)", 2.0**-1022)):
+    F = Q(f)
+    allow = L.UF * F + L.NU
+    ulp = Q(math.ulp(f))
+    fh = f
+    for _ in range(3):
+        fh = math.nextafter(fh, math.inf)
+    d = L.premise(fh, F, F)
+    e = math.frexp(f)[1] - 1
+    print(f"  {label}: allowance = {float(allow / ulp)!r} ulps; f > 1.5 x 2^e: {F > Q(3, 2) * Q(2) ** e};"
+          f" f + 3 ulps decision {d}")
+
+print("R2-F3: DL-2 draft on a finite-intermediate point")
+r = (2.0**1020,) * 3
+try:
+    print("  enclosure", L.true_height_enc(*r))
+except ValueError as exc:
+    print(f"  true_height_enc{tuple(math.log2(v) for v in r)} (log2 coords) raises ValueError: {exc} -> fails closed")

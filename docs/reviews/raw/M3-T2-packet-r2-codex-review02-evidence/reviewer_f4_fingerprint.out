@@ -1,0 +1,89 @@
+{
+ "python": {
+  "[O] implementation": "cpython",
+  "[O] version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+  "[O] version_info": [
+   3,
+   12,
+   15,
+   "final",
+   0
+  ],
+  "[O] build": [
+   "main",
+   "Oct  3 2026 00:54:36"
+  ],
+  "[O] compiler (as reported by the interpreter)": "Clang 22.1.3 ",
+  "[O] sys.executable sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+  "[P] libpython sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+  "[O] math module location": "built into the interpreter"
+ },
+ "build_config": {
+  "CC": "cc -pthread",
+  "CFLAGS": "-fno-strict-overflow -Wsign-compare -Wunreachable-code -DNDEBUG -g -O3 -Wall -O3 -arch x86_64 -mmacosx-version-min=10.15 -Wno-nullability-completeness -Wno-expansion-to-defined -Wno-undef-prefix -fPIC",
+  "OPT": "-DNDEBUG -g -O3 -Wall",
+  "CONFIG_ARGS": "'--build=aarch64-apple-darwin' '--host=x86_64-apple-darwin' '--prefix=/install' '--with-openssl=/tmp/tmp564b51eh/tools/deps' '--with-system-expat' '--with-system-libmpdec' '--without-ensurepip' 'MODULE_BUILDTYPE=static' '--enable-loadable-sqlite-extensions' '--enable-static-libpython-for-interpreter' '--enable-shared' '--enable-optimizations' '--with-lto=full' '--with-build-python=/tmp/tmp564b51eh/tools/host/bin/python3.12' 'ac_cv_lib_intl_textdomain=no' 'MACHDEP=darwin' 'ac_sys_system=Darwin' 'ac_sys_release=24.6.0' 'ac_cv_func_ptsname_r=no' '--with-dbmliborder=ndbm' 'cross_compiling=yes' 'ac_cv_buggy_getaddrinfo=no' 'ac_cv_file__dev_ptc=no' 'ac_cv_file__dev_ptmx=no' 'ac_cv_pthread=yes' 'ac_cv_aligned_required=no' 'build_alias=aarch64-apple-darwin' 'host_alias=x86_64-apple-darwin' 'PKG_CONFIG=pkg-config --static --define-prefix' 'PKG_CONFIG_PATH=/tmp/tmp564b51eh/tools/deps/share/pkgconfig:/tmp/tmp564b51eh/tools/deps/lib/pkgconfig' 'CC=clang' 'CFLAGS=-O3 -arch x86_64 -mmacosx-version-min=10.15 -Wno-nullability-completeness -Wno-expansion-to-defined -Wno-undef-prefix -fPIC -Werror=unguarded-availability-new' 'LDFLAGS=-arch x86_64 -mmacosx-version-min=10.15 -Wl,-headerpad,40' 'CPPFLAGS=-O3 -arch x86_64 -mmacosx-version-min=10.15 -Wno-nullability-completeness -Wno-expansion-to-defined -Wno-undef-prefix -fPIC -Werror=unguarded-availability-new' 'PROFILE_TASK=-m test --pgo -j 12' 'BOLT_COMMON_FLAGS=' 'BOLT_APPLY_FLAGS='",
+  "HOST_GNU_TYPE": "x86_64-apple-darwin",
+  "MULTIARCH": "darwin",
+  "PY_CFLAGS_NODIST": "-flto=full -std=c11 -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wstrict-prototypes -Werror=implicit-function-declaration -fvisibility=hidden -fprofile-instr-use=/private/tmp/tmp564b51eh/Python-3.12.15/code.profclangd -I./Include/internal",
+  "LDFLAGS": "-arch x86_64 -mmacosx-version-min=10.15 -Wl,-headerpad,40",
+  "note": "[P] the flags CPython was built with; they do not describe the system libm's build, and LTO/PGO may change code generation"
+ },
+ "os": {
+  "[O] platform": "macOS-26.2-x86_64-i386-64bit",
+  "[O] uname (node name redacted)": [
+   "Darwin",
+   "[redacted]",
+   "25.2.0",
+   "Darwin Kernel Version 25.2.0: Tue Nov 18 21:09:34 PST 2025; root:xnu-12377.61.12~1/RELEASE_X86_64",
+   "x86_64",
+   "i386"
+  ],
+  "[P] mac_ver": [
+   "26.2",
+   "x86_64"
+  ],
+  "[P] libc_ver (empty on macOS)": [
+   "",
+   ""
+  ]
+ },
+ "libm": {
+  "[P] find_library('m')": "/usr/lib/libm.dylib",
+  "[O] sw_vers": "ProductName:\t\tmacOS\nProductVersion:\t\t26.2\nBuildVersion:\t\t25C56",
+  "[U] libm binary": "libm is part of libSystem in the dyld shared cache: no file to hash from the process; the OS build (sw_vers) is the only proxy"
+ },
+ "cpu": {
+  "[O] machine": "x86_64",
+  "[O] processor": "i386",
+  "[O] brand": "",
+  "[P] features": "",
+  "[P] leaf7 features": "",
+  "[P] arm64 FP features": "",
+  "[U] microcode / dispatch inside libm": "not observable from the process"
+ },
+ "floating_point": {
+  "[O] round-to-nearest-even: 1 + 2^-53 == 1": true,
+  "[O] ties to even: (1 + 2^-52) + 2^-53 == 1 + 2^-51": true,
+  "[O] gradual underflow: 2^-1074 > 0 and 2^-1022 / 2 > 0": true,
+  "[O] no flush-to-zero on operands: 2^-1074 * 2^52 == 2^-1022": true,
+  "[O] no FMA contraction in Python a*b + c (exact product would give 2^-60)": true,
+  "[O] sys.float_info": {
+   "mant_dig": 53,
+   "max_exp": 1024,
+   "min_exp": -1021,
+   "rounds": 1
+  },
+  "[O] float_repr_style": "short"
+ },
+ "numpy": {
+  "[O] version": "2.5.3",
+  "note": "recorded only; RQ-6 excludes NumPy from the specified sequences"
+ },
+ "[O] uv_lock_sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+ "behaviour_digest": {
+  "[O] sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+  "[O] results hashed": 7410,
+  "note": "changes iff a result on THESE arguments changes"
+ }
+}
