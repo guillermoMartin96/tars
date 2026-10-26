@@ -1,0 +1,77 @@
+ok   [1] docs/decisions/requests/DR-0029-m3-t0-proposals.md:221-227 heading and list byte-identical to 1f2ce7e (lines 221-227)
+ok   [1] I-29 correction block starts at docs/decisions/requests/DR-0029-m3-t0-proposals.md:229, immediately after the list (blank line 228)
+ok   [1] marker states: reentry DECIDED under I-26
+ok   [1] marker states: precedence DECIDED
+ok   [1] marker states: T3 implements, does not reopen
+ok   [1] marker states: other fields/payload/serialization T3 within contract
+ok   [1] marker states: change needs new owner decision
+ok   [1] marker states: superseded only insofar as reentry provisional
+ok   [1] marker states: A5-b unchanged
+    marker block:
+      **I-29 correction (2026-10-25, append-only; M3T2OD-I28-C1).** Authority: "TARS — Authorization I-29: M3 Owner Decisions: I-28-C1 Correction and Indepe
+      1. **The outcome name `reentry` is DECIDED** under I-26 (§2 P3; this DR's P3 "I-27 correction").
+      2. **The precedence `non_finite` → `reentry` → `impact` → `escape` is DECIDED.**
+      3. **T3 implements these decisions; it does not reopen them.**
+      4. The other event field names (`termination_altitude_m`, `crossing_t_s`, the method identifier), the event payload details and serialization remain T
+      5. **Any change to the decided outcome name or precedence requires a new owner decision.**
+      6. The heading's "names remain proposals until the v3 contract is designed at T3" is superseded **only insofar as it describes `reentry` as provisiona
+ok   [1] docs/decisions/requests/DR-0029-m3-t0-proposals.md: no line removed or modified (9 lines added)
+ok   [1] Resolution log: I-29 entry appended after the last entry
+ok   [2] R2-F1 marker still present at docs/milestones/M3-T0-decision-matrix.md:14
+ok   [2] R2-F1 marker still present at docs/milestones/M3-T0-decision-matrix.md:27
+ok   [2] docs/milestones/M3-T0-decision-matrix.md unchanged since 1f2ce7e
+ok   [3] docs/reviews/raw/M3-T2-owner-decisions-I27-evidence/self_validation.out:31 ends in exactly one space
+ok   [3] it is the only trailing-whitespace line of docs/reviews/raw/M3-T2-owner-decisions-I27-evidence/self_validation.out
+ok   [3] git diff --check a22297d f3ae387: exit 2, 4 lines, as the I-28 note states
+ok   [3] I-28 R2-F2 note present in the I-27 correction record
+ok   [3] I-27 evidence checksums verify (raw evidence unchanged)
+[4] ok   docs/decisions/requests/DR-0024-m3-physical-models-and-constants.md:222 -> historical Q8 context text (pre-T0); Q8 resolved via DR-0027 (I-26 note)
+[4] ok   docs/decisions/requests/DR-0024-m3-physical-models-and-constants.md:319 -> historical Q8 question text (pre-T0)
+[4] ok   docs/decisions/requests/DR-0027-m3-atmosphere-validity-boundary-and-table-residuals.md:93 -> historical A-5 question text; transitioned in the I-26 note A-5 row
+[4] ok   docs/decisions/requests/DR-0027-m3-atmosphere-validity-boundary-and-table-residuals.md:96 -> superseded by the I-26 note's 'Names' transition row, which carries the I-27 marker naming this row
+[4] ok   docs/decisions/requests/DR-0029-P1-P9-owner-briefing.md:12 -> pre-decision question text; answered 'Proposal accepted' in the answer table
+[4] ok   docs/decisions/requests/DR-0029-P1-P9-owner-decision-packet.md:173 -> pre-decision alternatives analysis
+[4] ok   docs/decisions/requests/DR-0029-m3-t0-proposals.md:21 -> summary row stating DECIDED (I-26) for the precedence
+[4] ok   docs/decisions/requests/DR-0029-m3-t0-proposals.md:77 -> false positive (stress test, 'not a proposed vehicle')
+[4] ok   docs/decisions/requests/DR-0029-m3-t0-proposals.md:221 -> I-28-C1 location: superseded by the I-29 correction block immediately after the list
+ok   [4] docs/decisions/requests/DR-0029-m3-t0-proposals.md:221: I-29 correction follows within 12 lines
+[4] ok   docs/decisions/requests/DR-0029-m3-t0-proposals.md:848 -> review-history log entry describing R1-F1
+[4] ok   docs/milestones/M3-T0-decision-matrix.md:15 -> historical options/recommendation columns of P3; no status claim; I-26/I-27 notes transition P3
+[4] ok   docs/milestones/M3-T0-decision-matrix.md:41 -> does not name `reentry`; accurate for names still T3 design (P4 cause name, event field names); examined in I-28
+[4] ok   docs/milestones/M3-T2-authorization-packet-r1.md:296 -> review-history log entry describing R1-F1
+[4] ok   docs/milestones/M3-decision-matrix.md:337 -> I-27 note stating DECIDED ('reconfirm' matched)
+[4] ok   docs/milestones/M3-open-issues-register.md:62 -> review-history log entry describing R1-F1
+[4] files scanned=24; unmarked hits=15; unclassified=0
+ok   [5] 23 other decision documents byte-identical to 1f2ce7e
+ok   [5] DR-0029 Resolution status rows (P1-P9): 9 line(s)
+      | P1 | **DECIDED** | A4-b; v̂ = V_b; κ = 0.01; clauses 1 and 2; dry-ma
+      | P2 | **DECIDED** | A5-b; run ends at the committed state; Hermite ti
+      | P3 | **DECIDED** | Precedence `non_finite` → `reentry` → `impact` →
+      | P4 | **DECIDED** | (ii) fail closed; finite h < 0 m raises a typed d
+      | P5 | **DECIDED** | Region table; top band extrapolated above 1000 km
+      | P6 | **NOT FULLY DECIDED** | Method (d) **PROVISIONALLY SELECTED**;
+      | P7 | **DECIDED** | RM-0 … RM-8; RM-8 under P1; P9 vehicles; RM-3b a
+      | P8 | **DECIDED** | (a) primary gate source within its justified doma
+      | P9 | **DECIDED** | Option (i): V1 850 kg, 15 m², C_d 2.2 (B ≈ 25.8 k
+ok   [5] P6(b) ruling not decided (packet status): 1 line(s)
+ok   [5] RM-3b unmeasured T4 candidate (I-27): 1 line(s)
+ok   [5] packet r1 report-only rows: 3 line(s)
+ok   [5] docs/decisions/requests/DR-0029-m3-t0-proposals.md minus the I-29 lines equals 1f2ce7e exactly (P1-P9 text, Q-GATE, DQ blocks unchanged)
+ok   [5] identical to a22297d (pre-I-27): docs/decisions/requests/DR-0029-m3-t0-proposals.md :: **Q-GATE — amendment
+ok   [5] identical to a22297d (pre-I-27): docs/milestones/M3-T2-authorization-packet-r1.md :: ## 5. Decided design
+ok   [5] identical to a22297d (pre-I-27): docs/milestones/M3-T2-authorization-packet-r1.md :: ### 6.2 Conditional-row register
+ok   [6] 2711 files under docs/reviews at 1f2ce7e byte-identical (I-27 and I-28 records and all raw evidence)
+ok   [6] checksums verify: docs/reviews/raw/M3-T2-owner-decisions-I26-evidence
+ok   [6] checksums verify: docs/reviews/raw/M3-T2-owner-decisions-I27-evidence
+ok   [6] checksums verify: docs/reviews/raw/M3-T2-owner-decisions-I28-evidence
+ok   [6] checksums verify: docs/reviews/raw/M3-T2-owner-decisions-codex-review01-evidence
+ok   [6] checksums verify: docs/reviews/raw/M3-T2-owner-decisions-codex-review02-evidence
+ok   [7] 3 changed files vs 1f2ce7e, all under docs/; protected paths changed: 0
+      docs/decisions/requests/DR-0029-m3-t0-proposals.md
+      docs/reviews/M3-T2-owner-decisions-I28-C1-correction.md
+      docs/reviews/raw/M3-T2-owner-decisions-I29-evidence/self_validation.py.txt
+ok   [7] protected paths changed since main fc50aed: 0
+ok   [8] relative links in changed Markdown resolve
+[9] git diff --cached --check 1f2ce7e: exit 0
+findings: R2-F1 corrected (I-28), R2-F2 corrected (I-28), I-28-C1 corrected (I-29) -- each pending the closure review
+RESULT: PASS (0 failure(s))

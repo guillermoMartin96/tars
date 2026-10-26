@@ -226,6 +226,14 @@ Every number below was measured by the T0 spike unless it is marked **[derived]*
 - the geodetic height of the committed final state;
 - a method identifier (for example `hermite_h_v1`) so the definition is versioned with the physics identity.
 
+**I-29 correction (2026-10-25, append-only; M3T2OD-I28-C1).** Authority: "TARS — Authorization I-29: M3 Owner Decisions: I-28-C1 Correction and Independent Closure Review" (owner/Tech Lead, 2026-10-25), §2. The heading and list above are kept as written. This records no new decision.
+1. **The outcome name `reentry` is DECIDED** under I-26 (§2 P3; this DR's P3 "I-27 correction").
+2. **The precedence `non_finite` → `reentry` → `impact` → `escape` is DECIDED.**
+3. **T3 implements these decisions; it does not reopen them.**
+4. The other event field names (`termination_altitude_m`, `crossing_t_s`, the method identifier), the event payload details and serialization remain T3 design responsibilities, **within the approved contract**.
+5. **Any change to the decided outcome name or precedence requires a new owner decision.**
+6. The heading's "names remain proposals until the v3 contract is designed at T3" is superseded **only insofar as it describes `reentry` as provisional**. P2's decided A5-b crossing behaviour is unchanged.
+
 **Risks**
 - Missed dips are not detected. At dt = 10 s the certified two-body bound is 0.74–0.80 m for circular orbits (perigee 80–250 km) and about 5.3–5.6 m for e = 0.04. It grows with e and with dt². For J2 + drag no bound is established; the sweep's observations are empirical (above).
 - A5-b reports a time that does not belong to a committed state, so consumers must not read it as a state.
@@ -841,3 +849,4 @@ Authorization I-12 — M3 T0 Review 09 NOTE Corrections and Independent Review 1
 - *(2026-10-25, append-only)* **I-27 corrections (Review 01 findings).** M3T2OD-R1-F1 is corrected in P3 ("I-27 correction"): `reentry` and the precedence are DECIDED, and T3 implements them without reconfirming them. M3T2OD-R1-F2 is corrected in P7 ("I-27 correction"): RM-3b is an unmeasured T4 candidate. The superseded sentences are kept, each marked in place. **No decision is added or changed.** P1–P5 and P7–P9 stay DECIDED; P6 stays NOT FULLY DECIDED. Q-GATE, DQ-1 … DQ-6 and the floating-point policy are unchanged. Matrix: `docs/reviews/M3-T2-owner-decisions-review-01-corrections.md`.
 
 - *(2026-10-25, append-only)* **Independent Review 02 (Codex, at `f3ae387`): PASS**, with no BLOCKER or MAJOR finding. Two MINOR findings are ACCEPTED and **not applied** (I-27 §11): M3T2OD-R2-F1, two pre-I-26 cells in `M3-T0-decision-matrix.md` (lines 14 and 27) still call `reentry` a proposal without an in-place marker; M3T2OD-R2-F2, the `git diff --check` description in the I-27 correction record omits a trailing space in `self_validation.out:31`. Record: `docs/reviews/M3-T2-owner-decisions-review-02.md`. Nothing is approved by the PASS.
+- *(2026-10-25, append-only)* **I-29 correction (M3T2OD-I28-C1).** The P2 list of proposed outcome and fields (T0 text) named `reentry` under "names remain proposals until … T3" without a local marker. A clarification now follows that list in P2: `reentry` and the precedence are DECIDED (I-26), T3 implements them without reopening them, and other field names, payload details and serialization remain T3 design within the approved contract. No decision changes. Record: `docs/reviews/M3-T2-owner-decisions-I28-C1-correction.md`.
