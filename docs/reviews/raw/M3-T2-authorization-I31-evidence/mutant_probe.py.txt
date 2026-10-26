@@ -1,0 +1,82 @@
+"""I-31 research probe (NOT T2 code): would an eps_h gate (E1, LIBM_ULP = 2) against the
+trig-free oracle kill plausible geodetic-height mutants? Each mutant is a copy of the T0
+path (alpha) sequence with one change. Same points as premise_probe.py.
+Usage: python -I mutant_probe.py <t0_dir>"""
+import math, sys
+from fractions import Fraction
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+import t0_model as m  # noqa: E402
+import t0_oracle as o  # noqa: E402
+import t0_termination as tt  # noqa: E402
+
+E1 = tt.rounding_allowances()
+ALPHA, BETA = Fraction(E1["alpha"]), Fraction(E1["beta_m"])
+A, E2 = m.A_WGS84, m.E2_WGS84
+
+
+def seq(r, a=A, e2=E2, iters=60, tol=1e-15, start="geodetic", datum=0.0, final_e2=None, swap=False):
+    x, y, z = (float(c) for c in r)
+    p = math.hypot(x, y)
+    lat = math.atan2(z, p * (1.0 - e2)) if start == "geodetic" else math.atan2(z, p)
+    for _ in range(iters):
+        s = math.sin(lat)
+        n = a / math.sqrt(1.0 - e2 * s * s)
+        new = math.atan2(z + e2 * n * s, p)
+        done = abs(new - lat) <= tol
+        lat = new
+        if done:
+            break
+    s, c = math.sin(lat), math.cos(lat)
+    fe2 = e2 if final_e2 is None else final_e2
+    if swap:
+        s, c = c, s
+    return p * c + z * s - a * math.sqrt(1.0 - fe2 * s * s) + datum
+
+
+MUTANTS = {
+    "reference (no change)": {},
+    "spherical height (e2 = 0)": {"e2": 0.0},
+    "flattening dropped in final height only": {"final_e2": 0.0},
+    "datum offset +1 mm": {"datum": 1e-3},
+    "datum offset +1 um": {"datum": 1e-6},
+    "datum offset +1e-7 m": {"datum": 1e-7},
+    "iteration truncated to 1": {"iters": 1},
+    "iteration truncated to 2": {"iters": 2},
+    "iteration truncated to 3": {"iters": 3},
+    "stop tolerance 1e-9 rad": {"tol": 1e-9},
+    "geocentric start, 1 iteration": {"start": "geocentric", "iters": 1},
+    "semi-major axis + 1 m": {"a": A + 1.0},
+    "e2 of the sphere-flattening mix-up (f instead of e2)": {"e2": m.F_WGS84},
+    "sin/cos swapped in final height": {"swap": True},
+}
+
+
+def points():
+    a, b = m.A_WGS84, m.B_WGS84
+    pts = []
+    for h in (1.0, 1e3, 8e4, 1.2e5, 2.5e5, 4e5, 1e6, 2e6):
+        pts += [np.array([a + h, 0.0, 0.0]), np.array([0.0, 0.0, b + h]), np.array([0.0, 0.0, -(b + h)])]
+    rng = np.random.default_rng(20261026)
+    for _ in range(600):
+        lat = rng.uniform(-math.pi / 2, math.pi / 2)
+        lon = rng.uniform(-math.pi, math.pi)
+        h = float(10 ** rng.uniform(0, math.log10(2e6)))
+        pts.append(m.geodetic_to_cartesian(lat, lon, h))
+    return pts
+
+
+pts = points()
+truth = [Fraction(o.true_height(r)) for r in pts]
+print(f"points: {len(pts)}")
+for name, kw in MUTANTS.items():
+    killed = 0
+    worst = 0.0
+    for r, h in zip(pts, truth):
+        e = abs(Fraction(seq(r, **kw)) - h)
+        ratio = float(e / (ALPHA * h + BETA))
+        worst = max(worst, ratio)
+        killed += e > ALPHA * h + BETA
+    print(f"{name:52s} points failing the eps_h gate: {killed:4d}/{len(pts)}   max |err|/eps_h = {worst:.3e}")

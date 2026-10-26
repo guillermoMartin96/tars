@@ -1,0 +1,12 @@
+host: Darwin x86_64, Python 3.12.15
+E1 (LIBM_ULP=2): alpha=1.221e-15, beta=8.878e-09 m; eps_h(120 km)=9.024e-09 m, eps_h(2000 km)=1.132e-08 m
+points (true height >= 0): 631; traced calls: 11867; premise violations: 0
+max relative error per function, units of 2^-52 (A-FP-2 allows 2; sqrt is checked for correct rounding):
+   atan2  0.490
+   cos    0.766
+   hypot  0.432
+   sin    0.719
+   sqrt   0.250
+points whose every call met the premise (gate-eligible): 631/631
+max |h^ - h_true| = 1.920e-09 m; max |h^ - h_true| / eps_h = 0.2162
+gate failures among eligible points: 0
