@@ -70,3 +70,5 @@ The output is in the evidence, check [4].
 - **Evidence directory:** `docs/reviews/raw/M3-T2-owner-decisions-I29-evidence/`.
 - **Contents:** `self_validation.py.txt`, `self_validation.out` and `SHA256SUMS`.
 - **Whitespace check:** check [9] records the exit status of `git diff --cached --check 1f2ce7e` exactly as returned.
+
+- *(2026-10-25, append-only)* **Independent closure review (Codex, at `69aa2e6`): PASS**, with no finding at any severity. R2-F1, R2-F2 and I-28-C1 are confirmed RESOLVED. Record: `docs/reviews/M3-T2-owner-decisions-review-closure.md`. Nothing is accepted or authorized by the PASS.
