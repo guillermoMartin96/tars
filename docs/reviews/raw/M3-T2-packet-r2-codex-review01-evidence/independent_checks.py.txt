@@ -1,0 +1,182 @@
+import ast
+import collections
+import hashlib
+import inspect
+import math
+from pathlib import Path
+import struct
+import sys
+import sysconfig
+import platform
+from decimal import Decimal as D, localcontext
+from fractions import Fraction as F
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(ROOT / 'docs/science/experiments/m3-t0'))
+import t0_model as m
+import t0_termination as tt
+import t0_oracle as oracle
+
+evidence = ROOT / 'docs/reviews/raw/M3-T2-authorization-I31-evidence'
+source = ROOT.parent / 'inputs/mathmodule.c'
+print('mathmodule.c SHA256', hashlib.sha256(source.read_bytes()).hexdigest())
+for line in (evidence / 'SHA256SUMS').read_text().splitlines():
+    digest, name = line.split(maxsplit=1)
+    name = name.lstrip('*')
+    print('evidence checksum', name, hashlib.sha256((evidence/name).read_bytes()).hexdigest() == digest)
+for name in ['premise_probe', 'mutant_probe', 'hypot_probe']:
+    print('output byte-identical', name, (evidence/(name+'.out')).read_bytes() == (ROOT/'review_scratch'/(name+'.out')).read_bytes())
+
+constants = tt.rounding_allowances()
+alpha, beta = F(constants['alpha']), F(constants['beta_m'])
+print('alpha', float(alpha), 'beta_m', float(beta))
+print('environment', sys.version, platform.platform(), platform.libc_ver(), platform.mac_ver())
+print('compiler', sysconfig.get_config_var('CC'))
+print('CFLAGS', sysconfig.get_config_var('CFLAGS'))
+print('CONFIG_ARGS', sysconfig.get_config_var('CONFIG_ARGS'))
+for h in [0, 120000, 2000000]:
+    print('epsilon', h, float(alpha*h+beta))
+
+# Load the preserved probe definitions without executing its main.
+tree = ast.parse((ROOT/'review_scratch/premise_probe.py').read_text())
+tree.body = [n for n in tree.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Call) and isinstance(n.value.func, ast.Name) and n.value.func.id == 'main')]
+sys.argv = ['independent_checks', str(ROOT/'docs/science/experiments/m3-t0')]
+ns = {}
+exec(compile(tree, 'preserved_probe', 'exec'), ns)
+worst_ratio = (-1, None)
+worst_error = (-1, None)
+trace_differences = 0
+for kind, point in ns['points']():
+    plain = m.geodetic_iterative(point)
+    tracer = ns['Tracer']()
+    real = m.math
+    m.math = tracer
+    try:
+        observed = m.geodetic_iterative(point)
+    finally:
+        m.math = real
+    trace_differences += struct.pack('dd', *plain) != struct.pack('dd', *observed)
+    try:
+        height = F(oracle.true_height(point))
+    except ValueError:
+        continue
+    error = abs(F(plain[1])-height)
+    ratio = float(error/(alpha*height+beta))
+    row = (kind, tuple(map(float, point)), float(height), float(error), float(alpha*height+beta))
+    if ratio > worst_ratio[0]:
+        worst_ratio = (ratio, row)
+    if float(error) > worst_error[0]:
+        worst_error = (float(error), row)
+print('worst per-point ratio', worst_ratio)
+print('largest absolute error', worst_error)
+print('instrumented vs plain tuple-bit differences', trace_differences)
+for limit in [2, 3]:
+    limit_env = dict(m.__dict__)
+    exec(inspect.getsource(m.geodetic_iterative).replace('range(60)', f'range({limit})'), limit_env)
+    differing_lat = differing_height = 0
+    for _, point in ns['points']():
+        original = m.geodetic_iterative(point)
+        shortened = limit_env['geodetic_iterative'](point)
+        differing_lat += struct.pack('d', original[0]) != struct.pack('d', shortened[0])
+        differing_height += struct.pack('d', original[1]) != struct.pack('d', shortened[1])
+    print('truncated', limit, 'latitude bit differences', differing_lat, 'height bit differences', differing_height)
+
+# Three ulps need not violate the stated 2*2^-52 relative allowance.
+x = 1.0
+got = math.sin(x)
+for _ in range(3):
+    got = math.nextafter(got, math.inf)
+relative, permitted = ns['premise']('sin', (x,), got)
+print('sin(1) plus 3 ulps', got.hex(), 'relative units', relative, 'A-FP-2 passes', permitted)
+sqrt_arg = math.nextafter(1.0, 0.0)
+relative, permitted = ns['premise']('sqrt', (sqrt_arg,), 1.0)
+with localcontext() as ctx:
+    ctx.prec = 100
+    expected_sqrt = float(D(sqrt_arg).sqrt())
+print('incorrect sqrt at nextdown(1): injected 1.0, correct', expected_sqrt.hex(),
+      'actual math.sqrt', math.sqrt(sqrt_arg).hex(), 'probe CR predicate passes', permitted)
+
+# Counts (even per-function counts and order) cannot establish data flow.
+fn_source = inspect.getsource(m.geodetic_iterative)
+fn_source = fn_source.replace('c = math.sin(lat), math.cos(lat)', 'c = math.sin(lat), (math.cos(lat), hidden_cos(lat))[1]')
+env = dict(m.__dict__)
+env['hidden_cos'] = lambda x: math.cos(x) + 1e-5
+exec(fn_source, env)
+point = (m.A_WGS84+120000, 0.0, 0.0)
+good_trace, bad_trace = ns['Tracer'](), ns['Tracer']()
+real = m.math
+m.math = good_trace
+try:
+    good = m.geodetic_iterative(point)
+finally:
+    m.math = real
+env['math'] = bad_trace
+bad = env['geodetic_iterative'](point)
+print('masked hidden cosine: same entire observed trace', good_trace.calls == bad_trace.calls,
+      'height difference m', bad[1]-good[1])
+print('masked hidden cosine: count', len(bad_trace.calls), collections.Counter(c[0] for c in bad_trace.calls))
+
+# A conformance twin using the same erroneous math service agrees bitwise.
+class WrongMath(ns['Tracer']):
+    def __getattr__(self, name):
+        base = super().__getattr__(name)
+        if name == 'cos':
+            return lambda x: base(x)+1e-5
+        return base
+
+wrong_math = WrongMath()
+m.math = wrong_math
+try:
+    component = m.geodetic_iterative(point)
+    twin = m.geodetic_iterative(point)
+finally:
+    m.math = real
+print('shared defective math: conformance tuple bits equal',
+      struct.pack('dd', *component) == struct.pack('dd', *twin),
+      'height error m', component[1]-120000)
+
+# C-internal sqrt calls are invisible to the Python module proxy. The aggregate
+# hypot premise, however, can cover the whole call without inspecting its internals.
+t = ns['Tracer']()
+print('hypot aggregate', t.hypot(3.0, 4.0), 'trace names', [c[0] for c in t.calls])
+print('pow result', 1.25**3, 'trace unchanged', [c[0] for c in t.calls])
+
+def bits(x):
+    return struct.pack('>d', x)
+
+tiny = math.ulp(0.0)
+values = [0., -0., tiny, -tiny, 2**-1022, -(2**-1022), 1., -1., 1e200, -1e200,
+          sys.float_info.max, -sys.float_info.max, math.inf, -math.inf,
+          struct.unpack('>d', bytes.fromhex('7ff8000000000123'))[0]]
+even_fail = swap_fail = 0
+for x in values:
+    for y in values:
+        baseline = bits(math.hypot(x,y))
+        swap_fail += baseline != bits(math.hypot(y,x))
+        even_fail += any(baseline != bits(math.hypot(sx*x,sy*y)) for sx in [-1,1] for sy in [-1,1])
+print('adversarial hypot pairs', len(values)**2, 'even failures', even_fail, 'swap failures', swap_fail)
+
+# A monotonicity test cannot detect a positive exponent scale error.
+band = m.TABLE[0]
+h1, h2 = 100., 200.
+rho0, scale = band.rho0, band.scale_km
+correct = [rho0*math.exp(-(h/1000-band.base_km)/scale) for h in [h1,h2]]
+wrong = [rho0*math.exp(-(h/1000-band.base_km)/(2*scale)) for h in [h1,h2]]
+print('scale doubled: correct densities', correct, 'wrong densities', wrong,
+      'both monotonic', correct[0]>=correct[1] and wrong[0]>=wrong[1])
+
+# Oracle-uncertainty direction: the packet is an outer compatibility enclosure,
+# not a sufficient certificate of the strict original E1 bound.
+ref, delta = F(120000), beta/F(10**6)
+htrue = ref-delta
+reported = ref+(alpha*(ref+delta)+beta+delta)
+print('outer height inequality can pass at equality while E1 fails by m',
+      float(abs(reported-htrue)-(alpha*htrue+beta)))
+
+# No-overflow is essential even when all three input coordinates are finite.
+try:
+    result = m.geodetic_iterative((sys.float_info.max, sys.float_info.max, 0.0))
+    print('finite huge point inverse', result)
+except Exception as exc:
+    print('finite huge point exception', type(exc).__name__, str(exc))

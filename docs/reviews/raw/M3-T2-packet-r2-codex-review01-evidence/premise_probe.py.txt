@@ -1,0 +1,141 @@
+"""I-31 research probe (NOT T2 code, NOT evidence for any gate): feasibility of a
+"premise-observed" geodetic-height gate.
+
+For each test point, run the T0 spike's `geodetic_iterative` (path (alpha), DQ-1) with every
+`math` call traced, then:
+  1. premise: check each traced sin/cos/atan2/hypot result against a 50-digit decimal
+     reference (T0's t0_height_error functions) for A-FP-2's statement,
+     |got - exact| <= LIBM_ULP * 2^-52 * |exact| + LIBM_ULP * 2^-1074  (LIBM_ULP = 2);
+     sqrt is checked for correct rounding (A-FP-1);
+  2. accuracy: |h^ - h_true| against E1's eps_h(h_true) = alpha h + beta (T0
+     rounding_allowances, LIBM_ULP = 2), with h_true from T0's trig-free foot-point oracle.
+The decimal references here carry no written error bound (their series stop when the sum
+stops changing), so this probe demonstrates feasibility only. Host: whatever runs it.
+Usage: python -I premise_probe.py <t0_dir>
+"""
+import math, platform, sys
+from decimal import Decimal as D, localcontext
+from fractions import Fraction
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+import t0_model as m  # noqa: E402
+import t0_oracle as o  # noqa: E402
+import t0_termination as tt  # noqa: E402
+import t0_height_error as he  # noqa: E402
+
+E1 = tt.rounding_allowances()
+ALPHA, BETA = Fraction(E1["alpha"]), Fraction(E1["beta_m"])
+UF, NU = Fraction(tt.LIBM_ULP, 2**52), Fraction(tt.LIBM_ULP, 2**1074)
+
+
+class Tracer:
+    def __init__(self):
+        self.calls = []
+
+    def __getattr__(self, name):
+        f = getattr(math, name)
+        if name not in ("sin", "cos", "atan2", "hypot", "sqrt"):
+            return f
+        def wrapped(*args):
+            out = f(*args)
+            self.calls.append((name, args, out))
+            return out
+        return wrapped
+
+
+def ref(name, args):
+    with localcontext() as c:
+        c.prec = he.PREC
+        a = [D(x) for x in args]
+        if name == "sin":
+            return he.d_sin(a[0])
+        if name == "cos":
+            return he.d_cos(a[0])
+        if name == "atan2":
+            return he.d_atan2(a[0], a[1])
+        if name == "hypot":
+            return (a[0] ** 2 + a[1] ** 2).sqrt()
+        return a[0].sqrt()
+
+
+def premise(name, args, out):
+    """Return the relative error in units of 2^-52 (for reporting) and whether the
+    A-FP-2 (or, for sqrt, correct-rounding) premise holds for this call."""
+    r = ref(name, args)
+    err = abs(Fraction(out) - Fraction(r))
+    rel = float(err / (abs(Fraction(r)) * Fraction(1, 2**52))) if r != 0 else 0.0
+    if name == "sqrt":
+        # correctly rounded: |out - exact| <= half an ulp of out
+        ulp = Fraction(math.ulp(out))
+        return rel, err <= ulp / 2
+    return rel, err <= UF * abs(Fraction(r)) + NU
+
+
+def points():
+    a, b = m.A_WGS84, m.B_WGS84
+    pts = []
+    for h in (0.0, 1.0, 1e3, 8e4, 1.2e5, 2.5e5, 4e5, 1e6, 2e6):
+        pts += [("equator", np.array([a + h, 0.0, 0.0])), ("axis+", np.array([0.0, 0.0, b + h])),
+                ("axis-", np.array([0.0, 0.0, -(b + h)]))]
+    rng = np.random.default_rng(20261026)
+    for _ in range(600):
+        lat = rng.uniform(-math.pi / 2, math.pi / 2)
+        lon = rng.uniform(-math.pi, math.pi)
+        h = float(10 ** rng.uniform(0, math.log10(2e6)))
+        pts.append(("forward", m.geodetic_to_cartesian(lat, lon, h)))
+    for d in (1e-3, 1e-6, 1e-9):  # near-axis and near-equator
+        pts += [("near-axis", m.geodetic_to_cartesian(math.pi / 2 - d, 0.3, 4e5)),
+                ("near-equator", m.geodetic_to_cartesian(d, 1.1, 4e5))]
+    return pts
+
+
+def main():
+    real = m.math
+    worst = {}
+    n_calls = n_viol = n_pts = gated = 0
+    max_ratio, max_err = 0.0, 0.0
+    fails = []
+    for kind, r in points():
+        tr = Tracer()
+        m.math = tr
+        try:
+            lat, h_hat = m.geodetic_iterative(r)
+        finally:
+            m.math = real
+        try:
+            h_true = Fraction(o.true_height(r))
+        except ValueError:  # inside the ellipsoid: negative height, report-only under P8
+            continue
+        n_pts += 1
+        ok_all = True
+        for name, args, out in tr.calls:
+            rel, ok = premise(name, args, out)
+            n_calls += 1
+            worst[name] = max(worst.get(name, 0.0), rel)
+            if not ok:
+                n_viol += 1; ok_all = False
+        eps = ALPHA * h_true + BETA
+        err = abs(Fraction(h_hat) - h_true)
+        ratio = float(err / eps)
+        max_ratio, max_err = max(max_ratio, ratio), max(max_err, float(err))
+        if ok_all:
+            gated += 1
+            if err > eps:
+                fails.append((kind, float(h_true), float(err), float(eps)))
+    print(f"host: {platform.system()} {platform.machine()}, Python {platform.python_version()}")
+    print(f"E1 (LIBM_ULP={tt.LIBM_ULP}): alpha={float(ALPHA):.3e}, beta={float(BETA):.3e} m;"
+          f" eps_h(120 km)={float(ALPHA * 120000 + BETA):.3e} m, eps_h(2000 km)={float(ALPHA * 2000000 + BETA):.3e} m")
+    print(f"points (true height >= 0): {n_pts}; traced calls: {n_calls}; premise violations: {n_viol}")
+    print("max relative error per function, units of 2^-52 (A-FP-2 allows 2; sqrt is checked for correct rounding):")
+    for k in sorted(worst):
+        print(f"   {k:6s} {worst[k]:.3f}")
+    print(f"points whose every call met the premise (gate-eligible): {gated}/{n_pts}")
+    print(f"max |h^ - h_true| = {max_err:.3e} m; max |h^ - h_true| / eps_h = {max_ratio:.4f}")
+    print(f"gate failures among eligible points: {len(fails)}")
+    for f in fails[:10]:
+        print("   ", f)
+
+
+main()

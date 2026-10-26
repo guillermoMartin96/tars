@@ -1,0 +1,35 @@
+mathmodule.c SHA256 436a01da195e3c2b9576a4b9188d5d62e9883e62e74f2d60bc55194bfce98281
+evidence checksum README.md True
+evidence checksum premise_probe.py.txt True
+evidence checksum premise_probe.out True
+evidence checksum mutant_probe.py.txt True
+evidence checksum mutant_probe.out True
+evidence checksum hypot_probe.py.txt True
+evidence checksum hypot_probe.out True
+output byte-identical premise_probe True
+output byte-identical mutant_probe True
+output byte-identical hypot_probe True
+alpha 1.2212453270876738e-15 beta_m 8.877691069434736e-09
+environment 3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ] macOS-26.2-x86_64-i386-64bit ('', '') ('26.2', ('', '', ''), 'x86_64')
+compiler cc -pthread
+CFLAGS -fno-strict-overflow -Wsign-compare -Wunreachable-code -DNDEBUG -g -O3 -Wall -O3 -arch x86_64 -mmacosx-version-min=10.15 -Wno-nullability-completeness -Wno-expansion-to-defined -Wno-undef-prefix -fPIC
+CONFIG_ARGS '--build=aarch64-apple-darwin' '--host=x86_64-apple-darwin' '--prefix=/install' '--with-openssl=/tmp/tmp564b51eh/tools/deps' '--with-system-expat' '--with-system-libmpdec' '--without-ensurepip' 'MODULE_BUILDTYPE=static' '--enable-loadable-sqlite-extensions' '--enable-static-libpython-for-interpreter' '--enable-shared' '--enable-optimizations' '--with-lto=full' '--with-build-python=/tmp/tmp564b51eh/tools/host/bin/python3.12' 'ac_cv_lib_intl_textdomain=no' 'MACHDEP=darwin' 'ac_sys_system=Darwin' 'ac_sys_release=24.6.0' 'ac_cv_func_ptsname_r=no' '--with-dbmliborder=ndbm' 'cross_compiling=yes' 'ac_cv_buggy_getaddrinfo=no' 'ac_cv_file__dev_ptc=no' 'ac_cv_file__dev_ptmx=no' 'ac_cv_pthread=yes' 'ac_cv_aligned_required=no' 'build_alias=aarch64-apple-darwin' 'host_alias=x86_64-apple-darwin' 'PKG_CONFIG=pkg-config --static --define-prefix' 'PKG_CONFIG_PATH=/tmp/tmp564b51eh/tools/deps/share/pkgconfig:/tmp/tmp564b51eh/tools/deps/lib/pkgconfig' 'CC=clang' 'CFLAGS=-O3 -arch x86_64 -mmacosx-version-min=10.15 -Wno-nullability-completeness -Wno-expansion-to-defined -Wno-undef-prefix -fPIC -Werror=unguarded-availability-new' 'LDFLAGS=-arch x86_64 -mmacosx-version-min=10.15 -Wl,-headerpad,40' 'CPPFLAGS=-O3 -arch x86_64 -mmacosx-version-min=10.15 -Wno-nullability-completeness -Wno-expansion-to-defined -Wno-undef-prefix -fPIC -Werror=unguarded-availability-new' 'PROFILE_TASK=-m test --pgo -j 12' 'BOLT_COMMON_FLAGS=' 'BOLT_APPLY_FLAGS='
+epsilon 0 8.877691069434736e-09
+epsilon 120000 9.024240508685258e-09
+epsilon 2000000 1.1320181723610084e-08
+worst per-point ratio (0.216247217000713, ('forward', (-3518839.21493463, -3939490.952348246, 3563019.310080782), 145.0304751527136, 1.9198142883865285e-09, 8.877868187224802e-09))
+largest absolute error (1.9198142883865285e-09, ('forward', (-3518839.21493463, -3939490.952348246, 3563019.310080782), 145.0304751527136, 1.9198142883865285e-09, 8.877868187224802e-09))
+instrumented vs plain tuple-bit differences 0
+truncated 2 latitude bit differences 566 height bit differences 296
+truncated 3 latitude bit differences 453 height bit differences 250
+sin(1) plus 3 ulps 0x1.aed548f090cf1p-1 relative units 1.773082884660813 A-FP-2 passes True
+incorrect sqrt at nextdown(1): injected 1.0, correct 0x1.fffffffffffffp-1 actual math.sqrt 0x1.fffffffffffffp-1 probe CR predicate passes True
+masked hidden cosine: same entire observed trace True height difference m 64.98137000016868
+masked hidden cosine: count 8 Counter({'atan2': 2, 'sin': 2, 'sqrt': 2, 'hypot': 1, 'cos': 1})
+shared defective math: conformance tuple bits equal True height error m 64.98137000016868
+hypot aggregate 5.0 trace names ['hypot']
+pow result 1.953125 trace unchanged ['hypot']
+adversarial hypot pairs 225 even failures 0 swap failures 0
+scale doubled: correct densities [1.208217143351689, 1.1916642167256455] wrong densities [1.2165796318391242, 1.208217143351689] both monotonic True
+outer height inequality can pass at equality while E1 fails by m 1.7755382138869496e-14
+finite huge point inverse (0.0, inf)

@@ -1,0 +1,35 @@
+"""I-31 research probe (NOT T2 code): CPython math.hypot under argument negation (evenness,
+which the 3.12 source makes exact via fabs) and under argument swap (symmetry, which the
+source does not make exact: csum = fl(fl(1 + x^2_hi) + y^2_hi) depends on order).
+Searches for swap counterexamples among random and adversarial pairs. A count of zero is a
+sample, not a proof. Usage: python -I hypot_probe.py"""
+import math, platform, random, sys
+
+rng = random.Random(20261026)
+N = 2_000_000
+neg_fail = swap_fail = 0
+examples = []
+
+
+def pairs():
+    for _ in range(N // 2):  # geodetic-like coordinates, metres
+        yield rng.uniform(-7e6, 7e6), rng.uniform(-7e6, 7e6)
+    for _ in range(N // 4):  # comparable magnitudes, differing in the last bits
+        x = rng.uniform(1.0, 2.0)
+        yield x, math.nextafter(x, 3.0) if rng.random() < 0.5 else x * (1 + rng.uniform(-1e-8, 1e-8))
+    for _ in range(N // 4):  # widely separated magnitudes
+        yield rng.uniform(0.5, 1.0) * 2.0 ** rng.randint(-60, 60), rng.uniform(0.5, 1.0) * 2.0 ** rng.randint(-60, 60)
+
+
+for x, y in pairs():
+    h = math.hypot(x, y)
+    if math.hypot(-x, y) != h or math.hypot(x, -y) != h or math.hypot(-x, -y) != h:
+        neg_fail += 1
+    if math.hypot(y, x) != h:
+        swap_fail += 1
+        if len(examples) < 5:
+            examples.append((x.hex(), y.hex(), h.hex(), math.hypot(y, x).hex()))
+print(f"host: {platform.system()} {platform.machine()}, {sys.version.split()[0]}")
+print(f"pairs: {N}; negation (evenness) mismatches: {neg_fail}; swap (symmetry) mismatches: {swap_fail}")
+for e in examples:
+    print("   swap counterexample (x, y, hypot(x,y), hypot(y,x)):", e)

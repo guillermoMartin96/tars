@@ -1,0 +1,15 @@
+import hashlib
+from pathlib import Path
+import subprocess
+
+root = Path(__file__).resolve().parents[1]
+for args in [('rev-parse', 'HEAD'), ('status', '--porcelain', '--untracked-files=no'),
+             ('diff', '--exit-code'), ('diff', '--cached', '--exit-code')]:
+    result = subprocess.run(['git', *args], cwd=root, text=True, capture_output=True)
+    print('git', *args, 'exit', result.returncode)
+    print(result.stdout, end='')
+    print(result.stderr, end='')
+print('CI: supplied claim of four green jobs at pinned HEAD; not independently queried (offline).')
+for p in sorted((root/'review_scratch').iterdir()):
+    if p.is_file() and p.name not in ['final_state.out', 'SHA256SUMS']:
+        print(hashlib.sha256(p.read_bytes()).hexdigest(), p.name)
