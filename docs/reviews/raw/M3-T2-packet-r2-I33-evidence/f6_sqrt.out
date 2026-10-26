@@ -1,0 +1,14 @@
+=== Review 01 F6 reproduced ===
+  a = nextdown(1) = 0x1.fffffffffffffp-1; host math.sqrt(a) = 0x1.fffffffffffffp-1
+  wrong result 1.0: I-31 predicate accepts it: True; exact RN test accepts it: False
+  correct result nextdown(1): I-31 predicate True; exact RN test True
+  why: the cell of 1.0 starts at (nextdown(1) + 1)/2 = 1 - 2^-54, squared 1 - 2^-53 + 2^-108 > a = 1 - 2^-53: True
+
+=== Uniqueness: of r and its 2 neighbours on each side, exactly one passes ===
+  5198 arguments (powers of two and neighbours from 2^-1074 to 2^1023, 4000 random): exactly one passing candidate in 5198; host sqrt correctly rounded in 5198
+  wrong candidates the I-31 predicate accepts on the same set: 146
+
+=== Ties and special values ===
+  sqrt(+0) = +0: True; sqrt(-0) = -0: True; sqrt(-0) -> +0 rejected: True
+  sqrt(4) = 2 exactly: True; 2 + 1 ulp rejected: True
+  squared midpoint representable as binary64: False (one instance of the general argument above)

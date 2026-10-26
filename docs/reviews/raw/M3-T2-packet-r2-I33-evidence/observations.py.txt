@@ -1,0 +1,137 @@
+"""I-33 evidence (research, NOT T2 evidence) for the Review 01 additional observations:
+  A  comparison semantics: packet r2's outer inequality vs strict E1
+  B  overflow: finite inputs with non-finite intermediates; a sufficient finite domain
+  C  oracle zeros: exact-zero references and zero crossings in DQ-1's call domain
+  D  rounded vs exact E1 coefficients
+Usage: python -I observations.py <t0_dir>
+"""
+import itertools
+import math
+import sys
+from fractions import Fraction as Q
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+import t0_model as m  # noqa: E402
+import t0_termination as tt  # noqa: E402
+import pog_lib as L  # noqa: E402
+import witness as W  # noqa: E402
+
+E1 = tt.rounding_allowances()
+ALPHA, BETA = E1["alpha"], E1["beta_m"]
+
+
+def obs_a():
+    print("=== A. Comparison semantics ===")
+    ref = Q(120000)
+    delta = BETA / 10**6
+    h_true = ref - delta
+    reported_exact = ref + ALPHA * (ref + delta) + BETA + delta
+    print("  Review 01 construction (exact rationals): true h = h_ref - d, reported = h_ref + eps(h_ref + d) + d,"
+          " d = 1e-6 beta")
+    print(f"    packet r2 outer rule admits it: {abs(reported_exact - ref) <= ALPHA * (ref + delta) + BETA + delta};"
+          f" strict E1 at the true height violated by {float(abs(reported_exact - h_true) - (ALPHA * h_true + BETA)):.6e} m")
+    g = lambda hh, rep: abs(rep - hh) - ALPHA * hh + 0 - BETA  # noqa: E731
+    print(f"    strict decision (convex endpoints): g(L) = {float(g(ref - delta, reported_exact)):+.3e} m,"
+          f" g(U) = {float(g(ref + delta, reported_exact)):+.3e} m -> not PASS")
+    print("  Binary64 outputs: at 120 km one ulp (1.46e-11 m) exceeds the 1.78e-14 m gap, so the two rules")
+    print("  differ only where ulp(h) is finer. Near h_ref = 1 m (ulp 2.2e-16 m), d = 1e-6 beta:")
+    ref = Q(1)
+    lo, hi = ref - delta, ref + delta
+    f = float(ref + ALPHA * ref + BETA)
+    while abs(Q(f) - ref) <= ALPHA * (ref + delta) + BETA + delta:
+        f = math.nextafter(f, math.inf)
+    f = math.nextafter(f, -math.inf)  # the largest double the outer rule admits
+    outer_n = strict_pass = 0
+    x = f
+    states = []
+    while abs(Q(x) - ref) <= ALPHA * (ref + delta) + BETA + delta:
+        outer_n += 1
+        st = L.e1_strict(x, lo, hi, ALPHA, BETA)
+        states.append(st)
+        if st == "PASS":
+            break
+        x = math.nextafter(x, -math.inf)
+    print(f"    doubles admitted by the outer rule above the largest strict PASS: {states.count('INCONCLUSIVE')}"
+          f" (strict: INCONCLUSIVE, i.e. fail closed); first strict PASS reached after {outer_n} steps down")
+    print("  With the DL-2 draft the enclosure width is <= 2.8e-92 m (pog_pipeline.out), so the band where")
+    print("  strict E1 is INCONCLUSIVE is that narrow in practice; INCONCLUSIVE fails closed.")
+
+
+def obs_b():
+    print("\n=== B. Overflow ===")
+    big = sys.float_info.max
+    for r in ((big, big, 0.0), (big, 0.0, big), (2.0**1023, 0.0, 0.0), (2.0**1023, 2.0**1023, 0.0)):
+        lat, h = m.geodetic_iterative(np.array(r))
+        lib = W.CheckedLib()
+        _, _, _, inter = W.twin_geodetic(*r, lib)
+        nf = [i for i, v in enumerate(inter) if not math.isfinite(v)]
+        print(f"  r = {tuple(float(v) for v in r)!s:58s} T0 returns (lat, h) = ({lat!r}, {h!r});"
+              f" first non-finite intermediate index: {nf[0] if nf else None}")
+    print("  Sufficient condition (drafted): max(|x|, |y|, |z|) <= 2^1020. Then p <= sqrt(2) 2^1020,")
+    print("  |z + e2 n s| <= 2^1020 + 0.0067 a/sqrt(1-e2) (1 + 8u), |p c| + |z s| <= sqrt(p^2 + z^2)(1 + 4u)")
+    print("  <= sqrt(3) 2^1020 (1 + 4u) < 2^1022, and a sqrt(.) <= a; no operation exceeds 2^1023.")
+    worst = 0
+    lim = 2.0**1020
+    for sx, sy, sz in itertools.product((-1, 1), repeat=3):
+        for r in ((sx * lim, sy * lim, sz * lim), (sx * lim, 0.0, sz * lim), (0.0, sy * lim, sz * lim),
+                  (sx * lim, sy * lim, 0.0)):
+            _, _, _, inter = W.twin_geodetic(*r, W.CheckedLib())
+            worst = max(worst, max(abs(v) for v in inter))
+            assert all(math.isfinite(v) for v in inter), r
+    print(f"  corner points of the box (all sign/zero patterns): every intermediate finite;"
+          f" largest |intermediate| = 2^{math.log2(worst):.4f}")
+    print("  The witness decision reports OUT-OF-DOMAIN (non-finite intermediate) and applies no bound.")
+    out, _ = W.witness_geodetic(m.geodetic_iterative, (big, big, 0.0), ALPHA, BETA)
+    print(f"  witness decision at (DBL_MAX, DBL_MAX, 0): {out}")
+
+
+def obs_c():
+    print("\n=== C. Oracle zeros ===")
+    print("  Exact-zero references in DQ-1's calls arise only from identities (C Annex F special values):")
+    for label, fn, args in (("hypot(0, 0) (axis point, p = 0)", "hypot", (0.0, 0.0)),
+                            ("hypot(-0, +0)", "hypot", (-0.0, 0.0)),
+                            ("atan2(+0, p > 0) (equator)", "atan2", (0.0, 6.4e6)),
+                            ("atan2(-0, p > 0)", "atan2", (-0.0, 6.4e6)),
+                            ("sin(+0)", "sin", (0.0,)), ("sin(-0)", "sin", (-0.0,))):
+        lo, hi = L.ENC[fn](*args)
+        out = getattr(math, fn)(*args)
+        print(f"    {label:34s} enclosure [{lo}, {hi}] (exact), host {out!r}, premise {L.premise(out, lo, hi)}")
+    print("  Non-zero arguments never have a zero exact value in this domain, and the enclosure excludes 0:")
+    print("    |x| <= 2 < pi: sin x = 0 only at x = 0; cos x = 0 only at +-pi/2, not a binary64;")
+    print("    atan2(y, x >= 0) = 0 only for y = 0; hypot = 0 only at (0, 0); exp never 0.")
+    tiny = [("sin", (5e-324,)), ("cos", (1.5707963267948966,)), ("atan2", (5e-324, 6.4e6)),
+            ("atan2", (5e-324, sys.float_info.max)), ("hypot", (5e-324, 0.0)), ("exp", (-745.2,)),
+            ("exp", (-800.0,))]
+    for fn, args in tiny:
+        lo, hi = L.ENC[fn](*args)
+        out = getattr(math, fn)(*args)
+        mag = f"2^{L._bits_below(lo)}" if lo != 0 else "0"
+        print(f"    {fn}{args}: enclosure {'excludes 0' if lo > 0 or hi < 0 else 'CONTAINS 0'};"
+              f" exact in [{mag}, 2^({L._bits_below(lo)}+1)); host {out!r}; premise {L.premise(out, lo, hi)}")
+    print("  Results below the subnormal range round to 0 within the absolute")
+    print("  term nu; no relative precision is required of the oracle there, only a width small against nu.")
+
+
+def obs_d():
+    print("\n=== D. Rounded vs exact E1 coefficients ===")
+    a_r, b_r = Q("1.22e-15"), Q("8.9e-9")
+    a_r2, b_r2 = Q("1.221e-15"), Q("8.878e-9")
+    print(f"  exact alpha = {float(ALPHA)!r} (Fraction, {ALPHA.denominator.bit_length()}-bit denominator)")
+    print(f"  exact beta  = {float(BETA)!r} m")
+    for h in (0, 120000, 2000000):
+        ex = ALPHA * h + BETA
+        print(f"  h = {h:>8} m: eps exact {float(ex):.12e}; with (1.22e-15, 8.9e-9) {float(a_r * h + b_r - ex):+.3e};"
+              f" with (1.221e-15, 8.878e-9) {float(a_r2 * h + b_r2 - ex):+.3e}")
+    print("  Rounding beta up loosens the gate (admits errors E1 does not bound); rounding down can reject")
+    print("  correct outputs. The gate takes alpha and beta as the exact Fractions returned by")
+    print("  t0_termination.rounding_allowances(); displayed decimals are presentation only.")
+
+
+obs_a()
+obs_b()
+obs_c()
+obs_d()

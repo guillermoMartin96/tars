@@ -1,0 +1,58 @@
+=== Threshold in ulps depends on the position in the binade ===
+  For normal f in [2^e, 2^(e+1)): ulp = 2^(e-52) and the allowance is
+  UF f + nu = 2^-51 f + 2^-1073, i.e. 2 f / 2^e ulps (+ a subnormal term):
+  between 2 ulps (f = 2^e) and 4 ulps (f -> 2^(e+1)). 3 ulps passes iff f > 1.5 x 2^e.
+    f = 1.0                    binade 2^0: allowance 2.000000 ulps
+    f = 1.25                   binade 2^0: allowance 2.500000 ulps
+    f = 1.5                    binade 2^0: allowance 3.000000 ulps
+    f = 1.75                   binade 2^0: allowance 3.500000 ulps
+    f = 1.9999999999999998     binade 2^0: allowance 4.000000 ulps
+    f = 0.8414709848078965     binade 2^-1: allowance 3.365884 ulps
+
+=== Review 01 F2 reproduced: sin(1) + 3 ulps is inside A-FP-2 ===
+  sin(1) + 3 ulps (positive control: must PASS)              err  2.9840 ulp(f) = 1.7731 x 2^-52 rel  expected PASS         checker PASS         ok
+
+=== Constructed negative controls: definite violations (must FAIL) ===
+  sin(x), sin x = 0.5(1 + 1.7e-12): + 3 ulps (must FAIL)     err  3.1571 ulp(f) = 3.1571 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  sin(1) + 5 ulps (allowance 3.37 ulps: must FAIL)           err  4.9840 ulp(f) = 2.9615 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  exp(-ln2 + 1e-9) + 3 ulps (bottom of binade: must FAIL)    err  3.3933 ulp(f) = 3.3933 x 2^-52 rel  expected FAIL         checker FAIL         ok
+
+=== Boundary tests: last double inside / first double outside (closed form) ===
+  sin(1): largest passing double                             err  2.9840 ulp(f) = 1.7731 x 2^-52 rel  expected PASS         checker PASS         ok
+  sin(1): next double up                                     err  3.9840 ulp(f) = 2.3673 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  sin(1): smallest passing double                            err  3.0160 ulp(f) = 1.7921 x 2^-52 rel  expected PASS         checker PASS         ok
+  sin(1): next double down                                   err  4.0160 ulp(f) = 2.3863 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  cos(0.3): largest passing double                           err  3.6223 ulp(f) = 1.8958 x 2^-52 rel  expected PASS         checker PASS         ok
+  cos(0.3): next double up                                   err  4.6223 ulp(f) = 2.4192 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  cos(0.3): smallest passing double                          err  3.3777 ulp(f) = 1.7678 x 2^-52 rel  expected PASS         checker PASS         ok
+  cos(0.3): next double down                                 err  4.3777 ulp(f) = 2.2912 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  atan2(1e5, 6.4e6): largest passing double                  err  3.2832 ulp(f) = 1.6418 x 2^-52 rel  expected PASS         checker PASS         ok
+  atan2(1e5, 6.4e6): next double up                          err  4.2832 ulp(f) = 2.1418 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  atan2(1e5, 6.4e6): smallest passing double                 err  3.7168 ulp(f) = 1.8585 x 2^-52 rel  expected PASS         checker PASS         ok
+  atan2(1e5, 6.4e6): next double down                        err  4.7168 ulp(f) = 2.3586 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  exp(-0.9): largest passing double                          err  3.1239 ulp(f) = 1.9209 x 2^-52 rel  expected PASS         checker PASS         ok
+  exp(-0.9): next double up                                  err  4.1239 ulp(f) = 2.5358 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  exp(-0.9): smallest passing double                         err  2.8761 ulp(f) = 1.7685 x 2^-52 rel  expected PASS         checker PASS         ok
+  exp(-0.9): next double down                                err  3.8761 ulp(f) = 2.3834 x 2^-52 rel  expected FAIL         checker FAIL         ok
+
+=== Subnormal regime: the absolute term nu dominates ===
+  exp(-744) = 1e-323 = 2 x 2^-1074; exact in [9.881313e-324, 9.881313e-324]
+  exp(-744) -2 subnormal ulps                                err  1.5528 ulp(f) = 4503599627370496.0000 x 2^-52 rel  expected PASS         checker PASS         ok
+  exp(-744) -1 subnormal ulps                                err  0.5528 ulp(f) = 1603326040551116.2500 x 2^-52 rel  expected PASS         checker PASS         ok
+  exp(-744) +1 subnormal ulps                                err  1.4472 ulp(f) = 4197221133087643.5000 x 2^-52 rel  expected PASS         checker PASS         ok
+  exp(-744) +2 subnormal ulps                                err  2.4472 ulp(f) = 7097494719907023.0000 x 2^-52 rel  expected FAIL         checker FAIL         ok
+  exp(-744) +3 subnormal ulps                                err  3.4472 ulp(f) = 9997768306726404.0000 x 2^-52 rel  expected FAIL         checker FAIL         ok
+
+=== Oracle uncertainty: an enclosure straddling the window edge ===
+  largest passing double vs a widened enclosure (must be INCONCLUSIVE) err  4.9840 ulp(f) = 2.9615 x 2^-52 rel  expected INCONCLUSIVE checker INCONCLUSIVE ok
+  INCONCLUSIVE is treated as PREMISE-NOT-OBSERVED (fail closed), never as PASS.
+
+=== Exact references (identities): zero and one ===
+  sin(+0) -> +0.0                expected PASS  checker PASS  ok
+  sin(+0) -> 2^-1074             expected PASS  checker PASS  ok
+  sin(+0) -> 3 x 2^-1074         expected FAIL  checker FAIL  ok
+  exp(0) -> 1.0                  expected PASS  checker PASS  ok
+  exp(0) -> 1 + 2^-52            expected PASS  checker PASS  ok
+  exp(0) -> 1 + 3 x 2^-52        expected FAIL  checker FAIL  ok
+
+ALL CONTROLS AGREE WITH THE CLOSED-FORM INEQUALITY: True

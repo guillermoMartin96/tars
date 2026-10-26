@@ -1,0 +1,244 @@
+"""I-33 F3 evidence (research, NOT T2 evidence): which density gate detects which defect.
+
+Reproduces Review 01 M3T2P2-R1-F3 (a doubled scale height keeps the density
+non-increasing inside a band) and builds a kill matrix: each mutant of the DQ-2 km-route
+density against each candidate gate. The correct component is the T0 spike's
+`density(h_m)` (identical to DQ-2 for h_m >= 0); the DL-4 twin is witness.twin_density_km.
+Gates evaluated here as discriminating checks on the component's output:
+  U11   table digest before parsing (DR-0027 B-1)            - file-level defects only
+  U12a  rho^(base) = rho0 exactly at the 27 bases and at 0 m
+  U12b  band selection at base -/+ 1 ulp, against the test-side formula of each band
+  PM4a  non-increase for ascending heights inside each band (A-LM-2 premise)
+  U13   rho^ <= E3 upper enclosure (A-FP-2 premise; one-sided)
+  U15   1000 km discontinuity and top-band values (1001/1100/1500/2000 km)
+  DL4   bitwise conformance with the DQ-2 twin at every sample point (D-8)
+Report-only (no derived two-sided bound, B-9 (ii)): the lower-side relative difference.
+Usage: python -I f3_density.py <t0_dir>
+"""
+import hashlib
+import math
+import sys
+from fractions import Fraction as Q
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, sys.argv[1])
+import t0_model as m  # noqa: E402
+import t0_termination as tt  # noqa: E402
+import pog_lib as L  # noqa: E402
+import witness as W  # noqa: E402
+
+T = m.TABLE
+DEC = tt.DEC_TABLE  # (base [m], rho0, scale [m]) exact decimals of the pinned file
+U = Q(1, 2**53)
+ETA0 = Q(1, 2**1075)
+UF, NU = L.UF, L.NU
+F_RHO = (1 + UF) * (1 + U) ** 2           # t0_termination.py line 717
+THETA_X = (1 + U) ** 2 / (1 - U) - 1       # line 715
+RHO0_MAX = max(Q(r[1]) for r in DEC)
+N_RHO = (1 + U) ** 2 * RHO0_MAX * NU + ETA0
+
+
+def band_of(h_km: float) -> int:
+    return m.band_index(h_km)
+
+
+def e3_upper(h_m: float) -> Q:
+    """E3: rho^ <= F_rho e^eta0 rho(h_s) exp(theta_x X) + N_rho, h_s = 1000 fl(h_m/1000),
+    X = (h_s - base)/H with the table's exact decimals; e^eta0 <= 1 + 2 eta0 and
+    rho(h_s) exp(theta_x X) = rho0 exp(-(1 - theta_x) X), enclosed by pog_lib.exp_enc."""
+    h_km = h_m / 1000.0
+    i = band_of(h_km)
+    base, rho0, H = (Q(v) for v in DEC[i])
+    X = (Q(h_km) * 1000 - base) / H
+    hi = L.exp_enc(-(1 - THETA_X) * X)[1]
+    return F_RHO * (1 + 2 * ETA0) * rho0 * hi + N_RHO
+
+
+def rho_exact(h_m: float) -> Q:
+    """Midpoint of an enclosure of the exact table formula at the input height (report)."""
+    i = m.band_index(h_m / 1000.0)
+    base, rho0, H = (Q(v) for v in DEC[i])
+    lo, hi = L.exp_enc(-(Q(h_m) - base) / H)
+    return rho0 * (lo + hi) / 2
+
+
+# --------------------------------------------------------------------- mutants
+def formula(h, b, scale_mult=1.0, rho_mult=1.0, base_off=0.0):
+    return (b.rho0 * rho_mult) * math.exp(-(h - (b.base_km + base_off)) / (b.scale_km * scale_mult))
+
+
+def m_scale2(h_m):
+    h = h_m / 1000.0
+    return formula(h, T[band_of(h)], scale_mult=2.0)
+
+
+def m_scale_half(h_m):
+    h = h_m / 1000.0
+    return formula(h, T[band_of(h)], scale_mult=0.5)
+
+
+def m_rho0(h_m):
+    h = h_m / 1000.0
+    return formula(h, T[band_of(h)], rho_mult=1.000001)
+
+
+def m_base_1m(h_m):
+    h = h_m / 1000.0
+    return formula(h, T[band_of(h)], base_off=0.001)
+
+
+def m_km_mul(h_m):  # h_m * 0.001 instead of h_m / 1000.0 (equivalent in R, not in binary64)
+    h = h_m * 0.001
+    return formula(h, T[band_of(h)])
+
+
+def m_metre_route(h_m):  # DR-0024 §9 route, mathematically equivalent (DQ-2 forbids)
+    return m.density(h_m, units="m")
+
+
+def m_band_le(h_m):  # an exact base assigned to the band below
+    h = h_m / 1000.0
+    i = len(T) - 1
+    for j in range(len(T) - 1):
+        if h <= T[j + 1].base_km:
+            i = j
+            break
+    return formula(h, T[i])
+
+
+def m_band_next(h_m):  # the next band's parameters
+    h = h_m / 1000.0
+    return formula(h, T[min(band_of(h) + 1, len(T) - 1)])
+
+
+def m_group_neg(h_m):  # exp((base - h) / H): fl(b - h) = -fl(h - b) exactly
+    h = h_m / 1000.0
+    b = T[band_of(h)]
+    return b.rho0 * math.exp((b.base_km - h) / b.scale_km)
+
+
+def m_group_split(h_m):  # exp(-h/H + base/H)
+    h = h_m / 1000.0
+    b = T[band_of(h)]
+    return b.rho0 * math.exp(-h / b.scale_km + b.base_km / b.scale_km)
+
+
+def m_sign(h_m):
+    h = h_m / 1000.0
+    b = T[band_of(h)]
+    return b.rho0 * math.exp((h - b.base_km) / b.scale_km)
+
+
+def m_top_clamp(h_m):  # no extrapolation above 1000 km (P5 requires the top band formula)
+    h = min(h_m, 1000e3) / 1000.0
+    return formula(h, T[band_of(h)])
+
+
+TAMPERED = m.TABLE_COPY.read_bytes().replace(b"1.585e-12", b"1.586e-12", 1)
+
+
+def m_table_tamper(h_m):  # a table whose one rho0 digit differs (file-level defect)
+    rows = [tuple(float(v) for v in ln.split(",")) for ln in TAMPERED.decode().splitlines() if ln.strip()]
+    tb = tuple(m.Band(*r) for r in rows)
+    h = h_m / 1000.0
+    return formula(h, tb[m.band_index(h, tb)])
+
+
+MUTANTS = {
+    "correct (T0 spike)": lambda h: m.density(h),
+    "scale height x2 (Review 01)": m_scale2,
+    "scale height x0.5": m_scale_half,
+    "rho0 x (1 + 1e-6)": m_rho0,
+    "base offset +1 m": m_base_1m,
+    "km conversion h*0.001": m_km_mul,
+    "metre route (equivalent in R)": m_metre_route,
+    "exact base -> band below": m_band_le,
+    "next band's parameters": m_band_next,
+    "exp((base-h)/H) regrouping": m_group_neg,
+    "exp(-h/H + base/H) regrouping": m_group_split,
+    "exponent sign flipped": m_sign,
+    "no top-band extrapolation": m_top_clamp,
+    "tampered table file": m_table_tamper,
+}
+
+
+# ---------------------------------------------------------------------- samples
+def samples():
+    pts = []
+    for i in range(len(T)):
+        lo = T[i].base_km * 1000.0
+        hi = T[i + 1].base_km * 1000.0 if i + 1 < len(T) else 2000e3
+        for k in range(1, 12):
+            pts.append((i, lo + (hi - lo) * k / 12.0))
+    return pts
+
+
+def twin(h_m):
+    return W.twin_density_km(h_m, T, W.CheckedLib())[0]
+
+
+def forced(h_m, i):
+    h = h_m / 1000.0
+    return formula(h, T[i])
+
+
+def gates(fn, name):
+    res = {}
+    # U11: digest of the table the component reads
+    data = TAMPERED if name == "tampered table file" else m.TABLE_COPY.read_bytes()
+    res["U11"] = hashlib.sha256(data).hexdigest() == m.TABLE_SHA256
+    # U12a: rho^(base) = rho0 exactly (27 bases and 0 m)
+    res["U12a"] = all(fn(T[i].base_km * 1000.0) == T[i].rho0 for i in range(len(T)))
+    # U12b: at base -/+ 1 ulp, equal (bitwise) to the test-side formula of the lower / upper
+    # band: a band-selection check that is also a narrow conformance check
+    ok = True
+    for i in range(1, len(T)):
+        b = T[i].base_km * 1000.0
+        ok &= fn(math.nextafter(b, 0.0)) == forced(math.nextafter(b, 0.0), i - 1)
+        ok &= fn(math.nextafter(b, math.inf)) == forced(math.nextafter(b, math.inf), i)
+    res["U12b"] = ok
+    # PM4a
+    ok = True
+    for i in range(len(T)):
+        seq = [h for j, h in samples() if j == i]
+        vals = [fn(h) for h in seq]
+        ok &= all(a >= b for a, b in zip(vals, vals[1:]))
+    res["PM4a"] = ok
+    # U13
+    res["U13"] = all(Q(fn(h)) <= e3_upper(h) for _, h in samples())
+    # U15
+    pts = [math.nextafter(1000e3, 0.0), 1000e3, math.nextafter(1000e3, math.inf), 1001e3, 1100e3, 1500e3, 2000e3]
+    res["U15"] = all(fn(h) == twin(h) for h in pts)
+    # DL4
+    allp = [h for _, h in samples()] + pts + [T[i].base_km * 1000.0 for i in range(len(T))]
+    res["DL4"] = all(W.bits(fn(h)) == W.bits(twin(h)) for h in allp)
+    # report-only lower side
+    res["lower_rel_min"] = min(float(Q(fn(h)) / rho_exact(h) - 1) for _, h in samples())
+    return res
+
+
+def main():
+    print("=== Review 01 F3 reproduced (band 0, h = 100 m and 200 m) ===")
+    for label, fn in (("correct", lambda h: m.density(h)), ("scale x2", m_scale2), ("scale x0.5", m_scale_half)):
+        a, b = fn(100.0), fn(200.0)
+        print(f"  {label:10s} rho(100 m) = {a!r}, rho(200 m) = {b!r}, non-increasing: {a >= b}")
+
+    print("\n=== Kill matrix (KILL = the gate fails on the mutant; - = survives) ===")
+    cols = ["U11", "U12a", "U12b", "PM4a", "U13", "U15", "DL4"]
+    print(f"  {'mutant':34s} " + " ".join(f"{c:5s}" for c in cols) + "  lower-side min rel (report)")
+    for name, fn in MUTANTS.items():
+        r = gates(fn, name)
+        cells = []
+        for c in cols:
+            if name.startswith("correct"):
+                cells.append("pass" if r[c] else "FAIL!")
+            else:
+                cells.append("KILL" if not r[c] else "-")
+        print(f"  {name:34s} " + " ".join(f"{c:5s}" for c in cells) + f"  {r['lower_rel_min']:+.3e}")
+    print("\n  The regrouping exp((base-h)/H) is bitwise identical to the specified grouping"
+          " (fl(b - h) = -fl(h - b)); surviving every gate is then harmless.")
+
+
+main()

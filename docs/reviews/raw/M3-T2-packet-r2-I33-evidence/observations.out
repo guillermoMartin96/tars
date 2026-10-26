@@ -1,0 +1,52 @@
+=== A. Comparison semantics ===
+  Review 01 construction (exact rationals): true h = h_ref - d, reported = h_ref + eps(h_ref + d) + d, d = 1e-6 beta
+    packet r2 outer rule admits it: True; strict E1 at the true height violated by 1.775538e-14 m
+    strict decision (convex endpoints): g(L) = +1.776e-14 m, g(U) = +0.000e+00 m -> not PASS
+  Binary64 outputs: at 120 km one ulp (1.46e-11 m) exceeds the 1.78e-14 m gap, so the two rules
+  differ only where ulp(h) is finer. Near h_ref = 1 m (ulp 2.2e-16 m), d = 1e-6 beta:
+    doubles admitted by the outer rule above the largest strict PASS: 80 (strict: INCONCLUSIVE, i.e. fail closed); first strict PASS reached after 81 steps down
+  With the DL-2 draft the enclosure width is <= 2.8e-92 m (pog_pipeline.out), so the band where
+  strict E1 is INCONCLUSIVE is that narrow in practice; INCONCLUSIVE fails closed.
+
+=== B. Overflow ===
+  r = (1.7976931348623157e+308, 1.7976931348623157e+308, 0.0)    T0 returns (lat, h) = (0.0, inf); first non-finite intermediate index: 0
+  r = (1.7976931348623157e+308, 0.0, 1.7976931348623157e+308)    T0 returns (lat, h) = (0.7853981633974483, inf); first non-finite intermediate index: 29
+  r = (8.98846567431158e+307, 0.0, 0.0)                          T0 returns (lat, h) = (0.0, 8.98846567431158e+307); first non-finite intermediate index: None
+  r = (8.98846567431158e+307, 8.98846567431158e+307, 0.0)        T0 returns (lat, h) = (0.0, 1.2711610061536464e+308); first non-finite intermediate index: None
+  Sufficient condition (drafted): max(|x|, |y|, |z|) <= 2^1020. Then p <= sqrt(2) 2^1020,
+  |z + e2 n s| <= 2^1020 + 0.0067 a/sqrt(1-e2) (1 + 8u), |p c| + |z s| <= sqrt(p^2 + z^2)(1 + 4u)
+  <= sqrt(3) 2^1020 (1 + 4u) < 2^1022, and a sqrt(.) <= a; no operation exceeds 2^1023.
+  corner points of the box (all sign/zero patterns): every intermediate finite; largest |intermediate| = 2^1020.7925
+  The witness decision reports OUT-OF-DOMAIN (non-finite intermediate) and applies no bound.
+  witness decision at (DBL_MAX, DBL_MAX, 0): OUT-OF-DOMAIN (non-finite intermediate)
+
+=== C. Oracle zeros ===
+  Exact-zero references in DQ-1's calls arise only from identities (C Annex F special values):
+    hypot(0, 0) (axis point, p = 0)    enclosure [0, 0] (exact), host 0.0, premise PASS
+    hypot(-0, +0)                      enclosure [0, 0] (exact), host 0.0, premise PASS
+    atan2(+0, p > 0) (equator)         enclosure [0, 0] (exact), host 0.0, premise PASS
+    atan2(-0, p > 0)                   enclosure [0, 0] (exact), host -0.0, premise PASS
+    sin(+0)                            enclosure [0, 0] (exact), host 0.0, premise PASS
+    sin(-0)                            enclosure [0, 0] (exact), host -0.0, premise PASS
+  Non-zero arguments never have a zero exact value in this domain, and the enclosure excludes 0:
+    |x| <= 2 < pi: sin x = 0 only at x = 0; cos x = 0 only at +-pi/2, not a binary64;
+    atan2(y, x >= 0) = 0 only for y = 0; hypot = 0 only at (0, 0); exp never 0.
+    sin(5e-324,): enclosure excludes 0; exact in [2^-1075, 2^(-1075+1)); host 5e-324; premise PASS
+    cos(1.5707963267948966,): enclosure excludes 0; exact in [2^-54, 2^(-54+1)); host 6.123233995736766e-17; premise PASS
+    atan2(5e-324, 6400000.0): enclosure excludes 0; exact in [2^-1097, 2^(-1097+1)); host 0.0; premise PASS
+    atan2(5e-324, 1.7976931348623157e+308): enclosure excludes 0; exact in [2^-2098, 2^(-2098+1)); host 0.0; premise PASS
+    hypot(5e-324, 0.0): enclosure excludes 0; exact in [2^-1074, 2^(-1074+1)); host 5e-324; premise PASS
+    exp(-745.2,): enclosure excludes 0; exact in [2^-1076, 2^(-1076+1)); host 0.0; premise PASS
+    exp(-800.0,): enclosure excludes 0; exact in [2^-1155, 2^(-1155+1)); host 0.0; premise PASS
+  Results below the subnormal range round to 0 within the absolute
+  term nu; no relative precision is required of the oracle there, only a width small against nu.
+
+=== D. Rounded vs exact E1 coefficients ===
+  exact alpha = 1.2212453270876738e-15 (Fraction, 4102-bit denominator)
+  exact beta  = 8.877691069434736e-09 m
+  h =        0 m: eps exact 8.877691069435e-09; with (1.22e-15, 8.9e-9) +2.231e-11; with (1.221e-15, 8.878e-9) +3.089e-13
+  h =   120000 m: eps exact 9.024240508685e-09; with (1.22e-15, 8.9e-9) +2.216e-11; with (1.221e-15, 8.878e-9) +2.795e-13
+  h =  2000000 m: eps exact 1.132018172361e-08; with (1.22e-15, 8.9e-9) +1.982e-11; with (1.221e-15, 8.878e-9) -1.817e-13
+  Rounding beta up loosens the gate (admits errors E1 does not bound); rounding down can reject
+  correct outputs. The gate takes alpha and beta as the exact Fractions returned by
+  t0_termination.rounding_allowances(); displayed decimals are presentation only.

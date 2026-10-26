@@ -1,0 +1,151 @@
+"""I-33 research module (NOT T2 code, NOT a gate): the witnessed-evaluation design that
+replaces packet r2's trace-of-the-component argument (Review 01 M3T2P2-R1-F1).
+
+The twins below are transcribed from the TEXT of packet r1 §5 (DQ-1 steps 1-5, DQ-2 steps
+1-5), not from t0_model. Every elementary call the twin makes goes through `lib`, an
+object the harness supplies; the harness therefore sees each value the twin's arithmetic
+consumes, by construction. The component is NOT instrumented.
+
+Witness argument (drafted; to be reviewed): if the component's returned (lat, h) are
+bit-identical to the twin's, and every elementary result the twin consumed satisfies its
+premise, then the component's output IS the output of the DQ-1 sequence evaluated with
+premise-satisfying elementary values. E1 is a statement about exactly that output, so it
+applies, whatever the component did internally.
+"""
+from __future__ import annotations
+
+import math
+import struct
+
+# DQ-1 step 1 (r1 §5): a = 6378137.0; INV_F = 298.257223563; F = 1.0/INV_F; e2 = F (2.0 - F)
+A = 6378137.0
+INV_F = 298.257223563
+F = 1.0 / INV_F
+E2 = F * (2.0 - F)
+
+
+class CheckedLib:
+    """Passes each call to `base` and returns its result object unchanged; records
+    (name, args, result). Checking happens afterwards, on the recorded values."""
+
+    def __init__(self, base=math):
+        self.base = base
+        self.calls: list[tuple[str, tuple, float]] = []
+
+    def _call(self, name, *args):
+        out = getattr(self.base, name)(*args)
+        self.calls.append((name, args, out))
+        return out
+
+    def hypot(self, x, y):
+        return self._call("hypot", x, y)
+
+    def atan2(self, y, x):
+        return self._call("atan2", y, x)
+
+    def sin(self, x):
+        return self._call("sin", x)
+
+    def cos(self, x):
+        return self._call("cos", x)
+
+    def sqrt(self, x):
+        return self._call("sqrt", x)
+
+    def exp(self, x):
+        return self._call("exp", x)
+
+
+def twin_geodetic(x: float, y: float, z: float, lib) -> tuple[float, float, int, list[float]]:
+    """DQ-1 steps 2-5, operation for operation. Returns (lat, h, iterations, intermediates);
+    every arithmetic and library result is appended to `inter` for the finiteness check."""
+    inter: list[float] = []
+    k = inter.append
+    p = lib.hypot(x, y); k(p)                                   # step 2
+    q = p * (1.0 - E2); k(q)
+    lat = lib.atan2(z, q); k(lat)                               # step 3
+    it = 0
+    for _ in range(60):                                         # step 4
+        s = lib.sin(lat); k(s)
+        t1 = E2 * s; k(t1)
+        t2 = t1 * s; k(t2)
+        t3 = 1.0 - t2; k(t3)
+        r = lib.sqrt(t3); k(r)
+        n = A / r; k(n)
+        u1 = E2 * n; k(u1)
+        u2 = u1 * s; k(u2)
+        u3 = z + u2; k(u3)
+        new = lib.atan2(u3, p); k(new)
+        it += 1
+        d = new - lat; k(d)
+        done = abs(d) <= 1e-15
+        lat = new
+        if done:
+            break
+    s = lib.sin(lat); k(s)                                      # step 5
+    c = lib.cos(lat); k(c)
+    v1 = p * c; k(v1)
+    v2 = z * s; k(v2)
+    v3 = v1 + v2; k(v3)
+    w1 = E2 * s; k(w1)
+    w2 = w1 * s; k(w2)
+    w3 = 1.0 - w2; k(w3)
+    w4 = lib.sqrt(w3); k(w4)
+    w5 = A * w4; k(w5)
+    h = v3 - w5; k(h)
+    return lat, h, it, inter
+
+
+def expected_geodetic_calls(it: int) -> list[str]:
+    """The call list DQ-1 implies for `it` iterations (packet §6.4 rule 4 order)."""
+    return ["hypot", "atan2"] + ["sin", "sqrt", "atan2"] * it + ["sin", "cos", "sqrt"]
+
+
+def twin_density_km(h_m: float, table, lib) -> tuple[float, int]:
+    """DQ-2 steps 1-5 (guard in metres before conversion). table: rows with base_km, rho0,
+    scale_km (the table's decimal strings parsed to binary64). Returns (rho, band)."""
+    if not math.isfinite(h_m):
+        raise ValueError("non-finite height")                   # step 1 (distinct error)
+    if h_m < 0:
+        raise ArithmeticError("atmosphere domain")              # step 2 (typed error)
+    h = h_m / 1000.0                                            # step 3
+    i = len(table) - 1                                          # step 4 (GMAT FindBand)
+    for j in range(len(table) - 1):
+        if h < table[j + 1].base_km:
+            i = j
+            break
+    b = table[i]
+    return b.rho0 * lib.exp(-(h - b.base_km) / b.scale_km), i  # step 5, this grouping
+
+
+def bits(*vals: float) -> bytes:
+    return struct.pack(f"<{len(vals)}d", *vals)
+
+
+def witness_geodetic(component, r, alpha, beta, base=math, enc=None) -> tuple[str, dict]:
+    """Corrected POG decision for one point. Order: domain (finite intermediates) ->
+    conformance -> harness completeness -> premises -> strict E1."""
+    import pog_lib as L
+    x, y, z = (float(v) for v in r)
+    lib = CheckedLib(base)
+    lat_t, h_t, it, inter = twin_geodetic(x, y, z, lib)
+    info = {"it": it, "calls": len(lib.calls)}
+    if not all(math.isfinite(v) for v in inter):
+        return "OUT-OF-DOMAIN (non-finite intermediate)", info
+    lat_c, h_c = component(r)
+    if bits(lat_c, h_c) != bits(lat_t, h_t):
+        return "SEQUENCE-NONCONFORMANT", info
+    if [c[0] for c in lib.calls] != expected_geodetic_calls(it):
+        return "HARNESS-INCOMPLETE", info
+    for name, args, out in lib.calls:
+        if name == "sqrt":
+            d = "PASS" if L.sqrt_is_rn(args[0], out) else "FAIL"
+        else:
+            lo, hi = (enc or L.ENC)[name](*args)
+            d = L.premise(out, lo, hi)
+        if d != "PASS":
+            info["call"] = (name, args, out)
+            return f"PREMISE-NOT-OBSERVED ({d})", info
+    lo, hi = L.true_height_enc(x, y, z)
+    info["L"], info["U"] = lo, hi
+    return "E1-" + L.e1_strict(h_c, lo, hi, alpha, beta), info

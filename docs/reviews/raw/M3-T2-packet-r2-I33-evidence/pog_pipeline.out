@@ -1,0 +1,37 @@
+=== Part 1: DL-1 draft enclosures ===
+  atan2   304 arguments; max relative width 6.367e-103 (target 2^-320 = 4.682e-97)
+  cos     414 arguments; max relative width 8.701e-103 (target 2^-320 = 4.682e-97)
+  exp     305 arguments; max relative width 8.784e-100 (target 2^-320 = 4.682e-97)
+  hypot   200 arguments; max relative width 1.796e-99 (target 2^-320 = 4.682e-97)
+  sin     414 arguments; max relative width 8.825e-103 (target 2^-320 = 4.682e-97)
+  independent-reference disagreements and host premise failures: none
+  sin^2 + cos^2 = 1 contained in the enclosure sums: 300/300
+  out-of-domain arguments refused (fail closed): 7/7
+
+=== Part 2: DL-2 draft true-height enclosure ===
+  equator (x, 0, 0), x >= a: enclosure collapses to exactly x - a: 6/6
+  axis (0, 0, z): enclosure consistent with |z| - b (b = sqrt(b^2) enclosed): 10/10
+  I-31 points with t0_oracle height (exterior): 631; T0 value inside [L, U] (+-1e-40 m): 631/631; T0-interior points with L < 0: 2
+  max width U - L = 2.721e-92 m; requirement delta_O <= 1e-6 beta = 8.878e-15 m: met
+  surface crossing on the equator: -3 ulp: L=-2.794e-09; -1 ulp: L=-9.313e-10; +0 ulp: L=+0.000e+00; +1 ulp: L=+9.313e-10; +3 ulp: L=+2.794e-09
+
+=== Part 3: corrected POG decision over the I-31 points ===
+  outcomes: {'E1-PASS': 631, 'E1-NOT-CERTIFIED-EXTERIOR': 2}
+  largest |h^ - h| / eps_h(h) among E1-PASS: 0.216247 at ('forward', 145.0304751527136) (empirical; not a bound)
+  F1 and height-equivalent mutants over every point (soundness: every PASS bit-identical):
+    (1) hidden cos +1e-5                 {'SEQUENCE-NONCONFORMANT': 615, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'E1-PASS': 16}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'axis+': 8, 'axis-': 8}
+    (1b) hidden cos +1 ulp               {'SEQUENCE-NONCONFORMANT': 256, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'E1-PASS': 375}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'axis+': 8, 'axis-': 8, 'forward': 355, 'near-axis': 3, 'near-equator': 1}
+    (2) final sin discarded              {'E1-PASS': 468, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'SEQUENCE-NONCONFORMANT': 163}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'equator': 9, 'axis+': 8, 'axis-': 8, 'forward': 437, 'near-axis': 3, 'near-equator': 3}
+    (3a) cos bound at import             {'E1-PASS': 631, 'E1-NOT-CERTIFIED-EXTERIOR': 2}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'equator': 9, 'axis+': 8, 'axis-': 8, 'forward': 600, 'near-axis': 3, 'near-equator': 3}
+    (3b) numpy cos                       {'E1-PASS': 631, 'E1-NOT-CERTIFIED-EXTERIOR': 2}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'equator': 9, 'axis+': 8, 'axis-': 8, 'forward': 600, 'near-axis': 3, 'near-equator': 3}
+    (3c) unobserved cos x (1 + 2^-40)    {'SEQUENCE-NONCONFORMANT': 608, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'E1-PASS': 23}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'axis+': 8, 'axis-': 8, 'forward': 4, 'near-axis': 3}
+    truncated after 2 iterations         {'E1-PASS': 65, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'SEQUENCE-NONCONFORMANT': 566}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'equator': 9, 'axis+': 8, 'axis-': 8, 'forward': 37, 'near-axis': 3}
+    stopping tolerance 1e-9              {'E1-PASS': 56, 'E1-NOT-CERTIFIED-EXTERIOR': 2, 'SEQUENCE-NONCONFORMANT': 575}; PASS with different bits: 0
+                                         E1-PASS by point kind: {'equator': 9, 'axis+': 8, 'axis-': 8, 'forward': 28, 'near-axis': 3}

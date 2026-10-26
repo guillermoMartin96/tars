@@ -1,0 +1,23 @@
+=== Review 01 F3 reproduced (band 0, h = 100 m and 200 m) ===
+  correct    rho(100 m) = 1.208217143351689, rho(200 m) = 1.1916642167256455, non-increasing: True
+  scale x2   rho(100 m) = 1.2165796318391242, rho(200 m) = 1.208217143351689, non-increasing: True
+  scale x0.5 rho(100 m) = 1.1916642167256455, rho(200 m) = 1.1592355962647725, non-increasing: True
+
+=== Kill matrix (KILL = the gate fails on the mutant; - = survives) ===
+  mutant                             U11   U12a  U12b  PM4a  U13   U15   DL4    lower-side min rel (report)
+  correct (T0 spike)                 pass  pass  pass  pass  pass  pass  pass   -1.416e-15
+  scale height x2 (Review 01)        -     -     KILL  -     KILL  KILL  KILL   +2.328e-02
+  scale height x0.5                  -     -     KILL  -     -     KILL  KILL   -9.673e-01
+  rho0 x (1 + 1e-6)                  -     KILL  KILL  -     KILL  KILL  KILL   +1.000e-06
+  base offset +1 m                   -     KILL  KILL  -     KILL  KILL  KILL   +3.731e-06
+  km conversion h*0.001              -     -     KILL  -     -     -     KILL   -1.416e-15
+  metre route (equivalent in R)      -     -     KILL  -     KILL  -     KILL   -3.039e-16
+  exact base -> band below           -     KILL  -     -     -     KILL  KILL   -1.416e-15
+  next band's parameters             -     KILL  KILL  -     KILL  KILL  KILL   -2.580e-01
+  exp((base-h)/H) regrouping         -     -     -     -     -     -     -      -1.416e-15
+  exp(-h/H + base/H) regrouping      -     -     KILL  -     KILL  KILL  KILL   -3.218e-15
+  exponent sign flipped              -     -     KILL  KILL  KILL  KILL  KILL   +9.643e-02
+  no top-band extrapolation          -     -     KILL  -     KILL  KILL  KILL   -1.416e-15
+  tampered table file                KILL  KILL  KILL  -     KILL  -     KILL   -1.416e-15
+
+  The regrouping exp((base-h)/H) is bitwise identical to the specified grouping (fl(b - h) = -fl(h - b)); surviving every gate is then harmless.

@@ -1,0 +1,236 @@
+"""I-33 evidence (research, NOT T2 evidence): DL-1 / DL-2 draft validation and the corrected
+POG decision (witnessed evaluation + bounded oracles + strict E1) over the I-31 point set.
+
+Part 1  DL-1 draft (pog_lib enclosures): widths, refusals, and consistency with independent
+        computations (Python's decimal exp, correctly rounded per its documentation; the
+        T0 spike's d_sin/d_cos/d_atan2, which are unbounded and serve as a cross-check
+        only; the identity sin^2 + cos^2 = 1 on the enclosures).
+Part 2  DL-2 draft (pog_lib.true_height_enc): exact equator answers, axis answers, the T0
+        oracle (60 digits, unbounded) inside the enclosure, widths against the packet's
+        requirement delta_O <= 1e-6 beta, interior points not certified.
+Part 3  The corrected decision over the I-31 points (identical generator), and the F1
+        mutants swept over every point, with the soundness check: every E1-PASS of a
+        mutant has output bits identical to the correct component's.
+Usage: python -I pog_pipeline.py <t0_dir>
+"""
+import collections
+import inspect
+import math
+import random
+import sys
+from decimal import Decimal as D, localcontext
+from fractions import Fraction as Q
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+import t0_model as m  # noqa: E402
+import t0_oracle as o  # noqa: E402
+import t0_termination as tt  # noqa: E402
+import t0_height_error as he  # noqa: E402
+import pog_lib as L  # noqa: E402
+import witness as W  # noqa: E402
+
+E1 = tt.rounding_allowances()
+ALPHA, BETA = E1["alpha"], E1["beta_m"]
+
+
+def points():
+    """Verbatim copy of the I-31 premise_probe.py.txt generator (same seed, same order)."""
+    a, b = m.A_WGS84, m.B_WGS84
+    pts = []
+    for h in (0.0, 1.0, 1e3, 8e4, 1.2e5, 2.5e5, 4e5, 1e6, 2e6):
+        pts += [("equator", np.array([a + h, 0.0, 0.0])), ("axis+", np.array([0.0, 0.0, b + h])),
+                ("axis-", np.array([0.0, 0.0, -(b + h)]))]
+    rng = np.random.default_rng(20261026)
+    for _ in range(600):
+        lat = rng.uniform(-math.pi / 2, math.pi / 2)
+        lon = rng.uniform(-math.pi, math.pi)
+        h = float(10 ** rng.uniform(0, math.log10(2e6)))
+        pts.append(("forward", m.geodetic_to_cartesian(lat, lon, h)))
+    for d in (1e-3, 1e-6, 1e-9):  # near-axis and near-equator
+        pts += [("near-axis", m.geodetic_to_cartesian(math.pi / 2 - d, 0.3, 4e5)),
+                ("near-equator", m.geodetic_to_cartesian(d, 1.1, 4e5))]
+    return pts
+
+
+def relw(lo, hi):
+    return float((hi - lo) / abs(lo)) if lo != 0 else 0.0
+
+
+def part1():
+    print("=== Part 1: DL-1 draft enclosures ===")
+    rng = random.Random(20261026)
+    # T0's references stop when the sum stops changing and carry no bound; at their default
+    # 50 (+5) digits d_cos loses relative accuracy near pi/2 (cancellation: 7e-49 relative at
+    # cos ~ 6e-17, measured during I-33). They are run here at 130 digits, with pi recomputed.
+    he.PREC = 130
+    he.PI = he.d_pi()
+    worst = collections.defaultdict(float)
+    bad = collections.Counter()
+    n = collections.Counter()
+    args = []
+    halfpi = math.pi / 2
+    for _ in range(400):
+        x = rng.uniform(-halfpi, halfpi)
+        args += [("sin", (x,)), ("cos", (x,))]
+    for e in (-1074, -1000, -300, -60, -30, -9, -1):
+        x = math.ldexp(1.0, e)
+        args += [("sin", (x,)), ("sin", (-x,)), ("cos", (x,)), ("cos", (halfpi - x if e > -60 else halfpi,))]
+    for _ in range(300):
+        args.append(("atan2", (rng.uniform(-7e6, 7e6), rng.uniform(1e-3, 7e6))))
+    args += [("atan2", (1.0, 0.0)), ("atan2", (-1.0, 0.0)), ("atan2", (5e-324, 6.4e6)), ("atan2", (6.4e6, 5e-324))]
+    for _ in range(300):
+        args.append(("exp", (rng.uniform(-800.0, 0.0),)))
+    args += [("exp", (-745.1,)), ("exp", (-708.4,)), ("exp", (1e-300,)), ("exp", (-1e-300,)), ("exp", (5.0,))]
+    for _ in range(200):
+        args.append(("hypot", (rng.uniform(-7e6, 7e6), rng.uniform(-7e6, 7e6))))
+    for name, a in args:
+        lo, hi = L.ENC[name](*a)
+        n[name] += 1
+        worst[name] = max(worst[name], relw(lo, hi))
+        with localcontext() as c:
+            c.prec = 120
+            if name == "exp":
+                ref = D(a[0]).exp()          # correctly rounded at 120 digits
+                tol = Q(1, 10**115)
+            elif name == "hypot":
+                ref = (D(a[0]) ** 2 + D(a[1]) ** 2).sqrt()
+                tol = Q(1, 10**115)
+            else:
+                ref = {"sin": he.d_sin, "cos": he.d_cos}[name](D(a[0])) if name != "atan2" else he.d_atan2(D(a[0]), D(a[1]))
+                tol = Q(1, 10**110)          # T0 references at 130 digits, no written bound
+        R = Q(ref)
+        if not (lo - tol * abs(R) <= R <= hi + tol * abs(R)):
+            bad[name] += 1
+        out = getattr(math, name)(*a)
+        if L.premise(out, lo, hi) != "PASS":
+            bad[name + " host premise"] += 1
+    for k in sorted(n):
+        print(f"  {k:6s} {n[k]:4d} arguments; max relative width {worst[k]:.3e} (target 2^-320 = {2.0**-320:.3e})")
+    print(f"  independent-reference disagreements and host premise failures: {dict(bad) or 'none'}")
+    sc = 0
+    for x in [rng.uniform(-halfpi, halfpi) for _ in range(300)]:
+        (slo, shi), (clo, chi) = L.sin_enc(x), L.cos_enc(x)
+        s2 = (min(slo * slo, shi * shi) if slo * shi > 0 else Q(0), max(slo * slo, shi * shi))
+        if not (s2[0] + clo * clo <= 1 <= s2[1] + chi * chi):
+            sc += 1
+    print(f"  sin^2 + cos^2 = 1 contained in the enclosure sums: {300 - sc}/300")
+    refused = 0
+    for name, a in (("sin", (2.5,)), ("cos", (-3.0,)), ("atan2", (1.0, -1.0)), ("atan2", (0.0, 0.0)),
+                    ("exp", (math.inf,)), ("hypot", (math.nan, 1.0)), ("atan2", (1.0, -0.0))):
+        try:
+            L.ENC[name](*a)
+        except ValueError:
+            refused += 1
+    print(f"  out-of-domain arguments refused (fail closed): {refused}/7")
+
+
+def part2():
+    print("\n=== Part 2: DL-2 draft true-height enclosure ===")
+    a, b = m.A_WGS84, m.B_WGS84
+    exact_eq = 0
+    for h in (0.0, 1.0, 1e3, 1.2e5, 2e6, 3.5e7):
+        x = a + h
+        lo, hi = L.true_height_enc(x, 0.0, 0.0)
+        exact_eq += lo == hi == Q(x) - L.A_M
+    print(f"  equator (x, 0, 0), x >= a: enclosure collapses to exactly x - a: {exact_eq}/6")
+    ax = 0
+    for h in (0.0, 1.0, 1e3, 1.2e5, 2e6):
+        for sgn in (1, -1):
+            z = sgn * (b + h)
+            lo, hi = L.true_height_enc(0.0, 0.0, z)
+            blo, bhi = L.sqrt_enc(L.B2)
+            ax += (lo >= abs(Q(z)) - bhi - Q(1, 10**80)) and (hi <= abs(Q(z)) - blo + Q(1, 10**80)) or lo < 0
+    print(f"  axis (0, 0, z): enclosure consistent with |z| - b (b = sqrt(b^2) enclosed): {ax}/10")
+    widths, inside, ext, interior = [], 0, 0, 0
+    for kind, r in points():
+        lo, hi = L.true_height_enc(*map(float, r))
+        try:
+            t0 = Q(o.true_height(r))
+        except ValueError:
+            interior += lo < 0
+            continue
+        ext += 1
+        inside += lo - Q(1, 10**40) <= t0 <= hi + Q(1, 10**40)
+        widths.append(hi - lo)
+    print(f"  I-31 points with t0_oracle height (exterior): {ext}; T0 value inside [L, U] (+-1e-40 m): {inside}/{ext};"
+          f" T0-interior points with L < 0: {interior}")
+    wmax = max(widths)
+    print(f"  max width U - L = {float(wmax):.3e} m; requirement delta_O <= 1e-6 beta = {float(BETA / 10**6):.3e} m:"
+          f" {'met' if wmax / 2 <= BETA / 10**6 else 'NOT met'}")
+    near = []
+    for k in (-3, -1, 0, 1, 3):
+        x = a
+        for _ in range(abs(k)):
+            x = math.nextafter(x, math.inf if k > 0 else 0.0)
+        lo, hi = L.true_height_enc(x, 0.0, 0.0)
+        near.append(f"{k:+d} ulp: L={float(lo):+.3e}")
+    print("  surface crossing on the equator: " + "; ".join(near))
+
+
+SRC = inspect.getsource(m.geodetic_iterative)
+
+
+def mutant(old, new, **extra):
+    env = dict(m.__dict__)
+    env.update(extra)
+    exec(SRC.replace(old, new), env)
+    return env["geodetic_iterative"]
+
+
+def part3():
+    print("\n=== Part 3: corrected POG decision over the I-31 points ===")
+    outcomes = collections.Counter()
+    ratio_max, lst = Q(0), None
+    for kind, r in points():
+        out, info = W.witness_geodetic(m.geodetic_iterative, r, ALPHA, BETA)
+        outcomes[out] += 1
+        if out == "E1-PASS":
+            h = Q(m.geodetic_iterative(r)[1])
+            mid = (info["L"] + info["U"]) / 2
+            ratio = abs(h - mid) / (ALPHA * mid + BETA)
+            if ratio > ratio_max:
+                ratio_max, lst = ratio, (kind, float(mid))
+    print(f"  outcomes: {dict(outcomes)}")
+    print(f"  largest |h^ - h| / eps_h(h) among E1-PASS: {float(ratio_max):.6f} at {lst} (empirical; not a bound)")
+
+    cos_b = math.cos
+    muts = {
+        "(1) hidden cos +1e-5": mutant("s, c = math.sin(lat), math.cos(lat)",
+                                       "s, c = math.sin(lat), (math.cos(lat), _h(lat))[1]",
+                                       _h=lambda x: math.cos(x) + 1e-5),
+        "(1b) hidden cos +1 ulp": mutant("s, c = math.sin(lat), math.cos(lat)",
+                                         "s, c = math.sin(lat), (math.cos(lat), math.nextafter(math.cos(lat), 2.0))[1]"),
+        "(2) final sin discarded": mutant("s, c = math.sin(lat), math.cos(lat)", "_d, c = math.sin(lat), math.cos(lat)"),
+        "(3a) cos bound at import": mutant("s, c = math.sin(lat), math.cos(lat)",
+                                           "s, c = math.sin(lat), (math.cos(lat), _c(lat))[1]", _c=cos_b),
+        "(3b) numpy cos": mutant("s, c = math.sin(lat), math.cos(lat)",
+                                 "s, c = math.sin(lat), (math.cos(lat), float(_np.cos(lat)))[1]", _np=np),
+        "(3c) unobserved cos x (1 + 2^-40)": mutant("s, c = math.sin(lat), math.cos(lat)",
+                                                    "s, c = math.sin(lat), (math.cos(lat), _c(lat) * (1 + 2.0**-40))[1]",
+                                                    _c=cos_b),
+        "truncated after 2 iterations": mutant("for _ in range(60):", "for _ in range(2):"),
+        "stopping tolerance 1e-9": mutant("<= 1e-15", "<= 1e-9"),
+    }
+    print("  F1 and height-equivalent mutants over every point (soundness: every PASS bit-identical):")
+    for name, fn in muts.items():
+        c = collections.Counter()
+        kinds = collections.Counter()
+        unsound = 0
+        for kind, r in points():
+            out, _ = W.witness_geodetic(fn, r, ALPHA, BETA)
+            c[out] += 1
+            if out == "E1-PASS":
+                kinds[kind] += 1
+                if W.bits(*fn(r)) != W.bits(*m.geodetic_iterative(r)):
+                    unsound += 1
+        print(f"    {name:36s} {dict(c)}; PASS with different bits: {unsound}")
+        print(f"    {'':36s} E1-PASS by point kind: {dict(kinds)}")
+
+
+part1()
+part2()
+part3()

@@ -1,0 +1,145 @@
+"""I-33 F4 evidence (research, NOT T2 evidence): the expanded DL-5 environment fingerprint,
+run on this host only (no CI change is authorized). Each field is labelled:
+  [O]  observed reliably by this probe;
+  [P]  observed only partially (a proxy, or platform-dependent);
+  [U]  not observable from the process (recorded as such, never guessed).
+Recording metadata does not prove numerical reproducibility; POG re-observes its premises
+on every run. The behaviour digest is the one field that observes libm results directly,
+and only on its own fixed arguments.
+Usage: python -I f4_fingerprint.py <path to uv.lock>
+"""
+import ctypes
+import ctypes.util
+import hashlib
+import json
+import math
+import os
+import platform
+import struct
+import subprocess
+import sys
+import sysconfig
+
+
+def sha256_file(path):
+    try:
+        with open(path, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+    except OSError as exc:
+        return f"[U] unreadable: {type(exc).__name__}"
+
+
+def run(cmd):
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=10).stdout.strip()
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"[U] {type(exc).__name__}"
+
+
+def fp_probes():
+    """Run-time floating-point configuration (A-FP-1 / X-P4 style)."""
+    u = 2.0**-53
+    tiny = 5e-324
+    a, b, c = 1.0 + 2.0**-30, 1.0 + 2.0**-30, -(1.0 + 2.0**-29)
+    return {
+        "[O] round-to-nearest-even: 1 + 2^-53 == 1": 1.0 + u == 1.0,
+        "[O] ties to even: (1 + 2^-52) + 2^-53 == 1 + 2^-51": (1.0 + 2.0**-52) + u == 1.0 + 2.0**-51,
+        "[O] gradual underflow: 2^-1074 > 0 and 2^-1022 / 2 > 0": tiny > 0 and 2.0**-1022 / 2 > 0,
+        "[O] no flush-to-zero on operands: 2^-1074 * 2^52 == 2^-1022": tiny * 2.0**52 == 2.0**-1022,
+        "[O] no FMA contraction in Python a*b + c (exact product would give 2^-60)": a * b + c == 0.0,
+        "[O] sys.float_info": dict(mant_dig=sys.float_info.mant_dig, max_exp=sys.float_info.max_exp,
+                                  min_exp=sys.float_info.min_exp, rounds=sys.float_info.rounds),
+        "[O] float_repr_style": sys.float_repr_style,
+    }
+
+
+def behaviour_digest():
+    """sha256 of the bit patterns math.{sin,cos,atan2,exp,hypot,sqrt} return on a fixed
+    argument set (DQ-1/DQ-2 ranges plus edge values). It detects a change of results on
+    these arguments only; it says nothing about other arguments."""
+    args = [i / 64.0 - 1.6 for i in range(205)] + [2.0**-k for k in range(1, 1075, 37)]
+    ex = [-(i / 8.0) for i in range(6000)]
+    h = hashlib.sha256()
+    for x in args:
+        h.update(struct.pack("<dd", math.sin(x), math.cos(x)))
+        h.update(struct.pack("<d", math.atan2(x, 6.4e6)))
+        h.update(struct.pack("<d", math.hypot(x * 6.4e6, 6.4e6 - x)))
+        h.update(struct.pack("<d", math.sqrt(abs(x))))
+    for x in ex:
+        h.update(struct.pack("<d", math.exp(x)))
+    return h.hexdigest(), len(args) * 6 + len(ex)
+
+
+def main():
+    cfg = sysconfig.get_config_vars()
+    fp = {}
+    fp["python"] = {
+        "[O] implementation": sys.implementation.name,
+        "[O] version": sys.version,
+        "[O] version_info": list(sys.version_info),
+        "[O] build": list(platform.python_build()),
+        "[O] compiler (as reported by the interpreter)": platform.python_compiler(),
+        "[O] sys.executable sha256": sha256_file(os.path.realpath(sys.executable)),
+        "[P] libpython sha256": sha256_file(os.path.join(cfg.get("LIBDIR") or "", cfg.get("LDLIBRARY") or ""))
+        if cfg.get("LDLIBRARY") else "[U] not a shared build",
+        "[O] math module location": getattr(math, "__file__", "built into the interpreter"),
+    }
+    fp["build_config"] = {k: cfg.get(k) for k in ("CC", "CFLAGS", "OPT", "CONFIG_ARGS", "HOST_GNU_TYPE",
+                                                  "MULTIARCH", "PY_CFLAGS_NODIST", "LDFLAGS")}
+    fp["build_config"]["note"] = ("[P] the flags CPython was built with; they do not describe the "
+                                  "system libm's build, and LTO/PGO may change code generation")
+    fp["os"] = {
+        "[O] platform": platform.platform(),
+        "[O] uname (node name redacted)": [v if i != 1 else "[redacted]" for i, v in enumerate(platform.uname())],
+        "[P] mac_ver": list(platform.mac_ver()[:1]) + [platform.mac_ver()[2]],
+        "[P] libc_ver (empty on macOS)": list(platform.libc_ver()),
+    }
+    libm = {}
+    name = ctypes.util.find_library("m")
+    libm["[P] find_library('m')"] = name
+    if sys.platform == "darwin":
+        libm["[O] sw_vers"] = run(["sw_vers"])
+        libm["[U] libm binary"] = ("libm is part of libSystem in the dyld shared cache: no file to hash "
+                                   "from the process; the OS build (sw_vers) is the only proxy")
+    else:
+        try:
+            g = ctypes.CDLL(None).gnu_get_libc_version
+            g.restype = ctypes.c_char_p
+            libm["[O] gnu_get_libc_version"] = g().decode()
+        except (AttributeError, OSError):
+            libm["[U] gnu_get_libc_version"] = "unavailable"
+        real = os.path.realpath(f"/lib/{cfg.get('MULTIARCH')}/libm.so.6") if cfg.get("MULTIARCH") else None
+        libm["[P] libm.so.6 sha256"] = sha256_file(real) if real else "[U] path unknown"
+        libm["[U] ifunc variant selected"] = ("glibc selects sin/cos/exp variants (e.g. FMA/AVX2) at load time "
+                                             "from CPU features; the choice is not reported to the process")
+    fp["libm"] = libm
+    cpu = {"[O] machine": platform.machine(), "[O] processor": platform.processor()}
+    if sys.platform == "darwin":
+        cpu["[O] brand"] = run(["sysctl", "-n", "machdep.cpu.brand_string"])
+        cpu["[P] features"] = run(["sysctl", "-n", "machdep.cpu.features"])
+        cpu["[P] leaf7 features"] = run(["sysctl", "-n", "machdep.cpu.leaf7_features"])
+        cpu["[P] arm64 FP features"] = run(["sysctl", "hw.optional.arm.FEAT_FP16", "hw.optional.AdvSIMD"])
+    else:
+        try:
+            flags = next(ln for ln in open("/proc/cpuinfo") if ln.startswith(("flags", "Features")))
+            cpu["[P] cpu flags"] = flags.split(":", 1)[1].strip()
+        except (OSError, StopIteration):
+            cpu["[U] cpu flags"] = "unavailable"
+    cpu["[U] microcode / dispatch inside libm"] = "not observable from the process"
+    fp["cpu"] = cpu
+    fp["floating_point"] = fp_probes()
+    try:
+        import numpy
+        fp["numpy"] = {"[O] version": numpy.__version__,
+                       "note": "recorded only; RQ-6 excludes NumPy from the specified sequences"}
+    except ImportError:
+        fp["numpy"] = "[U] not importable"
+    lock = sys.argv[1] if len(sys.argv) > 1 else None
+    fp["[O] uv_lock_sha256"] = sha256_file(lock) if lock else "[U] no uv.lock path given"
+    dig, n = behaviour_digest()
+    fp["behaviour_digest"] = {"[O] sha256": dig, "[O] results hashed": n,
+                              "note": "changes iff a result on THESE arguments changes"}
+    print(json.dumps(fp, indent=1, sort_keys=False, default=str))
+
+
+main()

@@ -1,0 +1,417 @@
+"""I-33 research library (NOT T2 code, NOT a gate): draft DL-1 / DL-2 oracles and the
+checkers the corrected packet r2 proposes. Every enclosure below is computed in exact
+rational arithmetic (fractions.Fraction); the only approximations are series truncations
+and square roots, each bounded explicitly and rounded outward. Nothing here is reviewed;
+the derivations are drafted in DL1-DL2-draft-derivations.md and remain proof obligations.
+
+Contents
+  sqrt_enc(q)                 enclosure of sqrt(q), q >= 0 rational
+  sin_enc, cos_enc(x)         |x| <= 2 (alternating Taylor series)
+  exp_enc(x)                  any finite x (halving + squaring, positive series)
+  atan2_enc(y, x)             x >= 0, (y, x) != (0, 0) (Euler series; Machin pi)
+  hypot_enc(x, y)             sqrt(x^2 + y^2)
+  premise(fhat, lo, hi)       A-FP-2 decision for one call: PASS / FAIL / INCONCLUSIVE
+  sqrt_is_rn(a, r)            exact correct-rounding (round-to-nearest-even) decision
+  true_height_enc(x, y, z)    DL-2 draft: [L, U] containing the geodetic height on the
+                              model ellipsoid, L >= 0 certifying an exterior point
+  e1_strict(hhat, L, U)       strict E1 decision: PASS / FAIL / INCONCLUSIVE
+"""
+from __future__ import annotations
+
+import math
+from fractions import Fraction as Q
+
+# ----------------------------------------------------------------- A-FP-2 (T0 E1 text)
+# t0_termination.py lines 455-457: |computed - exact| <= UF |exact| + nu,
+# UF = LIBM_ULP 2^-52, nu = LIBM_ULP 2^-1074, LIBM_ULP = 2.
+LIBM_ULP = 2
+UF = Q(LIBM_ULP, 2**52)
+NU = Q(LIBM_ULP, 2**1074)
+
+PREC_BITS = 320  # target relative width 2^-PREC_BITS for every elementary enclosure
+
+
+def _round_out(lo: Q, hi: Q, bits: int = PREC_BITS + 40) -> tuple[Q, Q]:
+    """Round lo down and hi up to `bits` significant bits (keeps Fractions small)."""
+    def rnd(v: Q, up: bool) -> Q:
+        if v == 0:
+            return v
+        e = v.numerator.bit_length() - v.denominator.bit_length()  # ~log2|v|
+        sh = bits - e
+        scaled = v * (Q(2) ** sh)
+        n = math.floor(scaled) if not up else math.ceil(scaled)
+        return Q(n) / (Q(2) ** sh)
+    return rnd(lo, False), rnd(hi, True)
+
+
+def _bits_below(v: Q) -> int:
+    """floor(log2 |v|) for v != 0: the k with 2^k <= |v| < 2^(k+1)."""
+    v = abs(v)
+    k = v.numerator.bit_length() - v.denominator.bit_length() - 1
+    while Q(2) ** k > v:
+        k -= 1
+    while Q(2) ** (k + 1) <= v:
+        k += 1
+    return k
+
+
+# --------------------------------------------------------------------------- sqrt
+def _is_square(n: int) -> bool:
+    return n >= 0 and math.isqrt(n) ** 2 == n
+
+
+def sqrt_enc(q: Q) -> tuple[Q, Q]:
+    """[lo, hi] with lo^2 <= q <= hi^2, both >= 0; exact when q is a rational square."""
+    if q < 0:
+        raise ValueError("sqrt of a negative number")
+    if q == 0:
+        return Q(0), Q(0)
+    if _is_square(q.numerator) and _is_square(q.denominator):
+        r = Q(math.isqrt(q.numerator), math.isqrt(q.denominator))
+        return r, r
+    k = PREC_BITS + 8 - _bits_below(q) // 2  # 2^-k <= 2^-(PREC+8) sqrt(q)
+    k = max(k, 1)
+    scaled = q * (Q(4) ** k)
+    s = math.isqrt(math.floor(scaled))
+    return Q(s, 2**k), Q(s + 1, 2**k)
+
+
+# ------------------------------------------------- fixed-point series (directed rounding)
+FP = PREC_BITS + 100  # fixed-point fraction bits for series whose sum lies in [~0.4, 2]
+
+
+def _fdiv_floor(n: int, d: int) -> int:
+    return n // d
+
+
+def _fdiv_ceil(n: int, d: int) -> int:
+    return -((-n) // d)
+
+
+def _series_alt(u: Q, d0: int, step) -> tuple[Q, Q]:
+    """sum_{k>=0} (-1)^k c_k, c_0 = 1, c_{k+1} = c_k * u / step(k), u >= 0, in fixed point
+    with directed rounding: C_lo[k] <= c_k 2^FP <= C_hi[k]. Stops at a k where
+    c_{k+1}/c_k < 1 for all later k (step increasing) so |remainder| <= c_{k+1}."""
+    un, ud = u.numerator, u.denominator
+    clo = chi = 1 << FP
+    slo = shi = 0
+    k = 0
+    while True:
+        if k % 2 == 0:
+            slo += clo; shi += chi
+        else:
+            slo -= chi; shi -= clo
+        dk = step(k)
+        clo = _fdiv_floor(clo * un, ud * dk)
+        chi = _fdiv_ceil(chi * un, ud * dk)
+        k += 1
+        if Q(un, ud * dk) < 1 and chi <= abs(slo) >> (PREC_BITS + 20):
+            return Q(slo - chi, 1 << FP), Q(shi + chi, 1 << FP)
+        if k > 2000:
+            raise RuntimeError("series did not converge")
+
+
+def _series_pos(u: Q, step, ratio_bound) -> tuple[Q, Q]:
+    """sum_{k>=0} c_k, c_0 = 1, c_{k+1} = c_k u / step(k) > 0, with every later ratio
+    <= ratio_bound(k) < 1, so the tail after c_k is <= c_{k+1} / (1 - ratio_bound(k+1))."""
+    un, ud = u.numerator, u.denominator
+    clo = chi = 1 << FP
+    slo = shi = 0
+    k = 0
+    while True:
+        slo += clo; shi += chi
+        dk = step(k)
+        clo = _fdiv_floor(clo * un, ud * dk)
+        chi = _fdiv_ceil(chi * un, ud * dk)
+        k += 1
+        rb = ratio_bound(k)
+        if rb < 1:
+            tail = Q(chi) / (1 - rb)
+            if tail <= Q(slo, 1 << (PREC_BITS + 20)):
+                return Q(slo, 1 << FP), (Q(shi) + tail) / (1 << FP)
+        if k > 5000:
+            raise RuntimeError("series did not converge")
+
+
+# ------------------------------------------------------------------- sin and cos
+def sin_enc(x: float) -> tuple[Q, Q]:
+    """sin x = x * sum (-1)^k x^(2k)/(2k+1)!, |x| <= 2: ratios x^2/((2k+2)(2k+3)) <= 2/3."""
+    if not math.isfinite(x) or abs(x) > 2:
+        raise ValueError("sin enclosure implemented for |x| <= 2 only")
+    if x == 0:  # sin(+-0) = +-0 exactly (identity, not precision)
+        return Q(0), Q(0)
+    X = Q(x)
+    lo, hi = _series_alt(X * X, 0, lambda k: (2 * k + 2) * (2 * k + 3))
+    lo, hi = (X * lo, X * hi) if x > 0 else (X * hi, X * lo)
+    return _round_out(lo, hi)
+
+
+def cos_enc(x: float) -> tuple[Q, Q]:
+    """cos x = sum (-1)^k x^(2k)/(2k)!, |x| <= 2: ratios x^2/((2k+1)(2k+2)), < 1 from k = 1."""
+    if not math.isfinite(x) or abs(x) > 2:
+        raise ValueError("cos enclosure implemented for |x| <= 2 only")
+    if x == 0:
+        return Q(1), Q(1)
+    X = Q(x)
+    lo, hi = _series_alt(X * X, 0, lambda k: (2 * k + 1) * (2 * k + 2))
+    if lo <= 0 <= hi or (hi - lo) > abs(lo) / (Q(2) ** PREC_BITS):
+        raise RuntimeError("cos enclosure too wide (fail closed)")
+    return _round_out(lo, hi)
+
+
+# --------------------------------------------------------------------------- exp
+def exp_enc(x) -> tuple[Q, Q]:
+    """exp(|x| / 2^m) by its positive series (|x|/2^m <= 1/2; ratio t/(k+1) <= 1/2), then
+    m squarings of the positive interval, then the reciprocal for x < 0. x: a finite
+    binary64 or an exact rational."""
+    if not isinstance(x, Q) and not math.isfinite(x):
+        raise ValueError("finite arguments only")
+    if x == 0:  # exp(+-0) = 1 exactly
+        return Q(1), Q(1)
+    t = abs(Q(x))
+    m = 0
+    while t > Q(1, 2):
+        t /= 2
+        m += 1
+    lo, hi = _series_pos(t, lambda k: k + 1, lambda k: t / (k + 1))
+    for _ in range(m):
+        lo, hi = _round_out(lo * lo, hi * hi, PREC_BITS + 140)
+    if x < 0:
+        lo, hi = 1 / hi, 1 / lo
+    return _round_out(lo, hi)
+
+
+# ------------------------------------------------------------------------- atan2
+def _atan(t: Q) -> tuple[Q, Q]:
+    """atan t for 0 < |t| <= 1, Euler: atan t = t/(1+t^2) sum_k c_k w^k, w = t^2/(1+t^2)
+    <= 1/2, c_{k+1} = c_k (2k+2)/(2k+3): positive terms, ratios <= w."""
+    if t == 0:
+        return Q(0), Q(0)
+    a = abs(t)
+    w = a * a / (1 + a * a)
+    lo, hi = _series_pos(w, lambda k: Q(2 * k + 3, 2 * k + 2), lambda k: w)
+    f = a / (1 + a * a)
+    lo, hi = f * lo, f * hi
+    lo, hi = _round_out(lo, hi)
+    return (lo, hi) if t > 0 else (-hi, -lo)
+
+
+def _pi_enc() -> tuple[Q, Q]:
+    a_lo, a_hi = _atan(Q(1, 5))
+    b_lo, b_hi = _atan(Q(1, 239))
+    return 4 * (4 * a_lo - b_hi), 4 * (4 * a_hi - b_lo)  # Machin: pi/4 = 4 atan 1/5 - atan 1/239
+
+
+PI_LO, PI_HI = _pi_enc()
+
+
+def atan2_enc(y: float, x: float) -> tuple[Q, Q]:
+    """atan2(y, x) for x >= +0 (the only case DQ-1 uses: x = p or p (1 - e2), p >= 0)."""
+    if not (math.isfinite(x) and math.isfinite(y)):
+        raise ValueError("finite arguments only")
+    if x < 0 or (x == 0 and math.copysign(1.0, x) < 0):
+        raise ValueError("atan2 enclosure implemented for x >= +0 only")
+    if y == 0:
+        if x == 0:
+            raise ValueError("atan2(0, 0) has no mathematical value")
+        return Q(0), Q(0)  # atan2(+-0, x > 0) = +-0 exactly (identity)
+    if x == 0:
+        lo, hi = PI_LO / 2, PI_HI / 2
+        return (lo, hi) if y > 0 else (-hi, -lo)
+    t = Q(y) / Q(x)
+    if abs(t) <= 1:
+        return _atan(t)
+    a_lo, a_hi = _atan(1 / t)  # same sign as t
+    if t > 0:  # pi/2 - atan(1/t)
+        return _round_out(PI_LO / 2 - a_hi, PI_HI / 2 - a_lo)
+    return _round_out(-PI_HI / 2 - a_hi, -PI_LO / 2 - a_lo)
+
+
+def hypot_enc(x: float, y: float) -> tuple[Q, Q]:
+    if not (math.isfinite(x) and math.isfinite(y)):
+        raise ValueError("finite arguments only")
+    return sqrt_enc(Q(x) ** 2 + Q(y) ** 2)
+
+
+ENC = {"sin": sin_enc, "cos": cos_enc, "exp": exp_enc, "atan2": atan2_enc, "hypot": hypot_enc}
+
+
+# ----------------------------------------------------------- premise decision (F2)
+def premise(fhat: float, lo: Q, hi: Q, uf: Q = UF, nu: Q = NU) -> str:
+    """Decide |fhat - f| <= uf |f| + nu for the unknown exact f in [lo, hi].
+
+    g(f) = |fhat - f| - uf |f| - nu. On an interval of fixed sign of f, -uf|f| is linear,
+    so g is convex: its maximum is at an endpoint, and its minimum at an endpoint or at
+    the kink f = fhat. PASS: max g <= 0 (holds for every f in the enclosure). FAIL:
+    min g > 0 (violated for every f). Otherwise INCONCLUSIVE, which the gate treats as
+    PREMISE-NOT-OBSERVED (fail closed)."""
+    if not math.isfinite(fhat):
+        return "FAIL"
+    F = Q(fhat)
+    if lo < 0 < hi:
+        return "INCONCLUSIVE"  # sign of f undetermined: refine the enclosure
+    g = lambda f: abs(F - f) - uf * abs(f) - nu  # noqa: E731
+    if max(g(lo), g(hi)) <= 0:
+        return "PASS"
+    cand = [lo, hi] + ([F] if lo <= F <= hi else [])
+    if min(g(c) for c in cand) > 0:
+        return "FAIL"
+    return "INCONCLUSIVE"
+
+
+def premise_window(lo: Q, hi: Q, uf: Q = UF, nu: Q = NU) -> tuple[Q, Q, Q, Q]:
+    """Closed-form window, derived independently of `premise` for f > 0:
+    PASS  iff hi (1 - uf) - nu <= fhat <= lo (1 + uf) + nu;
+    FAIL  iff fhat < lo (1 - uf) - nu  or  fhat > hi (1 + uf) + nu.
+    Returns (pass_lo, pass_hi, fail_below, fail_above)."""
+    assert lo > 0
+    return hi * (1 - uf) - nu, lo * (1 + uf) + nu, lo * (1 - uf) - nu, hi * (1 + uf) + nu
+
+
+# --------------------------------------------------------- sqrt correct rounding (F6)
+def sqrt_is_rn(a: float, r: float) -> bool:
+    """True iff r = RN(sqrt(a)) (IEEE 754 round to nearest, ties to even), exactly.
+
+    r is RN(sqrt a) iff sqrt(a) lies in r's rounding cell: between the midpoints with its
+    two neighbours, whose spacings may differ (binade boundary), with ties going to the
+    neighbour whose significand is even. Squares of the midpoints are compared with a in
+    exact rational arithmetic."""
+    if math.isnan(a) or a < 0:
+        return math.isnan(r)
+    if a == 0:
+        return r == 0 and math.copysign(1.0, r) == math.copysign(1.0, a)
+    if math.isinf(a):
+        return r == math.inf
+    if not (math.isfinite(r) and r > 0):
+        return False
+    A = Q(a)
+    R = Q(r)
+    below = math.nextafter(r, 0.0)
+    above = math.nextafter(r, math.inf)
+    m_lo = (Q(below) + R) / 2
+    m_hi = (R + Q(above)) / 2 if math.isfinite(above) else None
+    even = (int.from_bytes(__import__("struct").pack(">d", r), "big") & 1) == 0
+    lo_sq = m_lo * m_lo
+    if A < lo_sq or (A == lo_sq and not even):
+        return False
+    if m_hi is not None:
+        hi_sq = m_hi * m_hi
+        if A > hi_sq or (A == hi_sq and not even):
+            return False
+    return True
+
+
+# ------------------------------------------------------------ DL-2 draft: true height
+A_M = Q(6378137)
+
+
+def model_e2() -> Q:
+    F = 1.0 / 298.257223563
+    return Q(F * (2.0 - F))  # DQ-1 step 1: the binary64 e2 defines the model ellipsoid
+
+
+E2 = model_e2()
+B2 = A_M * A_M * (1 - E2)
+
+
+def _isub(a, b):
+    return a[0] - b[1], a[1] - b[0]
+
+
+def _isq(a):
+    lo, hi = a
+    if lo <= 0 <= hi:
+        return Q(0), max(lo * lo, hi * hi)
+    return min(lo * lo, hi * hi), max(lo * lo, hi * hi)
+
+
+def true_height_enc(x: float, y: float, z: float) -> tuple[Q, Q]:
+    """[L, U] with L <= h <= U, h the distance from r = (x, y, z) to the model ellipsoid
+    K = {p^2/a^2 + z^2/b^2 <= 1}, b^2 = a^2 (1 - e2) (rational).
+
+    U: the distance from r to a point Q* exactly on the ellipsoid (in r's meridian), with
+       Q* known in an interval; h <= |r - Q*|.
+    L: K lies in the half-space m.X <= sigma(m) for every m, sigma(m) = sqrt(a^2 m_p^2 +
+       b^2 m_z^2) the support function, so dist(r, K) >= (m.r - sigma(m)) / |m|.
+    For an exterior point h (geodetic height) = dist(r, K). L >= 0 certifies h >= 0;
+    otherwise the point is NOT certified exterior and E1 is not applied."""
+    if not all(math.isfinite(v) for v in (x, y, z)):
+        raise ValueError("finite coordinates only")
+    pq = Q(x) ** 2 + Q(y) ** 2
+    P = sqrt_enc(pq)
+    Z = Q(z)
+    # approximate foot point (any choice is valid; its quality only affects the width):
+    # Newton on t in Decimal (the foot point is (p a^2/(a^2+t), z b^2/(b^2+t)), f(t) = 0)
+    pf, zf = _foot_point(pq, Z)
+    if abs(zf) <= Q(7, 10) * sqrt_enc(B2)[0]:
+        zq = zf
+        PQ = sqrt_enc(A_M * A_M * (1 - zq * zq / B2))
+        ZQ = (zq, zq)
+    else:
+        pq_ = max(pf, Q(0))
+        PQ = (pq_, pq_)
+        zz = sqrt_enc(B2 * (1 - pq_ * pq_ / (A_M * A_M)))
+        ZQ = zz if z >= 0 else (-zz[1], -zz[0])
+    d2 = _isq(_isub(P, PQ))
+    e2_ = _isq(_isub((Z, Z), ZQ))
+    U = sqrt_enc(d2[1] + e2_[1])[1]
+    mp, mz = max(pf, Q(0)) / (A_M * A_M), zf / B2
+    sig = sqrt_enc(A_M * A_M * mp * mp + B2 * mz * mz)[1]
+    num_lo = mp * P[0] + mz * Z - sig  # mp >= 0
+    nrm = sqrt_enc(mp * mp + mz * mz)
+    L = num_lo / nrm[1] if num_lo >= 0 else num_lo / nrm[0]
+    if L > U:
+        raise AssertionError("enclosure inverted")
+    return L, U
+
+
+def _foot_point(pq: Q, Z: Q) -> tuple[Q, Q]:
+    """An approximation of the nearest ellipsoid point (meridian coordinates), as exact
+    rationals. Exterior points: Newton on t from 0 (f decreasing and convex for t > -b^2,
+    f(0) >= 0), as in t0_oracle.true_height but written separately. Interior points: the
+    t = 0 projection is returned (L then comes out negative: not certified)."""
+    from decimal import Decimal, localcontext
+    with localcontext() as c:
+        c.prec = 100
+        a2 = Decimal(A_M.numerator) * Decimal(A_M.numerator)
+        b2 = Decimal(B2.numerator) / Decimal(B2.denominator)
+        pp = Decimal(pq.numerator) / Decimal(pq.denominator)
+        zz = Decimal(Z.numerator) / Decimal(Z.denominator)
+        z2 = zz * zz
+        t = Decimal(0)
+        f0 = pp / a2 + z2 / b2 - 1
+        if f0 > 0:
+            for _ in range(200):
+                ua, wb = a2 + t, b2 + t
+                f = pp * a2 / (ua * ua) + z2 * b2 / (wb * wb) - 1
+                df = -2 * pp * a2 / (ua * ua * ua) - 2 * z2 * b2 / (wb * wb * wb)
+                step = f / df
+                t -= step
+                if abs(step) <= a2 * Decimal("1e-80"):
+                    break
+        p = pp.sqrt()
+        fp, fz = p * a2 / (a2 + t), zz * b2 / (b2 + t)
+        return Q(fp), Q(fz)
+
+
+# ------------------------------------------------------------ strict E1 (obs. A)
+def e1_strict(hhat: float, L: Q, U: Q, alpha: Q, beta: Q) -> str:
+    """Strict E1: |hhat - h| <= alpha h + beta for the unknown true h in [L, U], L >= 0.
+    g(h) = |hhat - h| - alpha h - beta is convex, so PASS iff g(L) <= 0 and g(U) <= 0;
+    FAIL iff g > 0 on all of [L, U] (minimum at an endpoint or at h = hhat); else
+    INCONCLUSIVE (fail closed). No oracle term is added to the tolerance."""
+    if L < 0:
+        return "NOT-CERTIFIED-EXTERIOR"
+    H = Q(hhat)
+    g = lambda h: abs(H - h) - alpha * h - beta  # noqa: E731
+    if max(g(L), g(U)) <= 0:
+        return "PASS"
+    cand = [L, U] + ([H] if L <= H <= U else [])
+    if min(g(c) for c in cand) > 0:
+        return "FAIL"
+    return "INCONCLUSIVE"
+
+
+def e1_outer_r2(hhat: float, href: Q, delta: Q, alpha: Q, beta: Q) -> bool:
+    """Packet r2 §6.4 rule 6 as written (superseded): |hhat - href| <= eps(href + d) + d."""
+    return abs(Q(hhat) - href) <= alpha * (href + delta) + beta + delta

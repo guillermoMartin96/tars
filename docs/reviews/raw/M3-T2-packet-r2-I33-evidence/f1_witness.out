@@ -1,0 +1,45 @@
+=== F1 reproduction (Review 01): hidden cosine behind a complete trace ===
+  r2 count check: correct component True, mutant True; identical traces True; height difference 64.98137000016868 m
+  call multiset {'hypot': 1, 'atan2': 2, 'sin': 2, 'sqrt': 2, 'cos': 1}
+
+=== Witnessed evaluation: the I-33 §2 adversarial designs ===
+ point: equator 120 km
+  correct component (T0 spike)                                       -> E1-PASS
+  (1) correct trace, hidden incorrect cosine (+1e-5)                 -> SEQUENCE-NONCONFORMANT
+  (1b) hidden cosine 1 ulp high (within A-FP-2)                      -> SEQUENCE-NONCONFORMANT
+  (2) final sin traced but its value discarded (stale s used)        -> E1-PASS
+  (2b) hypot traced, value replaced after tracing                    -> E1-PASS
+  (3a) unobserved call supplies the value: same function bound at import -> E1-PASS
+  (3b) unobserved call supplies the value: numpy.cos                 -> E1-PASS
+  (3c) unobserved perturbed call (2^-40 relative) supplies the value -> SEQUENCE-NONCONFORMANT
+  (4) component omits one traced invocation (cos bound at import)    -> E1-PASS
+      (r2 count check on this mutant: rejects; the witness decision does not depend on tracing the component)
+ point: lat 0.6, 400 km
+  correct component (T0 spike)                                       -> E1-PASS
+  (1) correct trace, hidden incorrect cosine (+1e-5)                 -> SEQUENCE-NONCONFORMANT
+  (1b) hidden cosine 1 ulp high (within A-FP-2)                      -> E1-PASS
+  (2) final sin traced but its value discarded (stale s used)        -> E1-PASS
+  (2b) hypot traced, value replaced after tracing                    -> SEQUENCE-NONCONFORMANT
+  (3a) unobserved call supplies the value: same function bound at import -> E1-PASS
+  (3b) unobserved call supplies the value: numpy.cos                 -> E1-PASS
+  (3c) unobserved perturbed call (2^-40 relative) supplies the value -> SEQUENCE-NONCONFORMANT
+  (4) component omits one traced invocation (cos bound at import)    -> E1-PASS
+      (r2 count check on this mutant: rejects; the witness decision does not depend on tracing the component)
+
+=== (4') harness omission: a twin that does not route one call through lib ===
+  omission twin: 22 recorded calls, expected 23 -> completeness assertion KILLS the mutant
+
+=== Fault injection at every call index of the correct twin (completeness proof by test) ===
+  equator 120 km: 1 iterations, 8 calls; violation at each index detected: 8/8
+  lat 0.6, 400 km: 6 iterations, 23 calls; violation at each index detected: 23/23
+
+=== F5: a faulty math shared by component and twin ===
+  bitwise conformance component vs twin: True; height error 51.353 m
+  witness decision (shared faulty cos)                               -> PREMISE-NOT-OBSERVED (FAIL)
+
+=== Native hypot: contract observed, internals not ===
+  hypot +1 ulp (inside A-FP-2), shared                               -> E1-PASS
+  hypot x (1 + 2^-40) (outside A-FP-2), shared                       -> PREMISE-NOT-OBSERVED (FAIL)
+
+=== Instrumentation neutrality: twin through CheckedLib vs twin on raw math ===
+  identical bits: 5/5; twin (text transcription) vs T0 spike bitwise: 5/5

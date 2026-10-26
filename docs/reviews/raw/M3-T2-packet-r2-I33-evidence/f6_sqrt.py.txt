@@ -1,0 +1,89 @@
+"""I-33 F6 evidence (research, NOT T2 evidence): a correct-rounding test for sqrt that
+rejects sqrt(nextdown(1)) -> 1.0, which the I-31 probe's predicate accepts.
+
+I-31 predicate (premise_probe.py.txt line 70): |r - sqrt(a)| <= ulp(r) / 2. At a binade
+boundary the spacing below r = 2^k is half the spacing above it, so the predicate's
+half-ulp (taken from above) is twice the true half-gap below: a value just below 2^k
+whose correct rounding is nextdown(2^k) can be "rounded" to 2^k and still pass.
+Replacement (pog_lib.sqrt_is_rn): r is accepted iff sqrt(a) lies in r's rounding cell,
+between the midpoints with each neighbour, ties to even, decided by comparing a with the
+squared midpoints in exact rationals. No tolerance.
+Usage: python -I f6_sqrt.py
+"""
+import math
+import random
+import sys
+from fractions import Fraction as Q
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pog_lib as L  # noqa: E402
+
+
+def i31_predicate(a: float, r: float) -> bool:
+    from decimal import Decimal, localcontext
+    with localcontext() as c:
+        c.prec = 60
+        ref = Decimal(a).sqrt()
+    return abs(Q(r) - Q(ref)) <= Q(math.ulp(r)) / 2
+
+
+def main():
+    a = math.nextafter(1.0, 0.0)
+    print("=== Review 01 F6 reproduced ===")
+    print(f"  a = nextdown(1) = {a.hex()}; host math.sqrt(a) = {math.sqrt(a).hex()}")
+    print(f"  wrong result 1.0: I-31 predicate accepts it: {i31_predicate(a, 1.0)};"
+          f" exact RN test accepts it: {L.sqrt_is_rn(a, 1.0)}")
+    print(f"  correct result nextdown(1): I-31 predicate {i31_predicate(a, math.sqrt(a))};"
+          f" exact RN test {L.sqrt_is_rn(a, math.sqrt(a))}")
+    m_lo = (Q(math.nextafter(1.0, 0.0)) + 1) / 2
+    print(f"  why: the cell of 1.0 starts at (nextdown(1) + 1)/2 = 1 - 2^-54, squared"
+          f" 1 - 2^-53 + 2^-108 > a = 1 - 2^-53: {m_lo * m_lo > Q(a)}")
+
+    print("\n=== Uniqueness: of r and its 2 neighbours on each side, exactly one passes ===")
+    cases = []
+    for k in range(-1074, 1024, 7):
+        for b in (2.0**k, ):
+            if b == 0 or not math.isfinite(b):
+                continue
+            for v in (b, math.nextafter(b, 0.0), math.nextafter(b, math.inf),
+                      math.nextafter(math.nextafter(b, 0.0), 0.0)):
+                if v > 0 and math.isfinite(v):
+                    cases.append(v)
+    rng = random.Random(20261026)
+    cases += [rng.uniform(0.5, 2.0) for _ in range(2000)]
+    cases += [math.ldexp(rng.uniform(1.0, 2.0), rng.randint(-1074, 1023)) for _ in range(2000)]
+    unique = host_ok = i31_wrong_accepts = 0
+    for v in cases:
+        r = math.sqrt(v)
+        cand = [r]
+        for d in (-1, 1):
+            c = r
+            for _ in range(2):
+                c = math.nextafter(c, math.inf * d)
+                cand.append(c)
+        passing = [c for c in cand if L.sqrt_is_rn(v, c)]
+        unique += len(passing) == 1
+        host_ok += L.sqrt_is_rn(v, r)
+        i31_wrong_accepts += sum(i31_predicate(v, c) for c in cand if c != r)
+    print(f"  {len(cases)} arguments (powers of two and neighbours from 2^-1074 to 2^1023,"
+          f" 4000 random): exactly one passing candidate in {unique}; host sqrt correctly"
+          f" rounded in {host_ok}")
+    print(f"  wrong candidates the I-31 predicate accepts on the same set: {i31_wrong_accepts}")
+
+    print("\n=== Ties and special values ===")
+    print(f"  sqrt(+0) = +0: {L.sqrt_is_rn(0.0, 0.0)}; sqrt(-0) = -0: {L.sqrt_is_rn(-0.0, -0.0)};"
+          f" sqrt(-0) -> +0 rejected: {not L.sqrt_is_rn(-0.0, 0.0)}")
+    print(f"  sqrt(4) = 2 exactly: {L.sqrt_is_rn(4.0, 2.0)}; 2 + 1 ulp rejected: {not L.sqrt_is_rn(4.0, math.nextafter(2.0, 3.0))}")
+    # A midpoint between adjacent binary64 values is M 2^k with M odd and 2^53 <= M < 2^54;
+    # its square M^2 2^(2k) has an odd integer part M^2 >= 2^106, i.e. at least 107
+    # significant bits, so it is never a binary64 and no argument a can produce a tie. One
+    # instance, checked:
+    r = 1.5
+    m_hi = (Q(r) + Q(math.nextafter(r, 2.0))) / 2
+    print(f"  squared midpoint representable as binary64: {Q(float(m_hi * m_hi)) == m_hi * m_hi}"
+          " (one instance of the general argument above)")
+
+
+main()
