@@ -1,0 +1,32 @@
+=== F2: the allowance in the defined ulp metric ===
+  A(f) closed form = (UF f + nu)/ulp(f) exactly: 8190/8190
+  pog_lib constants: UF = 2^-51, nu = 2^-1073
+  checker = closed form (k = 1..5 ulps): 36855/36855 (4095 displacements not binary64, skipped)
+
+=== F2: Review 02 cases (f exact, fhat = f + 3 ulp(f)) ===
+  f = 1.5                      A(f) = 3 ulps; old 'iff f > 1.5 2^e' rule: FAIL; closed form: PASS; checker: PASS
+  f = 2^-1022 (least normal)   A(f) = 4 ulps; old 'iff f > 1.5 2^e' rule: FAIL; closed form: PASS; checker: PASS
+
+=== F2: corollary threshold (f = 1.5 2^e and the double below it, + 3 ulps) ===
+  f = 1.5 2^e passes and nextdown(1.5 2^e) fails for every e >= -969 (violations above it: 0)
+    e = -970: nextdown(1.5 2^e) + 3 ulps -> PASS (nu term 4.44e-16 ulps, shortfall 2^-51 = 4.44e-16)
+    e = -969: nextdown(1.5 2^e) + 3 ulps -> FAIL (nu term 2.22e-16 ulps, shortfall 2^-51 = 4.44e-16)
+
+  sin(1): fl(sin 1) + 3 nextafter steps is 2.9840 ulp(f) from the exact value; A(f) = 3.3659; checker PASS
+
+=== F3: draft DL-2 (true_height_enc) coverage on fixed rays r = 2^k d, k = 23..1020 ===
+  d = (1.0, 1.0, 1.0): first exception at k = 139; 882 of 882 k >= 139 raise; types ['ValueError']; twin intermediates finite at 882/882
+  d = (1.0, 0.0, 1.0): first exception at k = 140; 881 of 881 k >= 140 raise; types ['ValueError']; twin intermediates finite at 881/881
+  d = (1.0, 0.0, 0.1): first exception at k = 143; 878 of 878 k >= 143 raise; types ['ValueError']; twin intermediates finite at 878/878
+  d = (0.1, 0.0, 1.0): first exception at k = 143; 878 of 878 k >= 143 raise; types ['ValueError']; twin intermediates finite at 878/878
+  d = (0.3, 0.4, 1.0): first exception at k = 141; 880 of 880 k >= 141 raise; types ['ValueError']; twin intermediates finite at 880/880
+  d = (1.0, 0.0, 0.0): no exception for k = 23..1020
+  d = (0.0, 0.0, 1.0): no exception for k = 23..1020
+  d = (1.0, 1.0, 0.0): no exception for k = 23..1020
+
+=== F3: zero support direction (the origin; outside DQ-1's guarded domain) ===
+  origin: ZeroDivisionError (m = 0 is not an admissible support direction)
+
+=== F3: (2^1020, 2^1020, 2^1020) through the draft witness ===
+  twin intermediates finite: True; largest |intermediate| = 2^1020.79
+  witness_geodetic raised ValueError: sqrt of a negative number; no verdict returned (fails closed)

@@ -1,0 +1,180 @@
+"""I-34A evidence: Review 02 MINOR findings R2-F2 and R2-F3 (research, NOT T2 evidence).
+
+Imports the I-33 drafts (pog_lib, witness; copied beside this script as *.py) unchanged.
+
+Part F2  The A-FP-2 allowance expressed in an explicitly defined binary64 ulp metric.
+         ulp(f) = 2^(e' - 52), e' = max(floor(log2 |f|), -1022): the spacing of binary64
+         at the exact value f (subnormal spacing 2^-1074 below 2^-1022). For a real k >= 0,
+         a displacement |fhat - f| = k ulp(f) satisfies A-FP-2 (inclusive) iff
+             k <= A(f) = (UF |f| + nu) / ulp(f) = 2 |f| / 2^e' + 2^(-1021 - e').
+         Checked exactly against pog_lib.premise with an exact enclosure lo = hi = f
+         (f a binary64 value, so f is its own exact value). Reproduces the two Review 02
+         cases (f = 1.5, f = 2^-1022) and the e >= -969 corollary.
+Part F3  Coverage of the draft DL-2 construction (pog_lib.true_height_enc) inside the
+         twin's finite-intermediate domain: a fixed grid of rays, and the
+         (2^1020, 2^1020, 2^1020) case through witness_geodetic.
+
+Run: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -I i34a_minor.py <repo>/docs/science/experiments/m3-t0
+"""
+import math
+import sys
+from fractions import Fraction as Q
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, sys.argv[1])
+import t0_termination as tt  # noqa: E402
+import pog_lib as L  # noqa: E402
+import witness as W  # noqa: E402
+
+E1 = tt.rounding_allowances()
+ALPHA, BETA = E1["alpha"], E1["beta_m"]
+
+
+def eprime(f: Q) -> int:
+    """max(floor(log2 f), -1022) for exact f > 0."""
+    e = f.numerator.bit_length() - f.denominator.bit_length()
+    if Q(2) ** e > f:
+        e -= 1
+    return max(e, -1022)
+
+
+def ulp(f: Q) -> Q:
+    return Q(2) ** (eprime(f) - 52)
+
+
+def allowance(f: Q) -> Q:
+    """Closed form A(f), derived separately from pog_lib.premise."""
+    ep = eprime(f)
+    return 2 * f / Q(2) ** ep + Q(2) ** (-1021 - ep)
+
+
+def premise_at(f: Q, k: int) -> tuple[str, str] | None:
+    """(checker, closed form) for fhat = f + k ulp(f), or None if fhat is not binary64."""
+    exact = f + k * ulp(f)
+    try:
+        fhat = float(exact)
+    except OverflowError:  # beyond DBL_MAX: not binary64
+        return None
+    if not math.isfinite(fhat) or Q(fhat) != exact:
+        return None
+    return L.premise(fhat, f, f), ("PASS" if k <= allowance(f) else "FAIL")
+
+
+def old_rule(f: Q) -> str:
+    """The r2/I-33 wording: '3 ulps passes iff f > 1.5 x 2^e'."""
+    return "PASS" if f > Q(3, 2) * Q(2) ** eprime(f) else "FAIL"
+
+
+def part_f2():
+    print("=== F2: the allowance in the defined ulp metric ===")
+    # 1. Closed form against the direct quotient, across every binade and the subnormals
+    samples = []
+    for e in range(-1022, 1024):
+        b = Q(2) ** e
+        samples += [b, Q(3, 2) * b, Q(3, 2) * b - Q(2) ** (e - 52), 2 * b - Q(2) ** (e - 52)]
+    samples += [Q(k, 2**1074) for k in (1, 2, 3, 2**51, 3 * 2**50, 2**52 - 1)]
+    bad = sum(allowance(f) != (L.UF * f + L.NU) / ulp(f) for f in samples)
+    print(f"  A(f) closed form = (UF f + nu)/ulp(f) exactly: {len(samples) - bad}/{len(samples)}")
+    print(f"  pog_lib constants: UF = 2^{math.log2(L.UF):.0f}, nu = 2^{math.log2(L.NU):.0f}")
+
+    # 2. Checker against the closed form for k = 1 .. 5 at every sample
+    agree = tested = skipped = 0
+    for f in samples:
+        for k in range(1, 6):
+            r = premise_at(f, k)
+            if r is None:
+                skipped += 1
+                continue
+            tested += 1
+            agree += r[0] == r[1]
+    print(f"  checker = closed form (k = 1..5 ulps): {agree}/{tested}"
+          f" ({skipped} displacements not binary64, skipped)")
+
+    # 3. The two Review 02 cases
+    print("\n=== F2: Review 02 cases (f exact, fhat = f + 3 ulp(f)) ===")
+    for label, f in (("f = 1.5", Q(3, 2)), ("f = 2^-1022 (least normal)", Q(1, 2**1022))):
+        chk, cf = premise_at(f, 3)
+        print(f"  {label:28s} A(f) = {float(allowance(f)):.17g} ulps;"
+              f" old 'iff f > 1.5 2^e' rule: {old_rule(f)}; closed form: {cf}; checker: {chk}")
+
+    # 4. Corollary: for e >= -969, k = 3 passes iff f >= 1.5 2^e
+    print("\n=== F2: corollary threshold (f = 1.5 2^e and the double below it, + 3 ulps) ===")
+    lowest_ok, viol = None, []
+    for e in range(-1022, 1024):
+        b = Q(2) ** e
+        at, below = Q(3, 2) * b, Q(3, 2) * b - Q(2) ** (e - 52)
+        r_at, r_below = premise_at(at, 3), premise_at(below, 3)
+        corollary = r_at[0] == "PASS" and r_below[0] == "FAIL"
+        if corollary and lowest_ok is None:
+            lowest_ok = e
+        if lowest_ok is not None and not corollary:
+            viol.append(e)
+    print(f"  f = 1.5 2^e passes and nextdown(1.5 2^e) fails for every e >= {lowest_ok}"
+          f" (violations above it: {len(viol)})")
+    for e in (lowest_ok - 1, lowest_ok):
+        below = Q(3, 2) * Q(2) ** e - Q(2) ** (e - 52)
+        print(f"    e = {e}: nextdown(1.5 2^e) + 3 ulps -> {premise_at(below, 3)[0]}"
+              f" (nu term {float(Q(2) ** (-1021 - e)):.3g} ulps, shortfall 2^-51 = {2**-51:.3g})")
+
+    # 5. Starting error: a rounded value of an irrational f is not f
+    lo, hi = L.sin_enc(1.0)
+    f = (lo + hi) / 2
+    fhat = math.sin(1.0)
+    for _ in range(3):
+        fhat = math.nextafter(fhat, math.inf)
+    print(f"\n  sin(1): fl(sin 1) + 3 nextafter steps is {float((Q(fhat) - f) / ulp(f)):.4f} ulp(f)"
+          f" from the exact value; A(f) = {float(allowance(f)):.4f}; checker {L.premise(fhat, lo, hi)}")
+
+
+def part_f3():
+    print("\n=== F3: draft DL-2 (true_height_enc) coverage on fixed rays r = 2^k d, k = 23..1020 ===")
+    dirs = [(1.0, 1.0, 1.0), (1.0, 0.0, 1.0), (1.0, 0.0, 0.1), (0.1, 0.0, 1.0),
+            (0.3, 0.4, 1.0), (1.0, 0.0, 0.0), (0.0, 0.0, 1.0), (1.0, 1.0, 0.0)]
+    for d in dirs:
+        first, raised, kinds, finite_twin = None, 0, set(), 0
+        for k in range(23, 1021):
+            r = tuple(math.ldexp(c, k) for c in d)
+            *_, inter = W.twin_geodetic(*r, W.CheckedLib(math))
+            twin_ok = all(math.isfinite(v) for v in inter)
+            try:
+                lo, hi = L.true_height_enc(*r)
+                assert lo <= hi
+            except Exception as exc:  # noqa: BLE001  (recorded, never converted)
+                raised += 1
+                kinds.add(type(exc).__name__)
+                finite_twin += twin_ok
+                first = k if first is None else first
+        if first is None:
+            print(f"  d = {d}: no exception for k = 23..1020")
+        else:
+            print(f"  d = {d}: first exception at k = {first}; {raised} of {1021 - first} k >= {first} raise;"
+                  f" types {sorted(kinds)}; twin intermediates finite at {finite_twin}/{raised}")
+
+    print("\n=== F3: zero support direction (the origin; outside DQ-1's guarded domain) ===")
+    try:
+        L.true_height_enc(0.0, 0.0, 0.0)
+        print("  origin: no exception")
+    except Exception as exc:  # noqa: BLE001
+        print(f"  origin: {type(exc).__name__} (m = 0 is not an admissible support direction)")
+
+    print("\n=== F3: (2^1020, 2^1020, 2^1020) through the draft witness ===")
+    r = (2.0**1020,) * 3
+    *_, inter = W.twin_geodetic(*r, W.CheckedLib(math))
+    print(f"  twin intermediates finite: {all(math.isfinite(v) for v in inter)};"
+          f" largest |intermediate| = 2^{max(math.log2(abs(v)) for v in inter if v):.2f}")
+
+    def component(p):
+        lat, h, *_ = W.twin_geodetic(*map(float, p), W.CheckedLib(math))
+        return lat, h
+
+    try:
+        res = W.witness_geodetic(component, r, ALPHA, BETA)
+        print(f"  witness_geodetic returned {res[0]!r}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"  witness_geodetic raised {type(exc).__name__}: {exc}; no verdict returned (fails closed)")
+
+
+if __name__ == "__main__":
+    part_f2()
+    part_f3()

@@ -22,6 +22,12 @@
   - the reviewed text is preserved at `0e37db6`;
   - the correction map is §16, and the correction record is `docs/reviews/M3-T2-packet-r2-review-01-corrections.md`;
   - evidence is in `docs/reviews/raw/M3-T2-packet-r2-I33-evidence/` (research, not T2 evidence).
+- **Corrected under I-34A** (owner/Tech Lead, 2026-10-26), for the three MINOR findings of independent Review 02 (`docs/reviews/M3-T2-packet-r2-review-02.md`, PASS):
+  - the corrections are marked *(I-34A, R2-Fn)*;
+  - the Review 02 text is preserved at `5f96119`;
+  - the record is `docs/reviews/M3-T2-packet-r2-review-02-corrections.md`, and the map is §16;
+  - evidence is in `docs/reviews/raw/M3-T2-packet-r2-I34A-evidence/`.
+  - No decision or threshold is changed, and no acceptance requirement is loosened. DL-2 gains one recorded review obligation: a supported domain and failure reporting (R2-F3).
 
   No owner decision is made or changed.
 
@@ -70,9 +76,9 @@ P6 and P7 are not T2 prerequisites (Q-GATE). P6's open items, the geodetic-drag 
 | ID | Deliverable | Needed for |
 |---|---|---|
 | DL-1 | **Elementary-function premise oracle (O-1)**, test-side. *(Corrected under I-33, F2 and observation C.)* For each traced call it returns a **rigorous rational enclosure** [lo, hi] of the exact value of `sin` or `cos` (\|x\| ≤ 2), `atan2` (x ≥ +0), `exp`, or the exact √(x² + y²). Each enclosure has a written derivation: series remainders, directed rounding and exact identities at zeros. Out-of-domain arguments are refused. The premise is decided over the whole enclosure (§6.4 rule 1): PASS, FAIL or INCONCLUSIVE, and INCONCLUSIVE fails closed. A draft with derivations exists ([P], I-33; **unreviewed**) | POG rows (§6.3) |
-| DL-2 | **True-height oracle (O-2)**, test-side. *(Corrected under I-33, observation A.)* It returns an enclosure [L, U] of the geodetic height of a binary64 point on the model ellipsoid (a = 6378137, e2 the binary64 value of DQ-1 step 1):<br>• **U:** the distance to a point exactly on the ellipsoid;<br>• **L:** the support-function bound (m·r − σ(m))/\|m\|, which certifies an exterior point when L ≥ 0.<br>The method needs no convergence argument: any foot-point approximation gives a valid enclosure, and its quality only affects the width. A draft with derivations exists ([P], I-33; **unreviewed**) | U-17, U-18, PM-5, PM-6, U-19 (c) |
+| DL-2 | **True-height oracle (O-2)**, test-side. *(Corrected under I-33, observation A.)* It returns an enclosure [L, U] of the geodetic height of a binary64 point on the model ellipsoid (a = 6378137, e2 the binary64 value of DQ-1 step 1):<br>• **U:** the distance to a point exactly on the ellipsoid;<br>• **L:** the support-function bound (m·r − σ(m))/\|m\|, which certifies an exterior point when L ≥ 0.<br>The method needs no convergence argument **provided the construction is admissible** *(corrected under I-34A, R2-F3)*: the constructed surface point lies exactly on the ellipsoid (so its constructed coordinate lies within the ellipse's range), and the support direction m is nonzero. Given an admissible construction, any foot-point approximation gives a valid enclosure, and its quality only affects the width. A draft with derivations exists ([P], I-33; **unreviewed**).<br>• **The draft's coverage is not established** (I-34A, R2-F3). With its fixed Newton budget it is not admissible throughout the twin's finite-intermediate domain (§6.4 rule 5). It raises `ValueError` while constructing the surface point at (2¹⁰²⁰, 2¹⁰²⁰, 2¹⁰²⁰), where the twin's intermediates are finite. On every sampled off-axis ray it raises from \|r\| ≈ 2¹³⁹ upward; on the sampled axis and equatorial rays it does not. At the origin (m = 0, outside DQ-1's guarded domain) it raises `ZeroDivisionError` (`i34a_minor.out`). These samples are corroboration, not a supported-domain bound.<br>• An oracle exception **fails closed**: no enclosure and no verdict. It is never converted into a pass or an enclosure (§6.3 step 6). A reviewed supported domain, and how oracle failure is reported, are DL-2 implementation-review obligations (I-33 derivations §5) | U-17, U-18, PM-5, PM-6, U-19 (c) |
 | DL-3 | **Witness harness**, test-side. *(Replaced under I-33, F1.)* It supplies the library object through which **the DL-4 twin** makes every elementary call. It records each call's arguments and result, and returns the result object unchanged. It checks:<br>• the twin's call list against the list DQ-1 implies for the iteration count;<br>• that every arithmetic and library intermediate is finite (observation B);<br>• completeness, by a **fault-injection self-test**: a definite premise violation injected at each call index in turn must be reported.<br>The component is **not** instrumented. Tracing the component may be kept as a diagnostic, but no conclusion rests on it (§6.3) | POG rows |
-| DL-4 | **Sequence-conformance twin**: the DQ-1 and DQ-2 operation sequences re-coded in the test from the packet r1 §5 text, not from the component, and compared **bitwise** with the component on the same platform, comparing **both h and φ** *(I-33, F5)*. Under POG it is also the **witness**: the evaluation whose premises DL-3 observes (§6.3). Conformance shows that the component's outputs equal the specified sequence's on that platform. **It does not show numerical correctness**: a faulty library shared by the component and the twin passes conformance (§6.3, F5) | DQ-1/DQ-2 conformance; POG witness; height-equivalent mutants (§8.3) |
+| DL-4 | **Sequence-conformance twin**: the DQ-1 and DQ-2 operation sequences re-coded in the test from the packet r1 §5 text, not from the component, and compared **bitwise** with the component on the same platform, comparing **both h and φ** *(I-33, F5)*. Under POG it is also the **witness**: the evaluation whose premises DL-3 observes (§6.3). Conformance shows that the component's outputs equal the specified sequence's on that platform. **It does not show numerical correctness**: a faulty library shared by the component and the twin passes conformance (§6.3, F5). *(I-34A, R2-F1.)* It is **output** conformance. It does not show which operations the component performed, nor that it avoids NumPy: a component using `numpy.cos` matches the twin bit for bit at all 631 exterior points (`pog_pipeline.out` (3b)). Throughout this packet, "sequence conformance" (DL-4, G-T2-10, D-8) means this output equality. Internal sequence and arithmetic requirements are verified by operation-by-operation source inspection (r1 §5 DQ-1, "Primary") | DQ-1/DQ-2 conformance; POG witness; height-equivalent mutants (§8.3) |
 | DL-5 | **Environment record** in every gate-evidence run. *(Expanded under I-33, F4.)* The fields are in §7.1, each marked as observed, partly observed or not observable. Recording identifies an environment; **it does not prove numerical reproducibility** | §7 |
 | DL-6 | The §3.9 deliverable derivations T2 chooses to complete (B-3 … B-8). Rows without a reviewed derivation stay reported (G-T2-3a) | As listed in strategy §3.9 |
 | DL-7 | **J-LM1-even record**: the CPython source argument for `hypot` evenness (§6.5), re-checked against the exact patch version used on each CI platform. *(Corrected under I-33, F4.)* It is also re-checked against the interpreter build record of §7.1: the build-configuration fields and the executable digest | U-19 (a′) |
@@ -85,7 +91,7 @@ P6 and P7 are not T2 prerequisites (Q-GATE). P6's open items, the geodetic-drag 
 | Density function `density(h_m) → ρ` | Non-finite input: a distinct error. Finite h_m < 0: the typed atmosphere-domain error, decided **in metres before conversion**. Then the DQ-2 km route exactly | DQ-2; P4; P5 |
 | Geodetic function `geodetic(r) → (h, φ)` | The DQ-1 (α) sequence exactly. The domain guard rejects non-finite input, the origin and the evolute region. Returns the latitude with h (P2) | DQ-1; P8; P2 |
 | Drag component | Constructor (C_d, A): positive, finite, owned binary64, immutable. Mass from `ForceContext`. v_rel = v − ω_E Ẑ × r. The T0 E4 coefficient sequence, or B-1 and E4b re-derived | DQ-6; R-DRAG |
-| **Testability requirements** *(new; PROPOSED, D-6; corrected under I-33, F1)* | (i) *Withdrawn under I-33.* Module-attribute `math` calls no longer support any conclusion: POG observes the twin, not the component (§6.3), so how the component binds its functions does not matter. (ii) The drag component's v_rel is observable to tests, or is recomputed by the identical sequence (strategy U-4 notes). (iii) The specified sequences use Python `float` scalars and `math`, and NumPy is not used for their arithmetic (§7 RQ-6). This is a **conformance** requirement: DL-4 enforces it at the tested points | [R] §6.4, §7 |
+| **Testability requirements** *(new; PROPOSED, D-6; corrected under I-33, F1)* | (i) *Withdrawn under I-33.* Module-attribute `math` calls no longer support any conclusion: POG observes the twin, not the component (§6.3), so how the component binds its functions does not matter. (ii) The drag component's v_rel is observable to tests, or is recomputed by the identical sequence (strategy U-4 notes). (iii) The specified sequences use Python `float` scalars and `math`, and NumPy is not used for their arithmetic (§7 RQ-6). This is an **implementation** requirement, verified by operation-by-operation source inspection (r1 §5 DQ-1, "Primary"). *(Corrected under I-34A, R2-F1: r2/I-33 said "DL-4 enforces it at the tested points". DL-4 cannot: it compares outputs only, and a `numpy.cos` component matches the twin bit for bit, `pog_pipeline.out` (3b).)* DL-4 adds output conformance at the tested points | [R] §6.4, §7 |
 
 No interface for T3 items (`reentry`, the P3 precedence, P1 admissibility, the P2 crossing event, the outcome mapping of the P4 error, scenario v3) is introduced in T2.
 
@@ -190,7 +196,7 @@ Reproduced in I-33: the r2 count check passes that mutant (`f1_witness.out`). No
 - Any cross-platform equality (§7 RQ-3).
 - Any threshold on trajectories (T4/T6).
 - Height-equivalent latitude defects (§8.3). Height is stationary in latitude at the solution, which E1 (i)–(ii) uses: truncation after two or three iterations and a 1e-9 rad stopping tolerance both stayed within 0.24 ε_h in the probe. These are caught by DL-4 instead.
-- *(I-33, F5)* **Numerical correctness from conformance alone.** Bitwise conformance shows that the execution sequence agrees with the twin's. A faulty component and a faulty reference can agree exactly: a shared faulty cosine gives identical bits and a 51 m error (`f1_witness.out`). The accuracy claim comes only from steps 4 and 5 (premise and E1), never from conformance.
+- *(I-33, F5)* **Numerical correctness from conformance alone.** Bitwise conformance shows that the component's outputs equal the twin's evaluation of the specified sequence. It does not show which operations produced them *(I-34A, R2-F1)*. A faulty component and a faulty reference can agree exactly: a shared faulty cosine gives identical bits and a 51 m error (`f1_witness.out`). The accuracy claim comes only from steps 4 and 5 (premise and E1), never from conformance.
 
 **Promotion under the policy.** POG supplies P-i only. Each row still needs:
 - P-ii: its criterion reviewed in the T2 independent review, including DL-1 … DL-3 and their error derivations;
@@ -201,7 +207,18 @@ D-1 asks the owner to accept POG as a **route** to P-i. It does not promote any 
 ### 6.4 POG rules (requirements on DL-1 … DL-4) *(rules 1 and 3–7 corrected or added under I-33)*
 1. **Premise decision over the oracle's enclosure, failing closed** *(F2; observation C)*.
    - A-FP-2 is |f̂ − f| ≤ UF·|f| + ν, with UF = 2·2⁻⁵² and ν = 2·2⁻¹⁰⁷⁴ (`t0_termination.py` lines 455–457). It is a relative-plus-absolute bound, **not a fixed number of ulps**.
-   - For a normal f in [2ᵉ, 2ᵉ⁺¹), it allows 2·f/2ᵉ ulps, which is between 2 and 4 depending on where f lies in the binade. So 3 ulps passes iff f > 1.5·2ᵉ (sin(1) + 3 ulps = 1.77 units: inside).
+   - **Ulp metric** *(corrected under I-34A, R2-F2)*.
+     - **Definition:** ulp(f) = 2^(e′ − 52), with e′ = max(⌊log₂ |f|⌋, −1022). This is the binary64 spacing at the exact value f, and it is 2⁻¹⁰⁷⁴ below 2⁻¹⁰²².
+     - **Exact allowance:** a displacement |f̂ − f| = k·ulp(f) satisfies A-FP-2 iff k ≤ A(f), where A(f) = (UF·|f| + ν)/ulp(f) = 2·|f|/2^e′ + 2^(−1021 − e′). The comparison is inclusive.
+       - The first term is between 2 (f = 2ᵉ) and 4 (f → 2ᵉ⁺¹), depending on where f lies in the binade.
+       - The second term, ν, is 2 ulps at e′ = −1022 and halves with each binade above.
+     - **Review 02's two cases:**
+       - f = 1.5 gives A = 3 + 2⁻¹⁰²¹, so 1.5 + 3 ulps passes;
+       - f = 2⁻¹⁰²² gives A = 4, so 2⁻¹⁰²² + 3 ulps passes.
+     - **Corollary, for exactly representable f only:** for e ≥ −969, 3 ulps passes iff f ≥ 1.5·2ᵉ. Below that, ν admits more.
+     - **Withdrawn:** r2/I-33's "3 ulps passes iff f > 1.5·2ᵉ" was wrong at equality and near underflow.
+     - **Starting error:** when the exact f is not binary64 (the usual case), "fl(f) + k ulps" is not a displacement of k·ulp(f). sin(1) + 3 nextafter steps lies 2.984·ulp(f) from sin 1. That is 1.77 × 2⁻⁵² relative, against UF = 2 × 2⁻⁵²: inside, since 2.984 ≤ A = 3.366.
+     - **Expected outcomes** therefore always come from the exact inequality, never from an ulp count. The checker, UF, ν and the 32 controls are unchanged (`i34a_minor.out`: closed form = checker at 36 855/36 855 displacements).
    - DL-1 returns an enclosure [lo, hi] of f. The decision uses convexity, so it is exact over the whole enclosure:
      - **PASS** iff the inequality holds at both ends of the enclosure;
      - **FAIL** iff it is violated at every point of the enclosure;
@@ -226,7 +243,7 @@ D-1 asks the owner to accept POG as a **route** to P-i. It does not promote any 
    - E1 applies only at true height ≥ 0, which is certified by O-2's lower end L ≥ 0. Points that are not certified are reported (P8).
    - E1 also needs **no overflow** ("Supported domain: points outside the ellipsoid, no overflow", `t0_termination.py`; "every overflow is outside the domain", DR-0029). Finite inputs do not imply finite results: (DBL_MAX, DBL_MAX, 0) overflows in `hypot`, and (DBL_MAX, 0, DBL_MAX) overflows in p·c + z·s; T0 returns h = ∞ for both.
    - The twin therefore requires every arithmetic and library intermediate to be finite. Otherwise the result is **OUT-OF-DOMAIN**: reported, and no bound applied.
-   - A sufficient condition is max(|x|, |y|, |z|) ≤ 2¹⁰²⁰. It is drafted in `observations.out` B, where the box corners give finite intermediates (largest 2^1020.79).
+   - A sufficient condition is max(|x|, |y|, |z|) ≤ 2¹⁰²⁰. It is drafted in `observations.out` B, where the box corners give finite intermediates (largest 2^1020.79). This condition is the **twin's** domain, not DL-2's coverage: the draft DL-2 raises inside it (§2.2 DL-2; I-34A, R2-F3).
    - Production behaviour on such inputs is unchanged by this packet: DQ-1's arithmetic, then DQ-2's distinct non-finite-height error (P4). No accuracy claim is made there.
 6. **Reference and comparison semantics** *(observation A)*.
    - **Exact-answer points** (P8 (a)) use their exact reference.
@@ -347,7 +364,7 @@ Source [S]: CPython v3.12.15 `Modules/mathmodule.c`, sha256 `436a01da195e3c2b957
 | RQ-3 | **No cross-platform bitwise expectation** for any output that depends on `exp`, `sin`, `cos`, `atan2` or `hypot`. Cross-platform differences are measured in ulps (X-P3) and reported. No tolerance is borrowed (DR-0025 §7; ADR-0008 TL-7 by analogy) | Report |
 | RQ-4 | **Environment record** (DL-5, §7.1) with all gate evidence. *(Corrected under I-33, F4.)* The source-dependent claims are of two kinds, and the record serves them differently:<br>(a) **Source arguments** (U-19 (a′), DL-7) depend on the CPython source **and** the interpreter build. The patch version is necessary but not sufficient: the same version built with other flags or compilers is a different artefact. They are valid only for a reviewed (patch version, build configuration, executable digest). Any unreviewed value is a stop condition for those rows.<br>(b) **POG rows** do not rest on the environment record. They re-observe their premises on every run (RQ-8), so an environment change cannot invalidate a passing run, though it can make a premise fail (a stop). For these rows the record serves traceability and replay.<br>CI installs the latest 3.12.x (`.python-version` = `3.12`). **D-5** chooses between pinning and recording plus re-checking; this packet recommends recording plus stopping on unreviewed values, with no CI or runtime change | Gate (stop on unreviewed build, for (a)) |
 | RQ-5 | A-FP-1 at run time on each platform (X-P4): round-to-nearest-even, gradual underflow, no flush-to-zero | Gate (E) |
-| RQ-6 | The DQ-1, DQ-2 and DQ-6 sequences are evaluated in Python `float` scalars and `math` calls, operation for operation. CPython does not contract `a*b + c` into FMA. NumPy is not used for their arithmetic, because a NumPy dot or norm may use FMA or SIMD reordering (A-FP-3) | Gate by inspection and DL-4 |
+| RQ-6 | The DQ-1, DQ-2 and DQ-6 sequences are evaluated in Python `float` scalars and `math` calls, operation for operation. CPython does not contract `a*b + c` into FMA. NumPy is not used for their arithmetic, because a NumPy dot or norm may use FMA or SIMD reordering (A-FP-3) | Gate by inspection. DL-4 checks output conformance only and cannot show that NumPy is absent *(I-34A, R2-F1)* |
 | RQ-7 | M1/M2 regression gates stay same-platform (R-1 … R-3), as approved | Gate |
 | RQ-8 | POG premises are observed **separately on each CI platform**. A premise failure on any platform for a gated row is a stop condition, never a skip | Gate / stop |
 
@@ -401,7 +418,7 @@ The red and green runs are recorded in the T2 report. A test that passes before 
     - a perturbation proved outside A-FP-2, for example sin(x) with sin x = 0.5(1 + 1.7e-12), at the bottom of its binade, plus 3 ulps (3.16 units of 2⁻⁵²);
     - sin(1) + 5 ulps (allowance 3.37 ulps);
     - exp(−ln 2 + 1e-9) + 3 ulps;
-  - **positive control (must PASS):** sin(1) + 3 ulps (1.77 units: inside A-FP-2). The r2 control "3 ulp off must be reported" is **withdrawn**, because it would have rejected a correct checker;
+  - **positive control (must PASS):** sin(1) + 3 ulps (1.77 × 2⁻⁵² relative, against UF = 2 × 2⁻⁵²: inside A-FP-2; §6.4 rule 1, I-34A). The r2 control "3 ulp off must be reported" is **withdrawn**, because it would have rejected a correct checker;
   - **boundary pairs:** for sin, cos, atan2 and exp, the largest and the smallest passing double must PASS, and the next double outward must FAIL;
   - **subnormal regime:** exp(−744) ± 1 or 2 subnormal ulps. The absolute term ν decides: −2 and ±1 PASS, +2 and +3 FAIL;
   - **oracle uncertainty:** an enclosure straddling the window edge must give INCONCLUSIVE, which is treated as PREMISE-NOT-OBSERVED;
@@ -530,6 +547,13 @@ Unchanged from r1 §10:
 | D-7 *(revised under I-33, observation A)* | P8 (a′): gate forward-constructed points against **O-2's enclosure of the true height of the binary64 point** (DL-2), under **strict E1** (§6.4 rule 6), instead of deriving δ_f | Approve, subject to DL-2's review. If DL-2's bound cannot be established, the alternatives are:<br>(a) derive δ_f (strategy B-4);<br>(b) keep U-18 report-only.<br>Both are owner choices | U-18 stays report-only until δ_f is derived |
 | D-8 *(clarified under I-33, F5)* | Make DL-4 (bitwise conformance with the DQ-1/DQ-2 sequences, same platform, both h and φ) a **gate** under G-T2-10. Today X-D1 (bitwise vs the T0 spike) is reported only. It is a **sequence-conformance** gate, never an accuracy gate | Approve: it is the only killer of height-equivalent latitude mutants (§8.3), the main killer of density formula defects (§6.6), and the witness link of POG (§6.3) | Those mutants survive; DQ-1 conformance rests on inspection alone; POG cannot run |
 
+**Reading note (I-34A, R2-F1; no decision is changed).** D-6 calls item (iii) "a conformance requirement", and its "if not approved" column says "RQ-6 enforced by DL-4 alone". Read both as corrected in §3 (iii) and §7 RQ-6:
+- item (iii) is verified by source inspection;
+- DL-4 shows output conformance only;
+- RQ-6 is not enforced by DL-4 in any case.
+
+"Sequence conformance" in D-8 has the meaning defined in §2.2 DL-4. Each decision's proposal and recommendation are unchanged, and D-0 … D-8 remain PROPOSED.
+
 ## 15. What the T2 authorization itself would need to state
 1. The base: a named `main` SHA (at least `0a9c040`), re-verified at T2 start (PC-6).
 2. That T2 implements r1 §2 within r1 §3–§4, under the DQ-1 … DQ-6 decisions, with the §3 interfaces.
@@ -566,5 +590,22 @@ The reviewed text is preserved at `0e37db6`. The dispositions are in `docs/revie
 - every owner decision: DR-0024 … DR-0029, DQ-1 … DQ-6, P1–P5 and P7–P9 DECIDED, P6 NOT FULLY DECIDED, P6(b) OPEN, X-1 NOT AUTHORIZED.
 
 D-0 … D-8 remain **PROPOSED**.
+
+### 16.1 I-34A correction map (Review 02 MINOR findings)
+The Review 02 text is preserved at `5f96119`. The record is `docs/reviews/M3-T2-packet-r2-review-02-corrections.md`.
+
+| Review 02 item | Where corrected |
+|---|---|
+| M3T2P2-R2-F1 (MINOR) DL-4 enforcement overclaim | §2.2 DL-4; §3 testability (iii); §6.3 ("What POG does not justify", F5 item); §7 RQ-6; reading note after the §14 table (D-6, D-8 rows unchanged) |
+| M3T2P2-R2-F2 (MINOR) 3-ulp rule | §6.4 rule 1 (ulp metric, exact allowance, corollary, starting error); §8.2 positive control |
+| M3T2P2-R2-F3 (MINOR) DL-2 admissibility | §2.2 DL-2; §6.4 rule 5 |
+| M3T2P2-R2-F4 (NOTE) fingerprint fields | Investigated only; a correction is proposed in the record and **not applied** (I-34A §3) |
+
+**Unchanged by I-34A:**
+- every threshold, constant and control;
+- every DL acceptance requirement. None is loosened. DL-2 records one added review obligation (R2-F3), as Review 02 recommended;
+- D-0 … D-8;
+- the readiness findings M3T2R-R2-F1 … F3 (closed under I-25) and the Readiness Review 03 conclusions;
+- the I-33 evidence and the Review 01 and Review 02 records.
 
 **T2 implementation remains NOT AUTHORIZED.**

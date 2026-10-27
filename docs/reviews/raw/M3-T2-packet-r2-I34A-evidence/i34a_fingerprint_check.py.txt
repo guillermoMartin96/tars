@@ -1,0 +1,58 @@
+"""I-34A fingerprint investigation (verification only; it regenerates no fingerprint).
+
+1. Lists the fields that differ between the committed I-33 fingerprint and the reviewer's
+   Review 02 rerun.
+2. Re-reads only those fields on this host with the same sysctl names, and compares them
+   with the committed values.
+3. Shows how the I-33 `run()` helper (copied verbatim from f4_fingerprint.py.txt) records
+   a failing command: stdout only, so a failure becomes an observed empty string.
+
+Run: .venv/bin/python -I i34a_fingerprint_check.py <committed f4_fingerprint.out> <reviewer_f4_fingerprint.out>
+"""
+import json
+import subprocess
+import sys
+
+
+def run(cmd):  # verbatim from I-33 f4_fingerprint.py.txt lines 32-36
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, timeout=10).stdout.strip()
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"[U] {type(exc).__name__}"
+
+
+def fields(path):
+    """Flatten the JSON objects in a fingerprint .out into {key: value}."""
+    text = open(path, encoding="utf-8").read()
+    out, dec, i = {}, json.JSONDecoder(), text.find("{")
+    while i != -1:
+        obj, end = dec.raw_decode(text, i)
+        stack = [obj]
+        while stack:
+            o = stack.pop()
+            for k, v in o.items():
+                if isinstance(v, dict):
+                    stack.append(v)
+                else:
+                    out[k] = v
+        i = text.find("{", end)
+    return out
+
+
+SYSCTL = {"[O] brand": "machdep.cpu.brand_string", "[P] features": "machdep.cpu.features",
+          "[P] leaf7 features": "machdep.cpu.leaf7_features"}
+
+committed, reviewer = fields(sys.argv[1]), fields(sys.argv[2])
+diff = sorted(k for k in committed.keys() | reviewer.keys() if committed.get(k) != reviewer.get(k))
+print(f"fields compared: {len(committed)}; differing: {diff}")
+for k in diff:
+    print(f"  {k}: committed {len(str(committed.get(k)))} chars, reviewer {reviewer.get(k)!r}")
+
+print("\nindependent re-read on this host (sysctl, exit status kept):")
+for k in diff:
+    p = subprocess.run(["sysctl", "-n", SYSCTL[k]], capture_output=True, text=True, timeout=10)
+    print(f"  {SYSCTL[k]}: rc={p.returncode}; equals committed value: {p.stdout.strip() == committed[k]}")
+
+print("\nI-33 run() on a failing sysctl query:")
+p = subprocess.run(["sysctl", "-n", "machdep.cpu.no_such_field"], capture_output=True, text=True, timeout=10)
+print(f"  rc={p.returncode}, stderr non-empty: {bool(p.stderr.strip())}; run() records {run(['sysctl', '-n', 'machdep.cpu.no_such_field'])!r}")

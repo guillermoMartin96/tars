@@ -1,0 +1,12 @@
+fields compared: 44; differing: ['[O] brand', '[P] features', '[P] leaf7 features']
+  [O] brand: committed 40 chars, reviewer ''
+  [P] features: committed 281 chars, reviewer ''
+  [P] leaf7 features: committed 147 chars, reviewer ''
+
+independent re-read on this host (sysctl, exit status kept):
+  machdep.cpu.brand_string: rc=0; equals committed value: True
+  machdep.cpu.features: rc=0; equals committed value: True
+  machdep.cpu.leaf7_features: rc=0; equals committed value: True
+
+I-33 run() on a failing sysctl query:
+  rc=1, stderr non-empty: True; run() records ''
