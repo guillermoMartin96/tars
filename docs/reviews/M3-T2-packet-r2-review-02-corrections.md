@@ -33,7 +33,7 @@
 ## 2. R2-F4 fingerprint fields (investigation only, I-34A §3)
 1. **Which fields are empty:** the reviewer's rerun has `[O] brand`, `[P] features` and `[P] leaf7 features` empty. *(Corrected under I-35, R3-F1; it read "3 of 44 fields; the other 41 are identical".)* There are **47 fields counted by full JSON path: 3 differ and 44 agree** (`i35_checks.out`).
    - The committed `i34a_fingerprint_check.out` reports "fields compared: 44". Its `fields()` helper keyed fields by bare leaf name, so a repeated name overwrote the earlier ones.
-   - Three names repeat across sections: `note` 3 times (`behaviour_digest`, `build_config`, `numpy`) and `[O] version` twice (`python`, `numpy`). That collapses 3 of the 47 paths, which leaves 44 distinct names.
+   - Two field names repeat, collapsing three distinct JSON paths when fields are keyed by name alone: `note` 3 times (`behaviour_digest`, `build_config`, `numpy`) and `[O] version` twice (`python`, `numpy`). (3 − 1) + (2 − 1) = 3 of the 47 paths collapse, which leaves 44 distinct names. *(Corrected under I-36, R4-F1; it read "Three names repeat across sections".)*
    - The three differing fields are the same under either count. The committed output stays unchanged as evidence.
 2. **Does the referenced evidence exist:** yes.
    - The committed I-33 `f4_fingerprint.out` is in commit `5f96119`, and its `SHA256SUMS` verifies 18/18.
@@ -93,9 +93,19 @@
   - every threshold, DL-1 … DL-4 requirement, D-0 … D-8 alternative and readiness correction;
   - the Review 01, 02 and 03 records.
 
+## 3b. I-36 correction (Review 04 finding)
+- **Authorization:** I-36, "M3 T2 Final Wording Correction and Owner Decision Handoff" (owner/Tech Lead, 2026-10-27). Baseline `144f59a`, with CI runs 40448488637 and 40448845679 green on 4/4 jobs. Review 04 (`docs/reviews/M3-T2-packet-r2-review-04.md`) is PASS, with M3T2P2-R4-F1 its only finding.
+- **Correction, in place and marked *(I-36, …)*:** R4-F1, the repeated-name sentence in §2 item 1, now uses the owner's wording. The counts are unchanged: 47 full-path fields, 3 differing and 44 agreeing; 44 distinct leaf names.
+- **Focused closure check** (I-36 §3; no fifth full review is required):
+  - The corrected sentence agrees with the committed `i35_checks.out`, which reports `repeated: {'note': 3, '[O] version': 2}`: two names, and (3 − 1) + (2 − 1) = 3 collapsed paths.
+  - Every evidence manifest verifies unchanged: I-33 18/18, Review 02 12/12, I-34A 5/5, Review 03 11/11, I-35 3/3, Review 04 6/6.
+  - The diff from `144f59a` touches only this file: the §2 item 1 sentence, this section and one §4 line. R3-F1 and R3-F2 (§2 item 1 counts, §1 R2-F3 cause note), R2-F1 … F3 (§1), the packet, the readiness records and every review record are unchanged.
+- **Unchanged:** every fingerprint value, numerical result, script, checksum and earlier review output.
+
 ## 4. Status
 - R2-F1, R2-F2 and R2-F3 are corrected. R2-F4 is investigated, with a correction proposed and not applied.
 - *(I-35.)* Review 03 found R2-F1 … F3 RESOLVED. R3-F1 and R3-F2 are corrected (§3a). The R2-F4 representation is applied as documentation only (§2, packet §7.1). Closure review: Review 04, recorded separately.
+- *(I-36.)* Review 04 PASS. R4-F1 is corrected (§3b), and no recorded finding remains open.
 - DL-1 … DL-4 remain drafts and unreviewed. POG accuracy gating remains **BLOCKED** (§6.7).
 - No per-platform run was made.
 - An independent closure review follows in a separate commit (I-34A §6).
