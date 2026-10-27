@@ -28,6 +28,10 @@
   - the record is `docs/reviews/M3-T2-packet-r2-review-02-corrections.md`, and the map is §16;
   - evidence is in `docs/reviews/raw/M3-T2-packet-r2-I34A-evidence/`.
   - No decision or threshold is changed, and no acceptance requirement is loosened. DL-2 gains one recorded review obligation: a supported domain and failure reporting (R2-F3).
+- **Corrected under I-35** (owner/Tech Lead, 2026-10-26), after Review 03 (`docs/reviews/M3-T2-packet-r2-review-03.md`, PASS):
+  - the packet's only substantive change is the §7.1 rule for unavailable probes, plus this note and the §16.2 map;
+  - the R3-F1 and R3-F2 corrections are in the I-34A correction record, §3a;
+  - evidence is in `docs/reviews/raw/M3-T2-packet-r2-I35-evidence/`.
 
   No owner decision is made or changed.
 
@@ -373,6 +377,10 @@ Each field is marked:
 - **[O]** observed reliably by a probe in the process;
 - **[P]** partly observed, or a proxy;
 - **[U]** not observable from the process, and recorded as such, never guessed.
+- **Unavailable probes** *(I-35)*. A probe whose command exits non-zero, or returns nothing, is recorded as `[U] unavailable` together with its exit status and diagnostic (stderr). It is never recorded as an observed empty value.
+  - Example: in a restricted review sandbox, `sysctl machdep.cpu.brand_string` exits with status 1 and `Operation not permitted` (Review 03 evidence).
+  - This is inaccessible metadata, **not** a numerical validation failure.
+  - This is a documentation requirement on the record. The I-33 draft probe does not implement it yet (it records `''`), and changing the probe needs separate authorization.
 
 A host run of the draft probe is `f4_fingerprint.out` (macOS x86_64).
 
@@ -607,5 +615,14 @@ The Review 02 text is preserved at `5f96119`. The record is `docs/reviews/M3-T2-
 - D-0 … D-8;
 - the readiness findings M3T2R-R2-F1 … F3 (closed under I-25) and the Readiness Review 03 conclusions;
 - the I-33 evidence and the Review 01 and Review 02 records.
+
+### 16.2 I-35 correction map (Review 03 findings)
+| Item | Where corrected |
+|---|---|
+| M3T2P2-R3-F1 (MINOR) fingerprint field count | `docs/reviews/M3-T2-packet-r2-review-02-corrections.md` §2 item 1 |
+| M3T2P2-R3-F2 (NOTE) a² + t notation | the same record, §1 R2-F3 row |
+| Fingerprint reporting (`[U] unavailable`) | §7.1 (rule); the same record, §2 (observed cause and representation) |
+
+The packet is otherwise unchanged by I-35.
 
 **T2 implementation remains NOT AUTHORIZED.**

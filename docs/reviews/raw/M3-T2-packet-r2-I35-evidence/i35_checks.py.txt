@@ -1,0 +1,129 @@
+"""I-35 verification (documentation corrections; regenerates no evidence).
+
+R3-F1  Counts the fingerprint fields by full JSON path and by bare leaf name, in the
+       committed I-33 fingerprint and the Review 02 reviewer's rerun.
+R3-F2  Traces the I-33 draft DL-2 Newton loop (pog_lib._foot_point, replicated
+       operation for operation) and reports the growth of the denominators a^2 + t and
+       b^2 + t per step; checks that the replica's foot point equals _foot_point's.
+FP     Extracts the observed exit status and diagnostic of the three CPU sysctl probes
+       from Review 03's reviewer output, and verifies the original evidence manifests.
+
+Run: PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -I i35_checks.py <repo>
+     (pog_lib.py, copied from the I-33 evidence, beside this script)
+"""
+import hashlib
+import json
+import re
+import sys
+from collections import Counter
+from decimal import Decimal, localcontext
+from fractions import Fraction as Q
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import pog_lib as L  # noqa: E402
+
+REPO = Path(sys.argv[1])
+RAW = REPO / "docs/reviews/raw"
+
+
+def paths(path):
+    t = path.read_text(encoding="utf-8")
+    d, i, out, n = json.JSONDecoder(), t.find("{"), {}, 0
+    while i != -1:
+        o, e = d.raw_decode(t, i)
+        st, n = [((f"#{n}",), o)], n + 1
+        while st:
+            pre, ob = st.pop()
+            for k, v in ob.items():
+                if isinstance(v, dict):
+                    st.append((pre + (k,), v))
+                else:
+                    out[pre + (k,)] = v
+        i = t.find("{", e)
+    return out
+
+
+def r3f1():
+    print("=== R3-F1: fingerprint field count ===")
+    a = paths(RAW / "M3-T2-packet-r2-I33-evidence/f4_fingerprint.out")
+    b = paths(RAW / "M3-T2-packet-r2-codex-review02-evidence/reviewer_f4_fingerprint.out")
+    diff = [k for k in a.keys() | b.keys() if a.get(k) != b.get(k)]
+    rep = {k: v for k, v in Counter(k[-1] for k in a).items() if v > 1}
+    print(f"  full-path fields: committed {len(a)}, reviewer {len(b)}; differing {len(diff)}:"
+          f" {sorted(k[-1] for k in diff)}; agreeing {len(a) - len(diff)}")
+    print(f"  distinct leaf names: {len({k[-1] for k in a})}; repeated: {rep}"
+          f" (collapse {sum(v - 1 for v in rep.values())} paths)")
+    for k in sorted(k for k in a if k[-1] in rep):
+        print(f"    {' / '.join(k[1:])}")
+
+
+def trace(x, y, z):
+    pq, Z = Q(x) ** 2 + Q(y) ** 2, Q(z)
+    with localcontext() as c:
+        c.prec = 100
+        a2 = Decimal(L.A_M.numerator) * Decimal(L.A_M.numerator)
+        b2 = Decimal(L.B2.numerator) / Decimal(L.B2.denominator)
+        pp = Decimal(pq.numerator) / Decimal(pq.denominator)
+        zz = Decimal(Z.numerator) / Decimal(Z.denominator)
+        z2, t, ua_hist, wb_hist, its = zz * zz, Decimal(0), [], [], 0
+        if pp / a2 + z2 / b2 - 1 > 0:
+            for _ in range(200):
+                ua, wb = a2 + t, b2 + t
+                ua_hist.append(ua)
+                wb_hist.append(wb)
+                f = pp * a2 / (ua * ua) + z2 * b2 / (wb * wb) - 1
+                df = -2 * pp * a2 / (ua * ua * ua) - 2 * z2 * b2 / (wb * wb * wb)
+                step = f / df
+                t -= step
+                its += 1
+                if abs(step) <= a2 * Decimal("1e-80"):
+                    break
+        p = pp.sqrt()
+        fp, fz = p * a2 / (a2 + t), zz * b2 / (b2 + t)
+        conv = pp * a2 / ((a2 + t) ** 2) + z2 * b2 / ((b2 + t) ** 2) - 1
+        return Q(fp), Q(fz), ua_hist, wb_hist, its, conv, a2
+
+
+def r3f2():
+    print("\n=== R3-F2: the Newton denominators are a^2 + t and b^2 + t ===")
+    for k in (30, 138, 139, 1020):
+        r = (2.0**k,) * 3
+        fp, fz, ua, wb, its, conv, a2 = trace(*r)
+        same = (fp, fz) == L._foot_point(Q(r[0]) ** 2 + Q(r[1]) ** 2, Q(r[2]))
+        rat = [float(ua[i + 1] / ua[i]) for i in range(min(5, len(ua) - 1))]
+        ratb = [float(wb[i + 1] / wb[i]) for i in range(min(5, len(wb) - 1))]
+        ratio = fp * fp / L.A_M**2
+        excess = (f"{float(ratio - 1):.3g}" if ratio < 2**60
+                  else f"2^{ratio.numerator.bit_length() - ratio.denominator.bit_length()} (approx.)")
+        print(f"  (2^{k},)^3: {its} iterations; replica = _foot_point: {same};"
+              f" residual f(t) = {conv:.3E}; p_foot^2/a^2 - 1 = {excess}{' > 0: outside the ellipse p-range' if ratio > 1 else ' <= 0: inside it'}")
+        print(f"    (a^2+t) ratios, first steps: {[round(v, 4) for v in rat]};"
+              f" (b^2+t): {[round(v, 4) for v in ratb]}")
+    print("  Far from convergence f(t) ~ C/u^2 - 1 with u = a^2 + t, so Newton gives"
+          " u' = u + u/2 - u^3/(2C) ~ 1.5 u.")
+
+
+def fingerprint():
+    print("\n=== Fingerprint: observed sysctl status (Review 03 reviewer sandbox) ===")
+    lines = (RAW / "M3-T2-packet-r2-codex-review03-evidence/independent.out").read_text().splitlines()
+    for i, ln in enumerate(lines, 1):
+        m = re.match(r"sysctl (\S+) rc (\d+) stdout '(.*)' stderr (.*)$", ln)
+        if m:
+            print(f"  line {i}: machdep.cpu.{m[1]}: exit status {m[2]}; stdout {m[3]!r};"
+                  f" diagnostic {m[4]!r}")
+    print("\n=== Original evidence manifests ===")
+    for d in ("M3-T2-packet-r2-I33-evidence", "M3-T2-packet-r2-codex-review02-evidence",
+              "M3-T2-packet-r2-I34A-evidence", "M3-T2-packet-r2-codex-review03-evidence"):
+        ok = n = 0
+        for ln in (RAW / d / "SHA256SUMS").read_text().splitlines():
+            h, name = ln.split(maxsplit=1)
+            n += 1
+            ok += hashlib.sha256((RAW / d / name.lstrip("*")).read_bytes()).hexdigest() == h
+        print(f"  {d}: {ok}/{n}")
+
+
+if __name__ == "__main__":
+    r3f1()
+    r3f2()
+    fingerprint()
