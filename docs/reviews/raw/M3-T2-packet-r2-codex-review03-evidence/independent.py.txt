@@ -1,0 +1,73 @@
+import sys, math, hashlib, subprocess, json
+from pathlib import Path
+from fractions import Fraction as F
+from decimal import Decimal, localcontext
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+import pog_lib as L
+import witness as W
+root=Path.cwd()
+p=lambda e:F(2)**e
+# Derivation: (2^-51 |f| + 2^-1073)/2^(e'-52)
+# = 2 |f|/2^e' + 2^(-1021-e').
+count=0
+for e in range(-1022,1024):
+ for m in (F(1), F(5,4),F(3,2),F(7,4)):
+  f=m*p(e); u=p(e-52); a=2*f/p(e)+p(-1021-e)
+  assert a==(p(-51)*f+p(-1073))/u
+  for sign in (-1,1):
+   for k in range(1,6):
+    h=f+sign*k*u
+    if math.isfinite(float(h)) and F(float(h))==h:
+     assert (L.premise(float(h),f,f)=='PASS')==(k<=a)
+     count+=1
+print('independent signed displacements agree:',count)
+print('1.5 allowance = 3 + 2^-1021; least-normal allowance =', (p(-51)*p(-1022)+p(-1073))/p(-1074))
+for e in (-970,-969):
+ f=F(3,2)*p(e)-p(e-52)
+ print('below midpoint e',e,'3-ulp outcome',L.premise(float(f+3*p(e-52)),f,f))
+# independent Decimal Taylor corroborates starting error
+with localcontext() as c:
+ c.prec=150
+ term=s=Decimal(1)
+ for n in range(1,100):
+  term=-term/Decimal((2*n)*(2*n+1));s+=term
+ h=math.sin(1)
+ for _ in range(3):h=math.nextafter(h,math.inf)
+ print('sin starting displacement ulps',float((F(h)-F(s))/p(-53)))
+# A component can perform extra/internal operations and still return identical bits.
+r=(7e6,2e6,3e6)
+expected=W.twin_geodetic(*r,W.CheckedLib(math))[:2]
+def different(r):
+ unused=math.cos(0.123)
+ return W.twin_geodetic(*r,W.CheckedLib(math))[:2]
+print('different internal sequence same bits:',W.bits(*expected)==W.bits(*different(r)))
+for d in ((1,1,1),(1,0,1),(1,0,.1),(.1,0,1),(.3,.4,1)):
+ first=None
+ for k in range(130,150):
+  r=tuple(math.ldexp(v,k) for v in d)
+  try:L.true_height_enc(*r)
+  except ValueError:
+   first=k;break
+ print('independent first failure',d,first)
+r=(2.0**1020,)*3
+print('huge twin finite',all(map(math.isfinite,W.twin_geodetic(*r,W.CheckedLib(math))[3])))
+for r in (r,(0.,0.,0.)):
+ try:L.true_height_enc(*r)
+ except Exception as ex:print('oracle exception',type(ex).__name__)
+try:
+ W.witness_geodetic(lambda r:W.twin_geodetic(*r,W.CheckedLib(math))[:2],(2.0**1020,)*3,F(0),F(0))
+except Exception as ex:print('witness no verdict:',type(ex).__name__)
+# Inspect exhausted Newton approximation: inadmissible coordinates.
+pf,zf=L._foot_point(3*p(2040)-p(2040),p(1020))
+print('200-step foot point p>a:',pf>L.A_M,'z>b:',zf*zf>L.B2)
+for folder in ('M3-T2-packet-r2-I34A-evidence','M3-T2-packet-r2-I33-evidence','M3-T2-packet-r2-codex-review02-evidence'):
+ base=root/'docs/reviews/raw'/folder;n=0
+ for line in (base/'SHA256SUMS').read_text().splitlines():
+  digest,name=line.split(maxsplit=1); name=name.lstrip('*')
+  assert hashlib.sha256((base/name).read_bytes()).hexdigest()==digest,(folder,name)
+  n+=1
+ print('manifest',folder,n,'verified')
+for key in ('brand_string','features','leaf7_features'):
+ q=subprocess.run(['sysctl','-n','machdep.cpu.'+key],capture_output=True,text=True)
+ print('sysctl',key,'rc',q.returncode,'stdout',repr(q.stdout.strip()),'stderr',q.stderr.strip())
+print('tracked status',subprocess.check_output(['git','status','--short','--untracked-files=no'],text=True).strip() or 'clean')

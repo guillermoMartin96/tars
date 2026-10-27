@@ -1,0 +1,28 @@
+"""Implementer reproduction of Review 03 R3-F1: path-qualified vs bare-key field counts.
+Run: .venv/bin/python -I implementer_r03_repro.py <I-33 f4_fingerprint.out> <reviewer_f4_fingerprint.out>"""
+import json
+import sys
+from collections import Counter
+
+
+def paths(path):
+    t = open(path, encoding="utf-8").read()
+    d, i, out, n = json.JSONDecoder(), t.find("{"), {}, 0
+    while i != -1:
+        o, e = d.raw_decode(t, i)
+        st, n = [((f"#{n}",), o)], n + 1
+        while st:
+            pre, ob = st.pop()
+            for k, v in ob.items():
+                if isinstance(v, dict):
+                    st.append((pre + (k,), v))
+                else:
+                    out[pre + (k,)] = v
+        i = t.find("{", e)
+    return out
+
+
+a, b = paths(sys.argv[1]), paths(sys.argv[2])
+print("path-qualified fields:", len(a), "; differing:", [k[-1] for k in a if a[k] != b.get(k)])
+print("bare leaf names:", len({k[-1] for k in a}))
+print("repeated leaf names:", {k: v for k, v in Counter(k[-1] for k in a).items() if v > 1})

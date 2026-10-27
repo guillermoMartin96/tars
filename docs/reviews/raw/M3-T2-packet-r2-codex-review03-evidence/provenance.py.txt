@@ -1,0 +1,18 @@
+import json,subprocess
+from pathlib import Path
+root=Path('docs/reviews/raw')
+a=root/'M3-T2-packet-r2-I33-evidence/f4_fingerprint.out'
+b=root/'M3-T2-packet-r2-codex-review02-evidence/reviewer_f4_fingerprint.out'
+def leaves(o,path=''):
+ out={}
+ for k,v in o.items():
+  p=path+'/'+k
+  if isinstance(v,dict):out.update(leaves(v,p))
+  else:out[p]=v
+ return out
+x,y=leaves(json.loads(a.read_text())),leaves(json.loads(b.read_text()))
+print('path-qualified fields',len(x),'differences',[(k,y.get(k)) for k in x if x[k]!=y.get(k)])
+for commit,path in [('5f96119',a),('3bb3637',b)]:
+ print('historical bytes identical',commit,str(path),subprocess.check_output(['git','show',f'{commit}:{path}'])==path.read_bytes())
+print('scratch files',*[str(p) for p in sorted(Path('review_scratch').iterdir())],sep='\n')
+print('final tracked status',repr(subprocess.check_output(['git','status','--short','--untracked-files=no'],text=True)))
