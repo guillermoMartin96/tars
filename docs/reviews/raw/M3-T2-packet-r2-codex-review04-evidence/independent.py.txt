@@ -1,0 +1,51 @@
+import sys,json,hashlib,subprocess,collections
+from pathlib import Path
+from fractions import Fraction as Q
+from decimal import Decimal as D,localcontext
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+import pog_lib as L
+root=Path.cwd(); raw=root/'docs/reviews/raw'
+def load(name):
+ s=(raw/name).read_text(); obj=json.JSONDecoder().raw_decode(s,s.index('{'))[0]
+ def walk(o,p=()):
+  for k,v in o.items():
+   if isinstance(v,dict): yield from walk(v,p+(k,))
+   else: yield p+(k,),v
+ return dict(walk(obj))
+a=load('M3-T2-packet-r2-I33-evidence/f4_fingerprint.out'); b=load('M3-T2-packet-r2-codex-review02-evidence/reviewer_f4_fingerprint.out')
+print('fields',len(a),len(b),'agree',sum(a[k]==b[k] for k in a))
+for p in a:
+ if a[p]!=b[p]: print('difference',p,repr(b[p]))
+c=collections.Counter(p[-1] for p in a)
+print('leaf names',len(c))
+for k,n in c.items():
+ if n>1: print('repeat',k,n,[p for p in a if p[-1]==k])
+for directory in ['M3-T2-packet-r2-I33-evidence','M3-T2-packet-r2-codex-review02-evidence','M3-T2-packet-r2-I34A-evidence','M3-T2-packet-r2-codex-review03-evidence','M3-T2-packet-r2-I35-evidence']:
+ d=raw/directory; count=0
+ for line in (d/'SHA256SUMS').read_text().splitlines():
+  h,f=line.split(maxsplit=1); assert hashlib.sha256((d/f.lstrip('*')).read_bytes()).hexdigest()==h; count+=1
+ tracked=subprocess.check_output(['git','ls-tree','-r','--name-only','d30e449','--',str(d.relative_to(root))],text=True).splitlines()
+ assert all(subprocess.check_output(['git','show','d30e449:'+f])==Path(f).read_bytes() for f in tracked)
+ print('manifest',directory,count,'verified; baseline files unchanged',len(tracked))
+for k in [30,138,139,1020]:
+ with localcontext() as ctx:
+  ctx.prec=100
+  a2=D(L.A_M.numerator)**2; b2=D(L.B2.numerator)/D(L.B2.denominator); q=D(2)**k; pp=2*q*q; zz=q*q;t=D(0); ratios=[]
+  for n in range(200):
+   u=a2+t;v=b2+t
+   terms=[pp*a2/u**2,zz*b2/v**2]
+   f=sum(terms)-1; df=-2*(terms[0]/u+terms[1]/v)
+   step=f/df;t-=step
+   if n<5: ratios.append((float((a2+t)/u),float((b2+t)/v)))
+   if abs(step)<=a2*D('1e-80'):break
+  residual=pp*a2/(a2+t)**2+zz*b2/(b2+t)**2-1
+  fp,fz=L._foot_point(Q(2)**(2*k)*2,Q(2)**k)
+  print('Newton',k,'iterations',n+1,'residual',f'{residual:.6E}','p excess',float(fp*fp/L.A_M**2-1) if k<1000 else 'huge','nonzero direction',bool(fp or fz),'ratios',ratios)
+ try:
+  lo,hi=L.true_height_enc(*((2.0**k,)*3)); print('enclosure',k,'returned ordered',lo<=hi)
+ except Exception as e: print('enclosure',k,type(e).__name__,str(e))
+for name in ['brand_string','features','leaf7_features']:
+ p=subprocess.run(['sysctl','-n','machdep.cpu.'+name],capture_output=True,text=True)
+ print('sysctl',name,'exit',p.returncode,'stdout',repr(p.stdout),'stderr',repr(p.stderr))
+r=subprocess.run(['git','diff','--check','d30e449','154378c'],capture_output=True,text=True);print('diff check',r.returncode,r.stdout,r.stderr)
+print('tracked status',repr(subprocess.check_output(['git','status','--short','--untracked-files=no'],text=True)))

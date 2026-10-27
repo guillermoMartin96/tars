@@ -1,0 +1,10 @@
+from pathlib import Path
+import subprocess
+for rev,d in [('5f96119','M3-T2-packet-r2-I33-evidence'),('3bb3637','M3-T2-packet-r2-codex-review02-evidence'),('8abfae2','M3-T2-packet-r2-I34A-evidence'),('d30e449','M3-T2-packet-r2-codex-review03-evidence')]:
+ prefix='docs/reviews/raw/'+d
+ files=subprocess.check_output(['git','ls-tree','-r','--name-only',rev,'--',prefix],text=True).splitlines()
+ assert all(subprocess.check_output(['git','show',rev+':'+f])==Path(f).read_bytes() for f in files)
+ print(rev,d,len(files),'all files including manifest byte-identical')
+print('I35 rerun byte-identical',Path('review_scratch/i35_checks.out').read_bytes()==Path('docs/reviews/raw/M3-T2-packet-r2-I35-evidence/i35_checks.out').read_bytes())
+print('HEAD',subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip())
+print('tracked status',repr(subprocess.check_output(['git','status','--short','--untracked-files=no'],text=True)))

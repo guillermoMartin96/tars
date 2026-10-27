@@ -1,0 +1,30 @@
+=== R3-F1: fingerprint field count ===
+  full-path fields: committed 47, reviewer 47; differing 3: ['[O] brand', '[P] features', '[P] leaf7 features']; agreeing 44
+  distinct leaf names: 44; repeated: {'note': 3, '[O] version': 2} (collapse 3 paths)
+    behaviour_digest / note
+    build_config / note
+    numpy / [O] version
+    numpy / note
+    python / [O] version
+
+=== R3-F2: the Newton denominators are a^2 + t and b^2 + t ===
+  (2^30,)^3: 23 iterations; replica = _foot_point: True; residual f(t) = -5.000E-100; p_foot^2/a^2 - 1 = -0.332 <= 0: inside it
+    (a^2+t) ratios, first steps: [1.4989, 1.4992, 1.4995, 1.4996, 1.4996]; (b^2+t): [1.5022, 1.5015, 1.501, 1.5006, 1.5003]
+  (2^138,)^3: 200 iterations; replica = _foot_point: True; residual f(t) = 6.502E-2; p_foot^2/a^2 - 1 = -0.288 <= 0: inside it
+    (a^2+t) ratios, first steps: [1.4989, 1.4993, 1.4995, 1.4997, 1.4998]; (b^2+t): [1.5022, 1.5015, 1.501, 1.5007, 1.5004]
+  (2^139,)^3: 200 iterations; replica = _foot_point: True; residual f(t) = 9.075E-1; p_foot^2/a^2 - 1 = 0.275 > 0: outside the ellipse p-range
+    (a^2+t) ratios, first steps: [1.4989, 1.4993, 1.4995, 1.4997, 1.4998]; (b^2+t): [1.5022, 1.5015, 1.501, 1.5007, 1.5004]
+  (2^1020,)^3: 200 iterations; replica = _foot_point: True; residual f(t) = 3.415E+530; p_foot^2/a^2 - 1 = 2^1762 (approx.) > 0: outside the ellipse p-range
+    (a^2+t) ratios, first steps: [1.4989, 1.4993, 1.4995, 1.4997, 1.4998]; (b^2+t): [1.5022, 1.5015, 1.501, 1.5007, 1.5004]
+  Far from convergence f(t) ~ C/u^2 - 1 with u = a^2 + t, so Newton gives u' = u + u/2 - u^3/(2C) ~ 1.5 u.
+
+=== Fingerprint: observed sysctl status (Review 03 reviewer sandbox) ===
+  line 20: machdep.cpu.brand_string: exit status 1; stdout ''; diagnostic 'sysctl: sysctl fmt -1 1024 1: Operation not permitted'
+  line 21: machdep.cpu.features: exit status 1; stdout ''; diagnostic 'sysctl: sysctl fmt -1 1024 1: Operation not permitted'
+  line 22: machdep.cpu.leaf7_features: exit status 1; stdout ''; diagnostic 'sysctl: sysctl fmt -1 1024 1: Operation not permitted'
+
+=== Original evidence manifests ===
+  M3-T2-packet-r2-I33-evidence: 18/18
+  M3-T2-packet-r2-codex-review02-evidence: 12/12
+  M3-T2-packet-r2-I34A-evidence: 5/5
+  M3-T2-packet-r2-codex-review03-evidence: 11/11

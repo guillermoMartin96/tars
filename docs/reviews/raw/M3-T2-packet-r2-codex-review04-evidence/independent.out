@@ -1,0 +1,25 @@
+fields 47 47 agree 44
+difference ('cpu', '[O] brand') ''
+difference ('cpu', '[P] features') ''
+difference ('cpu', '[P] leaf7 features') ''
+leaf names 44
+repeat [O] version 2 [('python', '[O] version'), ('numpy', '[O] version')]
+repeat note 3 [('build_config', 'note'), ('numpy', 'note'), ('behaviour_digest', 'note')]
+manifest M3-T2-packet-r2-I33-evidence 18 verified; baseline files unchanged 19
+manifest M3-T2-packet-r2-codex-review02-evidence 12 verified; baseline files unchanged 13
+manifest M3-T2-packet-r2-I34A-evidence 5 verified; baseline files unchanged 6
+manifest M3-T2-packet-r2-codex-review03-evidence 11 verified; baseline files unchanged 12
+manifest M3-T2-packet-r2-I35-evidence 3 verified; baseline files unchanged 0
+Newton 30 iterations 23 residual -5.000000E-100 p excess -0.3318525586586226 nonzero direction True ratios [(1.498868401007543, 1.502230522970958), (1.4992391016075297, 1.5014788512647572), (1.4994730797742075, 1.5009654746606298), (1.4996022583072133, 1.5005968054098258), (1.499629307172911, 1.5002921107618579)]
+enclosure 30 returned ordered True
+Newton 138 iterations 200 residual 6.501662E-2 p excess -0.28840101532437634 nonzero direction True ratios [(1.4988742554189345, 1.502236416838136), (1.4992522868140277, 1.5014920868367425), (1.4995027605255484, 1.500995225084519), (1.499669056039005, 1.5006637037290653), (1.499779614610715, 1.5004425664545638)]
+enclosure 138 returned ordered True
+Newton 139 iterations 200 residual 9.075150E-1 p excess 0.27452073060573107 nonzero direction True ratios [(1.4988742554189345, 1.502236416838136), (1.4992522868140277, 1.5014920868367425), (1.4995027605255484, 1.500995225084519), (1.499669056039005, 1.5006637037290653), (1.499779614610715, 1.5004425664545638)]
+enclosure 139 ValueError sqrt of a negative number
+Newton 1020 iterations 200 residual 3.415059E+530 p excess huge nonzero direction True ratios [(1.4988742554189345, 1.502236416838136), (1.4992522868140277, 1.5014920868367425), (1.4995027605255484, 1.500995225084519), (1.499669056039005, 1.5006637037290653), (1.499779614610715, 1.5004425664545638)]
+enclosure 1020 ValueError sqrt of a negative number
+sysctl brand_string exit 1 stdout '' stderr 'sysctl: sysctl fmt -1 1024 1: Operation not permitted\n'
+sysctl features exit 1 stdout '' stderr 'sysctl: sysctl fmt -1 1024 1: Operation not permitted\n'
+sysctl leaf7_features exit 1 stdout '' stderr 'sysctl: sysctl fmt -1 1024 1: Operation not permitted\n'
+diff check 0  
+tracked status ''
