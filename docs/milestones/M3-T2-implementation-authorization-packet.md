@@ -34,6 +34,7 @@
   - evidence is in `docs/reviews/raw/M3-T2-packet-r2-I35-evidence/`.
 
   No owner decision is made or changed.
+- **Owner decisions recorded under I-37** (owner/Tech Lead, 2026-10-27; append-only, §17): D-0 … D-8 **APPROVED with conditions**; D-6 (i) stays withdrawn. The §14 proposal table is preserved as written. **This packet still authorizes nothing: T2 implementation remains NOT AUTHORIZED (PC-7).**
 
 ## 0. How to read this packet
 - **Nothing here is an instruction to start T2.** Every "must" describes what a future T2 authorization would require.
@@ -59,7 +60,7 @@
 | PC-5 | Base branch | **MET**: the reconciliation is on `main` (`0a9c040`, I-31). T2 would branch from a named `main` SHA |
 | PC-6 | `origin/main` verified, clean, CI green at T2 start | To be re-verified at T2 start. Post-merge CI on `0a9c040`: see the I-31 report |
 | PC-7 | An explicit, separate T2 implementation authorization | **NONE** |
-| PC-8 *(new)* | The owner's decisions on §14 D-0 … D-8 | **OPEN.** The T2 authorization would state which were approved. Every PROPOSED item that is not approved falls back to r1 and the I-26 policy (report-only) |
+| PC-8 *(new)* | The owner's decisions on §14 D-0 … D-8 | **OPEN.** The T2 authorization would state which were approved. Every PROPOSED item that is not approved falls back to r1 and the I-26 policy (report-only). *(I-37, 2026-10-27, append-only: **MET**. D-0 … D-8 are recorded in §17. PC-7 is unchanged.)* |
 
 P6 and P7 are not T2 prerequisites (Q-GATE). P6's open items, the geodetic-drag residual (ESCALATED), DR-0028 P6(b) (OPEN) and X-1 (NOT AUTHORIZED), block geodetic GMAT acceptance in T5. They do not block T2.
 
@@ -562,6 +563,8 @@ Unchanged from r1 §10:
 
 "Sequence conformance" in D-8 has the meaning defined in §2.2 DL-4. Each decision's proposal and recommendation are unchanged, and D-0 … D-8 remain PROPOSED.
 
+**Owner decisions (2026-10-27, append-only): recorded under I-37 in §17.** The table and reading note above are preserved as proposed.
+
 ## 15. What the T2 authorization itself would need to state
 1. The base: a named `main` SHA (at least `0a9c040`), re-verified at T2 start (PC-6).
 2. That T2 implements r1 §2 within r1 §3–§4, under the DQ-1 … DQ-6 decisions, with the §3 interfaces.
@@ -624,5 +627,54 @@ The Review 02 text is preserved at `5f96119`. The record is `docs/reviews/M3-T2-
 | Fingerprint reporting (`[U] unavailable`) | §7.1 (rule); the same record, §2 (observed cause and representation) |
 
 The packet is otherwise unchanged by I-35.
+
+## 17. Owner decisions (2026-10-27, append-only): I-37
+- **Authority:** "I-37 — M3 T2 Owner Decision Recording" (owner/Tech Lead, 2026-10-27). Baseline `42fc823afdd81c0e6d876e482e948b2428e7c064`, CI run 40536225099 green on 4/4 jobs, no recorded finding open.
+- **Owner confirmation:** I-37 was issued as "PROPOSED — awaiting owner confirmation". The owner confirmed it explicitly on 2026-10-27 ("Confirmed, record them": record I-37 §2 and §3 exactly as written).
+- **Recorded verbatim (I-37 §2):**
+
+  > - D-0: APPROVED.
+  > - D-1: APPROVED, conditional POG route only.
+  > - D-2: APPROVED, DL-1 through DL-7 required and independently reviewed before gating.
+  > - D-3: APPROVED, restricted to reviewed CPython builds.
+  > - D-4: APPROVED, with the documented limits of local premises.
+  > - D-5: APPROVED, option (b).
+  > - D-6 (ii): APPROVED.
+  > - D-6 (iii): APPROVED.
+  > - D-7: APPROVED, conditional on validated DL-2 enclosures.
+  > - D-8: APPROVED, as an output-conformance gate, not an accuracy gate.
+  >
+  > D-6 item (i) remains withdrawn.
+
+### 17.1 Decision table
+Each row maps the owner's decision to the §14 alternative it approves. The §14 text is preserved as written.
+
+| ID | §14 alternative approved | Owner decision (I-37 §2) | Conditions kept |
+|---|---|---|---|
+| D-0 | The proposal: geodetic accumulation = the error within one geodetic evaluation and its band-selection effect; trajectory accumulation is T4 | **APPROVED** | Trajectory accumulation stays T4 work |
+| D-1 | Accept POG by witnessed evaluation as a route to P-i (J-FP2 (ii) over the gated finite domain) for the A-FP-2 rows | **APPROVED, conditional POG route only** | The route only, not the evidence. It does not justify A-FP-2 for production inputs. No row is promoted. Gating stays BLOCKED (§6.7) |
+| D-2 | Accept DL-1 … DL-7 as T2 deliverables, as corrected under I-33 | **APPROVED, DL-1 through DL-7 required and independently reviewed before gating** | Each DL is reviewed before it supports a gate. The I-33 drafts are research inputs, not deliverables. DL-2's review covers its supported domain and failure reporting (R2-F3) |
+| D-3 | Accept the CPython 3.12.15 `hypot` evenness source argument (J-LM1-even), giving U-19 (a′) | **APPROVED, restricted to reviewed CPython builds** | Valid only for a reviewed (patch version, build configuration, executable digest) (RQ-4 (a), DL-7). Quarter-turn symmetry U-19 (a) stays conditional |
+| D-4 | Allow POG (witnessed) for the A-LM-1 symmetry premise (U-19 (a)) and the A-LM-2 premise (PM-4 (a)), with the §6.6 assignment | **APPROVED, with the documented limits of local premises** | Pairwise, local conclusions only: no interval-wide monotonicity or swap theorem. PM-4 (a) is a supplementary invariant (exponent sign only). No density accuracy claim rests on it. PM-4 (b) and U-19 (b) stay report-only |
+| D-5 | Option **(b)**: record the §7.1 environment on every run, and stop the source-argument rows on any unreviewed (patch version, build configuration, executable digest) | **APPROVED, option (b)** | Option (a), pinning `.python-version`, is **not** chosen. No CI or runtime change. Recording does not prove numerical reproducibility. Unavailable probes are recorded as `[U] unavailable` (§7.1) |
+| D-6 (ii) | The drag component's v_rel is observable to tests, or recomputed by the identical sequence | **APPROVED** | U-4 / B-1 assume the test sees the component's own v_rel |
+| D-6 (iii) | The specified sequences use Python `float` scalars and `math`; NumPy is not used for their arithmetic | **APPROVED** | Read as corrected in §3 (iii) and §7 RQ-6 (§14 reading note): an **implementation** requirement verified by operation-by-operation source inspection. DL-4 cannot enforce it |
+| D-6 (i) | — | **Remains withdrawn** | No conclusion rests on tracing the component |
+| D-7 | Gate P8 (a′) forward-constructed points against O-2's enclosure of the true height of the binary64 point (DL-2), under strict E1, instead of deriving δ_f | **APPROVED, conditional on validated DL-2 enclosures** | No oracle term in the tolerance. U-18 stays report-only until DL-2's bound passes review. If it cannot be established, the §14 fallbacks ((a) derive δ_f; (b) keep U-18 report-only) remain **owner choices, not decided here** |
+| D-8 | Make DL-4 (bitwise conformance with the DQ-1/DQ-2 sequences, same platform, both h and φ) a gate under G-T2-10 | **APPROVED, as an output-conformance gate, not an accuracy gate** | "Sequence conformance" means output equality (§2.2 DL-4). It does not establish numerical correctness (F5) or internal implementation (R2-F1) |
+
+### 17.2 Acceptance boundaries (I-37 §3, recorded verbatim)
+> 1. No A-FP-2 or A-LM row is automatically promoted.
+> 2. POG accuracy gating remains BLOCKED.
+> 3. DL-1 through DL-4 remain unreviewed drafts.
+> 4. Per-platform testing remains outstanding.
+> 5. Numerical thresholds and production numerical sequences remain unchanged.
+> 6. D-6 (iii) requires source inspection; DL-4 alone cannot enforce the implementation requirement.
+> 7. No CI modifications are authorized.
+> 8. No production implementation is authorized.
+
+- **Promotion is still per row (P-iii):** each row needs the reviewed DL deliverables (P-ii), the premise observed on every CI platform (RQ-8) and the owner's explicit promotion at acceptance.
+- **Unchanged by I-37:** every threshold and constant; the DQ-1 … DQ-6 sequences; DR-0024 … DR-0029 (P6 NOT FULLY DECIDED, P6(b) OPEN, X-1 NOT AUTHORIZED); the §14 proposal text; every review record and every evidence file.
+- **PC-7 (an explicit, separate T2 implementation authorization) remains NONE.** A T2 authorization would quote these decisions verbatim (§15 item 3).
 
 **T2 implementation remains NOT AUTHORIZED.**
