@@ -1,0 +1,14 @@
+diff -ru v2/src/tars/sim/simulator.py v3S/src/tars/sim/simulator.py
+--- v2/src/tars/sim/simulator.py	2026-10-28 12:39:38
++++ v3S/src/tars/sim/simulator.py	2026-10-28 12:39:39
+@@ -463,8 +463,8 @@
+                 r, v = y[:3], y[3:6]
+                 # Stage mass, validated only when a model reads it (I-41): a coast stage of
+                 # infinite length carries NaN propellant and must fail as before.
+-                mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)
+-                ctx = ForceContext.deferred(mass)
++                prop = float(np.ndarray.__getitem__(y, _PROP))
++                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(prop, 0.0))
+                 return np.concatenate([v, force_model.acceleration(t, r, v, ctx), _COAST_RATES])
+ 
+             return coast

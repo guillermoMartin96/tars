@@ -1,0 +1,582 @@
+{
+ "masked": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": [
+    "UserWarning: Warning: converting a masked element to nan."
+   ]
+  },
+  "A_warnings_as_errors": {
+   "msg": "Warning: converting a masked element to nan.",
+   "outcome": "raise",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x0.0p+0",
+    "0x0.0p+0"
+   ],
+   "tick": 0,
+   "type": "UserWarning",
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "msg": "total_mass_kg must be finite and positive, got nan",
+      "raise": "ValueError",
+      "warnings": []
+     },
+     "read2": {
+      "msg": "total_mass_kg must be finite and positive, got nan",
+      "raise": "ValueError",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "msg": "total_mass_kg must be finite and positive, got nan",
+      "raise": "ValueError",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": false
+   },
+   "step": "ok",
+   "step_warnings": [
+    "UserWarning: Warning: converting a masked element to nan."
+   ]
+  },
+  "label": "supported"
+ },
+ "mutate_after": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": false
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "object_none": {
+  "A_record": {
+   "msg": "float() argument must be a string or a real number, not 'NoneType'",
+   "outcome": "raise",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x0.0p+0",
+    "0x0.0p+0"
+   ],
+   "tick": 0,
+   "type": "TypeError",
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "msg": "float() argument must be a string or a real number, not 'NoneType'",
+   "outcome": "raise",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x0.0p+0",
+    "0x0.0p+0"
+   ],
+   "tick": 0,
+   "type": "TypeError",
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [],
+   "distinct_stage_objects": 1,
+   "lifetime": null,
+   "step": "TypeError: float() argument must be a string or a real number, not 'NoneType'",
+   "step_warnings": []
+  },
+  "label": "out_of_contract"
+ },
+ "raising_getitem": {
+  "A_record": {
+   "msg": "stage propellant read",
+   "outcome": "raise",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x0.0p+0",
+    "0x0.0p+0"
+   ],
+   "tick": 0,
+   "type": "LookupError",
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "msg": "stage propellant read",
+   "outcome": "raise",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x0.0p+0",
+    "0x0.0p+0"
+   ],
+   "tick": 0,
+   "type": "LookupError",
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [],
+   "distinct_stage_objects": 1,
+   "lifetime": null,
+   "step": "LookupError: stage propellant read",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "rk4_control": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 4,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": false
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "shared_buffer": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": false
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "views": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 4,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": false
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ }
+}

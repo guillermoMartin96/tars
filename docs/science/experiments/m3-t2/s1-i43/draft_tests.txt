@@ -1,0 +1,35 @@
+PASSED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[masked]
+PASSED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[raising_getitem]
+FAILED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+FAILED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+2 failed, 2 passed in 0.14s
+PASSED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+PASSED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+FAILED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[masked]
+FAILED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[raising_getitem]
+2 failed, 2 passed in 0.23s
+PASSED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[masked]
+PASSED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[raising_getitem]
+FAILED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+FAILED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+2 failed, 2 passed in 0.15s
+PASSED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[masked]
+PASSED tests/test_s1_r02_draft.py::test_t07_l_coast_does_not_read_the_stage_through_a_subclass[raising_getitem]
+PASSED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+PASSED tests/test_s1_r02_draft.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+4 passed in 0.10s
+== base
+   2 E       AttributeError: module 'tars.sim.simulator' has no attribute 'LegacyForceAdapter'
+== v2
+   1 E           LookupError: stage propellant read
+   1 E           UserWarning: Warning: converting a masked element to nan.
+== v3L
+   2 E             
+   1 E             + 0x1.18c0000000000p+10
+   1 E             + 0x1.f400000000000p+9
+   2 E             - 0x1.4500000000000p+10
+   1 E             ?      -             ^^
+   1 E             ?     +              ^
+   2 E             ?     ^^^
+   1 E           AssertionError: assert '0x1.18c0000000000p+10' == '0x1.4500000000000p+10'
+   1 E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'

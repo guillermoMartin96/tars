@@ -1,0 +1,11 @@
+#!/bin/bash
+# I-43: S1 tests and both corpora for v3-L and v3-S (scratch src trees, run from the proto clone).
+S=$1; P=$S/i42/v/clones/proto; EV=$S/i42/ev; O=$S/i43/out; export PYTHONDONTWRITEBYTECODE=1
+for v in v3L v3S; do
+  (cd $P && PYTHONPATH=$S/i43/trees/$v/src .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_s1_failure_paths.py tests/test_s1_force_context.py > $O/tests_$v.log 2>&1); echo "$v tests: $(tail -1 $O/tests_$v.log)"
+  (cd $P && PYTHONPATH=$S/i43/trees/$v/src .venv/bin/python -B $EV/harness.py $O/main_$v.jsonl > /dev/null 2>&1)
+  (cd $P && PYTHONPATH=$S/i43/trees/$v/src .venv/bin/python -B $EV/harness_writers.py $O/w_$v.jsonl > /dev/null 2>&1)
+  cmp -s $O/main_$v.jsonl $S/i42/v/out/base.jsonl && echo "$v main corpus == BASE" || echo "$v main corpus DIFFERS"
+  cmp -s $O/w_$v.jsonl $S/i42/v/out/w_base.jsonl && echo "$v writer corpus == BASE" || echo "$v writer corpus DIFFERS"
+done
+echo DONE

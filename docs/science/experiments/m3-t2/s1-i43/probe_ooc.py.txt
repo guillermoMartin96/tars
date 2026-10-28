@@ -1,0 +1,23 @@
+"""I-43 extra out-of-contract controls: stage handed to the coast derivative as a list / float32 array."""
+import sys, warnings
+sys.path.insert(0, sys.argv[1] + "/src")
+import numpy as np
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import Simulator
+class Free:
+    name = "free_space"
+    def acceleration(self, t, r, v): return np.zeros(3)
+class E:
+    order = 1
+    def __init__(s, k): s.k, s.name = k, k
+    def step(s, f, t, y, dt):
+        yy = list(map(float, y)) if s.k == "list" else y.astype(np.float32)
+        return y + dt * np.asarray(f(t, yy), dtype=float)
+craft = SpacecraftSpec(dry_mass_kg=1000.0, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=300.0))
+for k in ["list", "float32"]:
+    sim = Simulator(np.array([7e6, 0., 0.]), np.array([0., 7.5e3, 0.]), Free(), E(k), 0.5, spacecraft=craft)
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter("always")
+        try: sim.step(); o = f"ok tick={sim.tick} r={[x.hex() for x in sim.snapshot().r]}"
+        except BaseException as e: o = f"{type(e).__name__}: {e} tick={sim.tick}"
+    print(k, o, [str(w.message) for w in ws])

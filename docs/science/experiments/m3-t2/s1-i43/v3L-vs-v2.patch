@@ -1,0 +1,64 @@
+diff -ru v2/src/tars/sim/forces.py v3L/src/tars/sim/forces.py
+--- v2/src/tars/sim/forces.py	2026-10-28 12:39:38
++++ v3L/src/tars/sim/forces.py	2026-10-28 12:39:46
+@@ -9,7 +9,7 @@
+ 
+ import math
+ import sys
+-from collections.abc import Sequence
++from collections.abc import Callable, Sequence
+ from fractions import Fraction
+ from typing import Protocol
+ 
+@@ -217,9 +217,10 @@
+     Both raise ``ValueError``; neither raises ``OverflowError`` or ``ZeroDivisionError``.
+     """
+ 
+-    __slots__ = ("_mass",)
++    __slots__ = ("_mass", "_source")
+ 
+     def __init__(self, total_mass_kg: float | None = None) -> None:
++        object.__setattr__(self, "_source", None)
+         self._store(total_mass_kg)
+         self.total_mass_kg  # noqa: B018 - validates now (option A)
+ 
+@@ -227,16 +228,25 @@
+     def deferred(cls, total_mass_kg: float) -> ForceContext:
+         """Context whose mass is validated when it is read (coast closure only, I-41)."""
+         ctx = cls.__new__(cls)
++        object.__setattr__(ctx, "_source", None)
+         ctx._store(total_mass_kg)
+         return ctx
+ 
++    @classmethod
++    def lazy(cls, source: Callable[[], float]) -> ForceContext:
++        """Context whose mass is computed by ``source()`` and validated on every read (I-43 v3-L)."""
++        ctx = cls.__new__(cls)
++        object.__setattr__(ctx, "_source", source)
++        object.__setattr__(ctx, "_mass", None)
++        return ctx
++
+     def _store(self, total_mass_kg: float | None) -> None:
+         mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)
+         object.__setattr__(self, "_mass", mass)
+ 
+     @property
+     def total_mass_kg(self) -> float | None:
+-        mass = self._mass
++        mass = self._mass if self._source is None else _owned_float("total_mass_kg", self._source())
+         if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+             raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+         return mass
+diff -ru v2/src/tars/sim/simulator.py v3L/src/tars/sim/simulator.py
+--- v2/src/tars/sim/simulator.py	2026-10-28 12:39:38
++++ v3L/src/tars/sim/simulator.py	2026-10-28 12:39:39
+@@ -463,8 +463,7 @@
+                 r, v = y[:3], y[3:6]
+                 # Stage mass, validated only when a model reads it (I-41): a coast stage of
+                 # infinite length carries NaN propellant and must fail as before.
+-                mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)
+-                ctx = ForceContext.deferred(mass)
++                ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+                 return np.concatenate([v, force_model.acceleration(t, r, v, ctx), _COAST_RATES])
+ 
+             return coast

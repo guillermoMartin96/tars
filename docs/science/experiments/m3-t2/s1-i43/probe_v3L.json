@@ -1,0 +1,618 @@
+{
+ "masked": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "msg": "total_mass_kg must be finite and positive, got nan",
+      "raise": "ValueError",
+      "warnings": [
+       "UserWarning: Warning: converting a masked element to nan."
+      ]
+     },
+     "read2": {
+      "msg": "total_mass_kg must be finite and positive, got nan",
+      "raise": "ValueError",
+      "warnings": [
+       "UserWarning: Warning: converting a masked element to nan."
+      ]
+     },
+     "read_after_stage_mutation": {
+      "msg": "total_mass_kg must be finite and positive, got nan",
+      "raise": "ValueError",
+      "warnings": [
+       "UserWarning: Warning: converting a masked element to nan."
+      ]
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "mutate_after": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.18c0000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.18c0000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "object_none": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "msg": "float() argument must be a string or a real number, not 'NoneType'",
+      "raise": "TypeError",
+      "warnings": []
+     },
+     "read2": {
+      "msg": "float() argument must be a string or a real number, not 'NoneType'",
+      "raise": "TypeError",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "msg": "float() argument must be a string or a real number, not 'NoneType'",
+      "raise": "TypeError",
+      "warnings": []
+     },
+     "stage_mass_at_call": null
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "out_of_contract"
+ },
+ "raising_getitem": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "msg": "stage propellant read",
+      "raise": "LookupError",
+      "warnings": []
+     },
+     "read2": {
+      "msg": "stage propellant read",
+      "raise": "LookupError",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "msg": "stage propellant read",
+      "raise": "LookupError",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "rk4_control": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 4,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "shared_buffer": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 1,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ },
+ "views": {
+  "A_record": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "A_warnings_as_errors": {
+   "outcome": "ok",
+   "propellant": "0x1.2c00000000000p+8",
+   "r": [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ],
+   "tick": 1,
+   "v": [
+    "0x0.0p+0",
+    "0x1.d4c0000000000p+12",
+    "0x0.0p+0"
+   ],
+   "warnings": []
+  },
+  "B": {
+   "contexts": [
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    },
+    {
+     "read1": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read2": {
+      "type": "float",
+      "value": "0x1.4500000000000p+10",
+      "warnings": []
+     },
+     "read_after_stage_mutation": {
+      "type": "float",
+      "value": "0x1.f400000000000p+9",
+      "warnings": []
+     },
+     "stage_mass_at_call": "0x1.4500000000000p+10"
+    }
+   ],
+   "distinct_stage_objects": 4,
+   "lifetime": {
+    "alive_after_release": false,
+    "alive_while_only_context_held": true
+   },
+   "step": "ok",
+   "step_warnings": []
+  },
+  "label": "supported"
+ }
+}

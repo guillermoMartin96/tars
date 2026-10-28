@@ -1,0 +1,269 @@
+"""I-43 R-02 compatibility and U-1 snapshot-semantics probe.
+
+Usage: python probe_i43.py SRC_ROOT OUT.json
+Runs against one source tree (BASE, v2, v3-L or v3-S) inserted at the front of sys.path.
+
+Part A (production-observable): the S1 legacy adapter never reads the context, so this is
+what any existing caller can observe: result, tick, committed state hex, propulsion state
+and warnings, with warnings recorded and, separately, raised as errors.
+
+Part B (context semantics): a recording adapter replaces LegacyForceAdapter in the
+simulator module and keeps every coast context; they are read after the step, with the
+stage arrays mutated in between, to test snapshot timing, repeated reads, aliasing and
+lifetime. BASE has no context, so Part B is "n/a" there.
+
+Inputs are labelled "supported" (float64 ndarray or float64 ndarray subclass, i.e. inside
+Integrator's NDArray[np.float64] annotation) or "out_of_contract".
+"""
+
+import gc
+import json
+import sys
+import warnings
+import weakref
+
+sys.path.insert(0, sys.argv[1] + "/src")
+import numpy as np  # noqa: E402
+
+import tars.sim.simulator as simmod  # noqa: E402
+from tars.sim.integrators import RK4  # noqa: E402
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec  # noqa: E402
+from tars.sim.simulator import Simulator  # noqa: E402
+
+DRY, PROP = 1000.0, 300.0
+CRAFT = SpacecraftSpec(
+    dry_mass_kg=DRY, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=PROP)
+)
+R0, V0 = np.array([7e6, 0.0, 0.0]), np.array([0.0, 7.5e3, 0.0])
+
+
+class Free:
+    name = "free_space"
+
+    def acceleration(self, t, r, v):
+        return np.zeros(3)
+
+
+class RaisingGetitem(np.ndarray):
+    """float64 subclass whose scalar read of the propellant raises (supported by type)."""
+
+    def __getitem__(self, k):
+        if k == 6:
+            raise LookupError("stage propellant read")
+        return super().__getitem__(k)
+
+
+def wrap(kind, y):
+    if kind == "masked":
+        return np.ma.array(y.copy(), mask=[False] * 6 + [True, False])
+    if kind == "raising_getitem":
+        return y.copy().view(RaisingGetitem)
+    if kind == "object_none":
+        a = y.astype(object)
+        a[6] = None
+        return a
+    return y.copy()
+
+
+class Euler:
+    """One derivative call on a (possibly wrapped) copy of the state."""
+
+    order = 1
+
+    def __init__(self, kind):
+        self.kind, self.name = kind, f"euler_{kind}"
+
+    def step(self, f, t, y, dt):
+        k = f(t, wrap(self.kind, y))
+        return y + dt * np.asarray(k, dtype=float)
+
+
+class MutateAfter:
+    """Euler; overwrites the stage propellant after the derivative call returns."""
+
+    name, order = "mutate_after", 1
+
+    def step(self, f, t, y, dt):
+        stage = y.copy()
+        k = f(t, stage)
+        stage[6] = 123.0
+        return y + dt * k
+
+
+class SharedBufferRK4:
+    """Classical RK4 evaluating all four stages in one reused buffer (aliased storage)."""
+
+    name, order = "rk4_shared_buffer", 4
+
+    def step(self, f, t, y, dt):
+        buf, h = np.empty_like(y), 0.5 * dt
+        buf[:] = y
+        k1 = f(t, buf)
+        buf[:] = y + h * k1
+        k2 = f(t + h, buf)
+        buf[:] = y + h * k2
+        k3 = f(t + h, buf)
+        buf[:] = y + dt * k3
+        k4 = f(t + dt, buf)
+        return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+class ViewRK4:
+    """Classical RK4 whose stage arrays are row views of one 2-D workspace."""
+
+    name, order = "rk4_views", 4
+
+    def step(self, f, t, y, dt):
+        ws, h = np.zeros((4, y.size)), 0.5 * dt
+        ws[0] = y
+        k1 = f(t, ws[0])
+        ws[1] = y + h * k1
+        k2 = f(t + h, ws[1])
+        ws[2] = y + h * k2
+        k3 = f(t + h, ws[2])
+        ws[3] = y + dt * k3
+        k4 = f(t + dt, ws[3])
+        return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+CASES = {
+    "rk4_control": ("supported", RK4),
+    "masked": ("supported", lambda: Euler("masked")),
+    "raising_getitem": ("supported", lambda: Euler("raising_getitem")),
+    "object_none": ("out_of_contract", lambda: Euler("object_none")),
+    "mutate_after": ("supported", MutateAfter),
+    "shared_buffer": ("supported", SharedBufferRK4),
+    "views": ("supported", ViewRK4),
+}
+
+
+def hexs(a):
+    return [float(x).hex() for x in np.asarray(a, dtype=float)]
+
+
+def run(make, mode):
+    sim = Simulator(R0, V0, Free(), make(), 0.5, spacecraft=CRAFT)
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter(mode)
+        try:
+            sim.step()
+            res = {"outcome": "ok"}
+        except BaseException as e:  # noqa: BLE001 - recorded, not handled
+            res = {"outcome": "raise", "type": type(e).__name__, "msg": str(e)}
+    snap, prop = sim.snapshot(), sim.propulsion_snapshot()
+    res.update(
+        tick=sim.tick,
+        r=hexs(snap.r),
+        v=hexs(snap.v),
+        propellant=float(prop.propellant_kg).hex(),
+        warnings=sorted({f"{w.category.__name__}: {w.message}" for w in ws}),
+    )
+    return res
+
+
+def read(ctx):
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter("always")
+        try:
+            m = ctx.total_mass_kg
+            out = {"value": None if m is None else float(m).hex(), "type": type(m).__name__}
+        except BaseException as e:  # noqa: BLE001
+            out = {"raise": type(e).__name__, "msg": str(e)}
+    out["warnings"] = sorted({f"{w.category.__name__}: {w.message}" for w in ws})
+    return out
+
+
+class Capturing:
+    """Delegates to an integrator, recording the exact stage object each derivative call gets."""
+
+    def __init__(self, inner, stages):
+        self.inner, self.stages = inner, stages
+        self.name, self.order = inner.name, inner.order
+
+    def step(self, f, t, y, dt):
+        def g(tt, yy):
+            self.stages.append(yy)
+            return f(tt, yy)
+
+        return self.inner.step(g, t, y, dt)
+
+
+def _plain(a):
+    """Element 6 of a stage without subclass dispatch, or None if not a 1-D float64 array."""
+    if isinstance(a, np.ndarray) and a.ndim == 1 and a.dtype == np.float64:
+        return float(np.ndarray.__getitem__(a, 6))
+    return None
+
+
+def _capture(make):
+    contexts, stages = [], []
+    orig = simmod.LegacyForceAdapter
+
+    class Recording(orig):
+        __slots__ = ()
+
+        def acceleration(self, t, r, v, ctx):
+            contexts.append((ctx, _plain(stages[-1])))
+            return orig.acceleration(self, t, r, v, ctx)
+
+    simmod.LegacyForceAdapter = Recording
+    try:
+        sim = Simulator(R0, V0, Free(), Capturing(make(), stages), 0.5, spacecraft=CRAFT)
+        with warnings.catch_warnings(record=True) as ws:
+            warnings.simplefilter("always")
+            try:
+                sim.step()
+                step = "ok"
+            except BaseException as e:  # noqa: BLE001
+                step = f"{type(e).__name__}: {e}"
+    finally:
+        simmod.LegacyForceAdapter = orig
+    return step, sorted({f"{w.category.__name__}: {w.message}" for w in ws}), contexts, stages
+
+
+def _lifetime(make):
+    """Whether the last coast context alone keeps its stage array alive."""
+    _, _, contexts, stages = _capture(make)
+    if not contexts or not isinstance(stages[-1], np.ndarray):
+        return None
+    ref, keep = weakref.ref(stages[-1]), contexts[-1][0]
+    contexts.clear()
+    stages.clear()
+    gc.collect()
+    alive_held = ref() is not None
+    del keep
+    gc.collect()
+    return {"alive_while_only_context_held": alive_held, "alive_after_release": ref() is not None}
+
+
+def part_b(make):
+    if not hasattr(simmod, "LegacyForceAdapter"):
+        return "n/a (no context at BASE)"
+    step, step_w, contexts, stages = _capture(make)
+    out = {"step": step, "step_warnings": step_w, "contexts": []}
+    # read every context first (snapshot timing after the integrator finished) ...
+    reads = [(read(c), read(c)) for c, _ in contexts]
+    # ... then mutate each stage's propellant to -7 (stage mass becomes dry exactly), read again
+    for st in stages:
+        if isinstance(st, np.ndarray) and st.dtype == np.float64 and st.ndim == 1 and st.flags.writeable:
+            np.ndarray.__setitem__(st, 6, -7.0)
+    for (c, at_call), (r1, r2) in zip(contexts, reads):
+        out["contexts"].append({
+            "stage_mass_at_call": None if at_call is None else (DRY + max(at_call, 0.0)).hex(),
+            "read1": r1, "read2": r2, "read_after_stage_mutation": read(c),
+        })
+    out["distinct_stage_objects"] = len({id(x) for x in stages})
+    out["lifetime"] = _lifetime(make)
+    return out
+
+
+result = {}
+for name, (label, make) in CASES.items():
+    result[name] = {
+        "label": label,
+        "A_record": run(make, "always"),
+        "A_warnings_as_errors": run(make, "error"),
+        "B": part_b(make),
+    }
+json.dump(result, open(sys.argv[2], "w"), indent=1, sort_keys=True)
+print("cases", len(result))

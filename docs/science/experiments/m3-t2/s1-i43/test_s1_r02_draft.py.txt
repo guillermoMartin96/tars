@@ -1,0 +1,113 @@
+"""M3 T2 S1 draft tests for I-43 (R-02 and U-1 snapshot timing). Scratch only; not proposed
+for commit until the owner selects a v3 design.
+
+- T-07 (l): R-02 regression. A custom integrator hands the coast derivative a float64 ndarray
+  subclass (inside Integrator's NDArray[np.float64] annotation). BASE commits the tick with no
+  warning; S1 must too, including with warnings raised as errors.
+- T-04 (snapshot): U-1 "owned binary64". The coast context's mass is the stage mass at the
+  derivative call, unchanged by later writes to the stage array (integrator writes after the
+  call; one buffer reused across RK4 stages), and identical on repeated reads.
+"""
+
+import warnings
+
+import numpy as np
+import pytest
+
+import tars.sim.simulator as simmod
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import Simulator
+
+DRY, PROP = 1000.0, 300.0
+CRAFT = SpacecraftSpec(
+    dry_mass_kg=DRY, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=PROP)
+)
+R0, V0 = np.array([7e6, 0.0, 0.0]), np.array([0.0, 7.5e3, 0.0])
+
+
+class _Free:
+    name = "free_space"
+
+    def acceleration(self, t, r, v):
+        return np.zeros(3)
+
+
+class _RaisingGetitem(np.ndarray):
+    def __getitem__(self, k):
+        if k == 6:
+            raise LookupError("stage propellant read")
+        return super().__getitem__(k)
+
+
+def _masked(y):
+    return np.ma.array(y.copy(), mask=[False] * 6 + [True, False])
+
+
+def _raising(y):
+    return y.copy().view(_RaisingGetitem)
+
+
+class _Euler:
+    name, order = "euler_wrapped", 1
+
+    def __init__(self, wrap):
+        self.wrap = wrap
+
+    def step(self, f, t, y, dt):
+        return y + dt * np.asarray(f(t, self.wrap(y)), dtype=float)
+
+
+@pytest.mark.parametrize("wrap", [_masked, _raising], ids=["masked", "raising_getitem"])
+def test_t07_l_coast_does_not_read_the_stage_through_a_subclass(wrap):
+    sim = Simulator(R0, V0, _Free(), _Euler(wrap), 0.5, spacecraft=CRAFT)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        sim.step()
+    assert sim.tick == 1
+
+
+class _WriteAfter:
+    name, order = "write_after", 1
+
+    def step(self, f, t, y, dt):
+        stage = y.copy()
+        k = f(t, stage)
+        stage[6] = 123.0
+        return y + dt * k
+
+
+class _SharedBufferRK4:
+    name, order = "rk4_shared_buffer", 4
+
+    def step(self, f, t, y, dt):
+        buf, h = y.copy(), 0.5 * dt
+        k1 = f(t, buf)
+        buf[:] = y + h * k1
+        k2 = f(t + h, buf)
+        buf[:] = y + h * k2
+        k3 = f(t + h, buf)
+        buf[:] = y + dt * k3
+        k4 = f(t + dt, buf)
+        buf[6] = -7.0
+        return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+@pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4])
+def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+    seen = []
+    orig = simmod.LegacyForceAdapter
+
+    class Recording(orig):
+        __slots__ = ()
+
+        def acceleration(self, t, r, v, ctx):
+            seen.append(ctx)
+            return orig.acceleration(self, t, r, v, ctx)
+
+    monkeypatch.setattr(simmod, "LegacyForceAdapter", Recording)
+    Simulator(R0, V0, _Free(), integrator(), 0.5, spacecraft=CRAFT).step()
+    assert seen
+    for ctx in seen:
+        first, second = ctx.total_mass_kg, ctx.total_mass_kg
+        assert type(first) is float
+        assert first.hex() == second.hex() == (DRY + PROP).hex()
