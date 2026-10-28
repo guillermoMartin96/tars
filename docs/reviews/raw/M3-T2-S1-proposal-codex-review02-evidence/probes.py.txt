@@ -1,0 +1,29 @@
+import json, math, warnings
+import numpy as np
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec,TankSpec
+from tars.sim import forces
+class Free:
+ name='zero'
+ def acceleration(self,t,r,v): return np.zeros(3)
+craft=SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=490.,isp_s=312.),tank=TankSpec(propellant_kg=300.))
+class AuditArray(np.ndarray):
+ def __getitem__(self,key):
+  if isinstance(key,int) and key==6: raise RuntimeError('scalar propellant read')
+  return super().__getitem__(key)
+class CustomIntegrator:
+ name='custom';order=1
+ def step(self,f,t,y,dt):
+  stage=y.copy().view(AuditArray)
+  return np.asarray(stage)+dt*f(t,stage)
+def run():
+ s=Simulator(np.array([7e6,0.,0.]), np.array([0.,1.,0.]), Free(),CustomIntegrator(),.5,spacecraft=craft)
+ try: s.step(); return {'ok':True,'tick':s.tick}
+ except BaseException as e: return {'type':type(e).__name__,'msg':str(e),'tick':s.tick}
+print('subclass_coast',json.dumps(run()))
+if hasattr(forces,'ForceContext'):
+ c=forces.ForceContext(1300.);c._store(math.nan)
+ try: print(c.total_mass_kg)
+ except Exception as e: print('store_mutation',type(e).__name__,str(e))
+ c=forces.ForceContext(1300.);c.__init__(1.);print('reinit_mutation',c.total_mass_kg)

@@ -1,0 +1,43 @@
+"""I-42 implementer's independent probe of Codex R-02: coast-closure stage-propellant read."""
+import json, sys, warnings
+import numpy as np
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import Simulator
+
+class Free:
+    name = "free_space"
+    def acceleration(self, t, r, v): return np.zeros(3)
+
+class Raising(np.ndarray):
+    def __getitem__(self, k):
+        if k == 6: raise LookupError("stage propellant read")
+        return super().__getitem__(k)
+
+def wrap(kind, y):
+    if kind == "masked": return np.ma.array(y.copy(), mask=[False] * 6 + [True, False])
+    if kind == "object_none": a = y.astype(object); a[6] = None; return a
+    if kind == "complex": return y.astype(complex)
+    if kind == "raising_subclass": return y.copy().view(Raising)
+    return y
+
+class Wrapping:
+    order = 1
+    def __init__(self, kind): self.kind, self.name = kind, f"wrap_{kind}"
+    def step(self, f, t, y, dt):
+        k = f(t, wrap(self.kind, y))
+        return y + dt * np.asarray(k, dtype=float).real
+
+craft = SpacecraftSpec(dry_mass_kg=1000.0, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=300.0))
+out = {}
+for kind in ["rk4_control", "masked", "object_none", "complex", "raising_subclass"]:
+    integ = RK4() if kind == "rk4_control" else Wrapping(kind)
+    sim = Simulator(np.array([7e6, 0.0, 0.0]), np.array([0.0, 7.5e3, 0.0]), Free(), integ, 0.5, spacecraft=craft)
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter("always")
+        try:
+            sim.step(); res = ["ok", sim.tick, [x.hex() for x in sim.snapshot().r]]
+        except BaseException as e:
+            res = ["raise", type(e).__name__, str(e), sim.tick]
+    out[kind] = {"result": res, "warnings": sorted({(w.category.__name__, str(w.message)) for w in ws})}
+json.dump(out, open(sys.argv[1], "w"), indent=1, default=list)

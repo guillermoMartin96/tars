@@ -1,0 +1,70 @@
+import json, math, warnings, sys
+import numpy as np
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import EngineSpec, TankSpec, SpacecraftSpec
+from tars.sim.forces import PointMassGravity
+
+class Zero:
+    name='zero'
+    def acceleration(self,t,r,v): return np.zeros(3)
+
+def craft(engine=None):
+    return SpacecraftSpec(1000., engine or EngineSpec(490.,312.), TankSpec(300.))
+def state(s):
+    p=s.propulsion_snapshot()
+    return dict(tick=s.tick, y=s._y.tobytes().hex(), prop=repr(p), events=repr(s.engine_transitions))
+def outcome(s):
+    before=state(s)
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter('always')
+        try: s.step(); result={'success':True}
+        except BaseException as e:
+            def chain(e):
+                return None if e is None else [type(e).__name__,str(e),chain(e.__cause__),chain(e.__context__)]
+            result={'exception':chain(e)}
+    result.update(atomic=before==state(s),state=state(s),warnings=[[type(w.message).__name__,str(w.message)] for w in ws])
+    return result
+out={}
+for dt in [1e308, math.nextafter(sys.float_info.max/2,math.inf),1.2e308]:
+    s=Simulator(np.array([7e6,0.,0.]),np.array([0.,1e-290,0.]),Zero(),RK4(),dt,spacecraft=craft(EngineSpec(5e-324,1e-10)))
+    s.step()
+    s.schedule_burn('prograde',float(s.t*1.2),float(s.t*.1),policy='burn_to_depletion')
+    out['overflow_'+dt.hex()]=outcome(s)
+# Mutating legacy force, ordinary RK4, split tick: a writable burn substep start.
+class Mutating(Zero):
+    def acceleration(self,t,r,v):
+        if t==1.0:
+            r.base[6]=math.nan
+        return np.zeros(3)
+s=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),Mutating(),RK4(),10.,spacecraft=craft())
+s.schedule_burn('prograde',1.,2.)
+out['mutating_powered_mass']=outcome(s)
+# Public Integrator extension point with non-finite mass stage.
+class NonfiniteStage:
+    name='stage_probe'; order=1
+    def step(self,f,t,y,dt):
+        z=y.copy(); z[6]=math.nan
+        f(t,z)
+        return y.copy()
+s=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),Zero(),NonfiniteStage(),10.,spacecraft=craft())
+s.schedule_burn('prograde',0.,5.)
+out['integrator_nonfinite_mass']=outcome(s)
+# Independent ordinary trajectory fingerprints, M1/M2 coast/burn and PM+J2.
+from tars.sim.forces import CompositeForceModel, ZonalJ2Gravity
+for model in [Zero(), PointMassGravity(3.986004418e14),CompositeForceModel([PointMassGravity(3.986004418e14),ZonalJ2Gravity(3.986004418e14,6378137.,1.08262668e-3)])]:
+    for mode in ['m1','coast','burn']:
+        s=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,100.]),model,RK4(),2.,spacecraft=None if mode=='m1' else craft())
+        if mode=='burn': s.schedule_burn('prograde',.75,6.5)
+        rows=[]
+        for _ in range(100): s.step(); rows.append(state(s))
+        out[type(model).__name__+'_'+mode]=rows
+# Process-control and arithmetic exception propagation through step.
+for typ in [OverflowError,ZeroDivisionError,KeyboardInterrupt,SystemExit]:
+    class Raising(Zero):
+        def acceleration(self,t,r,v): raise typ('sentinel')
+    for mode in ['m1','coast','burn']:
+        s=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),Raising(),RK4(),np.float64(10.),spacecraft=None if mode=='m1' else craft())
+        if mode=='burn': s.schedule_burn('prograde',0.,5.)
+        out[typ.__name__+'_'+mode]=outcome(s)
+print(json.dumps(out,sort_keys=True,indent=2))

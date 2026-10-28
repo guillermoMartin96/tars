@@ -1,0 +1,215 @@
+..................................................................FFFFFF [ 96%]
+...                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_t07_h_scenarios_reject_non_finite_dt[inf-path0] _____________
+
+path = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json')
+dt = inf
+
+    @pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
+    @pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
+    def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
+>       data = json.loads(path.read_text())
+                          ^^^^^^^^^^^^^^^^
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json'
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_____________ test_t07_h_scenarios_reject_non_finite_dt[inf-path1] _____________
+
+path = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json')
+dt = inf
+
+    @pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
+    @pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
+    def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
+>       data = json.loads(path.read_text())
+                          ^^^^^^^^^^^^^^^^
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json'
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+____________ test_t07_h_scenarios_reject_non_finite_dt[-inf-path0] _____________
+
+path = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json')
+dt = -inf
+
+    @pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
+    @pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
+    def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
+>       data = json.loads(path.read_text())
+                          ^^^^^^^^^^^^^^^^
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json'
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+____________ test_t07_h_scenarios_reject_non_finite_dt[-inf-path1] _____________
+
+path = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json')
+dt = -inf
+
+    @pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
+    @pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
+    def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
+>       data = json.loads(path.read_text())
+                          ^^^^^^^^^^^^^^^^
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json'
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_____________ test_t07_h_scenarios_reject_non_finite_dt[nan-path0] _____________
+
+path = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json')
+dt = nan
+
+    @pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
+    @pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
+    def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
+>       data = json.loads(path.read_text())
+                          ^^^^^^^^^^^^^^^^
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m1_leo_250km.json'
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+_____________ test_t07_h_scenarios_reject_non_finite_dt[nan-path1] _____________
+
+path = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json')
+dt = nan
+
+    @pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
+    @pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
+    def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
+>       data = json.loads(path.read_text())
+                          ^^^^^^^^^^^^^^^^
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json')
+mode = 'r', buffering = -1, encoding = 'locale', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i41/codex/snap/review_scratch/reviewer/proto/scenarios/m2_prograde_burn.json'
+
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: FileNotFoundError
+=========================== short test summary info ============================
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[inf-path0]
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[inf-path1]
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[-inf-path0]
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[-inf-path1]
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[nan-path0]
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[nan-path1]
+6 failed, 69 passed in 0.52s

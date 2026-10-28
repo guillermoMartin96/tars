@@ -1,0 +1,14 @@
+Python: 3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]
+Platform: macOS-26.2-x86_64-i386-64bit
+uv.lock sha256: 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf
+prototype: changed []
+option_a: changed ['overflow_0x1.0000000000000p+1023', 'overflow_0x1.1ccf385ebc8a0p+1023', 'overflow_0x1.55c576d815726p+1023']
+  overflow_0x1.0000000000000p+1023: BASE=['FloatingPointError', 'non-finite state produced at tick 2', None, None]; option_a=['ValueError', 'total_mass_kg must be finite and positive, got nan', None, None]
+  overflow_0x1.1ccf385ebc8a0p+1023: BASE=['FloatingPointError', 'non-finite state produced at tick 2', None, None]; option_a=['ValueError', 'total_mass_kg must be finite and positive, got nan', None, None]
+  overflow_0x1.55c576d815726p+1023: BASE=['FloatingPointError', 'non-finite state produced at tick 2', None, None]; option_a=['ValueError', 'total_mass_kg must be finite and positive, got nan', None, None]
+early: changed ['integrator_nonfinite_mass', 'mutating_powered_mass']
+  integrator_nonfinite_mass: BASE=['FloatingPointError', 'non-finite state during a burn at t = 0.0', None, None]; early=['ValueError', 'total_mass_kg must be finite and positive, got nan', None, None]
+  mutating_powered_mass: BASE=['FloatingPointError', 'non-finite state during a burn at t = 2.0', None, None]; early=['ValueError', 'total_mass_kg must be finite and positive, got nan', None, None]
+overflow_0x1.0000000000000p+1023: ['FloatingPointError', 'non-finite state produced at tick 2', None, None]; atomic=True; warnings=[['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply']]
+overflow_0x1.1ccf385ebc8a0p+1023: ['FloatingPointError', 'non-finite state produced at tick 2', None, None]; atomic=True; warnings=[['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply']]
+overflow_0x1.55c576d815726p+1023: ['FloatingPointError', 'non-finite state produced at tick 2', None, None]; atomic=True; warnings=[['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply'], ['RuntimeWarning', 'invalid value encountered in multiply']]

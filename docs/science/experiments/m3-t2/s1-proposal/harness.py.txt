@@ -1,0 +1,151 @@
+"""I-41 differential harness: direct-API behaviour of the Simulator, recorded exactly.
+
+Run once against each source tree (PYTHONPATH=<tree>/src) and compare the outputs
+byte for byte. Every outcome is recorded: per-step state hex, engine transitions,
+detections and warnings, or the exception (type, message, cause, context), the state
+after the failure (atomicity) and the outcome of one retry.
+"""
+import itertools, json, math, sys, warnings
+import numpy as np
+import tars
+from tars.astro.elements import circular_orbit_state
+from tars.sim.constants import WGS84
+from tars.sim.forces import CompositeForceModel, PointMassGravity, ZonalJ2Gravity
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import AscendingNodeDetector, Simulator
+
+INF = math.inf
+R0, V0 = circular_orbit_state(radius=WGS84.equatorial_radius + 250e3, inclination=math.radians(51.6), raan=0.0, arg_latitude=0.0, mu=WGS84.mu)
+J2C = 1.08262668e-3
+
+class Free:
+    name = "free_space"
+    def acceleration(self, t, r, v): return np.zeros(3)
+class Raise:
+    def __init__(self, exc): self.exc, self.name = exc, "raise"
+    def acceleration(self, t, r, v): raise self.exc("sentinel")
+class Custom(Exception): pass
+class CustomBase(BaseException): pass
+class NanAfter:
+    name = "nan_after"
+    def __init__(self, frac): self.frac = frac
+    def acceleration(self, t, r, v):
+        return np.full(3, np.nan) if t > 0 else PointMassGravity(WGS84.mu).acceleration(t, r, v)
+class Const:
+    name = "const"
+    def __init__(self, val): self.val = val
+    def acceleration(self, t, r, v): return np.full(3, self.val)
+class Overflowing:
+    name = "py_overflow"
+    def acceleration(self, t, r, v): return np.full(3, 1e300 ** 2)
+class Writer:
+    name = "writer"
+    def acceleration(self, t, r, v):
+        r[0] = 0.0
+        return np.zeros(3)
+class ListRet:
+    name = "list"
+    def acceleration(self, t, r, v): return [0.0, 0.0, 0.0]
+class Short:
+    name = "short"
+    def acceleration(self, t, r, v): return np.zeros(2)
+class StateDependent:  # uses t, r, v
+    name = "sd"
+    def acceleration(self, t, r, v): return -1e-9 * np.asarray(v) + 1e-12 * t * np.asarray(r)
+
+FORCES = {
+    "pm": lambda: PointMassGravity(WGS84.mu),
+    "pm_j2": lambda: CompositeForceModel([PointMassGravity(WGS84.mu), ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2C)]),
+    "j2": lambda: ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2C),
+    "free": Free,
+    "nan_after": lambda: NanAfter(0.5),
+    "inf": lambda: Const(INF),
+    "big": lambda: Const(1e190),
+    "py_overflow": Overflowing,
+    "writer": Writer,
+    "list": ListRet,
+    "short": Short,
+    "sd": StateDependent,
+    **{f"raise_{e.__name__}": (lambda e=e: Raise(e)) for e in (OverflowError, ZeroDivisionError, ValueError, RuntimeError, FloatingPointError, TypeError, AttributeError, Custom, CustomBase)},
+}
+DTS = [10.0, 0.5, 1e-300, 5e-324, 1e300, 1e307, 1e308, 8.98846567431158e307, 1.7976931348623157e308, INF]
+def sc(dry, prop, thrust, isp): return SpacecraftSpec(dry_mass_kg=dry, engine=EngineSpec(thrust_n=thrust, isp_s=isp), tank=TankSpec(propellant_kg=prop))
+CRAFT = {
+    "none": None,
+    "ref": lambda: sc(1000.0, 300.0, 490.0, 312.0),
+    "empty": lambda: sc(1000.0, 0.0, 490.0, 312.0),
+    "tiny_dry": lambda: sc(5e-324, 1e-300, 490.0, 312.0),
+    "thrust_ovf": lambda: sc(1e-300, 1e-300, 1e100, 1e100),
+    "huge": lambda: sc(1e308, 1e307, 490.0, 312.0),
+    "uflow_thrust": lambda: sc(1000.0, 300.0, 5e-324, 1e-10),
+}
+INIT = {
+    "leo": (R0, V0),
+    "zero_v": (R0, np.zeros(3)),
+    "tiny_v": (np.array([7e6, 0.0, 0.0]), np.array([0.0, 1e-290, 0.0])),
+    "huge_r": (np.array([1e154, 0.0, 0.0]), V0),
+}
+BURNS = ["none", "inside", "at0_span", "after1_scaled", "deplete"]
+
+def hx(a): return [float(x).hex() for x in np.asarray(a, dtype=np.float64).ravel()]
+def exc_rec(e): return {"type": type(e).__qualname__, "msg": str(e), "cause": type(e.__cause__).__qualname__ if e.__cause__ else None, "context": type(e.__context__).__qualname__ if e.__context__ else None, "suppress": e.__suppress_context__}
+def state(sim):
+    s = sim.snapshot(); p = sim.propulsion_snapshot()
+    d = {"tick": sim.tick, "t": float(sim.t).hex(), "r": hx(s.r), "v": hx(s.v)}
+    if p is not None:
+        d.update(prop=float(p.propellant_kg).hex(), mass=float(p.total_mass_kg).hex(), dv=float(p.delta_v_sensed_mps).hex(), eng=str(p.engine_state), pending=list(p.pending_burn_ids), active=p.active_burn_id)
+    return d
+def schedule(sim, kind):
+    dt = sim.dt
+    try:
+        if kind == "inside": p = sim.schedule_burn("prograde", sim.t + 0.3 * dt, 0.4 * dt, policy="burn_to_depletion")
+        elif kind == "at0_span": p = sim.schedule_burn("prograde", sim.t, 2.5 * dt, policy="burn_to_depletion")
+        elif kind == "after1_scaled": p = sim.schedule_burn("prograde", sim.t * 1.2, sim.t * 0.1, policy="burn_to_depletion")
+        elif kind == "deplete": p = sim.schedule_burn("retrograde", sim.t, 1e9, policy="burn_to_depletion")
+        else: return None
+        return {"ok": [float(p.ignition_t_s).hex(), float(p.cutoff_t_s).hex(), float(p.propellant_used_kg).hex()]}
+    except BaseException as e:
+        return {"rej": exc_rec(e)}
+def step(sim):
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        try:
+            det = sim.step()
+            out = {"ok": state(sim), "det": [[float(d.crossing_t).hex(), d.tick] for d in det],
+                   "ev": [[e.kind, float(e.t).hex(), hx(e.r), hx(e.v), float(e.propellant_kg).hex(), float(e.delta_v_sensed_mps).hex(), e.burn_id] for e in sim.engine_transitions]}
+        except BaseException as e:
+            out = {"err": exc_rec(e), "after": state(sim), "ev_after": len(sim.engine_transitions)}
+    out["warn"] = [[c.category.__name__, str(c.message)] for c in w]
+    return out
+def run_case(dt, fname, cname, iname, burn):
+    rec = {"case": [repr(dt), fname, cname, iname, burn]}
+    try:
+        craft = CRAFT[cname]() if CRAFT[cname] else None
+        r0, v0 = INIT[iname]
+        sim = Simulator(r0, v0, FORCES[fname](), RK4(), dt, (AscendingNodeDetector(),), spacecraft=craft)
+    except BaseException as e:
+        rec["init_err"] = exc_rec(e); return rec
+    steps = []
+    if burn != "after1_scaled": rec["sched"] = schedule(sim, burn)
+    for i in range(3):
+        if i == 1 and burn == "after1_scaled": rec["sched"] = schedule(sim, burn)
+        s = step(sim); steps.append(s)
+        if "err" in s:
+            steps.append(step(sim))  # retry after the failure: must fail identically, atomically
+            break
+    rec["steps"] = steps
+    return rec
+
+def main():
+    out = open(sys.argv[1], "w")
+    out.write(json.dumps({"tars_file": "<redacted per tree>", "numpy": np.__version__}) + "\n")
+    n = 0
+    for dt, f, c, i, b in itertools.product(DTS, FORCES, CRAFT, INIT, BURNS):
+        if c == "none" and b != "none" and b != "inside":
+            continue
+        out.write(json.dumps(run_case(dt, f, c, i, b), sort_keys=True) + "\n"); n += 1
+    out.close()
+    print("cases", n, "tars at", tars.__file__, file=sys.stderr)
+
+main()

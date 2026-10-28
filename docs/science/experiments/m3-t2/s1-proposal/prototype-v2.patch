@@ -1,0 +1,701 @@
+diff --git a/src/tars/sim/forces.py b/src/tars/sim/forces.py
+index 75d8429..f347a0f 100644
+--- a/src/tars/sim/forces.py
++++ b/src/tars/sim/forces.py
+@@ -196,3 +196,90 @@ class ZonalJ2Gravity:
+         if not np.all(np.isfinite(a)):
+             raise ValueError("outside the J2 numerical domain: acceleration overflows")
+         return a
++
++
++class ForceContext:
++    """Immutable force-evaluation context (DQ-3 (a); DR-0026 Q-G3-1): the stage total mass.
++
++    ``total_mass_kg`` is a built-in float that is finite and positive, or ``None`` when the
++    simulation has no mass (the M1 path, I-40 OD-4). Absent mass is never 0.0.
++
++    The mass is converted to an owned binary64 at construction (M3T1-R2-F2 pattern):
++    supported are int (not bool), float, NumPy integer and floating scalars, and
++    zero-dimensional arrays of those; any other type raises ``TypeError``.
++
++    - ``ForceContext(m)`` rejects a non-finite or non-positive m at construction (U-1;
++      I-40 OD-2 option A).
++    - ``ForceContext.deferred(m)`` is used only by the coast derivative (I-41, option B for
++      the coast closure): it rejects such an m when ``total_mass_kg`` is read. A model that
++      never reads the mass therefore fails exactly as it did before the context existed.
++
++    Both raise ``ValueError``; neither raises ``OverflowError`` or ``ZeroDivisionError``.
++    """
++
++    __slots__ = ("_mass",)
++
++    def __init__(self, total_mass_kg: float | None = None) -> None:
++        self._store(total_mass_kg)
++        self.total_mass_kg  # noqa: B018 - validates now (option A)
++
++    @classmethod
++    def deferred(cls, total_mass_kg: float) -> ForceContext:
++        """Context whose mass is validated when it is read (coast closure only, I-41)."""
++        ctx = cls.__new__(cls)
++        ctx._store(total_mass_kg)
++        return ctx
++
++    def _store(self, total_mass_kg: float | None) -> None:
++        mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)
++        object.__setattr__(self, "_mass", mass)
++
++    @property
++    def total_mass_kg(self) -> float | None:
++        mass = self._mass
++        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
++            raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
++        return mass
++
++    def __setattr__(self, name: str, value: object) -> None:
++        raise AttributeError(f"ForceContext is immutable: cannot set {name!r}")
++
++    def __delattr__(self, name: str) -> None:
++        raise AttributeError(f"ForceContext is immutable: cannot delete {name!r}")
++
++
++class ContextForceModel(Protocol):
++    """Context-aware force model: acceleration [m/s^2] at time ``t`` [s] for ECI state
++    (r, v) and the immutable evaluation context ``ctx`` (DQ-3 (a))."""
++
++    name: str
++
++    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -> Vector: ...
++
++
++class LegacyForceAdapter:
++    """Presents a legacy ``ForceModel`` through the context-aware protocol (DQ-3 (a), DQ-5 (a)).
++
++    ``acceleration`` calls the wrapped ``acceleration(t, r, v)`` once with the identical
++    argument objects and returns its result object unchanged; the context is not passed on
++    and not read. Exceptions propagate unchanged. The adapter is immutable and never
++    modifies the wrapped model.
++    """
++
++    __slots__ = ("model",)
++
++    def __init__(self, model: ForceModel) -> None:
++        object.__setattr__(self, "model", model)
++
++    @property
++    def name(self) -> str:
++        return self.model.name
++
++    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -> Vector:
++        return self.model.acceleration(t, r, v)
++
++    def __setattr__(self, name: str, value: object) -> None:
++        raise AttributeError(f"LegacyForceAdapter is immutable: cannot set {name!r}")
++
++    def __delattr__(self, name: str) -> None:
++        raise AttributeError(f"LegacyForceAdapter is immutable: cannot delete {name!r}")
+diff --git a/src/tars/sim/simulator.py b/src/tars/sim/simulator.py
+index 14d1e3b..8d4fbd6 100644
+--- a/src/tars/sim/simulator.py
++++ b/src/tars/sim/simulator.py
+@@ -28,7 +28,7 @@ from tars.sim.commands import (
+     safe_text,
+     schema_errors,
+ )
+-from tars.sim.forces import ForceModel
++from tars.sim.forces import ForceContext, ForceModel, LegacyForceAdapter
+ from tars.sim.integrators import Derivative, Integrator
+ from tars.sim.propulsion import (
+     DIRECTION_LAWS,
+@@ -447,19 +447,25 @@ class Simulator:
+ 
+     def _derivative(self, t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
+         r, v = y[:3], y[3:]
+-        return np.concatenate([v, self._force_model.acceleration(t, r, v)])
++        # No spacecraft: the context carries no mass (I-40 OD-4).
++        model = LegacyForceAdapter(self._force_model)
++        return np.concatenate([v, model.acceleration(t, r, v, ForceContext())])
+ 
+     def _powered_derivative(self, burn: _ScheduledBurn | None) -> Derivative:
+         """RHS for y = [r, v, m_prop, dv_sensed] with the engine off or on."""
+         spacecraft = self._spacecraft
+         assert spacecraft is not None
+-        force_model = self._force_model
++        force_model = LegacyForceAdapter(self._force_model)
+ 
+         if burn is None:
+ 
+             def coast(t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
+                 r, v = y[:3], y[3:6]
+-                return np.concatenate([v, force_model.acceleration(t, r, v), _COAST_RATES])
++                # Stage mass, validated only when a model reads it (I-41): a coast stage of
++                # infinite length carries NaN propellant and must fail as before.
++                mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)
++                ctx = ForceContext.deferred(mass)
++                return np.concatenate([v, force_model.acceleration(t, r, v, ctx), _COAST_RATES])
+ 
+             return coast
+ 
+@@ -477,7 +483,7 @@ class Simulator:
+             if not math.isfinite(engine.thrust_n / mass):  # F/m overflows (K4)
+                 raise FloatingPointError(f"thrust acceleration overflows at t = {t!r}")
+             thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)
+-            a = force_model.acceleration(t, r, v) + thrust
++            a = force_model.acceleration(t, r, v, ForceContext(mass)) + thrust
+             return np.concatenate([v, a, [-mdot, engine.thrust_n / mass]])
+ 
+         return powered
+diff --git a/tests/test_s1_failure_paths.py b/tests/test_s1_failure_paths.py
+new file mode 100644
+index 0000000..ddfb981
+--- /dev/null
++++ b/tests/test_s1_failure_paths.py
+@@ -0,0 +1,238 @@
++"""M3 T2 S1, T-07: failure-path characterization (PC-7(S1) §8; I-40 OD-2; I-41).
++
++Regression guards, green at BASE ``ee602c5`` and required unchanged after S1. They pin the
++exception type, message and precedence of every failure path that ForceContext
++construction sits on. Under I-41 (option B for the coast closure) no T-07 case changes,
++including (a) and (b) at dt = +inf; (i) pins the finite-dt counterexample found in I-40
++and (j) shows that dt = +inf admits no split tick.
++"""
++
++import json
++import math
++
++import numpy as np
++import pytest
++from pydantic import ValidationError
++
++from tars.astro.elements import circular_orbit_state
++from tars.sim.constants import WGS84
++from tars.sim.forces import CompositeForceModel, PointMassGravity, ZonalJ2Gravity
++from tars.sim.integrators import RK4
++from tars.sim.propulsion import BurnRejectedError, EngineSpec, SpacecraftSpec, TankSpec
++from tars.sim.scenario import parse_scenario
++from tars.sim.simulator import Simulator
++from tests.conftest import M1_SCENARIO, M2_SLICE_SCENARIO
++
++J2 = 1.08262668e-3
++ENGINE = EngineSpec(thrust_n=490.0, isp_s=312.0)
++R0, V0 = circular_orbit_state(
++    radius=WGS84.equatorial_radius + 250_000.0,
++    inclination=math.radians(51.6),
++    raan=0.0,
++    arg_latitude=0.0,
++    mu=WGS84.mu,
++)
++
++
++def _spacecraft(dry=1000.0, prop=300.0, engine=ENGINE):
++    return SpacecraftSpec(dry_mass_kg=dry, engine=engine, tank=TankSpec(propellant_kg=prop))
++
++
++def _pm():
++    return PointMassGravity(WGS84.mu)
++
++
++def _pm_j2():
++    return CompositeForceModel([_pm(), ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2)])
++
++
++class _FreeSpace:
++    name = "free_space"
++
++    def acceleration(self, t, r, v):
++        return np.zeros(3)
++
++
++class _Raise:
++    name = "raise"
++
++    def __init__(self, exc):
++        self.exc = exc
++
++    def acceleration(self, t, r, v):
++        raise self.exc
++
++
++class _NanAfter:
++    name = "nan_after"
++
++    def __init__(self, t_fail):
++        self.t_fail = t_fail
++
++    def acceleration(self, t, r, v):
++        return np.full(3, np.nan) if t >= self.t_fail else _pm().acceleration(t, r, v)
++
++
++def _assert_unchanged(sim, r, v):
++    assert sim.tick == 0
++    np.testing.assert_array_equal(sim.snapshot().r, r)
++    np.testing.assert_array_equal(sim.snapshot().v, v)
++
++
++@pytest.mark.filterwarnings("ignore::RuntimeWarning")
++def test_t07_a_infinite_dt_coast_point_mass_is_non_finite():
++    sim = Simulator(R0, V0, _pm(), RK4(), math.inf, spacecraft=_spacecraft())
++    with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
++        sim.step()
++    _assert_unchanged(sim, R0, V0)
++
++
++@pytest.mark.filterwarnings("ignore::RuntimeWarning")
++def test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2():
++    sim = Simulator(R0, V0, _pm_j2(), RK4(), math.inf, spacecraft=_spacecraft())
++    with pytest.raises(ValueError, match=r"^position must be finite$"):
++        sim.step()
++    _assert_unchanged(sim, R0, V0)
++
++
++@pytest.mark.filterwarnings("ignore::RuntimeWarning")
++def test_t07_c_infinite_dt_m1_path_is_non_finite():
++    sim = Simulator(R0, V0, _pm(), RK4(), math.inf)
++    with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
++        sim.step()
++    _assert_unchanged(sim, R0, V0)
++
++
++def test_t07_d_non_finite_powered_stage_fails_before_any_mass_use():
++    sim = Simulator(R0, V0, _NanAfter(1.5), RK4(), 10.0, spacecraft=_spacecraft())
++    sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
++    with pytest.raises(FloatingPointError, match=r"^non-finite state during a burn at t = 2\.0$"):
++        sim.step()
++    _assert_unchanged(sim, R0, V0)
++
++
++def test_t07_e_thrust_over_mass_overflow():
++    engine = EngineSpec(thrust_n=1e100, isp_s=1e100)
++    sim = Simulator(R0, V0, _pm(), RK4(), 1e-300, spacecraft=_spacecraft(1e-300, 1e-300, engine))
++    sim.schedule_burn("prograde", 0.0, 1e-300, policy="burn_to_depletion")
++    with pytest.raises(FloatingPointError, match=r"^thrust acceleration overflows at t = 0\.0$"):
++        sim.step()
++    _assert_unchanged(sim, R0, V0)
++
++
++@pytest.mark.parametrize("exc_type", [OverflowError, ZeroDivisionError])
++@pytest.mark.parametrize("path", ["m1", "coast", "powered"])
++def test_t07_f_python_arithmetic_errors_are_converted_by_step(exc_type, path):
++    original = exc_type("sentinel")
++    craft = None if path == "m1" else _spacecraft()
++    sim = Simulator(R0, V0, _Raise(original), RK4(), 10.0, spacecraft=craft)
++    if path == "powered":
++        sim.schedule_burn("prograde", 0.0, 5.0)
++    expected = r"^numerical overflow at tick 1: sentinel$"
++    with pytest.raises(FloatingPointError, match=expected) as err:
++        sim.step()
++    assert err.value.__cause__ is original
++    _assert_unchanged(sim, R0, V0)
++
++
++@pytest.mark.parametrize("path", ["m1", "coast", "powered"])
++def test_t07_f_other_force_errors_propagate_as_the_identical_object(path):
++    original = ValueError("sentinel")
++    craft = None if path == "m1" else _spacecraft()
++    sim = Simulator(R0, V0, _Raise(original), RK4(), 10.0, spacecraft=craft)
++    if path == "powered":
++        sim.schedule_burn("prograde", 0.0, 5.0)
++    with pytest.raises(ValueError) as err:
++        sim.step()
++    assert err.value is original
++    _assert_unchanged(sim, R0, V0)
++
++
++def test_t07_g_pointing_law_error_precedes_the_force_model():
++    sim = Simulator(
++        R0, np.zeros(3), _Raise(RuntimeError("force")), RK4(), 10.0, spacecraft=_spacecraft()
++    )
++    sim.schedule_burn("prograde", 0.0, 5.0)
++    with pytest.raises(
++        ValueError, match=r"^velocity-tracking direction is undefined for zero velocity$"
++    ):
++        sim.step()
++    _assert_unchanged(sim, R0, np.zeros(3))
++
++
++@pytest.mark.parametrize("path", [M1_SCENARIO, M2_SLICE_SCENARIO])
++@pytest.mark.parametrize("dt", [math.inf, -math.inf, math.nan])
++def test_t07_h_scenarios_reject_non_finite_dt(path, dt):
++    data = json.loads(path.read_text())
++    data["dt_s"] = dt
++    with pytest.raises(ValidationError, match="dt_s"):
++        parse_scenario(json.dumps(data))
++
++
++def _overflowing_tick_end(dt):
++    """I-40 counterexample: finite dt, tick 2 ends at (1 + 1) dt = +inf, so the last coast
++    sub-step of a split tick has infinite length (NaN stage propellant)."""
++    engine = EngineSpec(thrust_n=5e-324, isp_s=1e-10)  # F/m underflows to 0: r stays finite
++    sim = Simulator(
++        np.array([7e6, 0.0, 0.0]),
++        np.array([0.0, 1e-290, 0.0]),
++        _FreeSpace(),
++        RK4(),
++        dt,
++        spacecraft=_spacecraft(engine=engine),
++    )
++    sim.step()
++    assert sim.tick == 1 and math.isfinite(sim.t) and (sim.tick + 1) * sim.dt == math.inf
++    sim.schedule_burn("prograde", sim.t * 1.2, sim.t * 0.1, policy="burn_to_depletion")
++    return sim
++
++
++@pytest.mark.filterwarnings("ignore::RuntimeWarning")
++@pytest.mark.parametrize("dt", [1e308, 8.98846567431158e307])
++def test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite(dt):
++    sim = _overflowing_tick_end(dt)
++    before = (sim.snapshot(), sim.propulsion_snapshot())
++    with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 2$"):
++        sim.step()
++    assert sim.tick == 1 and sim.propulsion_snapshot() == before[1]
++    np.testing.assert_array_equal(sim.snapshot().r, before[0].r)
++
++
++def test_t07_j_infinite_dt_admits_no_burn_so_no_split_tick():
++    """dt = +inf: t = 0 * inf is NaN, so every burn is schema-invalid and a split tick (whose
++    last coast sub-step would have infinite length) cannot arise; (a)/(b) are the only
++    infinite-dt coast paths."""
++    sim = Simulator(R0, V0, _pm(), RK4(), math.inf, spacecraft=_spacecraft())
++    assert math.isnan(sim.t)
++    with pytest.raises(BurnRejectedError, match=r"^schema_invalid: earliest_t_s must be finite"):
++        sim.schedule_burn("prograde", 1.0, 2.0)
++    assert sim.propulsion_snapshot().pending_burn_ids == ()
++
++
++class _StageWriter:
++    """Legacy model that writes into the RK4 stage array behind its r view (stage arrays
++    are writable; only the committed state is read-only, REV-004)."""
++
++    name = "stage_writer"
++
++    def __init__(self, t_write, index, value):
++        self.t_write, self.index, self.value = t_write, index, value
++
++    def acceleration(self, t, r, v):
++        if t == self.t_write and r.base is not None and r.base.flags.writeable:
++            r.base[self.index] = self.value
++        return np.zeros(3)
++
++
++@pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
++def test_t07_k_finiteness_check_precedes_powered_context_construction(value):
++    """Review R-01 (I-41): a stage propellant made non-finite by a model is reported by the
++    powered closure's finiteness check, before any context exists (pins I-39A §10 M-14)."""
++    model = _StageWriter(1.0, 6, value)
++    sim = Simulator(R0, V0, model, RK4(), 10.0, spacecraft=_spacecraft())
++    sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
++    before = (sim.snapshot(), sim.propulsion_snapshot())
++    with pytest.raises(FloatingPointError, match=r"^non-finite state during a burn at t = 2\.0$"):
++        sim.step()
++    _assert_unchanged(sim, R0, V0)
++    assert sim.propulsion_snapshot() == before[1] and sim.engine_transitions == ()
+diff --git a/tests/test_s1_force_context.py b/tests/test_s1_force_context.py
+new file mode 100644
+index 0000000..22227b0
+--- /dev/null
++++ b/tests/test_s1_force_context.py
+@@ -0,0 +1,305 @@
++"""M3 T2 S1: ForceContext, the context-aware protocol and the legacy adapter (DQ-3 (a),
++DQ-5 (a); PC-7(S1) §9a T-01 … T-06; I-41 option B for the coast closure).
++
++The new interface is imported inside each test, so before S1 every test fails on its own
++(AttributeError from the absent name), never as a collection error.
++"""
++
++import math
++import random
++
++import numpy as np
++import pytest
++
++from tars.astro.elements import circular_orbit_state
++from tars.sim import forces
++from tars.sim import simulator as simulator_module
++from tars.sim.constants import WGS84
++from tars.sim.forces import PointMassGravity, ZonalJ2Gravity
++from tars.sim.integrators import RK4
++from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
++from tars.sim.simulator import Simulator
++
++J2 = 1.08262668e-3
++DRY, PROP = 1000.0, 300.0
++ENGINE = EngineSpec(thrust_n=490.0, isp_s=312.0)
++R0, V0 = circular_orbit_state(
++    radius=WGS84.equatorial_radius + 250_000.0,
++    inclination=math.radians(51.6),
++    raan=0.0,
++    arg_latitude=0.0,
++    mu=WGS84.mu,
++)
++INVALID = [math.nan, math.inf, -math.inf, 0.0, -0.0, -1.0, -5e-324]
++
++
++def _spacecraft(prop=PROP):
++    return SpacecraftSpec(dry_mass_kg=DRY, engine=ENGINE, tank=TankSpec(propellant_kg=prop))
++
++
++# ------------------------------------------------------------------ T-01 (U-1, INV-5)
++
++
++def test_t01_a_context_is_immutable():
++    ctx = forces.ForceContext(1300.0)
++    with pytest.raises(AttributeError):
++        ctx.total_mass_kg = 1.0
++    with pytest.raises(AttributeError):
++        ctx._mass = 1.0
++    with pytest.raises(AttributeError):
++        del ctx._mass
++    with pytest.raises(AttributeError):
++        ctx.extra = 1
++    assert not hasattr(ctx, "__dict__")
++    assert ctx.total_mass_kg == 1300.0
++
++
++@pytest.mark.parametrize(
++    "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
++)
++def test_t01_b_mass_is_an_owned_builtin_float(mass):
++    for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
++        assert type(ctx.total_mass_kg) is float
++        assert ctx.total_mass_kg == 1300.0
++
++
++@pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
++def test_t01_b_unsupported_mass_types_raise_type_error(mass):
++    with pytest.raises(TypeError):
++        forces.ForceContext(mass)
++    with pytest.raises(TypeError):
++        forces.ForceContext.deferred(mass)
++
++
++@pytest.mark.parametrize("mass", INVALID)
++def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
++    with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
++        forces.ForceContext(mass)
++
++
++@pytest.mark.parametrize("mass", INVALID)
++def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
++    ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
++    for _ in range(2):  # every read rejects it; nothing is cached or coerced
++        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
++            ctx.total_mass_kg  # noqa: B018
++
++
++def test_t01_d_absent_mass_is_none_never_zero():
++    ctx = forces.ForceContext()
++    assert ctx.total_mass_kg is None
++    assert forces.ForceContext(None).total_mass_kg is None
++    with pytest.raises(ValueError):
++        forces.ForceContext(0.0)
++
++
++@pytest.mark.parametrize("mass", [10**400, -(10**400), np.longdouble(1e300) * 1e300])
++def test_t01_e_construction_never_raises_overflow_or_zero_division(mass):
++    for make in (forces.ForceContext, forces.ForceContext.deferred):
++        try:
++            ctx = make(mass)
++            ctx.total_mass_kg  # noqa: B018
++        except (OverflowError, ZeroDivisionError) as err:  # pragma: no cover - the failure
++            pytest.fail(f"{type(err).__name__} escaped: step() would misreport it")
++        except ValueError:
++            pass
++
++
++def test_t01_smallest_positive_mass_is_valid():
++    assert forces.ForceContext(5e-324).total_mass_kg == 5e-324
++
++
++# ------------------------------------------------------------------ T-02 (U-2, INV-1)
++
++
++class _Recorder:
++    name = "recorder"
++
++    def __init__(self, result=None, exc=None):
++        self.calls, self.result, self.exc = [], result, exc
++
++    def acceleration(self, t, r, v):
++        self.calls.append((t, r, v))
++        if self.exc is not None:
++            raise self.exc
++        return self.result
++
++
++@pytest.mark.parametrize(
++    "payload",
++    [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
++)
++def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
++    model = _Recorder(result=payload)
++    state = dict(vars(model))
++    adapter = forces.LegacyForceAdapter(model)
++    t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
++    out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
++    assert out is payload
++    assert len(model.calls) == 1
++    (ct, cr, cv) = model.calls[0]
++    assert ct is t and cr is r and cv is v
++    model.calls.clear()
++    assert vars(model) == {**state, "calls": []} and adapter.model is model
++    assert adapter.name == "recorder"
++
++
++@pytest.mark.parametrize(
++    "exc",
++    [
++        ValueError("x"),
++        FloatingPointError("x"),
++        OverflowError("x"),
++        ZeroDivisionError("x"),
++        KeyboardInterrupt(),
++    ],
++)
++def test_t02_adapter_propagates_the_identical_exception(exc):
++    adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
++    with pytest.raises(type(exc)) as err:
++        adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
++    assert err.value is exc
++    assert err.value.__context__ is None and err.value.__cause__ is None
++
++
++def test_t02_adapter_is_immutable():
++    adapter = forces.LegacyForceAdapter(_Recorder())
++    with pytest.raises(AttributeError):
++        adapter.model = None
++    with pytest.raises(AttributeError):
++        del adapter.model
++
++
++# ------------------------------------------------------------------------ T-03 (DQ-5)
++
++
++@pytest.mark.parametrize(
++    "model",
++    [PointMassGravity(WGS84.mu), ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2)],
++    ids=["point_mass", "zonal_j2"],
++)
++def test_t03_legacy_models_through_the_adapter_are_bit_identical(model):
++    rng = random.Random(20261028)  # seed recorded
++    adapter = forces.LegacyForceAdapter(model)
++    for _ in range(2000):
++        r = np.array([rng.uniform(-4e7, 4e7) for _ in range(3)])
++        v = np.array([rng.uniform(-1e4, 1e4) for _ in range(3)])
++        t = rng.uniform(0.0, 1e6)
++        direct = model.acceleration(t, r, v)
++        for ctx in (forces.ForceContext(), forces.ForceContext(rng.uniform(1.0, 1e4))):
++            via = adapter.acceleration(t, r, v, ctx)
++            assert [x.hex() for x in via.tolist()] == [x.hex() for x in direct.tolist()]
++
++
++# -------------------------------------------- T-04 … T-06 (U-3, INV-3, I-7 (a), OD-4)
++
++
++class _StageSpy:
++    """RK4 whose derivative calls are recorded: (t, stage y) per evaluation."""
++
++    name = "rk4"
++    order = 4
++
++    def __init__(self):
++        self.stages = []
++
++    def step(self, f, t, y, dt):
++        def spied(ts, ys):
++            self.stages.append((ts, ys.copy()))
++            return f(ts, ys)
++
++        return RK4().step(spied, t, y, dt)
++
++
++def _record_contexts(monkeypatch):
++    """Replace the simulator's adapter by one that records each context it receives."""
++    seen = []
++    original = forces.LegacyForceAdapter
++
++    class Recording(original):
++        __slots__ = ()
++
++        def acceleration(self, t, r, v, ctx):
++            seen.append(ctx)
++            return super().acceleration(t, r, v, ctx)
++
++    monkeypatch.setattr(simulator_module, "LegacyForceAdapter", Recording)
++    return seen
++
++
++def _stage_mass(y):
++    return DRY + max(float(y[6]), 0.0)
++
++
++def _run(monkeypatch, sim_args, burn=None, ticks=3):
++    seen = _record_contexts(monkeypatch)
++    spy = _StageSpy()
++    sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), spy, 10.0, **sim_args)
++    if burn is not None:
++        sim.schedule_burn("prograde", *burn)
++    for _ in range(ticks):
++        sim.step()
++    assert len(seen) == len(spy.stages) > 0
++    return seen, spy.stages
++
++
++@pytest.mark.parametrize(
++    "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
++)
++def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
++    seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
++    for ctx, (_, y) in zip(seen, stages, strict=True):
++        assert type(ctx.total_mass_kg) is float
++        assert ctx.total_mass_kg.hex() == _stage_mass(y).hex()
++    if burn is not None:  # stage-derived, not committed: the masses vary within each burn step
++        assert len({ctx.total_mass_kg for ctx in seen}) > 1
++        # Some RK4 stage carries a mass other than its sub-step's committed start (stage 1).
++        starts = [seen[i - i % 4].total_mass_kg for i in range(len(seen))]
++        assert any(c.total_mass_kg != m0 for c, m0 in zip(seen, starts, strict=True))
++
++
++@pytest.mark.parametrize("dry", [DRY, 1e-3])
++def test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly(monkeypatch, dry):
++    """U-3. At dry = 1e-3 kg, dry - 1e-17 is a different binary64, so the clamp is observable;
++    at 1000 kg the subtraction rounds back to 1000 (both are pinned)."""
++    assert (dry - 1e-17 != dry) is (dry == 1e-3)
++    seen = _record_contexts(monkeypatch)
++    craft = SpacecraftSpec(dry_mass_kg=dry, engine=ENGINE, tank=TankSpec(propellant_kg=PROP))
++    sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), 10.0, spacecraft=craft)
++    for law in (None, "burn"):
++        y = np.concatenate([R0, V0, [-1e-17, 0.0]])
++        burn = None
++        if law == "burn":
++            sim.schedule_burn("prograde", 0.0, 5.0)
++            burn = sim._pending[0]
++        seen.clear()
++        sim._powered_derivative(burn)(0.0, y)
++        (ctx,) = seen
++        assert ctx.total_mass_kg.hex() == dry.hex()
++
++
++def test_t06_massless_path_carries_absent_mass(monkeypatch):
++    seen, _ = _run(monkeypatch, {})
++    for ctx in seen:
++        try:
++            mass = ctx.total_mass_kg
++        except ValueError as err:
++            pytest.fail(f"massless context carries a supplied (invalid) mass: {err}")
++        assert mass is None
++
++
++@pytest.mark.filterwarnings("ignore::RuntimeWarning")
++def test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read(monkeypatch):
++    """I-41: a coast stage of infinite length (dt = +inf) has NaN propellant. Its context
++    is built without raising and its mass is neither repaired nor clamped: reading it
++    raises. The step then fails exactly as at BASE (T-07 (a))."""
++    seen = _record_contexts(monkeypatch)
++    sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), math.inf, spacecraft=_spacecraft())
++    with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
++        sim.step()
++    assert len(seen) == 4
++    assert seen[0].total_mass_kg == DRY + PROP
++    rejected = r"^total_mass_kg must be finite and positive, got nan$"
++    for ctx in seen[1:]:
++        with pytest.raises(ValueError, match=rejected):
++            ctx.total_mass_kg  # noqa: B018

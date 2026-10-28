@@ -1,0 +1,11 @@
+from pathlib import Path
+import json,xml.etree.ElementTree as E
+p=Path('review_scratch/reviewer')
+for a,b in [('base.jsonl','proto.jsonl'),('writers-base.jsonl','writers-proto.jsonl')]:
+ x=(p/a).read_bytes();y=(p/b).read_bytes();print(a,b,'equal',x==y,'lines',len(x.splitlines()),len(y.splitlines()))
+base=json.loads((p/'independent-base.json').read_text())
+for tag in ('proto','M14','M19','coastA'):
+ other=json.loads((p/f'independent-{tag}.json').read_text());diff=[(a[0],a[1][0][0],b[1][0][0]) for a,b in zip(base,other) if a!=b];print(tag,'differences',len(diff));print(json.dumps(diff,indent=1))
+r=json.loads((p/'mutations/mutation_results.json').read_text());print('control',len(r['control']))
+for k,v in r.items():
+ if k!='control': print(k, v['failed'], [(f['node'],f['message']) for f in v['failures']])

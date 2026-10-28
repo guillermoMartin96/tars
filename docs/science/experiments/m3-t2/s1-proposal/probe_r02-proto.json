@@ -1,0 +1,66 @@
+{
+ "rk4_control": {
+  "result": [
+   "ok",
+   1,
+   [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ]
+  ],
+  "warnings": []
+ },
+ "masked": {
+  "result": [
+   "ok",
+   1,
+   [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ]
+  ],
+  "warnings": [
+   [
+    "UserWarning",
+    "Warning: converting a masked element to nan."
+   ]
+  ]
+ },
+ "object_none": {
+  "result": [
+   "raise",
+   "TypeError",
+   "float() argument must be a string or a real number, not 'NoneType'",
+   0
+  ],
+  "warnings": []
+ },
+ "complex": {
+  "result": [
+   "ok",
+   1,
+   [
+    "0x1.ab3f000000000p+22",
+    "0x1.d4c0000000000p+11",
+    "0x0.0p+0"
+   ]
+  ],
+  "warnings": [
+   [
+    "ComplexWarning",
+    "Casting complex values to real discards the imaginary part"
+   ]
+  ]
+ },
+ "raising_subclass": {
+  "result": [
+   "raise",
+   "LookupError",
+   "stage propellant read",
+   0
+  ],
+  "warnings": []
+ }
+}

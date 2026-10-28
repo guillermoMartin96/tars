@@ -1,0 +1,66 @@
+"""I-41 mutation campaign on the scratch prototype (PC-7(S1) §10 plus coast-B mutants).
+
+Each mutant: copy the prototype src, apply one exact replacement, run the designated test
+nodes against it (PYTHONPATH), record JUnit. A kill counts only if every failure in the
+designated nodes is an assertion-type failure (AssertionError, pytest Failed/DID NOT RAISE,
+regex mismatch) or, for T-07 type pins, the propagated exception of the declared changed type.
+"""
+import json, shutil, subprocess, sys, xml.etree.ElementTree as ET
+from pathlib import Path
+PROTO, OUT = Path(sys.argv[1]), Path(sys.argv[2])
+F, SIM = "src/tars/sim/forces.py", "src/tars/sim/simulator.py"
+FC, FP = "tests/test_s1_force_context.py", "tests/test_s1_failure_paths.py"
+ADAPT = "        return self.model.acceleration(t, r, v)\n"
+PW = "            a = force_model.acceleration(t, r, v, ForceContext(mass)) + thrust\n"
+COAST = "                ctx = ForceContext.deferred(mass)\n"
+M = [
+ ("M-01 adapter copies r", F, ADAPT, "        return self.model.acceleration(t, np.array(r), v)\n", [f"{FC}::test_t02_adapter_passes_identical_objects_once_and_returns_the_result"]),
+ ("M-02 adapter swaps r and v", F, ADAPT, "        return self.model.acceleration(t, v, r)\n", [f"{FC}::test_t02_adapter_passes_identical_objects_once_and_returns_the_result"]),
+ ("M-03 adapter copies the result", F, ADAPT, "        return np.array(self.model.acceleration(t, r, v))\n", [f"{FC}::test_t02_adapter_passes_identical_objects_once_and_returns_the_result"]),
+ ("M-04 adapter calls twice", F, ADAPT, "        self.model.acceleration(t, r, v)\n" + ADAPT, [f"{FC}::test_t02_adapter_passes_identical_objects_once_and_returns_the_result"]),
+ ("M-05 adapter wraps exceptions", F, ADAPT, "        try:\n            return self.model.acceleration(t, r, v)\n        except Exception as err:\n            raise RuntimeError(str(err)) from err\n", [f"{FC}::test_t02_adapter_propagates_the_identical_exception"]),
+ ("M-06 powered context from committed state", SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext(spacecraft.dry_mass_kg + max(float(self._y[_PROP]), 0.0))) + thrust\n", [f"{FC}::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit"]),
+ ("M-06c coast context from committed state", SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(float(self._y[_PROP]), 0.0))\n", [f"{FC}::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly", f"{FC}::test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read"]),
+ ("M-07 powered dry mass only", SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext(spacecraft.dry_mass_kg)) + thrust\n", [f"{FC}::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit"]),
+ ("M-07c coast dry mass only", SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg)\n", [f"{FC}::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit"]),
+ ("M-08 coast no clamp", SIM, "                mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)\n", "                mass = spacecraft.dry_mass_kg + float(y[_PROP])\n", [f"{FC}::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly"]),
+ ("M-09 powered context cached per sub-step", SIM, PW, "            if not cache:\n                cache.append(ForceContext(mass))\n            a = force_model.acceleration(t, r, v, cache[0]) + thrust\n", [f"{FC}::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit"], ("        engine, law, mdot = spacecraft.engine, burn.law, burn.plan.mass_flow_kgps\n", "        engine, law, mdot = spacecraft.engine, burn.law, burn.plan.mass_flow_kgps\n        cache = []\n")),
+ ("M-10 mutable context", F, '        raise AttributeError(f"ForceContext is immutable: cannot set {name!r}")\n', "        object.__setattr__(self, name, value)\n", [f"{FC}::test_t01_a_context_is_immutable"]),
+ ("M-11 unowned mass (np.float64 kept)", F, '        mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)\n', "        mass = total_mass_kg\n", [f"{FC}::test_t01_b_mass_is_an_owned_builtin_float"]),
+ ("M-12 validation removed", F, "        if mass is not None and not (math.isfinite(mass) and mass > 0.0):\n", "        if False:\n", [f"{FC}::test_t01_c_invalid_mass_is_rejected_at_construction", f"{FC}::test_t01_c_deferred_invalid_mass_is_rejected_when_read"]),
+ ("M-13 massless path gets 0.0", SIM, "        return np.concatenate([v, model.acceleration(t, r, v, ForceContext())])\n", "        return np.concatenate([v, model.acceleration(t, r, v, ForceContext.deferred(0.0))])\n", [f"{FC}::test_t06_massless_path_carries_absent_mass"]),
+ ("M-14 powered context before the finiteness check", SIM, "            if not np.all(np.isfinite(y)):\n", "            early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))\n            if not np.all(np.isfinite(y)):\n", [f"{FP}::test_t07_k_finiteness_check_precedes_powered_context_construction"], (PW, "            a = force_model.acceleration(t, r, v, early) + thrust\n")),
+ ("M-15 force call before thrust_acceleration", SIM, "            thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)\n" + PW, "            f = force_model.acceleration(t, r, v, ForceContext(mass))\n            thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)\n            a = f + thrust\n", [f"{FP}::test_t07_g_pointing_law_error_precedes_the_force_model"]),
+ ("M-16 coast validates at construction (option A)", SIM, COAST, "                ctx = ForceContext(mass)\n", [f"{FP}::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite", f"{FP}::test_t07_a_infinite_dt_coast_point_mass_is_non_finite", f"{FP}::test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2"]),
+ ("M-17 coast repairs NaN (max argument order swapped)", SIM, "                mass = spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0)\n", "                mass = spacecraft.dry_mass_kg + max(0.0, float(y[_PROP]))\n", [f"{FC}::test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read"]),
+ ("M-18 coast passes absent mass", SIM, COAST, "                ctx = ForceContext()\n", [f"{FC}::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit"]),
+ ("M-19 powered context deferred (expected equivalent)", SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext.deferred(mass)) + thrust\n", [FC, FP]),
+]
+ASSERT_KINDS = ("AssertionError", "Failed: DID NOT RAISE", "Failed:", "assert ")
+def run(tag, src, nodes):
+    xml = OUT / f"{tag}.xml"
+    env = {"PYTHONPATH": str(src), "PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin"}
+    subprocess.run([str(PROTO / ".venv/bin/python"), "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}", *nodes], cwd=PROTO, env=env, capture_output=True, text=True)
+    res = []
+    for tc in ET.parse(xml).getroot().iter("testcase"):
+        f = tc.find("failure") if tc.find("failure") is not None else tc.find("error")
+        res.append({"node": tc.get("name"), "status": "pass" if f is None else tc.find("error") is not None and "error" or "fail", "message": None if f is None else (f.get("message") or "")[:160]})
+    return res
+OUT.mkdir(parents=True, exist_ok=True)
+report = {"control": run("control", PROTO / "src", sorted({n for m in M for n in m[4]}))}
+assert all(r["status"] == "pass" for r in report["control"]), report["control"]
+for mid, path, old, new, nodes, *extra in M:
+    tag = mid.split()[0]
+    d = OUT / tag / "src"
+    if d.exists(): shutil.rmtree(d)
+    shutil.copytree(PROTO / "src", d)
+    p = d.parent / path; p = d / path.removeprefix("src/")
+    s = p.read_text()
+    for o, n in [(old, new), *extra]:
+        assert s.count(o) == 1, (mid, o); s = s.replace(o, n)
+    p.write_text(s)
+    res = run(tag, d, nodes)
+    fails = [r for r in res if r["status"] != "pass"]
+    report[mid] = {"nodes": nodes, "failed": len(fails), "total": len(res), "failures": fails}
+    print(f"{mid:55s} failed {len(fails):3d}/{len(res):3d}  " + ("; ".join(sorted({(f['message'] or '')[:70] for f in fails}))[:220]))
+(OUT / "mutation_results.json").write_text(json.dumps(report, indent=1))

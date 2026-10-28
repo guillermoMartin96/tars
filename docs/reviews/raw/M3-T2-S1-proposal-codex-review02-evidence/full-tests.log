@@ -1,0 +1,44 @@
+
+==================================== ERRORS ====================================
+_____ ERROR collecting review_scratch/reviewer/proto/tests/test_gmat_m2.py _____
+review_scratch/reviewer/proto/tests/test_gmat_m2.py:26: in <module>
+    LIMITS = json.loads(M2_THRESHOLDS.read_text())["limits"]["o9_gmat"]
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i42/snap/review_scratch/reviewer/proto/proof/thresholds/m2.json'
+_ ERROR collecting review_scratch/reviewer/proto/tests/test_m2_cross_platform.py _
+review_scratch/reviewer/proto/tests/test_m2_cross_platform.py:37: in <module>
+    LIMITS = load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS)).for_validator(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/proto/src/tars/validation/thresholds.py:133: in load_scoped_thresholds
+    raw = path.read_bytes()
+          ^^^^^^^^^^^^^^^^^
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i42/snap/review_scratch/reviewer/proto/proof/thresholds/m2.json'
+__ ERROR collecting review_scratch/reviewer/proto/tests/test_m2_validation.py __
+review_scratch/reviewer/proto/tests/test_m2_validation.py:23: in <module>
+    LIMITS = json.loads(M2_THRESHOLDS.read_text())["limits"]
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '/private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414/scratchpad/i42/snap/review_scratch/reviewer/proto/proof/thresholds/m2.json'
+=========================== short test summary info ============================
+ERROR review_scratch/reviewer/proto/tests/test_gmat_m2.py - FileNotFoundError...
+ERROR review_scratch/reviewer/proto/tests/test_m2_cross_platform.py - FileNot...
+ERROR review_scratch/reviewer/proto/tests/test_m2_validation.py - FileNotFoun...
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
+3 errors in 85.58s (0:01:25)

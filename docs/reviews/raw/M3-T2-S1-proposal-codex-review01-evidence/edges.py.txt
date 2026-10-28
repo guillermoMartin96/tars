@@ -1,0 +1,25 @@
+import json, math, warnings
+import numpy as np
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import EngineSpec,TankSpec,SpacecraftSpec
+class Zero:
+ name='zero'
+ def acceleration(self,t,r,v):return np.array([0.,-0.,5e-324])
+rows=[]
+for dt in [5e-324,np.float64(5e-324),np.float32(.125),np.int64(1),np.array(1.),-0.,np.float64(-0.),math.inf]:
+ for dry in [5e-324,1e-300,1e-3,1000.]:
+  for warn in ['always','error']:
+   for burn in [False,True]:
+    s=None
+    with warnings.catch_warnings(record=True) as ws:
+     warnings.simplefilter(warn)
+     try:
+      craft=SpacecraftSpec(dry,EngineSpec(5e-324,1e-10),TankSpec(300.))
+      s=Simulator(np.array([7e6,-0.,0.]),np.array([0.,1e-290,0.]),Zero(),RK4(),dt,spacecraft=craft)
+      if burn:s.schedule_burn('prograde',0.,float(dt),policy='burn_to_depletion')
+      for _ in range(3):s.step()
+      exc=None
+     except BaseException as e:exc=[type(e).__name__,str(e),None if e.__cause__ is None else [type(e.__cause__).__name__,str(e.__cause__)],None if e.__context__ is None else [type(e.__context__).__name__,str(e.__context__)]]
+    rows.append([repr(dt),dry,warn,burn,exc,None if s is None else [s.tick,s._y.tobytes().hex(),repr(s.propulsion_snapshot())],[[type(w.message).__name__,str(w.message)] for w in ws]])
+print(json.dumps(rows,indent=1))

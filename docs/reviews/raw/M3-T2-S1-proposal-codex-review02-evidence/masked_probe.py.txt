@@ -1,0 +1,13 @@
+exec(open('review_scratch/reviewer/probes.py').read().split("print('subclass_coast'")[0])
+class MaskedIntegrator:
+ name='masked';order=1
+ def step(self,f,t,y,dt):
+  a=np.ma.array(y.copy(),mask=[False]*6+[True,False])
+  return y+dt*f(t,a)
+s=Simulator(np.array([7e6,0.,0.]),np.array([0.,1.,0.]),Free(),MaskedIntegrator(),.5,spacecraft=craft)
+import warnings
+with warnings.catch_warnings(record=True) as ws:
+ warnings.simplefilter('always')
+ try:s.step();print('ok',s.tick)
+ except BaseException as e:print(type(e).__name__,str(e))
+ print([(w.category.__name__,str(w.message)) for w in ws])

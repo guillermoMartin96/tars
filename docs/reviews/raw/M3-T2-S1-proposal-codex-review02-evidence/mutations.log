@@ -1,0 +1,28 @@
+M-01 adapter copies r                                   failed   4/  4  assert (-0.0 is -0.0 and array([7000000.,       0.,      -0.]) is arra
+M-02 adapter swaps r and v                              failed   4/  4  assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) is array([
+M-03 adapter copies the result                          failed   4/  4  AssertionError: assert array('not an array', dtype='<U12') is 'not an ; assert array(None, dtype=object) is None; assert array([     nan,      inf, -1.e+308]) is array([     nan,      ; assert array([ 1.e+000, -0.e+000, 
+M-04 adapter calls twice                                failed   4/  4  assert 2 == 1
+ +  where 2 = len([(-0.0, array([7000000.,       0.,    
+M-05 adapter wraps exceptions                           failed   4/  5  RuntimeError: x
+M-06 powered context from committed state               failed   3/  4  AssertionError: assert '0x1.4500000000000p+10' == '0x1.44ccc0b27f5b2p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44e660593fad9p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44eb804766248p+
+M-06c coast context from committed state                failed   3/  3  AssertionError: assert '0x1.2c004189374bcp+8' == '0x1.0624dd2f1a9fcp-1; AssertionError: assert '0x1.4500000000000p+10' == '0x1.f400000000000p+; Failed: DID NOT RAISE ValueError
+M-07 powered dry mass only                              failed   3/  4  AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+1
+M-07c coast dry mass only                               failed   3/  4  AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+1
+M-08 coast no clamp                                     failed   1/  2  AssertionError: assert '0x1.0624dd2f1a9cep-10' == '0x1.0624dd2f1a9fcp-
+M-09 powered context cached per sub-step                failed   3/  4  AssertionError: assert '0x1.4500000000000p+10' == '0x1.44ccc0b27f5b2p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44e660593fad9p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44eb804766248p+
+M-10 mutable context                                    failed   1/  1  Failed: DID NOT RAISE AttributeError
+M-11 unowned mass (np.float64 kept)                     failed   5/  5  AssertionError: assert <class 'int'> is float
+ +  where <class 'int'> ; AssertionError: assert <class 'numpy.float32'> is float
+ +  where <cla; AssertionError: assert <class 'numpy.float64'> is float
+ +  where <cla; Asse
+M-12 validation removed                                 failed  14/ 14  Failed: DID NOT RAISE ValueError
+M-13 massless path gets 0.0                             failed   1/  1  Failed: massless context carries a supplied (invalid) mass: total_mass
+M-14 powered context before the finiteness check        failed   2/ 78  ValueError: total_mass_kg must be finite and positive, got inf; ValueError: total_mass_kg must be finite and positive, got nan
+M-15 force call before thrust_acceleration              failed   1/  1  RuntimeError: force
+M-16 coast validates at construction (option A)         failed   4/  4  AssertionError: 
+- total_mass_kg must be finite and positive, got nan
+; ValueError: total_mass_kg must be finite and positive, got nan
+M-17 coast repairs NaN (max argument order swapped)     failed   1/  1  Failed: DID NOT RAISE ValueError
+M-18 coast passes absent mass                           failed   3/  4  AssertionError: assert <class 'NoneType'> is float
+ +  where <class 'N
+M-19 powered context deferred (expected equivalent)     failed   0/ 78  

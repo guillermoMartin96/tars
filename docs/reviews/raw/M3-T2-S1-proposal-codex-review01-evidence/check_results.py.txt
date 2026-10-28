@@ -1,0 +1,13 @@
+import json, hashlib, pathlib, platform, sys
+r=pathlib.Path(__file__).resolve().parent
+b=json.loads((r/'base.json').read_text())
+lines=[f'Python: {sys.version}',f'Platform: {platform.platform()}',f'uv.lock sha256: {hashlib.sha256(pathlib.Path("uv.lock").read_bytes()).hexdigest()}']
+for name in ['prototype','option_a','early']:
+ p=json.loads((r/(name+'.json')).read_text())
+ changed=[k for k in b if b[k]!=p[k]]
+ lines.append(f'{name}: changed {changed}')
+ for k in changed:lines.append(f'  {k}: BASE={b[k].get("exception")}; {name}={p[k].get("exception")}')
+for k,v in b.items():
+ if k.startswith('overflow'):lines.append(f'{k}: {v["exception"]}; atomic={v["atomic"]}; warnings={v["warnings"]}')
+assert b==json.loads((r/'prototype.json').read_text())
+print('\n'.join(lines))

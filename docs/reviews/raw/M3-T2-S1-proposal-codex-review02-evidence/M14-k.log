@@ -1,0 +1,94 @@
+FF.                                                                      [100%]
+=================================== FAILURES ===================================
+____ test_t07_k_finiteness_check_precedes_powered_context_construction[nan] ____
+
+value = nan
+
+    @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+    def test_t07_k_finiteness_check_precedes_powered_context_construction(value):
+        """Review R-01 (I-41): a stage propellant made non-finite by a model is reported by the
+        powered closure's finiteness check, before any context exists (pins I-39A §10 M-14)."""
+        model = _StageWriter(1.0, 6, value)
+        sim = Simulator(R0, V0, model, RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state during a burn at t = 2\.0$"):
+>           sim.step()
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:236: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+review_scratch/reviewer/M14-own/src/tars/sim/simulator.py:504: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/simulator.py:543: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/simulator.py:475: in powered
+    early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/forces.py:224: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x104bd5c30>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+review_scratch/reviewer/M14-own/src/tars/sim/forces.py:241: ValueError
+____ test_t07_k_finiteness_check_precedes_powered_context_construction[inf] ____
+
+value = inf
+
+    @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+    def test_t07_k_finiteness_check_precedes_powered_context_construction(value):
+        """Review R-01 (I-41): a stage propellant made non-finite by a model is reported by the
+        powered closure's finiteness check, before any context exists (pins I-39A §10 M-14)."""
+        model = _StageWriter(1.0, 6, value)
+        sim = Simulator(R0, V0, model, RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state during a burn at t = 2\.0$"):
+>           sim.step()
+
+review_scratch/reviewer/proto/tests/test_s1_failure_paths.py:236: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+review_scratch/reviewer/M14-own/src/tars/sim/simulator.py:504: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/simulator.py:543: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/simulator.py:475: in powered
+    early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/M14-own/src/tars/sim/forces.py:224: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x104bd6860>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got inf
+
+review_scratch/reviewer/M14-own/src/tars/sim/forces.py:241: ValueError
+=========================== short test summary info ============================
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[nan]
+FAILED review_scratch/reviewer/proto/tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[inf]
+2 failed, 1 passed, 24 deselected in 0.20s

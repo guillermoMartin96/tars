@@ -1,0 +1,58 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_nonfinite_powered_propellant_preserves_finiteness_precedence _______
+
+    def test_nonfinite_powered_propellant_preserves_finiteness_precedence():
+        sim=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),MutatingLegacy(),RK4(),10.,spacecraft=SpacecraftSpec(1000.,EngineSpec(490.,312.),TankSpec(300.)))
+        sim.schedule_burn('prograde',1.,2.)
+        before=sim._y.tobytes(),sim.propulsion_snapshot(),sim.engine_transitions
+        try:
+>           sim.step()
+
+review_scratch/reviewer/test_early_mass.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+review_scratch/reviewer/early/src/tars/sim/simulator.py:504: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/early/src/tars/sim/simulator.py:543: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/early/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/early/src/tars/sim/simulator.py:475: in powered
+    early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+review_scratch/reviewer/early/src/tars/sim/forces.py:224: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x10ea0b520>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+review_scratch/reviewer/early/src/tars/sim/forces.py:241: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    def test_nonfinite_powered_propellant_preserves_finiteness_precedence():
+        sim=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),MutatingLegacy(),RK4(),10.,spacecraft=SpacecraftSpec(1000.,EngineSpec(490.,312.),TankSpec(300.)))
+        sim.schedule_burn('prograde',1.,2.)
+        before=sim._y.tobytes(),sim.propulsion_snapshot(),sim.engine_transitions
+        try:
+            sim.step()
+        except BaseException as e:
+>           assert type(e) is FloatingPointError
+E           AssertionError: assert <class 'ValueError'> is FloatingPointError
+E            +  where <class 'ValueError'> = type(ValueError('total_mass_kg must be finite and positive, got nan'))
+
+review_scratch/reviewer/test_early_mass.py:21: AssertionError
+=========================== short test summary info ============================
+FAILED review_scratch/reviewer/test_early_mass.py::test_nonfinite_powered_propellant_preserves_finiteness_precedence
+1 failed in 0.57s

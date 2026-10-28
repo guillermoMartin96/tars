@@ -1,0 +1,55 @@
+import json,math,warnings,sys
+from pathlib import Path
+import numpy as np
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import EngineSpec,SpacecraftSpec,TankSpec
+class Zero:
+ name='zero'
+ def __init__(self):self.calls=[]
+ def acceleration(self,t,r,v):self.calls.append(float(t).hex());return np.zeros(3)
+class Writer(Zero):
+ def __init__(self,value,via):super().__init__();self.value=value;self.via=via
+ def acceleration(self,t,r,v):
+  super().acceleration(t,r,v)
+  a=r if self.via=='r' else v
+  if t==1 and a.base.flags.writeable:a.base[6]=self.value
+  return np.zeros(3)
+class Fail(Zero):
+ def __init__(self,exc):super().__init__();self.exc=exc
+ def acceleration(self,t,r,v):super().acceleration(t,r,v);raise self.exc
+class Inject:
+ name='inject';order=1
+ def __init__(self,value,kind):self.value=value;self.kind=kind
+ def step(self,f,t,y,dt):
+  a=y.copy()
+  if self.kind=='view':a=a[::-1][::-1]
+  elif self.kind=='alias':a=np.lib.stride_tricks.as_strided(a,shape=(8,),strides=(0,))
+  if self.kind!='alias':a[6]=self.value
+  f(t,a)
+  return y.copy()
+def craft(tiny=False):return SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=5e-324 if tiny else 490.,isp_s=1e-10 if tiny else 312.),tank=TankSpec(propellant_kg=300.))
+def state(s):return [s.tick,s.snapshot().r.tobytes().hex(),s.snapshot().v.tobytes().hex(),repr(s.propulsion_snapshot()),repr(s.engine_transitions)]
+def err(e):return [type(e).__name__,str(e),repr(e.__cause__),repr(e.__context__),e.__suppress_context__]
+def case(label,model,dt=.5,burn=False,integrator=None,tiny=False):
+ s=Simulator(np.array([7e6,0.,0.]),np.array([0.,1e-290 if tiny else 1.,0.]),model,integrator or RK4(),dt,spacecraft=craft(tiny))
+ if burn:s.schedule_burn('prograde',0. if integrator else 1.,.2 if integrator else 2.)
+ if tiny:
+  s.step();s.schedule_burn('prograde',s.t*1.2,s.t*.1,policy='burn_to_depletion')
+ out=[]
+ for retry in range(2):
+  before=state(s)
+  with warnings.catch_warnings(record=True) as ws:
+   warnings.simplefilter('always')
+   try:s.step();e=None
+   except BaseException as x:e=err(x)
+  out.append([e,state(s),before==state(s),[[w.category.__name__,str(w.message)] for w in ws],list(model.calls)])
+ return [label,out]
+rows=[]
+for val in (math.nan,math.inf,-math.inf):
+ for via in ('r','v'):rows.append(case(['writer',repr(val),via],Writer(val,via),10.,True))
+ for kind in ('plain','view','alias'):rows.append(case(['inject',repr(val),kind],Zero(),.5,True,Inject(val,kind)))
+for dt in (1e308,8.98846567431158e307,1.2e308):rows.append(case(['overflow',dt],Zero(),dt,tiny=True))
+for ex in (OverflowError,ZeroDivisionError,KeyboardInterrupt,SystemExit):
+ for burn in (False,True):rows.append(case(['exc',ex.__name__,burn],Fail(ex('sentinel')),10.,burn))
+print(json.dumps(rows,sort_keys=True))

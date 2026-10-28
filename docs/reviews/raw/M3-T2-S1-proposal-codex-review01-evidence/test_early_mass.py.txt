@@ -1,0 +1,27 @@
+"""Independent M-14 discriminator using ordinary RK4 and the public Simulator API."""
+import numpy as np
+import pytest
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import SpacecraftSpec, TankSpec, EngineSpec
+class MutatingLegacy:
+    name='mutating_legacy'
+    def acceleration(self,t,r,v):
+        if t==1.0:
+            assert r.base.flags.writeable
+            r.base[6]=np.nan
+        return np.zeros(3)
+def test_nonfinite_powered_propellant_preserves_finiteness_precedence():
+    sim=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),MutatingLegacy(),RK4(),10.,spacecraft=SpacecraftSpec(1000.,EngineSpec(490.,312.),TankSpec(300.)))
+    sim.schedule_burn('prograde',1.,2.)
+    before=sim._y.tobytes(),sim.propulsion_snapshot(),sim.engine_transitions
+    try:
+        sim.step()
+    except BaseException as e:
+        assert type(e) is FloatingPointError
+        assert str(e)=='non-finite state during a burn at t = 2.0'
+        assert e.__cause__ is None and e.__context__ is None
+    else:
+        pytest.fail('expected non-finite powered stage failure')
+    assert sim.tick==0
+    assert before==(sim._y.tobytes(),sim.propulsion_snapshot(),sim.engine_transitions)

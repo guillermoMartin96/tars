@@ -1,0 +1,3 @@
+import warnings
+warnings.filterwarnings('error',message='Warning: converting a masked element to nan.')
+exec(open('review_scratch/reviewer/masked_probe.py').read().replace("warnings.simplefilter('always')", "warnings.simplefilter('error')"))

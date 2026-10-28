@@ -1,0 +1,69 @@
+[15:45:39] clone base at ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd patched=no
+[15:45:45] clone proto at 1b30d3b1055a517fb194021f8d6c2ebf1f9b4f48 patched=yes
+[15:45:52] clone baseM1 at ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd patched=no
+[15:45:59] clone baseM2 at ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd patched=no
+[15:46:05] clone protoM1 at 9eeb18845804414a109b3c0c1b2f26f70bc9b825 patched=yes
+[15:46:12] clone protoM2 at 181faef9292ee6ca11d818ed551caef66b895aad patched=yes
+[15:46:12] proto tree vs patch:  4 files changed, 641 insertions(+), 5 deletions(-)
+[15:46:18] green proto: 78 passed in 0.31s
+[15:46:22] T-07 at BASE: 27 passed in 0.14s
+[15:46:24] T-01..T-06 at BASE: 51 failed in 0.63s; AttributeError failures: 103 lines; collection errors: 0
+[15:46:24] base clone clean after test copy: 0 changes
+[16:20:10] suite BASE: 1290 passed, 3 warnings in 2025.34s (0:33:45)
+[16:49:17] suite proto: 1368 passed, 3 warnings in 1745.17s (0:29:05)
+e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814  base.jsonl
+e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814  proto.jsonl
+5aa92f5f47f11a8fecd4f3c8f8f9f413bb0950996cb27ae41702c8498433eea4  protoA.jsonl
+3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415  w_base.jsonl
+3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415  w_proto.jsonl
+main corpus cases 26880 proto differing 0
+option-A control differing 964 at dt=inf 960 finite [('1e+308', 'free'), ('1e+308', 'list'), ('8.98846567431158e+307', 'free'), ('8.98846567431158e+307', 'list')]
+writer corpus cases 26111 proto differing 0
+[16:50:42] mutate exit=0
+M-01 adapter copies r                                   failed   4/  4  assert (-0.0 is -0.0 and array([7000000.,       0.,      -0.]) is arra
+M-02 adapter swaps r and v                              failed   4/  4  assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) is array([
+M-03 adapter copies the result                          failed   4/  4  AssertionError: assert array('not an array', dtype='<U12') is 'not an ; assert array(None, dtype=object) is None; assert array([     nan,      inf, -1.e+308]) is array([     nan,      ; assert array([ 1.e+000, -0.e+000, 
+M-04 adapter calls twice                                failed   4/  4  assert 2 == 1
+ +  where 2 = len([(-0.0, array([7000000.,       0.,    
+M-05 adapter wraps exceptions                           failed   4/  5  RuntimeError: x
+M-06 powered context from committed state               failed   3/  4  AssertionError: assert '0x1.4500000000000p+10' == '0x1.44ccc0b27f5b2p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44e660593fad9p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44eb804766248p+
+M-06c coast context from committed state                failed   3/  3  AssertionError: assert '0x1.2c004189374bcp+8' == '0x1.0624dd2f1a9fcp-1; AssertionError: assert '0x1.4500000000000p+10' == '0x1.f400000000000p+; Failed: DID NOT RAISE ValueError
+M-07 powered dry mass only                              failed   3/  4  AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+1
+M-07c coast dry mass only                               failed   3/  4  AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+1
+M-08 coast no clamp                                     failed   1/  2  AssertionError: assert '0x1.0624dd2f1a9cep-10' == '0x1.0624dd2f1a9fcp-
+M-09 powered context cached per sub-step                failed   3/  4  AssertionError: assert '0x1.4500000000000p+10' == '0x1.44ccc0b27f5b2p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44e660593fad9p+; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44eb804766248p+
+M-10 mutable context                                    failed   1/  1  Failed: DID NOT RAISE AttributeError
+M-11 unowned mass (np.float64 kept)                     failed   5/  5  AssertionError: assert <class 'int'> is float
+ +  where <class 'int'> ; AssertionError: assert <class 'numpy.float32'> is float
+ +  where <cla; AssertionError: assert <class 'numpy.float64'> is float
+ +  where <cla; Asse
+M-12 validation removed                                 failed  14/ 14  Failed: DID NOT RAISE ValueError
+M-13 massless path gets 0.0                             failed   1/  1  Failed: massless context carries a supplied (invalid) mass: total_mass
+M-14 powered context before the finiteness check        failed   2/ 78  ValueError: total_mass_kg must be finite and positive, got inf; ValueError: total_mass_kg must be finite and positive, got nan
+M-15 force call before thrust_acceleration              failed   1/  1  RuntimeError: force
+M-16 coast validates at construction (option A)         failed   4/  4  AssertionError: 
+- total_mass_kg must be finite and positive, got nan
+; ValueError: total_mass_kg must be finite and positive, got nan
+M-17 coast repairs NaN (max argument order swapped)     failed   1/  1  Failed: DID NOT RAISE ValueError
+M-18 coast passes absent mass                           failed   3/  4  AssertionError: assert <class 'NoneType'> is float
+ +  where <class 'N
+M-19 powered context deferred (expected equivalent)     failed   0/ 78  
+writer corpus M-14 differing 46
+writer corpus M-19 differing 0
+[16:51:14] T-10 exit=0 T-10 AST identity: 51 checks, 0 failures
+[16:51:14] T-11 changed paths: src/tars/sim/forces.py src/tars/sim/simulator.py tests/test_s1_failure_paths.py tests/test_s1_force_context.py 
+[16:51:14] missions: DIFFER
+[16:51:14] stdout differs: m1_leo_250km
+[16:51:14] stdout differs: m2_burn_to_depletion
+[16:51:14] stdout differs: m2_invalid_commands
+[16:51:14] stdout differs: m2_prograde_burn
+[16:51:14] stdout differs: m2_retrograde_burn
+[16:51:26] R-3 base: r01 identical, r02 identical, tests 109 passed in 4.81s
+[16:53:57] R-4 base: 314 passed in 150.65s (0:02:30)
+[16:54:09] R-3 proto: r01 identical, r02 identical, tests 109 passed in 4.53s
+[16:56:40] R-4 proto: 314 passed in 150.15s (0:02:30)
+[16:56:40] proof baseM1: overall: PASS exit=0
+[16:56:40] proof protoM1: overall: PASS exit=0
+[16:56:40] proof baseM2: overall: PASS exit=0
+[16:56:40] proof protoM2: overall: PASS exit=0
+[16:56:40] DONE
