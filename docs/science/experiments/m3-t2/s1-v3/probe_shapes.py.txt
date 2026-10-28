@@ -1,0 +1,26 @@
+"""I-44 out-of-contract shape controls: stage arrays not of shape (8,). argv: tree root."""
+import sys, warnings
+sys.path.insert(0, sys.argv[1] + "/src")
+import numpy as np
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import Simulator
+CRAFT = SpacecraftSpec(dry_mass_kg=1000.0, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=300.0))
+class Free:
+    name = "free"
+    def acceleration(self, t, r, v): return np.zeros(3)
+class E:
+    name, order = "e", 1
+    def __init__(self, w): self.w = w
+    def step(self, f, t, y, dt):
+        k = np.asarray(f(t, self.w(y.copy())), dtype=float).reshape(-1)
+        return y + dt * k[:8] if k.size >= 8 else y + dt * np.concatenate([k, np.zeros(8 - k.size)])
+for burn in (None, (0.0, 2.0)):
+  print("burn", burn)
+  for name, w in {"short_6": lambda y: y[:6], "row_2d_1x8": lambda y: y.reshape(1, 8), "long_10": lambda y: np.concatenate([y, [0.0, 0.0]])}.items():
+      sim = Simulator(np.array([7e6, 0.0, 0.0]), np.array([0.0, 7.5e3, 0.0]), Free(), E(w), 0.5, spacecraft=CRAFT)
+      if burn: sim.schedule_burn('prograde', *burn)
+      with warnings.catch_warnings(record=True) as ws:
+          warnings.simplefilter("always")
+          try: sim.step(); out = "commit"
+          except BaseException as e: out = f"{type(e).__name__}: {str(e)[:70]}"
+      print(f"{name:12s} {out:85s} tick={sim.tick} r={[x.hex() for x in sim.snapshot().r.tolist()][1]} W={[str(w.message)[:40] for w in ws]}")

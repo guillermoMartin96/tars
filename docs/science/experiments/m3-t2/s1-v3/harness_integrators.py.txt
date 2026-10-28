@@ -1,0 +1,278 @@
+"""I-44 custom-integrator differential corpus (R-02 / U-1).
+
+Usage: PYTHONPATH=<tree>/src python harness_integrators.py OUT.jsonl
+
+Every row is one direct-API run of up to 3 step() attempts (continuing after a failure) with a
+custom integrator that hands the derivative a wrapped stage. Recorded per attempt: outcome,
+exception type and message, tick, committed r/v hex, propellant hex, and warnings (category and
+message), once with warnings recorded and once with warnings raised as errors.
+
+Axes: stage wrapper (supported float64 ndarray subclasses and layouts; out-of-contract controls)
+x scheme (Euler, RK4 with every stage wrapped) plus three plain-array schemes (shared buffer,
+row views, write-after) x force model x dt x burn x spacecraft x warnings mode.
+"""
+
+import json
+import math
+import sys
+import warnings
+
+import numpy as np
+
+from tars.sim.forces import PointMassGravity, ZonalJ2Gravity, CompositeForceModel
+from tars.sim.constants import WGS84
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import Simulator
+
+R0, V0 = np.array([6.6281370e6, 0.0, 0.0]), np.array([0.0, 4816.905, 6077.42])
+CRAFT = SpacecraftSpec(
+    dry_mass_kg=1000.0, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=300.0)
+)
+J2 = 1.08262668e-3
+
+
+# ------------------------------------------------------------------ stage wrappers
+class RaisingGetitem(np.ndarray):
+    def __getitem__(self, k):
+        if k == 6:
+            raise LookupError("stage propellant read")
+        return super().__getitem__(k)
+
+
+class ScalingGetitem(np.ndarray):
+    """Reinterprets element 6 (returns twice the stored value) through __getitem__."""
+
+    def __getitem__(self, k):
+        out = super().__getitem__(k)
+        return out * 2.0 if k == 6 else out
+
+
+class WarningGetitem(np.ndarray):
+    def __getitem__(self, k):
+        if k == 6:
+            warnings.warn("stage propellant read", DeprecationWarning, stacklevel=2)
+        return super().__getitem__(k)
+
+
+class Finalizing(np.ndarray):
+    def __array_finalize__(self, obj):
+        self.tag = getattr(obj, "tag", 0) + 1
+
+
+def _strided(y):
+    big = np.zeros(2 * y.size)
+    big[::2] = y
+    return big[::2]
+
+
+def _readonly(y):
+    a = y.copy()
+    a.flags.writeable = False
+    return a
+
+
+_KEEP = object()
+
+
+def _obj(y, v=_KEEP):
+    a = y.astype(object)
+    if v is not _KEEP:
+        a[6] = v
+    return a
+
+
+WRAPS = {
+    # supported: float64 ndarray or float64 ndarray subclass (NDArray[np.float64])
+    "plain": ("supported", lambda y: y.copy()),
+    "masked_prop": ("supported", lambda y: np.ma.array(y.copy(), mask=[False] * 6 + [True, False])),
+    "masked_nomask": ("supported", lambda y: np.ma.array(y.copy())),
+    "masked_all_false": ("supported", lambda y: np.ma.array(y.copy(), mask=[False] * 8)),
+    "raising_getitem": ("supported", lambda y: y.copy().view(RaisingGetitem)),
+    "scaling_getitem": ("supported", lambda y: y.copy().view(ScalingGetitem)),
+    "warning_getitem": ("supported", lambda y: y.copy().view(WarningGetitem)),
+    "finalizing": ("supported", lambda y: y.copy().view(Finalizing)),
+    "recarray_view": ("supported", lambda y: y.copy().view(np.recarray)),
+    "readonly": ("supported", _readonly),
+    "strided_view": ("supported", _strided),
+    "byteswapped_be": ("supported", lambda y: y.astype(">f8")),
+    # out of contract (not NDArray[np.float64])
+    "object_float": ("out_of_contract", _obj),
+    "object_none": ("out_of_contract", lambda y: _obj(y, None)),
+    "list": ("out_of_contract", lambda y: [float(x) for x in y]),
+    "float32": ("out_of_contract", lambda y: y.astype(np.float32)),
+    "longdouble": ("out_of_contract", lambda y: y.astype(np.longdouble)),
+}
+
+
+class WrapEuler:
+    order = 1
+
+    def __init__(self, w):
+        self.w, self.name = w, f"euler_{w}"
+
+    def step(self, f, t, y, dt):
+        return y + dt * np.asarray(f(t, WRAPS[self.w][1](y)), dtype=float)
+
+
+class WrapRK4:
+    order = 4
+
+    def __init__(self, w):
+        self.w, self.name = w, f"rk4_{w}"
+
+    def step(self, f, t, y, dt):
+        g = lambda tt, yy: np.asarray(f(tt, WRAPS[self.w][1](yy)), dtype=float)  # noqa: E731
+        h = 0.5 * dt
+        k1 = g(t, y)
+        k2 = g(t + h, y + h * k1)
+        k3 = g(t + h, y + h * k2)
+        k4 = g(t + dt, y + dt * k3)
+        return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+class SharedBufferRK4:
+    name, order = "rk4_shared_buffer", 4
+
+    def step(self, f, t, y, dt):
+        buf, h = y.copy(), 0.5 * dt
+        k1 = f(t, buf)
+        buf[:] = y + h * k1
+        k2 = f(t + h, buf)
+        buf[:] = y + h * k2
+        k3 = f(t + h, buf)
+        buf[:] = y + dt * k3
+        k4 = f(t + dt, buf)
+        buf[6] = -7.0
+        return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+class RowViewRK4:
+    name, order = "rk4_row_views", 4
+
+    def step(self, f, t, y, dt):
+        ws, h = np.empty((4, y.size)), 0.5 * dt
+        ws[0] = y
+        k1 = f(t, ws[0])
+        ws[1] = y + h * k1
+        k2 = f(t + h, ws[1])
+        ws[2] = y + h * k2
+        k3 = f(t + h, ws[2])
+        ws[3] = y + dt * k3
+        k4 = f(t + dt, ws[3])
+        ws[:, 6] = -7.0
+        return y + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+
+class WriteAfter:
+    name, order = "euler_write_after", 1
+
+    def step(self, f, t, y, dt):
+        stage = y.copy()
+        k = f(t, stage)
+        stage[6] = 123.0
+        return y + dt * k
+
+
+INTEGRATORS = {f"{s.__name__}:{w}": (WRAPS[w][0], (lambda s=s, w=w: s(w))) for w in WRAPS for s in (WrapEuler, WrapRK4)}
+INTEGRATORS.update({k: ("supported", c) for k, c in (("shared_buffer", SharedBufferRK4), ("row_views", RowViewRK4), ("write_after", WriteAfter))})
+
+
+# ------------------------------------------------------------------ force models
+class Zero:
+    name = "zero"
+
+    def acceleration(self, t, r, v):
+        return np.zeros(3)
+
+
+class NanAfter:
+    name = "nan_after"
+
+    def acceleration(self, t, r, v):
+        return np.full(3, np.nan) if t >= 1.0 else PointMassGravity(WGS84.mu).acceleration(t, r, v)
+
+
+class StageWriter:
+    """Writes NaN into the stage propellant behind its r view at t == 1.0 (R-01 shape)."""
+
+    name = "stage_writer"
+
+    def acceleration(self, t, r, v):
+        b = getattr(r, "base", None)
+        if t == 1.0 and isinstance(b, np.ndarray) and b.flags.writeable and b.size > 6:
+            b[6] = math.nan
+        return np.zeros(3)
+
+
+class Raising:
+    name = "raising"
+
+    def acceleration(self, t, r, v):
+        raise RuntimeError("model failure")
+
+
+class ListReturning:
+    name = "list"
+
+    def acceleration(self, t, r, v):
+        return [0.0, 0.0, 0.0]
+
+
+MODELS = {
+    "zero": Zero,
+    "pm": lambda: PointMassGravity(WGS84.mu),
+    "pm_j2": lambda: CompositeForceModel([PointMassGravity(WGS84.mu), ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2)]),
+    "nan_after": NanAfter,
+    "stage_writer": StageWriter,
+    "raising": Raising,
+    "list": ListReturning,
+}
+DTS = [0.5, 10.0, 1e308, math.inf]
+BURNS = [None, (1.0, 2.0)]
+
+
+def hexs(a):
+    return [float(x).hex() for x in np.asarray(a, dtype=float)]
+
+
+def one(icase, model, dt, burn, craft, mode):
+    rec = {"case": [icase, model, repr(dt), burn, craft, mode]}
+    with warnings.catch_warnings(record=True) as ws:
+        warnings.simplefilter(mode)
+        try:
+            sim = Simulator(R0, V0, MODELS[model](), INTEGRATORS[icase][1](), dt, spacecraft=CRAFT if craft else None)
+            if burn is not None:
+                sim.schedule_burn("prograde", *burn)
+        except BaseException as e:  # noqa: BLE001
+            rec["setup"] = f"{type(e).__name__}: {e}"
+            rec["warnings"] = [f"{w.category.__name__}: {w.message}" for w in ws]
+            return rec
+        steps = []
+        for _ in range(3):
+            n = len(ws)
+            try:
+                sim.step()
+                out = {"ok": True}
+            except BaseException as e:  # noqa: BLE001
+                out = {"ok": False, "exc": f"{type(e).__name__}: {e}"}
+            snap = sim.snapshot()
+            out.update(tick=sim.tick, r=hexs(snap.r), v=hexs(snap.v), warnings=[f"{w.category.__name__}: {w.message}" for w in ws[n:]])
+            if craft:
+                out["prop"] = float(sim.propulsion_snapshot().propellant_kg).hex()
+            steps.append(out)
+        rec["steps"] = steps
+    return rec
+
+
+with open(sys.argv[1], "w") as fh:
+    fh.write(json.dumps({"header": "I-44 custom-integrator corpus", "integrators": {k: v[0] for k, v in INTEGRATORS.items()}}) + "\n")
+    n = 0
+    for icase in INTEGRATORS:
+        for model in MODELS:
+            for dt in DTS:
+                for craft in (True, False):
+                    for burn in BURNS if craft else [None]:
+                        for mode in ("always", "error"):
+                            fh.write(json.dumps(one(icase, model, dt, burn, craft, mode), sort_keys=True) + "\n")
+                            n += 1
+print("rows", n)

@@ -1,0 +1,59 @@
+Part A (production-observable); '=' means identical to BASE (outcome, tick, r/v/prop hex, warnings)
+  byteswapped      supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  float32          out_of_contract base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  list             out_of_contract base: commit / err-mode: commit | v2: = | v3L: = | v3S: TypeError / err-mode: TypeError
+  masked           supported       base: commit / err-mode: commit | v2: commit +W[UserWarning] / err-mode: UserWarning | v3L: = | v3S: =
+  mutate_after     supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  object_none      out_of_contract base: commit / err-mode: commit | v2: TypeError / err-mode: TypeError | v3L: = | v3S: TypeError / err-mode: TypeError
+  raising_getitem  supported       base: commit / err-mode: commit | v2: LookupError / err-mode: LookupError | v3L: = | v3S: =
+  recarray         supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  rk4_control      supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  scaling_getitem  supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  shared_buffer    supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  strided          supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  views            supported       base: commit / err-mode: commit | v2: = | v3L: = | v3S: =
+  warning_getitem  supported       base: commit / err-mode: commit | v2: commit +W[DeprecationWarning] / err-mode: DeprecationWarning | v3L: = | v3S: =
+
+Part B (contexts read after the step): read1/read2/after-mutation per context; lifetime
+  byteswapped      v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  byteswapped      v3L  step=ok                                            n=1 reads=['1300.0/1300.0/1000.0'] kept_alive=True
+  byteswapped      v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  float32          v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  float32          v3L  step=ok                                            n=1 reads=['1300.0/1300.0/1000.0'] kept_alive=True
+  float32          v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  list             v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=None
+  list             v3L  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=None
+  list             v3S  step=TypeError: descriptor '__getitem__' requires  n=0 reads=[] kept_alive=None
+  masked           v2   step=ok                                            n=1 reads=['ValueError/ValueError/ValueError'] kept_alive=False
+  masked           v3L  step=ok                                            n=1 reads=['ValueError+W/ValueError+W/ValueError+W'] kept_alive=True
+  masked           v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  mutate_after     v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  mutate_after     v3L  step=ok                                            n=1 reads=['1123.0/1123.0/1000.0'] kept_alive=True
+  mutate_after     v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  object_none      v2   step=TypeError: float() argument must be a string  n=0 reads=[] kept_alive=None
+  object_none      v3L  step=ok                                            n=1 reads=['TypeError/TypeError/TypeError'] kept_alive=True
+  object_none      v3S  step=TypeError: float() argument must be a string  n=0 reads=[] kept_alive=None
+  raising_getitem  v2   step=LookupError: stage propellant read            n=0 reads=[] kept_alive=None
+  raising_getitem  v3L  step=ok                                            n=1 reads=['LookupError/LookupError/LookupError'] kept_alive=True
+  raising_getitem  v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  recarray         v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  recarray         v3L  step=ok                                            n=1 reads=['1300.0/1300.0/1000.0'] kept_alive=True
+  recarray         v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  rk4_control      v2   step=ok                                            n=4 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  rk4_control      v3L  step=ok                                            n=4 reads=['1300.0/1300.0/1000.0', '1300.0/1300.0/1300.0'] kept_alive=True
+  rk4_control      v3S  step=ok                                            n=4 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  scaling_getitem  v2   step=ok                                            n=1 reads=['1600.0/1600.0/1600.0'] kept_alive=False
+  scaling_getitem  v3L  step=ok                                            n=1 reads=['1600.0/1600.0/1000.0'] kept_alive=True
+  scaling_getitem  v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  shared_buffer    v2   step=ok                                            n=4 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  shared_buffer    v3L  step=ok                                            n=4 reads=['1300.0/1300.0/1000.0'] kept_alive=True
+  shared_buffer    v3S  step=ok                                            n=4 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  strided          v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  strided          v3L  step=ok                                            n=1 reads=['1300.0/1300.0/1000.0'] kept_alive=True
+  strided          v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  views            v2   step=ok                                            n=4 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  views            v3L  step=ok                                            n=4 reads=['1300.0/1300.0/1000.0'] kept_alive=True
+  views            v3S  step=ok                                            n=4 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  warning_getitem  v2   step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False
+  warning_getitem  v3L  step=ok                                            n=1 reads=['1300.0+W/1300.0+W/1000.0+W'] kept_alive=True
+  warning_getitem  v3S  step=ok                                            n=1 reads=['1300.0/1300.0/1300.0'] kept_alive=False

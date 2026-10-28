@@ -1,0 +1,121 @@
+#!/bin/bash
+# I-44 regression verification of prototype v3 (v3-S), from fresh clones (derived from I-42 repro.sh).
+# Usage: repro.sh REPO_URL PATCH EVIDENCE_SCRIPTS_DIR OUT_DIR
+# EVIDENCE_SCRIPTS_DIR holds harness.py, harness_writers.py, harness_integrators.py,
+# compare_integrators.py, mutate.py, ast_identity.py.
+set -u
+REPO=$1; PATCH=$2; EV=$3; O=$4
+BASE=ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd
+export PYTHONDONTWRITEBYTECODE=1
+mkdir -p "$O/logs" "$O/out" "$O/missions"; L=$O/logs; C=$O/clones; mkdir -p "$C"
+log() { echo "[$(date -u +%H:%M:%S)] $*" | tee -a "$L/summary.txt"; }
+
+mk() {  # mk NAME patched?
+  git clone -q "$REPO" "$C/$1" && git -C "$C/$1" checkout -q "$BASE"
+  if [ "$2" = yes ]; then
+    git -C "$C/$1" apply "$PATCH" && git -C "$C/$1" add -A &&
+      git -C "$C/$1" -c user.name=scratch -c user.email=scratch@invalid commit -qm "SCRATCH I-44 v3 prototype (not for push)"
+  fi
+  (cd "$C/$1" && uv sync --locked -q)
+  log "clone $1 at $(git -C "$C/$1" rev-parse HEAD) patched=$2"
+}
+for n in base:no proto:yes baseM1:no baseM2:no protoM1:yes protoM2:yes; do mk "${n%%:*}" "${n##*:}"; done
+B=$C/base; P=$C/proto; PY=$P/.venv/bin/python
+log "proto tree vs patch: $(git -C "$P" diff --stat "$BASE" | tail -1)"
+
+# protoA: coast built eagerly (option-A control)
+mkdir -p "$O/protoA" && cp -R "$P/src" "$O/protoA/src"
+"$PY" -B - "$O/protoA/src/tars/sim/simulator.py" <<'EOF'
+import sys; p=sys.argv[1]; s=open(p).read(); o="ctx = ForceContext.deferred(spacecraft"; assert s.count(o)==1; open(p,"w").write(s.replace(o,"ctx = ForceContext(spacecraft"))
+EOF
+
+# Proofs in the background (separate fresh clones)
+for n in baseM1:m1 protoM1:m1 baseM2:m2 protoM2:m2; do
+  c=${n%%:*}; k=${n##*:}
+  (cd "$C/$c" && toolbox/scripts/run_${k}_proof.sh > "$L/proof_$c.log" 2>&1; echo "exit=$?" >> "$L/proof_$c.log") &
+done
+
+# Proposed tests: green on proto, T-07 green at BASE, T-01..T-06 red at BASE per node
+(cd "$P" && .venv/bin/python -B -m pytest -q -p no:cacheprovider --junitxml="$O/out/green_proto.xml" tests/test_s1_failure_paths.py tests/test_s1_force_context.py > "$L/green_proto.log" 2>&1)
+log "green proto: $(tail -1 "$L/green_proto.log")"
+cp "$P/tests/test_s1_failure_paths.py" "$P/tests/test_s1_force_context.py" "$B/tests/"
+(cd "$B" && .venv/bin/python -B -m pytest -q -p no:cacheprovider --junitxml="$O/out/t07_base.xml" tests/test_s1_failure_paths.py > "$L/t07_base.log" 2>&1)
+log "T-07 at BASE: $(tail -1 "$L/t07_base.log")"
+(cd "$B" && .venv/bin/python -B -m pytest -q -p no:cacheprovider --junitxml="$O/out/red_base.xml" tests/test_s1_force_context.py > "$L/red_base.log" 2>&1)
+log "T-01..T-06 at BASE: $(tail -1 "$L/red_base.log"); AttributeError failures: $(grep -c 'AttributeError' "$O/out/red_base.xml") lines; collection errors: $(grep -c 'collection' "$L/red_base.log")"
+rm "$B/tests/test_s1_failure_paths.py" "$B/tests/test_s1_force_context.py"
+log "base clone clean after test copy: $(git -C "$B" status --porcelain | wc -l | tr -d ' ') changes"
+
+# Full CI test suite on both trees
+(cd "$B" && .venv/bin/python -B -m pytest -q -p no:cacheprovider > "$L/suite_base.log" 2>&1); log "suite BASE: $(tail -1 "$L/suite_base.log")"
+(cd "$P" && .venv/bin/python -B -m pytest -q -p no:cacheprovider > "$L/suite_proto.log" 2>&1); log "suite proto: $(tail -1 "$L/suite_proto.log")"
+
+# Differential corpora
+for t in base:$B/src proto:$P/src protoA:$O/protoA/src; do
+  (cd "$P" && PYTHONPATH=${t#*:} .venv/bin/python -B "$EV/harness.py" "$O/out/${t%%:*}.jsonl" > "$L/harness_${t%%:*}.log" 2>&1)
+done
+for t in base:$B/src proto:$P/src; do
+  (cd "$P" && PYTHONPATH=${t#*:} .venv/bin/python -B "$EV/harness_writers.py" "$O/out/w_${t%%:*}.jsonl" > "$L/writers_${t%%:*}.log" 2>&1)
+done
+(cd "$O/out" && shasum -a 256 base.jsonl proto.jsonl protoA.jsonl w_base.jsonl w_proto.jsonl) | tee -a "$L/summary.txt"
+"$PY" -B - "$O/out" <<'EOF' | tee -a "$L/summary.txt"
+import json, sys
+d = sys.argv[1]
+ld = lambda f: [json.loads(l) for l in open(f"{d}/{f}")][1:]
+B, P, A = ld("base.jsonl"), ld("proto.jsonl"), ld("protoA.jsonl")
+print("main corpus cases", len(B), "proto differing", sum(b != p for b, p in zip(B, P)))
+dA = [b for b, a in zip(B, A) if b != a]
+print("option-A control differing", len(dA), "at dt=inf", sum(b["case"][0] == "inf" for b in dA),
+      "finite", sorted({tuple(b["case"][:2]) for b in dA if b["case"][0] != "inf"}))
+WB, WP = ld("w_base.jsonl"), ld("w_proto.jsonl")
+print("writer corpus cases", len(WB), "proto differing", sum(b != p for b, p in zip(WB, WP)))
+EOF
+
+# Custom-integrator corpus (I-44), BASE vs proto
+for t in base:$B/src proto:$P/src; do
+  (cd "$P" && PYTHONPATH=${t#*:} .venv/bin/python -B "$EV/harness_integrators.py" "$O/out/ci_${t%%:*}.jsonl" > "$L/ci_${t%%:*}.log" 2>&1)
+done
+(cd "$O/out" && shasum -a 256 ci_base.jsonl ci_proto.jsonl) | tee -a "$L/summary.txt"
+"$PY" -B "$EV/compare_integrators.py" "$O/out/ci_base.jsonl" "$O/out/ci_proto.jsonl" > "$L/ci_compare.txt" 2>&1; grep -E "^(rows|ci_proto)|^  " "$L/ci_compare.txt" | tee -a "$L/summary.txt"
+
+# Mutation campaign
+(cd "$P" && .venv/bin/python -B "$EV/mutate.py" "$P" "$O/mut" > "$L/mutate.log" 2>&1); log "mutate exit=$?"; cat "$L/mutate.log" >> "$L/summary.txt"
+for m in M-14 M-19; do
+  (cd "$P" && PYTHONPATH=$O/mut/$m/src .venv/bin/python -B "$EV/harness_writers.py" "$O/out/w_$m.jsonl" > /dev/null 2>&1)
+done
+"$PY" -B - "$O/out" <<'EOF' | tee -a "$L/summary.txt"
+import json, sys
+d = sys.argv[1]; ld = lambda f: [json.loads(l) for l in open(f"{d}/{f}")][1:]
+WB = ld("w_base.jsonl")
+for m in ("M-14", "M-19"):
+    print(f"writer corpus {m} differing", sum(b != x for b, x in zip(WB, ld(f"w_{m}.jsonl"))))
+EOF
+
+# T-10 AST identity, T-11 changed paths
+(cd "$P" && .venv/bin/python -B "$EV/ast_identity.py" "$B" "$P" > "$L/ast.log" 2>&1); log "T-10 exit=$? $(tail -1 "$L/ast.log")"
+log "T-11 changed paths: $(git -C "$P" diff --name-only "$BASE" | tr '\n' ' ')"
+
+# Validated scenarios
+for t in base proto; do for s in "$B"/scenarios/*.json; do b=$(basename "$s" .json)
+  (cd "$C/$t" && .venv/bin/python -B toolbox/scripts/run_mission.py --scenario "scenarios/$b.json" --out "$O/missions/$t/$b" > "$O/missions/$t-$b.stdout" 2>&1)
+done; done
+diff -r "$O/missions/base" "$O/missions/proto" > /dev/null && log "missions: output trees identical ($(find "$O/missions/base" -type f | wc -l | tr -d ' ') files)" || log "missions: DIFFER"
+for s in "$B"/scenarios/*.json; do b=$(basename "$s" .json); cmp -s "$O/missions/base-$b.stdout" "$O/missions/proto-$b.stdout" || log "stdout differs: $b"; done
+
+# R-3 (T1) and R-4 (T0) on both trees
+for t in base proto; do
+  c=$C/$t; mkdir -p "$O/r3/$t/old"
+  (cd "$c" && git archive 97b69ef src | tar -x -C "$O/r3/$t/old" && mkdir -p "$O/r3/$t/old2" && git archive b1566ae src | tar -x -C "$O/r3/$t/old2" &&
+    .venv/bin/python -B docs/science/experiments/m3-t1/t1_review01_correction_check.py "$O/r3/$t/old/src" "$O/r3/$t/r01.json" > /dev/null 2>&1 &&
+    .venv/bin/python -B docs/science/experiments/m3-t1/t1_review02_correction_check.py "$O/r3/$t/old2/src" "$O/r3/$t/r02.json" > /dev/null 2>&1)
+  cmp -s "$O/r3/$t/r01.json" "$c/docs/science/experiments/m3-t1/t1_review01_correction_check_results.json" && r1=identical || r1=DIFFERS
+  cmp -s "$O/r3/$t/r02.json" "$c/docs/science/experiments/m3-t1/t1_review02_correction_check_results.json" && r2=identical || r2=DIFFERS
+  (cd "$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider tests/test_zonal_j2.py tests/test_constants.py > "$L/r3_$t.log" 2>&1)
+  log "R-3 $t: r01 $r1, r02 $r2, tests $(tail -1 "$L/r3_$t.log")"
+  (cd "$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py > "$L/r4_$t.log" 2>&1)
+  log "R-4 $t: $(tail -1 "$L/r4_$t.log")"
+done
+
+wait
+for c in baseM1 protoM1 baseM2 protoM2; do log "proof $c: $(grep -E '^overall:' "$L/proof_$c.log" | tail -1) $(tail -1 "$L/proof_$c.log")"; done
+log DONE

@@ -1,0 +1,24 @@
+"""Summarize probe_i44 outputs. argv: dir containing probe_{base,v2,v3L,v3S}.json"""
+import json, sys
+d = sys.argv[1]; T = ["base", "v2", "v3L", "v3S"]
+P = {t: json.load(open(f"{d}/probe_{t}.json")) for t in T}
+def a(r):
+    s = "commit" if r["outcome"] == "ok" else f"{r['type']}"
+    return s + (" +W[" + ";".join(w.split(":")[0] for w in r["warnings"]) + "]" if r["warnings"] else "")
+print("Part A (production-observable); '=' means identical to BASE (outcome, tick, r/v/prop hex, warnings)")
+for c in P["base"]:
+    row = []
+    for t in T:
+        rr = (P[t][c]["A_record"], P[t][c]["A_warnings_as_errors"])
+        row.append("=" if t != "base" and rr == (P["base"][c]["A_record"], P["base"][c]["A_warnings_as_errors"]) else f"{a(rr[0])} / err-mode: {a(rr[1])}")
+    print(f"  {c:16s} {P['base'][c]['label']:15s} " + " | ".join(f"{t}: {x}" for t, x in zip(T, row)))
+print("\nPart B (contexts read after the step): read1/read2/after-mutation per context; lifetime")
+def rd(x):
+    if "raise" in x: return x["raise"] + ("+W" if x["warnings"] else "")
+    return (str(float.fromhex(x["value"])) if x["value"] else "None") + ("+W" if x["warnings"] else "")
+for c in P["base"]:
+    for t in T[1:]:
+        b = P[t][c]["B"]
+        ctxs = sorted({f"{rd(x['read1'])}/{rd(x['read2'])}/{rd(x['read_after_stage_mutation'])}" for x in b["contexts"]})
+        lt = b["lifetime"]
+        print(f"  {c:16s} {t:4s} step={b['step'][:45]:45s} n={len(b['contexts'])} reads={ctxs} kept_alive={None if lt is None else lt['alive_while_only_context_held']}")

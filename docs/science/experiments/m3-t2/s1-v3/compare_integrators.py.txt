@@ -1,0 +1,19 @@
+"""Compare custom-integrator corpora against BASE. argv: BASE.jsonl, then OTHER.jsonl ..."""
+import collections, json, sys
+ld = lambda f: [json.loads(l) for l in open(f)]
+B = ld(sys.argv[1]); labels = B[0]["integrators"]; B = B[1:]
+print("rows", len(B), "supported integrators", sum(v == "supported" for v in labels.values()), "out_of_contract", sum(v != "supported" for v in labels.values()))
+for f in sys.argv[2:]:
+    X = ld(f)[1:]
+    assert [b["case"] for b in B] == [x["case"] for x in X]
+    d = [(b, x) for b, x in zip(B, X) if b != x]
+    by = collections.Counter((labels[b["case"][0]], b["case"][0].split(":")[-1]) for b, _ in d)
+    print(f"\n{f.rsplit('/',1)[-1]}: differing {len(d)} (supported {sum(c for (l,_),c in by.items() if l=='supported')}, out_of_contract {sum(c for (l,_),c in by.items() if l!='supported')})")
+    for k, c in sorted(by.items()): print(f"  {k[0]:16s} {k[1]:18s} {c}")
+    kinds = collections.Counter()
+    for b, x in d:
+        def sig(r):
+            if "setup" in r: return "setup " + r["setup"][:60]
+            s = r["steps"][0]; return ("ok" if s["ok"] else s["exc"][:60]) + (" | W " + ";".join(sorted(set(w[:50] for w in s["warnings"]))) if s["warnings"] else "")
+        kinds[(b["case"][0].split(":")[-1], sig(b), sig(x))] += 1
+    for (w, sb, sx), c in sorted(kinds.items()): print(f"    {w:16s} x{c:4d}  BASE[{sb}]  ->  [{sx}]")
