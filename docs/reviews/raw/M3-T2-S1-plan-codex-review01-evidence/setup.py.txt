@@ -1,0 +1,14 @@
+from pathlib import Path
+import shutil, subprocess, hashlib, re
+R=Path.cwd(); O=R/'review_scratch/reviewer'
+for n in ['v3s','base']:
+ t=O/n;t.mkdir(exist_ok=True)
+ for d in ['src','tests','scenarios']: shutil.copytree(R/d,t/d,dirs_exist_ok=True)
+subprocess.run(['git','apply','--unsafe-paths','--directory='+str(O/'v3s'),str(R/'docs/science/experiments/m3-t2/s1-v3/prototype-v3.patch')],check=True)
+for p in (O/'v3s/tests').glob('test_s1*.py'):shutil.copy(p,O/'base/tests'/p.name)
+shutil.copytree(O/'v3s',O/'mutant',dirs_exist_ok=True)
+ns={};s=(R/'docs/science/experiments/m3-t2/s1-v3/mutate.py.txt').read_text()
+print(s[s.index('LAZY_FORCES'):s.index('LAZY_FORCES')+500])
+a=(R/'review_scratch/pkg/I-46.md').read_bytes(); b=(R/'review_scratch/pkg/M3-T2-S1-decision-I45.md').read_text().split('## 5. I-46 (owner, 2026-10-29)\n\n')[1];b=re.sub(r'^##', '#',b,flags=re.M)
+assert b.encode()==a
+print('verbatim',hashlib.sha256(a).hexdigest());print('pin',hashlib.sha256((R/'docs/milestones/M3-T2-S1-proposal-v3.md').read_bytes()).hexdigest())

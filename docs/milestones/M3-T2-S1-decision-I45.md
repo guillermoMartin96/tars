@@ -1,15 +1,24 @@
-# M3 T2 S1: owner decision I-45 and its disposition
+# M3 T2 S1: owner decisions I-45 and I-46 and their disposition
 
 This record is made under I-45 §5. The owner text in §3 is verbatim, with heading levels demoted by
 one and no other change. The sha256 of the text as recorded by the implementer (UTF-8, before
 demotion) is `a14f935836e1ce547b28ab063d2615c6477312840f75ea3f9514a902e26e7305`.
 
+**I-46 addendum (2026-10-29).** The I-46 owner decisions D1…D7 are recorded in §4 under I-46
+authorized work item 2. The owner text is in §5, verbatim, with heading levels demoted by one and no
+other change. The sha256 of the I-46 text as recorded by the implementer (UTF-8, before demotion) is
+`4ba876213b6ebf96617781584117d232a0dd9b4e4dd1b4f8977ddcd399d030bd`. §0–§3 are kept as written under
+I-45, except that a pointer to §4 is added at the head of §1.
+
 This record amends nothing in `M3-T2-S1-authorization.md` (I-40), `M3-T2-S1-decisions-I41-I43.md` or
-`M3-T2-S1-decision-I44.md`.
+`M3-T2-S1-decision-I44.md`. The only exception is the I-46 D2 test and mutation plan amendment A-1
+(`M3-T2-S1-test-plan-amendment-I46.md`), which adds to I-40 §9a T-04 and §10 and changes nothing
+else in them.
 
 - It does not reverse the `REQUEST_CHANGES` verdicts of Review 01 or Review 02.
 - **S1 is NOT IMPLEMENTED, NOT ACCEPTED, NOT MERGED.**
-- No production implementation is authorized, and implementation commit A has not begun.
+- No production implementation is authorized, and implementation commit A has not begun. Under
+  I-46, commit A remains **NOT AUTHORIZED** pending the owner's review of I-46.
 
 ## 0. Disposition (2026-10-28)
 
@@ -24,6 +33,9 @@ This record amends nothing in `M3-T2-S1-authorization.md` (I-40), `M3-T2-S1-deci
 | §5 recording | This commit, docs only, on the planning branch with an ordinary push. External evidence is in `~/projects/tars-evidence/I-45/`: `MANIFEST.sha256` (9 019 files) has sha256 `d4bc4b1faadb47e1cd25f25ef34fa0413dac4ed3ba2752a27778c8ec8a4aa969`. |
 
 ## 1. Points for the owner (none authorized by this record)
+
+> **Resolved by I-46 (§4).** Points 1–3 below were decided by the owner in I-46 (D2, D3/D4, D5).
+> Point 4 remains open: commit A is not authorized. The text below is kept as written under I-45.
 
 1. **N-01: powered snapshot coverage.**
    - The committed snapshot and lifetime tests (T-04 (a)/(b)) exercise coast contexts only.
@@ -198,3 +210,141 @@ Return:
 Do not begin implementation commit A.
 
 Await my explicit authorization after I review the independent verdict.
+
+## 4. I-46 owner decisions and disposition (2026-10-29)
+
+The owner accepted Review 03's `PASS` "as a proposal-level verdict, not as implementation acceptance".
+
+### 4.1 Baseline (I-46 work item 1), verified before any change
+
+| Item | Observed |
+|---|---|
+| main / origin/main | `ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd` (unchanged) |
+| Planning branch | `milestone-3-t2-authorization` at `b52f77cb6693243b1ba681753627bb79c7005264`, local and remote; main is an ancestor |
+| Planning CI on `b52f77c` | run 40801015917 `success`: check on ubuntu-latest, macos-15-intel and macos-latest, plus m2-cross-platform (4/4) |
+| S1 implementation worktree | branch `milestone-3-t2-s1-force-context` at BASE `ee602c5`. It has 0 commits beyond BASE and is not on the remote. Its only untracked content is `docs/science/experiments/m3-t2/s1/run_record.py` (sha256 `435a2b7ef66f0d73bb7bee60f92f07247ab5a823cfb39dbe95481746db347353`, preserved, not touched). |
+| Proposal v3-S | sha256 `dd705dd464cfeedac8c7c7918114ce7b893a8c17acb0dc4370f209d52cb9102d`, equal to the D1 pin |
+| In-repo evidence manifest | `docs/science/experiments/m3-t2/s1-v3s-i45/MANIFEST.sha256`: 0 failures |
+| External evidence | `~/projects/tars-evidence/I-45/MANIFEST.sha256` (sha256 `d4bc4b1faadb47e1cd25f25ef34fa0413dac4ed3ba2752a27778c8ec8a4aa969`): 0 failures |
+
+### 4.2 Decisions
+
+| Decision | Owner decision (summary; §5 is authoritative) | Disposition |
+|---|---|---|
+| **D1** Proposal baseline | FINAL v3-S is the S1 implementation design baseline, pinned to `dd705dd4…102d`. Reviews 01 and 02 stay `REQUEST_CHANGES`. | **Recorded.** The proposal file is not edited, so the pin holds. Review 01/02 records are unchanged. |
+| **D2** N-01 | Add a powered-context snapshot-and-lifetime regression test and mutant M-22, and update the approved test and mutation plan. Preserve all existing test requirements. | **Recorded as plan amendment A-1** (`M3-T2-S1-test-plan-amendment-I46.md`): T-04 (d), 3 nodes; T-04 (e), 1 node; M-22. All existing T-01…T-11 and M-01…M-21b requirements are kept. **Plan only; nothing is implemented.** |
+| **D3** Compatibility disclosures | The proposal §6 out-of-contract differences are accepted. They do not expand or redefine the contract. | **Recorded.** The supported contract stays as in proposal §3.2. |
+| **D4** Stored-value semantics | The stored-value snapshot semantics for MaskedArray and ndarray subclasses are accepted within the contract. The legacy model's existing behaviour outside the new context boundary is preserved. | **Recorded.** A-1 deliberately does not mirror T-04 (c) on the powered path, because that would change the legacy `y[_PROP]` read (A-1 §2). |
+| **D5** D-1 | Correct the stale docstring in commit A only if the existing allowlist and scope permit it. Otherwise defer. | **Deferred.** `src/tars/sim/integrators.py` is protected under I-40 §6 ("every other `src/` file"), and commit A is T-07 only (I-40 §12). The correction needs a separately authorized change. |
+| **D6** Runtime enforcement | No runtime contract validation in S1. | **Recorded.** A-1 adds only observing tests and a scratch mutant. |
+| **D7** Platform evidence | The prototype evidence is single-host (macOS x86_64, CPython 3.12.15, NumPy 2.5.3) and must not be called cross-platform validated. The established CI matrix is required after implementation. | **Recorded.** R-6 (CI 4/4 on every push tip) is unchanged and applies. |
+
+### 4.3 Work items
+
+| I-46 item | Status |
+|---|---|
+| 1 Baseline | PASS (§4.1) |
+| 2 Record decisions | This section and §5 |
+| 3 Plan update | A-1 |
+| 4 Consistency check | A-1 §5: no contradiction with the gates, the allowlist, the commit sequence or the proposal. The only change to the pinned proposal's content is its §5 counts, which A-1 supersedes under D2. |
+| 5 Independent review | **Done:** Codex plan review 01, `VERDICT: PASS` (0 BLOCKER, 0 MAJOR, 0 MINOR, 2 NOTE); `docs/reviews/M3-T2-S1-plan-review-01.md` |
+| 6 Findings | N1 (implementation evidence still owed): ACCEPTED, no change; it is already in A-1 §6. N2 (§4.3 named destinations, not results): ACCEPTED and corrected in this table. No decision text changed. |
+| 7 CI | Run on the planning commit that records this section. CI cannot be recorded inside the commit it tests, so its result is in the I-46 report. |
+| 8 Commit A readiness | Reported to the owner. **Commit A NOT AUTHORIZED.** |
+
+**S1 is NOT IMPLEMENTED, NOT ACCEPTED, NOT MERGED.**
+
+## 5. I-46 (owner, 2026-10-29)
+
+## I-46 — S1 v3-S Owner Decisions and Commit A Readiness
+
+The I-45 report is acknowledged.
+
+I accept Codex Review 03's PASS as a proposal-level verdict, not as implementation acceptance.
+
+The following decisions are authorized:
+
+**D1 — Proposal baseline**
+
+Accept FINAL v3-S as the S1 implementation design baseline, pinned to SHA-256:
+
+`dd705dd464cfeedac8c7c7918114ce7b893a8c17acb0dc4370f209d52cb9102d`
+
+Preserve Reviews 01 and 02 as REQUEST_CHANGES. Do not rewrite their historical verdicts.
+
+**D2 — N-01**
+
+Authorize the addition of:
+
+1. A powered-context snapshot-and-lifetime regression test mirroring the coast ownership tests.
+2. Mutant M-22, which deliberately retains a lazy reference in the powered path and must be killed by the new regression test.
+
+Update the approved S1 test and mutation plan accordingly. Preserve all existing test requirements.
+
+**D3 — Compatibility disclosures**
+
+Accept the documented §6 differences for out-of-contract inputs, including descriptor errors, object-dtype None behavior, and malformed stage-shape exception differences.
+
+These differences are not authorization to expand or redefine the supported integrator contract.
+
+**D4 — Stored-value semantics**
+
+Accept the documented stored-value snapshot semantics for MaskedArray and ndarray subclasses within S1's approved contract.
+
+Preserve the legacy model's existing behavior outside the new context boundary.
+
+**D5 — D-1**
+
+Accept the stale integrator docstring as a documented issue. Correct it in Commit A only if that correction is explicitly permitted by the existing file allowlist and implementation scope. Otherwise defer it to a separately authorized change.
+
+**D6 — Runtime enforcement**
+
+Do not add runtime contract validation as part of S1. Preserve the documented contract and existing supported-input behavior.
+
+**D7 — Platform evidence**
+
+The prototype evidence is limited to macOS x86_64, CPython 3.12.15, NumPy 2.5.3.
+
+Do not describe the prototype as cross-platform validated. Require the established CI matrix after implementation.
+
+### Authorized work
+
+1. Verify the repository baseline, branch ancestry, worktree cleanliness, proposal checksum, evidence manifest, and final CI status.
+2. Record these owner decisions in the existing decision record.
+3. Incorporate the N-01 test and mutation additions into the S1 plan.
+4. Check that the additions do not contradict existing gates, the approved scope, or the final proposal.
+5. Obtain a fresh independent Codex review of the updated decision and test-plan records.
+6. Resolve any findings within the explicitly authorized documentation scope, without silently expanding authorization.
+7. Run applicable checks and obtain green CI on the final planning commit.
+8. Report whether every prerequisite for Commit A is satisfied.
+
+### Restrictions
+
+- Do not begin Commit A.
+- Do not modify production code.
+- Do not implement the new tests or mutant yet; update the plan only.
+- Do not merge into main.
+- Do not rebase or force-push.
+- Do not alter the preserved S1 worktree or its untracked run_record.py.
+- Do not broaden S1's runtime contract.
+- Do not reinterpret earlier Codex verdicts.
+- Stop and escalate any new contract contradiction, BLOCKER, MAJOR finding, or required scope expansion.
+
+### Required final report
+
+Provide:
+
+- Exact repository and branch SHAs
+- Decision-record changes
+- Updated test and mutation counts
+- Independent Codex review verdict and findings
+- CI results
+- Scope and checksum verification
+- Remaining risks
+- Explicit Commit A readiness recommendation
+
+Final status must remain:
+
+**S1 NOT IMPLEMENTED / NOT ACCEPTED / NOT MERGED.**
+
+Commit A remains NOT AUTHORIZED pending my review of I-46.

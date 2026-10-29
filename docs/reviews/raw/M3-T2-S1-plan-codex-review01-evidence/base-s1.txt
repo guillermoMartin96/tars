@@ -1,0 +1,1004 @@
+FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF............... [ 83%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+_______________________ test_t01_a_context_is_immutable ________________________
+
+    def test_t01_a_context_is_immutable():
+>       ctx = forces.ForceContext(1300.0)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:47: AttributeError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[1300] ________________
+
+mass = 1300
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+>       for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+                    ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:64: AttributeError
+______________ test_t01_b_mass_is_an_owned_builtin_float[1300.0] _______________
+
+mass = np.float64(1300.0)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+>       for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+                    ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:64: AttributeError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[mass2] _______________
+
+mass = np.float32(1300.0)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+>       for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+                    ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:64: AttributeError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[mass3] _______________
+
+mass = np.int64(1300)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+>       for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+                    ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:64: AttributeError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[mass4] _______________
+
+mass = array(1300.)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+>       for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+                    ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:64: AttributeError
+___________ test_t01_b_unsupported_mass_types_raise_type_error[True] ___________
+
+mass = True
+
+    @pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
+    def test_t01_b_unsupported_mass_types_raise_type_error(mass):
+        with pytest.raises(TypeError):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:72: AttributeError
+__________ test_t01_b_unsupported_mass_types_raise_type_error[False] ___________
+
+mass = False
+
+    @pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
+    def test_t01_b_unsupported_mass_types_raise_type_error(mass):
+        with pytest.raises(TypeError):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:72: AttributeError
+__________ test_t01_b_unsupported_mass_types_raise_type_error[mass2] ___________
+
+mass = np.True_
+
+    @pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
+    def test_t01_b_unsupported_mass_types_raise_type_error(mass):
+        with pytest.raises(TypeError):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:72: AttributeError
+___________ test_t01_b_unsupported_mass_types_raise_type_error[1300] ___________
+
+mass = '1300'
+
+    @pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
+    def test_t01_b_unsupported_mass_types_raise_type_error(mass):
+        with pytest.raises(TypeError):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:72: AttributeError
+__________ test_t01_b_unsupported_mass_types_raise_type_error[mass4] ___________
+
+mass = [1300.0]
+
+    @pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
+    def test_t01_b_unsupported_mass_types_raise_type_error(mass):
+        with pytest.raises(TypeError):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:72: AttributeError
+__________ test_t01_b_unsupported_mass_types_raise_type_error[mass5] ___________
+
+mass = <object object at 0x10574c980>
+
+    @pytest.mark.parametrize("mass", [True, False, np.bool_(True), "1300", [1300.0], object()])
+    def test_t01_b_unsupported_mass_types_raise_type_error(mass):
+        with pytest.raises(TypeError):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:72: AttributeError
+___________ test_t01_c_invalid_mass_is_rejected_at_construction[nan] ___________
+
+mass = nan
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+___________ test_t01_c_invalid_mass_is_rejected_at_construction[inf] ___________
+
+mass = inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+__________ test_t01_c_invalid_mass_is_rejected_at_construction[-inf] ___________
+
+mass = -inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+___________ test_t01_c_invalid_mass_is_rejected_at_construction[0.0] ___________
+
+mass = 0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+__________ test_t01_c_invalid_mass_is_rejected_at_construction[-0.0] ___________
+
+mass = -0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+__________ test_t01_c_invalid_mass_is_rejected_at_construction[-1.0] ___________
+
+mass = -1.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+_________ test_t01_c_invalid_mass_is_rejected_at_construction[-5e-324] _________
+
+mass = -5e-324
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+        with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+>           forces.ForceContext(mass)
+            ^^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:80: AttributeError
+_________ test_t01_c_deferred_invalid_mass_is_rejected_when_read[nan] __________
+
+mass = nan
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+_________ test_t01_c_deferred_invalid_mass_is_rejected_when_read[inf] __________
+
+mass = inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+_________ test_t01_c_deferred_invalid_mass_is_rejected_when_read[-inf] _________
+
+mass = -inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+_________ test_t01_c_deferred_invalid_mass_is_rejected_when_read[0.0] __________
+
+mass = 0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+_________ test_t01_c_deferred_invalid_mass_is_rejected_when_read[-0.0] _________
+
+mass = -0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+_________ test_t01_c_deferred_invalid_mass_is_rejected_when_read[-1.0] _________
+
+mass = -1.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+_______ test_t01_c_deferred_invalid_mass_is_rejected_when_read[-5e-324] ________
+
+mass = -5e-324
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+>       ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:85: AttributeError
+__________________ test_t01_d_absent_mass_is_none_never_zero ___________________
+
+    def test_t01_d_absent_mass_is_none_never_zero():
+>       ctx = forces.ForceContext()
+              ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:92: AttributeError
+_ test_t01_e_construction_never_raises_overflow_or_zero_division[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000] _
+
+mass = 100000000000000000...0000000000000000000
+
+    @pytest.mark.parametrize("mass", [10**400, -(10**400), np.longdouble(1e300) * 1e300])
+    def test_t01_e_construction_never_raises_overflow_or_zero_division(mass):
+>       for make in (forces.ForceContext, forces.ForceContext.deferred):
+                     ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:101: AttributeError
+_ test_t01_e_construction_never_raises_overflow_or_zero_division[-10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000] _
+
+mass = -10000000000000000...0000000000000000000
+
+    @pytest.mark.parametrize("mass", [10**400, -(10**400), np.longdouble(1e300) * 1e300])
+    def test_t01_e_construction_never_raises_overflow_or_zero_division(mass):
+>       for make in (forces.ForceContext, forces.ForceContext.deferred):
+                     ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:101: AttributeError
+____ test_t01_e_construction_never_raises_overflow_or_zero_division[mass2] _____
+
+mass = np.longdouble('1.0000000000000001051e+600')
+
+    @pytest.mark.parametrize("mass", [10**400, -(10**400), np.longdouble(1e300) * 1e300])
+    def test_t01_e_construction_never_raises_overflow_or_zero_division(mass):
+>       for make in (forces.ForceContext, forces.ForceContext.deferred):
+                     ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:101: AttributeError
+___________________ test_t01_smallest_positive_mass_is_valid ___________________
+
+    def test_t01_smallest_positive_mass_is_valid():
+>       assert forces.ForceContext(5e-324).total_mass_kg == 5e-324
+               ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'ForceContext'
+
+tests/test_s1_force_context.py:112: AttributeError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload0] _
+
+payload = array([ 1.e+000, -0.e+000,  5.e-324])
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+>       adapter = forces.LegacyForceAdapter(model)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:138: AttributeError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload1] _
+
+payload = array([     nan,      inf, -1.e+308])
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+>       adapter = forces.LegacyForceAdapter(model)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:138: AttributeError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[not an array] _
+
+payload = 'not an array'
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+>       adapter = forces.LegacyForceAdapter(model)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:138: AttributeError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[None] __
+
+payload = None
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+>       adapter = forces.LegacyForceAdapter(model)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:138: AttributeError
+__________ test_t02_adapter_propagates_the_identical_exception[exc0] ___________
+
+exc = ValueError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+>       adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:161: AttributeError
+__________ test_t02_adapter_propagates_the_identical_exception[exc1] ___________
+
+exc = FloatingPointError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+>       adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:161: AttributeError
+__________ test_t02_adapter_propagates_the_identical_exception[exc2] ___________
+
+exc = OverflowError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+>       adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:161: AttributeError
+__________ test_t02_adapter_propagates_the_identical_exception[exc3] ___________
+
+exc = ZeroDivisionError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+>       adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:161: AttributeError
+__________ test_t02_adapter_propagates_the_identical_exception[exc4] ___________
+
+exc = KeyboardInterrupt()
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+>       adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:161: AttributeError
+________________________ test_t02_adapter_is_immutable _________________________
+
+    def test_t02_adapter_is_immutable():
+>       adapter = forces.LegacyForceAdapter(_Recorder())
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:169: AttributeError
+___ test_t03_legacy_models_through_the_adapter_are_bit_identical[point_mass] ___
+
+model = <tars.sim.forces.PointMassGravity object at 0x1057e9250>
+
+    @pytest.mark.parametrize(
+        "model",
+        [PointMassGravity(WGS84.mu), ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2)],
+        ids=["point_mass", "zonal_j2"],
+    )
+    def test_t03_legacy_models_through_the_adapter_are_bit_identical(model):
+        rng = random.Random(20261028)  # seed recorded
+>       adapter = forces.LegacyForceAdapter(model)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:186: AttributeError
+____ test_t03_legacy_models_through_the_adapter_are_bit_identical[zonal_j2] ____
+
+model = <tars.sim.forces.ZonalJ2Gravity object at 0x106002a40>
+
+    @pytest.mark.parametrize(
+        "model",
+        [PointMassGravity(WGS84.mu), ZonalJ2Gravity(WGS84.mu, WGS84.equatorial_radius, J2)],
+        ids=["point_mass", "zonal_j2"],
+    )
+    def test_t03_legacy_models_through_the_adapter_are_bit_identical(model):
+        rng = random.Random(20261028)  # seed recorded
+>       adapter = forces.LegacyForceAdapter(model)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:186: AttributeError
+________ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[coast] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dcb440>
+burn = None
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+>       seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s1_force_context.py:238: in _run
+    seen = _record_contexts(monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dcb440>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+________ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[full] _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd3650>
+burn = (0.0, 30.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+>       seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s1_force_context.py:238: in _run
+    seen = _record_contexts(monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd3650>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+_______ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[inside] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd38c0>
+burn = (3.0, 4.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+>       seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s1_force_context.py:238: in _run
+    seen = _record_contexts(monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd38c0>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+________ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[split] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd3860>
+burn = (5.0, 12.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+>       seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:253: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s1_force_context.py:238: in _run
+    seen = _record_contexts(monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd3860>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+__ test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[1000.0] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd3620>
+dry = 1000.0
+
+    @pytest.mark.parametrize("dry", [DRY, 1e-3])
+    def test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly(monkeypatch, dry):
+        """U-3. At dry = 1e-3 kg, dry - 1e-17 is a different binary64, so the clamp is observable;
+        at 1000 kg the subtraction rounds back to 1000 (both are pinned)."""
+        assert (dry - 1e-17 != dry) is (dry == 1e-3)
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd3620>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+___ test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dcba10>
+dry = 0.001
+
+    @pytest.mark.parametrize("dry", [DRY, 1e-3])
+    def test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly(monkeypatch, dry):
+        """U-3. At dry = 1e-3 kg, dry - 1e-17 is a different binary64, so the clamp is observable;
+        at 1000 kg the subtraction rounds back to 1000 (both are pinned)."""
+        assert (dry - 1e-17 != dry) is (dry == 1e-3)
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dcba10>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+__________________ test_t06_massless_path_carries_absent_mass __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dca060>
+
+    def test_t06_massless_path_carries_absent_mass(monkeypatch):
+>       seen, _ = _run(monkeypatch, {})
+                  ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:285: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s1_force_context.py:238: in _run
+    seen = _record_contexts(monkeypatch)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dca060>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+______ test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1056dbc80>
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read(monkeypatch):
+        """I-41: a coast stage of infinite length (dt = +inf) has NaN propellant. Its context
+        is built without raising and its mass is neither repaired nor clamped: reading it
+        raises. The step then fails exactly as at BASE (T-07 (a))."""
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:299: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1056dbc80>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+__ test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1056fb200>
+integrator = <class 'tests.test_s1_force_context._WriteAfter'>
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:375: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1056fb200>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+_ test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dbe9c0>
+integrator = <class 'tests.test_s1_force_context._SharedBufferRK4'>
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:375: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dbe9c0>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+__ test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd2de0>
+integrator = <class 'tests.test_s1_force_context._RowViewRK4'>
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:375: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd2de0>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+_____________ test_t04_coast_context_does_not_keep_the_stage_alive _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd1610>
+
+    def test_t04_coast_context_does_not_keep_the_stage_alive(monkeypatch):
+>       seen, stages = _record_contexts(monkeypatch), []
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:385: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd1610>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+_ test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd2e70>
+wrap = <function <lambda> at 0x105e7b560>
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:421: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd2e70>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+_ test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd21e0>
+wrap = <function <lambda> at 0x105e7b6a0>
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+>       seen = _record_contexts(monkeypatch)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:421: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105dd21e0>
+
+    def _record_contexts(monkeypatch):
+        """Replace the simulator's adapter by one that records each context it receives."""
+        seen = []
+>       original = forces.LegacyForceAdapter
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'tars.sim.forces' has no attribute 'LegacyForceAdapter'
+
+tests/test_s1_force_context.py:220: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t01_a_context_is_immutable - Attr...
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[1300]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[1300.0]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass2]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass3]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass4]
+FAILED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[True]
+FAILED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[False]
+FAILED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[mass2]
+FAILED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[1300]
+FAILED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[mass4]
+FAILED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[mass5]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[nan]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[inf]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-inf]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[0.0]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-0.0]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-1.0]
+FAILED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-5e-324]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[nan]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[inf]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-inf]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[0.0]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-0.0]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-1.0]
+FAILED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-5e-324]
+FAILED tests/test_s1_force_context.py::test_t01_d_absent_mass_is_none_never_zero
+FAILED tests/test_s1_force_context.py::test_t01_e_construction_never_raises_overflow_or_zero_division[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000]
+FAILED tests/test_s1_force_context.py::test_t01_e_construction_never_raises_overflow_or_zero_division[-10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000]
+FAILED tests/test_s1_force_context.py::test_t01_e_construction_never_raises_overflow_or_zero_division[mass2]
+FAILED tests/test_s1_force_context.py::test_t01_smallest_positive_mass_is_valid
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload0]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload1]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[not an array]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[None]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc0]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc1]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc2]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc3]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc4]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_is_immutable - Attrib...
+FAILED tests/test_s1_force_context.py::test_t03_legacy_models_through_the_adapter_are_bit_identical[point_mass]
+FAILED tests/test_s1_force_context.py::test_t03_legacy_models_through_the_adapter_are_bit_identical[zonal_j2]
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[coast]
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[full]
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[inside]
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[split]
+FAILED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[1000.0]
+FAILED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001]
+FAILED tests/test_s1_force_context.py::test_t06_massless_path_carries_absent_mass
+FAILED tests/test_s1_force_context.py::test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4]
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_does_not_keep_the_stage_alive
+FAILED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]
+FAILED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem]
+57 failed, 29 passed in 0.85s

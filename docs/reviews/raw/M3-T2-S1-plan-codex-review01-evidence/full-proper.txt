@@ -1,0 +1,44 @@
+
+==================================== ERRORS ====================================
+______ ERROR collecting review_scratch/reviewer/v3s/tests/test_gmat_m2.py ______
+tests/test_gmat_m2.py:26: in <module>
+    LIMITS = json.loads(M2_THRESHOLDS.read_text())["limits"]["o9_gmat"]
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+~/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '$SCRATCH/i46/codex/snap/review_scratch/reviewer/v3s/proof/thresholds/m2.json'
+_ ERROR collecting review_scratch/reviewer/v3s/tests/test_m2_cross_platform.py _
+tests/test_m2_cross_platform.py:37: in <module>
+    LIMITS = load_scoped_thresholds(missions=frozenset(m.name for m in MISSIONS)).for_validator(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src/tars/validation/thresholds.py:133: in load_scoped_thresholds
+    raw = path.read_bytes()
+          ^^^^^^^^^^^^^^^^^
+~/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1019: in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+~/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '$SCRATCH/i46/codex/snap/review_scratch/reviewer/v3s/proof/thresholds/m2.json'
+___ ERROR collecting review_scratch/reviewer/v3s/tests/test_m2_validation.py ___
+tests/test_m2_validation.py:23: in <module>
+    LIMITS = json.loads(M2_THRESHOLDS.read_text())["limits"]
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^
+~/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1027: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py:1013: in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   FileNotFoundError: [Errno 2] No such file or directory: '$SCRATCH/i46/codex/snap/review_scratch/reviewer/v3s/proof/thresholds/m2.json'
+=========================== short test summary info ============================
+ERROR tests/test_gmat_m2.py - FileNotFoundError: [Errno 2] No such file or di...
+ERROR tests/test_m2_cross_platform.py - FileNotFoundError: [Errno 2] No such ...
+ERROR tests/test_m2_validation.py - FileNotFoundError: [Errno 2] No such file...
+!!!!!!!!!!!!!!!!!!! Interrupted: 3 errors during collection !!!!!!!!!!!!!!!!!!!!
+3 errors in 2.65s

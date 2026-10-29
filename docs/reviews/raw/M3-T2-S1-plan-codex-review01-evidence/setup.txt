@@ -1,0 +1,8 @@
+LAZY_FORCES = [
+    (F, "from collections.abc import Sequence\n", "from collections.abc import Callable, Sequence\n"),
+    (F, '    __slots__ = ("_mass",)\n', '    __slots__ = ("_mass", "_source")\n'),
+    (F, "        self._store(total_mass_kg)\n        self.total_mass_kg  # noqa: B018 - validates now (option A)\n",
+     '        object.__setattr__(self, "_source", None)\n        self._store(total_mass_kg)\n        self.total_mass_kg  # noqa: B018 - validates now (option A)\n'),
+    (F, "      
+verbatim 4ba876213b6ebf96617781584117d232a0dd9b4e4dd1b4f8977ddcd399d030bd
+pin dd705dd464cfeedac8c7c7918114ce7b893a8c17acb0dc4370f209d52cb9102d

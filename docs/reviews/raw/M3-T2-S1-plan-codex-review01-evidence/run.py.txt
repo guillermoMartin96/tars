@@ -1,0 +1,13 @@
+from pathlib import Path
+import ast, subprocess, os
+R=Path.cwd();O=R/'review_scratch/reviewer';s=(R/'docs/science/experiments/m3-t2/s1-v3/mutate.py.txt').read_text(); ns={'F':'src/tars/sim/forces.py'}
+a=ast.parse(s)
+node=next(n for n in a.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='LAZY_FORCES' for t in n.targets));exec(compile(ast.Module(body=[node],type_ignores=[]),'edits','exec'),ns)
+for file,old,new in ns['LAZY_FORCES']:
+ p=O/'mutant'/file;v=p.read_text();assert v.count(old)==1;p.write_text(v.replace(old,new))
+p=O/'mutant/src/tars/sim/simulator.py';v=p.read_text();old='ForceContext(mass)) + thrust';assert v.count(old)==1;p.write_text(v.replace(old,'ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))) + thrust'))
+for tree in ['base','v3s','mutant']:
+ env=dict(os.environ,PYTHONPATH=str(O/tree/'src'),PYTHONDONTWRITEBYTECODE='1')
+ for name,args in [('probe',[str(O/'probe.py')]),('s1',['-m','pytest','-q','-p','no:cacheprovider','tests/test_s1_force_context.py','tests/test_s1_failure_paths.py'])]:
+  with (O/f'{tree}-{name}.txt').open('w') as f:r=subprocess.run([str(R/'.venv/bin/python'),'-B',*args],cwd=O/tree,env=env,stdout=f,stderr=subprocess.STDOUT)
+  print(tree,name,r.returncode,flush=True)

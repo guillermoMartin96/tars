@@ -1,0 +1,12 @@
+from pathlib import Path
+import subprocess, hashlib, re
+R=Path.cwd();O=R/'review_scratch/reviewer'
+def run(args,cwd=R):
+ p=subprocess.run(args,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT);print('$',*args,'\n',p.stdout,'exit',p.returncode)
+run(['shasum','-a','256','-c','SHA256SUMS'],R/'review_scratch/pkg')
+run(['shasum','-a','256','-c','MANIFEST.sha256'],R/'docs/science/experiments/m3-t2/s1-v3s-i45')
+old=(R/'docs/milestones/M3-T2-S1-decision-I45.md').read_text();new=(R/'review_scratch/pkg/M3-T2-S1-decision-I45.md').read_text()
+a=old[old.index('## 0.'):];b=new[new.index('## 0.'):new.index('\n## 4.')]
+pointer='> **Resolved by I-46 (§4).** Points 1–3 below were decided by the owner in I-46 (D2, D3/D4, D5).\n> Point 4 remains open: commit A is not authorized. The text below is kept as written under I-45.\n\n'
+assert a.rstrip()==b.replace(pointer,'').rstrip();print('I45 sections preserved except declared pointer')
+run(['git','status','--porcelain']);run(['git','diff','--exit-code','--','src','tests','docs/milestones/M3-T2-S1-proposal-v3.md'])

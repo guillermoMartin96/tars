@@ -1,0 +1,24 @@
+$ shasum -a 256 -c SHA256SUMS 
+ I-46.md: OK
+M3-T2-S1-decision-I45.md: OK
+M3-T2-S1-test-plan-amendment-I46.md: OK
+decision-record.diff: OK
+ exit 0
+$ shasum -a 256 -c MANIFEST.sha256 
+ ./README.md: OK
+./ast_identity.txt: OK
+./contract_verification.md: OK
+./corpus_hashes.txt: OK
+./integrator_corpus_compare.txt: OK
+./missions.sha256: OK
+./probe_r04.py.txt: OK
+./probe_r04.txt: OK
+./proposal-reviewed-vs-final.diff: OK
+./regression_summary.txt: OK
+./repro.sh.txt: OK
+ exit 0
+I45 sections preserved except declared pointer
+$ git status --porcelain 
+  exit 0
+$ git diff --exit-code -- src tests docs/milestones/M3-T2-S1-proposal-v3.md 
+  exit 0

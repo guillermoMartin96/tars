@@ -1,0 +1,28 @@
+"""Reviewer probe only: instrumentation of existing integrators; not planned T-04 tests."""
+import importlib.util, pathlib, gc, weakref, pytest
+p=pathlib.Path(__file__).parent/'v3s/tests/test_s1_force_context.py'
+s=importlib.util.spec_from_file_location('helpers',p); h=importlib.util.module_from_spec(s);s.loader.exec_module(h)
+for kind in [h._WriteAfter,h._SharedBufferRK4,h._RowViewRK4,None]:
+ mp=pytest.MonkeyPatch(); refs=[]; expected=[]
+ try:
+  seen=h._record_contexts(mp)
+  if kind: inner=kind()
+  else:
+   class Euler:
+    order=1;name='euler_kept_stage'
+    def step(self,f,t,y,dt):
+     stage=y.copy();refs.append(weakref.ref(stage));return y+dt*f(t,stage)
+   inner=Euler()
+  class Instrument:
+   name=inner.name;order=inner.order
+   def step(self,f,t,y,dt):
+    def observe(t,y):
+     expected.append(h._stage_mass(y));return f(t,y)
+    return inner.step(observe,t,y,dt)
+  sim=h.Simulator(h.R0,h.V0,h._ZeroForce(),Instrument(),0.5,spacecraft=h._spacecraft())
+  sim.schedule_burn('prograde',0.0,30.0);sim.step();gc.collect()
+  values=[(c.total_mass_kg,c.total_mass_kg) for c in seen]
+  owned=len(seen)==len(expected)==inner.order and all(type(a) is float and type(b) is float and a.hex()==b.hex()==e.hex() for (a,b),e in zip(values,expected))
+  print(inner.name,'calls',len(seen),'expected',[x.hex() for x in expected],'actual',[a.hex() for a,b in values],'snapshot',owned,'released',all(r() is None for r in refs))
+ except Exception as e:print(kind and kind.__name__ or 'lifetime',type(e).__name__,str(e))
+ finally:mp.undo()
