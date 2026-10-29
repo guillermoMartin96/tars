@@ -1,0 +1,14 @@
+from pathlib import Path
+import json,collections,hashlib
+O=Path(__file__).resolve().parent
+b=[json.loads(l) for l in (O/'base-own.txt').read_text().splitlines()]
+for n in ['v2','v3s']:
+ x=[json.loads(l) for l in (O/(n+'-own.txt')).read_text().splitlines()]
+ dif=[(a,c) for a,c in zip(b,x) if any(a[k]!=c[k] for k in ['key','out','warnings','events'])]
+ print(n,'own rows',len(x),'execution differences',len(dif),collections.Counter(a['key'][0] for a,c in dif))
+ print('success stages alive',collections.Counter(c['alive'] for c in x if all(o[0] is None for o in c['out'])))
+ print('snapshot mismatch',sum(v[1]!=v[2] or v[2]!=v[3] or v[0]!='float' for c in x for v in c['snap'] if len(v)==4 and v[0]=='float'))
+for script in ['harness','harness_writers']:
+ for tree in ['base','v3s']:
+  p=O/(tree+'-'+script+'.jsonl')
+  print(p.name,len(p.read_text().splitlines()),hashlib.sha256(p.read_bytes()).hexdigest())

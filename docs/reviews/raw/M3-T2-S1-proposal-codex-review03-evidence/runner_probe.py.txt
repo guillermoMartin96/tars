@@ -1,0 +1,19 @@
+from pathlib import Path
+import numpy as np,warnings,json
+from tars.sim import runner
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import SpacecraftSpec,EngineSpec,TankSpec
+from tars.sim.scenario import load_scenario
+class Zero:
+ name='zero'
+ def acceleration(self,t,r,v):return np.zeros(3)
+for dt in [1e308,8.98846567431158e307,1.2e308]:
+ craft=SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=5e-324,isp_s=1e-10),tank=TankSpec(propellant_kg=300.))
+ sim=Simulator(np.array([7e6,0.,0.]),np.array([0.,1e-290,0.]),Zero(),RK4(),dt,spacecraft=craft)
+ sim.step();sim.schedule_burn('prograde',sim.t*1.2,sim.t*.1,policy='burn_to_depletion')
+ runner.Simulator=lambda *a,**kw:sim
+ sc=load_scenario(Path('scenarios/m2_prograde_burn.json'))
+ with warnings.catch_warnings():
+  warnings.simplefilter('ignore');result=runner.run_scenario(sc)
+ print(dt,result.failure_cause,sim.tick)

@@ -1,0 +1,18 @@
+import numpy as np,warnings,json
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import SpacecraftSpec,EngineSpec,TankSpec
+craft=SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=490.,isp_s=312.),tank=TankSpec(propellant_kg=300.))
+ops={'zeros':lambda r:np.zeros(3),'dot':lambda r:np.full(3,np.dot(r,r)),'norm':lambda r:np.full(3,np.linalg.norm(r)),'sum':lambda r:np.full(3,np.sum(r)),'sqrt':lambda r:np.sqrt(r),'add':lambda r:r+1.,'solve':lambda r:np.linalg.solve(np.eye(3),r)}
+class F:
+ name='snan'
+ def acceleration(self,t,r,v):return ops[OP](r)
+for OP in ops:
+ for filt in ['always','error']:
+  s=Simulator(np.array([7e6,1.,1.]),np.array([0.,7500.,0.]),F(),RK4(),.5,spacecraft=craft)
+  a=np.array([7e6,1.,1.,0.,7500.,0.,0.,0.]);a.view(np.uint64)[6]=0x7ff0000000000001
+  with warnings.catch_warnings(record=True) as ws:
+   warnings.simplefilter(filt)
+   try:out=[float(x).hex() for x in s._powered_derivative(None)(0.,a)]
+   except Exception as e:out=[type(e).__name__,str(e)]
+  print(json.dumps([OP,filt,out,[(type(w.message).__name__,str(w.message)) for w in ws]]))

@@ -1,0 +1,31 @@
+import math,numpy as np,warnings,json
+from tars.sim import simulator as sm
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import SpacecraftSpec,EngineSpec,TankSpec
+seen=[]
+if hasattr(sm,'LegacyForceAdapter'):
+ orig=sm.LegacyForceAdapter
+ class Record(orig):
+  __slots__=()
+  def acceleration(self,t,r,v,c):seen.append((t,c._mass));return super().acceleration(t,r,v,c)
+ sm.LegacyForceAdapter=Record
+class Model:
+ name='independent_writer'
+ def __init__(self,value=None):self.value=value
+ def acceleration(self,t,r,v):
+  if self.value is not None and t==1 and r.base is not None and r.base.flags.writeable:r.base[6]=self.value
+  return np.zeros(3)
+def craft(tiny=False):return SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=5e-324 if tiny else 490.,isp_s=1e-10 if tiny else 312.),tank=TankSpec(propellant_kg=300.))
+for dt in [1e308,8.98846567431158e307]:
+ s=sm.Simulator(np.array([7e6,0.,0.]),np.array([0.,1e-290,0.]),Model(),RK4(),dt,spacecraft=craft(True));s.step();s.schedule_burn('prograde',s.t*1.2,s.t*.1,policy='burn_to_depletion')
+ for retry in range(2):
+  with warnings.catch_warnings(record=True) as ws:
+   warnings.simplefilter('always')
+   try:s.step();out='commit'
+   except Exception as e:out=[type(e).__name__,str(e),repr(e.__cause__),repr(e.__context__)]
+  print(json.dumps(dict(case='overflow',dt=dt,retry=retry,out=out,tick=s.tick,r=[float(x).hex() for x in s.snapshot().r],prop=s.propulsion_snapshot().propellant_kg.hex(),warnings=[str(w.message) for w in ws])))
+for val in [math.nan,math.inf,-math.inf]:
+ seen.clear();s=sm.Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),Model(val),RK4(),10.,spacecraft=craft());s.schedule_burn('prograde',1.,2.)
+ try:s.step();out='commit'
+ except Exception as e:out=[type(e).__name__,str(e),repr(e.__cause__),repr(e.__context__)]
+ print(json.dumps(dict(case='writer',val=str(val),out=out,tick=s.tick,contexts=seen)))

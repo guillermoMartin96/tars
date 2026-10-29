@@ -1,0 +1,8 @@
+exec(open('review_scratch/reviewer/run_checks.py').read().split('jobs=[]')[0])
+import shutil
+D=O/'powered-lazy-mutant/src'
+shutil.copytree(O/'v3s/src',D,dirs_exist_ok=True)
+shutil.copy(O/'v3l/src/tars/sim/forces.py',D/'tars/sim/forces.py')
+p=D/'tars/sim/simulator.py';s=p.read_text();old='ForceContext(mass)) + thrust';assert s.count(old)==1;s=s.replace(old,'ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))) + thrust');p.write_text(s)
+print(run('powered-lazy-tests',['-m','pytest','-q','-p','no:cacheprovider','tests/test_s1_force_context.py','tests/test_s1_failure_paths.py'],O/'v3s',D))
+print(run('powered-lazy-own',[str(O/'ownership.py')],O/'v3s',D))

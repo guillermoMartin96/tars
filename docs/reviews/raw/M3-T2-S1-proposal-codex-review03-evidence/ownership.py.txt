@@ -1,0 +1,38 @@
+import numpy as np,weakref,gc,json,math
+from tars.sim import simulator as sm
+from tars.sim.propulsion import SpacecraftSpec,EngineSpec,TankSpec
+seen=[]
+original=sm.LegacyForceAdapter
+class Recorder(original):
+ __slots__=()
+ def acceleration(self,t,r,v,ctx):seen.append(ctx);return super().acceleration(t,r,v,ctx)
+sm.LegacyForceAdapter=Recorder
+class F:
+ name='zero'
+ def acceleration(self,t,r,v):return np.zeros(3)
+class I:
+ name='unused';order=1
+craft=SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=490.,isp_s=312.),tank=TankSpec(propellant_kg=300.))
+s=sm.Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),F(),I(),.5,spacecraft=craft)
+s.schedule_burn('prograde',0.,2.)
+for burn in [None,s._pending[0]]:
+ for kind in ['shared','rows','strided']:
+  seen.clear();refs=[]
+  work=np.empty((4,16));work[:]=0
+  buf=np.array([7e6,0.,0.,0.,7500.,0.,300.,0.])
+  for j in range(4):
+   if kind=='rows':a=work[j,:8]
+   elif kind=='strided':a=work[j,::2]
+   else:a=buf
+   a[:]=[7e6,0.,0.,0.,7500.,0.,300.-j,0.]
+   refs.append(weakref.ref(a));s._powered_derivative(burn)(0.,a)
+  old=[c.total_mass_kg.hex() for c in seen]
+  work[:]=123;buf[:]=123
+  now=[c.total_mass_kg.hex() for c in seen]
+  del a,work,buf;gc.collect()
+  print(json.dumps(dict(powered=burn is not None,kind=kind,before=old,after=now,repeated=[c.total_mass_kg.hex() for c in seen],types=[type(c._mass).__name__ for c in seen],alive=sum(r() is not None for r in refs))))
+for prop in [float('nan'),float('inf'),-float('inf'),-1e300,1e300]:
+ a=np.array([7e6,0,0,0,7500,0,prop,0]);seen.clear()
+ try:s._powered_derivative(s._pending[0])(0.,a);result='ok'
+ except Exception as e:result=[type(e).__name__,str(e)]
+ print(json.dumps(dict(prop=str(prop),result=result,contexts=len(seen))))

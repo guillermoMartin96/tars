@@ -1,0 +1,78 @@
+macOS-26.2-x86_64-i386-64bit 3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ] 2.5.3
+src/tars/sim/integrators.py:1: """Fixed-step numerical integrators (ADR-0004).
+src/tars/sim/integrators.py:3: An integrator advances y' = f(t, y) by one step of size dt. The simulator's
+src/tars/sim/integrators.py:4: state vector is y = [r, v] (6 components), so f(t, y) = [v, a(t, r, v)].
+src/tars/sim/integrators.py:18: class Integrator(Protocol):
+src/tars/sim/integrators.py:44: INTEGRATORS: dict[str, type[RK4]] = {RK4.name: RK4}
+src/tars/sim/simulator.py:32: from tars.sim.integrators import Derivative, Integrator
+src/tars/sim/simulator.py:51: # Augmented state layout with a spacecraft: y = [r(3), v(3), m_prop, dv_sensed].
+src/tars/sim/simulator.py:74:     interpolation error is O(dt^4), far below the integrator's own error.
+src/tars/sim/simulator.py:184:     Without a spacecraft the state is y = [r, v], and stepping is exactly the M1 path.
+src/tars/sim/simulator.py:185:     With a spacecraft, y = [r, v, m_prop, dv_sensed]. Ticks containing an engine
+src/tars/sim/simulator.py:195:         integrator: Integrator,
+src/tars/sim/simulator.py:205:         self._integrator = integrator
+src/tars/sim/simulator.py:453:         """RHS for y = [r, v, m_prop, dv_sensed] with the engine off or on."""
+src/tars/sim/simulator.py:494:                 y_next = self._integrator.step(self._derivative, prev.t, self._y, self._dt)
+src/tars/sim/simulator.py:531:             y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+src/tars/sim/simulator.py:536:                 y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+docs/decisions/0004-fixed-step-rk4-integrator.md:1: # ADR-0004: Fixed-step classical RK4 integrator
+docs/decisions/0004-fixed-step-rk4-integrator.md:16: - Option A, behind an `Integrator` protocol (`step(t, y, dt, deriv) -> y_next`).
+docs/decisions/0007-propulsion-architecture.md:1: # ADR-0007: Propulsion architecture (separate subsystem, augmented state, engine-event step splitting)
+docs/decisions/0007-propulsion-architecture.md:22:   - augmented state y = [r, v, m_prop, Δv_sensed];
+docs/decisions/0007-propulsion-architecture.md:24:   - M1 6-state path unchanged when no propulsion is configured.
+docs/decisions/0007-propulsion-architecture.md:103: - T1: unit tests against the rocket equation, mass conservation, the free-space closed form and an independent integrator.
+docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md:39: **1A — Augmented integrated state y = [r, v, m_prop] (+ auxiliary sensed-Δv accumulator during a burn) (recommended)**
+docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md:46: - Does not generalize to throttling. Hides mass from the integrator, which makes later models a redesign.
+docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md:48: **1C — Mass updated once per tick, outside the integrator (operator splitting)**
+docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md:69: **3C — Adaptive or variable-step integrator during burns**
+docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md:73: **4A — When a scenario has no spacecraft/propulsion block, the simulator runs the existing 6-state code path unchanged (recommended)**
+docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md:76: **4B — Always use the augmented state (mass constant when there is no engine)**
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:17: | Concern | Where | Shape |
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:19: | State | `tars.sim.simulator.Simulator` | y = [r, v] (M1 path), or y = [r, v, m_prop, Δv_sensed] with a spacecraft (ADR-0007). It is private and committed atomically per tick, and exposed only as read-only snapshots (ADR-0002). |
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:22: | Integrator | `tars.sim.integrators.RK4` | Sees only f(t, y). Ticks are split at engine events (DR-0013 3A). |
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:26: | Events | `tars.events.schema` | `SimulationStarted` records the scenario hash, `software_version` (a static `0.1.0`), constants (name, mu, radius), force-model *names*, integrator and dt. Additive M2 types (strict). `SimulationCompleted.failure_cause ∈ {impact, escape, timeout, non_finite}`. |
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:52: - **AR-1 Integrator decoupled.** The integrator sees only f(t, y). Force models never see the integrator or y's layout. This is already true, and it stays true.
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:119: Simulator (owns y; builds ctx from stage y) ──► derivative f(t, y) ──► Integrator (RK4)
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:147: | Integrator, dt | Scenario (unchanged) | Immutable | `scenario_hash` |
+docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md:157:   - the existing initial orbit, integrator, dt, commands, stop and telemetry semantics;
+docs/milestones/M2-propulsion.md:61: 10. Validation against analytic oracles, an independent integrator, and GMAT (DR-0015).
+docs/milestones/M2-propulsion.md:120:                RK4 on y = [r, v, m_prop, Δv_sensed], tick split at ignition/cutoff/depletion
+docs/milestones/M2-propulsion.md:129: | `tars.sim.simulator` | owns y, engine, propellant; `submit()`; sub-step scheduling inside a tick; snapshots | 6-state M1 path unchanged when no propulsion (DR-0013 4A) |
+docs/milestones/M2-propulsion.md:146: - Integrator: classical RK4, dt = 10 s, unchanged (ADR-0004, DR-0008).
+docs/milestones/M2-propulsion.md:186: | T2 | Simulator: augmented state, engine state machine, sub-step scheduling, `PropulsionSnapshot`, M1 byte-identity gate | DR-0013 | integration tests |
+docs/milestones/M2-propulsion.md:239: | [DR-0013](../decisions/requests/DR-0013-propulsion-architecture-and-integration.md) | Architecture and integration | 1A+2A+3A+4A+5: augmented state, separate subsystem, split steps, M1 path untouched |
+README.md:81:   timestep, integrator, force model, or the propulsion model requires remeasurement,
+BASE Simulator constructor integrator expressions
+test_simulator.py 18 RK4()
+test_simulator.py 80 RK4()
+test_simulator.py 121 RK4()
+test_simulator.py 137 RK4()
+test_simulator.py 153 RK4()
+test_simulator.py 70 RK4()
+test_simulator_propulsion.py 55 RK4()
+test_simulator_propulsion.py 73 RK4()
+test_simulator_propulsion.py 74 RK4()
+test_simulator_propulsion.py 84 RK4()
+test_simulator_propulsion.py 100 RK4()
+test_simulator_propulsion.py 158 RK4()
+test_simulator_propulsion.py 200 RK4()
+test_simulator_propulsion.py 460 RK4()
+test_simulator_propulsion.py 481 RK4()
+test_simulator_propulsion.py 577 RK4()
+test_simulator_propulsion.py 667 RK4()
+test_simulator_propulsion.py 674 RK4()
+test_simulator_propulsion.py 711 RK4()
+test_simulator_propulsion.py 776 RK4()
+test_simulator_propulsion.py 798 RK4()
+test_simulator_propulsion.py 910 RK4()
+test_simulator_propulsion.py 1098 RK4()
+test_simulator_propulsion.py 1025 RK4()
+test_commands.py 75 RK4()
+test_mission_m2.py 570 10.0
+changed paths
+src/tars/sim/forces.py
+src/tars/sim/simulator.py
+tests/test_s1_force_context.py
+tests/test_s1_failure_paths.py
+simulator remainder AST equal True
+v2 powered AST equal v3s True

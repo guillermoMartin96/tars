@@ -1,0 +1,7 @@
+import json,sys
+rows=[json.loads(l) for l in open(sys.argv[1])][:6]
+for r in rows:
+ assert r['before']==r['after']==r['repeated'],('mass changed through stage alias',r)
+ assert r['types']==['float']*4,('context does not own built-in floats',r)
+ assert r['alive']==0,('context kept stage alive',r)
+print('PASS: both closures own fixed floats and release all stages')

@@ -1,0 +1,209 @@
+...................................................FFFFFF............... [ 83%]
+..............                                                           [100%]
+=================================== FAILURES ===================================
+__ test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10703a510>
+integrator = <class 'tests.test_s1_force_context._WriteAfter'>
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+        seen = _record_contexts(monkeypatch)
+        Simulator(R0, V0, _ZeroForce(), integrator(), 0.5, spacecraft=_spacecraft()).step()
+        assert len(seen) == integrator.order
+        for ctx in seen:
+            first, second = ctx.total_mass_kg, ctx.total_mass_kg
+            assert type(first) is float
+>           assert first.hex() == second.hex() == (DRY + PROP).hex()
+E           AssertionError: assert '0x1.18c0000000000p+10' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?     ^^^
+E             + 0x1.18c0000000000p+10
+E             ?     ^^^
+
+tests/test_s1_force_context.py:381: AssertionError
+_ test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10703bb30>
+integrator = <class 'tests.test_s1_force_context._SharedBufferRK4'>
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+        seen = _record_contexts(monkeypatch)
+        Simulator(R0, V0, _ZeroForce(), integrator(), 0.5, spacecraft=_spacecraft()).step()
+        assert len(seen) == integrator.order
+        for ctx in seen:
+            first, second = ctx.total_mass_kg, ctx.total_mass_kg
+            assert type(first) is float
+>           assert first.hex() == second.hex() == (DRY + PROP).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:381: AssertionError
+__ test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4] __
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10703a5a0>
+integrator = <class 'tests.test_s1_force_context._RowViewRK4'>
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+        seen = _record_contexts(monkeypatch)
+        Simulator(R0, V0, _ZeroForce(), integrator(), 0.5, spacecraft=_spacecraft()).step()
+        assert len(seen) == integrator.order
+        for ctx in seen:
+            first, second = ctx.total_mass_kg, ctx.total_mass_kg
+            assert type(first) is float
+>           assert first.hex() == second.hex() == (DRY + PROP).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:381: AssertionError
+_____________ test_t04_coast_context_does_not_keep_the_stage_alive _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10703caa0>
+
+    def test_t04_coast_context_does_not_keep_the_stage_alive(monkeypatch):
+        seen, stages = _record_contexts(monkeypatch), []
+    
+        class _Keep:
+            name, order = "euler_kept_stage", 1
+    
+            def step(self, f, t, y, dt):
+                stage = y.copy()
+                stages.append(weakref.ref(stage))
+                return y + dt * f(t, stage)
+    
+        Simulator(R0, V0, _ZeroForce(), _Keep(), 0.5, spacecraft=_spacecraft()).step()
+        gc.collect()
+        ((ctx,), (stage,)) = seen, stages
+>       assert stage() is None
+E       AssertionError: assert array([6.62813700e+06, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n       4.81690507e+03, 6.07742168e+03, 3.00000000e+02, 0.00000000e+00]) is None
+E        +  where array([6.62813700e+06, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n       4.81690507e+03, 6.07742168e+03, 3.00000000e+02, 0.00000000e+00]) = <weakref at 0x107193380; to 'numpy.ndarray' at 0x1070cf2d0>()
+
+tests/test_s1_force_context.py:398: AssertionError
+_ test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10703b1d0>
+wrap = <function <lambda> at 0x1070cbec0>
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+        seen = _record_contexts(monkeypatch)
+    
+        class _Wrapping:
+            name, order = "euler_wrapped", 1
+    
+            def step(self, f, t, y, dt):
+                return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+    
+        Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft()).step()
+        ((ctx,),) = (seen,)
+>       assert ctx.total_mass_kg.hex() == (DRY + PROP).hex()
+               ^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x10703a680>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass if self._source is None else _owned_float("total_mass_kg", self._source())
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+src/tars/sim/forces.py:251: ValueError
+_ test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10703f410>
+wrap = <function <lambda> at 0x107120040>
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+        seen = _record_contexts(monkeypatch)
+    
+        class _Wrapping:
+            name, order = "euler_wrapped", 1
+    
+            def step(self, f, t, y, dt):
+                return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+    
+        Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft()).step()
+        ((ctx,),) = (seen,)
+>       assert ctx.total_mass_kg.hex() == (DRY + PROP).hex()
+               ^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/tars/sim/forces.py:249: in total_mass_kg
+    mass = self._mass if self._source is None else _owned_float("total_mass_kg", self._source())
+                                                                                 ^^^^^^^^^^^^^^
+src/tars/sim/simulator.py:466: in <lambda>
+    ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+                                                                       ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = _RaisingGetitem([6.62813700e+06, 0.00000000e+00, 0.00000000e+00,
+                 0.00000000e+00, 4.81690507e+03, 6.07742168e+03,
+                 3.00000000e+02, 0.00000000e+00])
+key = 6
+
+    def __getitem__(self, key):
+        if key == 6:
+>           raise LookupError("stage propellant read through the subclass")
+E           LookupError: stage propellant read through the subclass
+
+tests/test_s1_force_context.py:405: LookupError
+=============================== warnings summary ===============================
+review_scratch/reviewer/v3l/tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]
+  $SCRATCH/i45/codex/snap/review_scratch/reviewer/v3l/src/tars/sim/simulator.py:466: UserWarning: Warning: converting a masked element to nan.
+    ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4]
+FAILED tests/test_s1_force_context.py::test_t04_coast_context_does_not_keep_the_stage_alive
+FAILED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]
+FAILED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem]
+6 failed, 80 passed, 1 warning in 0.98s

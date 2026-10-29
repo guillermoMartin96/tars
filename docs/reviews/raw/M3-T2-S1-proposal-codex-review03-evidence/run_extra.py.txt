@@ -1,0 +1,15 @@
+exec(open('review_scratch/reviewer/run_checks.py').read().split('jobs=[]')[0])
+jobs=[]
+for tree in ['base','v2','v3s']:
+ t=O/tree
+ jobs.append((tree+'-own',[str(O/'independent.py')],t,t/'src'))
+for tree in ['base','v3s']:
+ t=O/tree
+ for script in ['harness.py','harness_writers.py']:
+  # main corpora accept SRC_ROOT OUT? inspect before using
+  pass
+# mutation tool expects interpreter beneath prototype root
+(O/'v3s/.venv').symlink_to(R/'.venv',target_is_directory=True)
+jobs.append(('mutation',[str(R/'review_scratch/pkg/mutate.py'),str(O/'v3s'),str(O/'mutations')],R,O/'v3s/src'))
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
+ for r in ex.map(lambda x:run(*x),jobs):print(r,flush=True)

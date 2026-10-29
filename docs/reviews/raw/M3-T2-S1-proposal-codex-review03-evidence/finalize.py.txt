@@ -1,0 +1,13 @@
+from pathlib import Path
+import hashlib, subprocess, json
+O=Path(__file__).resolve().parent
+logs={n:(O/(n+'-full-complete.txt')).read_text() for n in ['base','v3s']}
+assert '1376 passed' in logs['v3s'],logs['v3s'][-2000:]
+assert '57 failed, 1319 passed' in logs['base'],logs['base'][-2000:]
+text='Full pytest with the proposed tests: v3-S **1,376 passed**; BASE **1,319 passed and 57 expected AttributeError failures** (the 1,290 original tests plus 29 T-07 passes). No other failure or collection error. T0: **314 passed** on each tree. T1 Review01/02 correction-check outputs are byte-identical across trees. Both M1 and M2 proof validators PASS, with byte-identical JSON reports. M1 cross-process determinism retains golden SHA-256 `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4`. These are local validator runs, not a claim that the uv-based proof shell wrappers, remote CI, cross-platform jobs or new GMAT executions were rerun.'
+p=O/'REVIEW.md';s=p.read_text();assert 'REGRESSION_RESULTS_PENDING' in s;s=s.replace('REGRESSION_RESULTS_PENDING',text);p.write_text(s)
+r=subprocess.run(['git','diff','--exit-code'],capture_output=True,text=True);assert r.returncode==0
+(O/'final-repository-state.txt').write_text(subprocess.check_output(['git','rev-parse','HEAD'],text=True)+subprocess.check_output(['git','status','--short'],text=True)+'Tracked diff: empty\n')
+files=[p for p in O.iterdir() if p.is_file() and p.name!='SHA256SUMS']+list((O/'mutations').glob('*.xml'))+[O/'mutations/mutation_results.json']
+(O/'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(O))+'\n' for p in sorted(files)))
+print(text)

@@ -1,0 +1,23 @@
+rows 6216 supported integrators 27 out_of_contract 10
+
+ci_proto.jsonl: differing 392 (supported 0, out_of_contract 392)
+  out_of_contract  list               196
+  out_of_contract  object_none        196
+    list             x   6  BASE[FloatingPointError: non-finite state produced at tick 1 | W RuntimeWarning: invalid value encountered in multi]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    list             x  12  BASE[FloatingPointError: non-finite state produced at tick 1 | W RuntimeWarning: overflow encountered in multiply]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    list             x  28  BASE[RuntimeError: model failure]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    list             x   6  BASE[RuntimeWarning: invalid value encountered in multiply]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    list             x  12  BASE[RuntimeWarning: overflow encountered in multiply]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    list             x  84  BASE[TypeError: can't multiply sequence by non-int of type 'float]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    list             x  48  BASE[ok]  ->  [TypeError: descriptor '__getitem__' requires a 'numpy.ndarra]
+    object_none      x   6  BASE[FloatingPointError: non-finite state produced at tick 1]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  11  BASE[FloatingPointError: non-finite state produced at tick 1 | W RuntimeWarning: invalid value encountered in multi]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x   1  BASE[FloatingPointError: non-finite state produced at tick 1 | W RuntimeWarning: invalid value encountered in multi;RuntimeWarning: overflow encountered in multiply]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  10  BASE[FloatingPointError: non-finite state produced at tick 1 | W RuntimeWarning: overflow encountered in multiply]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  28  BASE[RuntimeError: model failure]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  12  BASE[RuntimeWarning: invalid value encountered in multiply]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  12  BASE[RuntimeWarning: overflow encountered in multiply]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  44  BASE[TypeError: ufunc 'isfinite' not supported for the input type]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x   1  BASE[ValueError: position must be finite | W RuntimeWarning: invalid value encountered in multi]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x   1  BASE[ValueError: position must be finite | W RuntimeWarning: invalid value encountered in multi;RuntimeWarning: overflow encountered in multiply]  ->  [TypeError: float() argument must be a string or a real numbe]
+    object_none      x  70  BASE[ok]  ->  [TypeError: float() argument must be a string or a real numbe]

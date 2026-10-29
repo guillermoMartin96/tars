@@ -1,0 +1,29 @@
+from pathlib import Path
+import ast,platform,sys,numpy as np
+R=Path.cwd();O=R/'review_scratch/reviewer'
+print(platform.platform(),sys.version,np.__version__)
+for fn in ['src/tars/sim/integrators.py','src/tars/sim/simulator.py','docs/decisions/0004-fixed-step-rk4-integrator.md','docs/decisions/0007-propulsion-architecture.md','docs/decisions/requests/DR-0013-propulsion-architecture-and-integration.md','docs/decisions/requests/DR-0026-m3-force-scenario-event-architecture.md','docs/milestones/M2-propulsion.md','proof/PROOF.md','README.md']:
+ for i,l in enumerate((R/fn).read_text().splitlines(),1):
+  if any(x in l.lower() for x in ['[r,','[r(','state vector','augmented','integrator','6-state','6 components','shape']):print(f'{fn}:{i}: {l}')
+print('BASE Simulator constructor integrator expressions')
+for p in (R/'tests').glob('*.py'):
+ for n in ast.walk(ast.parse(p.read_text())):
+  if isinstance(n,ast.Call) and isinstance(n.func,ast.Name) and n.func.id=='Simulator':
+   arg=n.args[3] if len(n.args)>3 else next((k.value for k in n.keywords if k.arg=='integrator'),None)
+   print(p.name,n.lineno,ast.unparse(arg) if arg else '?')
+print('changed paths')
+for d in ['src','tests','scenarios']:
+ for p in (O/'v3s'/d).rglob('*'):
+  if p.is_file():
+   rel=p.relative_to(O/'v3s');orig=R/rel
+   if not orig.exists() or p.read_bytes()!=orig.read_bytes():print(rel)
+b=ast.parse((R/'src/tars/sim/simulator.py').read_text());v=ast.parse((O/'v3s/src/tars/sim/simulator.py').read_text())
+for t in [b,v]:
+ t.body=[n for n in t.body if not isinstance(n,(ast.Import,ast.ImportFrom))]
+ for n in t.body:
+  if isinstance(n,ast.ClassDef) and n.name=='Simulator':n.body=[f for f in n.body if not isinstance(f,ast.FunctionDef) or f.name not in ['_derivative','_powered_derivative']]
+print('simulator remainder AST equal',ast.dump(b)==ast.dump(v))
+for tree in ['v2','v3s']:
+ t=ast.parse((O/tree/'src/tars/sim/simulator.py').read_text());f=next(n for n in ast.walk(t) if isinstance(n,ast.FunctionDef) and n.name=='powered')
+ if tree=='v2':old=ast.dump(f)
+ else:print('v2 powered AST equal v3s',old==ast.dump(f))

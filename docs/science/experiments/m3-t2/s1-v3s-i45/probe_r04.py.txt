@@ -1,0 +1,27 @@
+"""I-45 implementer reproduction of Review 03 R-04: 2-D coast stages of shape (1, 8) and (8, 1). argv: tree root."""
+import sys
+sys.path.insert(0, sys.argv[1] + "/src")
+import numpy as np
+from tars.sim.propulsion import EngineSpec, SpacecraftSpec, TankSpec
+from tars.sim.simulator import Simulator
+CRAFT = SpacecraftSpec(dry_mass_kg=1000.0, engine=EngineSpec(thrust_n=490.0, isp_s=312.0), tank=TankSpec(propellant_kg=300.0))
+class Zero:
+    name = "zero"
+    def acceleration(self, t, r, v):
+        return np.zeros(3)
+class Reshape:
+    name, order = "reshape", 1
+    def __init__(self, shape):
+        self.shape = shape
+    def step(self, f, t, y, dt):
+        return y + dt * np.asarray(f(t, y.copy().reshape(self.shape)), dtype=float).reshape(-1)
+for burn in (None, (0.0, 2.0)):
+  for shape in [(1, 8), (8, 1), (2, 4)]:
+    sim = Simulator(np.array([7e6, 0, 0.0]), np.array([0, 7.5e3, 0.0]), Zero(), Reshape(shape), 1.0, spacecraft=CRAFT)
+    if burn:
+        sim.schedule_burn("prograde", *burn)
+    try:
+        sim.step(); out = "commit"
+    except Exception as e:
+        out = f"{type(e).__name__}: {str(e)[:70]}"
+    print("burn" if burn else "coast", shape, out, "tick", sim.tick)

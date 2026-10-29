@@ -1,0 +1,152 @@
+{
+  "F1": {
+    "del_equatorial_radius": "AttributeError: ZonalJ2Gravity is immutable: cannot delete 'equatorial_radius'",
+    "del_extra": "AttributeError: ZonalJ2Gravity is immutable: cannot delete 'extra'",
+    "del_j2": "AttributeError: ZonalJ2Gravity is immutable: cannot delete 'j2'",
+    "del_mu": "AttributeError: ZonalJ2Gravity is immutable: cannot delete 'mu'",
+    "del_name": "AttributeError: ZonalJ2Gravity is immutable: cannot delete 'name'",
+    "has_instance_dict": false,
+    "set_equatorial_radius": "AttributeError: ZonalJ2Gravity is immutable: cannot set 'equatorial_radius'",
+    "set_extra": "AttributeError: ZonalJ2Gravity is immutable: cannot set 'extra'",
+    "set_j2": "AttributeError: ZonalJ2Gravity is immutable: cannot set 'j2'",
+    "set_mu": "AttributeError: ZonalJ2Gravity is immutable: cannot set 'mu'",
+    "set_name": "AttributeError: ZonalJ2Gravity is immutable: cannot set 'name'"
+  },
+  "F2_parameters": {
+    "a=inf": {
+      "corrected": {
+        "accepted": false,
+        "message": "mu and equatorial_radius must be finite and positive"
+      },
+      "reviewed": {
+        "accepted": true,
+        "result": [
+          "-inf",
+          "nan",
+          "nan"
+        ]
+      }
+    },
+    "mu=inf": {
+      "corrected": {
+        "accepted": false,
+        "message": "mu and equatorial_radius must be finite and positive"
+      },
+      "reviewed": {
+        "accepted": true,
+        "result": [
+          "-inf",
+          "nan",
+          "nan"
+        ]
+      }
+    }
+  },
+  "F2_states": {
+    "origin": {
+      "corrected": {
+        "message": "J2 gravity is singular at the origin",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "message": "J2 gravity is singular at the origin",
+        "raises": "ValueError"
+      }
+    },
+    "x=1e-100": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: |r|^5 is not a normal binary64",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "message": "float division by zero",
+        "raises": "ZeroDivisionError"
+      }
+    },
+    "x=1e200": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: |r|^5 is not a normal binary64",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "x=1e62": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: |r|^5 is not a normal binary64",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "x=1e70": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: |r|^5 is not a normal binary64",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "x=5e-324": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: |r|^2 underflows to zero",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "message": "J2 gravity is singular at the origin",
+        "raises": "ValueError"
+      }
+    },
+    "x=inf": {
+      "corrected": {
+        "message": "position must be finite",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "result": [
+          "nan",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "x=nan": {
+      "corrected": {
+        "message": "position must be finite",
+        "raises": "ValueError"
+      },
+      "reviewed": {
+        "result": [
+          "nan",
+          "nan",
+          "nan"
+        ]
+      }
+    }
+  },
+  "bit_identity_j2_zero": true,
+  "bit_identity_valid_states": {
+    "differing": 0,
+    "seed": 20261023,
+    "states": 200004
+  },
+  "numerical_domain_equatorial_canonical": {
+    "largest_accepted_x_m": 4.476546622757235e+61,
+    "smallest_accepted_x_m": 3.3773820261812166e-57
+  }
+}

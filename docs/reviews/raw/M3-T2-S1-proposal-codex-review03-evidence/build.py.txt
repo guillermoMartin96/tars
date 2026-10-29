@@ -1,0 +1,11 @@
+from pathlib import Path
+import shutil, subprocess
+root=Path.cwd(); out=root/'review_scratch/reviewer'
+for name, patches in [('base',[]),('v2',['prototype-v2.patch']),('v3s',['prototype-v3.patch']),('v3l',['prototype-v2.patch','v3L-vs-v2.patch'])]:
+ p=out/name;p.mkdir(exist_ok=True)
+ for d in ['src','tests','scenarios']:shutil.copytree(root/d,p/d,dirs_exist_ok=True)
+ for patch in patches:
+  with (root/'review_scratch/pkg'/patch).open() as f:
+   r=subprocess.run(['patch','-p1'],cwd=p,stdin=f,capture_output=True,text=True); assert r.returncode==0,r.stdout+r.stderr
+# Copy proposed tests onto BASE for red/green discrimination
+for f in ['test_s1_force_context.py','test_s1_failure_paths.py']:shutil.copy(out/'v3s/tests'/f,out/'base/tests'/f)

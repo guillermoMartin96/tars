@@ -1,0 +1,9 @@
+exec(open('review_scratch/reviewer/run_checks.py').read().split('jobs=[]')[0])
+import shutil
+jobs=[]
+for tree in ['v2','v3l']:
+ t=O/tree
+ for f in ['test_s1_force_context.py','test_s1_failure_paths.py']:shutil.copy(O/'v3s/tests'/f,t/'tests'/f)
+ jobs.append((tree+'-v3tests',['-m','pytest','-q','-p','no:cacheprovider','tests/test_s1_force_context.py','tests/test_s1_failure_paths.py'],t,t/'src'))
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+ for r in ex.map(lambda x:run(*x),jobs):print(r,flush=True)

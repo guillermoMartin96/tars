@@ -1,0 +1,27 @@
+import numpy as np,warnings,json,sys
+from tars.sim.simulator import Simulator
+from tars.sim.integrators import RK4
+from tars.sim.propulsion import SpacecraftSpec,EngineSpec,TankSpec
+class Zero:
+ name='zero'
+ def acceleration(self,t,r,v):return np.zeros(3)
+craft=SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=490.,isp_s=312.),tank=TankSpec(propellant_kg=300.))
+class Shapes:
+ name='shape';order=1
+ def step(self,f,t,y,dt):return y+dt*f(t,y.reshape(8,1))
+s=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),Zero(),Shapes(),.5,spacecraft=craft)
+try:s.step();print('shape commit')
+except Exception as e:print('shape',type(e).__name__,str(e),'tick',s.tick)
+s=Simulator(np.array([7e6,0.,0.]),np.zeros(3),Zero(),RK4(),1e308,spacecraft=craft)
+with warnings.catch_warnings(record=True) as w:
+ warnings.simplefilter('always')
+ for attempt in range(3):
+  try:s.step();print('huge',attempt,'commit',s.tick)
+  except Exception as e:print('huge',attempt,type(e).__name__,str(e),'tick',s.tick,'cause',repr(e.__cause__),'context',repr(e.__context__))
+ print('warnings',[(type(x.message).__name__,str(x.message)) for x in w])
+# Signalling NaN, infinities, subnormals: read/convert itself stays quiet.
+for bits in [0x7ff0000000000001,0x7ff8000000000000,0x7ff0000000000000,1,0x8000000000000000]:
+ a=np.zeros(8);a.view(np.uint64)[6]=bits
+ with warnings.catch_warnings(record=True) as w:
+  warnings.simplefilter('error');v=float(np.ndarray.__getitem__(a,6))
+ print('bits',hex(bits),v.hex(),len(w))

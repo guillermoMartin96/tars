@@ -1,0 +1,83 @@
+import numpy as np, warnings, json, math, weakref,gc,sys,tempfile
+from tars.sim.simulator import Simulator
+from tars.sim import simulator as sm
+from tars.sim.propulsion import SpacecraftSpec,EngineSpec,TankSpec
+EVENT=[]
+class Hooks(np.ndarray):
+ def __array_finalize__(self,obj): EVENT.append('finalize')
+ def __getitem__(self,k):
+  if isinstance(k,int) and k==6:
+   if MODE=='raise':raise LookupError('independent scalar read')
+   if MODE=='warn':warnings.warn('independent scalar read')
+   if MODE=='scale':return super().__getitem__(k)*2
+  return super().__getitem__(k)
+ def __float__(self):raise RuntimeError('array float hook')
+ def item(self,*a):raise RuntimeError('item hook')
+class Zero:
+ name='zero'
+ def acceleration(self,t,r,v):
+  EVENT.append(('force',float(t),type(r).__name__,type(v).__name__))
+  if FORCE=='raise':raise RuntimeError('independent force error')
+  return np.zeros(3)
+refs=[];contexts=[]
+if hasattr(sm,'LegacyForceAdapter'):
+ orig=sm.LegacyForceAdapter
+ class Recording(orig):
+  __slots__=()
+  def acceleration(self,t,r,v,ctx): contexts.append((ctx,ctx._mass));return super().acceleration(t,r,v,ctx)
+ sm.LegacyForceAdapter=Recording
+
+def wrap(y,kind):
+ if kind in ['raise','warn','scale','hooks']:return y.view(Hooks)
+ if kind=='mask':return np.ma.array(y,mask=[False]*6+[True,False])
+ if kind=='nomask':return np.ma.array(y,mask=np.ma.nomask)
+ if kind=='false':return np.ma.array(y,mask=False)
+ if kind=='stride':
+  a=np.zeros(16);a[::2]=y;return a[::2]
+ if kind=='reverse':return y[::-1].copy()[::-1]
+ if kind=='endian':return y.astype('>f8')
+ if kind=='readonly': y.flags.writeable=False
+ if kind=='rec':return y.view(np.recarray)
+ if kind=='memmap':
+  with tempfile.TemporaryFile() as fp:
+   a=np.memmap(fp,dtype='float64',mode='w+',shape=(8,));a[:]=y
+  return a
+ return y
+class Custom:
+ name='independent';order=4
+ def step(self,f,t,y,dt):
+  def call(t,z):
+   a=wrap(z.copy(),MODE);refs.append(weakref.ref(a));k=np.asarray(f(t,a));
+   if a.flags.writeable:a[6]=-99
+   return k
+  k1=call(t,y)
+  if METHOD=='euler':return y+dt*k1
+  if METHOD=='midpoint':return y+dt*call(t+dt/2,y+dt*k1/2)
+  k2=call(t+dt/2,y+dt*k1/2);k3=call(t+dt/2,y+dt*k2/2);k4=call(t+dt,y+dt*k3)
+  return y+dt/6*(k1+2*k2+2*k3+k4)
+def state(s):
+ a=s.snapshot();p=s.propulsion_snapshot();return [s.tick,*[float(x).hex() for x in [*a.r,*a.v,p.propellant_kg,p.total_mass_kg,p.delta_v_sensed_mps]],repr(p)]
+def exc(e):return None if e is None else [type(e).__name__,str(e),exc(e.__cause__),exc(e.__context__)]
+craft=SpacecraftSpec(dry_mass_kg=1000.,engine=EngineSpec(thrust_n=490.,isp_s=312.),tank=TankSpec(propellant_kg=300.))
+for MODE in ['plain','raise','warn','scale','hooks','mask','nomask','false','stride','reverse','endian','readonly','rec','memmap']:
+ for METHOD in ['euler','midpoint','rk4']:
+  for FORCE in ['zero','raise']:
+   for burn in [False,True]:
+    for filt in ['always','error']:
+     EVENT.clear();contexts.clear();refs.clear()
+     s=Simulator(np.array([7e6,0.,0.]),np.array([0.,7500.,0.]),Zero(),Custom(),.5,spacecraft=craft)
+     if burn:s.schedule_burn('prograde',0.,2.)
+     outcomes=[]
+     with warnings.catch_warnings(record=True) as ws:
+      warnings.simplefilter(filt)
+      for attempt in range(2):
+       err=None
+       try:s.step()
+       except Exception as e:err=e
+       outcomes.append([exc(err),state(s)])
+     gc.collect()
+     snap=[]
+     for c,original in contexts:
+      try:snap.append([type(c._mass).__name__,original.hex(),c.total_mass_kg.hex(),c.total_mass_kg.hex()])
+      except Exception as e:snap.append(exc(e))
+     print(json.dumps(dict(key=[MODE,METHOD,FORCE,burn,filt],out=outcomes,warnings=[[type(w.message).__name__,str(w.message)] for w in ws],events=EVENT,snap=snap,alive=sum(r() is not None for r in refs))))

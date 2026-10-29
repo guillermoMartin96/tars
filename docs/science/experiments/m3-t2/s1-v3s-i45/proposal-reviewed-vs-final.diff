@@ -1,0 +1,91 @@
+--- reviewed/I-45-proposal-v3S.md
++++ docs/milestones/M3-T2-S1-proposal-v3.md
+@@ -1,12 +1,15 @@
+ # S1 proposal v3: owned raw coast snapshot (v3-S), for owner approval; NOT implemented
+ 
+-> **Record status (I-45, 2026-10-28): FINAL v3-S revision, submitted to independent Review 03.**
++> **Record status (I-45, 2026-10-28): FINAL v3-S revision. Independent Review 03: `PASS`** (0 BLOCKER,
++> 0 MAJOR; R-04 MINOR corrected editorially in §4 and §6; N-01 NOTE escalated to the owner, §7).
+ >
+ > - I44-Q1 is resolved by the owner (I-45, option (a)) after contract verification (§3.2).
+ > - The I-44 draft (`4654ee2`) stopped on that question; this revision supersedes it.
+ > - The earlier review verdicts are **unchanged**: Review 01 (proposal v1) and Review 02 (proposal v2)
+ >   remain `REQUEST_CHANGES`. This proposal does not reverse them (§8).
+-> - The outcome of Review 03 is recorded separately (`docs/reviews/M3-T2-S1-proposal-review-03.md`).
++> - Review 03 record: `docs/reviews/M3-T2-S1-proposal-review-03.md`. The reviewed text (sha256
++>   `407c66bc…01df1b`) differs from this record only by the R-04 correction (§4, §6), the writer-corpus count (§4), the re-run note (§4a) and the
++>   post-review status text (this block, §7, §8). Diff: `s1-v3s-i45/proposal-reviewed-vs-final.diff`.
+ > - This document authorizes nothing. **S1 is NOT IMPLEMENTED, NOT ACCEPTED, NOT MERGED.**
+ 
+ - Supersedes proposal v2 (`M3-T2-S1-proposal-v2.md`, REQUEST_CHANGES in Review 02) in §2–§6 only.
+@@ -152,10 +155,15 @@
+ 
+ - for a non-ndarray, it raises `TypeError` (the descriptor requires `ndarray`);
+ - for object dtype, it returns the stored object (`float(None)` raises `TypeError`);
+-- for size < 7 or 2-D, it raises `IndexError`.
++- for a 1-D stage of size < 7, or a 2-D stage whose first axis has length ≤ 6 (for example (1, 8)
++  or (2, 4)), it raises `IndexError`;
++- for a 2-D stage whose first axis has length > 6 (for example (8, 1)), index 6 selects a row, and
++  `float()` of that row raises `TypeError: only 0-dimensional arrays can be converted to Python
++  scalars` (Review 03 R-04; `s1-v3s-i45/probe_r04.txt`).
+ 
+-BASE's **powered** closure already performs `float(y[_PROP])` and raises the same `IndexError` for
+-those shapes (`probe_shapes.txt`).
++BASE's **powered** closure already performs `float(y[_PROP])` and raises the same exception for each of
++these shapes: `IndexError` for size 6, (1, 8) and (2, 4); `TypeError` for (8, 1) (`probe_shapes.txt`,
++`s1-v3s-i45/probe_r04.txt`).
+ 
+ **Evidence (`s1-v3/`; re-run under I-45 in `s1-v3s-i45/`):**
+ 
+@@ -164,7 +172,7 @@
+ | Custom-integrator corpus (`harness_integrators.py`) | **v3-S vs BASE: 0 differing rows on supported kinds.** 392 differing rows, all out of contract (`list` 196, object `None` 196), all with a spacecraft. Identical to BASE: object floats, float32, longdouble. v2 vs BASE: 500 supported rows differ (masked, raising and warning `__getitem__`), plus object `None` 196. v3-L vs BASE: 0. |
+ | Probe Part A (14 cases, warnings recorded and raised as errors) | v3-S = BASE on every supported case. `list` and object `None` raise `TypeError`. |
+ | Probe Part B (contexts read after the step, stage mutated, re-read; lifetime) | v3-S: every context reads 1300.0 / 1300.0 / 1300.0 and never keeps the stage alive. Masked → stored 1300. Raising / warning `__getitem__` → 1300, no warning. Scaling `__getitem__` → stored 1300 (v2 gave the interpreted 1600). v3-L: 1123 / 1000 after writes, keeps the stage alive, and moves warnings and exceptions to read time. |
+-| Main direct-API corpus (26 880 cases) and stage-writer corpus (26 112 cases) | v3 = BASE byte for byte (`e0309486…a814`, `3310fd90…0415`). The option-A control still differs in 964 cases. M-14 differs in 46 writer cases, M-19 in 0. |
++| Main direct-API corpus (26 880 cases) and stage-writer corpus (26 111 cases; 26 112 JSONL lines with the header) | v3 = BASE byte for byte (`e0309486…a814`, `3310fd90…0415`). The option-A control still differs in 964 cases. M-14 differs in 46 writer cases, M-19 in 0. |
+ 
+ Corpus axes: 6 216 runs over 27 supported integrator kinds and 10 out-of-contract kinds.
+ 
+@@ -192,8 +200,8 @@
+ | T-10 AST identity / T-11 changed paths | — | 51 checks, 0 failures / the 4 allowlisted paths |
+ | Mutation campaign (24 mutants) | — | control 86/86; 23 killed, each for its declared reason; M-19 survives 0/86 |
+ 
+-The I-45 re-run results are in `s1-v3s-i45/regression_summary.txt`. This table is the I-44 result; the
+-I-45 decision record states whether the re-run reproduced it.
++This table is the I-44 result. The I-45 fresh-clone re-run (`s1-v3s-i45/regression_summary.txt`)
++reproduced every row, with identical corpus hashes, test counts and Proof step counts.
+ 
+ ## 4b. I-44 §4 coverage map
+ 
+@@ -291,7 +299,8 @@
+ | object dtype, propellant `None` | commits, or fails later (corpus: 70 of the 196 differing rows commit) | `TypeError: float() argument must be a string or a real number, not 'NoneType'`; tick not committed (as v2) |
+ | object dtype with float propellant; float32; longdouble | — | identical to BASE |
+ | float64, size 6 (no propellant element) | coast commits; powered raises `IndexError` | `IndexError: index 6 is out of bounds for axis 0 with size 6` on coast too (as v2) |
+-| float64, 2-D (1, 8) | coast raises `ValueError` (concatenate dimensions); powered raises `IndexError` | `IndexError` on coast too (as v2) |
++| float64, 2-D (1, 8) or (2, 4) | coast raises `ValueError` (concatenate dimensions); powered raises `IndexError` | `IndexError: index 6 is out of bounds for axis 0 with size 1` (or `size 2`) on coast too |
++| float64, 2-D (8, 1) (Review 03 R-04) | coast raises `ValueError` (concatenate dimensions); powered raises `TypeError` (0-dimensional conversion) | `TypeError: only 0-dimensional arrays can be converted to Python scalars`; tick not committed |
+ | float64, size 10 | commits | identical |
+ 
+ - I-44 §2 provisionally accepts the `list` and object-dtype deltas as out of contract.
+@@ -301,7 +310,11 @@
+ ## 7. Authorization points for the owner
+ 
+ - **Resolved (I-45):** I44-Q1, option (a), scoped per §3.2 (C-1).
+-- **Open, for the owner after Review 03:**
++- **Review 03 N-01 (escalated, not applied):** the snapshot and lifetime regressions cover coast
++  contexts only. A powered lazy-reference mutant passes all 86 S1 tests. Adding a powered
++  snapshot/lifetime test and mutant (M-22) would change the approved test plan, so it is left to the
++  owner. Recommended before or with commit A.
++- **Open, for the owner:**
+   - final acceptance of the §6 disclosures;
+   - the stored-value semantics of §3.2;
+   - the test and mutation additions of §5;
+@@ -315,7 +328,7 @@
+ |---|---|---|---|---|
+ | 01 (`M3-T2-S1-proposal-review-01.md`) | proposal v1 | **REQUEST_CHANGES** | R-01 MAJOR (powered context reachable with an invalid mass via writable stages) | Remains REQUEST_CHANGES. R-01 recorded CLOSED for v2 in Review 02. v3 keeps v2's powered closure (§1). |
+ | 02 (`M3-T2-S1-proposal-review-02.md`) | proposal v2 | **REQUEST_CHANGES** | R-02 MAJOR (coast read dispatches to subclasses), R-03 MINOR (stale references) | Remains REQUEST_CHANGES; R-02 recorded OPEN there. v3-S is the proposed remedy (§2, §4). R-03 corrected under I-43. |
+-| 03 | this proposal and prototype v3 | see `M3-T2-S1-proposal-review-03.md` | — | — |
++| 03 (`M3-T2-S1-proposal-review-03.md`) | this proposal and prototype v3 | **PASS** | R-04 MINOR (2-D exception statement), N-01 NOTE (powered snapshot test coverage), D-1 NOTE (stale `integrators.py` docstring) | R-02 recorded CLOSED, R-01 PRESERVED, I44-Q1 CONSISTENT, M-19 EQUIVALENT CONFIRMED. R-04 corrected; N-01 escalated (§7); D-1 not changed (production source). |
+ 
+ A new verdict on v3 does not alter the verdicts of Reviews 01 and 02. Those reviews judged v1 and v2,
+ and their records stand as written.

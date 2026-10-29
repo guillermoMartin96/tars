@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "$SCRATCH/i45/codex/snap/review_scratch/reviewer/check_ownership.py", line 4, in <module>
+    assert r['before']==r['after']==r['repeated'],('mass changed through stage alias',r)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('mass changed through stage alias', {'powered': True, 'kind': 'shared', 'before': ['0x1.4440000000000p+10', '0x1.4440000000000p+10', '0x1.4440000000000p+10', '0x1.4440000000000p+10'], 'after': ['0x1.18c0000000000p+10', '0x1.18c0000000000p+10', '0x1.18c0000000000p+10', '0x1.18c0000000000p+10'], 'repeated': ['0x1.18c0000000000p+10', '0x1.18c0000000000p+10', '0x1.18c0000000000p+10', '0x1.18c0000000000p+10'], 'types': ['NoneType', 'NoneType', 'NoneType', 'NoneType'], 'alive': 4})

@@ -1,0 +1,8 @@
+exec(open('review_scratch/reviewer/run_checks.py').read().split('jobs=[]')[0])
+jobs=[]
+for tree in ['base','v3s']:
+ t=O/tree
+ jobs.append((tree+'-shapes',[str(R/'review_scratch/pkg/probe_shapes.py'),str(t)],t,t/'src'))
+ jobs.append((tree+'-t0',['-m','pytest','-q','-p','no:cacheprovider',*[str(p) for p in sorted((t/'docs/science/experiments/m3-t0').glob('check_review0*.py'))]],t,t/'src'))
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
+ for r in ex.map(lambda x:run(*x),jobs):print(r,flush=True)

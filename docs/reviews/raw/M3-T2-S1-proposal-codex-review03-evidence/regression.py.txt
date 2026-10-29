@@ -1,0 +1,14 @@
+exec(open('review_scratch/reviewer/run_checks.py').read().split('jobs=[]')[0])
+import shutil
+jobs=[]
+for tree in ['base','v3s']:
+ t=O/tree
+ for d in ['proof','docs','toolbox','references']:
+  if (R/d).is_dir():shutil.copytree(R/d,t/d,dirs_exist_ok=True)
+ for f in ['pyproject.toml','uv.lock','README.md']:
+  shutil.copy(R/f,t/f)
+ jobs.append((tree+'-full-complete',['-m','pytest','-q','-p','no:cacheprovider','tests'],t,t/'src'))
+for tree in ['base','v2','v3s']:
+ t=O/tree;jobs.append((tree+'-own',[str(O/'independent.py')],t,t/'src'))
+with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
+ for r in ex.map(lambda x:run(*x),jobs):print(r,flush=True)

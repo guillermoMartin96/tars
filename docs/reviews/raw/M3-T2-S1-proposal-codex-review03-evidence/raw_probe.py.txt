@@ -1,0 +1,26 @@
+import numpy as np,json,warnings,tempfile
+calls=[]
+class Hostile(np.ndarray):
+ def __getitem__(self,k):raise RuntimeError('getitem')
+ def __array_finalize__(self,obj):calls.append('finalize')
+ def __array_ufunc__(self,*a,**k):raise RuntimeError('ufunc')
+ def __array_function__(self,*a,**k):raise RuntimeError('function')
+ def __array_wrap__(self,*a,**k):raise RuntimeError('wrap')
+ def __float__(self):raise RuntimeError('float')
+ def item(self,*a):raise RuntimeError('item')
+ @property
+ def dtype(self):calls.append('dtype property');return np.dtype('float64')
+ @property
+ def shape(self):calls.append('shape property');return (8,)
+for endian in ['<f8','>f8']:
+ for stride in [1,-1,2]:
+  x=np.arange(16,dtype=endian)[::abs(stride)][:8]
+  if stride<0:x=x[::-1]
+  a=x.view(Hostile);calls.clear()
+  with warnings.catch_warnings(record=True) as w:
+   warnings.simplefilter('error');v=float(np.ndarray.__getitem__(a,6))
+  print(endian,stride,v,type(v).__name__,calls,len(w))
+for shape in [(1,8),(8,1),(8,0),(2,4)]:
+ a=np.zeros(shape)
+ try:print(shape,float(np.ndarray.__getitem__(a,6)))
+ except Exception as e:print(shape,type(e).__name__,str(e))
