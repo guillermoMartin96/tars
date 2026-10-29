@@ -1,0 +1,125 @@
+# Verbatim extract of the historical P-5 manifest checks (I-39A readiness and I-40 P-5).
+# Source transcript: ~/.claude/projects/-Users-guillermomartin--superset-worktrees-tars-flowery-coat-0225a8f3/120cfef1-ae08-4146-a639-733504b7a414.jsonl
+# Source sha256 at extraction: 7b6fa8184006af80bcd7b91ce52345502c3939df26ed0de89d91d7b0de81a339
+# Each "tool_use" block: the Bash command exactly as issued and its result exactly as returned. The final block: the line of the I-39 assistant report that states the claim.
+
+### tool_use toolu_01FqYyBdhJjabsZaw9U7k862  result timestamp 2026-10-27T23:15:55.661Z
+--- command
+cd <home>/.superset/worktrees/tars/flowery-coat-0225a8f3 && for f in $(git ls-files 'docs/reviews/raw/*SHA256SUMS' 'docs/science/*SHA256SUMS'); do d=$(dirname $f); r=$(cd $d && shasum -a 256 -c SHA256SUMS 2>&1 | grep -vc ': OK$'); n=$(wc -l < $f | tr -d ' '); echo "$d  entries=$n  non-OK=$r"; done; echo '---'; git diff --stat a57de3f HEAD -- docs/science/experiments/m3-t0/ | tail -2; git log --oneline -1 -- docs/science/experiments/m3-t0/t0_model.py; sed -n 38,42p docs/science/experiments/m3-t0/t0_model.py; sed -n 87,118p docs/science/experiments/m3-t0/t0_model.py; sed -n 144,162p docs/science/experiments/m3-t0/t0_model.py
+--- result
+docs/reviews/raw/M3-T0-codex-review01-evidence  entries=18  non-OK=0
+docs/reviews/raw/M3-T0-codex-review02-evidence  entries=39  non-OK=0
+docs/reviews/raw/M3-T0-codex-review03-evidence  entries=42  non-OK=0
+docs/reviews/raw/M3-T0-codex-review04-evidence  entries=48  non-OK=0
+docs/reviews/raw/M3-T0-codex-review05-evidence  entries=60  non-OK=0
+docs/reviews/raw/M3-T0-codex-review06-evidence  entries=81  non-OK=0
+docs/reviews/raw/M3-T0-codex-review07-evidence  entries=74  non-OK=0
+docs/reviews/raw/M3-T0-codex-review08-evidence  entries=118  non-OK=0
+docs/reviews/raw/M3-T0-codex-review09-evidence  entries=101  non-OK=0
+docs/reviews/raw/M3-T0-codex-review09-evidence  entries=92  non-OK=0
+docs/reviews/raw/M3-T0-codex-review10-evidence  entries=92  non-OK=0
+docs/reviews/raw/M3-T0-review05-findings-correction-evidence  entries=13  non-OK=0
+docs/reviews/raw/M3-T0-review06-findings-correction-evidence  entries=13  non-OK=0
+docs/reviews/raw/M3-T0-review07-findings-correction-evidence  entries=20  non-OK=0
+docs/reviews/raw/M3-T0-review08-findings-correction-evidence  entries=19  non-OK=0
+docs/reviews/raw/M3-T0-review09-findings-correction-evidence  entries=21  non-OK=0
+docs/reviews/raw/M3-T1-codex-closure-evidence  entries=33  non-OK=0
+docs/reviews/raw/M3-T1-codex-closure-evidence  entries=31  non-OK=0
+docs/reviews/raw/M3-T1-codex-review01-evidence  entries=98  non-OK=0
+docs/reviews/raw/M3-T1-codex-review02-evidence  entries=81  non-OK=0
+docs/reviews/raw/M3-T1-codex-review02-evidence  entries=80  non-OK=0
+docs/reviews/raw/M3-T1-codex-review03-evidence  entries=100  non-OK=0
+docs/reviews/raw/M3-T1-codex-review03-evidence  entries=100  non-OK=0
+docs/reviews/raw/M3-T2-authorization-I31-evidence  entries=7  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-I26-evidence  entries=1  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-I27-evidence  entries=2  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-I28-evidence  entries=2  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-I29-evidence  entries=2  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-codex-closure-evidence  entries=2  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-codex-review01-evidence  entries=3  non-OK=0
+docs/reviews/raw/M3-T2-owner-decisions-codex-review02-evidence  entries=2  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-I33-evidence  entries=18  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-I34A-evidence  entries=5  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-I35-evidence  entries=3  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-codex-review01-evidence  entries=14  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-codex-review01-evidence  entries=12  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-codex-review02-evidence  entries=12  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-codex-review03-evidence  entries=11  non-OK=0
+docs/reviews/raw/M3-T2-packet-r2-codex-review04-evidence  entries=6  non-OK=0
+docs/reviews/raw/M3-T2-readiness-I24-evidence  entries=2  non-OK=0
+docs/reviews/raw/M3-T2-readiness-codex-review01-evidence  entries=3  non-OK=0
+docs/reviews/raw/M3-T2-readiness-codex-review02-evidence  entries=8  non-OK=0
+docs/reviews/raw/M3-T2-readiness-codex-review03-evidence  entries=2  non-OK=0
+---
+3729ffd feat(M3-T0): isolated reference-configuration spike and its evidence
+A_WGS84 = 6378137.0  # m (equatorial radius; J2 reference radius, Q2)
+INV_F_WGS84 = 298.257223563
+F_WGS84 = 1.0 / INV_F_WGS84
+E2_WGS84 = F_WGS84 * (2.0 - F_WGS84)
+B_WGS84 = A_WGS84 * (1.0 - F_WGS84)
+def band_index(h_km: float, table: tuple[Band, ...] = TABLE) -> int:
+    """GMAT's rule (ExponentialAtmosphere::FindBand): the first band i with h < base[i+1];
+    the top band otherwise. An exact base height therefore belongs to the band above."""
+    for i in range(len(table) - 1):
+        if h_km < table[i + 1].base_km:
+            return i
+    return len(table) - 1
+
+
+def density(
+    h_m: float,
+    table: tuple[Band, ...] = TABLE,
+    below: str = "raise",
+    units: str = "km",
+) -> float:
+    """Piecewise-exponential density at geodetic height h_m [m].
+
+    below: behaviour for h below the lowest base: 'raise' (OutsideDomainError, GMAT's behaviour
+           for h < 0 in R2026a is measured separately), or 'extrapolate' (lowest band's
+           formula; a diagnostic used to measure what an RK4 stage would see).
+    units: 'km' evaluates exactly as GMAT does (h converted to km, then the formula);
+           'm' converts the table to metres once and compares in metres (DR-0024 §9).
+    """
+    if not math.isfinite(h_m):
+        raise ValueError("non-finite height")
+    lowest = table[0].base_km
+    if units == "km":
+        h = h_m / 1000.0
+        if h < lowest and below == "raise":
+            raise OutsideDomainError(f"h = {h_m} m below the table's lower edge")
+        b = table[band_index(h, table)]
+        return b.rho0 * math.exp(-(h - b.base_km) / b.scale_km)
+def geodetic_iterative(
+    r: np.ndarray, a: float = A_WGS84, e2: float = E2_WGS84
+) -> tuple[float, float]:
+    """Fixed-point iteration on geodetic latitude, iterated to convergence (|dlat| <= 1e-15
+    or 60 iterations), with the pole-safe height h = p cos(lat) + z sin(lat) - a sqrt(1 - e2
+    sin^2 lat). Returns (lat, h)."""
+    x, y, z = (float(c) for c in r)
+    p = math.hypot(x, y)
+    lat = math.atan2(z, p * (1.0 - e2))
+    for _ in range(60):
+        s = math.sin(lat)
+        n = a / math.sqrt(1.0 - e2 * s * s)
+        new = math.atan2(z + e2 * n * s, p)
+        done = abs(new - lat) <= 1e-15
+        lat = new
+        if done:
+            break
+    s, c = math.sin(lat), math.cos(lat)
+    return lat, p * c + z * s - a * math.sqrt(1.0 - e2 * s * s)
+
+### tool_use toolu_01HbKfxsK9HDLe6f8nWLxB3v  result timestamp 2026-10-28T02:10:50.574Z
+--- command
+S=<scratch>; cd <home>/.superset/worktrees/tars/flowery-coat-0225a8f3 && { echo "## P-5 $(date -u +%FT%TZ)"; n=0; f=0; for m in $(git ls-files '*SHA256SUMS'); do n=$((n+1)); if (cd "$(dirname $m)" && shasum -a 256 -c --quiet SHA256SUMS >/dev/null 2>&1); then echo "OK   $m"; else echo "FAIL $m"; f=$((f+1)); fi; done; echo "manifests=$n failed=$f"; echo "t0 diff a57de3f..BASE:"; git diff --stat a57de3f ee602c5 -- docs/science/experiments/m3-t0/; echo "(end t0 diff)"; } 2>&1 | tee $S/s1ev/pre/p5.txt | tail -6
+--- result
+OK   docs/reviews/raw/M3-T2-readiness-codex-review01-evidence/SHA256SUMS
+OK   docs/reviews/raw/M3-T2-readiness-codex-review02-evidence/SHA256SUMS
+OK   docs/reviews/raw/M3-T2-readiness-codex-review03-evidence/SHA256SUMS
+manifests=43 failed=0
+t0 diff a57de3f..BASE:
+(end t0 diff)
+
+### assistant report text (I-39 readiness response), message uuid db16d967-7d3f-41f3-8d09-413cdcd47c71, timestamp 2026-10-27T23:22:46.592Z
+--- the line containing the claim, verbatim
+| Evidence integrity | — | all 43 committed `SHA256SUMS` manifests verify, 0 mismatches. `docs/science/experiments/m3-t0/` is byte-unchanged since `a57de3f` | ✅ |

@@ -1,0 +1,13 @@
+ok   control: every gate True on the BASE result
+ok   L1 sibling digest mismatch -> gate 'P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered' False
+ok   L3 sibling entry absent -> gate 'P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered' False
+ok   L5 sibling manifest fails P-5A -> gate 'P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered' False
+ok   L2 unexpectedly covered by a sibling -> gate 'P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered' False
+ok   L4 unexpectedly listed in some manifest -> gate 'P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered' False
+ok   L1 history leaves another blob -> gate 'P-5C: every commit in the path history leaves that blob' False
+ok   P-5A failure -> gate 'P-5A: 38 manifests, all PASS' False
+ok   T0 diff non-empty -> gate 'T0 evidence unchanged since a57de3f' False
+ok   manifest entry escaping its directory is reported and fails P-5A
+ok   edited-then-reverted list: endpoint equality still True
+ok   edited-then-reverted list: history gate False
+selftest failures: 0

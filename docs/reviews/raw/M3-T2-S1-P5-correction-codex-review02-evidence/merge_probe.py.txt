@@ -1,0 +1,18 @@
+from pathlib import Path
+import subprocess,sys,json
+root=Path('review_scratch/reviewer').resolve(); repo=root/'merge-repo'
+def run(*a):return subprocess.check_output(list(a),stderr=subprocess.STDOUT).decode()
+print(run('git','clone','--shared','--no-checkout','.',str(repo)))
+def g(*a):return run('git','-C',str(repo),'-c','user.name=reviewer','-c','user.email=reviewer@invalid',*a)
+print(g('checkout','-b','control','ee602c5'))
+print(g('checkout','-b','side'))
+p='docs/reviews/raw/M3-T1-codex-closure-evidence/reviewer-SHA256SUMS'
+f=repo/p; original=f.read_bytes(); f.write_bytes(original.replace(b'./',b'xx',1));g('add',p);g('commit','-qm','side modifies original reviewer list');side=g('rev-parse','HEAD').strip()
+g('checkout','control');(repo/'review-probe-marker').write_text('probe\n');g('add','review-probe-marker');g('commit','-qm','control unrelated change');g('merge','--no-ff','-s','ours','side','-m','merge side retaining original tree')
+print('side commit',side)
+print('default follow log',g('log','--follow','--format=%H %s','HEAD','--',p))
+print('full history',g('log','--full-history','--format=%H %s','HEAD','--',p))
+print('endpoint original', f.read_bytes()==original)
+r=subprocess.run([sys.executable,'-I','-B',str(root/'p5_verify.py'),str(repo),'HEAD'],capture_output=True,text=True)
+(root/'merge-result.json').write_text(r.stdout);print('verifier exit',r.returncode);print(r.stderr)
+x=json.loads(r.stdout);print('gates',x['gates']);print('L2 history',next(a['history'] for a in x['P-5BC']['lists'] if a['path']==p))

@@ -1,0 +1,149 @@
+--- review_scratch/pkg/review01/p5_verify-as-reviewed.py.txt	2026-10-29 11:26:56
++++ review_scratch/pkg/s1-i48/p5_verify.py.txt	2026-10-29 11:26:56
+@@ -19,6 +19,15 @@
+ 
+ EMPTY = hashlib.sha256(b"").hexdigest()
+ 
++# I-48 P-5C: L1, L3 and L5 are covered by their sibling SHA256SUMS; L2 and L4 by no manifest.
++EXPECTED_SIBLING_COVERAGE = {
++    "docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS": True,
++    "docs/reviews/raw/M3-T1-codex-closure-evidence/reviewer-SHA256SUMS": False,
++    "docs/reviews/raw/M3-T1-codex-review02-evidence/reviewer-SHA256SUMS": True,
++    "docs/reviews/raw/M3-T1-codex-review03-evidence/reviewer-SHA256SUMS": False,
++    "docs/reviews/raw/M3-T2-packet-r2-codex-review01-evidence/reviewer_SHA256SUMS": True,
++}
++
+ REVIEWER_LISTS = {
+     # path: (sibling manifest expected to cover it per I-47, documented purpose, source record)
+     "docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS": (
+@@ -131,22 +140,25 @@
+     for m in manifests:
+         base = os.path.dirname(m)
+         text = git(repo, "cat-file", "blob", files[m])
+-        ok, missing, mismatch = 0, [], []
++        ok, missing, mismatch, escapes = 0, [], [], []
+         for digest, name in parse(text):
+             path = resolve(base, name)
+-            if path not in files:
++            if not path.startswith(base + "/"):
++                escapes.append(name)  # R04: entries must stay inside the manifest's directory
++            elif path not in files:
+                 missing.append(name)
+             elif blobs.sha256(files[path]) != digest:
+                 mismatch.append(name)
+             else:
+                 ok += 1
+-        passed = not missing and not mismatch and ok > 0
++        passed = not missing and not mismatch and not escapes and ok > 0
+         failures += not passed
+-        rows.append({"manifest": m, "base_dir": base, "entries": ok + len(missing) + len(mismatch),
+-                     "ok": ok, "missing": missing, "mismatch": mismatch,
++        rows.append({"manifest": m, "base_dir": base, "entries": ok + len(missing) + len(mismatch) + len(escapes),
++                     "ok": ok, "missing": missing, "mismatch": mismatch, "escapes": escapes,
+                      "result": "PASS" if passed else "FAIL"})
+     return {"selector": "committed files whose basename is exactly SHA256SUMS",
+-            "count": len(manifests), "expected_count": 38, "failures": failures, "manifests": rows}
++            "count": len(manifests), "expected_count": 38, "failures": failures,
++            "entries_total": sum(r["entries"] for r in rows), "manifests": rows}
+ 
+ 
+ def search_roots(roots, wanted):
+@@ -156,7 +168,7 @@
+         b = os.path.basename(name)
+         for cand in (b, b + ".txt"):
+             by_name.setdefault(cand, set()).add(digest)
+-    found = {}
++    found, unreadable = {}, []
+     for root in roots:
+         for dirpath, dirnames, filenames in os.walk(root):
+             dirnames[:] = [d for d in dirnames if d not in (".git", ".venv", "node_modules")]
+@@ -168,10 +180,11 @@
+                     with open(full, "rb") as fh:
+                         h = hashlib.sha256(fh.read()).hexdigest()
+                 except OSError:
++                    unreadable.append(full)  # R04: reported, not silently skipped
+                     continue
+                 if h in by_name[fn]:
+                     found.setdefault(h, full)
+-    return found
++    return found, unreadable
+ 
+ 
+ def p5bc(repo, commit, files, blobs, roots, p5a_result):
+@@ -191,6 +204,12 @@
+         added = git(repo, "log", "--diff-filter=A", "--format=%H", "--follow", commit, "--", path).split()
+         intro = added[-1] if added else None
+         intro_oid = git(repo, "rev-parse", f"{intro}:{path}").strip() if intro else None
++        # R01: every commit that touched the path must leave the same blob (no edit, even if reverted)
++        history_blobs = []
++        for h in (row.split()[0] for row in log):
++            r = subprocess.run(["git", "-C", repo, "rev-parse", "--verify", "-q", f"{h}:{path}"],
++                               capture_output=True, text=True)
++            history_blobs.append(r.stdout.strip() if r.returncode == 0 else None)
+         base = os.path.dirname(path)
+         sibling = os.path.join(base, "SHA256SUMS")
+         sib_entry = None
+@@ -204,7 +223,7 @@
+             if p.startswith(base + "/"):
+                 dir_blobs.setdefault(blobs.sha256(o), []).append(p)
+         entries = parse(git(repo, "cat-file", "blob", oid))
+-        external = search_roots(roots, entries) if roots else {}
++        external, unreadable = search_roots(roots, entries) if roots else ({}, [])
+         erows = []
+         for d, name in entries:
+             same_path = resolve(base, name) in files
+@@ -256,6 +275,9 @@
+             "blob_id_at_introducing_commit": intro_oid,
+             "unchanged_since_introduction": intro_oid == oid,
+             "commits_touching": len(log),
++            "history_blobs": history_blobs,
++            "history_single_blob": len(log) >= 1 and set(history_blobs) == {oid},
++            "host_search_unreadable": len(unreadable),
+             "history": log,
+             "sibling_manifest": sibling if sibling in files else None,
+             "sibling_manifest_p5a": sibling_ok.get(sibling),
+@@ -270,6 +292,31 @@
+             "matches_expected": selector == sorted(REVIEWER_LISTS), "lists": out}
+ 
+ 
++def coverage_ok(x):
++    """R01: the list's coverage matches the I-48 expectation exactly."""
++    want = EXPECTED_SIBLING_COVERAGE.get(x["path"])
++    cov = x["covered_by_sibling_entry"]
++    if want is True:
++        return (cov is not None and cov["matches"] and x["sibling_manifest_p5a"] is True
++                and len(x["covered_by_any_committed_SHA256SUMS"]) >= 1)
++    if want is False:
++        return cov is None and not x["covered_by_any_committed_SHA256SUMS"]
++    return False
++
++
++def gates(r):
++    lists = r["P-5BC"]["lists"]
++    return {
++        "P-5A: 38 manifests, all PASS": r["P-5A_PASS"],
++        "P-5B: exactly the five expected lists": r["P-5BC"]["matches_expected"],
++        "P-5C: blob at introduction equals blob at commit": r["P-5C_all_unchanged"],
++        "P-5C: every commit in the path history leaves that blob": all(
++            x["history_single_blob"] for x in lists),
++        "P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered": all(coverage_ok(x) for x in lists),
++        "T0 evidence unchanged since a57de3f": r["T0_unchanged"],
++    }
++
++
+ def main(argv):
+     repo, commit = argv[1], argv[2]
+     roots = [argv[i + 1] for i, a in enumerate(argv) if a == "--search-root"]
+@@ -289,10 +336,10 @@
+         "P-5C_all_unchanged": all(x["unchanged_since_introduction"] for x in bc["lists"]),
+         "T0_unchanged": t0 == "",
+     }
++    result["gates"] = gates(result)
+     json.dump(result, sys.stdout, indent=1, sort_keys=True)
+     sys.stdout.write("\n")
+-    ok = result["P-5A_PASS"] and result["P-5C_all_unchanged"] and result["T0_unchanged"] \
+-        and bc["matches_expected"]
++    ok = all(result["gates"].values())
+     return 0 if ok else 1
+ 
+ 

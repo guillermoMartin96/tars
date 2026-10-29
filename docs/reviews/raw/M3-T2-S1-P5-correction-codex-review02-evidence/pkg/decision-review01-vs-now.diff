@@ -1,0 +1,153 @@
+--- review_scratch/pkg/review01/decision-as-reviewed.md	2026-10-29 11:26:56
++++ review_scratch/pkg/M3-T2-S1-decision-I48.md	2026-10-29 11:26:56
+@@ -28,12 +28,13 @@
+ 
+ ## 2. The defective historical verification procedure (P-5D)
+ 
+-Source: the I-39A and I-40 session transcript, extracted verbatim, with absolute paths redacted, in
++Source: the I-39/I-39A/I-40 session transcript. The commands, their outputs, and the report line
++that states the I-39 claim are extracted verbatim, with absolute paths redacted, in
+ `s1-i48/historical_p5_transcript_extract.txt`.
+ 
+ | When (UTC) | Purpose | Selector | Check actually run | Reported |
+ |---|---|---|---|---|
+-| 2026-10-27T23:15:55Z | I-39A readiness | `git ls-files 'docs/reviews/raw/*SHA256SUMS' 'docs/science/*SHA256SUMS'` | `cd <dir> && shasum -a 256 -c SHA256SUMS` | "43 `SHA256SUMS` manifests verify"; "all 43 committed `SHA256SUMS` manifests verify, 0 mismatches" |
++| 2026-10-27T23:15:55Z | I-39 readiness | `git ls-files 'docs/reviews/raw/*SHA256SUMS' 'docs/science/*SHA256SUMS'` | `cd <dir> && shasum -a 256 -c SHA256SUMS` | The command printed one `non-OK=0` row per matched path (43 rows). The I-39 report, at 2026-10-27T23:22:46Z, stated: "all 43 committed `SHA256SUMS` manifests verify, 0 mismatches". |
+ | 2026-10-28T02:10:50Z | I-40 P-5 | `git ls-files '*SHA256SUMS'` (43 paths) | `cd <dir> && shasum -a 256 -c --quiet SHA256SUMS` | `manifests=43 failed=0` |
+ 
+ **The defect.**
+@@ -78,12 +79,31 @@
+ mismatched entries.
+ 
+ **Result: PASS.**
+-- 38 manifests with 1 412 entries.
++- 38 manifests with 1 176 entries.
+ - 0 missing and 0 mismatched.
+-- Every entry resolves inside its manifest's directory.
++- Every entry resolves inside its manifest's directory. The verifier enforces this as a failure
++  condition (Review 01 R04).
+ 
+ Per-manifest rows are in `p5_summary.txt`.
+ 
++*Count correction (Review 01 R02).* A draft of this record said 1 412 entries. That number was the
++OK lines summed over I-47's direct check of all 43 files. It is 1 176 P-5A entries plus 236 lines of
++the 5 reviewer lists that happened to match committed files (70 + 28 + 55 + 83 + 0). It is not the
++P-5A entry total.
++
++**Out of P-5 scope** (Review 01 R03). Two kinds of committed file carry checksums but fall outside
++both I-40's 43-path selector (`*SHA256SUMS`) and I-48's five-list ruling. This record does not
++broaden that scope. It records them as follows:
++
++- **Five `reviewer-SHA256SUMS.txt` files**, in the T0 Review 07–10 and T1 Review 01 evidence
++  directories. They are of the same kind as L1–L5: implementer-written lists over a reviewer's
++  unredacted files. Each is itself a covered artifact, listed in its directory's `SHA256SUMS`, which
++  passes P-5A. Their entries are not P-5A manifests and are not checked here.
++- **`proof/records/evidence/M2-T7/cross-platform/MANIFEST.json`**. This is protected M2 proof
++  evidence. It is governed by the M2 proof, not by P-5.
++
++Whether either should join a future precondition is the owner's call.
++
+ ### P-5B: reviewer-original checksum lists
+ 
+ **Requirement (I-48).**
+@@ -141,8 +161,16 @@
+ 
+   All three hash-equal the listed digests.
+ - **Host-local search:** it searched the evidence store, the session scratch areas, the main checkout
+-  and all worktrees. It found nothing beyond the committed tree. The summary is identical apart from
+-  its header (`p5_summary_host.txt` in the external evidence).
++  and all worktrees. It found nothing beyond the committed tree, and it reported 0 unreadable files.
++  The summary is identical apart from its header (`p5_summary_host.txt` in the external evidence).
++  A fresh clone cannot reproduce or authenticate this search. "Unavailable" therefore means: absent
++  from the committed tree and from the places searched on this host. It does not mean absent
++  everywhere.
++- **Limits of hash matching** (Review 01 R04):
++  - Equal hashes show equal bytes, not unique origin. Some non-empty blobs match more than one
++    committed path, and an empty original matches every empty file.
++  - The "same name / `.txt`" pairing compares basenames.
++  - The host search looks only at candidate basenames (the listed name, or the name plus `.txt`).
+ 
+ **Original-content verification cannot be performed for 14 entries.**
+ - L1: `ast.log`, `env.log`, `independent.log`, `inspection_commands.md`, `pytest.log`,
+@@ -173,13 +201,38 @@
+ | L4 | `8e1ea224ad41415f575a6ecfb642cd33f09c46c6` | `d01d6aa` | identical | 1 | **git provenance only** |
+ | L5 | `e1698912050262fcb06cc067fe535aa133e4d23a` | `43a6c29` | identical | 1 | sibling entry digest `d7f753ee…b3c6` matches; sibling passes P-5A |
+ 
+-- All five are unchanged since their original commits: each path has exactly one commit, and the
+-  blob there equals the blob at BASE.
++- All five are unchanged since their original commits. Each path has exactly one commit in its
++  `--follow` history, and the blob at every commit in that history equals the blob at BASE. The
++  verifier checks each commit in the history, not only the two endpoints, so an edit that was later
++  reverted would fail (Review 01 R01).
+ - Coverage of L1, L3 and L5 by their neighbouring `SHA256SUMS` was verified directly.
+ - **L2 and L4 are listed in no committed `SHA256SUMS`.** Their integrity rests on git object identity
+   and history alone. **Git provenance is not an independent checksum of the original reviewer
+   artifacts.**
+ 
++### Automated gate (Review 01 R01)
++
++`p5_verify.py` exits 0 only if every one of these gates holds. Each gate is printed in
++`p5_summary.txt`.
++
++1. P-5A: exactly 38 manifests, all PASS, with no directory escape.
++2. P-5B: the non-exact `*SHA256SUMS` files are exactly L1–L5.
++3. P-5C: for each list, the blob at its introducing commit equals the blob at the verified commit.
++4. P-5C: every commit in each list's history leaves that same blob.
++5. P-5C: coverage is exactly as expected:
++   - L1, L3 and L5 each have a sibling entry whose digest matches, and the sibling passes P-5A;
++   - L2 and L4 appear in no committed `SHA256SUMS`.
++6. The T0 diff since `a57de3f` is empty.
++
++`p5_gate_selftest.py.txt` checks that the gates can fail:
++- it perturbs a passing result once per gate condition;
++- it builds a throwaway repository with a manifest entry that escapes its directory, and with a list
++  that is edited and then reverted;
++- it confirms that each perturbation turns its gate False.
++
++Result `p5_gate_selftest.txt`: 12 checks, 0 failures. The pre-review verifier had no such gates.
++Review 01 showed this with its own probe, which returned exit 0 on failed coverage.
++
+ ### P-5D: historical correction
+ 
+ Recorded in §2. The T0 half of P-5 is unchanged: `git diff --stat a57de3f ee602c5 --
+@@ -215,7 +268,7 @@
+ 
+ | Gate | Where recorded |
+ |---|---|
+-| Independent verification of the corrected procedure, and a fresh Codex review with 0 unresolved BLOCKER/MAJOR | review record committed with this ruling (`docs/reviews/M3-T2-S1-P5-correction-review-01.md`) |
++| Independent verification of the corrected procedure, and a fresh Codex review with 0 unresolved BLOCKER/MAJOR | Review 01 (`REQUEST_CHANGES`) and Review 02, both committed with this ruling (§10) |
+ | Planning CI green on the commit that records this ruling | I-48 report (a commit cannot record its own CI) |
+ | Full live re-run of I-40 §4 P-1…P-7, with P-3 and P-5 as ruled here; proposal and patch pins; I-46 records | I-48 report; later `M3-T2-report.md` §S1 (I-40 §4, commit E) |
+ 
+@@ -520,3 +573,31 @@
+ **Commit B NOT AUTHORIZED.**
+ 
+ If any gate fails, report the stopping point and leave implementation unchanged.
++
++## 10. Independent reviews of this correction (I-48 §4)
++
++### Review 01: `REQUEST_CHANGES`
++
++- Fresh Codex session, Codex CLI 0.162.0.
++- The reviewed draft was this record and `s1-i48/` before the changes below.
++- Record: `docs/reviews/M3-T2-S1-P5-correction-review-01.md`.
++
++The reviewer's independent results agree with the implementer's:
++- P-5A: 38/38 PASS, 1 176 entries, no escape;
++- historical defect analysis: CORRECT;
++- P-5B classification: CORRECT, with all 315 classes recomputed and the 3 regenerated hashes
++  reproduced;
++- P-5C provenance: CORRECT for the facts at BASE;
++- S1 technical contract: UNCHANGED.
++
++| ID | Severity | Finding (summary) | Disposition | Change |
++|---|---|---|---|---|
++| R01 | MAJOR | The verifier's exit status did not enforce the P-5C coverage expectations, and judged "unchanged" by endpoint blob equality only | **ACCEPTED** | Six explicit gates, including expected coverage and per-commit history blobs; negative self-test (§4, "Automated gate"). The BASE facts were already correct. The defect was in the automated gate that the precondition re-run relies on. |
++| R02 | MINOR | The P-5A entry total is 1 176, not 1 412 | **ACCEPTED** | Corrected, with the origin of 1 412 explained (§4 P-5A) |
++| R03 | MINOR | No explicit disposition of the five `reviewer-SHA256SUMS.txt` files or of the M2 `MANIFEST.json` | **ACCEPTED** | "Out of P-5 scope" paragraph (§4 P-5A). The ruling is not broadened. |
++| R04 | NOTE | `resolve` permitted manifest-directory escape; the host search hid unreadable files; basename and hash matching have limits | **ACCEPTED** | P-5A now fails on an escape. Unreadable files are counted (0). The limits are stated (§4 P-5B). |
++| — | (remark, item 4) | The first historical block's output does not itself contain the quoted I-39 prose | **ACCEPTED** (editorial) | §2 now cites the I-39 report line, which is added verbatim to the extract. A quote from a context-compaction summary was removed, because it is not a primary source. |
++
++### Review 02
++
++REVIEW02_PLACEHOLDER

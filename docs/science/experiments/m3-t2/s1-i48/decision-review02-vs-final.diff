@@ -1,0 +1,65 @@
+--- /private/tmp/claude-501/-Users-guillermomartin--superset-worktrees-tars-lilac-comb-5363188d/f481e823-c8c5-4354-82f4-94bd191a2fa2/scratchpad/i48codex2/snap/review_scratch/pkg/M3-T2-S1-decision-I48.md	2026-10-29 11:26:56
++++ docs/milestones/M3-T2-S1-decision-I48.md	2026-10-29 11:31:57
+@@ -96,8 +96,10 @@
+ broaden that scope. It records them as follows:
+ 
+ - **Five `reviewer-SHA256SUMS.txt` files**, in the T0 Review 07–10 and T1 Review 01 evidence
+-  directories. They are of the same kind as L1–L5: implementer-written lists over a reviewer's
+-  unredacted files. Each is itself a covered artifact, listed in its directory's `SHA256SUMS`, which
++  directories. They are of the same kind as L1–L5: checksum lists over a reviewer's unredacted files.
++  - T0 Reviews 07 and 08 describe theirs as "the reviewer's own checksum list"
++    (`M3-T0-review-07.md:29`, `M3-T0-review-08.md:23`).
++  - T0 Reviews 09 and 10 and T1 Review 01 describe theirs as written by the implementer. Each is itself a covered artifact, listed in its directory's `SHA256SUMS`, which
+   passes P-5A. Their entries are not P-5A manifests and are not checked here.
+ - **`proof/records/evidence/M2-T7/cross-platform/MANIFEST.json`**. This is protected M2 proof
+   evidence. It is governed by the M2 proof, not by P-5.
+@@ -166,11 +168,14 @@
+   A fresh clone cannot reproduce or authenticate this search. "Unavailable" therefore means: absent
+   from the committed tree and from the places searched on this host. It does not mean absent
+   everywhere.
+-- **Limits of hash matching** (Review 01 R04):
++- **Limits of hash matching and search** (Review 01 R04; Review 02 R2-02):
+   - Equal hashes show equal bytes, not unique origin. Some non-empty blobs match more than one
+     committed path, and an empty original matches every empty file.
+   - The "same name / `.txt`" pairing compares basenames.
+   - The host search looks only at candidate basenames (the listed name, or the name plus `.txt`).
++  - The host search reports files it cannot read, but not directories it cannot traverse. A count of
++    0 unreadable files does not prove that every directory was searched. The host search is
++    informational and is not one of the gates.
+ 
+ **Original-content verification cannot be performed for 14 entries.**
+ - L1: `ast.log`, `env.log`, `independent.log`, `inspection_commands.md`, `pytest.log`,
+@@ -578,7 +583,7 @@
+ 
+ ### Review 01: `REQUEST_CHANGES`
+ 
+-- Fresh Codex session, Codex CLI 0.162.0.
++- Fresh Codex session (thread `01a188e2-abf2-7890-a986-26137e9256e5`), Codex CLI 0.162.0.
+ - The reviewed draft was this record and `s1-i48/` before the changes below.
+ - Record: `docs/reviews/M3-T2-S1-P5-correction-review-01.md`.
+ 
+@@ -600,4 +605,23 @@
+ 
+ ### Review 02
+ 
+-REVIEW02_PLACEHOLDER
++**`VERDICT: PASS`** (0 BLOCKER, 0 MAJOR).
++- Fresh Codex session (thread `01a188ea-aa72-7f63-9408-a3e873077af9`), not Review 01's session.
++- It reviewed the revised record and evidence, with diffs against the Review 01 versions.
++- Record: `docs/reviews/M3-T2-S1-P5-correction-review-02.md`.
++
++Results:
++- **R01, R02, R03, R04 and the item-4 remark: all CLOSED.**
++- P-5A independent result: 38/38 PASS.
++- S1 technical contract: UNCHANGED.
++- The reviewer's 27 fresh negative exit-status probes all returned 1. Merge-commit edit and
++  edit/revert probes fail the history gate. The supplied self-test passes 12/12, and the reviewer
++  judged it "meaningful but not exhaustive".
++
++| ID | Severity | Finding (summary) | Disposition | Change |
++|---|---|---|---|---|
++| R2-01 | MINOR | Calling all five `.txt` lists "implementer-written" overstated the evidence: T0 Reviews 07/08 call theirs the reviewer's own | **ACCEPTED** (editorial) | The "Out of P-5 scope" paragraph now states each list's attribution with its source. Scope and coverage are unchanged. |
++| R2-02 | NOTE | The host search reports unreadable candidate files but not traversal errors, so 0 unreadable does not prove complete traversal | **ACCEPTED** as a stated limitation | Stated in §4 P-5B. The verifier is not changed after review, because the host search is informational and is not a gate. |
++
++No BLOCKER or MAJOR finding is unresolved. Both post-review changes are editorial text in this
++record. Neither touches the verifier, its results or any gate.

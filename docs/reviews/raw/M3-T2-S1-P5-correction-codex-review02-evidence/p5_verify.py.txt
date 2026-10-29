@@ -1,0 +1,347 @@
+"""I-48 corrected P-5 verification (P-5A, P-5B, P-5C) for I-40 section 4.
+
+Reads only git objects at the named commit, never the working tree, so the result
+does not depend on checkout state. Standard library only.
+
+Usage: python3 -I -B p5_verify.py <repo> <commit> [--search-root DIR ...]
+
+--search-root adds host-local directories that are searched for the original
+reviewer files listed in the five reviewer checksum lists (P-5B item "originals
+still available"). Without it, only the committed tree is searched.
+"""
+
+import hashlib
+import json
+import re
+import os
+import subprocess
+import sys
+
+EMPTY = hashlib.sha256(b"").hexdigest()
+
+# I-48 P-5C: L1, L3 and L5 are covered by their sibling SHA256SUMS; L2 and L4 by no manifest.
+EXPECTED_SIBLING_COVERAGE = {
+    "docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS": True,
+    "docs/reviews/raw/M3-T1-codex-closure-evidence/reviewer-SHA256SUMS": False,
+    "docs/reviews/raw/M3-T1-codex-review02-evidence/reviewer-SHA256SUMS": True,
+    "docs/reviews/raw/M3-T1-codex-review03-evidence/reviewer-SHA256SUMS": False,
+    "docs/reviews/raw/M3-T2-packet-r2-codex-review01-evidence/reviewer_SHA256SUMS": True,
+}
+
+REVIEWER_LISTS = {
+    # path: (sibling manifest expected to cover it per I-47, documented purpose, source record)
+    "docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS": (
+        "the reviewer's own checksum list, written by the reviewer over its scratch files",
+        "docs/reviews/M3-T0-review-09.md:23",
+    ),
+    "docs/reviews/raw/M3-T1-codex-closure-evidence/reviewer-SHA256SUMS": (
+        "covers the verifier's original files",
+        "docs/reviews/M3-T1-closure-verification.md:23",
+    ),
+    "docs/reviews/raw/M3-T1-codex-review02-evidence/reviewer-SHA256SUMS": (
+        "written by the implementer over the reviewer's unrenamed, unredacted files",
+        "docs/reviews/M3-T1-review-02.md:29",
+    ),
+    "docs/reviews/raw/M3-T1-codex-review03-evidence/reviewer-SHA256SUMS": (
+        "written by the implementer over the reviewer's unrenamed, unredacted files",
+        "docs/reviews/M3-T1-review-03.md:36",
+    ),
+    "docs/reviews/raw/M3-T2-packet-r2-codex-review01-evidence/reviewer_SHA256SUMS": (
+        "the reviewer's manifest, verbatim; paths say review_scratch/ and .py",
+        "docs/reviews/M3-T2-packet-r2-review-01.md:24",
+    ),
+}
+
+
+# Reviewer-original files that the review record says were omitted as derivable
+# (docs/reviews/M3-T0-review-09.md:26-28), with the git command that derives them.
+REGENERABLE = {
+    ("docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS", "correction.diff"):
+        ["diff", "--no-color", "--no-ext-diff", "--no-textconv", "115e747", "f04f995"],
+    ("docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS", "full.diff"):
+        ["diff", "--no-color", "--no-ext-diff", "--no-textconv", "86df2c3", "f04f995"],
+    ("docs/reviews/raw/M3-T0-codex-review09-evidence/review_SHA256SUMS", "termination_before.py"):
+        ["show", "115e747:docs/science/experiments/m3-t0/t0_termination.py"],
+}
+REDACTION_TOKENS = re.compile(rb"<(clone|review-root|scratch|home|tmp|SNAP|SCRATCH|HOME)>")
+
+
+def git(repo, *args, binary=False):
+    out = subprocess.run(["git", "-C", repo, *args], check=True, capture_output=True)
+    return out.stdout if binary else out.stdout.decode()
+
+
+def tree(repo, commit):
+    """Map path -> blob id for every file at commit."""
+    files = {}
+    for line in git(repo, "ls-tree", "-r", "-z", commit).split("\0"):
+        if not line:
+            continue
+        meta, path = line.split("\t", 1)
+        _mode, kind, oid = meta.split()
+        if kind == "blob":
+            files[path] = oid
+    return files
+
+
+class Blobs:
+    def __init__(self, repo):
+        self.repo = repo
+        self.cache = {}
+
+    def sha256(self, oid):
+        if oid not in self.cache:
+            data = git(self.repo, "cat-file", "blob", oid, binary=True)
+            self.cache[oid] = hashlib.sha256(data).hexdigest()
+        return self.cache[oid]
+
+
+_TREE_INDEX = {}
+
+
+def tree_index(files, blobs):
+    """sha256 -> committed paths, over the whole tree (built once)."""
+    if not _TREE_INDEX:
+        out = subprocess.run(["git", "-C", blobs.repo, "cat-file", "--batch"],
+                             input="".join(o + "\n" for o in sorted(set(files.values()))).encode(),
+                             check=True, capture_output=True).stdout
+        pos, digest_of = 0, {}
+        while pos < len(out):
+            nl = out.index(b"\n", pos)
+            oid, _kind, size = out[pos:nl].decode().split()
+            size = int(size)
+            digest_of[oid] = hashlib.sha256(out[nl + 1:nl + 1 + size]).hexdigest()
+            pos = nl + 1 + size + 1
+        for path, oid in files.items():
+            _TREE_INDEX.setdefault(digest_of[oid], []).append(path)
+    return _TREE_INDEX
+
+
+def parse(text):
+    entries = []
+    for n, line in enumerate(text.splitlines(), 1):
+        digest, sep, name = line.partition("  ")
+        if not sep or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+            raise ValueError(f"line {n}: unparseable manifest line {line!r}")
+        entries.append((digest, name))
+    return entries
+
+
+def resolve(base, name):
+    p = os.path.normpath(os.path.join(base, name))
+    if os.path.isabs(name) or p.startswith(".."):
+        raise ValueError(f"entry escapes the repository: {name!r}")
+    return p
+
+
+def p5a(repo, commit, files, blobs):
+    manifests = sorted(p for p in files if os.path.basename(p) == "SHA256SUMS")
+    rows, failures = [], 0
+    for m in manifests:
+        base = os.path.dirname(m)
+        text = git(repo, "cat-file", "blob", files[m])
+        ok, missing, mismatch, escapes = 0, [], [], []
+        for digest, name in parse(text):
+            path = resolve(base, name)
+            if not path.startswith(base + "/"):
+                escapes.append(name)  # R04: entries must stay inside the manifest's directory
+            elif path not in files:
+                missing.append(name)
+            elif blobs.sha256(files[path]) != digest:
+                mismatch.append(name)
+            else:
+                ok += 1
+        passed = not missing and not mismatch and not escapes and ok > 0
+        failures += not passed
+        rows.append({"manifest": m, "base_dir": base, "entries": ok + len(missing) + len(mismatch) + len(escapes),
+                     "ok": ok, "missing": missing, "mismatch": mismatch, "escapes": escapes,
+                     "result": "PASS" if passed else "FAIL"})
+    return {"selector": "committed files whose basename is exactly SHA256SUMS",
+            "count": len(manifests), "expected_count": 38, "failures": failures,
+            "entries_total": sum(r["entries"] for r in rows), "manifests": rows}
+
+
+def search_roots(roots, wanted):
+    """Host-local search: basename (or basename + '.txt') match, then sha256 compare."""
+    by_name = {}
+    for digest, name in wanted:
+        b = os.path.basename(name)
+        for cand in (b, b + ".txt"):
+            by_name.setdefault(cand, set()).add(digest)
+    found, unreadable = {}, []
+    for root in roots:
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if d not in (".git", ".venv", "node_modules")]
+            for fn in filenames:
+                if fn not in by_name:
+                    continue
+                full = os.path.join(dirpath, fn)
+                try:
+                    with open(full, "rb") as fh:
+                        h = hashlib.sha256(fh.read()).hexdigest()
+                except OSError:
+                    unreadable.append(full)  # R04: reported, not silently skipped
+                    continue
+                if h in by_name[fn]:
+                    found.setdefault(h, full)
+    return found, unreadable
+
+
+def p5bc(repo, commit, files, blobs, roots, p5a_result):
+    sibling_ok = {r["manifest"]: r["result"] == "PASS" for r in p5a_result["manifests"]}
+    all_manifest_hashes = {}
+    for m in (r["manifest"] for r in p5a_result["manifests"]):
+        for digest, name in parse(git(repo, "cat-file", "blob", files[m])):
+            all_manifest_hashes.setdefault(digest, []).append(f"{m}: {name}")
+    selector = sorted(p for p in files if p.endswith("SHA256SUMS")
+                      and os.path.basename(p) != "SHA256SUMS")
+    out = []
+    for path in selector:
+        purpose, source = REVIEWER_LISTS.get(path, ("UNCLASSIFIED", "none"))
+        oid = files[path]
+        digest = blobs.sha256(oid)
+        log = git(repo, "log", "--format=%H %s", "--follow", commit, "--", path).splitlines()
+        added = git(repo, "log", "--diff-filter=A", "--format=%H", "--follow", commit, "--", path).split()
+        intro = added[-1] if added else None
+        intro_oid = git(repo, "rev-parse", f"{intro}:{path}").strip() if intro else None
+        # R01: every commit that touched the path must leave the same blob (no edit, even if reverted)
+        history_blobs = []
+        for h in (row.split()[0] for row in log):
+            r = subprocess.run(["git", "-C", repo, "rev-parse", "--verify", "-q", f"{h}:{path}"],
+                               capture_output=True, text=True)
+            history_blobs.append(r.stdout.strip() if r.returncode == 0 else None)
+        base = os.path.dirname(path)
+        sibling = os.path.join(base, "SHA256SUMS")
+        sib_entry = None
+        if sibling in files:
+            for d, name in parse(git(repo, "cat-file", "blob", files[sibling])):
+                if resolve(base, name) == path:
+                    sib_entry = {"name": name, "digest": d, "matches": d == digest}
+        # entries: compare against committed files of the same evidence directory by content
+        dir_blobs = {}
+        for p, o in files.items():
+            if p.startswith(base + "/"):
+                dir_blobs.setdefault(blobs.sha256(o), []).append(p)
+        entries = parse(git(repo, "cat-file", "blob", oid))
+        external, unreadable = search_roots(roots, entries) if roots else ({}, [])
+        erows = []
+        for d, name in entries:
+            same_path = resolve(base, name) in files
+            b = os.path.basename(name)
+            if d == EMPTY and d in dir_blobs:
+                # zero-byte original: any empty file matches, so only the name pairing is informative
+                status = "EMPTY_ORIGINAL_EMPTY_COMMITTED_COUNTERPART"
+                where = [p for p in dir_blobs[d] if os.path.basename(p) in (b, b + ".txt")]
+                if not where:
+                    status = "EMPTY_ORIGINAL_NO_NAMED_COUNTERPART"
+            elif d in dir_blobs:
+                named = [p for p in dir_blobs[d] if os.path.basename(p) in (b, b + ".txt")]
+                status = ("ORIGINAL_CONTENT_COMMITTED_SAME_NAME_OR_TXT_SUFFIX" if named
+                          else "ORIGINAL_CONTENT_COMMITTED_RENAMED")
+                where = named or dir_blobs[d]
+            elif d != EMPTY and d in tree_index(files, blobs):
+                status = "ORIGINAL_CONTENT_COMMITTED_ELSEWHERE_IN_TREE"
+                where = tree_index(files, blobs)[d]
+            elif (path, name) in REGENERABLE and hashlib.sha256(
+                    git(repo, *REGENERABLE[(path, name)], binary=True)).hexdigest() == d:
+                status = "ORIGINAL_CONTENT_REGENERATED_FROM_GIT"
+                where = ["git " + " ".join(REGENERABLE[(path, name)])]
+            elif d in external:
+                status = "ORIGINAL_CONTENT_FOUND_HOST_LOCAL"
+                where = [external[d]]
+            else:
+                status = "ORIGINAL_UNAVAILABLE_NOT_VERIFIABLE"
+                where = []
+            tokens = None
+            if status.startswith("ORIGINAL_UNAVAILABLE") and same_path:
+                tokens = len(REDACTION_TOKENS.findall(
+                    git(repo, "cat-file", "blob", files[resolve(base, name)], binary=True)))
+            erows.append({"name": name, "digest": d, "status": status, "found_at": where,
+                          "redaction_tokens_in_committed_counterpart": tokens,
+                          "committed_file_at_listed_path": same_path,
+                          "committed_counterpart_differs": status.startswith("ORIGINAL_UNAVAILABLE")
+                          and same_path})
+        counts = {}
+        for e in erows:
+            counts[e["status"]] = counts.get(e["status"], 0) + 1
+        out.append({
+            "path": path,
+            "classification": "REVIEWER_ORIGINAL_CHECKSUM_LIST (not a committed-artifact manifest)",
+            "documented_purpose": purpose,
+            "purpose_source": source,
+            "blob_id_at_commit": oid,
+            "sha256_at_commit": digest,
+            "introducing_commit": intro,
+            "blob_id_at_introducing_commit": intro_oid,
+            "unchanged_since_introduction": intro_oid == oid,
+            "commits_touching": len(log),
+            "history_blobs": history_blobs,
+            "history_single_blob": len(log) >= 1 and set(history_blobs) == {oid},
+            "host_search_unreadable": len(unreadable),
+            "history": log,
+            "sibling_manifest": sibling if sibling in files else None,
+            "sibling_manifest_p5a": sibling_ok.get(sibling),
+            "covered_by_sibling_entry": sib_entry,
+            "covered_by_any_committed_SHA256SUMS": all_manifest_hashes.get(digest, []),
+            "entry_counts": counts,
+            "entries": erows,
+            "label_against_committed_tree": "NOT APPLICABLE (owner ruling I-48 P-5B: not labelled PASS)",
+        })
+    return {"selector": "committed files whose name ends in SHA256SUMS but is not exactly SHA256SUMS",
+            "count": len(selector), "expected": sorted(REVIEWER_LISTS),
+            "matches_expected": selector == sorted(REVIEWER_LISTS), "lists": out}
+
+
+def coverage_ok(x):
+    """R01: the list's coverage matches the I-48 expectation exactly."""
+    want = EXPECTED_SIBLING_COVERAGE.get(x["path"])
+    cov = x["covered_by_sibling_entry"]
+    if want is True:
+        return (cov is not None and cov["matches"] and x["sibling_manifest_p5a"] is True
+                and len(x["covered_by_any_committed_SHA256SUMS"]) >= 1)
+    if want is False:
+        return cov is None and not x["covered_by_any_committed_SHA256SUMS"]
+    return False
+
+
+def gates(r):
+    lists = r["P-5BC"]["lists"]
+    return {
+        "P-5A: 38 manifests, all PASS": r["P-5A_PASS"],
+        "P-5B: exactly the five expected lists": r["P-5BC"]["matches_expected"],
+        "P-5C: blob at introduction equals blob at commit": r["P-5C_all_unchanged"],
+        "P-5C: every commit in the path history leaves that blob": all(
+            x["history_single_blob"] for x in lists),
+        "P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered": all(coverage_ok(x) for x in lists),
+        "T0 evidence unchanged since a57de3f": r["T0_unchanged"],
+    }
+
+
+def main(argv):
+    repo, commit = argv[1], argv[2]
+    roots = [argv[i + 1] for i, a in enumerate(argv) if a == "--search-root"]
+    commit = git(repo, "rev-parse", "--verify", commit + "^{commit}").strip()
+    files = tree(repo, commit)
+    blobs = Blobs(repo)
+    a = p5a(repo, commit, files, blobs)
+    bc = p5bc(repo, commit, files, blobs, roots, a)
+    t0 = git(repo, "diff", "--stat", "a57de3f", commit, "--", "docs/science/experiments/m3-t0/")
+    result = {
+        "commit": commit,
+        "search_roots": roots,
+        "P-5A": a,
+        "P-5BC": bc,
+        "t0_diff_a57de3f": t0,
+        "P-5A_PASS": a["count"] == 38 and a["failures"] == 0,
+        "P-5C_all_unchanged": all(x["unchanged_since_introduction"] for x in bc["lists"]),
+        "T0_unchanged": t0 == "",
+    }
+    result["gates"] = gates(result)
+    json.dump(result, sys.stdout, indent=1, sort_keys=True)
+    sys.stdout.write("\n")
+    ok = all(result["gates"].values())
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

@@ -1,0 +1,17 @@
+from pathlib import Path
+import hashlib,json,re,subprocess
+pkg=Path('review_scratch/pkg'); out=Path('review_scratch/reviewer')
+def sh(b):return hashlib.sha256(b).hexdigest()
+for m in [pkg/'SHA256SUMS',pkg/'s1-i48/i47/MANIFEST.sha256']:
+ rows=m.read_text().splitlines()
+ for row in rows:
+  h,n=row.split(maxsplit=1);p=m.parent/n.lstrip('*');assert sh(p.read_bytes())==h,(m,n)
+ print(m,len(rows),'PASS')
+a=(out/'supplied.json').read_bytes();b=(pkg/'s1-i48/p5_result.json').read_bytes();print('JSON bytes identical',a==b);assert a==b
+r=json.loads(a);ind=json.loads((out/'independent.json').read_text());print('entries',sum(x['entries'] for x in ind['manifests']))
+log=(pkg/'s1-i48/i47/p5_manifests.txt').read_text();ok=[(p,int(n)) for p,n in re.findall(r'^(\S+) rc=\d+ ok=(\d+)',log,re.M)];print('i47 direct exact',sum(n for p,n in ok if p.endswith('/SHA256SUMS')),'reviewer',[n for p,n in ok if not p.endswith('/SHA256SUMS')])
+for p in ind['other_lists']:
+ if p.endswith('.txt'):
+  m=p.rsplit('/',1)[0]+'/SHA256SUMS'; row=next(x for x in r['P-5A']['manifests'] if x['manifest']==m)
+  txt=subprocess.check_output(['git','show','ee602c5:'+m]).decode();h=sh(subprocess.check_output(['git','show','ee602c5:'+p]));assert any(line[:64]==h and line[66:].removeprefix('./')==p.rsplit('/',1)[1] for line in txt.splitlines());print('covered txt',p,row['result'])
+print('tracked diff',subprocess.check_output(['git','diff','--stat','HEAD']).decode())

@@ -1,0 +1,50 @@
+"""Render p5_verify.py JSON output as a plain-text summary. Usage: p5_render.py result.json"""
+
+import json
+import sys
+
+r = json.load(open(sys.argv[1]))
+a, bc = r["P-5A"], r["P-5BC"]
+print(f"# Corrected P-5 verification (I-48) at {r['commit']}")
+print(f"# host-local search roots: {len(r['search_roots'])} (paths not recorded here)")
+print()
+print(f"## P-5A: {a['selector']}")
+print(f"count {a['count']} (expected {a['expected_count']}); failures {a['failures']}; "
+      f"P-5A {'PASS' if r['P-5A_PASS'] else 'FAIL'}")
+for m in a["manifests"]:
+    print(f"{m['result']}  {m['manifest']}  base={m['base_dir']}  entries={m['entries']}  ok={m['ok']}"
+          f"  missing={len(m['missing'])}  mismatch={len(m['mismatch'])}")
+print()
+print(f"## P-5B/P-5C: {bc['selector']}")
+print(f"count {bc['count']}; equals the five identified lists: {bc['matches_expected']}")
+for x in bc["lists"]:
+    print()
+    print(f"### {x['path']}")
+    print(f"classification: {x['classification']}")
+    print(f"documented purpose: {x['documented_purpose']} ({x['purpose_source']})")
+    print(f"git blob at commit: {x['blob_id_at_commit']}; sha256 {x['sha256_at_commit']}")
+    print(f"introduced by: {x['introducing_commit']}; blob there: {x['blob_id_at_introducing_commit']}")
+    print(f"unchanged since introduction: {x['unchanged_since_introduction']}; "
+          f"commits touching the path: {x['commits_touching']}")
+    cov = x["covered_by_sibling_entry"]
+    if cov:
+        print(f"covered by sibling {x['sibling_manifest']} entry {cov['name']!r}: digest matches = "
+              f"{cov['matches']}; sibling P-5A result = {'PASS' if x['sibling_manifest_p5a'] else 'FAIL'}")
+    else:
+        print(f"covered by sibling manifest: NO; covered by any committed SHA256SUMS: "
+              f"{'YES' if x['covered_by_any_committed_SHA256SUMS'] else 'NO'}. Integrity rests on git "
+              "object identity and history only, which is not an independent checksum of the "
+              "original reviewer artifacts.")
+    print(f"against the committed artifact tree: {x['label_against_committed_tree']}")
+    print("original-content entry classes: " + ", ".join(
+        f"{k}={v}" for k, v in sorted(x["entry_counts"].items())))
+    for e in x["entries"]:
+        if e["status"] not in ("ORIGINAL_CONTENT_COMMITTED_SAME_NAME_OR_TXT_SUFFIX",
+                               "EMPTY_ORIGINAL_EMPTY_COMMITTED_COUNTERPART"):
+            extra = ""
+            if e["redaction_tokens_in_committed_counterpart"] is not None:
+                extra = f"  committed counterpart redaction tokens={e['redaction_tokens_in_committed_counterpart']}"
+            print(f"  {e['status']}  {e['name']}  -> {e['found_at']}{extra}")
+print()
+print(f"## T0 evidence unchanged since a57de3f: {r['T0_unchanged']}")
+print(f"## all five lists unchanged since introduction: {r['P-5C_all_unchanged']}")

@@ -1,0 +1,105 @@
+"""Negative self-test of p5_verify.py's gates (Review 01 R01, R04).
+
+Usage: python3 -I -B p5_gate_selftest.py <p5_verify.py> <result.json> <scratch-dir>
+
+Part 1 perturbs a passing result and checks that each perturbation turns at least the intended gate
+False. Part 2 builds a throwaway git repository to check the verifier's own computation of manifest
+directory escapes and of edited-then-reverted list history.
+"""
+
+import copy
+import importlib.util
+import json
+import os
+import subprocess
+import sys
+
+spec = importlib.util.spec_from_file_location("p5v", sys.argv[1])
+p5v = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(p5v)
+base = json.load(open(sys.argv[2]))
+scratch = sys.argv[3]
+failures = 0
+
+
+def check(label, cond):
+    global failures
+    failures += not cond
+    print(f"{'ok  ' if cond else 'FAIL'} {label}")
+
+
+check("control: every gate True on the BASE result", all(p5v.gates(base).values()))
+
+L = {x["path"].split("/")[-2]: i for i, x in enumerate(base["P-5BC"]["lists"])}
+COV = "P-5C: coverage matches L1/L3/L5 covered, L2/L4 uncovered"
+HIST = "P-5C: every commit in the path history leaves that blob"
+
+
+def perturbed(fn):
+    r = copy.deepcopy(base)
+    fn(r)
+    return p5v.gates(r)
+
+
+def lst(r, key):
+    return r["P-5BC"]["lists"][L[key]]
+
+
+cases = [
+    ("L1 sibling digest mismatch", COV,
+     lambda r: lst(r, "M3-T0-codex-review09-evidence")["covered_by_sibling_entry"].update(matches=False)),
+    ("L3 sibling entry absent", COV,
+     lambda r: lst(r, "M3-T1-codex-review02-evidence").update(covered_by_sibling_entry=None)),
+    ("L5 sibling manifest fails P-5A", COV,
+     lambda r: lst(r, "M3-T2-packet-r2-codex-review01-evidence").update(sibling_manifest_p5a=False)),
+    ("L2 unexpectedly covered by a sibling", COV,
+     lambda r: lst(r, "M3-T1-codex-closure-evidence").update(
+         covered_by_sibling_entry={"name": "x", "digest": "0" * 64, "matches": True})),
+    ("L4 unexpectedly listed in some manifest", COV,
+     lambda r: lst(r, "M3-T1-codex-review03-evidence").update(
+         covered_by_any_committed_SHA256SUMS=["some/SHA256SUMS: x"])),
+    ("L1 history leaves another blob", HIST,
+     lambda r: lst(r, "M3-T0-codex-review09-evidence").update(history_single_blob=False)),
+    ("P-5A failure", "P-5A: 38 manifests, all PASS", lambda r: r.update({"P-5A_PASS": False})),
+    ("T0 diff non-empty", "T0 evidence unchanged since a57de3f", lambda r: r.update(T0_unchanged=False)),
+]
+for label, gate, fn in cases:
+    check(f"{label} -> gate '{gate}' False", perturbed(fn)[gate] is False)
+
+
+def run(*a, cwd):
+    subprocess.run(a, cwd=cwd, check=True, capture_output=True)
+
+
+repo = os.path.join(scratch, "selftest-repo")
+os.makedirs(repo, exist_ok=False)
+g = ["git", "-c", "user.name=selftest", "-c", "user.email=selftest@invalid"]
+run("git", "init", "-q", cwd=repo)
+d = os.path.join(repo, "docs/reviews/raw/M3-T1-codex-closure-evidence")
+os.makedirs(d)
+os.makedirs(os.path.join(repo, "docs/reviews/raw/outside"))
+open(os.path.join(repo, "docs/reviews/raw/outside/f"), "w").write("x\n")
+import hashlib
+
+hx = hashlib.sha256(b"x\n").hexdigest()
+open(os.path.join(d, "SHA256SUMS"), "w").write(f"{hx}  ../outside/f\n")
+lst_path = os.path.join(d, "reviewer-SHA256SUMS")
+open(lst_path, "w").write(f"{hx}  a\n")
+run(*g, "add", "-A", cwd=repo)
+run(*g, "commit", "-qm", "one", cwd=repo)
+open(lst_path, "w").write(f"{hx}  b\n")
+run(*g, "commit", "-qam", "edit", cwd=repo)
+open(lst_path, "w").write(f"{hx}  a\n")
+run(*g, "commit", "-qam", "revert", cwd=repo)
+files = p5v.tree(repo, "HEAD")
+blobs = p5v.Blobs(repo)
+a = p5v.p5a(repo, "HEAD", files, blobs)
+check("manifest entry escaping its directory is reported and fails P-5A",
+      a["manifests"][0]["escapes"] == ["../outside/f"] and a["failures"] == 1)
+bc = p5v.p5bc(repo, "HEAD", files, blobs, [], a)
+x = bc["lists"][0]
+check("edited-then-reverted list: endpoint equality still True", x["unchanged_since_introduction"])
+check("edited-then-reverted list: history gate False", x["history_single_blob"] is False)
+
+print(f"selftest failures: {failures}")
+sys.exit(1 if failures else 0)

@@ -1,0 +1,26 @@
+import runpy,copy,json,contextlib,io
+from pathlib import Path
+ns=runpy.run_path('review_scratch/reviewer/p5_verify.py'); main=ns['main']; g=main.__globals__
+base=json.loads(Path('review_scratch/reviewer/supplied.json').read_text())
+g['tree']=lambda *a:{};g['git']=lambda repo,*a,**k:base['commit']+'\n' if a[0]=='rev-parse' else ''
+def probe(label,change):
+ r=copy.deepcopy(base);change(r)
+ g['p5a']=lambda *a:r['P-5A'];g['p5bc']=lambda *a:r['P-5BC']
+ with contextlib.redirect_stdout(io.StringIO()): code=main(['probe','.','BASE'])
+ print(label,'exit',code);assert code==1
+for i in [0,2,4]:
+ for key,val in [('covered_by_sibling_entry',None),('sibling_manifest_p5a',False),('covered_by_any_committed_SHA256SUMS',[])]:
+  probe(f'L{i+1} {key}',lambda r,i=i,key=key,val=val:r['P-5BC']['lists'][i].update({key:val}))
+ probe(f'L{i+1} wrong digest',lambda r,i=i:r['P-5BC']['lists'][i]['covered_by_sibling_entry'].update(matches=False))
+for i in [1,3]:probe(f'L{i+1} unexpected covering manifest',lambda r,i=i:r['P-5BC']['lists'][i].update(covered_by_any_committed_SHA256SUMS=['unexpected']))
+for i in range(5):
+ probe(f'L{i+1} intermediate differing blob',lambda r,i=i:r['P-5BC']['lists'][i].update(history_single_blob=False))
+ probe(f'L{i+1} introductory blob mismatch',lambda r,i=i:r['P-5BC']['lists'][i].update(unchanged_since_introduction=False))
+probe('wrong manifest count',lambda r:r['P-5A'].update(count=37))
+probe('artifact failure',lambda r:r['P-5A'].update(failures=1))
+probe('wrong list selector',lambda r:r['P-5BC'].update(matches_expected=False))
+# unreadable candidate file: force OS error deterministically, independent of privilege
+from unittest.mock import patch
+with patch('os.walk',return_value=[('/candidate',[],['original'])]),patch('builtins.open',side_effect=PermissionError('denied')):
+ print('unreadable candidate',ns['search_roots'](['/candidate'],[('0'*64,'original')]))
+print('missing search root',ns['search_roots'](['/path/does/not/exist/review02'],[('0'*64,'original')]))
