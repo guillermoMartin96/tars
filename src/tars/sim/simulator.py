@@ -28,7 +28,7 @@ from tars.sim.commands import (
     safe_text,
     schema_errors,
 )
-from tars.sim.forces import ForceModel
+from tars.sim.forces import ForceContext, ForceModel, LegacyForceAdapter
 from tars.sim.integrators import Derivative, Integrator
 from tars.sim.propulsion import (
     DIRECTION_LAWS,
@@ -447,19 +447,28 @@ class Simulator:
 
     def _derivative(self, t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
         r, v = y[:3], y[3:]
-        return np.concatenate([v, self._force_model.acceleration(t, r, v)])
+        # No spacecraft: the context carries no mass (I-40 OD-4).
+        model = LegacyForceAdapter(self._force_model)
+        return np.concatenate([v, model.acceleration(t, r, v, ForceContext())])
 
     def _powered_derivative(self, burn: _ScheduledBurn | None) -> Derivative:
         """RHS for y = [r, v, m_prop, dv_sensed] with the engine off or on."""
         spacecraft = self._spacecraft
         assert spacecraft is not None
-        force_model = self._force_model
+        force_model = LegacyForceAdapter(self._force_model)
 
         if burn is None:
 
             def coast(t: float, y: NDArray[np.float64]) -> NDArray[np.float64]:
                 r, v = y[:3], y[3:6]
-                return np.concatenate([v, force_model.acceleration(t, r, v), _COAST_RATES])
+                # Stage mass, validated only when a model reads it (I-41): a coast stage of
+                # infinite length carries NaN propellant and must fail as before. The stored
+                # element is read through the base-class indexer, so a float64 ndarray subclass
+                # (masked or otherwise) cannot warn or raise here, and the context owns a
+                # binary64 snapshot instead of a reference to the stage (I-44, U-1).
+                prop = float(np.ndarray.__getitem__(y, _PROP))
+                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(prop, 0.0))
+                return np.concatenate([v, force_model.acceleration(t, r, v, ctx), _COAST_RATES])
 
             return coast
 
@@ -477,7 +486,7 @@ class Simulator:
             if not math.isfinite(engine.thrust_n / mass):  # F/m overflows (K4)
                 raise FloatingPointError(f"thrust acceleration overflows at t = {t!r}")
             thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)
-            a = force_model.acceleration(t, r, v) + thrust
+            a = force_model.acceleration(t, r, v, ForceContext(mass)) + thrust
             return np.concatenate([v, a, [-mdot, engine.thrust_n / mass]])
 
         return powered

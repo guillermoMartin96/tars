@@ -196,3 +196,90 @@ class ZonalJ2Gravity:
         if not np.all(np.isfinite(a)):
             raise ValueError("outside the J2 numerical domain: acceleration overflows")
         return a
+
+
+class ForceContext:
+    """Immutable force-evaluation context (DQ-3 (a); DR-0026 Q-G3-1): the stage total mass.
+
+    ``total_mass_kg`` is a built-in float that is finite and positive, or ``None`` when the
+    simulation has no mass (the M1 path, I-40 OD-4). Absent mass is never 0.0.
+
+    The mass is converted to an owned binary64 at construction (M3T1-R2-F2 pattern):
+    supported are int (not bool), float, NumPy integer and floating scalars, and
+    zero-dimensional arrays of those; any other type raises ``TypeError``.
+
+    - ``ForceContext(m)`` rejects a non-finite or non-positive m at construction (U-1;
+      I-40 OD-2 option A).
+    - ``ForceContext.deferred(m)`` is used only by the coast derivative (I-41, option B for
+      the coast closure): it rejects such an m when ``total_mass_kg`` is read. A model that
+      never reads the mass therefore fails exactly as it did before the context existed.
+
+    Both raise ``ValueError``; neither raises ``OverflowError`` or ``ZeroDivisionError``.
+    """
+
+    __slots__ = ("_mass",)
+
+    def __init__(self, total_mass_kg: float | None = None) -> None:
+        self._store(total_mass_kg)
+        self.total_mass_kg  # noqa: B018 - validates now (option A)
+
+    @classmethod
+    def deferred(cls, total_mass_kg: float) -> ForceContext:
+        """Context whose mass is validated when it is read (coast closure only, I-41)."""
+        ctx = cls.__new__(cls)
+        ctx._store(total_mass_kg)
+        return ctx
+
+    def _store(self, total_mass_kg: float | None) -> None:
+        mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)
+        object.__setattr__(self, "_mass", mass)
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+            raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+        return mass
+
+    def __setattr__(self, name: str, value: object) -> None:
+        raise AttributeError(f"ForceContext is immutable: cannot set {name!r}")
+
+    def __delattr__(self, name: str) -> None:
+        raise AttributeError(f"ForceContext is immutable: cannot delete {name!r}")
+
+
+class ContextForceModel(Protocol):
+    """Context-aware force model: acceleration [m/s^2] at time ``t`` [s] for ECI state
+    (r, v) and the immutable evaluation context ``ctx`` (DQ-3 (a))."""
+
+    name: str
+
+    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -> Vector: ...
+
+
+class LegacyForceAdapter:
+    """Presents a legacy ``ForceModel`` through the context-aware protocol (DQ-3 (a), DQ-5 (a)).
+
+    ``acceleration`` calls the wrapped ``acceleration(t, r, v)`` once with the identical
+    argument objects and returns its result object unchanged; the context is not passed on
+    and not read. Exceptions propagate unchanged. The adapter is immutable and never
+    modifies the wrapped model.
+    """
+
+    __slots__ = ("model",)
+
+    def __init__(self, model: ForceModel) -> None:
+        object.__setattr__(self, "model", model)
+
+    @property
+    def name(self) -> str:
+        return self.model.name
+
+    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -> Vector:
+        return self.model.acceleration(t, r, v)
+
+    def __setattr__(self, name: str, value: object) -> None:
+        raise AttributeError(f"LegacyForceAdapter is immutable: cannot set {name!r}")
+
+    def __delattr__(self, name: str) -> None:
+        raise AttributeError(f"LegacyForceAdapter is immutable: cannot delete {name!r}")
