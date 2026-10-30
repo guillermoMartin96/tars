@@ -1,0 +1,6 @@
+pinned control nodes 86 D control nodes 90 all pass True control pytest exit 0
+M-19 powered context deferred (expected equivalent): DIFFERS pinned ('SURVIVED (expected equivalent)', 0, 86, []) vs D ('SURVIVED (expected equivalent)', 0, 90, [])
+M-22 powered lazy stage reference (v3-L machinery, powered path only): NEW (A-1) verdict KILLED 4/4 exit 1 failing ['test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]', 'test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]', 'test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4]', 'test_t04_powered_context_does_not_keep_the_stage_alive']
+23 of 24 pinned mutants: identical verdict, counts and failing nodes
+verdicts: {'KILLED': 24, 'SURVIVED (expected equivalent)': 1}
+pytest exits: [0, 1]

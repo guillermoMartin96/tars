@@ -1,0 +1,70 @@
+.FFF                                                                     [100%]
+=================================== FAILURES ===================================
+________ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[full] _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10379e8d0>
+burn = (0.0, 30.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+        seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+        for ctx, (_, y) in zip(seen, stages, strict=True):
+            assert type(ctx.total_mass_kg) is float
+>           assert ctx.total_mass_kg.hex() == _stage_mass(y).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:256: AssertionError
+_______ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[inside] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10388a9c0>
+burn = (3.0, 4.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+        seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+        for ctx, (_, y) in zip(seen, stages, strict=True):
+            assert type(ctx.total_mass_kg) is float
+>           assert ctx.total_mass_kg.hex() == _stage_mass(y).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:256: AssertionError
+________ test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[split] ________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10388e120>
+burn = (5.0, 12.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+        seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+        for ctx, (_, y) in zip(seen, stages, strict=True):
+            assert type(ctx.total_mass_kg) is float
+>           assert ctx.total_mass_kg.hex() == _stage_mass(y).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:256: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[full]
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[inside]
+FAILED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[split]
+3 failed, 1 passed in 0.17s

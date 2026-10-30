@@ -1,0 +1,104 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: $SCRATCH/clones/C
+configfile: pyproject.toml
+collected 90 items
+
+tests/test_s1_failure_paths.py .............................             [ 32%]
+tests/test_s1_force_context.py ......................................... [ 77%]
+....................                                                     [100%]
+
+==================================== PASSES ====================================
+- generated xml file: $SCRATCH/green_C/s1_junit.xml -
+=========================== short test summary info ============================
+PASSED tests/test_s1_failure_paths.py::test_t07_a_infinite_dt_coast_point_mass_is_non_finite
+PASSED tests/test_s1_failure_paths.py::test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2
+PASSED tests/test_s1_failure_paths.py::test_t07_c_infinite_dt_m1_path_is_non_finite
+PASSED tests/test_s1_failure_paths.py::test_t07_d_non_finite_powered_stage_fails_before_any_mass_use
+PASSED tests/test_s1_failure_paths.py::test_t07_e_thrust_over_mass_overflow
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[m1-OverflowError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[m1-ZeroDivisionError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[coast-OverflowError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[coast-ZeroDivisionError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[powered-OverflowError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[powered-ZeroDivisionError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_other_force_errors_propagate_as_the_identical_object[m1]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_other_force_errors_propagate_as_the_identical_object[coast]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_other_force_errors_propagate_as_the_identical_object[powered]
+PASSED tests/test_s1_failure_paths.py::test_t07_g_pointing_law_error_precedes_the_force_model
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[inf-path0]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[inf-path1]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[-inf-path0]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[-inf-path1]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[nan-path0]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[nan-path1]
+PASSED tests/test_s1_failure_paths.py::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[1e+308]
+PASSED tests/test_s1_failure_paths.py::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[8.98846567431158e+307]
+PASSED tests/test_s1_failure_paths.py::test_t07_j_infinite_dt_admits_no_burn_so_no_split_tick
+PASSED tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[nan]
+PASSED tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[inf]
+PASSED tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[-inf]
+PASSED tests/test_s1_failure_paths.py::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[masked_propellant]
+PASSED tests/test_s1_failure_paths.py::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[raising_getitem]
+PASSED tests/test_s1_force_context.py::test_t01_a_context_is_immutable
+PASSED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[1300]
+PASSED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[1300.0]
+PASSED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass2]
+PASSED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass3]
+PASSED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass4]
+PASSED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[True]
+PASSED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[False]
+PASSED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[mass2]
+PASSED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[1300]
+PASSED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[mass4]
+PASSED tests/test_s1_force_context.py::test_t01_b_unsupported_mass_types_raise_type_error[mass5]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[nan]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[inf]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-inf]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[0.0]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-0.0]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-1.0]
+PASSED tests/test_s1_force_context.py::test_t01_c_invalid_mass_is_rejected_at_construction[-5e-324]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[nan]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[inf]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-inf]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[0.0]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-0.0]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-1.0]
+PASSED tests/test_s1_force_context.py::test_t01_c_deferred_invalid_mass_is_rejected_when_read[-5e-324]
+PASSED tests/test_s1_force_context.py::test_t01_d_absent_mass_is_none_never_zero
+PASSED tests/test_s1_force_context.py::test_t01_e_construction_never_raises_overflow_or_zero_division[10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000]
+PASSED tests/test_s1_force_context.py::test_t01_e_construction_never_raises_overflow_or_zero_division[-10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000]
+PASSED tests/test_s1_force_context.py::test_t01_e_construction_never_raises_overflow_or_zero_division[mass2]
+PASSED tests/test_s1_force_context.py::test_t01_smallest_positive_mass_is_valid
+PASSED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload0]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload1]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[not an array]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[None]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc0]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc1]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc2]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc3]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc4]
+PASSED tests/test_s1_force_context.py::test_t02_adapter_is_immutable
+PASSED tests/test_s1_force_context.py::test_t03_legacy_models_through_the_adapter_are_bit_identical[point_mass]
+PASSED tests/test_s1_force_context.py::test_t03_legacy_models_through_the_adapter_are_bit_identical[zonal_j2]
+PASSED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[coast]
+PASSED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[full]
+PASSED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[inside]
+PASSED tests/test_s1_force_context.py::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[split]
+PASSED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[1000.0]
+PASSED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001]
+PASSED tests/test_s1_force_context.py::test_t06_massless_path_carries_absent_mass
+PASSED tests/test_s1_force_context.py::test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read
+PASSED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+PASSED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+PASSED tests/test_s1_force_context.py::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4]
+PASSED tests/test_s1_force_context.py::test_t04_coast_context_does_not_keep_the_stage_alive
+PASSED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]
+PASSED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem]
+PASSED tests/test_s1_force_context.py::test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]
+PASSED tests/test_s1_force_context.py::test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]
+PASSED tests/test_s1_force_context.py::test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4]
+PASSED tests/test_s1_force_context.py::test_t04_powered_context_does_not_keep_the_stage_alive
+============================== 90 passed in 0.40s ==============================

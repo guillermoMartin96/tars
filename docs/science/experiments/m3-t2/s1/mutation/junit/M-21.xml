@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.179" timestamp="2026-10-29T21:13:46.125702-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_WriteAfter]" time="0.001"><failure message="AssertionError: assert '0x1.18c0000000000p+10' == '0x1.4500000000000p+10'&#10;  &#10;  - 0x1.4500000000000p+10&#10;  ?     ^^^&#10;  + 0x1.18c0000000000p+10&#10;  ?     ^^^">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x105a778c0&gt;
+integrator = &lt;class 'tests.test_s1_force_context._WriteAfter'&gt;
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+        seen = _record_contexts(monkeypatch)
+        Simulator(R0, V0, _ZeroForce(), integrator(), 0.5, spacecraft=_spacecraft()).step()
+        assert len(seen) == integrator.order
+        for ctx in seen:
+            first, second = ctx.total_mass_kg, ctx.total_mass_kg
+            assert type(first) is float
+&gt;           assert first.hex() == second.hex() == (DRY + PROP).hex()
+E           AssertionError: assert '0x1.18c0000000000p+10' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?     ^^^
+E             + 0x1.18c0000000000p+10
+E             ?     ^^^
+
+tests/test_s1_force_context.py:381: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_SharedBufferRK4]" time="0.001"><failure message="AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'&#10;  &#10;  - 0x1.4500000000000p+10&#10;  ?      -             ^^&#10;  + 0x1.f400000000000p+9&#10;  ?     +              ^">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x105b62480&gt;
+integrator = &lt;class 'tests.test_s1_force_context._SharedBufferRK4'&gt;
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+        seen = _record_contexts(monkeypatch)
+        Simulator(R0, V0, _ZeroForce(), integrator(), 0.5, spacecraft=_spacecraft()).step()
+        assert len(seen) == integrator.order
+        for ctx in seen:
+            first, second = ctx.total_mass_kg, ctx.total_mass_kg
+            assert type(first) is float
+&gt;           assert first.hex() == second.hex() == (DRY + PROP).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:381: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass[_RowViewRK4]" time="0.001"><failure message="AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'&#10;  &#10;  - 0x1.4500000000000p+10&#10;  ?      -             ^^&#10;  + 0x1.f400000000000p+9&#10;  ?     +              ^">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x105b64260&gt;
+integrator = &lt;class 'tests.test_s1_force_context._RowViewRK4'&gt;
+
+    @pytest.mark.parametrize("integrator", [_WriteAfter, _SharedBufferRK4, _RowViewRK4])
+    def test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass(monkeypatch, integrator):
+        """U-1: the coast context owns the stage mass at the derivative call. Later writes to the
+        stage storage (after the call, by buffer reuse, through views) do not change it, and
+        repeated reads agree. Zero force keeps every stage mass at DRY + PROP."""
+        seen = _record_contexts(monkeypatch)
+        Simulator(R0, V0, _ZeroForce(), integrator(), 0.5, spacecraft=_spacecraft()).step()
+        assert len(seen) == integrator.order
+        for ctx in seen:
+            first, second = ctx.total_mass_kg, ctx.total_mass_kg
+            assert type(first) is float
+&gt;           assert first.hex() == second.hex() == (DRY + PROP).hex()
+E           AssertionError: assert '0x1.f400000000000p+9' == '0x1.4500000000000p+10'
+E             
+E             - 0x1.4500000000000p+10
+E             ?      -             ^^
+E             + 0x1.f400000000000p+9
+E             ?     +              ^
+
+tests/test_s1_force_context.py:381: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_coast_context_does_not_keep_the_stage_alive" time="0.010"><failure message="AssertionError: assert array([6.62813700e+06, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n       4.81690507e+03, 6.07742168e+03, 3.00000000e+02, 0.00000000e+00]) is None&#10; +  where array([6.62813700e+06, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n       4.81690507e+03, 6.07742168e+03, 3.00000000e+02, 0.00000000e+00]) = &lt;weakref at 0x1063ab240; to 'numpy.ndarray' at 0x1061a7f30&gt;()">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x105a4a900&gt;
+
+    def test_t04_coast_context_does_not_keep_the_stage_alive(monkeypatch):
+        seen, stages = _record_contexts(monkeypatch), []
+    
+        class _Keep:
+            name, order = "euler_kept_stage", 1
+    
+            def step(self, f, t, y, dt):
+                stage = y.copy()
+                stages.append(weakref.ref(stage))
+                return y + dt * f(t, stage)
+    
+        Simulator(R0, V0, _ZeroForce(), _Keep(), 0.5, spacecraft=_spacecraft()).step()
+        gc.collect()
+        ((ctx,), (stage,)) = seen, stages
+&gt;       assert stage() is None
+E       AssertionError: assert array([6.62813700e+06, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n       4.81690507e+03, 6.07742168e+03, 3.00000000e+02, 0.00000000e+00]) is None
+E        +  where array([6.62813700e+06, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,\n       4.81690507e+03, 6.07742168e+03, 3.00000000e+02, 0.00000000e+00]) = &lt;weakref at 0x1063ab240; to 'numpy.ndarray' at 0x1061a7f30&gt;()
+
+tests/test_s1_force_context.py:398: AssertionError</failure></testcase></testsuite></testsuites>

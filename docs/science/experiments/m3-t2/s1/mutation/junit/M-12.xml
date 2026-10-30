@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="14" time="0.269" timestamp="2026-10-29T21:13:35.730056-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[nan]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mass = nan
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[inf]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mass = inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[-inf]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mass = -inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[0.0]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mass = 0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[-0.0]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mass = -0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[-1.0]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = -1.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_invalid_mass_is_rejected_at_construction[-5e-324]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = -5e-324
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_invalid_mass_is_rejected_at_construction(mass):
+&gt;       with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:79: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[nan]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = nan
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[inf]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[-inf]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = -inf
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[0.0]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = 0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[-0.0]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = -0.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[-1.0]" time="0.000"><failure message="Failed: DID NOT RAISE ValueError">mass = -1.0
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_c_deferred_invalid_mass_is_rejected_when_read[-5e-324]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">mass = -5e-324
+
+    @pytest.mark.parametrize("mass", INVALID)
+    def test_t01_c_deferred_invalid_mass_is_rejected_when_read(mass):
+        ctx = forces.ForceContext.deferred(mass)  # construction accepts it (I-41)
+        for _ in range(2):  # every read rejects it; nothing is cached or coerced
+&gt;           with pytest.raises(ValueError, match="total_mass_kg must be finite and positive"):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:87: Failed</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,56 @@
+"""T-10 (PC-7(S1) §6, INV-8; I-40 OD-5): AST identity of every protected region against BASE.
+
+forces.py: ForceModel, PointMassGravity, CompositeForceModel, ZonalJ2Gravity, _owned_float,
+_underflows identical; every BASE module-level statement still present unchanged (additive).
+simulator.py: every module-level statement identical except imports; class Simulator: every
+member identical except _derivative and _powered_derivative.
+
+Usage: python ast_identity.py BASE_ROOT TIP_ROOT
+"""
+import ast, sys
+from pathlib import Path
+
+def dump(n): return ast.dump(n, include_attributes=False)
+def named(tree):
+    out = {}
+    for n in tree.body:
+        name = getattr(n, "name", None)
+        out[name or dump(n)] = n
+    return out
+base, tip = Path(sys.argv[1]), Path(sys.argv[2])
+fails, checks = [], 0
+B = ast.parse((base / "src/tars/sim/forces.py").read_text()); T = ast.parse((tip / "src/tars/sim/forces.py").read_text())
+bn, tn = named(B), named(T)
+for name in ("ForceModel", "PointMassGravity", "CompositeForceModel", "ZonalJ2Gravity", "_owned_float", "_underflows"):
+    checks += 1
+    if name not in tn or dump(bn[name]) != dump(tn[name]): fails.append(f"forces.{name}")
+tdumps = [dump(n) for n in T.body]
+for n in B.body:  # additive: every BASE statement still present, in order
+    checks += 1
+    if dump(n) not in tdumps: fails.append(f"forces: BASE statement removed/changed: {dump(n)[:80]}")
+order = [tdumps.index(dump(n)) for n in B.body if dump(n) in tdumps]
+checks += 1
+if order != sorted(order): fails.append("forces: BASE statements reordered")
+B = ast.parse((base / "src/tars/sim/simulator.py").read_text()); T = ast.parse((tip / "src/tars/sim/simulator.py").read_text())
+bs = [n for n in B.body if not isinstance(n, ast.Import | ast.ImportFrom)]
+ts = [n for n in T.body if not isinstance(n, ast.Import | ast.ImportFrom)]
+checks += 1
+if len(bs) != len(ts): fails.append("simulator: module-level statement count changed")
+for b, t in zip(bs, ts):
+    if isinstance(b, ast.ClassDef) and b.name == "Simulator":
+        checks += 1
+        if [dump(x) for x in b.decorator_list + b.bases] != [dump(x) for x in t.decorator_list + t.bases] or t.name != b.name:
+            fails.append("simulator: Simulator header changed")
+        bm, tm = named(b), named(t)
+        checks += 1
+        if list(bm) != list(tm): fails.append("simulator: Simulator member set/order changed")
+        for k in bm:
+            if k in ("_derivative", "_powered_derivative"): continue
+            checks += 1
+            if k not in tm or dump(bm[k]) != dump(tm[k]): fails.append(f"simulator.Simulator.{k}")
+    else:
+        checks += 1
+        if dump(b) != dump(t): fails.append(f"simulator: {getattr(b, 'name', dump(b)[:60])}")
+print(f"T-10 AST identity: {checks} checks, {len(fails)} failures")
+for f in fails: print("  FAIL", f)
+sys.exit(1 if fails else 0)

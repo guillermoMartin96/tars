@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.139" timestamp="2026-10-29T21:13:39.116078-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_failure_paths" name="test_t07_g_pointing_law_error_precedes_the_force_model" time="0.002"><failure message="RuntimeError: force">def test_t07_g_pointing_law_error_precedes_the_force_model():
+        sim = Simulator(
+            R0, np.zeros(3), _Raise(RuntimeError("force")), RK4(), 10.0, spacecraft=_spacecraft()
+        )
+        sim.schedule_burn("prograde", 0.0, 5.0)
+        with pytest.raises(
+            ValueError, match=r"^velocity-tracking direction is undefined for zero velocity$"
+        ):
+&gt;           sim.step()
+
+tests/test_s1_failure_paths.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-15/src/tars/sim/simulator.py:507: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-15/src/tars/sim/simulator.py:546: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-15/src/tars/sim/integrators.py:37: in step
+    k1 = f(t, y)
+         ^^^^^^^
+../../mutation/M-15/src/tars/sim/simulator.py:488: in powered
+    f = force_model.acceleration(t, r, v, ForceContext(mass))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-15/src/tars/sim/forces.py:279: in acceleration
+    return self.model.acceleration(t, r, v)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tests.test_s1_failure_paths._Raise object at 0x10d3fc8f0&gt;, t = 0.0
+r = array([6628137.,       0.,       0.]), v = array([0., 0., 0.])
+
+    def acceleration(self, t, r, v):
+&gt;       raise self.exc
+E       RuntimeError: force
+
+tests/test_s1_failure_paths.py:65: RuntimeError</failure></testcase></testsuite></testsuites>

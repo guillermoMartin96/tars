@@ -1,0 +1,44 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_t06_massless_path_carries_absent_mass __________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x102bcf230>
+
+    def test_t06_massless_path_carries_absent_mass(monkeypatch):
+        seen, _ = _run(monkeypatch, {})
+        for ctx in seen:
+            try:
+>               mass = ctx.total_mass_kg
+                       ^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:288: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x102bd20e0>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got 0.0
+
+../../mutation/M-13/src/tars/sim/forces.py:241: ValueError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x102bcf230>
+
+    def test_t06_massless_path_carries_absent_mass(monkeypatch):
+        seen, _ = _run(monkeypatch, {})
+        for ctx in seen:
+            try:
+                mass = ctx.total_mass_kg
+            except ValueError as err:
+>               pytest.fail(f"massless context carries a supplied (invalid) mass: {err}")
+E               Failed: massless context carries a supplied (invalid) mass: total_mass_kg must be finite and positive, got 0.0
+
+tests/test_s1_force_context.py:290: Failed
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t06_massless_path_carries_absent_mass
+1 failed in 0.14s

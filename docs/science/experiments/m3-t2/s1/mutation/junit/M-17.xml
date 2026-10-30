@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.136" timestamp="2026-10-29T21:13:41.357729-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10e920770&gt;
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read(monkeypatch):
+        """I-41: a coast stage of infinite length (dt = +inf) has NaN propellant. Its context
+        is built without raising and its mass is neither repaired nor clamped: reading it
+        raises. The step then fails exactly as at BASE (T-07 (a))."""
+        seen = _record_contexts(monkeypatch)
+        sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), math.inf, spacecraft=_spacecraft())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
+            sim.step()
+        assert len(seen) == 4
+        assert seen[0].total_mass_kg == DRY + PROP
+        rejected = r"^total_mass_kg must be finite and positive, got nan$"
+        for ctx in seen[1:]:
+&gt;           with pytest.raises(ValueError, match=rejected):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:307: Failed</failure></testcase></testsuite></testsuites>

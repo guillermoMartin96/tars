@@ -1,0 +1,139 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_____ test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[1e+308] _____
+
+dt = 1e+308
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.parametrize("dt", [1e308, 8.98846567431158e307])
+    def test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite(dt):
+        sim = _overflowing_tick_end(dt)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 2$"):
+>           sim.step()
+
+tests/test_s1_failure_paths.py:198: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-16/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/simulator.py:545: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/simulator.py:470: in coast
+    ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/forces.py:224: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x11224a9b0>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+../../mutation/M-16/src/tars/sim/forces.py:241: ValueError
+_ test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[8.98846567431158e+307] _
+
+dt = 8.98846567431158e+307
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.parametrize("dt", [1e308, 8.98846567431158e307])
+    def test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite(dt):
+        sim = _overflowing_tick_end(dt)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 2$"):
+>           sim.step()
+
+tests/test_s1_failure_paths.py:198: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-16/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/simulator.py:545: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/simulator.py:470: in coast
+    ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/forces.py:224: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x11233a1a0>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+../../mutation/M-16/src/tars/sim/forces.py:241: ValueError
+____________ test_t07_a_infinite_dt_coast_point_mass_is_non_finite _____________
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t07_a_infinite_dt_coast_point_mass_is_non_finite():
+        sim = Simulator(R0, V0, _pm(), RK4(), math.inf, spacecraft=_spacecraft())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
+>           sim.step()
+
+tests/test_s1_failure_paths.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-16/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/simulator.py:470: in coast
+    ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-16/src/tars/sim/forces.py:224: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x112338bb0>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+../../mutation/M-16/src/tars/sim/forces.py:241: ValueError
+__________ test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2 __________
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2():
+        sim = Simulator(R0, V0, _pm_j2(), RK4(), math.inf, spacecraft=_spacecraft())
+>       with pytest.raises(ValueError, match=r"^position must be finite$"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: 
+E       - total_mass_kg must be finite and positive, got nan
+E       + position must be finite
+
+tests/test_s1_failure_paths.py:95: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s1_failure_paths.py::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[1e+308]
+FAILED tests/test_s1_failure_paths.py::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[8.98846567431158e+307]
+FAILED tests/test_s1_failure_paths.py::test_t07_a_infinite_dt_coast_point_mass_is_non_finite
+FAILED tests/test_s1_failure_paths.py::test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2
+4 failed in 0.20s

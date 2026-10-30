@@ -1,0 +1,81 @@
+#!/bin/bash
+# I-52 Commit D, phase 1: gate evidence for the D directory, recomputed in fresh clones.
+# - red record at Commit B, green record and full suite at Commit C, ruff at C;
+# - T-08 corpora (BASE vs C), T-10 AST identity, T-11 changed paths, validated scenarios;
+# - mutation campaign (25 mutants, A-1) at C.
+# Each gate run gets an I-40 §9 run record produced by the preserved run_record.py (read only).
+# Usage: d_evidence.sh S1_WORKTREE SCRIPTS_DIR OUT_DIR
+set -u
+W=$1; EV=$2; O=$3
+BASE=ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd
+B_SHA=234874b60f7e96c85387df52e63a671d1fe7dcdf
+C_SHA=fed74284119562f59724b270ed5de4f21e734506
+URL=https://github.com/guillermoMartin96/tars.git
+RR=$W/docs/science/experiments/m3-t2/s1/run_record.py
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"/{logs,red_B,green_C,t08,t10_t11,mutation,missions,run_records}; L=$O/logs; C=$O/clones; mkdir -p "$C"
+log() { echo "[$(date -u +%H:%M:%S)] $*" | tee -a "$L/summary.txt"; }
+rr() { (cd "$1" && .venv/bin/python -B "$RR" "$2" "$O/run_records/$3.json" > /dev/null); }  # rr CLONE LABEL NAME
+log "run_record.py sha256 $(shasum -a 256 "$RR" | cut -c1-64)"
+git clone -q "$URL" "$C/base" && git -C "$C/base" checkout -q --detach "$BASE"
+for n in B:$B_SHA C:$C_SHA; do git clone -q --no-local "$W" "$C/${n%%:*}" && git -C "$C/${n%%:*}" checkout -q --detach "${n#*:}"; done
+for c in base B C; do (cd "$C/$c" && uv sync --locked -q); log "clone $c HEAD $(git -C "$C/$c" rev-parse HEAD) status [$(git -C "$C/$c" status --porcelain)]"; done
+
+# Red record at B (I-40 §9a, §12 step 2)
+(cd "$C/B" && .venv/bin/python -B -m pytest -p no:cacheprovider -rA --junitxml="$O/red_B/s1_junit.xml" tests/test_s1_failure_paths.py tests/test_s1_force_context.py > "$O/red_B/s1_output.txt" 2>&1)
+python3 -I -B "$EV/classify_nodes.py" "$O/red_B/s1_junit.xml" > "$O/red_B/s1_classification.txt"
+rr "$C/B" "I-52 D: S1 red record at Commit B (local host)" red_B
+log "red B: $(tail -1 "$O/red_B/s1_output.txt") | $(tail -1 "$O/red_B/s1_classification.txt")"
+
+# Green record at C
+(cd "$C/C" && .venv/bin/python -B -m pytest -p no:cacheprovider -rA --junitxml="$O/green_C/s1_junit.xml" tests/test_s1_failure_paths.py tests/test_s1_force_context.py > "$O/green_C/s1_output.txt" 2>&1)
+python3 -I -B "$EV/classify_nodes.py" "$O/green_C/s1_junit.xml" > "$O/green_C/s1_classification.txt"
+(cd "$C/C" && .venv/bin/ruff check --no-cache . > "$O/green_C/ruff_check.txt" 2>&1; echo "exit=$?" >> "$O/green_C/ruff_check.txt"; .venv/bin/ruff format --no-cache --check . > "$O/green_C/ruff_format.txt" 2>&1; echo "exit=$?" >> "$O/green_C/ruff_format.txt")
+rr "$C/C" "I-52 D: S1 green record, ruff and full suite at Commit C (local host)" green_C
+log "green C: $(tail -1 "$O/green_C/s1_output.txt") | $(tail -1 "$O/green_C/s1_classification.txt") | ruff $(tail -1 "$O/green_C/ruff_check.txt") / format $(tail -1 "$O/green_C/ruff_format.txt")"
+(cd "$C/C" && .venv/bin/python -B -m pytest -p no:cacheprovider -q --junitxml="$O/green_C/full_suite_junit.xml" > "$O/green_C/full_suite_output.txt" 2>&1) &
+SUITE=$!
+
+# Mutation campaign at C (I-40 §10 + A-1 §3)
+(cd "$C/C" && .venv/bin/python -B "$EV/mutate.py" "$C/C" "$O/mutation" > "$O/mutation/mutation_summary.txt" 2>&1); log "mutate exit=$?"
+rr "$C/C" "I-52 D: mutation campaign at Commit C (local host)" mutation
+cat "$O/mutation/mutation_summary.txt" >> "$L/summary.txt"
+
+# T-08 corpora, BASE vs C
+for t in base C; do
+  (cd "$C/C" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$EV/harness.py" "$O/t08/main_$t.jsonl" > "$L/harness_$t.log" 2>&1)
+  (cd "$C/C" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$EV/harness_writers.py" "$O/t08/writers_$t.jsonl" > "$L/writers_$t.log" 2>&1)
+  (cd "$C/C" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$EV/harness_integrators.py" "$O/t08/integrators_$t.jsonl" > "$L/integrators_$t.log" 2>&1)
+done
+(cd "$O/t08" && shasum -a 256 main_base.jsonl main_C.jsonl writers_base.jsonl writers_C.jsonl integrators_base.jsonl integrators_C.jsonl) > "$O/t08/corpus_hashes.txt"
+"$C/C/.venv/bin/python" -B - "$O/t08" <<'PY' > "$O/t08/corpus_compare.txt"
+import json, sys
+d = sys.argv[1]
+ld = lambda f: [json.loads(l) for l in open(f"{d}/{f}")][1:]
+for name in ("main", "writers"):
+    b, c = ld(f"{name}_base.jsonl"), ld(f"{name}_C.jsonl")
+    print(f"{name} corpus cases BASE {len(b)} C {len(c)}; C differing from BASE: {sum(x != y for x, y in zip(b, c))}")
+PY
+"$C/C/.venv/bin/python" -B "$EV/compare_integrators.py" "$O/t08/integrators_base.jsonl" "$O/t08/integrators_C.jsonl" > "$O/t08/integrator_corpus_compare.txt" 2>&1
+rr "$C/C" "I-52 D: T-08 corpora BASE vs Commit C (local host)" t08
+cat "$O/t08/corpus_hashes.txt" "$O/t08/corpus_compare.txt" >> "$L/summary.txt"; grep -E "^(rows|integrators_C)" "$O/t08/integrator_corpus_compare.txt" | tee -a "$L/summary.txt"
+
+# T-10, T-11
+(cd "$C/C" && .venv/bin/python -B "$EV/ast_identity.py" "$C/base" "$C/C" > "$O/t10_t11/ast_identity.txt" 2>&1); log "T-10 exit=$? $(tail -1 "$O/t10_t11/ast_identity.txt")"
+{ echo "git diff --name-only BASE..C ($BASE..$C_SHA):"; git -C "$C/C" diff --name-only "$BASE" "$C_SHA"
+  echo; echo "per commit:"; for r in abcf7553ed58138db15493044c0f34429b643286 $B_SHA $C_SHA; do echo "$r: $(git -C "$C/C" diff --name-only "$r^" "$r" | tr '\n' ' ')"; done
+  echo; echo "protected paths changed BASE..C (pyproject.toml uv.lock .python-version .github proof toolbox scenarios, docs outside the two allowlisted locations, other src):"
+  git -C "$C/C" diff --name-only "$BASE" "$C_SHA" -- pyproject.toml uv.lock .python-version .github proof toolbox scenarios docs src | grep -v -E '^(src/tars/sim/forces.py|src/tars/sim/simulator.py|docs/science/experiments/m3-t2/s1/.*|docs/milestones/M3-T2-report.md)$' || echo "(none)"; } > "$O/t10_t11/t11_changed_paths.txt"
+rr "$C/C" "I-52 D: T-10 and T-11 at Commit C (local host)" t10_t11
+log "T-11: $(sed -n 2,6p "$O/t10_t11/t11_changed_paths.txt" | tr '\n' ' ')"
+
+# Validated scenarios, BASE vs C
+for t in base C; do for s in "$C/base"/scenarios/*.json; do b=$(basename "$s" .json)
+  (cd "$C/$t" && .venv/bin/python -B toolbox/scripts/run_mission.py --scenario "scenarios/$b.json" --out "$O/missions/$t/$b" > "$O/missions/$t-$b.stdout" 2>&1); done; done
+diff -r "$O/missions/base" "$O/missions/C" > /dev/null && log "missions: output trees identical ($(find "$O/missions/base" -type f | wc -l | tr -d ' ') files)" || log "missions: DIFFER"
+(cd "$O/missions" && find base C -type f | sort | xargs shasum -a 256) > "$O/missions/missions.sha256"
+
+wait $SUITE
+log "full suite at C: $(tail -1 "$O/green_C/full_suite_output.txt")"
+for c in base B C; do log "clone $c tracked changes after runs: [$(git -C "$C/$c" status --porcelain --untracked-files=no)]"; done
+log DONE

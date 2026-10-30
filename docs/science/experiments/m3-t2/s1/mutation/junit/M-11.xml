@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="5" time="0.206" timestamp="2026-10-29T21:13:34.631376-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t01_b_mass_is_an_owned_builtin_float[1300]" time="0.001"><failure message="AssertionError: assert &lt;class 'int'&gt; is float&#10; +  where &lt;class 'int'&gt; = type(1300)&#10; +    where 1300 = &lt;tars.sim.forces.ForceContext object at 0x103366650&gt;.total_mass_kg">mass = 1300
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'int'&gt; is float
+E            +  where &lt;class 'int'&gt; = type(1300)
+E            +    where 1300 = &lt;tars.sim.forces.ForceContext object at 0x103366650&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_b_mass_is_an_owned_builtin_float[1300.0]" time="0.001"><failure message="AssertionError: assert &lt;class 'numpy.float64'&gt; is float&#10; +  where &lt;class 'numpy.float64'&gt; = type(np.float64(1300.0))&#10; +    where np.float64(1300.0) = &lt;tars.sim.forces.ForceContext object at 0x104168730&gt;.total_mass_kg">mass = np.float64(1300.0)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'numpy.float64'&gt; is float
+E            +  where &lt;class 'numpy.float64'&gt; = type(np.float64(1300.0))
+E            +    where np.float64(1300.0) = &lt;tars.sim.forces.ForceContext object at 0x104168730&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_b_mass_is_an_owned_builtin_float[mass2]" time="0.001"><failure message="AssertionError: assert &lt;class 'numpy.float32'&gt; is float&#10; +  where &lt;class 'numpy.float32'&gt; = type(np.float32(1300.0))&#10; +    where np.float32(1300.0) = &lt;tars.sim.forces.ForceContext object at 0x104168be0&gt;.total_mass_kg">mass = np.float32(1300.0)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'numpy.float32'&gt; is float
+E            +  where &lt;class 'numpy.float32'&gt; = type(np.float32(1300.0))
+E            +    where np.float32(1300.0) = &lt;tars.sim.forces.ForceContext object at 0x104168be0&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_b_mass_is_an_owned_builtin_float[mass3]" time="0.001"><failure message="AssertionError: assert &lt;class 'numpy.int64'&gt; is float&#10; +  where &lt;class 'numpy.int64'&gt; = type(np.int64(1300))&#10; +    where np.int64(1300) = &lt;tars.sim.forces.ForceContext object at 0x104166830&gt;.total_mass_kg">mass = np.int64(1300)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'numpy.int64'&gt; is float
+E            +  where &lt;class 'numpy.int64'&gt; = type(np.int64(1300))
+E            +    where np.int64(1300) = &lt;tars.sim.forces.ForceContext object at 0x104166830&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t01_b_mass_is_an_owned_builtin_float[mass4]" time="0.001"><failure message="AssertionError: assert &lt;class 'numpy.ndarray'&gt; is float&#10; +  where &lt;class 'numpy.ndarray'&gt; = type(array(1300.))&#10; +    where array(1300.) = &lt;tars.sim.forces.ForceContext object at 0x10404e3b0&gt;.total_mass_kg">mass = array(1300.)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'numpy.ndarray'&gt; is float
+E            +  where &lt;class 'numpy.ndarray'&gt; = type(array(1300.))
+E            +    where array(1300.) = &lt;tars.sim.forces.ForceContext object at 0x10404e3b0&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError</failure></testcase></testsuite></testsuites>

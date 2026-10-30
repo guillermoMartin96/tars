@@ -1,0 +1,27 @@
+"""Classify S1 per-node red results from JUnit XML. Usage: python3 -I -B classify_red.py junit.xml"""
+import collections
+import re
+import sys
+import xml.etree.ElementTree as ET
+
+rows, bad = [], []
+for tc in ET.parse(sys.argv[1]).iter("testcase"):
+    node = tc.get("classname").split(".")[-1] + "::" + tc.get("name")
+    f, e, s = tc.find("failure"), tc.find("error"), tc.find("skipped")
+    if e is not None or s is not None:
+        bad.append(node); rows.append((node, "ERROR/SKIP", "")); continue
+    if f is None:
+        rows.append((node, "PASS", "")); continue
+    msg = f.get("message", "")
+    m = re.match(r"AttributeError: module 'tars\.sim\.forces' has no attribute '(\w+)'$", msg)
+    where = re.findall(r"^(tests/test_s1_force_context\.py):(\d+): AttributeError", f.text or "", re.M)
+    rows.append((node, "RED:AttributeError:" + m.group(1) if m else "OTHER:" + msg, where[-1][1] if where else "?"))
+    if not m:
+        bad.append(node)
+for r in rows:
+    print("\t".join(r))
+c = collections.Counter((r[0].split("::")[0], r[1]) for r in rows)
+print("\nSUMMARY")
+for k, v in sorted(c.items()):
+    print(v, *k)
+print("nodes", len(rows), "not-as-declared", len(bad), bad)

@@ -1,0 +1,89 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+__ test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[1000.0] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bcfe450>
+dry = 1000.0
+
+    @pytest.mark.parametrize("dry", [DRY, 1e-3])
+    def test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly(monkeypatch, dry):
+        """U-3. At dry = 1e-3 kg, dry - 1e-17 is a different binary64, so the clamp is observable;
+        at 1000 kg the subtraction rounds back to 1000 (both are pinned)."""
+        assert (dry - 1e-17 != dry) is (dry == 1e-3)
+        seen = _record_contexts(monkeypatch)
+        craft = SpacecraftSpec(dry_mass_kg=dry, engine=ENGINE, tank=TankSpec(propellant_kg=PROP))
+        sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), 10.0, spacecraft=craft)
+        for law in (None, "burn"):
+            y = np.concatenate([R0, V0, [-1e-17, 0.0]])
+            burn = None
+            if law == "burn":
+                sim.schedule_burn("prograde", 0.0, 5.0)
+                burn = sim._pending[0]
+            seen.clear()
+            sim._powered_derivative(burn)(0.0, y)
+            (ctx,) = seen
+>           assert ctx.total_mass_kg.hex() == dry.hex()
+E           AssertionError: assert '0x1.4500000000000p+10' == '0x1.f400000000000p+9'
+E             
+E             - 0x1.f400000000000p+9
+E             ?     -              ^
+E             + 0x1.4500000000000p+10
+E             ?      +             ^^
+
+tests/test_s1_force_context.py:281: AssertionError
+___ test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bde8110>
+dry = 0.001
+
+    @pytest.mark.parametrize("dry", [DRY, 1e-3])
+    def test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly(monkeypatch, dry):
+        """U-3. At dry = 1e-3 kg, dry - 1e-17 is a different binary64, so the clamp is observable;
+        at 1000 kg the subtraction rounds back to 1000 (both are pinned)."""
+        assert (dry - 1e-17 != dry) is (dry == 1e-3)
+        seen = _record_contexts(monkeypatch)
+        craft = SpacecraftSpec(dry_mass_kg=dry, engine=ENGINE, tank=TankSpec(propellant_kg=PROP))
+        sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), 10.0, spacecraft=craft)
+        for law in (None, "burn"):
+            y = np.concatenate([R0, V0, [-1e-17, 0.0]])
+            burn = None
+            if law == "burn":
+                sim.schedule_burn("prograde", 0.0, 5.0)
+                burn = sim._pending[0]
+            seen.clear()
+            sim._powered_derivative(burn)(0.0, y)
+            (ctx,) = seen
+>           assert ctx.total_mass_kg.hex() == dry.hex()
+E           AssertionError: assert '0x1.2c004189374bcp+8' == '0x1.0624dd2f1a9fcp-10'
+E             
+E             - 0x1.0624dd2f1a9fcp-10
+E             + 0x1.2c004189374bcp+8
+
+tests/test_s1_force_context.py:281: AssertionError
+______ test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read _______
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10bdec740>
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read(monkeypatch):
+        """I-41: a coast stage of infinite length (dt = +inf) has NaN propellant. Its context
+        is built without raising and its mass is neither repaired nor clamped: reading it
+        raises. The step then fails exactly as at BASE (T-07 (a))."""
+        seen = _record_contexts(monkeypatch)
+        sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), math.inf, spacecraft=_spacecraft())
+        with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
+            sim.step()
+        assert len(seen) == 4
+        assert seen[0].total_mass_kg == DRY + PROP
+        rejected = r"^total_mass_kg must be finite and positive, got nan$"
+        for ctx in seen[1:]:
+>           with pytest.raises(ValueError, match=rejected):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE ValueError
+
+tests/test_s1_force_context.py:307: Failed
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[1000.0]
+FAILED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001]
+FAILED tests/test_s1_force_context.py::test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read
+3 failed in 0.16s

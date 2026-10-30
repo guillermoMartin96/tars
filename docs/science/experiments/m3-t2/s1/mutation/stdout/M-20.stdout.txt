@@ -1,0 +1,207 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[masked_propellant] _
+
+wrap = <function _masked_propellant at 0x106ed7600>
+
+    @pytest.mark.parametrize(
+        "wrap", [_masked_propellant, _raising_getitem], ids=["masked_propellant", "raising_getitem"]
+    )
+    def test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass(wrap):
+        """Review R-02 (I-44): BASE's coast closure never indexes the stage propellant, so a
+        custom integrator's float64 subclass stage commits with no warning. It still does, with
+        warnings raised as errors, and the committed state equals the unwrapped integrator's."""
+        craft = _spacecraft()
+        plain = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(np.asarray), 0.5, spacecraft=craft)
+        plain.step()
+        sim = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(wrap), 0.5, spacecraft=craft)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+>           sim.step()
+
+tests/test_s1_failure_paths.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-20/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-20/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_s1_failure_paths.py:270: in step
+    return y + dt * np.asarray(f(t, self.wrap(y.copy())), dtype=float)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-20/src/tars/sim/simulator.py:469: in coast
+    prop = float(y[_PROP])
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = masked
+
+    def __float__(self):
+        """
+        Convert to float.
+    
+        """
+        if self.size > 1:
+            raise TypeError("Only length-1 arrays can be converted "
+                            "to Python scalars")
+        elif self._mask:
+>           warnings.warn("Warning: converting a masked element to nan.", stacklevel=2)
+E           UserWarning: Warning: converting a masked element to nan.
+
+.venv/lib/python3.12/site-packages/numpy/ma/core.py:4528: UserWarning
+_ test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[raising_getitem] _
+
+wrap = <function _raising_getitem at 0x106ed7740>
+
+    @pytest.mark.parametrize(
+        "wrap", [_masked_propellant, _raising_getitem], ids=["masked_propellant", "raising_getitem"]
+    )
+    def test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass(wrap):
+        """Review R-02 (I-44): BASE's coast closure never indexes the stage propellant, so a
+        custom integrator's float64 subclass stage commits with no warning. It still does, with
+        warnings raised as errors, and the committed state equals the unwrapped integrator's."""
+        craft = _spacecraft()
+        plain = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(np.asarray), 0.5, spacecraft=craft)
+        plain.step()
+        sim = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(wrap), 0.5, spacecraft=craft)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+>           sim.step()
+
+tests/test_s1_failure_paths.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-20/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-20/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_s1_failure_paths.py:270: in step
+    return y + dt * np.asarray(f(t, self.wrap(y.copy())), dtype=float)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-20/src/tars/sim/simulator.py:469: in coast
+    prop = float(y[_PROP])
+                 ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = _RaisingGetitem([6.62813700e+06, 0.00000000e+00, 0.00000000e+00,
+                 0.00000000e+00, 4.81690507e+03, 6.07742168e+03,
+                 3.00000000e+02, 0.00000000e+00])
+key = 6
+
+    def __getitem__(self, key):
+        if key == 6:
+>           raise LookupError("stage propellant read through the subclass")
+E           LookupError: stage propellant read through the subclass
+
+tests/test_s1_failure_paths.py:249: LookupError
+_ test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106e40a70>
+wrap = <function <lambda> at 0x106f79a80>
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+        seen = _record_contexts(monkeypatch)
+    
+        class _Wrapping:
+            name, order = "euler_wrapped", 1
+    
+            def step(self, f, t, y, dt):
+                return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+    
+        Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft()).step()
+        ((ctx,),) = (seen,)
+>       assert ctx.total_mass_kg.hex() == (DRY + PROP).hex()
+               ^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <tars.sim.forces.ForceContext object at 0x106e42410>
+
+    @property
+    def total_mass_kg(self) -> float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass > 0.0):
+>           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+../../mutation/M-20/src/tars/sim/forces.py:241: ValueError
+_ test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem] _
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x106e428d0>
+wrap = <function <lambda> at 0x106f79bc0>
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+        seen = _record_contexts(monkeypatch)
+    
+        class _Wrapping:
+            name, order = "euler_wrapped", 1
+    
+            def step(self, f, t, y, dt):
+                return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+    
+>       Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft()).step()
+
+tests/test_s1_force_context.py:429: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../mutation/M-20/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-20/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_s1_force_context.py:427: in step
+    return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+                               ^^^^^^^^^^^^^^^^^^^^
+../../mutation/M-20/src/tars/sim/simulator.py:469: in coast
+    prop = float(y[_PROP])
+                 ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = _RaisingGetitem([6.62813700e+06, 0.00000000e+00, 0.00000000e+00,
+                 0.00000000e+00, 4.81690507e+03, 6.07742168e+03,
+                 3.00000000e+02, 0.00000000e+00])
+key = 6
+
+    def __getitem__(self, key):
+        if key == 6:
+>           raise LookupError("stage propellant read through the subclass")
+E           LookupError: stage propellant read through the subclass
+
+tests/test_s1_force_context.py:405: LookupError
+=============================== warnings summary ===============================
+tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]
+  $SCRATCH/mutation/M-20/src/tars/sim/simulator.py:469: UserWarning: Warning: converting a masked element to nan.
+    prop = float(y[_PROP])
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_s1_failure_paths.py::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[masked_propellant]
+FAILED tests/test_s1_failure_paths.py::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[raising_getitem]
+FAILED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]
+FAILED tests/test_s1_force_context.py::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem]
+4 failed, 1 warning in 0.37s

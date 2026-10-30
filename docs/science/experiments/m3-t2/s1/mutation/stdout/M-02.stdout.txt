@@ -1,0 +1,92 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload0] _
+
+payload = array([ 1.e+000, -0.e+000,  5.e-324])
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+        assert len(model.calls) == 1
+        (ct, cr, cv) = model.calls[0]
+>       assert ct is t and cr is r and cv is v
+E       assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) is array([7000000.,       0.,      -0.]))
+
+tests/test_s1_force_context.py:144: AssertionError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload1] _
+
+payload = array([     nan,      inf, -1.e+308])
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+        assert len(model.calls) == 1
+        (ct, cr, cv) = model.calls[0]
+>       assert ct is t and cr is r and cv is v
+E       assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) is array([7000000.,       0.,      -0.]))
+
+tests/test_s1_force_context.py:144: AssertionError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[not an array] _
+
+payload = 'not an array'
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+        assert len(model.calls) == 1
+        (ct, cr, cv) = model.calls[0]
+>       assert ct is t and cr is r and cv is v
+E       assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) is array([7000000.,       0.,      -0.]))
+
+tests/test_s1_force_context.py:144: AssertionError
+_ test_t02_adapter_passes_identical_objects_once_and_returns_the_result[None] __
+
+payload = None
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+        assert len(model.calls) == 1
+        (ct, cr, cv) = model.calls[0]
+>       assert ct is t and cr is r and cv is v
+E       assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) is array([7000000.,       0.,      -0.]))
+
+tests/test_s1_force_context.py:144: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload0]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload1]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[not an array]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_passes_identical_objects_once_and_returns_the_result[None]
+4 failed in 0.17s

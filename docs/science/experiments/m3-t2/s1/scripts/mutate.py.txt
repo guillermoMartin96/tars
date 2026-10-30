@@ -1,0 +1,150 @@
+"""I-52 Commit D mutation campaign: the pinned I-44 campaign (s1-v3/mutate.py.txt, PC-7(S1) §10,
+I-41 coast mutants, I-44 R-02 / U-1 snapshot mutants) plus M-22 (plan amendment A-1 §3).
+Usage: mutate.py TREE_ROOT OUT_DIR, where TREE_ROOT is a fresh clone at Commit C with .venv synced.
+
+Changes from the pinned script: M-22 added; for M-22 every designated node must fail (A-1 §3);
+the report also records each mutant's exact edits and the pytest exit status.
+
+Each mutant: copy the prototype src, apply exact replacements (each anchor must occur exactly
+once), run the designated test nodes against it (PYTHONPATH), record JUnit. A mutant is
+KILLED only if at least one designated node fails and every failure message matches the
+mutant's declared reason (assertion-type failures, or for T-07-type pins the propagated
+exception of the declared changed type). Otherwise it is reported as SURVIVED or
+KILLED_WRONG_REASON. M-19 is expected to survive (documented equivalent).
+"""
+
+import json
+import re
+import shutil
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+PROTO, OUT = Path(sys.argv[1]), Path(sys.argv[2])
+F, SIM = "src/tars/sim/forces.py", "src/tars/sim/simulator.py"
+FC, FP = "tests/test_s1_force_context.py", "tests/test_s1_failure_paths.py"
+ADAPT = "        return self.model.acceleration(t, r, v)\n"
+PW = "            a = force_model.acceleration(t, r, v, ForceContext(mass)) + thrust\n"
+PROPLINE = "                prop = float(np.ndarray.__getitem__(y, _PROP))\n"
+COAST = "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(prop, 0.0))\n"
+ASSERT = r"^(AssertionError|assert |Failed: DID NOT RAISE)"
+T02 = f"{FC}::test_t02_adapter_passes_identical_objects_once_and_returns_the_result"
+T0405 = f"{FC}::test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit"
+ROUND = f"{FC}::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly"
+INVAL = f"{FC}::test_t04_invalid_coast_stage_mass_is_carried_and_rejected_on_read"
+SNAP = f"{FC}::test_t04_coast_context_is_an_owned_snapshot_of_the_stage_mass"
+ALIVE = f"{FC}::test_t04_coast_context_does_not_keep_the_stage_alive"
+STORED = f"{FC}::test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage"
+PSNAP = f"{FC}::test_t04_powered_context_is_an_owned_snapshot_of_the_stage_mass"
+PALIVE = f"{FC}::test_t04_powered_context_does_not_keep_the_stage_alive"
+T07L = f"{FP}::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass"
+
+# v3-L's ForceContext.lazy (I-43 v3L-vs-v2.patch), used by the lazy mutants M-21 / M-21b.
+LAZY_FORCES = [
+    (F, "from collections.abc import Sequence\n", "from collections.abc import Callable, Sequence\n"),
+    (F, '    __slots__ = ("_mass",)\n', '    __slots__ = ("_mass", "_source")\n'),
+    (F, "        self._store(total_mass_kg)\n        self.total_mass_kg  # noqa: B018 - validates now (option A)\n",
+     '        object.__setattr__(self, "_source", None)\n        self._store(total_mass_kg)\n        self.total_mass_kg  # noqa: B018 - validates now (option A)\n'),
+    (F, "        ctx = cls.__new__(cls)\n        ctx._store(total_mass_kg)\n        return ctx\n",
+     '        ctx = cls.__new__(cls)\n        object.__setattr__(ctx, "_source", None)\n        ctx._store(total_mass_kg)\n        return ctx\n\n'
+     "    @classmethod\n    def lazy(cls, source):\n        ctx = cls.__new__(cls)\n"
+     '        object.__setattr__(ctx, "_source", source)\n        object.__setattr__(ctx, "_mass", None)\n        return ctx\n'),
+    (F, "        mass = self._mass\n        if mass is not None and not",
+     '        mass = self._mass if self._source is None else _owned_float("total_mass_kg", self._source())\n        if mass is not None and not'),
+]
+
+M = [
+    ("M-01 adapter copies r", [(F, ADAPT, "        return self.model.acceleration(t, np.array(r), v)\n")], [T02], ASSERT),
+    ("M-02 adapter swaps r and v", [(F, ADAPT, "        return self.model.acceleration(t, v, r)\n")], [T02], ASSERT),
+    ("M-03 adapter copies the result", [(F, ADAPT, "        return np.array(self.model.acceleration(t, r, v))\n")], [T02], ASSERT),
+    ("M-04 adapter calls twice", [(F, ADAPT, "        self.model.acceleration(t, r, v)\n" + ADAPT)], [T02], ASSERT),
+    ("M-05 adapter wraps exceptions", [(F, ADAPT, "        try:\n            return self.model.acceleration(t, r, v)\n        except Exception as err:\n            raise RuntimeError(str(err)) from err\n")],
+     [f"{FC}::test_t02_adapter_propagates_the_identical_exception"], r"^RuntimeError"),
+    ("M-06 powered context from committed state", [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext(spacecraft.dry_mass_kg + max(float(self._y[_PROP]), 0.0))) + thrust\n")], [T0405], ASSERT),
+    ("M-06c coast context from committed state", [(SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(float(self._y[_PROP]), 0.0))\n")], [ROUND, INVAL], ASSERT),
+    ("M-07 powered dry mass only", [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext(spacecraft.dry_mass_kg)) + thrust\n")], [T0405], ASSERT),
+    ("M-07c coast dry mass only", [(SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg)\n")], [T0405], ASSERT),
+    ("M-08 coast no clamp", [(SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + prop)\n")], [ROUND], ASSERT),
+    ("M-09 powered context cached per sub-step", [
+        (SIM, PW, "            if not cache:\n                cache.append(ForceContext(mass))\n            a = force_model.acceleration(t, r, v, cache[0]) + thrust\n"),
+        (SIM, "        engine, law, mdot = spacecraft.engine, burn.law, burn.plan.mass_flow_kgps\n", "        engine, law, mdot = spacecraft.engine, burn.law, burn.plan.mass_flow_kgps\n        cache = []\n")], [T0405], ASSERT),
+    ("M-10 mutable context", [(F, '        raise AttributeError(f"ForceContext is immutable: cannot set {name!r}")\n', "        object.__setattr__(self, name, value)\n")], [f"{FC}::test_t01_a_context_is_immutable"], ASSERT),
+    ("M-11 unowned mass (np.float64 kept)", [(F, '        mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)\n', "        mass = total_mass_kg\n")], [f"{FC}::test_t01_b_mass_is_an_owned_builtin_float"], ASSERT),
+    ("M-12 validation removed", [(F, "        if mass is not None and not (math.isfinite(mass) and mass > 0.0):\n", "        if False:\n")],
+     [f"{FC}::test_t01_c_invalid_mass_is_rejected_at_construction", f"{FC}::test_t01_c_deferred_invalid_mass_is_rejected_when_read"], ASSERT),
+    ("M-13 massless path gets 0.0", [(SIM, "        return np.concatenate([v, model.acceleration(t, r, v, ForceContext())])\n", "        return np.concatenate([v, model.acceleration(t, r, v, ForceContext.deferred(0.0))])\n")],
+     [f"{FC}::test_t06_massless_path_carries_absent_mass"], r"^Failed: massless context"),
+    ("M-14 powered context before the finiteness check", [
+        (SIM, "            if not np.all(np.isfinite(y)):\n", "            early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))\n            if not np.all(np.isfinite(y)):\n"),
+        (SIM, PW, "            a = force_model.acceleration(t, r, v, early) + thrust\n")],
+     [f"{FP}::test_t07_k_finiteness_check_precedes_powered_context_construction"], r"^ValueError: total_mass_kg must be finite and positive"),
+    ("M-15 force call before thrust_acceleration", [(SIM, "            thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)\n" + PW,
+        "            f = force_model.acceleration(t, r, v, ForceContext(mass))\n            thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)\n            a = f + thrust\n")],
+     [f"{FP}::test_t07_g_pointing_law_error_precedes_the_force_model"], r"^RuntimeError: force"),
+    ("M-16 coast validates at construction (option A)", [(SIM, COAST, "                ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))\n")],
+     [f"{FP}::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite", f"{FP}::test_t07_a_infinite_dt_coast_point_mass_is_non_finite", f"{FP}::test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2"],
+     ASSERT + r"|^ValueError: total_mass_kg must be finite and positive"),
+    ("M-17 coast repairs NaN (max argument order swapped)", [(SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(0.0, prop))\n")], [INVAL], ASSERT),
+    ("M-18 coast passes absent mass", [(SIM, COAST, "                ctx = ForceContext()\n")], [T0405], ASSERT),
+    ("M-19 powered context deferred (expected equivalent)", [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext.deferred(mass)) + thrust\n")], [FC, FP], None),
+    # I-44 (R-02 / U-1)
+    ("M-20 premature subclass-sensitive coast read (v2)", [(SIM, PROPLINE, "                prop = float(y[_PROP])\n")], [T07L, STORED],
+     r"^(UserWarning: Warning: converting a masked element to nan|LookupError: stage propellant read through the subclass"
+     r"|ValueError: total_mass_kg must be finite and positive, got nan)"),
+    ("M-21 lazy stage reference, dispatching read (v3-L)", LAZY_FORCES + [(SIM, PROPLINE + COAST, "                ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))\n")], [SNAP, ALIVE], ASSERT),
+    ("M-21b lazy stage reference, base-class read", LAZY_FORCES + [(SIM, PROPLINE + COAST, "                ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(np.ndarray.__getitem__(y, _PROP)), 0.0))\n")], [SNAP, ALIVE], ASSERT),
+    # A-1 §3 (I-46 D2): powered lazy stage reference; every designated node must fail
+    ("M-22 powered lazy stage reference (v3-L machinery, powered path only)", LAZY_FORCES + [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))) + thrust\n")], [PSNAP, PALIVE], ASSERT),
+]
+ALL_MUST_FAIL = {"M-22"}
+
+
+def run(tag, src, nodes):
+    xml = OUT / f"{tag}.xml"
+    env = {"PYTHONPATH": str(src), "PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin"}
+    proc = subprocess.run([str(PROTO / ".venv/bin/python"), "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}", *nodes],
+                          cwd=PROTO, env=env, capture_output=True, text=True)
+    (OUT / f"{tag}.stdout.txt").write_text(proc.stdout + proc.stderr)
+    exits[tag] = proc.returncode
+    res = []
+    for tc in ET.parse(xml).getroot().iter("testcase"):
+        f = tc.find("failure") if tc.find("failure") is not None else tc.find("error")
+        res.append({"node": tc.get("name"), "status": "pass" if f is None else ("error" if tc.find("error") is not None else "fail"),
+                    "message": None if f is None else (f.get("message") or "")[:200]})
+    return res
+
+
+OUT.mkdir(parents=True, exist_ok=True)
+exits = {}
+report = {"control": run("control", PROTO / "src", sorted({n for m in M for n in m[2]}))}
+assert all(r["status"] == "pass" for r in report["control"]), report["control"]
+print(f"control: {len(report['control'])} nodes pass")
+for mid, edits, nodes, reason in M:
+    tag = mid.split()[0]
+    d = OUT / tag / "src"
+    if d.exists():
+        shutil.rmtree(d)
+    shutil.copytree(PROTO / "src", d)
+    for path, old, new in edits:
+        p = d / path.removeprefix("src/")
+        s = p.read_text()
+        assert s.count(old) == 1, (mid, old)
+        p.write_text(s.replace(old, new))
+    res = run(tag, d, nodes)
+    fails = [r for r in res if r["status"] != "pass"]
+    if reason is None:
+        verdict = "SURVIVED (expected equivalent)" if not fails else "KILLED (expected equivalent!)"
+    elif not fails:
+        verdict = "SURVIVED"
+    elif tag in ALL_MUST_FAIL and len(fails) != len(res):
+        verdict = "NOT_ALL_DESIGNATED_FAILED"
+    else:
+        verdict = "KILLED" if all(re.search(reason, f["message"] or "") for f in fails) else "KILLED_WRONG_REASON"
+    report[mid] = {"nodes": nodes, "reason": reason, "verdict": verdict, "failed": len(fails), "total": len(res),
+                   "pytest_exit": exits[tag], "edits": [{"path": p, "old": o, "new": n} for p, o, n in edits],
+                   "results": res, "failures": fails}
+    msgs = "; ".join(sorted({(f["message"] or "")[:60].replace("\n", " ") for f in fails}))
+    print(f"{mid:62s} {verdict:30s} {len(fails):3d}/{len(res):3d}  {msgs[:200]}")
+report["control_pytest_exit"] = exits["control"]
+(OUT / "mutation_results.json").write_text(json.dumps(report, indent=1))

@@ -1,0 +1,84 @@
+FFFFF                                                                    [100%]
+=================================== FAILURES ===================================
+_______________ test_t01_b_mass_is_an_owned_builtin_float[1300] ________________
+
+mass = 1300
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+>           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert <class 'int'> is float
+E            +  where <class 'int'> = type(1300)
+E            +    where 1300 = <tars.sim.forces.ForceContext object at 0x103366650>.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError
+______________ test_t01_b_mass_is_an_owned_builtin_float[1300.0] _______________
+
+mass = np.float64(1300.0)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+>           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert <class 'numpy.float64'> is float
+E            +  where <class 'numpy.float64'> = type(np.float64(1300.0))
+E            +    where np.float64(1300.0) = <tars.sim.forces.ForceContext object at 0x104168730>.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[mass2] _______________
+
+mass = np.float32(1300.0)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+>           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert <class 'numpy.float32'> is float
+E            +  where <class 'numpy.float32'> = type(np.float32(1300.0))
+E            +    where np.float32(1300.0) = <tars.sim.forces.ForceContext object at 0x104168be0>.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[mass3] _______________
+
+mass = np.int64(1300)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+>           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert <class 'numpy.int64'> is float
+E            +  where <class 'numpy.int64'> = type(np.int64(1300))
+E            +    where np.int64(1300) = <tars.sim.forces.ForceContext object at 0x104166830>.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError
+_______________ test_t01_b_mass_is_an_owned_builtin_float[mass4] _______________
+
+mass = array(1300.)
+
+    @pytest.mark.parametrize(
+        "mass", [1300, np.float64(1300.0), np.float32(1300.0), np.int64(1300), np.array(1300.0)]
+    )
+    def test_t01_b_mass_is_an_owned_builtin_float(mass):
+        for ctx in (forces.ForceContext(mass), forces.ForceContext.deferred(mass)):
+>           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert <class 'numpy.ndarray'> is float
+E            +  where <class 'numpy.ndarray'> = type(array(1300.))
+E            +    where array(1300.) = <tars.sim.forces.ForceContext object at 0x10404e3b0>.total_mass_kg
+
+tests/test_s1_force_context.py:65: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[1300]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[1300.0]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass2]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass3]
+FAILED tests/test_s1_force_context.py::test_t01_b_mass_is_an_owned_builtin_float[mass4]
+5 failed in 0.21s

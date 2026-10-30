@@ -1,0 +1,51 @@
+[04:12:58] run_record.py sha256 435a2b7ef66f0d73bb7bee60f92f07247ab5a823cfb39dbe95481746db347353
+[04:13:11] clone base HEAD ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd status []
+[04:13:12] clone B HEAD 234874b60f7e96c85387df52e63a671d1fe7dcdf status []
+[04:13:12] clone C HEAD fed74284119562f59724b270ed5de4f21e734506 status []
+[04:13:15] red B: ======================== 61 failed, 29 passed in 0.90s ========================= | nodes 90 not-as-declared 0 []
+[04:13:19] green C: ============================== 90 passed in 0.40s ============================== | nodes 90 not-as-declared 0 [] | ruff exit=0 / format exit=0
+[04:13:48] mutate exit=0
+control: 90 nodes pass
+M-01 adapter copies r                                          KILLED                           4/  4  assert (-0.0 is -0.0 and array([7000000.,       0.,      -0.
+M-02 adapter swaps r and v                                     KILLED                           4/  4  assert (-0.0 is -0.0 and array([5.e-324,     nan, 1.e+000]) 
+M-03 adapter copies the result                                 KILLED                           4/  4  AssertionError: assert array('not an array', dtype='<U12') i; assert array(None, dtype=object) is None; assert array([     nan,      inf, -1.e+308]) is array([     ; assert array([ 1.e+000, -0.e+000, 
+M-04 adapter calls twice                                       KILLED                           4/  4  assert 2 == 1  +  where 2 = len([(-0.0, array([7000000.,    
+M-05 adapter wraps exceptions                                  KILLED                           4/  5  RuntimeError: x
+M-06 powered context from committed state                      KILLED                           3/  4  AssertionError: assert '0x1.4500000000000p+10' == '0x1.44ccc; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44e66; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44eb8
+M-06c coast context from committed state                       KILLED                           3/  3  AssertionError: assert '0x1.2c004189374bcp+8' == '0x1.0624dd; AssertionError: assert '0x1.4500000000000p+10' == '0x1.f4000; Failed: DID NOT RAISE ValueError
+M-07 powered dry mass only                                     KILLED                           3/  4  AssertionError: assert '0x1.f400000000000p+9' == '0x1.450000
+M-07c coast dry mass only                                      KILLED                           3/  4  AssertionError: assert '0x1.f400000000000p+9' == '0x1.450000
+M-08 coast no clamp                                            KILLED                           1/  2  AssertionError: assert '0x1.0624dd2f1a9cep-10' == '0x1.0624d
+M-09 powered context cached per sub-step                       KILLED                           3/  4  AssertionError: assert '0x1.4500000000000p+10' == '0x1.44ccc; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44e66; AssertionError: assert '0x1.4500000000000p+10' == '0x1.44eb8
+M-10 mutable context                                           KILLED                           1/  1  Failed: DID NOT RAISE AttributeError
+M-11 unowned mass (np.float64 kept)                            KILLED                           5/  5  AssertionError: assert <class 'int'> is float  +  where <cla; AssertionError: assert <class 'numpy.float32'> is float  +  ; AssertionError: assert <class 'numpy.float64'> is float  +  ; AssertionError
+M-12 validation removed                                        KILLED                          14/ 14  Failed: DID NOT RAISE ValueError
+M-13 massless path gets 0.0                                    KILLED                           1/  1  Failed: massless context carries a supplied (invalid) mass: 
+M-14 powered context before the finiteness check               KILLED                           2/  3  ValueError: total_mass_kg must be finite and positive, got i; ValueError: total_mass_kg must be finite and positive, got n
+M-15 force call before thrust_acceleration                     KILLED                           1/  1  RuntimeError: force
+M-16 coast validates at construction (option A)                KILLED                           4/  4  AssertionError:  - total_mass_kg must be finite and positive; ValueError: total_mass_kg must be finite and positive, got n
+M-17 coast repairs NaN (max argument order swapped)            KILLED                           1/  1  Failed: DID NOT RAISE ValueError
+M-18 coast passes absent mass                                  KILLED                           3/  4  AssertionError: assert <class 'NoneType'> is float  +  where
+M-19 powered context deferred (expected equivalent)            SURVIVED (expected equivalent)   0/ 90  
+M-20 premature subclass-sensitive coast read (v2)              KILLED                           4/  4  LookupError: stage propellant read through the subclass; UserWarning: Warning: converting a masked element to nan.; ValueError: total_mass_kg must be finite and positive, got n
+M-21 lazy stage reference, dispatching read (v3-L)             KILLED                           4/  4  AssertionError: assert '0x1.18c0000000000p+10' == '0x1.45000; AssertionError: assert '0x1.f400000000000p+9' == '0x1.450000; AssertionError: assert array([6.62813700e+06, 0.00000000e+00
+M-21b lazy stage reference, base-class read                    KILLED                           4/  4  AssertionError: assert '0x1.18c0000000000p+10' == '0x1.45000; AssertionError: assert '0x1.f400000000000p+9' == '0x1.450000; AssertionError: assert array([6.62813700e+06, 0.00000000e+00
+M-22 powered lazy stage reference (v3-L machinery, powered path only) KILLED                           4/  4  AssertionError: assert '0x1.18c0000000000p+10' == '0x1.45000; AssertionError: assert '0x1.f400000000000p+9' == '0x1.450000; AssertionError: assert array([6.62813700e+06, 0.00000000e+00
+e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814  main_base.jsonl
+e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814  main_C.jsonl
+3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415  writers_base.jsonl
+3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415  writers_C.jsonl
+d21c7c4a5bfe37b82705f0ae17518c308879ed85608af5e9cd251d0588b304d7  integrators_base.jsonl
+1c9a9e89a9622df4891bb6749fdd3aa5b648d9e8d976b6c706b3cb9dab374eba  integrators_C.jsonl
+main corpus cases BASE 26880 C 26880; C differing from BASE: 0
+writers corpus cases BASE 26111 C 26111; C differing from BASE: 0
+rows 6216 supported integrators 27 out_of_contract 10
+integrators_C.jsonl: differing 392 (supported 0, out_of_contract 392)
+[04:14:46] T-10 exit=0 T-10 AST identity: 51 checks, 0 failures
+[04:14:47] T-11: src/tars/sim/forces.py src/tars/sim/simulator.py tests/test_s1_failure_paths.py tests/test_s1_force_context.py  
+[04:15:00] missions: output trees identical (10 files)
+[04:41:55] full suite at C: 1380 passed, 3 warnings in 1715.53s (0:28:35)
+[04:41:55] clone base tracked changes after runs: []
+[04:41:55] clone B tracked changes after runs: []
+[04:41:55] clone C tracked changes after runs: []
+[04:41:55] DONE

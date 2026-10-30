@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="5" time="0.212" timestamp="2026-10-29T21:13:25.808982-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_propagates_the_identical_exception[exc0]" time="0.001"><failure message="RuntimeError: x">self = &lt;tests.test_s1_force_context._Recorder object at 0x1051aacf0&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+
+    def acceleration(self, t, r, v):
+        self.calls.append((t, r, v))
+        if self.exc is not None:
+&gt;           raise self.exc
+E           ValueError: x
+
+tests/test_s1_force_context.py:127: ValueError
+
+The above exception was the direct cause of the following exception:
+
+exc = ValueError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        with pytest.raises(type(exc)) as err:
+&gt;           adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+
+tests/test_s1_force_context.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.LegacyForceAdapter object at 0x10514a920&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+ctx = &lt;tars.sim.forces.ForceContext object at 0x105092a70&gt;
+
+    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -&gt; Vector:
+        try:
+            return self.model.acceleration(t, r, v)
+        except Exception as err:
+&gt;           raise RuntimeError(str(err)) from err
+E           RuntimeError: x
+
+../../mutation/M-05/src/tars/sim/forces.py:282: RuntimeError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_propagates_the_identical_exception[exc1]" time="0.001"><failure message="RuntimeError: x">self = &lt;tests.test_s1_force_context._Recorder object at 0x1051ad700&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+
+    def acceleration(self, t, r, v):
+        self.calls.append((t, r, v))
+        if self.exc is not None:
+&gt;           raise self.exc
+E           FloatingPointError: x
+
+tests/test_s1_force_context.py:127: FloatingPointError
+
+The above exception was the direct cause of the following exception:
+
+exc = FloatingPointError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        with pytest.raises(type(exc)) as err:
+&gt;           adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+
+tests/test_s1_force_context.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.LegacyForceAdapter object at 0x1051ad030&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+ctx = &lt;tars.sim.forces.ForceContext object at 0x1051ac4f0&gt;
+
+    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -&gt; Vector:
+        try:
+            return self.model.acceleration(t, r, v)
+        except Exception as err:
+&gt;           raise RuntimeError(str(err)) from err
+E           RuntimeError: x
+
+../../mutation/M-05/src/tars/sim/forces.py:282: RuntimeError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_propagates_the_identical_exception[exc2]" time="0.001"><failure message="RuntimeError: x">self = &lt;tests.test_s1_force_context._Recorder object at 0x1051a5d90&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+
+    def acceleration(self, t, r, v):
+        self.calls.append((t, r, v))
+        if self.exc is not None:
+&gt;           raise self.exc
+E           OverflowError: x
+
+tests/test_s1_force_context.py:127: OverflowError
+
+The above exception was the direct cause of the following exception:
+
+exc = OverflowError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        with pytest.raises(type(exc)) as err:
+&gt;           adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+
+tests/test_s1_force_context.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.LegacyForceAdapter object at 0x1051a6020&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+ctx = &lt;tars.sim.forces.ForceContext object at 0x1051a61a0&gt;
+
+    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -&gt; Vector:
+        try:
+            return self.model.acceleration(t, r, v)
+        except Exception as err:
+&gt;           raise RuntimeError(str(err)) from err
+E           RuntimeError: x
+
+../../mutation/M-05/src/tars/sim/forces.py:282: RuntimeError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_propagates_the_identical_exception[exc3]" time="0.001"><failure message="RuntimeError: x">self = &lt;tests.test_s1_force_context._Recorder object at 0x1051a6a50&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+
+    def acceleration(self, t, r, v):
+        self.calls.append((t, r, v))
+        if self.exc is not None:
+&gt;           raise self.exc
+E           ZeroDivisionError: x
+
+tests/test_s1_force_context.py:127: ZeroDivisionError
+
+The above exception was the direct cause of the following exception:
+
+exc = ZeroDivisionError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        with pytest.raises(type(exc)) as err:
+&gt;           adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+
+tests/test_s1_force_context.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.LegacyForceAdapter object at 0x1051a74c0&gt;, t = 0.0
+r = array([0., 0., 0.]), v = array([0., 0., 0.])
+ctx = &lt;tars.sim.forces.ForceContext object at 0x1051a4220&gt;
+
+    def acceleration(self, t: float, r: Vector, v: Vector, ctx: ForceContext) -&gt; Vector:
+        try:
+            return self.model.acceleration(t, r, v)
+        except Exception as err:
+&gt;           raise RuntimeError(str(err)) from err
+E           RuntimeError: x
+
+../../mutation/M-05/src/tars/sim/forces.py:282: RuntimeError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_propagates_the_identical_exception[exc4]" time="0.001" /></testsuite></testsuites>

@@ -1,0 +1,25 @@
+"""I-41 (after review R-01): differential corpus of legacy models that write into the
+writable RK4 stage array through r.base (propellant, sensed dv, position) on their n-th call."""
+import itertools, json, math, sys
+from pathlib import Path
+src = Path(__file__).with_name("harness.py").read_text().replace("\nmain()\n", "\n")
+g = {"__name__": "harness_lib"}; exec(compile(src, "harness.py", "exec"), g)
+import numpy as np
+class Writer:
+    name = "stage_writer"
+    def __init__(self, n, idx, val): self.n, self.idx, self.val, self.calls = n, idx, val, 0
+    def acceleration(self, t, r, v):
+        self.calls += 1
+        if (self.n == 0 or self.calls == self.n) and r.base is not None and r.base.flags.writeable and r.base.shape[0] > self.idx:
+            r.base[self.idx] = self.val
+        return np.zeros(3)
+F = {}
+for n, idx, val in itertools.product((0, 1, 2, 3, 4, 6), (6, 7, 0, 4), (math.nan, math.inf, -math.inf, 1.7976931348623157e308, -1e308, -1.0, -1e-17, 0.0)):
+    F[f"w{n}_{idx}_{val!r}"] = (lambda n=n, idx=idx, val=val: Writer(n, idx, val))
+g["FORCES"].clear(); g["FORCES"].update(F)
+out = open(sys.argv[1], "w"); k = 0  # noqa
+for dt, f, c, i, b in itertools.product([10.0, 0.5, 1e308, math.inf], F, ["none", "ref", "huge", "tiny_dry"], ["leo", "tiny_v"], g["BURNS"]):
+    if c == "none" and b not in ("none", "inside"): continue
+    out.write(json.dumps(g["run_case"](dt, f, c, i, b), sort_keys=True) + "\n"); k += 1
+print("cases", k, file=sys.stderr)
+out.close()

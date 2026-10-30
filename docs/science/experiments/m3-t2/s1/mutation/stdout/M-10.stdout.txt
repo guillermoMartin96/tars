@@ -1,0 +1,16 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________________ test_t01_a_context_is_immutable ________________________
+
+    def test_t01_a_context_is_immutable():
+        ctx = forces.ForceContext(1300.0)
+        with pytest.raises(AttributeError):
+            ctx.total_mass_kg = 1.0
+>       with pytest.raises(AttributeError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE AttributeError
+
+tests/test_s1_force_context.py:50: Failed
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t01_a_context_is_immutable - Fail...
+1 failed in 0.14s

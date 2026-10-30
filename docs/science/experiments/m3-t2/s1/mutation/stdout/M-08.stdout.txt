@@ -1,0 +1,36 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___ test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001] ___
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x111375e50>
+dry = 0.001
+
+    @pytest.mark.parametrize("dry", [DRY, 1e-3])
+    def test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly(monkeypatch, dry):
+        """U-3. At dry = 1e-3 kg, dry - 1e-17 is a different binary64, so the clamp is observable;
+        at 1000 kg the subtraction rounds back to 1000 (both are pinned)."""
+        assert (dry - 1e-17 != dry) is (dry == 1e-3)
+        seen = _record_contexts(monkeypatch)
+        craft = SpacecraftSpec(dry_mass_kg=dry, engine=ENGINE, tank=TankSpec(propellant_kg=PROP))
+        sim = Simulator(R0, V0, PointMassGravity(WGS84.mu), RK4(), 10.0, spacecraft=craft)
+        for law in (None, "burn"):
+            y = np.concatenate([R0, V0, [-1e-17, 0.0]])
+            burn = None
+            if law == "burn":
+                sim.schedule_burn("prograde", 0.0, 5.0)
+                burn = sim._pending[0]
+            seen.clear()
+            sim._powered_derivative(burn)(0.0, y)
+            (ctx,) = seen
+>           assert ctx.total_mass_kg.hex() == dry.hex()
+E           AssertionError: assert '0x1.0624dd2f1a9cep-10' == '0x1.0624dd2f1a9fcp-10'
+E             
+E             - 0x1.0624dd2f1a9fcp-10
+E             ?                -
+E             + 0x1.0624dd2f1a9cep-10
+E             ?                 +
+
+tests/test_s1_force_context.py:281: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t04_negative_round_off_propellant_gives_the_dry_mass_exactly[0.001]
+1 failed, 1 passed in 0.18s

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.178" timestamp="2026-10-29T21:13:24.744329-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload0]" time="0.001"><failure message="assert 2 == 1&#10; +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])&#10; +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff0acc0&gt;.calls">payload = array([ 1.e+000, -0.e+000,  5.e-324])
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+&gt;       assert len(model.calls) == 1
+E       assert 2 == 1
+E        +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])
+E        +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff0acc0&gt;.calls
+
+tests/test_s1_force_context.py:142: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_passes_identical_objects_once_and_returns_the_result[payload1]" time="0.001"><failure message="assert 2 == 1&#10; +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])&#10; +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff09a00&gt;.calls">payload = array([     nan,      inf, -1.e+308])
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+&gt;       assert len(model.calls) == 1
+E       assert 2 == 1
+E        +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])
+E        +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff09a00&gt;.calls
+
+tests/test_s1_force_context.py:142: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_passes_identical_objects_once_and_returns_the_result[not an array]" time="0.001"><failure message="assert 2 == 1&#10; +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])&#10; +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff0c440&gt;.calls">payload = 'not an array'
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+&gt;       assert len(model.calls) == 1
+E       assert 2 == 1
+E        +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])
+E        +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff0c440&gt;.calls
+
+tests/test_s1_force_context.py:142: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t02_adapter_passes_identical_objects_once_and_returns_the_result[None]" time="0.001"><failure message="assert 2 == 1&#10; +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])&#10; +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff08530&gt;.calls">payload = None
+
+    @pytest.mark.parametrize(
+        "payload",
+        [np.array([1.0, -0.0, 5e-324]), np.array([np.nan, np.inf, -1e308]), "not an array", None],
+    )
+    def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payload):
+        model = _Recorder(result=payload)
+        state = dict(vars(model))
+        adapter = forces.LegacyForceAdapter(model)
+        t, r, v = -0.0, np.array([7e6, 0.0, -0.0]), np.array([5e-324, np.nan, 1.0])
+        out = adapter.acceleration(t, r, v, forces.ForceContext(1300.0))
+        assert out is payload
+&gt;       assert len(model.calls) == 1
+E       assert 2 == 1
+E        +  where 2 = len([(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))])
+E        +    where [(-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000])), (-0.0, array([7000000.,       0.,      -0.]), array([5.e-324,     nan, 1.e+000]))] = &lt;tests.test_s1_force_context._Recorder object at 0x10ff08530&gt;.calls
+
+tests/test_s1_force_context.py:142: AssertionError</failure></testcase></testsuite></testsuites>

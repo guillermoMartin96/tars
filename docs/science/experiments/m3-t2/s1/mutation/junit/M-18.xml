@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="4" time="0.160" timestamp="2026-10-29T21:13:42.424042-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[coast]" time="0.001"><failure message="AssertionError: assert &lt;class 'NoneType'&gt; is float&#10; +  where &lt;class 'NoneType'&gt; = type(None)&#10; +    where None = &lt;tars.sim.forces.ForceContext object at 0x111852440&gt;.total_mass_kg">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x111851250&gt;
+burn = None
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+        seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+        for ctx, (_, y) in zip(seen, stages, strict=True):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'NoneType'&gt; is float
+E            +  where &lt;class 'NoneType'&gt; = type(None)
+E            +    where None = &lt;tars.sim.forces.ForceContext object at 0x111852440&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:255: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[full]" time="0.001" /><testcase classname="tests.test_s1_force_context" name="test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[inside]" time="0.001"><failure message="AssertionError: assert &lt;class 'NoneType'&gt; is float&#10; +  where &lt;class 'NoneType'&gt; = type(None)&#10; +    where None = &lt;tars.sim.forces.ForceContext object at 0x111854640&gt;.total_mass_kg">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x111853d40&gt;
+burn = (3.0, 4.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+        seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+        for ctx, (_, y) in zip(seen, stages, strict=True):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'NoneType'&gt; is float
+E            +  where &lt;class 'NoneType'&gt; = type(None)
+E            +    where None = &lt;tars.sim.forces.ForceContext object at 0x111854640&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:255: AssertionError</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit[split]" time="0.001"><failure message="AssertionError: assert &lt;class 'NoneType'&gt; is float&#10; +  where &lt;class 'NoneType'&gt; = type(None)&#10; +    where None = &lt;tars.sim.forces.ForceContext object at 0x1118561d0&gt;.total_mass_kg">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1118540e0&gt;
+burn = (5.0, 12.0)
+
+    @pytest.mark.parametrize(
+        "burn", [None, (0.0, 30.0), (3.0, 4.0), (5.0, 12.0)], ids=["coast", "full", "inside", "split"]
+    )
+    def test_t04_t05_context_mass_is_the_stage_mass_bit_for_bit(monkeypatch, burn):
+        seen, stages = _run(monkeypatch, {"spacecraft": _spacecraft()}, burn)
+        for ctx, (_, y) in zip(seen, stages, strict=True):
+&gt;           assert type(ctx.total_mass_kg) is float
+E           AssertionError: assert &lt;class 'NoneType'&gt; is float
+E            +  where &lt;class 'NoneType'&gt; = type(None)
+E            +    where None = &lt;tars.sim.forces.ForceContext object at 0x1118561d0&gt;.total_mass_kg
+
+tests/test_s1_force_context.py:255: AssertionError</failure></testcase></testsuite></testsuites>

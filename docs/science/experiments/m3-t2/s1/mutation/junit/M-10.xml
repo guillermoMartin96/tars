@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.142" timestamp="2026-10-29T21:13:33.580298-07:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_force_context" name="test_t01_a_context_is_immutable" time="0.001"><failure message="Failed: DID NOT RAISE AttributeError">def test_t01_a_context_is_immutable():
+        ctx = forces.ForceContext(1300.0)
+        with pytest.raises(AttributeError):
+            ctx.total_mass_kg = 1.0
+&gt;       with pytest.raises(AttributeError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE AttributeError
+
+tests/test_s1_force_context.py:50: Failed</failure></testcase></testsuite></testsuites>
