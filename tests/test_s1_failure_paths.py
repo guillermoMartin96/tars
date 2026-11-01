@@ -10,6 +10,7 @@ and (l) the coast closure's insensitivity to float64 ndarray subclasses (Review 
 
 import json
 import math
+import re
 import warnings
 
 import numpy as np
@@ -75,6 +76,28 @@ class _NanAfter:
         return np.full(3, np.nan) if t >= self.t_fail else _pm().acceleration(t, r, v)
 
 
+def _assert_raises(expected, pattern, call, *args):
+    """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+    fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+    try:
+        call(*args)
+    except Exception as err:
+        assert isinstance(err, expected) and re.search(pattern, str(err)), (
+            f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+        )
+        return err
+    pytest.fail(f"DID NOT RAISE {expected.__name__}")
+
+
+def _assert_no_exception(call, *args):
+    """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+    naming it, instead of propagating (I-40 §10, I-59)."""
+    try:
+        return call(*args)
+    except Exception as err:
+        pytest.fail(f"raised {type(err).__name__}: {err}")
+
+
 def _assert_unchanged(sim, r, v):
     assert sim.tick == 0
     np.testing.assert_array_equal(sim.snapshot().r, r)
@@ -84,8 +107,7 @@ def _assert_unchanged(sim, r, v):
 @pytest.mark.filterwarnings("ignore::RuntimeWarning")
 def test_t07_a_infinite_dt_coast_point_mass_is_non_finite():
     sim = Simulator(R0, V0, _pm(), RK4(), math.inf, spacecraft=_spacecraft())
-    with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 1$"):
-        sim.step()
+    _assert_raises(FloatingPointError, r"^non-finite state produced at tick 1$", sim.step)
     _assert_unchanged(sim, R0, V0)
 
 
@@ -155,10 +177,8 @@ def test_t07_g_pointing_law_error_precedes_the_force_model():
         R0, np.zeros(3), _Raise(RuntimeError("force")), RK4(), 10.0, spacecraft=_spacecraft()
     )
     sim.schedule_burn("prograde", 0.0, 5.0)
-    with pytest.raises(
-        ValueError, match=r"^velocity-tracking direction is undefined for zero velocity$"
-    ):
-        sim.step()
+    expected = r"^velocity-tracking direction is undefined for zero velocity$"
+    _assert_raises(ValueError, expected, sim.step)
     _assert_unchanged(sim, R0, np.zeros(3))
 
 
@@ -194,8 +214,7 @@ def _overflowing_tick_end(dt):
 def test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite(dt):
     sim = _overflowing_tick_end(dt)
     before = (sim.snapshot(), sim.propulsion_snapshot())
-    with pytest.raises(FloatingPointError, match=r"^non-finite state produced at tick 2$"):
-        sim.step()
+    _assert_raises(FloatingPointError, r"^non-finite state produced at tick 2$", sim.step)
     assert sim.tick == 1 and sim.propulsion_snapshot() == before[1]
     np.testing.assert_array_equal(sim.snapshot().r, before[0].r)
 
@@ -234,8 +253,7 @@ def test_t07_k_finiteness_check_precedes_powered_context_construction(value):
     sim = Simulator(R0, V0, model, RK4(), 10.0, spacecraft=_spacecraft())
     sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
     before = (sim.snapshot(), sim.propulsion_snapshot())
-    with pytest.raises(FloatingPointError, match=r"^non-finite state during a burn at t = 2\.0$"):
-        sim.step()
+    _assert_raises(FloatingPointError, r"^non-finite state during a burn at t = 2\.0$", sim.step)
     _assert_unchanged(sim, R0, V0)
     assert sim.propulsion_snapshot() == before[1] and sim.engine_transitions == ()
 
@@ -283,7 +301,7 @@ def test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass(wrap):
     sim = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(wrap), 0.5, spacecraft=craft)
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        sim.step()
+        _assert_no_exception(sim.step)
     assert sim.tick == 1
     got, want = sim.snapshot(), plain.snapshot()
     for a, b in ((got.r, want.r), (got.v, want.v)):

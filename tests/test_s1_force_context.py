@@ -129,6 +129,15 @@ def _assert_raises(expected, pattern, call, *args):
     pytest.fail(f"DID NOT RAISE {expected.__name__}")
 
 
+def _assert_no_exception(call, *args):
+    """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+    naming it, instead of propagating (I-40 §10)."""
+    try:
+        return call(*args)
+    except Exception as err:
+        pytest.fail(f"raised {type(err).__name__}: {err}")
+
+
 def _converting_to(base, result):
     """An instance of a ``base`` subclass whose ``__float__`` returns, or raises, ``result``."""
 
@@ -260,10 +269,16 @@ def test_t02_adapter_passes_identical_objects_once_and_returns_the_result(payloa
 )
 def test_t02_adapter_propagates_the_identical_exception(exc):
     adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
-    with pytest.raises(type(exc)) as err:
+    try:
         adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
-    assert err.value is exc
-    assert err.value.__context__ is None and err.value.__cause__ is None
+    except BaseException as raised:  # any type: identity is asserted below (I-40 §10)
+        err = raised
+    else:
+        pytest.fail(f"DID NOT RAISE {type(exc).__name__}")
+    assert err is exc, (
+        f"expected the identical {type(exc).__name__}, got {type(err).__name__}: {err}"
+    )
+    assert err.__context__ is None and err.__cause__ is None
 
 
 def test_t02_adapter_is_immutable():
@@ -527,9 +542,10 @@ def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch
         def step(self, f, t, y, dt):
             return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
 
-    Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft()).step()
+    sim = Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft())
+    _assert_no_exception(sim.step)
     ((ctx,),) = (seen,)
-    assert ctx.total_mass_kg.hex() == (DRY + PROP).hex()
+    assert _assert_no_exception(getattr, ctx, "total_mass_kg").hex() == (DRY + PROP).hex()
 
 
 # ------------------- T-04 powered snapshot (plan amendment A-1, I-46 D2; Review 03 N-01)
