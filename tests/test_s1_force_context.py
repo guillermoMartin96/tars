@@ -9,6 +9,7 @@ The new interface is imported inside each test, so before S1 every test fails on
 import gc
 import math
 import random
+import re
 import weakref
 
 import numpy as np
@@ -106,6 +107,106 @@ def test_t01_e_construction_never_raises_overflow_or_zero_division(mass):
             pytest.fail(f"{type(err).__name__} escaped: step() would misreport it")
         except ValueError:
             pass
+
+
+# T-01 (e) regression, review finding S1R-01 (I-58, I-59): a supported numeric type whose
+# conversion raises OverflowError or ZeroDivisionError. step() converts both into its
+# "numerical overflow" FloatingPointError, so a leak would misreport an invalid mass.
+
+NOT_BINARY64 = r"^total_mass_kg is not representable as a binary64 number$"
+
+
+def _assert_raises(expected, pattern, call, *args):
+    """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+    fails the test with an assertion naming it, instead of propagating (I-40 §10)."""
+    try:
+        call(*args)
+    except Exception as err:
+        assert isinstance(err, expected) and re.search(pattern, str(err)), (
+            f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+        )
+        return err
+    pytest.fail(f"DID NOT RAISE {expected.__name__}")
+
+
+def _converting_to(base, result):
+    """An instance of a ``base`` subclass whose ``__float__`` returns, or raises, ``result``."""
+
+    def to_float(self):
+        if isinstance(result, BaseException):
+            raise result
+        return result
+
+    return type(f"_{base.__name__}Subclass", (base,), {"__float__": to_float})(1300)
+
+
+class _RaisingScalarRead(np.ndarray):
+    """Zero-dimensional float64 array whose scalar read raises."""
+
+    def __getitem__(self, key):
+        raise ZeroDivisionError("sentinel")
+
+
+@pytest.mark.parametrize("exc_type", [ZeroDivisionError, OverflowError])
+@pytest.mark.parametrize("base", [int, float])
+def test_t01_e_numeric_subclass_conversion_errors_raise_value_error(base, exc_type):
+    """Direct and deferred construction both reject the mass at construction, with
+    ValueError; the arithmetic exception does not escape (I-40 §5 F1, §9a T-01 (e))."""
+    for make in (forces.ForceContext, forces.ForceContext.deferred):
+        mass = _converting_to(base, exc_type("sentinel"))
+        err = _assert_raises(ValueError, NOT_BINARY64, make, mass)
+        assert type(err) is ValueError
+        assert err.__cause__ is None and err.__suppress_context__
+
+
+def test_t01_e_zero_dimensional_array_read_error_raises_value_error():
+    for make in (forces.ForceContext, forces.ForceContext.deferred):
+        mass = np.array(1300.0).view(_RaisingScalarRead)
+        err = _assert_raises(ValueError, NOT_BINARY64, make, mass)
+        assert type(err) is ValueError
+
+
+@pytest.mark.parametrize("base", [int, float])
+def test_t01_e_other_conversion_errors_propagate_unchanged(base):
+    """Only OverflowError and ZeroDivisionError are converted; any other exception from
+    the conversion propagates as the identical object."""
+    original = RuntimeError("sentinel")
+    for make in (forces.ForceContext, forces.ForceContext.deferred):
+        err = _assert_raises(RuntimeError, "^sentinel$", make, _converting_to(base, original))
+        assert err is original
+
+
+def test_t01_e_type_check_precedes_conversion():
+    """An unsupported type raises TypeError before any conversion is attempted."""
+
+    class _Str(str):
+        def __float__(self):
+            raise ZeroDivisionError("sentinel")
+
+    class _Obj:
+        def __float__(self):
+            raise ZeroDivisionError("sentinel")
+
+    for mass in (_Str("1300"), _Obj()):
+        for make in (forces.ForceContext, forces.ForceContext.deferred):
+            _assert_raises(TypeError, "^total_mass_kg must be a real number", make, mass)
+
+
+@pytest.mark.parametrize("base", [int, float])
+def test_t01_e_converted_subclass_mass_is_validated_as_before(base):
+    """A subclass that converts is an owned built-in float, validated as before: invalid at
+    construction for the direct path, on read for the deferred path."""
+    for make in (forces.ForceContext, forces.ForceContext.deferred):
+        mass = make(_converting_to(base, 1300.5)).total_mass_kg
+        assert type(mass) is float and mass == 1300.5
+    invalid = _converting_to(base, math.nan)
+    _assert_raises(
+        ValueError, "^total_mass_kg must be finite and positive", forces.ForceContext, invalid
+    )
+    ctx = forces.ForceContext.deferred(invalid)
+    _assert_raises(
+        ValueError, "^total_mass_kg must be finite and positive", getattr, ctx, "total_mass_kg"
+    )
 
 
 def test_t01_smallest_positive_mass_is_valid():
