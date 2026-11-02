@@ -1,0 +1,6 @@
+import json, sys
+d = sys.argv[1]
+ld = lambda f: [json.loads(l) for l in open(f"{d}/{f}")][1:]
+for name in ("main", "writers"):
+    b, c = ld(f"{name}_base.jsonl"), ld(f"{name}_H.jsonl")
+    print(f"{name} corpus cases BASE {len(b)} H {len(c)}; H differing from BASE: {sum(x != y for x, y in zip(b, c))}")

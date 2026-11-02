@@ -1,0 +1,9 @@
+format writers; expected cases 26112
+BASE: sha256 3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415; header records 0; case records 26112; duplicated case identities 0; first case record: line 1 case 10.0|w0_6_nan|none|leo|none
+TIP: sha256 53d644f57b86004f15cf21d8ba816c3d56defbb89d1bcb65b2407a4ac5aadc05; header records 0; case records 26112; duplicated case identities 0; first case record: line 1 case 10.0|w0_6_nan|none|leo|none
+F4 case-identity sequences equal (26112 cases, same order)
+C1 cases compared byte for byte: 26112; identical 26111; different 1
+C2 parsed-record differences: 1
+coverage: first compared case index 0 = line 1 10.0|w0_6_nan|none|leo|none; last compared case index 26111 = line 26112 inf|w6_4_0.0|tiny_dry|tiny_v|deplete
+DIFF case index 13056 line 13057 case ('1e+308', 'w0_6_nan', 'none', 'leo', 'none')
+verdict DIFFERENCES_FOUND

@@ -1,0 +1,88 @@
+#!/bin/bash
+# I-62 (S1C-03) driver: regenerate the T-08 main and writer corpora at BASE and J in fresh GitHub clones,
+# verify them against the pinned hashes, reproduce the historical comparison defect, run the corrected
+# complete comparison (fresh BASE vs J, and the retained I-59 BASE vs H files), and run negative controls.
+# Usage: s1c03_run.sh OUT_DIR CLONE_DIR I59_T08_DIR
+# Harness scripts: the pinned copies used by I-59 (scripts/pinned/), hash-checked against the committed
+# D copies (docs/science/experiments/m3-t2/s1/scripts/*.py.txt) before use.
+set -u
+O=$1; C=$2; I59=$3
+BASE=ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd
+J=f47cf0d0fcc5e5ca01167aa689c7228e03127215
+URL=https://github.com/guillermoMartin96/tars.git
+PIN_MAIN=e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814
+PIN_WRITERS=3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415
+S=$(cd "$(dirname "$0")" && pwd); P=$S/pinned
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"/{logs,corpora,defect,compare_fresh,compare_i59,format,negative_controls} "$C"; L=$O/logs
+log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$L/summary.txt"; }
+
+for n in base:$BASE J:$J; do c=${n%%:*}
+  git clone -q "$URL" "$C/$c" && git -C "$C/$c" checkout -q --detach "${n#*:}"
+  (cd "$C/$c" && uv sync --locked -q) > "$L/uv_sync_$c.log" 2>&1
+  log "clone $c HEAD $(git -C "$C/$c" rev-parse HEAD) tree $(git -C "$C/$c" rev-parse 'HEAD^{tree}') uv.lock $(shasum -a 256 "$C/$c/uv.lock" | cut -c1-16) status [$(git -C "$C/$c" status --porcelain)]"
+done
+[ "$(git -C "$C/J" rev-parse HEAD)" = "$J" ] && [ "$(git -C "$C/base" rev-parse HEAD)" = "$BASE" ] || { log "STOP: clone HEAD mismatch"; exit 2; }
+# Pinned harness copies must equal the committed D copies at J.
+for f in harness.py harness_writers.py; do
+  a=$(shasum -a 256 "$P/$f" | cut -d' ' -f1); b=$(git -C "$C/J" show "HEAD:docs/science/experiments/m3-t2/s1/scripts/$f.txt" | shasum -a 256 | cut -d' ' -f1)
+  log "harness $f pinned $a committed-D $b equal $([ "$a" = "$b" ] && echo yes || echo NO)"; [ "$a" = "$b" ] || { log "STOP: harness mismatch"; exit 2; }
+done
+(cd "$C/J" && .venv/bin/python -B -I -c 'import sys,platform,numpy;print(sys.version);print(platform.platform());print(platform.machine());print("numpy",numpy.__version__)') > "$O/env.txt" 2>&1
+log "uv $(uv --version)"
+
+# Regenerate the corpora (same invocation as D / I-59: J's venv, PYTHONPATH at each tree's src).
+for t in base J; do
+  (cd "$C/J" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$P/harness.py" "$O/corpora/main_$t.jsonl" > "$L/harness_$t.log" 2>&1)
+  (cd "$C/J" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$P/harness_writers.py" "$O/corpora/writers_$t.jsonl" > "$L/writers_$t.log" 2>&1)
+  log "corpora at $t: $(tr '\n' ' ' < "$L/harness_$t.log" | sed "s|$C/||g") / $(tr '\n' ' ' < "$L/writers_$t.log")"
+done
+(cd "$O/corpora" && shasum -a 256 main_base.jsonl main_J.jsonl writers_base.jsonl writers_J.jsonl) > "$O/corpora/corpus_hashes.txt"
+(cd "$I59" && shasum -a 256 main_base.jsonl main_H.jsonl writers_base.jsonl writers_H.jsonl) > "$O/corpora/i59_corpus_hashes.txt"
+for f in "$O/corpora/corpus_hashes.txt" "$O/corpora/i59_corpus_hashes.txt"; do
+  while read -r h n; do case $n in main_*) p=$PIN_MAIN;; writers_*) p=$PIN_WRITERS;; esac
+    log "hash $(basename "$f") $n $h pinned-match $([ "$h" = "$p" ] && echo yes || echo NO)"; done < "$f"; done
+
+# Corpus format and row counts (independent of the comparator), using the harness axes.
+(cd "$C/J" && PYTHONPATH=$C/J/src .venv/bin/python -B "$S/format_check.py" "$P/harness.py" \
+  "$O/corpora/main_base.jsonl" "$O/corpora/main_J.jsonl" "$O/corpora/writers_base.jsonl" "$O/corpora/writers_J.jsonl" \
+  "$I59/main_base.jsonl" "$I59/main_H.jsonl" "$I59/writers_base.jsonl" "$I59/writers_H.jsonl" 2>&1 | sed "s|$I59/||g;s|$O/||g") > "$O/format/format_check.txt"
+log "format check: $(grep -c 'identity sequence equals harness-axis expectation' "$O/format/format_check.txt") sequences checked, $(grep -c 'expectation.*: True' "$O/format/format_check.txt") True"
+
+# Defect reproduction: the I-59 comparison heredoc, extracted verbatim from the committed driver at J.
+git -C "$C/J" show HEAD:docs/science/experiments/m3-t2/s1/i59/scripts/i59_gates.sh.txt \
+  | awk '/^"\$C\/H\/.venv\/bin\/python" -B - "\$O\/t08" <<.PY. > "\$O\/t08\/corpus_compare.txt"$/{f=1;next} /^PY$/{f=0} f' > "$O/defect/i59_historical_compare.py"
+for f in main_base main_H writers_base writers_H; do ln -sf "$I59/$f.jsonl" "$O/defect/$f.jsonl"; done
+(cd "$O/defect" && "$C/J/.venv/bin/python" -B -I i59_historical_compare.py . > historical_output.txt 2>&1)
+"$C/J/.venv/bin/python" -B -I - "$O/defect" <<'PY' > "$O/defect/omitted_record.txt"
+import json, sys
+d = sys.argv[1]
+for name in ("main_H", "writers_H"):
+    lines = open(f"{d}/{name}.jsonl").read().split("\n")[:-1]
+    first = json.loads(lines[0])
+    kept = [json.loads(l) for l in lines][1:]
+    print(f"{name}: lines {len(lines)}; line 1 is {'a case record ' + '|'.join(first['case']) if 'case' in first else 'a header record (keys ' + ','.join(sorted(first)) + ')'}; "
+          f"after [1:] {len(kept)} records; line 1 omitted from the comparison: {'YES (a real case)' if 'case' in first else 'yes (the header, correctly)'}")
+PY
+rm -f "$O/defect/"*.jsonl
+log "historical (verbatim I-59) comparison: $(tr '\n' ' ' < "$O/defect/historical_output.txt")"
+
+# Corrected complete comparison.
+PY=$C/J/.venv/bin/python
+for set in fresh:base:J:$O/corpora i59:base:H:$I59; do IFS=: read -r tag b t dir <<< "$set"
+  "$PY" -B -I "$S/compare_corpora.py" main 26880 "$dir/main_$b.jsonl" "$dir/main_$t.jsonl" "$O/compare_$tag/main" > /dev/null; e1=$?
+  "$PY" -B -I "$S/compare_corpora.py" writers 26112 "$dir/writers_$b.jsonl" "$dir/writers_$t.jsonl" "$O/compare_$tag/writers" > /dev/null; e2=$?
+  sed -i '' "s|$dir/||g" "$O/compare_$tag/"*.summary.txt
+  log "corrected comparison $tag ($b vs $t): main exit $e1 [$(grep -E '^(C1|verdict)' "$O/compare_$tag/main.summary.txt" | tr '\n' ' ')] writers exit $e2 [$(grep -E '^(C1|verdict)' "$O/compare_$tag/writers.summary.txt" | tr '\n' ' ')]"
+done
+
+# Negative controls (on copies of the fresh J corpora; work files deleted afterwards).
+"$PY" -B -I "$S/negative_controls.py" "$S/compare_corpora.py" "$C/nc_work" \
+  "$O/corpora/main_base.jsonl" "$O/corpora/main_J.jsonl" "$O/corpora/writers_base.jsonl" "$O/corpora/writers_J.jsonl" \
+  2>&1 | sed "s|$C/nc_work/||g" > "$O/negative_controls/negative_controls.txt"; e=$?
+cp "$C/nc_work/"*.summary.txt "$O/negative_controls/" 2>/dev/null
+for f in "$O/negative_controls/"*.summary.txt; do sed -i '' "s|$C/nc_work/||g" "$f"; done
+rm -rf "$C/nc_work"
+log "negative controls: $(tail -1 "$O/negative_controls/negative_controls.txt")"
+for c in base J; do log "clone $c tracked changes after runs: [$(git -C "$C/$c" status --porcelain)]"; done
+log "done"

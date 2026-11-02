@@ -1,0 +1,163 @@
+"""I-62 (S1C-03): format-aware, complete comparison of a T-08 corpus between two trees.
+
+Replaces the unconditional ``[1:]`` slice used by the D / I-59 drivers. That slice was right for
+the main corpus, which starts with a header record, and wrong for the stage-writer corpus, which
+has none: it silently dropped the writer corpus's first case.
+
+Usage:  compare_corpora.py FORMAT EXPECTED_CASES BASE_FILE TIP_FILE OUT_PREFIX
+
+FORMAT is declared, never guessed:
+  main     exactly one header record on line 1: a JSON object with keys {"numpy", "tars_file"} and no
+           "case" key; every later line is a case record.
+  writers  no header: every line is a case record.
+A case record is a JSON object whose "case" value is a non-empty list of strings (its identity).
+
+Checks, all on both files:
+  F1  every line is newline-terminated, valid UTF-8, a JSON object; the header layout matches FORMAT;
+  F2  the number of case records equals EXPECTED_CASES;
+  F3  case identities are unique within each file (no duplicated record);
+  F4  the case-identity sequences of BASE and TIP are equal (same records, same order).
+Comparison (governing criterion: I-40 T-08 / INV-2, same-platform byte identity of the per-tick hex
+of r, v, propulsion state and all engine events):
+  C1  each case line is compared byte for byte, BASE vs TIP, at the same case index;
+  C2  as a secondary check each pair of parsed records is compared with ==;
+  C3  the main header line is compared byte for byte (reported separately; not a case).
+Every case is listed in OUT_PREFIX.cases.tsv (index, file line, case identity, result), so coverage
+is shown explicitly rather than inferred from file hashes. Differences carry the same identifiers.
+
+Exit status: 0 = formats valid and every case identical; 1 = formats valid, at least one difference;
+2 = format / count / identity failure (comparison not trustworthy).
+"""
+
+import hashlib
+import json
+import sys
+
+HEADER_KEYS = {"numpy", "tars_file"}
+
+
+def load(path, fmt):
+    """Return (header_line_or_None, [(file_line_no, raw_line_bytes, case_tuple, record)], errors)."""
+    errors, header, cases = [], None, []
+    with open(path, "rb") as fh:
+        raw = fh.read()
+    if raw and not raw.endswith(b"\n"):
+        errors.append("F1 last line is not newline-terminated")
+    lines = raw.split(b"\n")[:-1] if raw.endswith(b"\n") else raw.split(b"\n")
+    for no, line in enumerate(lines, start=1):
+        try:
+            rec = json.loads(line.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            errors.append(f"F1 line {no}: not valid UTF-8 JSON ({type(exc).__name__})")
+            continue
+        if not isinstance(rec, dict):
+            errors.append(f"F1 line {no}: not a JSON object")
+            continue
+        is_header = "case" not in rec and set(rec) == HEADER_KEYS
+        if fmt == "main" and no == 1:
+            if not is_header:
+                errors.append("F1 line 1: main format requires a header record here")
+            header = line
+            continue
+        if is_header or "case" not in rec:
+            errors.append(f"F1 line {no}: header/non-case record where a case record is required")
+            continue
+        case = rec["case"]
+        if not (isinstance(case, list) and case and all(isinstance(x, str) for x in case)):
+            errors.append(f"F1 line {no}: malformed case identity")
+            continue
+        cases.append((no, line, tuple(case), rec))
+    if fmt == "main" and not lines:
+        errors.append("F1 empty file: main format requires a header record")
+    return header, cases, errors
+
+
+def cid(case):
+    return "|".join(case)
+
+
+def main():
+    fmt, expected, base_path, tip_path, out = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5]
+    if fmt not in ("main", "writers"):
+        sys.exit(f"unknown format {fmt!r}")
+    rep = [f"format {fmt}; expected cases {expected}"]
+    fail = False
+    loaded = {}
+    for tag, path in (("BASE", base_path), ("TIP", tip_path)):
+        header, cases, errors = load(path, fmt)
+        loaded[tag] = (header, cases)
+        ids = [c[2] for c in cases]
+        dup = len(ids) - len(set(ids))
+        with open(path, "rb") as fh:
+            digest = hashlib.sha256(fh.read()).hexdigest()
+        first = f"line {cases[0][0]} case {cid(cases[0][2])}" if cases else "none"
+        rep.append(f"{tag}: sha256 {digest}; header records {0 if header is None else 1}; case records {len(cases)}; "
+                   f"duplicated case identities {dup}; first case record: {first}")
+        for e in errors[:20]:
+            rep.append(f"{tag}: {e}")
+        if len(errors) > 20:
+            rep.append(f"{tag}: ... {len(errors) - 20} more format errors")
+        if errors:
+            fail = True
+        if len(cases) != expected:
+            rep.append(f"{tag}: F2 FAIL case records {len(cases)} != expected {expected}")
+            fail = True
+        if dup:
+            seen, shown = set(), 0
+            for no, _, case, _ in cases:
+                if case in seen and shown < 20:
+                    rep.append(f"{tag}: F3 FAIL duplicated case identity at line {no}: {cid(case)}")
+                    shown += 1
+                seen.add(case)
+            fail = True
+    bh, bc = loaded["BASE"]
+    th, tc = loaded["TIP"]
+    seq_equal = [c[2] for c in bc] == [c[2] for c in tc]
+    if not seq_equal:
+        fail = True
+        n = min(len(bc), len(tc))
+        k = next((i for i in range(n) if bc[i][2] != tc[i][2]), n)
+        rep.append(f"F4 FAIL case-identity sequences differ (first at case index {k}: BASE "
+                   f"{cid(bc[k][2]) if k < len(bc) else 'END'} / TIP {cid(tc[k][2]) if k < len(tc) else 'END'})")
+    else:
+        rep.append(f"F4 case-identity sequences equal ({len(bc)} cases, same order)")
+    if fmt == "main":
+        rep.append(f"C3 header line byte-identical: {bh == th}")
+    rows, byte_diff, parsed_diff, compared = [], [], 0, 0
+    if not fail:
+        for i, (b, t) in enumerate(zip(bc, tc)):
+            same_bytes = b[1] == t[1]
+            same_parsed = b[3] == t[3]
+            compared += 1
+            parsed_diff += not same_parsed
+            res = "IDENTICAL" if same_bytes else "DIFFERENT"
+            if not same_bytes:
+                byte_diff.append((i, b[0], b[2]))
+            rows.append(f"{i}\t{b[0]}\t{cid(b[2])}\t{res}")
+        with open(out + ".cases.tsv", "w") as fh:
+            fh.write("case_index\tfile_line\tcase\tresult\n")
+            fh.write("\n".join(rows) + "\n")
+        rep.append(f"C1 cases compared byte for byte: {compared}; identical {compared - len(byte_diff)}; "
+                   f"different {len(byte_diff)}")
+        rep.append(f"C2 parsed-record differences: {parsed_diff}")
+        rep.append(f"coverage: first compared case index 0 = line {bc[0][0]} {cid(bc[0][2])}; "
+                   f"last compared case index {compared - 1} = line {bc[-1][0]} {cid(bc[-1][2])}")
+        for i, no, case in byte_diff[:50]:
+            rep.append(f"DIFF case index {i} line {no} case {case!r}")
+    else:
+        rep.append("comparison NOT performed: format/count/identity checks failed")
+    if fail:
+        verdict, code = "FORMAT_FAILURE", 2
+    elif byte_diff or parsed_diff or (fmt == "main" and bh != th):
+        verdict, code = "DIFFERENCES_FOUND", 1
+    else:
+        verdict, code = "ALL_CASES_IDENTICAL", 0
+    rep.append(f"verdict {verdict}")
+    with open(out + ".summary.txt", "w") as fh:
+        fh.write("\n".join(rep) + "\n")
+    print("\n".join(rep))
+    sys.exit(code)
+
+
+if __name__ == "__main__":
+    main()

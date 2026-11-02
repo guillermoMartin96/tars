@@ -1,0 +1,63 @@
+"""I-62 (S1C-03): corpus format and row-count verification, independent of compare_corpora.py.
+
+Usage:  format_check.py HARNESS_PY CORPUS_FILE...   (run with PYTHONPATH pointing at a tars src tree,
+        because harness.py imports tars; only its axis constants are used, no case is run)
+
+For each corpus file: line count, records that carry a "case" identity, records that do not
+(header candidates), their line numbers, unique identities, and the first two lines' identities.
+Then the expected case-identity sequences are rebuilt from the harness axes, in harness loop order:
+  main     itertools.product(DTS, FORCES, CRAFT, INIT, BURNS), skipping craft "none" with a burn
+           other than "none"/"inside"   (harness.py main())
+  writers  itertools.product([10.0, 0.5, 1e308, inf], F, ["none","ref","huge","tiny_dry"],
+           ["leo","tiny_v"], BURNS) with the same skip; F = 6 call numbers x 4 indexes x 8 values
+           (axes copied verbatim from harness_writers.py)
+and each file whose name starts with main_/writers_ is compared, in order, against its expected sequence.
+"""
+
+import itertools
+import json
+import math
+import sys
+from pathlib import Path
+
+harness, files = sys.argv[1], sys.argv[2:]
+src = Path(harness).read_text().replace("\nmain()\n", "\n")
+g = {"__name__": "harness_lib"}
+exec(compile(src, "harness.py", "exec"), g)
+
+
+def seq(dts, forces, crafts, inits, burns):
+    out = []
+    for dt, f, c, i, b in itertools.product(dts, forces, crafts, inits, burns):
+        if c == "none" and b not in ("none", "inside"):
+            continue
+        out.append((repr(dt), f, c, i, b))
+    return out
+
+
+main_expected = seq(g["DTS"], list(g["FORCES"]), list(g["CRAFT"]), list(g["INIT"]), g["BURNS"])
+wnames = [f"w{n}_{idx}_{val!r}" for n, idx, val in itertools.product(
+    (0, 1, 2, 3, 4, 6), (6, 7, 0, 4), (math.nan, math.inf, -math.inf, 1.7976931348623157e308, -1e308, -1.0, -1e-17, 0.0))]
+writers_expected = seq([10.0, 0.5, 1e308, math.inf], wnames, ["none", "ref", "huge", "tiny_dry"], ["leo", "tiny_v"],
+                       g["BURNS"])
+print(f"axes main: DTS {len(g['DTS'])} FORCES {len(g['FORCES'])} CRAFT {len(g['CRAFT'])} INIT {len(g['INIT'])} "
+      f"BURNS {len(g['BURNS'])} -> expected cases {len(main_expected)}")
+print(f"axes writers: dt 4 x writer models {len(wnames)} x crafts 4 x initial states 2 x burns {len(g['BURNS'])}, "
+      f"craft 'none' only with burns none/inside -> 4 x {len(wnames)} x 2 x (2 + 3 x 5) = {len(writers_expected)}")
+for path in files:
+    name = Path(path).name
+    label = f"{Path(path).parent.name}/{name}"
+    lines = Path(path).read_bytes().split(b"\n")
+    assert lines[-1] == b"", f"{label}: not newline-terminated"
+    recs = [json.loads(x) for x in lines[:-1]]
+    case_lines = [k for k, r in enumerate(recs, 1) if "case" in r]
+    other = [k for k, r in enumerate(recs, 1) if "case" not in r]
+    ids = [tuple(r["case"]) for r in recs if "case" in r]
+    print(f"{label}: lines {len(recs)}; case records {len(case_lines)}; non-case (header) records {len(other)} "
+          f"at lines {other}; unique case identities {len(set(ids))}")
+    for k in (1, 2):
+        r = recs[k - 1]
+        print(f"  line {k}: " + ("case " + "|".join(r["case"]) if "case" in r else "header keys " + ",".join(sorted(r))))
+    exp = main_expected if name.startswith("main_") else writers_expected if name.startswith("writers_") else None
+    if exp is not None:
+        print(f"  identity sequence equals harness-axis expectation ({len(exp)} cases, same order): {ids == exp}")

@@ -1,0 +1,9 @@
+format main; expected cases 26880
+BASE: sha256 e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814; header records 1; case records 26880; duplicated case identities 0; first case record: line 2 case 10.0|pm|none|leo|none
+TIP: sha256 1e0eb39fcee1fd484643f7025f0662cf9c12a09dbb23aa557e73c231f99e2702; header records 1; case records 26879; duplicated case identities 0; first case record: line 2 case 10.0|pm|none|leo|inside
+TIP: F1 line 1: main format requires a header record here
+TIP: F2 FAIL case records 26879 != expected 26880
+F4 FAIL case-identity sequences differ (first at case index 0: BASE 10.0|pm|none|leo|none / TIP 10.0|pm|none|leo|inside)
+C3 header line byte-identical: False
+comparison NOT performed: format/count/identity checks failed
+verdict FORMAT_FAILURE

@@ -1,0 +1,80 @@
+NC-0: unmodified TIP writer corpus (baseline)
+  historical: BASE 26111 TIP 26111 differing 0 -> NOT DETECTED (expected not detected)
+  corrected:  exit 0 verdict ALL_CASES_IDENTICAL -> NOT DETECTED (expected not detected)
+    C1 cases compared byte for byte: 26112; identical 26112; different 0
+  control result: PASS
+NC-1: one hex digit changed in the first writer record (index 0, file line 1): case 10.0|w0_6_nan|none|leo|none, field .steps[0].ok.r[0]
+  historical: BASE 26111 TIP 26111 differing 0 -> NOT DETECTED (expected not detected)
+  corrected:  exit 1 verdict DIFFERENCES_FOUND -> DETECTED (expected detected)
+    C1 cases compared byte for byte: 26112; identical 26111; different 1
+    DIFF case index 0 line 1 case ('10.0', 'w0_6_nan', 'none', 'leo', 'none')
+  control result: PASS
+NC-2: one hex digit changed in the middle writer record (index 13056): case 1e+308|w0_6_nan|none|leo|none, field .steps[0].after.r[0]
+  historical: BASE 26111 TIP 26111 differing 1 -> DETECTED (expected detected)
+  corrected:  exit 1 verdict DIFFERENCES_FOUND -> DETECTED (expected detected)
+    C1 cases compared byte for byte: 26112; identical 26111; different 1
+    DIFF case index 13056 line 13057 case ('1e+308', 'w0_6_nan', 'none', 'leo', 'none')
+  control result: PASS
+NC-3: one hex digit changed in the last writer record (index 26111): case inf|w6_4_0.0|tiny_dry|tiny_v|deplete, field .steps[0].after.dv
+  historical: BASE 26111 TIP 26111 differing 1 -> DETECTED (expected detected)
+  corrected:  exit 1 verdict DIFFERENCES_FOUND -> DETECTED (expected detected)
+    C1 cases compared byte for byte: 26112; identical 26111; different 1
+    DIFF case index 26111 line 26112 case ('inf', 'w6_4_0.0', 'tiny_dry', 'tiny_v', 'deplete')
+  control result: PASS
+NC-4: first writer record deleted
+  historical: BASE 26111 TIP 26110 differing 26110 -> DETECTED (expected detected)
+  corrected:  exit 2 verdict FORMAT_FAILURE -> DETECTED (expected detected)
+    TIP: F2 FAIL case records 26111 != expected 26112
+    F4 FAIL case-identity sequences differ (first at case index 0: BASE 10.0|w0_6_nan|none|leo|none / TIP 10.0|w0_6_nan|none|leo|inside)
+  control result: PASS
+NC-5: writer record index 1 replaced by a duplicate of index 0
+  historical: BASE 26111 TIP 26111 differing 1 -> DETECTED (expected detected)
+  corrected:  exit 2 verdict FORMAT_FAILURE -> DETECTED (expected detected)
+    TIP: F3 FAIL duplicated case identity at line 2: 10.0|w0_6_nan|none|leo|none
+    F4 FAIL case-identity sequences differ (first at case index 1: BASE 10.0|w0_6_nan|none|leo|inside / TIP 10.0|w0_6_nan|none|leo|none)
+  control result: PASS
+NC-6: writer records index 0 and 1 swapped
+  historical: BASE 26111 TIP 26111 differing 1 -> DETECTED (expected detected)
+  corrected:  exit 2 verdict FORMAT_FAILURE -> DETECTED (expected detected)
+    F4 FAIL case-identity sequences differ (first at case index 0: BASE 10.0|w0_6_nan|none|leo|none / TIP 10.0|w0_6_nan|none|leo|inside)
+  control result: PASS
+NC-7: a main-style header line prepended to the writer corpus
+  historical: BASE 26111 TIP 26112 differing 26111 -> DETECTED (expected detected)
+  corrected:  exit 2 verdict FORMAT_FAILURE -> DETECTED (expected detected)
+    TIP: F1 line 1: header/non-case record where a case record is required
+  control result: PASS
+NC-8: unmodified TIP main corpus (baseline)
+  historical: BASE 26880 TIP 26880 differing 0 -> NOT DETECTED (expected not detected)
+  corrected:  exit 0 verdict ALL_CASES_IDENTICAL -> NOT DETECTED (expected not detected)
+    C3 header line byte-identical: True
+    C1 cases compared byte for byte: 26880; identical 26880; different 0
+  control result: PASS
+NC-9: one hex digit changed in the first main case record (index 0, file line 2): case 10.0|pm|none|leo|none, field .steps[0].ok.r[0]
+  historical: BASE 26880 TIP 26880 differing 1 -> DETECTED (expected detected)
+  corrected:  exit 1 verdict DIFFERENCES_FOUND -> DETECTED (expected detected)
+    C3 header line byte-identical: True
+    C1 cases compared byte for byte: 26880; identical 26879; different 1
+    DIFF case index 0 line 2 case ('10.0', 'pm', 'none', 'leo', 'none')
+  control result: PASS
+NC-10: one hex digit changed in the last main case record (index 26879): case inf|raise_CustomBase|uflow_thrust|huge_r|deplete, field .steps[0].after.dv
+  historical: BASE 26880 TIP 26880 differing 1 -> DETECTED (expected detected)
+  corrected:  exit 1 verdict DIFFERENCES_FOUND -> DETECTED (expected detected)
+    C3 header line byte-identical: True
+    C1 cases compared byte for byte: 26880; identical 26879; different 1
+    DIFF case index 26879 line 26881 case ('inf', 'raise_CustomBase', 'uflow_thrust', 'huge_r', 'deplete')
+  control result: PASS
+NC-11: main header line removed
+  historical: BASE 26880 TIP 26879 differing 26879 -> DETECTED (expected detected)
+  corrected:  exit 2 verdict FORMAT_FAILURE -> DETECTED (expected detected)
+    TIP: F1 line 1: main format requires a header record here
+    TIP: F2 FAIL case records 26879 != expected 26880
+    F4 FAIL case-identity sequences differ (first at case index 0: BASE 10.0|pm|none|leo|none / TIP 10.0|pm|none|leo|inside)
+    C3 header line byte-identical: False
+  control result: PASS
+NC-12: main header numpy value changed (header only; every case unchanged)
+  historical: BASE 26880 TIP 26880 differing 0 -> NOT DETECTED (expected not detected)
+  corrected:  exit 1 verdict DIFFERENCES_FOUND -> DETECTED (expected detected)
+    C3 header line byte-identical: False
+    C1 cases compared byte for byte: 26880; identical 26880; different 0
+  control result: PASS
+negative controls: 13/13 PASS

@@ -12,6 +12,10 @@
 >
 > **S1 is NOT ACCEPTED and NOT MERGED.**
 
+> **Superseding note (I-62, 2026-11-02).** I-61 returned REQUEST_CHANGES on finding S1C-03. The
+> stage-writer count of 26 111 in §S1.9 is superseded: the corpus has 26 112 cases, and all of them are
+> byte-identical between BASE and J. The current status is in §S1.17.
+
 **Authority:**
 - I-40, the S1 contract: `M3-T2-S1-authorization.md` on `milestone-3-t2-authorization`;
 - owner rulings I-41 … I-50, recorded on that branch;
@@ -317,6 +321,10 @@ They were run under `PYTHONPATH` set to the BASE tree and to the C tree, on the 
 | Main direct API | 26 880 | 0 differing | `e0309486277deb101d341f23d57964d2f0c2874ab865d5be80c07f6499f0a814` |
 | Stage writers | 26 111 | 0 differing | `3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415` |
 | Custom integrators | 6 216 rows: 27 supported kinds, 10 out-of-contract | **0 supported-kind differences**; 392 out-of-contract (`list` 196, object `None` 196) | BASE `d21c7c4a…04d7`, C `1c9a9e89…4eba` |
+
+> **Superseding note (I-62).** The stage-writer row's "26 111" is superseded. The corpus has
+> **26 112** cases and no header line, and the comparison's `[1:]` slice skipped its first case (S1C-03).
+> §S1.17 has the complete 26 112-case comparison.
 
 All hashes equal the pinned I-44/I-45 references (`s1-v3s-i45/corpus_hashes.txt`). The 5 validated
 scenarios give byte-identical output trees (`missions/missions.sha256`).
@@ -681,3 +689,95 @@ Conclusion: **`success`, 4/4.**
 - **Merge:** NOT AUTHORIZED.
 - **S2:** NOT AUTHORIZED.
 - **Next independent review:** NOT STARTED.
+
+### S1.17 I-61 review and I-62 S1C-03 correction: superseding record (added under I-62, 2026-11-02)
+
+This section is **appended**. It supersedes every statement that the stage-writer (T-08) corpus has
+26 111 cases. Notes inserted at the top of this report and after the §S1.9 table point here.
+§S1.1–§S1.16 are otherwise unchanged; no text was removed.
+
+**Authority** (verbatim texts are kept externally in `~/tars-evidence/<ID>/`; none is recorded on the
+planning branch):
+- I-61: independent closure review of J `f47cf0d0…`;
+- I-62: S1C-03 accepted as MINOR / must-fix, and this evidence and report correction authorized. I-62
+  authorizes no production, test, algorithm or assumption change.
+
+**I-61 review.** OpenAI Codex (codex-cli 0.162.0) ran in a fresh session (thread
+`01a19d41-45ac-77d0-9dba-ecf0af3020bb`) against a fresh clone detached at J.
+
+**Verdict: REQUEST_CHANGES.**
+
+| Finding | Severity | Reviewer assessment; owner disposition |
+|---|---|---|
+| S1R-01 (I-58) | — | Reviewer: resolved, independently reproduced at E and fixed at H/J |
+| S1R-02 (I-58) | — | Reviewer: resolved; E 19 qualifying / 5 non-qualifying / 1 equivalent and J 24 / 0 / 1 reproduced |
+| S1C-01 (S1R-03) | NOTE | Reviewer: nonblocking, disclosed limitation (the arm64 longdouble parameter is `inf`). I-62 makes no separate ruling |
+| S1C-02 (S1R-04) | NOTE | Reviewer: nonblocking, disclosed limitation (T-09 B/C are external, single-host probes). I-62 makes no separate ruling |
+| **S1C-03** | **MINOR, must-fix** | **Owner: accepted as MINOR / must-fix (I-62).** The writer corpus has 26 112 cases, not 26 111 |
+
+The I-61 evidence is in `~/tars-evidence/I-61/`, with `MANIFEST.sha256` sha256
+`641254128a7962f2160729cb3c373d5f988f4959650c7f2cfa6287af9248dc16` (2 710 entries).
+
+**The S1C-03 defect.** The D and I-59 drivers loaded every corpus with
+`[json.loads(l) for l in open(f)][1:]`, which assumes a header line:
+- the main corpus starts with a header record, so the slice was correct there;
+- the stage-writer corpus has no header, so the slice dropped its first real case,
+  `10.0|w0_6_nan|none|leo|none`;
+- the integrator corpus has a real header and its own comparator, so it is not affected.
+
+The miscount began in I-42 and was carried through I-44, I-45, D, I-59 and §S1.9. Codex review 03
+(I-45) counted 26 112 JSONL lines and took the extra line for a header.
+
+**Historical claims and corrected results:**
+
+| Statement | Historical | Corrected (I-62) |
+|---|---|---|
+| Writer corpus size | 26 111 cases (§S1.9, D, I-59, planning) | **26 112 cases, no header line**; also derived independently from the harness axes, 4 × 192 × 2 × (2 + 3 × 5) |
+| Writer cases compared per case | 26 111 (index 0 never compared) | **26 112**, index 0 … 26 111 |
+| Writer result | 0 differing of 26 111 | **0 differing of 26 112**, byte for byte (I-40 T-08 / INV-2), fresh BASE vs J and retained I-59 BASE vs H |
+| Main corpus | 26 880 cases, 0 differing | Unchanged and re-verified: 26 880 cases, 0 differing, header identical |
+| Corpus sha256 | main `e0309486…a814`, writers `3310fd90…0415` | Unchanged; all 8 regenerated or retained files equal the pinned hashes |
+
+**Pinned proposal v3.** `M3-T2-S1-proposal-v3.md` line 175, on the planning branch at `5714959`, reads
+"stage-writer corpus (26 111 cases; 26 112 JSONL lines with the header)". **That count is incorrect.**
+The 26 112 JSONL lines are 26 112 cases, and the writer corpus has no header. The byte-for-byte
+BASE equality the proposal records holds for all 26 112 cases. The proposal is pinned and **is not
+modified**. The same applies to:
+- `M3-T2-S1-decision-I45.md:62`;
+- `M3-T2-S1-proposal-review-03.md:57`;
+- the `s1-proposal/`, `s1-v3/` and `s1-v3s-i45/` summaries listed in `s1/s1c03/README.md`.
+
+**Corrected comparison** (`docs/science/experiments/m3-t2/s1/s1c03/`).
+- **Comparator.** The format of each corpus is declared: `main` has exactly one header record, `writers`
+  has none. There is no unconditional slice.
+- **Format checks.** Every line is valid JSON with the declared header layout; the case count is as
+  expected; case identities are unique; BASE and J have the same identity sequence, in the same order.
+- **Comparison.** Every case line is compared byte for byte, with a parsed-record comparison as a
+  secondary check. Every case is listed with its index, file line and identity.
+- **Results:** all 26 112 writer cases and all 26 880 main cases are identical, for both fresh BASE vs J
+  and retained I-59 BASE vs H. The previously omitted case is compared and is identical. No previously
+  untested case differs.
+- **Negative controls:** 13/13 behave as expected. A one-digit change to the first writer case is
+  **not detected** by the historical expression and **is detected** by the corrected comparator, at case
+  index 0. Changes to a middle case and to the last case are detected by both. Deletion, duplication,
+  reordering, header insertion and header removal are each detected by the corrected comparator as
+  format failures.
+
+**Scope.** This commit adds `docs/science/experiments/m3-t2/s1/s1c03/` and inserts lines into this
+report. `src/`, `tests/`, the D evidence, the `i59/` evidence and the planning branch are unchanged.
+The corpora (30–36 MB each) and the run logs are kept externally in `~/tars-evidence/I-62/`. That
+manifest is written after this commit, so it cannot be quoted here.
+
+**Limitations (unchanged):**
+- S1C-01 / S1R-03 and S1C-02 / S1R-04 remain as stated in §S1.16.
+- T-08 remains a same-host comparison (macOS x86_64). It is not an accuracy claim or a cross-platform
+  claim.
+- The scientific boundaries recorded in §S1.14–§S1.16 are unchanged. No tolerance, accuracy gate or
+  assumption is added or promoted.
+
+**Status after I-62:** `S1 IMPLEMENTED / REVIEWED (I-58: REQUEST_CHANGES) / CORRECTED (F–H) / RE-REVIEWED (I-61: REQUEST_CHANGES, S1C-03) / S1C-03 CORRECTION PREPARED (I-62; local, not pushed, not re-reviewed) / NOT ACCEPTED / NOT MERGED`.
+- **S1 acceptance:** NOT GRANTED.
+- **Merge:** NOT AUTHORIZED.
+- **S2:** NOT AUTHORIZED.
+- **Push of this correction:** NOT AUTHORIZED at the time of writing.
+- **Further independent review:** NOT STARTED.

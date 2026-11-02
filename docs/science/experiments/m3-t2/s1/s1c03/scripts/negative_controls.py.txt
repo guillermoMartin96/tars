@@ -1,0 +1,120 @@
+"""I-62 (S1C-03): negative controls for the corrected comparison (and the historical one).
+
+Usage:  negative_controls.py COMPARE_CORPORA_PY WORK_DIR MAIN_BASE MAIN_TIP WRITERS_BASE WRITERS_TIP
+
+Each control writes a modified copy of a TIP corpus into WORK_DIR and runs:
+  historical  the D / I-59 expression, verbatim:
+              ld = lambda f: [json.loads(l) for l in open(f)][1:]; sum(x != y for x, y in zip(b, c))
+  corrected   compare_corpora.py with the declared format and expected count.
+A value change flips the last hex digit of the first "0x..." string found (depth-first, sorted keys) in
+the chosen record, and re-serialises it as the harness does (json.dumps(..., sort_keys=True)); the
+script first checks that re-serialising the unmodified record reproduces its line byte for byte.
+"""
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+cmp_py, work = sys.argv[1], Path(sys.argv[2])
+MB, MT, WB, WT = sys.argv[3:7]
+work.mkdir(parents=True, exist_ok=True)
+
+
+def historical(base, tip):
+    ld = lambda f: [json.loads(l) for l in open(f)][1:]  # noqa: E731,E741  (verbatim D / I-59 expression)
+    b, c = ld(base), ld(tip)
+    return len(b), len(c), sum(x != y for x, y in zip(b, c))
+
+
+def flip(obj):
+    """Return (modified copy, path) with the last hex digit of the first hex string flipped."""
+    if isinstance(obj, str) and obj.startswith(("0x", "-0x")) and "p" in obj:
+        m, e = obj.split("p", 1)
+        d = m[-1]
+        nd = "0123456789abcdef"[("0123456789abcdef".index(d) ^ 1)] if d in "0123456789abcdef" else None
+        return (m[:-1] + nd + "p" + e, "") if nd else (None, None)
+    if isinstance(obj, dict):
+        for k in sorted(obj):
+            new, p = flip(obj[k])
+            if new is not None:
+                return {**obj, k: new}, f".{k}{p}"
+    if isinstance(obj, list):
+        for i, v in enumerate(obj):
+            new, p = flip(v)
+            if new is not None:
+                return obj[:i] + [new] + obj[i + 1:], f"[{i}]{p}"
+    return None, None
+
+
+def lines_of(path):
+    return Path(path).read_bytes().split(b"\n")[:-1]
+
+
+def write(name, lines):
+    p = work / name
+    p.write_bytes(b"\n".join(lines) + b"\n")
+    return p
+
+
+def modify(lines, k):
+    rec = json.loads(lines[k])
+    assert json.dumps(rec, sort_keys=True).encode() == lines[k], "re-serialisation is not byte-exact"
+    new, path = flip(rec)
+    assert new is not None
+    out = list(lines)
+    out[k] = json.dumps(new, sort_keys=True).encode()
+    return out, f"case {'|'.join(rec['case'])}, field {path}"
+
+
+def run(nid, desc, fmt, n, base, tip, expect_hist, expect_corr):
+    hb, hc, hd = historical(base, tip)
+    r = subprocess.run([sys.executable, "-I", cmp_py, fmt, str(n), str(base), str(tip), str(work / nid)],
+                       capture_output=True, text=True)
+    verdict = [x for x in r.stdout.splitlines() if x.startswith("verdict")][-1]
+    detail = [x for x in r.stdout.splitlines() if x.startswith(("DIFF", "F4 FAIL", "C1", "C3")) or " F1 " in x or " F2 FAIL" in x or " F3 FAIL" in x]
+    hist_detects = hd > 0 or hb != hc
+    corr_detects = r.returncode != 0
+    ok = (hist_detects == expect_hist) and (corr_detects == expect_corr)
+    print(f"{nid}: {desc}")
+    print(f"  historical: BASE {hb} TIP {hc} differing {hd} -> {'DETECTED' if hist_detects else 'NOT DETECTED'}"
+          f" (expected {'detected' if expect_hist else 'not detected'})")
+    print(f"  corrected:  exit {r.returncode} {verdict} -> {'DETECTED' if corr_detects else 'NOT DETECTED'}"
+          f" (expected {'detected' if expect_corr else 'not detected'})")
+    for x in detail[:8]:
+        print(f"    {x}")
+    print(f"  control result: {'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+W, M = lines_of(WT), lines_of(MT)
+nW, nM = len(W), len(M) - 1
+results = []
+# NC-0: unmodified copies (the controls' baseline): nothing is detected by either comparator.
+results.append(run("NC-0", "unmodified TIP writer corpus (baseline)", "writers", nW, WB, write("w_nc0.jsonl", W), False, False))
+for nid, k, label in (("NC-1", 0, "first writer record (index 0, file line 1)"),
+                      ("NC-2", nW // 2, f"middle writer record (index {nW // 2})"),
+                      ("NC-3", nW - 1, f"last writer record (index {nW - 1})")):
+    mod, where = modify(W, k)
+    results.append(run(nid, f"one hex digit changed in the {label}: {where}", "writers", nW, WB,
+                       write(f"w_{nid}.jsonl", mod), k != 0, True))
+results.append(run("NC-4", "first writer record deleted", "writers", nW, WB, write("w_nc4.jsonl", W[1:]), True, True))
+results.append(run("NC-5", "writer record index 1 replaced by a duplicate of index 0", "writers", nW, WB,
+                   write("w_nc5.jsonl", [W[0], W[0]] + W[2:]), True, True))
+results.append(run("NC-6", "writer records index 0 and 1 swapped", "writers", nW, WB,
+                   write("w_nc6.jsonl", [W[1], W[0]] + W[2:]), True, True))
+results.append(run("NC-7", "a main-style header line prepended to the writer corpus", "writers", nW, WB,
+                   write("w_nc7.jsonl", [M[0]] + W), True, True))
+results.append(run("NC-8", "unmodified TIP main corpus (baseline)", "main", nM, MB, write("m_nc8.jsonl", M), False, False))
+mod, where = modify(M, 1)
+results.append(run("NC-9", f"one hex digit changed in the first main case record (index 0, file line 2): {where}", "main",
+                   nM, MB, write("m_nc9.jsonl", mod), True, True))
+mod, where = modify(M, len(M) - 1)
+results.append(run("NC-10", f"one hex digit changed in the last main case record (index {nM - 1}): {where}", "main",
+                   nM, MB, write("m_nc10.jsonl", mod), True, True))
+results.append(run("NC-11", "main header line removed", "main", nM, MB, write("m_nc11.jsonl", M[1:]), True, True))
+hdr = json.loads(M[0]); hdr["numpy"] = hdr["numpy"] + "-x"
+results.append(run("NC-12", "main header numpy value changed (header only; every case unchanged)", "main", nM, MB,
+                   write("m_nc12.jsonl", [json.dumps(hdr).encode()] + M[1:]), False, True))
+print(f"negative controls: {sum(results)}/{len(results)} PASS")
+sys.exit(0 if all(results) else 1)

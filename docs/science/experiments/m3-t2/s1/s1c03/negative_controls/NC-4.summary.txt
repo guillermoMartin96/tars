@@ -1,0 +1,7 @@
+format writers; expected cases 26112
+BASE: sha256 3310fd9031bc2c0cd611168e9ae3d1164ac00e87628fbe89d4c9b99401f60415; header records 0; case records 26112; duplicated case identities 0; first case record: line 1 case 10.0|w0_6_nan|none|leo|none
+TIP: sha256 653ca4cc3eb1a233e6a897fc13ffcb1370d401df216653f99bd1c5801b065830; header records 0; case records 26111; duplicated case identities 0; first case record: line 1 case 10.0|w0_6_nan|none|leo|inside
+TIP: F2 FAIL case records 26111 != expected 26112
+F4 FAIL case-identity sequences differ (first at case index 0: BASE 10.0|w0_6_nan|none|leo|none / TIP 10.0|w0_6_nan|none|leo|inside)
+comparison NOT performed: format/count/identity checks failed
+verdict FORMAT_FAILURE
