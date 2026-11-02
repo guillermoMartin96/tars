@@ -1,0 +1,30 @@
+# I-40 §10 strict classification committed_D
+# source $SCRATCH/i59/dcopy/mutation_results.json
+M-01 adapter copies r                                          harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+M-02 adapter swaps r and v                                     harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+M-03 adapter copies the result                                 harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+M-04 adapter calls twice                                       harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+M-05 adapter wraps exceptions                                  harness=KILLED                          strict=NOT_KILLED_I40_10     4/  5 A=0 B=0 C=4 4 failure(s) are not assertion failures (class C)
+M-06 powered context from committed state                      harness=KILLED                          strict=KILLED_I40_10         3/  4 A=3 B=0 C=0 
+M-06c coast context from committed state                       harness=KILLED                          strict=KILLED_I40_10         3/  3 A=3 B=0 C=0 
+M-07 powered dry mass only                                     harness=KILLED                          strict=KILLED_I40_10         3/  4 A=3 B=0 C=0 
+M-07c coast dry mass only                                      harness=KILLED                          strict=KILLED_I40_10         3/  4 A=3 B=0 C=0 
+M-08 coast no clamp                                            harness=KILLED                          strict=KILLED_I40_10         1/  2 A=1 B=0 C=0 
+M-09 powered context cached per sub-step                       harness=KILLED                          strict=KILLED_I40_10         3/  4 A=3 B=0 C=0 
+M-10 mutable context                                           harness=KILLED                          strict=KILLED_I40_10         1/  1 A=1 B=0 C=0 
+M-11 unowned mass (np.float64 kept)                            harness=KILLED                          strict=KILLED_I40_10         5/  5 A=5 B=0 C=0 
+M-12 validation removed                                        harness=KILLED                          strict=KILLED_I40_10        14/ 14 A=14 B=0 C=0 
+M-13 massless path gets 0.0                                    harness=KILLED                          strict=KILLED_I40_10         1/  1 A=1 B=0 C=0 
+M-14 powered context before the finiteness check               harness=KILLED                          strict=NOT_KILLED_I40_10     2/  3 A=0 B=0 C=2 2 failure(s) are not assertion failures (class C)
+M-15 force call before thrust_acceleration                     harness=KILLED                          strict=NOT_KILLED_I40_10     1/  1 A=0 B=0 C=1 1 failure(s) are not assertion failures (class C)
+M-16 coast validates at construction (option A)                harness=KILLED                          strict=NOT_KILLED_I40_10     4/  4 A=1 B=0 C=3 3 failure(s) are not assertion failures (class C)
+M-17 coast repairs NaN (max argument order swapped)            harness=KILLED                          strict=KILLED_I40_10         1/  1 A=1 B=0 C=0 
+M-18 coast passes absent mass                                  harness=KILLED                          strict=KILLED_I40_10         3/  4 A=3 B=0 C=0 
+M-19 powered context deferred (expected equivalent)            harness=SURVIVED (expected equivalent)  strict=EQUIVALENT_SURVIVED   0/ 90 A=0 B=0 C=0 
+M-20 premature subclass-sensitive coast read (v2)              harness=KILLED                          strict=NOT_KILLED_I40_10     4/  4 A=0 B=0 C=4 4 failure(s) are not assertion failures (class C)
+M-21 lazy stage reference, dispatching read (v3-L)             harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+M-21b lazy stage reference, base-class read                    harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+M-22 powered lazy stage reference (v3-L machinery, powered pat harness=KILLED                          strict=KILLED_I40_10         4/  4 A=4 B=0 C=0 
+control nodes 90, all pass: True
+strict verdicts: {"EQUIVALENT_SURVIVED": 1, "KILLED_I40_10": 19, "NOT_KILLED_I40_10": 5}
+non-equivalent mutants: 24

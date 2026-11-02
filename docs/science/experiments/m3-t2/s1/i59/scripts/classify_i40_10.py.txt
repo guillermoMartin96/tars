@@ -1,0 +1,94 @@
+"""I-59 §3: classify every claimed mutation kill under I-40 §10 ("must fail its designated
+test node with an assertion failure ... a kill by an unrelated exception does not count").
+
+Usage: classify_i40_10.py RESULTS_JSON JUNIT_DIR [LABEL]
+RESULTS_JSON is a mutate.py mutation_results.json; JUNIT_DIR holds its <tag>.xml files
+(full, untruncated failure text is read from there).
+
+Per failing designated node:
+  A  assertion failure: pytest reports AssertionError (bare `assert`, explicit AssertionError,
+     pytest.raises match mismatch) or a pytest test outcome Failed (DID NOT RAISE, pytest.fail).
+  B  as A, and the assertion message itself names a raised exception that the test checked
+     ("got <Type>: ..." / "raised <Type>: ...") - an expected exception explicitly validated
+     by an assertion.
+  C  anything else: an exception that propagated out of the test unasserted, a junit <error>
+     (setup/teardown/collection), or a missing node (premature termination).
+Strict verdict KILLED_I40_10 iff: >= 1 designated node failed; every failing node is A or B;
+every failure also matches the mutant's declared reason pattern (it is the intended
+violation); for M-22 every designated node failed; the node count equals the control count;
+pytest exit is 0 or 1. Otherwise NOT_KILLED_I40_10 with the reasons.
+"""
+
+import json
+import re
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+ASSERTION = re.compile(r"^(AssertionError\b|assert |Failed: )")
+VALIDATED = re.compile(r"\b(got|raised) [A-Za-z_]*(Error|Warning|Exception|Interrupt)\b: ")
+ALL_MUST_FAIL = {"M-22"}
+
+res_path, junit, label = Path(sys.argv[1]), Path(sys.argv[2]), (sys.argv[3] if len(sys.argv) > 3 else "")
+rep = json.loads(res_path.read_text())
+
+
+def nodes(tag):
+    out = {}
+    for tc in ET.parse(junit / f"{tag}.xml").getroot().iter("testcase"):
+        el = tc.find("failure") if tc.find("failure") is not None else tc.find("error")
+        out[tc.get("name")] = None if el is None else (el.tag, el.get("message") or "")
+    return out
+
+
+control = nodes("control")
+summary, detail = {}, {}
+print(f"# I-40 §10 strict classification {label}\n# source {res_path}")
+for mid, m in rep.items():
+    if not isinstance(m, dict) or "verdict" not in m:
+        continue
+    tag = mid.split()[0]
+    got = nodes(tag)
+    reason = m["reason"]
+    rows, problems = [], []
+    if m["pytest_exit"] not in (0, 1):
+        problems.append(f"pytest exit {m['pytest_exit']}")
+    if len(got) != m["total"]:
+        problems.append("node count differs from the recorded total")
+    for name, f in got.items():
+        if f is None:
+            continue
+        kind, msg = f
+        if kind == "error":
+            cls = "C"
+        elif ASSERTION.search(msg):
+            cls = "B" if VALIDATED.search(msg) else "A"
+        else:
+            cls = "C"
+        intended = bool(reason) and re.search(reason, msg, re.S) is not None
+        rows.append({"node": name, "class": cls, "matches_declared_reason": intended, "message": msg[:400]})
+    fails = rows
+    if reason is None:
+        verdict = "EQUIVALENT_SURVIVED" if not fails else "EQUIVALENT_KILLED"
+    else:
+        if not fails:
+            problems.append("no designated node failed")
+        bad = [r["node"] for r in fails if r["class"] == "C"]
+        if bad:
+            problems.append(f"{len(bad)} failure(s) are not assertion failures (class C)")
+        wrong = [r["node"] for r in fails if not r["matches_declared_reason"]]
+        if wrong:
+            problems.append(f"{len(wrong)} failure(s) do not match the declared reason")
+        if tag in ALL_MUST_FAIL and len(fails) != len(got):
+            problems.append("A-1: not every M-22 designated node failed")
+        verdict = "KILLED_I40_10" if not problems else "NOT_KILLED_I40_10"
+    counts = {c: sum(r["class"] == c for r in fails) for c in "ABC"}
+    summary[verdict] = summary.get(verdict, 0) + 1
+    detail[mid] = {"harness_verdict": m["verdict"], "strict_verdict": verdict, "failed": len(fails), "total": len(got),
+                   "classes": counts, "problems": problems, "failures": rows}
+    print(f"{mid[:62]:62s} harness={m['verdict']:31s} strict={verdict:19s} {len(fails):3d}/{len(got):3d} "
+          f"A={counts['A']} B={counts['B']} C={counts['C']} {'; '.join(problems)}")
+print(f"control nodes {len(control)}, all pass: {all(v is None for v in control.values())}")
+print("strict verdicts:", json.dumps(summary, sort_keys=True))
+print("non-equivalent mutants:", sum(1 for d in detail.values() if not d["strict_verdict"].startswith("EQUIVALENT")))
+(res_path.parent / f"strict_classification{('_' + label) if label else ''}.json").write_text(json.dumps(detail, indent=1))

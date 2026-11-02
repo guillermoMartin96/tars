@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.535" timestamp="2026-11-01T08:49:29.451652-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_failure_paths" name="test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[masked_propellant]" time="0.048"><failure message="Failed: raised UserWarning: Warning: converting a masked element to nan.">call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x104fa76e0&gt;&gt;
+args = ()
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           return call(*args)
+                   ^^^^^^^^^^^
+
+tests/test_s1_failure_paths.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_s1_failure_paths.py:288: in step
+    return y + dt * np.asarray(f(t, self.wrap(y.copy())), dtype=float)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:469: in coast
+    prop = float(y[_PROP])
+           ^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = masked
+
+    def __float__(self):
+        """
+        Convert to float.
+    
+        """
+        if self.size &gt; 1:
+            raise TypeError("Only length-1 arrays can be converted "
+                            "to Python scalars")
+        elif self._mask:
+&gt;           warnings.warn("Warning: converting a masked element to nan.", stacklevel=2)
+E           UserWarning: Warning: converting a masked element to nan.
+
+.venv/lib/python3.12/site-packages/numpy/ma/core.py:4528: UserWarning
+
+During handling of the above exception, another exception occurred:
+
+wrap = &lt;function _masked_propellant at 0x10563f920&gt;
+
+    @pytest.mark.parametrize(
+        "wrap", [_masked_propellant, _raising_getitem], ids=["masked_propellant", "raising_getitem"]
+    )
+    def test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass(wrap):
+        """Review R-02 (I-44): BASE's coast closure never indexes the stage propellant, so a
+        custom integrator's float64 subclass stage commits with no warning. It still does, with
+        warnings raised as errors, and the committed state equals the unwrapped integrator's."""
+        craft = _spacecraft()
+        plain = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(np.asarray), 0.5, spacecraft=craft)
+        plain.step()
+        sim = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(wrap), 0.5, spacecraft=craft)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+&gt;           _assert_no_exception(sim.step)
+
+tests/test_s1_failure_paths.py:304: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x104fa76e0&gt;&gt;
+args = ()
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            return call(*args)
+        except Exception as err:
+&gt;           pytest.fail(f"raised {type(err).__name__}: {err}")
+E           Failed: raised UserWarning: Warning: converting a masked element to nan.
+
+tests/test_s1_failure_paths.py:98: Failed</failure></testcase><testcase classname="tests.test_s1_failure_paths" name="test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[raising_getitem]" time="0.006"><failure message="Failed: raised LookupError: stage propellant read through the subclass">call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x105035070&gt;&gt;
+args = ()
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           return call(*args)
+                   ^^^^^^^^^^^
+
+tests/test_s1_failure_paths.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_s1_failure_paths.py:288: in step
+    return y + dt * np.asarray(f(t, self.wrap(y.copy())), dtype=float)
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:469: in coast
+    prop = float(y[_PROP])
+                 ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = _RaisingGetitem([6.62813700e+06, 0.00000000e+00, 0.00000000e+00,
+                 0.00000000e+00, 4.81690507e+03, 6.07742168e+03,
+                 3.00000000e+02, 0.00000000e+00])
+key = 6
+
+    def __getitem__(self, key):
+        if key == 6:
+&gt;           raise LookupError("stage propellant read through the subclass")
+E           LookupError: stage propellant read through the subclass
+
+tests/test_s1_failure_paths.py:267: LookupError
+
+During handling of the above exception, another exception occurred:
+
+wrap = &lt;function _raising_getitem at 0x10563fa60&gt;
+
+    @pytest.mark.parametrize(
+        "wrap", [_masked_propellant, _raising_getitem], ids=["masked_propellant", "raising_getitem"]
+    )
+    def test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass(wrap):
+        """Review R-02 (I-44): BASE's coast closure never indexes the stage propellant, so a
+        custom integrator's float64 subclass stage commits with no warning. It still does, with
+        warnings raised as errors, and the committed state equals the unwrapped integrator's."""
+        craft = _spacecraft()
+        plain = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(np.asarray), 0.5, spacecraft=craft)
+        plain.step()
+        sim = Simulator(R0, V0, _FreeSpace(), _WrappingEuler(wrap), 0.5, spacecraft=craft)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+&gt;           _assert_no_exception(sim.step)
+
+tests/test_s1_failure_paths.py:304: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x105035070&gt;&gt;
+args = ()
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            return call(*args)
+        except Exception as err:
+&gt;           pytest.fail(f"raised {type(err).__name__}: {err}")
+E           Failed: raised LookupError: stage propellant read through the subclass
+
+tests/test_s1_failure_paths.py:98: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[masked_propellant]" time="0.001"><failure message="Failed: raised ValueError: total_mass_kg must be finite and positive, got nan">call = &lt;built-in function getattr&gt;
+args = (&lt;tars.sim.forces.ForceContext object at 0x104fa5870&gt;, 'total_mass_kg')
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10)."""
+        try:
+&gt;           return call(*args)
+                   ^^^^^^^^^^^
+
+tests/test_s1_force_context.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.ForceContext object at 0x104fa5870&gt;
+
+    @property
+    def total_mass_kg(self) -&gt; float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass &gt; 0.0):
+&gt;           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/forces.py:247: ValueError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10502ca40&gt;
+wrap = &lt;function &lt;lambda&gt; at 0x104c899e0&gt;
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+        seen = _record_contexts(monkeypatch)
+    
+        class _Wrapping:
+            name, order = "euler_wrapped", 1
+    
+            def step(self, f, t, y, dt):
+                return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+    
+        sim = Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft())
+        _assert_no_exception(sim.step)
+        ((ctx,),) = (seen,)
+&gt;       assert _assert_no_exception(getattr, ctx, "total_mass_kg").hex() == (DRY + PROP).hex()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s1_force_context.py:548: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+call = &lt;built-in function getattr&gt;
+args = (&lt;tars.sim.forces.ForceContext object at 0x104fa5870&gt;, 'total_mass_kg')
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10)."""
+        try:
+            return call(*args)
+        except Exception as err:
+&gt;           pytest.fail(f"raised {type(err).__name__}: {err}")
+E           Failed: raised ValueError: total_mass_kg must be finite and positive, got nan
+
+tests/test_s1_force_context.py:138: Failed</failure></testcase><testcase classname="tests.test_s1_force_context" name="test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage[raising_getitem]" time="0.001"><failure message="Failed: raised LookupError: stage propellant read through the subclass">call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x104fa65a0&gt;&gt;
+args = ()
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10)."""
+        try:
+&gt;           return call(*args)
+                   ^^^^^^^^^^^
+
+tests/test_s1_force_context.py:136: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_s1_force_context.py:543: in step
+    return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+                               ^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-20/src/tars/sim/simulator.py:469: in coast
+    prop = float(y[_PROP])
+                 ^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = _RaisingGetitem([6.62813700e+06, 0.00000000e+00, 0.00000000e+00,
+                 0.00000000e+00, 4.81690507e+03, 6.07742168e+03,
+                 3.00000000e+02, 0.00000000e+00])
+key = 6
+
+    def __getitem__(self, key):
+        if key == 6:
+&gt;           raise LookupError("stage propellant read through the subclass")
+E           LookupError: stage propellant read through the subclass
+
+tests/test_s1_force_context.py:521: LookupError
+
+During handling of the above exception, another exception occurred:
+
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x104fa69c0&gt;
+wrap = &lt;function &lt;lambda&gt; at 0x1055f28e0&gt;
+
+    @pytest.mark.parametrize(
+        "wrap",
+        [
+            lambda y: np.ma.array(y, mask=[False] * 6 + [True, False]),
+            lambda y: y.view(_RaisingGetitem),
+        ],
+        ids=["masked_propellant", "raising_getitem"],
+    )
+    def test_t04_coast_mass_is_the_stored_propellant_of_a_subclass_stage(monkeypatch, wrap):
+        """I-44: for a float64 ndarray subclass the coast mass is built from the stored binary64
+        element, not from the subclass's indexing (a mask is not interpreted), and reading it
+        raises nothing."""
+        seen = _record_contexts(monkeypatch)
+    
+        class _Wrapping:
+            name, order = "euler_wrapped", 1
+    
+            def step(self, f, t, y, dt):
+                return y + dt * np.asarray(f(t, wrap(y.copy())), dtype=float)
+    
+        sim = Simulator(R0, V0, _ZeroForce(), _Wrapping(), 0.5, spacecraft=_spacecraft())
+&gt;       _assert_no_exception(sim.step)
+
+tests/test_s1_force_context.py:546: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x104fa65a0&gt;&gt;
+args = ()
+
+    def _assert_no_exception(call, *args):
+        """Returns ``call(*args)``; an exception it raises fails the test with an assertion
+        naming it, instead of propagating (I-40 §10)."""
+        try:
+            return call(*args)
+        except Exception as err:
+&gt;           pytest.fail(f"raised {type(err).__name__}: {err}")
+E           Failed: raised LookupError: stage propellant read through the subclass
+
+tests/test_s1_force_context.py:138: Failed</failure></testcase></testsuite></testsuites>

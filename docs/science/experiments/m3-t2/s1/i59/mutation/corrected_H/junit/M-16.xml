@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="0.217" timestamp="2026-11-01T08:49:24.757274-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_failure_paths" name="test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[1e+308]" time="0.002"><failure message="AssertionError: expected FloatingPointError matching '^non-finite state produced at tick 2$', got ValueError: total_mass_kg must be finite and positive, got nan&#10;assert (False)&#10; +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)">expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state produced at tick 2$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x1036a2510&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           call(*args)
+
+tests/test_s1_failure_paths.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:545: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:470: in coast
+    ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/forces.py:225: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.ForceContext object at 0x1036a26b0&gt;
+
+    @property
+    def total_mass_kg(self) -&gt; float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass &gt; 0.0):
+&gt;           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/forces.py:247: ValueError
+
+During handling of the above exception, another exception occurred:
+
+dt = 1e+308
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.parametrize("dt", [1e308, 8.98846567431158e307])
+    def test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite(dt):
+        sim = _overflowing_tick_end(dt)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+&gt;       _assert_raises(FloatingPointError, r"^non-finite state produced at tick 2$", sim.step)
+
+tests/test_s1_failure_paths.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state produced at tick 2$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x1036a2510&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            call(*args)
+        except Exception as err:
+&gt;           assert isinstance(err, expected) and re.search(pattern, str(err)), (
+                f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+            )
+E           AssertionError: expected FloatingPointError matching '^non-finite state produced at tick 2$', got ValueError: total_mass_kg must be finite and positive, got nan
+E           assert (False)
+E            +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)
+
+tests/test_s1_failure_paths.py:85: AssertionError</failure></testcase><testcase classname="tests.test_s1_failure_paths" name="test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[8.98846567431158e+307]" time="0.001"><failure message="AssertionError: expected FloatingPointError matching '^non-finite state produced at tick 2$', got ValueError: total_mass_kg must be finite and positive, got nan&#10;assert (False)&#10; +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)">expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state produced at tick 2$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10378dee0&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           call(*args)
+
+tests/test_s1_failure_paths.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:545: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:470: in coast
+    ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/forces.py:225: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.ForceContext object at 0x10378dd20&gt;
+
+    @property
+    def total_mass_kg(self) -&gt; float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass &gt; 0.0):
+&gt;           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/forces.py:247: ValueError
+
+During handling of the above exception, another exception occurred:
+
+dt = 8.98846567431158e+307
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    @pytest.mark.parametrize("dt", [1e308, 8.98846567431158e307])
+    def test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite(dt):
+        sim = _overflowing_tick_end(dt)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+&gt;       _assert_raises(FloatingPointError, r"^non-finite state produced at tick 2$", sim.step)
+
+tests/test_s1_failure_paths.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state produced at tick 2$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10378dee0&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            call(*args)
+        except Exception as err:
+&gt;           assert isinstance(err, expected) and re.search(pattern, str(err)), (
+                f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+            )
+E           AssertionError: expected FloatingPointError matching '^non-finite state produced at tick 2$', got ValueError: total_mass_kg must be finite and positive, got nan
+E           assert (False)
+E            +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)
+
+tests/test_s1_failure_paths.py:85: AssertionError</failure></testcase><testcase classname="tests.test_s1_failure_paths" name="test_t07_a_infinite_dt_coast_point_mass_is_non_finite" time="0.001"><failure message="AssertionError: expected FloatingPointError matching '^non-finite state produced at tick 1$', got ValueError: total_mass_kg must be finite and positive, got nan&#10;assert (False)&#10; +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)">expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state produced at tick 1$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10378d280&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           call(*args)
+
+tests/test_s1_failure_paths.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:506: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:540: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), t0, y, self._dt)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/simulator.py:470: in coast
+    ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/forces.py:225: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.ForceContext object at 0x10378cbe0&gt;
+
+    @property
+    def total_mass_kg(self) -&gt; float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass &gt; 0.0):
+&gt;           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+$EVIDENCE/run1/mutation/corrected_H/M-16/src/tars/sim/forces.py:247: ValueError
+
+During handling of the above exception, another exception occurred:
+
+    @pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t07_a_infinite_dt_coast_point_mass_is_non_finite():
+        sim = Simulator(R0, V0, _pm(), RK4(), math.inf, spacecraft=_spacecraft())
+&gt;       _assert_raises(FloatingPointError, r"^non-finite state produced at tick 1$", sim.step)
+
+tests/test_s1_failure_paths.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state produced at tick 1$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10378d280&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            call(*args)
+        except Exception as err:
+&gt;           assert isinstance(err, expected) and re.search(pattern, str(err)), (
+                f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+            )
+E           AssertionError: expected FloatingPointError matching '^non-finite state produced at tick 1$', got ValueError: total_mass_kg must be finite and positive, got nan
+E           assert (False)
+E            +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)
+
+tests/test_s1_failure_paths.py:85: AssertionError</failure></testcase><testcase classname="tests.test_s1_failure_paths" name="test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2" time="0.001"><failure message="AssertionError: &#10;- total_mass_kg must be finite and positive, got nan&#10;+ position must be finite">@pytest.mark.filterwarnings("ignore::RuntimeWarning")
+    def test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2():
+        sim = Simulator(R0, V0, _pm_j2(), RK4(), math.inf, spacecraft=_spacecraft())
+&gt;       with pytest.raises(ValueError, match=r"^position must be finite$"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: 
+E       - total_mass_kg must be finite and positive, got nan
+E       + position must be finite
+
+tests/test_s1_failure_paths.py:117: AssertionError</failure></testcase></testsuite></testsuites>

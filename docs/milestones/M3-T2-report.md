@@ -3,6 +3,15 @@
 **Status: S1 IMPLEMENTED / NOT REVIEWED / NOT ACCEPTED / NOT MERGED.** S2–S6 are not started.
 **PC-7(T2 overall): NONE.**
 
+> **Superseding note (I-60, 2026-11-01).** The status line above and §S1.1–§S1.15 are the
+> historical record of Commit E and are kept unchanged. The current status is in §S1.16:
+> - the independent review I-58 returned REQUEST_CHANGES;
+> - corrections F–H were made under I-59 and pushed under I-60;
+> - under I-40 §10, E had 19 qualifying kills and 5 non-qualifying kills, and H has 24 qualifying
+>   kills and 0 non-qualifying kills.
+>
+> **S1 is NOT ACCEPTED and NOT MERGED.**
+
 **Authority:**
 - I-40, the S1 contract: `M3-T2-S1-authorization.md` on `milestone-3-t2-authorization`;
 - owner rulings I-41 … I-50, recorded on that branch;
@@ -289,6 +298,15 @@ per-node results, pytest exit status and failure messages.
   (`s1-v3/`) in verdict, counts and failing nodes. M-19's denominator grows from 86 to 90 only
   because of the A-1 nodes (`mutation/compare_with_pinned_s1v3.txt`).
 
+> **Superseded in part (I-58, I-59, I-60; see §S1.16).** "24 mutants KILLED" above counted the
+> per-mutant reason patterns of D. Five of those patterns (M-05, M-14, M-15, M-16, M-20) accepted a
+> propagated, unasserted exception.
+> - **At E, under I-40 §10:** 19 qualifying kills and 5 non-qualifying kills, plus the M-19
+>   equivalent. E does not meet the criterion.
+> - **At H:** 24 qualifying kills, 0 non-qualifying kills, M-19 equivalent, and a denominator of 25.
+>
+> The table above and the D evidence are kept unchanged as the historical record.
+
 ### S1.9 Numerical compatibility, snapshot ownership and lifetime
 
 **T-08 (`t08/`)**: direct-API corpora, per-tick hex of r, v and the propulsion state, plus events.
@@ -409,6 +427,9 @@ push run on `milestone-3-t2-s1-force-context`, head SHA
 **Run records** (I-40 §9): one per gate run is in `docs/science/experiments/m3-t2/s1/run_records/`,
 produced by `run_record.py`. The CI CPython lines are those in the table above.
 
+> **Later CI (see §S1.16).** Tip E: run 41156488074, 4/4 (I-55). CI on the corrected tip H and on the
+> documentation tip is recorded in §S1.16.
+
 ### S1.12 Evidence, manifests and independent reviews (item 11)
 
 **In the repository:**
@@ -513,3 +534,150 @@ touches no `src/` or `tests/` path (I-40 §12 step 6).
   authorization to push it.
 - The **independent S1 review** (I-40 §14) is **NOT AUTHORIZED**; OD-7 is still open.
 - **S1 acceptance: NOT GRANTED. Merge: NOT AUTHORIZED.** PC-7(T2 overall): NONE.
+
+> **Superseded (I-55 … I-60; see §S1.16).** E was pushed under I-55, OD-7 was closed under I-57,
+> the I-58 independent review returned REQUEST_CHANGES, and F–H were pushed under I-60. **S1 acceptance:
+> NOT GRANTED. Merge: NOT AUTHORIZED.**
+
+### S1.16 I-58 review and I-59 correction: superseding record (added under I-60, 2026-11-01)
+
+This section is **appended**. It supersedes the statements that §S1.1–§S1.15 make about the mutation
+kill count and the S1 tip. Those sections are kept unchanged as the historical record of E. Notes
+inserted in §S1.8, §S1.11 and §S1.15 point here. No text of E was removed.
+
+**Authority** (verbatim texts are kept externally in `~/tars-evidence/<ID>/`; none is recorded on the
+planning branch):
+- I-55: E pushed;
+- I-56 and I-57: OD-7 recorded and closed;
+- I-58: independent S1 review;
+- I-59: corrections authorized;
+- I-60: F–H approved, pushed and CI-checked, plus this record.
+
+**History since E:**
+- **E pushed (I-55).** E `0e70f540…` was pushed, and CI run 41156488074 was 4/4 `success`. §S1.10's
+  "R-6 for Commit E is pending" and §S1.15's "E … is **not pushed**" are therefore historical.
+- **OD-7 closed (I-56, I-57).** It was closed by `docs/milestones/M3-T2-S1-OD7-I30-section4-record.md` on the planning
+  branch (`5714959`, CI run 41244497808 4/4).
+- **Independent S1 review (I-58).** A Codex review of E (separate provider, fresh session, no network)
+  returned **REQUEST_CHANGES**:
+
+| Finding | Severity | Disposition |
+|---|---|---|
+| S1R-01: an `int`/`float` subclass whose `__float__` raises `ZeroDivisionError` escapes `ForceContext(...)` and `ForceContext.deferred(...)`, against T-01 (e) | MAJOR | ACCEPTED; corrected in F and G |
+| S1R-02: M-05, M-14, M-15, M-16 and M-20 were counted KILLED on propagated, unasserted exceptions, against I-40 §10 ("a kill by an unrelated exception does not count") | MAJOR | ACCEPTED; I-40 §10 governs; corrected in H |
+| S1R-03: T-01 (e) longdouble parameter is `inf` on arm64 (§S1.11) | NOTE | accepted, no change |
+| S1R-04: T-09 is an external single-host verification (§S1.7) | NOTE | accepted, no change |
+
+**Corrective commits** (I-59; approved and pushed under I-60):
+
+| Commit | SHA | Change |
+|---|---|---|
+| F | `c52c0904b19d9abd701864a329350c15ce0b8b64` | `tests/test_s1_force_context.py`: 10 S1R-01 regression nodes, red at E's code |
+| G | `45053ef6c2a11f8bd8272928060df8845f65f1b1` | `src/tars/sim/forces.py`, `ForceContext._store`: an `OverflowError` or `ZeroDivisionError` raised while converting the mass becomes `ValueError("total_mass_kg is not representable as a binary64 number")` `from None`, on both construction paths. Other exceptions propagate unchanged; the `TypeError` type check still runs first. |
+| H | `2a35ebf397b474533300ee5a0169f8d5d025e86a` | both S1 test files: the designated nodes of M-05, M-14, M-15, M-16 and M-20 assert the expected exception's type, message and identity. Node IDs are unchanged. |
+
+E..H changes 3 allowlisted files (+159 −18). `_owned_float`, the simulator and the derivative
+arithmetic are unchanged (T-10 51/51). The supported-input behaviour of `ForceContext` is unchanged:
+2 105 inputs, E vs H, 0 differing.
+
+**S1R-01 regression coverage (F):**
+- int and float subclasses whose conversion raises `ZeroDivisionError` or `OverflowError`, on direct
+  and deferred construction (`ValueError`, message, suppressed context);
+- a 0-d `ndarray` subclass whose element read raises;
+- other conversion errors propagate as the identical object;
+- the type check runs before conversion;
+- a subclass that converts is validated as before.
+
+Red first, at F against E's code: 3 failed, 97 passed. Each failure is
+`AssertionError: expected ValueError …, got ZeroDivisionError: sentinel`. Green at G and H: 100/100.
+
+**Mutation campaign: historical E versus corrected H.**
+- The 25 mutants, their edits and designated nodes, and the denominator of 25 are unchanged.
+- The kill criterion is I-40 §10 applied strictly: every failing designated node must be an assertion
+  failure, either a plain assertion or an assertion that validates an expected exception, and must
+  match the mutant's declared reason.
+
+| | E (historical, as committed in D and reported in §S1.8) | H (corrected) |
+|---|---|---|
+| Qualifying kills (I-40 §10) | **19** | **24** |
+| Non-qualifying kills (unasserted exception) | **5**: M-05, M-14, M-15, M-16, M-20 | **0** |
+| Documented equivalent survivor | M-19 (v3-S §5.1) | M-19, unchanged (0/100) |
+| Denominator | 25 | 25 |
+
+- §S1.8's "24 mutants KILLED" counted the five non-qualifying kills, because the D reason patterns
+  accepted a propagated exception. **E does not meet the I-40 §10 criterion.** The same corrected
+  harness run at E gives 19 / 5. Strict re-classification of the committed D results gives the same
+  split.
+- At H, every failing designated node of all 24 non-equivalent mutants is an assertion failure that
+  matches its declared reason. Failing nodes are identical to E's.
+- M-19's node total grows from 90 to 100 only because its designated nodes are the two whole S1 files.
+
+**Regression gates at H** (fresh clones, macOS x86_64 host):
+- T-07 29/29;
+- T-08 0 differing, with all 6 corpus hashes equal to D's;
+- T-09 scan, comparison and negative control (7/7) pass;
+- T-10 51/51;
+- T-11 within the allowlist;
+- 10 validated-scenario files byte-identical to BASE;
+- R-1 golden `7a4e1877…20a4`;
+- R-2 228/228, mission records identical;
+- R-3 109 passed, outputs byte-identical;
+- R-4 314 passed;
+- full suite 1 390 passed;
+- `ruff check` and `ruff format --check` exit 0.
+
+**Platform CI on H.** Run **41363138188** of workflow `ci`
+(https://github.com/guillermoMartin96/tars/actions/runs/41363138188) was a push run on
+`milestone-3-t2-s1-force-context` with head SHA `2a35ebf397b474533300ee5a0169f8d5d025e86a`.
+Conclusion: **`success`, 4/4.**
+
+| Job | Runner image / arch | CPython (from the log) | Conclusion | pytest | T-07 file | `test_s1_force_context.py` |
+|---|---|---|---|---|---|---|
+| check (ubuntu-latest) | ubuntu-24.04 / x86_64 | 3.12.3 | success | 1 387 passed, 3 skipped | 29/29 | 71/71 |
+| check (macos-latest) | macos-26-arm64 / arm64 | 3.12.10 | success | 1 387 passed, 3 skipped | 29/29 | 71/71 |
+| check (macos-15-intel) | macos-15 / x86_64 | 3.12.10 | success | 1 387 passed, 3 skipped | 29/29 | 71/71 |
+| m2-cross-platform | ubuntu-24.04 | 3.12.3 | success | — | — | — |
+
+- **Totals:** 1 387 + 3 = 1 390 on every check job, equal to the local full suite at H. The 3 skips are
+  the existing `tests/test_gmat_m2.py:326` GMAT skip.
+- **I-40 §8:** the modified T-07 file passes all 29 nodes on all three required platforms, with no
+  failure, error or skip.
+- **Job metadata:** every step of every job concluded `success`. Per-file counts were parsed from the
+  raw job logs, fetched through the jobs logs API.
+- **Platform-specific:** on macos-latest (arm64), the T-01 (e) longdouble `RuntimeWarning` appears as at
+  D and E (S1R-03).
+- **Records:** `docs/science/experiments/m3-t2/s1/i59/ci_H/` holds the run and job metadata and the
+  summary. The raw logs are kept externally in `~/tars-evidence/I-60/ci_H/`.
+- **CI on this documentation commit** is recorded in the I-60 external evidence. A commit cannot quote
+  its own CI run.
+
+**Evidence.**
+- **In the repository:** `docs/science/experiments/m3-t2/s1/i59/`, a new subdirectory with its own
+  `README.md`, `SHA256SUMS` and `SCRUBBED.txt`.
+- **D evidence unchanged.** The Commit D files in `docs/science/experiments/m3-t2/s1/`, including
+  `SHA256SUMS`, `README.md` and `mutation/`, are byte-identical to D and remain the historical record.
+  Their mutation verdicts are superseded only as stated above.
+- **External evidence:**
+
+| Instruction | Location | MANIFEST.sha256 sha256 |
+|---|---|---|
+| I-58 | `~/tars-evidence/I-58/` | `de02632c8d86b25660c86421d8eb3fe85346d48138e01b02e5bdcd96776d17c2` (unchanged; 1 056 entries) |
+| I-59 | `~/tars-evidence/I-59/` | `da4a6032e6815db9c4658c0a0922fdb63bf94796fe1b472fd1efc57ba64cd567` (3 770 entries) |
+| I-60 | `~/tars-evidence/I-60/` | — (written after this commit, so it cannot be quoted here) |
+
+**Remaining limitations:**
+- **S1R-03.** On macOS arm64 the T-01 (e) longdouble parameter exercises `inf`, not a finite
+  extended-precision value. Coverage differs by platform; the test passes everywhere.
+- **S1R-04.** T-09 is an external verification on one host (macOS x86_64). It is not a committed CI
+  gate.
+- **Local gates on one host only.** All local gates above, including T-08, T-09 and R-1…R-4, ran
+  on one macOS x86_64 host. CI covers only its own jobs. No new cross-platform claim is made.
+- **No dedicated mutant for G.** The fix itself has no mutant; the denominator of 25 was preserved.
+  Reverting G gives the state F's red record shows failing.
+- **No independent review of F–H yet.** The corrections have not been independently reviewed.
+
+**Status after I-60:** `S1 IMPLEMENTED / REVIEWED (I-58: REQUEST_CHANGES) / CORRECTED (F–H) / NOT RE-REVIEWED / NOT ACCEPTED / NOT MERGED`.
+- **S1 acceptance:** NOT GRANTED.
+- **Merge:** NOT AUTHORIZED.
+- **S2:** NOT AUTHORIZED.
+- **Next independent review:** NOT STARTED.

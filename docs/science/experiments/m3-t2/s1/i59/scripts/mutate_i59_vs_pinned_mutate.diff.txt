@@ -1,0 +1,77 @@
+--- $HOME/.superset/worktrees/tars/m3-t2-s1-i59-corrections/docs/science/experiments/m3-t2/s1/scripts/mutate.py.txt	2026-11-01 08:43:40
++++ $EVIDENCE/scripts/mutate_i59.py	2026-11-01 08:46:13
+@@ -1,4 +1,12 @@
+-"""I-52 Commit D mutation campaign: the pinned I-44 campaign (s1-v3/mutate.py.txt, PC-7(S1) §10,
++"""I-59 corrected mutation campaign (I-40 §10 kill criterion; review finding S1R-02).
++
++Derived from the I-52 Commit D script below with these changes only: the declared reason
++patterns of M-05, M-14, M-15, M-16 and M-20 now require the assertion failures that the
++I-59 test corrections produce (each names the intended exception); every failure must be
++assertion-class (AssertionError / pytest Failed); failure messages are kept to 2000
++characters and matched with re.S. Mutant ids, edits, designated nodes and order are unchanged.
++
++I-52 Commit D mutation campaign: the pinned I-44 campaign (s1-v3/mutate.py.txt, PC-7(S1) §10,
+ I-41 coast mutants, I-44 R-02 / U-1 snapshot mutants) plus M-22 (plan amendment A-1 §3).
+ Usage: mutate.py TREE_ROOT OUT_DIR, where TREE_ROOT is a fresh clone at Commit C with .venv synced.
+ 
+@@ -60,7 +68,7 @@
+     ("M-03 adapter copies the result", [(F, ADAPT, "        return np.array(self.model.acceleration(t, r, v))\n")], [T02], ASSERT),
+     ("M-04 adapter calls twice", [(F, ADAPT, "        self.model.acceleration(t, r, v)\n" + ADAPT)], [T02], ASSERT),
+     ("M-05 adapter wraps exceptions", [(F, ADAPT, "        try:\n            return self.model.acceleration(t, r, v)\n        except Exception as err:\n            raise RuntimeError(str(err)) from err\n")],
+-     [f"{FC}::test_t02_adapter_propagates_the_identical_exception"], r"^RuntimeError"),
++     [f"{FC}::test_t02_adapter_propagates_the_identical_exception"], r"^AssertionError: expected the identical \w+, got RuntimeError: x\b"),
+     ("M-06 powered context from committed state", [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext(spacecraft.dry_mass_kg + max(float(self._y[_PROP]), 0.0))) + thrust\n")], [T0405], ASSERT),
+     ("M-06c coast context from committed state", [(SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(float(self._y[_PROP]), 0.0))\n")], [ROUND, INVAL], ASSERT),
+     ("M-07 powered dry mass only", [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext(spacecraft.dry_mass_kg)) + thrust\n")], [T0405], ASSERT),
+@@ -78,19 +86,19 @@
+     ("M-14 powered context before the finiteness check", [
+         (SIM, "            if not np.all(np.isfinite(y)):\n", "            early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))\n            if not np.all(np.isfinite(y)):\n"),
+         (SIM, PW, "            a = force_model.acceleration(t, r, v, early) + thrust\n")],
+-     [f"{FP}::test_t07_k_finiteness_check_precedes_powered_context_construction"], r"^ValueError: total_mass_kg must be finite and positive"),
++     [f"{FP}::test_t07_k_finiteness_check_precedes_powered_context_construction"], r"^AssertionError: expected FloatingPointError matching .*, got ValueError: total_mass_kg must be finite and positive"),
+     ("M-15 force call before thrust_acceleration", [(SIM, "            thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)\n" + PW,
+         "            f = force_model.acceleration(t, r, v, ForceContext(mass))\n            thrust = thrust_acceleration(engine, law.direction(t, r, v), mass)\n            a = f + thrust\n")],
+-     [f"{FP}::test_t07_g_pointing_law_error_precedes_the_force_model"], r"^RuntimeError: force"),
++     [f"{FP}::test_t07_g_pointing_law_error_precedes_the_force_model"], r"^AssertionError: expected ValueError matching .*, got RuntimeError: force\b"),
+     ("M-16 coast validates at construction (option A)", [(SIM, COAST, "                ctx = ForceContext(spacecraft.dry_mass_kg + max(prop, 0.0))\n")],
+      [f"{FP}::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite", f"{FP}::test_t07_a_infinite_dt_coast_point_mass_is_non_finite", f"{FP}::test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2"],
+-     ASSERT + r"|^ValueError: total_mass_kg must be finite and positive"),
++     r"^AssertionError: .*total_mass_kg must be finite and positive"),
+     ("M-17 coast repairs NaN (max argument order swapped)", [(SIM, COAST, "                ctx = ForceContext.deferred(spacecraft.dry_mass_kg + max(0.0, prop))\n")], [INVAL], ASSERT),
+     ("M-18 coast passes absent mass", [(SIM, COAST, "                ctx = ForceContext()\n")], [T0405], ASSERT),
+     ("M-19 powered context deferred (expected equivalent)", [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext.deferred(mass)) + thrust\n")], [FC, FP], None),
+     # I-44 (R-02 / U-1)
+     ("M-20 premature subclass-sensitive coast read (v2)", [(SIM, PROPLINE, "                prop = float(y[_PROP])\n")], [T07L, STORED],
+-     r"^(UserWarning: Warning: converting a masked element to nan|LookupError: stage propellant read through the subclass"
++     r"^Failed: raised (UserWarning: Warning: converting a masked element to nan|LookupError: stage propellant read through the subclass"
+      r"|ValueError: total_mass_kg must be finite and positive, got nan)"),
+     ("M-21 lazy stage reference, dispatching read (v3-L)", LAZY_FORCES + [(SIM, PROPLINE + COAST, "                ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))\n")], [SNAP, ALIVE], ASSERT),
+     ("M-21b lazy stage reference, base-class read", LAZY_FORCES + [(SIM, PROPLINE + COAST, "                ctx = ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(np.ndarray.__getitem__(y, _PROP)), 0.0))\n")], [SNAP, ALIVE], ASSERT),
+@@ -98,6 +106,7 @@
+     ("M-22 powered lazy stage reference (v3-L machinery, powered path only)", LAZY_FORCES + [(SIM, PW, "            a = force_model.acceleration(t, r, v, ForceContext.lazy(lambda: spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))) + thrust\n")], [PSNAP, PALIVE], ASSERT),
+ ]
+ ALL_MUST_FAIL = {"M-22"}
++ASSERTION_CLASS = r"^(AssertionError\b|assert |Failed: )"  # I-40 §10: assertion failures only
+ 
+ 
+ def run(tag, src, nodes):
+@@ -111,7 +120,7 @@
+     for tc in ET.parse(xml).getroot().iter("testcase"):
+         f = tc.find("failure") if tc.find("failure") is not None else tc.find("error")
+         res.append({"node": tc.get("name"), "status": "pass" if f is None else ("error" if tc.find("error") is not None else "fail"),
+-                    "message": None if f is None else (f.get("message") or "")[:200]})
++                    "message": None if f is None else (f.get("message") or "")[:2000]})
+     return res
+ 
+ 
+@@ -140,7 +149,9 @@
+     elif tag in ALL_MUST_FAIL and len(fails) != len(res):
+         verdict = "NOT_ALL_DESIGNATED_FAILED"
+     else:
+-        verdict = "KILLED" if all(re.search(reason, f["message"] or "") for f in fails) else "KILLED_WRONG_REASON"
++        assertion = all(re.search(ASSERTION_CLASS, f["message"] or "") and f["status"] == "fail" for f in fails)
++        reasons = all(re.search(reason, f["message"] or "", re.S) for f in fails)
++        verdict = "KILLED" if assertion and reasons else ("KILLED_NOT_BY_ASSERTION" if not assertion else "KILLED_WRONG_REASON")
+     report[mid] = {"nodes": nodes, "reason": reason, "verdict": verdict, "failed": len(fails), "total": len(res),
+                    "pytest_exit": exits[tag], "edits": [{"path": p, "old": o, "new": n} for p, o, n in edits],
+                    "results": res, "failures": fails}

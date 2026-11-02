@@ -1,0 +1,41 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: $SCRATCH/i59/clones/H
+configfile: pyproject.toml
+collected 29 items
+
+tests/test_s1_failure_paths.py .............................             [100%]
+
+==================================== PASSES ====================================
+- generated xml file: $EVIDENCE/run1/tip_H/t07_at_base_src_junit.xml -
+=========================== short test summary info ============================
+PASSED tests/test_s1_failure_paths.py::test_t07_a_infinite_dt_coast_point_mass_is_non_finite
+PASSED tests/test_s1_failure_paths.py::test_t07_b_infinite_dt_coast_point_mass_and_j2_fails_in_j2
+PASSED tests/test_s1_failure_paths.py::test_t07_c_infinite_dt_m1_path_is_non_finite
+PASSED tests/test_s1_failure_paths.py::test_t07_d_non_finite_powered_stage_fails_before_any_mass_use
+PASSED tests/test_s1_failure_paths.py::test_t07_e_thrust_over_mass_overflow
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[m1-OverflowError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[m1-ZeroDivisionError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[coast-OverflowError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[coast-ZeroDivisionError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[powered-OverflowError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_python_arithmetic_errors_are_converted_by_step[powered-ZeroDivisionError]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_other_force_errors_propagate_as_the_identical_object[m1]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_other_force_errors_propagate_as_the_identical_object[coast]
+PASSED tests/test_s1_failure_paths.py::test_t07_f_other_force_errors_propagate_as_the_identical_object[powered]
+PASSED tests/test_s1_failure_paths.py::test_t07_g_pointing_law_error_precedes_the_force_model
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[inf-path0]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[inf-path1]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[-inf-path0]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[-inf-path1]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[nan-path0]
+PASSED tests/test_s1_failure_paths.py::test_t07_h_scenarios_reject_non_finite_dt[nan-path1]
+PASSED tests/test_s1_failure_paths.py::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[1e+308]
+PASSED tests/test_s1_failure_paths.py::test_t07_i_finite_dt_with_overflowing_tick_end_is_non_finite[8.98846567431158e+307]
+PASSED tests/test_s1_failure_paths.py::test_t07_j_infinite_dt_admits_no_burn_so_no_split_tick
+PASSED tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[nan]
+PASSED tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[inf]
+PASSED tests/test_s1_failure_paths.py::test_t07_k_finiteness_check_precedes_powered_context_construction[-inf]
+PASSED tests/test_s1_failure_paths.py::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[masked_propellant]
+PASSED tests/test_s1_failure_paths.py::test_t07_l_coast_closure_does_not_read_the_stage_through_a_subclass[raising_getitem]
+============================== 29 passed in 0.21s ==============================

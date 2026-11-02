@@ -1,0 +1,30 @@
+"""I-59 precondition 7 / S1R-01 probe: which exception does ForceContext construction raise
+for numeric subclasses whose conversion raises? Usage: python -I repro_s1r01.py SRC_DIR"""
+import sys
+
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+
+from tars.sim import forces  # noqa: E402
+
+
+def sub(base, exc):
+    return type(f"{base.__name__}_{exc.__name__}", (base,), {"__float__": lambda self: (_ for _ in ()).throw(exc("sentinel"))})
+
+
+class Arr0(np.ndarray):
+    def __getitem__(self, key):
+        raise ZeroDivisionError("sentinel")
+
+
+cases = [(f"{b.__name__} subclass, __float__ raises {e.__name__}", lambda b=b, e=e: sub(b, e)(1300))
+         for b in (int, float) for e in (ZeroDivisionError, OverflowError, RuntimeError)]
+cases.append(("0-d ndarray subclass, [()] raises ZeroDivisionError", lambda: np.array(1300.0).view(Arr0)))
+for label, make in cases:
+    for kind, ctor in (("direct", forces.ForceContext), ("deferred", forces.ForceContext.deferred)):
+        try:
+            ctor(make())
+            out = "no exception at construction"
+        except Exception as err:  # noqa: BLE001 - this is the probe
+            out = f"{type(err).__name__}: {err}"
+        print(f"{label:55s} {kind:8s} -> {out}")

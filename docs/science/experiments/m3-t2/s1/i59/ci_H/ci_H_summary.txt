@@ -1,0 +1,16 @@
+# I-60 §3: CI on H 2a35ebf397b474533300ee5a0169f8d5d025e86a (push event, branch milestone-3-t2-s1-force-context)
+Workflow "ci", run 41363138188, https://github.com/guillermoMartin96/tars/actions/runs/41363138188 : completed / success (4/4 jobs)
+job                         job id        CPython (log)  conclusion  pytest (Tests step)                                 T-07 file (test_s1_failure_paths.py)   test_s1_force_context.py
+check (ubuntu-latest)       125017595435  3.12.3         success     1387 passed, 3 skipped, 3 warnings (24m13s)         29/29 pass                             71/71 pass
+check (macos-latest, arm64) 125017595453  3.12.10        success     1387 passed, 3 skipped, 2 warnings (16m46s)         29/29 pass                             71/71 pass
+check (macos-15-intel)      125017595145  3.12.10        success     1387 passed, 3 skipped, 3 warnings (46m26s)         29/29 pass                             71/71 pass
+m2-cross-platform           125030884038  3.12.3         success     (M2 three-platform final-state gate)                -                                      -
+Skips: the 3 existing tests/test_gmat_m2.py:326 skips "GMAT R2026a not installed (CI never runs GMAT)" on each check job; 1387+3 = 1390 = local full suite at H.
+Every step of every job concluded success (no stale step metadata this time); per-file counts parsed from the raw job logs (jobs logs API).
+Warnings: macos-latest has the existing T-01(e) longdouble RuntimeWarning (tests/test_s1_force_context.py:100: np.longdouble is binary64 on arm64; S1R-03, unchanged); counts differ by platform exactly as at D/E.
+I-40 §8: the modified T-07 file (H) passes all 29 nodes on all three required platforms; no node failed, errored or was skipped.
+2026-11-01T23:39:07.0736311Z Image: ubuntu-24.04
+2026-11-01T23:39:07.3531530Z Image: macos-26-arm64
+2026-11-01T23:39:09.5863730Z Image: macos-15
+2026-11-02T00:31:06.2669313Z Image: ubuntu-24.04
+Head SHA 2a35ebf397b474533300ee5a0169f8d5d025e86a appears in every job log's checkout step.

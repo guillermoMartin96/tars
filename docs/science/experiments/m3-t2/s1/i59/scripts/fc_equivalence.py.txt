@@ -1,0 +1,53 @@
+"""I-59 supported-input equivalence: ForceContext outcomes per input, run identically in two trees.
+Usage: python -I fc_equivalence.py SRC_DIR OUT_JSON. Each case records, for direct and deferred
+construction and the first read, either the value's float.hex() and type, or the exception
+type and message. The S1R-01 cases (conversion raising) are listed separately: they are the
+only intended difference."""
+import json
+import math
+import random
+import sys
+
+sys.path.insert(0, sys.argv[1])
+import numpy as np  # noqa: E402
+
+from tars.sim import forces  # noqa: E402
+
+rng = random.Random(59)
+floats = [5e-324, 2.2250738585072014e-308, 1e-300, 1.0, 1300.0, 1300.5, 1e300, 1.7976931348623157e308,
+          0.0, -0.0, -1.0, -5e-324, math.nan, math.inf, -math.inf]
+floats += [rng.uniform(1e-3, 1e6) for _ in range(200)] + [math.ldexp(rng.random(), rng.randint(-1074, 1023)) for _ in range(200)]
+ints = [1, 1300, 2**53 + 1, 10**308, 10**309, 10**400, -(10**400), 0, -1]
+cases = []
+for x in floats:
+    cases += [("float", x), ("np.float64", np.float64(x)), ("np.float32", np.float32(x)), ("0-d f64", np.array(x)),
+              ("np.longdouble", np.longdouble(x))]
+for i in ints:
+    cases += [("int", i)]
+    if abs(i) < 2**63:
+        cases += [("np.int64", np.int64(i)), ("0-d i64", np.array(i, dtype=np.int64))]
+cases += [("longdouble overflow", np.longdouble(1e300) * np.longdouble(1e300)), ("np.float16", np.float16(1300)),
+          ("np.uint8", np.uint8(200)), ("None", None)]
+cases += [("unsupported " + type(x).__name__, x) for x in (True, False, np.bool_(True), "1300", [1300.0], object(), 1300j)]
+
+
+def outcome(fn):
+    try:
+        v = fn()
+    except Exception as err:  # noqa: BLE001
+        return ["raise", type(err).__name__, str(err)]
+    return ["value", type(v).__name__, v.hex() if isinstance(v, float) else None]  # no repr: addresses
+
+
+out = []
+for label, x in cases:
+    rec = {"label": label, "input": type(x).__name__ if type(x) is object else repr(x)}
+    for kind, make in (("direct", forces.ForceContext), ("deferred", forces.ForceContext.deferred)):
+        built = outcome(lambda: make(x))
+        rec[kind] = built
+        if built[0] == "value":
+            ctx = make(x)
+            rec[kind + "_read"] = outcome(lambda: ctx.total_mass_kg)
+    out.append(rec)
+json.dump({"numpy": np.__version__, "longdouble": str(np.finfo(np.longdouble).dtype), "cases": out}, open(sys.argv[2], "w"), indent=0)
+print(len(out), "cases")

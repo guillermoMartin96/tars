@@ -1,0 +1,156 @@
+#!/bin/bash
+# I-59 §4 verification of the proposed S1R-01 / S1R-02 corrections, in fresh clones.
+# Derived from the I-52 drivers (d_evidence.sh, d_rgates.sh) and the I-54A T-09 driver.
+# Usage: i59_gates.sh WORKTREE OUT_DIR CLONE_DIR
+#   WORKTREE: the local correction worktree (branch m3-t2-s1-i59-corrections), read only;
+#   F, G, H: the three proposed commits; E: the reviewed S1 tip; BASE: main.
+set -u
+W=$1; O=$2; C=$3
+BASE=ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd
+E_SHA=0e70f540126788be8a9596d49ef422d2488f8f08
+F_SHA=$(git -C "$W" rev-parse HEAD~2); G_SHA=$(git -C "$W" rev-parse HEAD~1); H_SHA=$(git -C "$W" rev-parse HEAD)
+URL=https://github.com/guillermoMartin96/tars.git
+GOLD=7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4
+S=$(cd "$(dirname "$0")" && pwd); P=$S/pinned
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"/{logs,red_F,green_G,tip_H,mutation,t08,t09,t10_t11,missions,fc_equivalence,r1,r2,r3,r4,run_records} "$C"; L=$O/logs
+log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$L/summary.txt"; }
+log "commits: BASE $BASE E $E_SHA F $F_SHA G $G_SHA H $H_SHA"
+[ "$(git -C "$W" rev-parse HEAD~3)" = "$E_SHA" ] || { log "STOP: H~3 is not E"; exit 2; }
+
+git clone -q "$URL" "$C/base" && git -C "$C/base" checkout -q --detach "$BASE"
+for c in bA bB bC; do git clone -q "$URL" "$C/$c" && git -C "$C/$c" checkout -q --detach "$BASE"; done
+for n in E:$E_SHA F:$F_SHA G:$G_SHA H:$H_SHA hA:$H_SHA hB:$H_SHA hC:$H_SHA; do
+  git clone -q --no-local "$W" "$C/${n%%:*}" && git -C "$C/${n%%:*}" checkout -q --detach "${n#*:}"; done
+for c in base bA bB bC E F G H hA hB hC; do (cd "$C/$c" && uv sync --locked -q) > "$L/uv_sync_$c.log" 2>&1
+  log "clone $c HEAD $(git -C "$C/$c" rev-parse HEAD) tree $(git -C "$C/$c" rev-parse 'HEAD^{tree}') uv.lock $(shasum -a 256 "$C/$c/uv.lock" | cut -c1-16) status [$(git -C "$C/$c" status --porcelain)]"; done
+(cd "$C/H" && .venv/bin/python -B -I -c 'import sys,platform,numpy;print(sys.version);print(platform.platform());print(platform.machine());print("numpy",numpy.__version__);print(numpy.finfo(numpy.longdouble))') > "$O/env_H.txt" 2>&1
+log "uv $(uv --version)"
+RR=$C/H/docs/science/experiments/m3-t2/s1/run_record.py
+rr() { (cd "$1" && .venv/bin/python -B "$RR" "$2" "$O/run_records/$3.json" > /dev/null); }
+S1T="tests/test_s1_failure_paths.py tests/test_s1_force_context.py"
+
+# Red at F (S1R-01 tests against E's production code), green at G, tip H.
+for n in F:red_F G:green_G H:tip_H; do c=${n%%:*}; d=${n#*:}
+  (cd "$C/$c" && .venv/bin/python -B -m pytest -p no:cacheprovider -rA --junitxml="$O/$d/s1_junit.xml" $S1T > "$O/$d/s1_output.txt" 2>&1)
+  python3 -I -B "$P/classify_nodes.py" "$O/$d/s1_junit.xml" > "$O/$d/s1_classification.txt" 2>&1
+  rr "$C/$c" "I-59 S1 tests at $c (local host)" "s1_$c"
+  log "S1 tests at $c: $(tail -1 "$O/$d/s1_output.txt")"; done
+(cd "$C/H" && .venv/bin/ruff check --no-cache . > "$O/tip_H/ruff_check.txt" 2>&1; echo "exit=$?" >> "$O/tip_H/ruff_check.txt"; .venv/bin/ruff format --no-cache --check . > "$O/tip_H/ruff_format.txt" 2>&1; echo "exit=$?" >> "$O/tip_H/ruff_format.txt")
+log "ruff at H: check $(tail -1 "$O/tip_H/ruff_check.txt"), format $(tail -2 "$O/tip_H/ruff_format.txt" | tr '\n' ' ')"
+(cd "$C/H" && .venv/bin/python -B -m pytest -p no:cacheprovider -q --junitxml="$O/tip_H/full_suite_junit.xml" > "$O/tip_H/full_suite_output.txt" 2>&1) &
+SUITE=$!
+# Corrected T-07 file at BASE src (characterization guard).
+(cd "$C/H" && PYTHONPATH=$C/base/src .venv/bin/python -B -m pytest -p no:cacheprovider -rA --junitxml="$O/tip_H/t07_at_base_src_junit.xml" tests/test_s1_failure_paths.py > "$O/tip_H/t07_at_base_src.txt" 2>&1)
+log "T-07 (H test file) against BASE src: $(tail -1 "$O/tip_H/t07_at_base_src.txt")"
+
+# Mutation: corrected harness at H (and at E, for comparison), original pinned harness at H; strict classification of all.
+for n in H:corrected_H:mutate_i59 E:corrected_E:mutate_i59 H:original_H:pinned/mutate; do c=${n%%:*}; r=${n#*:}; d=${r%%:*}; s=${r#*:}
+  (cd "$C/$c" && .venv/bin/python -B "$S/$s.py" "$C/$c" "$O/mutation/$d" > "$O/mutation/${d}_summary.txt" 2>&1); log "mutation $d exit=$?"
+  "$C/H/.venv/bin/python" -I -B "$S/classify_i40_10.py" "$O/mutation/$d/mutation_results.json" "$O/mutation/$d" "$d" > "$O/mutation/${d}_strict.txt" 2>&1
+  log "mutation $d strict: $(grep 'strict verdicts' "$O/mutation/${d}_strict.txt")"; done
+rr "$C/H" "I-59 corrected mutation campaign at H (local host)" mutation_H
+
+# T-08 corpora BASE vs H (pinned references: main e0309486...a814, writers 3310fd90...0415)
+for t in base H; do
+  (cd "$C/H" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$P/harness.py" "$O/t08/main_$t.jsonl" > "$L/harness_$t.log" 2>&1)
+  (cd "$C/H" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$P/harness_writers.py" "$O/t08/writers_$t.jsonl" > "$L/writers_$t.log" 2>&1)
+  (cd "$C/H" && PYTHONPATH=$C/$t/src .venv/bin/python -B "$P/harness_integrators.py" "$O/t08/integrators_$t.jsonl" > "$L/integrators_$t.log" 2>&1)
+done
+(cd "$O/t08" && shasum -a 256 main_base.jsonl main_H.jsonl writers_base.jsonl writers_H.jsonl integrators_base.jsonl integrators_H.jsonl) > "$O/t08/corpus_hashes.txt"
+"$C/H/.venv/bin/python" -B - "$O/t08" <<'PY' > "$O/t08/corpus_compare.txt"
+import json, sys
+d = sys.argv[1]
+ld = lambda f: [json.loads(l) for l in open(f"{d}/{f}")][1:]
+for name in ("main", "writers"):
+    b, c = ld(f"{name}_base.jsonl"), ld(f"{name}_H.jsonl")
+    print(f"{name} corpus cases BASE {len(b)} H {len(c)}; H differing from BASE: {sum(x != y for x, y in zip(b, c))}")
+PY
+"$C/H/.venv/bin/python" -B "$P/compare_integrators.py" "$O/t08/integrators_base.jsonl" "$O/t08/integrators_H.jsonl" > "$O/t08/integrator_corpus_compare.txt" 2>&1
+rr "$C/H" "I-59 T-08 corpora BASE vs H (local host)" t08
+log "T-08: $(cat "$O/t08/corpus_compare.txt" | tr '\n' ' ')"; grep -E "^(rows|integrators_)" "$O/t08/integrator_corpus_compare.txt" | tee -a "$L/summary.txt"
+cat "$O/t08/corpus_hashes.txt" >> "$L/summary.txt"
+rm -f "$O/t08/"*.jsonl.tmp
+
+# Supported-input ForceContext equivalence, E vs H
+for c in E H; do (cd "$C/$c" && .venv/bin/python -B -I "$S/fc_equivalence.py" "$C/$c/src" "$O/fc_equivalence/fc_$c.json") > "$O/fc_equivalence/fc_$c.log" 2>&1; done
+"$C/H/.venv/bin/python" -B - "$O/fc_equivalence" <<'PY' | tee "$O/fc_equivalence/compare.txt" | tee -a "$L/summary.txt"
+import json, sys
+d = sys.argv[1]
+e, h = (json.load(open(f"{d}/fc_{t}.json")) for t in "EH")
+diff = [(a["label"], a["input"]) for a, b in zip(e["cases"], h["cases"]) if a != b]
+print(f"ForceContext supported-input equivalence E vs H: {len(e['cases'])} cases, differing {len(diff)}; numpy {h['numpy']} longdouble {h['longdouble']}", diff[:5])
+PY
+
+# T-10 (AST identity vs BASE), T-11 (changed paths)
+(cd "$C/H" && .venv/bin/python -B "$P/ast_identity.py" "$C/base" "$C/H" > "$O/t10_t11/ast_identity.txt" 2>&1); log "T-10 exit=$? $(tail -1 "$O/t10_t11/ast_identity.txt")"
+{ echo "git diff --name-only BASE..H ($BASE..$H_SHA):"; git -C "$C/H" diff --name-only "$BASE" "$H_SHA"
+  echo; echo "git diff --name-only E..H:"; git -C "$C/H" diff --name-only "$E_SHA" "$H_SHA"
+  echo; echo "per commit:"; for r in $F_SHA $G_SHA $H_SHA; do echo "$r: $(git -C "$C/H" diff --name-only "$r^" "$r" | tr '\n' ' ')"; done
+  echo; echo "protected paths changed BASE..H (anything outside the I-40 §6 allowlist):"
+  git -C "$C/H" diff --name-only "$BASE" "$H_SHA" | grep -v -E '^(src/tars/sim/forces.py|src/tars/sim/simulator.py|tests/test_s1_force_context.py|tests/test_s1_failure_paths.py|docs/science/experiments/m3-t2/s1/.*|docs/milestones/M3-T2-report.md)$' || echo "(none)"; } > "$O/t10_t11/t11_changed_paths.txt"
+git -C "$C/H" diff "$E_SHA" "$H_SHA" -- src > "$O/t10_t11/src_diff_E_H.diff"
+rr "$C/H" "I-59 T-10 and T-11 at H (local host)" t10_t11
+log "T-11: $(sed -n '/protected/,$p' "$O/t10_t11/t11_changed_paths.txt" | tail -1); src E..H: $(git -C "$C/H" diff --stat "$E_SHA" "$H_SHA" -- src | tail -1)"
+
+# Validated scenarios, BASE vs H
+for t in base H; do for s in "$C/base"/scenarios/*.json; do b=$(basename "$s" .json)
+  (cd "$C/$t" && .venv/bin/python -B toolbox/scripts/run_mission.py --scenario "scenarios/$b.json" --out "$O/missions/$t/$b" > "$O/missions/$t-$b.stdout" 2>&1); done; done
+diff -r "$O/missions/base" "$O/missions/H" > /dev/null && log "missions: output trees identical ($(find "$O/missions/base" -type f | wc -l | tr -d ' ') files)" || log "missions: DIFFER"
+(cd "$O/missions" && find base H -type f | sort | xargs shasum -a 256) > "$O/missions/missions.sha256"
+
+# T-09 (INV-7): scan, probe at BASE and H, compare, negative control (I-54A scripts, unchanged)
+for c in H base; do
+  (cd "$C/$c" && .venv/bin/python -B -m pytest -p no:cacheprovider -v "tests/test_validation.py::test_repository_passes_architecture_scan") > "$O/t09/t09a_pytest_$c.txt" 2>&1
+  log "T-09A $c exit=$? $(tail -1 "$O/t09/t09a_pytest_$c.txt")"
+  (cd "$C/$c" && .venv/bin/python -B -I "$P/t09_probe.py" "$O/t09/probe_$c.json") > "$O/t09/probe_$c.log" 2>&1; log "T-09 probe $c exit=$?"; done
+"$C/H/.venv/bin/python" -B -I "$P/t09_compare.py" "$O/t09/probe_base.json" "$O/t09/probe_H.json" "$O/t09/t09_compare.txt" > /dev/null 2>&1
+log "T-09 compare (label D = H) exit=$? $(tail -1 "$O/t09/t09_compare.txt")"
+(cd "$C/H" && .venv/bin/python -B -I "$P/t09_negative_control.py" "$P" "$O/t09/t09_negative_control.txt") > "$O/t09/negative_control.log" 2>&1
+log "T-09 negative control exit=$? detected $(grep -c '^DETECTED' "$O/t09/t09_negative_control.txt")/$(grep -c . "$O/t09/t09_negative_control.txt")"
+rr "$C/H" "I-59 T-09 at H vs BASE (local host)" t09
+
+# R-1..R-4 at H vs BASE (I-40 §11), recomputed in both
+for n in hA:m1 bA:m1 hB:m2 bB:m2; do c=${n%%:*}; k=${n##*:}
+  (cd "$C/$c" && toolbox/scripts/run_${k}_proof.sh > "$L/proof_$c.log" 2>&1; echo "exit=$?" >> "$L/proof_$c.log") & done
+for t in hC bC; do c=$C/$t; mkdir -p "$O/r3/$t/old" "$O/r3/$t/old2"
+  (cd "$c" && git archive 97b69ef src | tar -x -C "$O/r3/$t/old" && git archive b1566ae src | tar -x -C "$O/r3/$t/old2")
+  (cd "$c" && .venv/bin/python -B docs/science/experiments/m3-t1/t1_review01_correction_check.py "$O/r3/$t/old/src" "$O/r3/$t/r01.json" > "$O/r3/$t/r01.stdout" 2>&1); e1=$?
+  (cd "$c" && .venv/bin/python -B docs/science/experiments/m3-t1/t1_review02_correction_check.py "$O/r3/$t/old2/src" "$O/r3/$t/r02.json" > "$O/r3/$t/r02.stdout" 2>&1); e2=$?
+  cmp -s "$O/r3/$t/r01.json" "$c/docs/science/experiments/m3-t1/t1_review01_correction_check_results.json" && r1=identical || r1=DIFFERS
+  cmp -s "$O/r3/$t/r02.json" "$c/docs/science/experiments/m3-t1/t1_review02_correction_check_results.json" && r2=identical || r2=DIFFERS
+  (cd "$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider -rA --junitxml="$O/r3/$t/t1_junit.xml" tests/test_zonal_j2.py tests/test_constants.py > "$O/r3/$t/t1_tests.txt" 2>&1)
+  log "R-3 $t: r01 exit=$e1 $r1; r02 exit=$e2 $r2 (vs committed results); T1 tests $(tail -1 "$O/r3/$t/t1_tests.txt")"
+  (cd "$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py > "$O/r4/$t.txt" 2>&1)
+  log "R-4 $t: $(tail -1 "$O/r4/$t.txt")"; done
+cmp -s "$O/r3/hC/r01.json" "$O/r3/bC/r01.json" && cmp -s "$O/r3/hC/r02.json" "$O/r3/bC/r02.json" && log "R-3 correction outputs H vs BASE: byte-identical" || log "R-3 correction outputs H vs BASE: DIFFER"
+rr "$C/hC" "I-59 R-3 T1 and R-4 T0 at H (local host)" R3_R4_H
+
+wait
+log "full suite at H: $(tail -1 "$O/tip_H/full_suite_output.txt")"
+for c in hA bA hB bB; do log "proof $c: $(grep -E '^overall' "$L/proof_$c.log" | tail -1) $(tail -1 "$L/proof_$c.log")"; done
+for c in hA bA; do cp -R "$C/$c/proof/records/evidence/M1" "$O/r1/$c"; log "R-1 $c golden in M1 evidence: $(grep -rho "$GOLD" "$C/$c/proof/records/evidence/M1/" | head -1)"; done
+for c in hB bB; do cp -R "$C/$c/proof/records/evidence/M2" "$O/r2/$c"; done
+rr "$C/hA" "I-59 R-1 M1 proof at H (local host)" R1_H; rr "$C/hB" "I-59 R-2 M2 proof at H (local host)" R2_H
+"$C/H/.venv/bin/python" -B - "$O" <<'PY' | tee -a "$L/summary.txt"
+import json, re, sys, hashlib
+O = sys.argv[1]
+def norm(p):
+    t = open(p).read()
+    t = re.sub(r"/var/folders/[^ \"']*/T/tmp\.[A-Za-z0-9]+", "<TMP>", t)
+    t = re.sub(r"(/private)?/tmp/claude-[^ \"']*?/clones/(hA|bA|hB|bB)", "<CLONE>", t)
+    return t.splitlines()
+a = json.load(open(f"{O}/r2/bB/m2_final_states_record.json")); b = json.load(open(f"{O}/r2/hB/m2_final_states_record.json"))
+print("R-2 m2_final_states_record keys differing BASE vs H:", sorted(k for k in a.keys() | b.keys() if a.get(k) != b.get(k)))
+print("R-2 missions identical:", a["missions"] == b["missions"])
+body = {k: v for k, v in b.items() if k != "sha256"}; body["revision"] = a["revision"]
+print("R-2 record sha256 with BASE revision substituted equals BASE:", hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest() == a["sha256"])
+x, y = norm(f"{O}/r2/bB/m2_proof_stdout.txt"), norm(f"{O}/r2/hB/m2_proof_stdout.txt")
+print(f"R-2 m2_proof_stdout: [PASS] BASE {sum(l.startswith('[PASS]') for l in x)} H {sum(l.startswith('[PASS]') for l in y)}; [FAIL] BASE {sum(l.startswith('[FAIL]') for l in x)} H {sum(l.startswith('[FAIL]') for l in y)}")
+sem = lambda ls: [l for l in ls if re.search(r"^\[(PASS|FAIL)\]|digest|sha256|golden|snapshot|manifest|threshold", l, re.I)]
+print("R-2 semantic lines identical after temp-path normalization:", sem(x) == sem(y), len(sem(x)))
+print("R-2 remaining differing lines:", sum(p != q for p, q in zip(x, y)), "len", len(x), len(y))
+PY
+for k in M1:r1/bA:r1/hA M2:r2/bB:r2/hB; do n=${k%%:*}; r=${k#*:}; diff -r "$O/${r%%:*}" "$O/${r#*:}" > "$L/proofdiff_$n.txt" 2>&1; done
+for c in base bA bB bC E F G H hA hB hC; do log "clone $c tracked changes after runs: [$(git -C "$C/$c" status --porcelain --untracked-files=no | tr '\n' ';')]"; done
+log DONE

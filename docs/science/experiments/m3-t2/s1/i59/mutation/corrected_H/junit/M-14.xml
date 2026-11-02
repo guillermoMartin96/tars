@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="0.192" timestamp="2026-11-01T08:49:22.534480-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s1_failure_paths" name="test_t07_k_finiteness_check_precedes_powered_context_construction[nan]" time="0.002"><failure message="AssertionError: expected FloatingPointError matching '^non-finite state during a burn at t = 2\\.0$', got ValueError: total_mass_kg must be finite and positive, got nan&#10;assert (False)&#10; +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)">expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state during a burn at t = 2\\.0$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10d28d940&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           call(*args)
+
+tests/test_s1_failure_paths.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/simulator.py:507: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/simulator.py:546: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/simulator.py:478: in powered
+    early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/forces.py:225: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.ForceContext object at 0x10d28be50&gt;
+
+    @property
+    def total_mass_kg(self) -&gt; float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass &gt; 0.0):
+&gt;           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got nan
+
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/forces.py:247: ValueError
+
+During handling of the above exception, another exception occurred:
+
+value = nan
+
+    @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+    def test_t07_k_finiteness_check_precedes_powered_context_construction(value):
+        """Review R-01 (I-41): a stage propellant made non-finite by a model is reported by the
+        powered closure's finiteness check, before any context exists (pins I-39A §10 M-14)."""
+        model = _StageWriter(1.0, 6, value)
+        sim = Simulator(R0, V0, model, RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+&gt;       _assert_raises(FloatingPointError, r"^non-finite state during a burn at t = 2\.0$", sim.step)
+
+tests/test_s1_failure_paths.py:256: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state during a burn at t = 2\\.0$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10d28d940&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            call(*args)
+        except Exception as err:
+&gt;           assert isinstance(err, expected) and re.search(pattern, str(err)), (
+                f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+            )
+E           AssertionError: expected FloatingPointError matching '^non-finite state during a burn at t = 2\\.0$', got ValueError: total_mass_kg must be finite and positive, got nan
+E           assert (False)
+E            +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got nan'), &lt;class 'FloatingPointError'&gt;)
+
+tests/test_s1_failure_paths.py:85: AssertionError</failure></testcase><testcase classname="tests.test_s1_failure_paths" name="test_t07_k_finiteness_check_precedes_powered_context_construction[inf]" time="0.001"><failure message="AssertionError: expected FloatingPointError matching '^non-finite state during a burn at t = 2\\.0$', got ValueError: total_mass_kg must be finite and positive, got inf&#10;assert (False)&#10; +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got inf'), &lt;class 'FloatingPointError'&gt;)">expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state during a burn at t = 2\\.0$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10d28b890&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+&gt;           call(*args)
+
+tests/test_s1_failure_paths.py:83: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/simulator.py:507: in step
+    y_next, engine = self._step_with_propulsion(prev.t)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/simulator.py:546: in _step_with_propulsion
+    y = self._integrator.step(self._powered_derivative(engine.active), a, y, b - a)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/integrators.py:38: in step
+    k2 = f(t + half, y + half * k1)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/simulator.py:478: in powered
+    early = ForceContext(spacecraft.dry_mass_kg + max(float(y[_PROP]), 0.0))
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/forces.py:225: in __init__
+    self.total_mass_kg  # noqa: B018 - validates now (option A)
+    ^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;tars.sim.forces.ForceContext object at 0x10d28ded0&gt;
+
+    @property
+    def total_mass_kg(self) -&gt; float | None:
+        mass = self._mass
+        if mass is not None and not (math.isfinite(mass) and mass &gt; 0.0):
+&gt;           raise ValueError(f"total_mass_kg must be finite and positive, got {mass!r}")
+E           ValueError: total_mass_kg must be finite and positive, got inf
+
+$EVIDENCE/run1/mutation/corrected_H/M-14/src/tars/sim/forces.py:247: ValueError
+
+During handling of the above exception, another exception occurred:
+
+value = inf
+
+    @pytest.mark.parametrize("value", [math.nan, math.inf, -math.inf])
+    def test_t07_k_finiteness_check_precedes_powered_context_construction(value):
+        """Review R-01 (I-41): a stage propellant made non-finite by a model is reported by the
+        powered closure's finiteness check, before any context exists (pins I-39A §10 M-14)."""
+        model = _StageWriter(1.0, 6, value)
+        sim = Simulator(R0, V0, model, RK4(), 10.0, spacecraft=_spacecraft())
+        sim.schedule_burn("prograde", ignition_t_s=1.0, duration_s=2.0)
+        before = (sim.snapshot(), sim.propulsion_snapshot())
+&gt;       _assert_raises(FloatingPointError, r"^non-finite state during a burn at t = 2\.0$", sim.step)
+
+tests/test_s1_failure_paths.py:256: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+expected = &lt;class 'FloatingPointError'&gt;
+pattern = '^non-finite state during a burn at t = 2\\.0$'
+call = &lt;bound method Simulator.step of &lt;tars.sim.simulator.Simulator object at 0x10d28b890&gt;&gt;
+args = ()
+
+    def _assert_raises(expected, pattern, call, *args):
+        """``pytest.raises(expected, match=pattern)`` as an assertion: a different exception
+        fails the test with an assertion naming it, instead of propagating (I-40 §10, I-59)."""
+        try:
+            call(*args)
+        except Exception as err:
+&gt;           assert isinstance(err, expected) and re.search(pattern, str(err)), (
+                f"expected {expected.__name__} matching {pattern!r}, got {type(err).__name__}: {err}"
+            )
+E           AssertionError: expected FloatingPointError matching '^non-finite state during a burn at t = 2\\.0$', got ValueError: total_mass_kg must be finite and positive, got inf
+E           assert (False)
+E            +  where False = isinstance(ValueError('total_mass_kg must be finite and positive, got inf'), &lt;class 'FloatingPointError'&gt;)
+
+tests/test_s1_failure_paths.py:85: AssertionError</failure></testcase><testcase classname="tests.test_s1_failure_paths" name="test_t07_k_finiteness_check_precedes_powered_context_construction[-inf]" time="0.016" /></testsuite></testsuites>

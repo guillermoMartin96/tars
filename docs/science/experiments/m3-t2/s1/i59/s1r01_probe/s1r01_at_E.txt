@@ -1,0 +1,14 @@
+int subclass, __float__ raises ZeroDivisionError        direct   -> ZeroDivisionError: sentinel
+int subclass, __float__ raises ZeroDivisionError        deferred -> ZeroDivisionError: sentinel
+int subclass, __float__ raises OverflowError            direct   -> ValueError: total_mass_kg is not representable as a binary64 number
+int subclass, __float__ raises OverflowError            deferred -> ValueError: total_mass_kg is not representable as a binary64 number
+int subclass, __float__ raises RuntimeError             direct   -> RuntimeError: sentinel
+int subclass, __float__ raises RuntimeError             deferred -> RuntimeError: sentinel
+float subclass, __float__ raises ZeroDivisionError      direct   -> ZeroDivisionError: sentinel
+float subclass, __float__ raises ZeroDivisionError      deferred -> ZeroDivisionError: sentinel
+float subclass, __float__ raises OverflowError          direct   -> ValueError: total_mass_kg is not representable as a binary64 number
+float subclass, __float__ raises OverflowError          deferred -> ValueError: total_mass_kg is not representable as a binary64 number
+float subclass, __float__ raises RuntimeError           direct   -> RuntimeError: sentinel
+float subclass, __float__ raises RuntimeError           deferred -> RuntimeError: sentinel
+0-d ndarray subclass, [()] raises ZeroDivisionError     direct   -> ZeroDivisionError: sentinel
+0-d ndarray subclass, [()] raises ZeroDivisionError     deferred -> ZeroDivisionError: sentinel

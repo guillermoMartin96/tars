@@ -1,0 +1,28 @@
+diff --git a/src/tars/sim/forces.py b/src/tars/sim/forces.py
+index f347a0f..6b08268 100644
+--- a/src/tars/sim/forces.py
++++ b/src/tars/sim/forces.py
+@@ -214,7 +214,8 @@ class ForceContext:
+       the coast closure): it rejects such an m when ``total_mass_kg`` is read. A model that
+       never reads the mass therefore fails exactly as it did before the context existed.
+ 
+-    Both raise ``ValueError``; neither raises ``OverflowError`` or ``ZeroDivisionError``.
++    Both raise ``ValueError``; neither raises ``OverflowError`` or ``ZeroDivisionError``. A
++    mass whose conversion to binary64 fails is rejected at construction on both paths.
+     """
+ 
+     __slots__ = ("_mass",)
+@@ -231,7 +232,12 @@ class ForceContext:
+         return ctx
+ 
+     def _store(self, total_mass_kg: float | None) -> None:
+-        mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)
++        # A supported numeric type whose conversion raises OverflowError or ZeroDivisionError
++        # (e.g. a subclass's __float__) is rejected here, for both paths (S1R-01, I-59).
++        try:
++            mass = None if total_mass_kg is None else _owned_float("total_mass_kg", total_mass_kg)
++        except (OverflowError, ZeroDivisionError):
++            raise ValueError("total_mass_kg is not representable as a binary64 number") from None
+         object.__setattr__(self, "_mass", mass)
+ 
+     @property

@@ -1,0 +1,124 @@
+FFFF.                                                                    [100%]
+=================================== FAILURES ===================================
+__________ test_t02_adapter_propagates_the_identical_exception[exc0] ___________
+
+exc = ValueError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        try:
+            adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+        except BaseException as raised:  # any type: identity is asserted below (I-40 §10)
+            err = raised
+        else:
+            pytest.fail(f"DID NOT RAISE {type(exc).__name__}")
+>       assert err is exc, (
+            f"expected the identical {type(exc).__name__}, got {type(err).__name__}: {err}"
+        )
+E       AssertionError: expected the identical ValueError, got RuntimeError: x
+E       assert RuntimeError('x') is ValueError('x')
+
+tests/test_s1_force_context.py:278: AssertionError
+__________ test_t02_adapter_propagates_the_identical_exception[exc1] ___________
+
+exc = FloatingPointError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        try:
+            adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+        except BaseException as raised:  # any type: identity is asserted below (I-40 §10)
+            err = raised
+        else:
+            pytest.fail(f"DID NOT RAISE {type(exc).__name__}")
+>       assert err is exc, (
+            f"expected the identical {type(exc).__name__}, got {type(err).__name__}: {err}"
+        )
+E       AssertionError: expected the identical FloatingPointError, got RuntimeError: x
+E       assert RuntimeError('x') is FloatingPointError('x')
+
+tests/test_s1_force_context.py:278: AssertionError
+__________ test_t02_adapter_propagates_the_identical_exception[exc2] ___________
+
+exc = OverflowError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        try:
+            adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+        except BaseException as raised:  # any type: identity is asserted below (I-40 §10)
+            err = raised
+        else:
+            pytest.fail(f"DID NOT RAISE {type(exc).__name__}")
+>       assert err is exc, (
+            f"expected the identical {type(exc).__name__}, got {type(err).__name__}: {err}"
+        )
+E       AssertionError: expected the identical OverflowError, got RuntimeError: x
+E       assert RuntimeError('x') is OverflowError('x')
+
+tests/test_s1_force_context.py:278: AssertionError
+__________ test_t02_adapter_propagates_the_identical_exception[exc3] ___________
+
+exc = ZeroDivisionError('x')
+
+    @pytest.mark.parametrize(
+        "exc",
+        [
+            ValueError("x"),
+            FloatingPointError("x"),
+            OverflowError("x"),
+            ZeroDivisionError("x"),
+            KeyboardInterrupt(),
+        ],
+    )
+    def test_t02_adapter_propagates_the_identical_exception(exc):
+        adapter = forces.LegacyForceAdapter(_Recorder(exc=exc))
+        try:
+            adapter.acceleration(0.0, np.zeros(3), np.zeros(3), forces.ForceContext())
+        except BaseException as raised:  # any type: identity is asserted below (I-40 §10)
+            err = raised
+        else:
+            pytest.fail(f"DID NOT RAISE {type(exc).__name__}")
+>       assert err is exc, (
+            f"expected the identical {type(exc).__name__}, got {type(err).__name__}: {err}"
+        )
+E       AssertionError: expected the identical ZeroDivisionError, got RuntimeError: x
+E       assert RuntimeError('x') is ZeroDivisionError('x')
+
+tests/test_s1_force_context.py:278: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc0]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc1]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc2]
+FAILED tests/test_s1_force_context.py::test_t02_adapter_propagates_the_identical_exception[exc3]
+4 failed, 1 passed in 0.19s
