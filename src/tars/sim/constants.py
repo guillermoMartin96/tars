@@ -38,6 +38,11 @@ WGS84 = EarthConstants(
 
 EARTH_CONSTANTS: dict[str, EarthConstants] = {WGS84.name: WGS84}
 
+# WGS 84 inverse flattening 1/f, NGA.STND.0036_1.0.0_WGS84 (2014), defining parameters
+# (M3 T2 S2, U-10 1/f part). The flattening f and e2 = f(2 - f) are derived from it by
+# DQ-1 step 1 in tars.sim.geodesy, never stored.
+WGS84_INVERSE_FLATTENING = 298.257223563
+
 # Earth's second zonal harmonic, approximate (SCI-0001; Vallado 2013 §9.6). Informational
 # only: used to compare GMAT's J2 node drift with the first-order analytic rate. The M1
 # force model does NOT include J2 (DR-0002).

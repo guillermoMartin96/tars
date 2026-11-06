@@ -1,7 +1,7 @@
 """S2 DL-4 conformance tests (M3 T2 S2; proposal v11 §3.10, §3.11 G-08 and G-12).
 
-Commit A holds G-12a (twin independence, a guard) and the twin sanity tests, none of which
-needs the component.
+G-12a (twin independence, a guard) and the twin sanity tests need no component; G-12b and
+G-08 are red-first (the component is imported inside the test functions).
 """
 
 from __future__ import annotations
@@ -87,3 +87,47 @@ def test_twin_records_the_cap_without_convergence_as_not_converged():
     assert rec.converged is False
     assert rec.iterations == 60
     assert Lib.calls == 61  # the start plus 60 updates
+
+
+# --- G-12b: the component exists and imports nothing from tests (red-first) ------------
+
+
+def test_g12b_component_exists_and_imports_nothing_from_tests():
+    geodesy = REPO_ROOT / "src" / "tars" / "sim" / "geodesy.py"
+    assert geodesy.exists(), "src/tars/sim/geodesy.py is absent"
+    modules = _imported_modules(geodesy)
+    assert not any(m == "tests" or m.startswith("tests.") for m in modules), modules
+
+
+# --- G-08: DL-4 outcome conformance at every `passes` entry -----------------------------
+
+
+def test_g08_component_equals_twin_at_every_passes_entry():
+    """For every listing entry labelled `passes`, on this platform, in one process: the
+    expected outcome from the twin (§3.10 adapter) equals the component's outcome, and
+    accepted h and phi are bit-identical (signed zeros included). Any twin exception other
+    than ArithmeticError or ValueError raises TwinStopError: a STOP, never a skipped point."""
+    from tars.sim import geodesy
+    from tests import s2_dl4_point_sets as gen
+    from tests.s2_dl4_geodetic_twin import twin_outcome
+
+    entries = gen.parse_listing((REPO_ROOT / "tests" / "s2_dl4_points.txt").read_text())
+    passes = [e for e in entries if e.label == "passes"]
+    assert len(passes) == 22601
+    mismatches = []
+    for e in passes:
+        expected = twin_outcome(e.x, e.y, e.z)
+        try:
+            h, phi = geodesy.geodetic((e.x, e.y, e.z))
+            actual = "accepted"
+        except geodesy.GeodeticDomainError as exc:
+            actual = exc.reason
+        if actual != expected.outcome:
+            mismatches.append((e.set, e.index, expected.outcome, actual))
+        elif actual == "accepted":
+            rec = expected.record
+            same_h = struct.pack("<d", h) == struct.pack("<d", rec.h)
+            same_phi = struct.pack("<d", phi) == struct.pack("<d", rec.phi)
+            if not (same_h and same_phi):
+                mismatches.append((e.set, e.index, "accepted bits", h.hex(), rec.h.hex()))
+    assert mismatches == [], f"stop 3: {len(mismatches)} G-08 mismatches: {mismatches[:10]}"

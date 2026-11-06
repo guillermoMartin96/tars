@@ -140,3 +140,15 @@ def test_c20_literal_only_in_constants_and_no_j2_literal_anywhere():
             j2_offenders.append(path.relative_to(REPO_ROOT))
     assert c20_offenders == []
     assert j2_offenders == []
+
+
+def test_wgs84_inverse_flattening_literal_only_in_constants_module():
+    """U-10 (1/f part), G-01: the NGA 1/f literal 298.257223563 appears exactly once in
+    src/, in constants.py (DR-0003)."""
+    pattern = re.compile(r"298\.257223563")
+    hits = {}
+    for path in (REPO_ROOT / "src").rglob("*.py"):
+        n = len(pattern.findall(path.read_text()))
+        if n:
+            hits[path.relative_to(REPO_ROOT).as_posix()] = n
+    assert hits == {"src/tars/sim/constants.py": 1}
