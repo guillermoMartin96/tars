@@ -1,0 +1,15 @@
+#!/bin/bash
+# I-101/I-99: host local gates for commit BC (v11 §3.14 step 3). Unfiltered output.
+set -u
+OUT="$HOME/tars-evidence/I-101/bc-gates"
+W="$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic"
+UV="$HOME/Library/Python/3.9/bin/uv"
+cd "$W" || exit 99
+date -u +%FT%TZ > "$OUT/start-utc.txt"
+{ git rev-parse HEAD; git status --porcelain --untracked-files=all; } > "$OUT/tree-at-start.txt"
+{ git ls-files --others --exclude-standard; git diff --name-only HEAD; } | sort -u | while read -r f; do echo "$(git hash-object "$f") $(shasum -a 256 "$f" | cut -d' ' -f1) $f"; done > "$OUT/untracked-identities.txt"
+"$UV" run ruff check . > "$OUT/ruff-check.log" 2>&1; echo $? > "$OUT/ruff-check.exit"
+"$UV" run ruff format --check . > "$OUT/ruff-format.log" 2>&1; echo $? > "$OUT/ruff-format.exit"
+"$UV" run pytest -ra -p no:cacheprovider --junitxml="$OUT/pytest-junit.xml" > "$OUT/pytest.log" 2>&1; echo $? > "$OUT/pytest.exit"
+date -u +%FT%TZ > "$OUT/end-utc.txt"
+touch "$OUT/DONE"

@@ -1,0 +1,71 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________________ test_g03_all_eight_signed_zero_origins ____________________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-03/src/tars/sim/geodesy.py'>
+r = (0.0, 0.0, 0.0), reason = 'origin'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+>           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (0.0, 0.0, 0.0)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if False:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+>           raise GeodeticDomainError("evolute_region")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the point lies in the evolute region (DR-0029 P8)
+
+../campaign/mutation/MG-03/src/tars/sim/geodesy.py:156: GeodeticDomainError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g03_all_eight_signed_zero_origins():
+        geo = _geo()
+        for sx, sy, sz in gen.SIGNS:
+>           _raises_reason(geo, (sx * 0.0, sy * 0.0, sz * 0.0), "origin")
+
+tests/test_s2_geodetic.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-03/src/tars/sim/geodesy.py'>
+r = (0.0, 0.0, 0.0), reason = 'origin'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           assert exc.reason == reason, (r, exc.reason)
+E           AssertionError: ((0.0, 0.0, 0.0), 'evolute_region')
+E           assert 'evolute_region' == 'origin'
+E             
+E             - origin
+E             + evolute_region
+
+tests/test_s2_geodetic.py:116: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g03_all_eight_signed_zero_origins - As...
+1 failed in 0.20s

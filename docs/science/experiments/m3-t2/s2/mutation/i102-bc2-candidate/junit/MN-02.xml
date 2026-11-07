@@ -1,0 +1,861 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="16" skipped="0" tests="16" time="0.890" timestamp="2026-11-06T20:22:14.714094-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g14_enumerated_acceptance_sets_are_accepted[S-EQ]" time="0.043"><failure message="AssertionError: stop 16: S-EQ entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 167 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'S-EQ'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-EQ entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 167 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g14_enumerated_acceptance_sets_are_accepted[S-AX]" time="0.043"><failure message="AssertionError: stop 16: S-AX entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 310 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'S-AX'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-AX entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 310 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR]" time="0.043"><failure message="AssertionError: stop 16: S-NEAR entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 60 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'S-NEAR'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-NEAR entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 60 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g14_enumerated_acceptance_sets_are_accepted[S-BIG]" time="0.053"><failure message="AssertionError: stop 16: S-BIG entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 8 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'S-BIG'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-BIG entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 8 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[+x]" time="0.001"><failure message="AssertionError: (42697.67270717997, 0.0, 0.0): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (42697.67270717997, 0.0, 0.0)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (42697.67270717997, 0.0, 0.0)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '+x'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (42697.67270717997, 0.0, 0.0)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (42697.67270717997, 0.0, 0.0): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[x=y]" time="0.001"><failure message="AssertionError: (30191.81391213073, 30191.81391213073, 0.0): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (30191.81391213073, 30191.81391213073, 0.0)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (30191.81391213073, 30191.81391213073, 0.0)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = 'x=y'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (30191.81391213073, 30191.81391213073, 0.0)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (30191.81391213073, 30191.81391213073, 0.0): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[+z]" time="0.001"><failure message="AssertionError: (0.0, 0.0, 42841.31151331358): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, 42841.31151331358)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (0.0, 0.0, 42841.31151331358)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '+z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, 42841.31151331358)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (0.0, 0.0, 42841.31151331358): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[-z]" time="0.001"><failure message="AssertionError: (0.0, 0.0, -42841.31151331358): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, -42841.31151331358)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (0.0, 0.0, -42841.31151331358)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '-z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, -42841.31151331358)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (0.0, 0.0, -42841.31151331358): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[(1,0,1)]" time="0.001"><failure message="AssertionError: (15121.263417223727, 0.0, 15121.263417223727): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (15121.263417223727, 0.0, 15121.263417223727)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (15121.263417223727, 0.0, 15121.263417223727)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (15121.263417223727, 0.0, 15121.263417223727)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (15121.263417223727, 0.0, 15121.263417223727): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[(2,0,1)]" time="0.001"><failure message="AssertionError: (20544.799187243247, 0.0, 10272.399593621623): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (20544.799187243247, 0.0, 10272.399593621623)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (20544.799187243247, 0.0, 10272.399593621623)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (20544.799187243247, 0.0, 10272.399593621623)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (20544.799187243247, 0.0, 10272.399593621623): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[(1,0,2)]" time="0.001"><failure message="AssertionError: (10280.23472671227, 0.0, 20560.46945342454): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (10280.23472671227, 0.0, 20560.46945342454)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (10280.23472671227, 0.0, 20560.46945342454)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (10280.23472671227, 0.0, 20560.46945342454)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (10280.23472671227, 0.0, 20560.46945342454): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_accepted[(1,1,1)]" time="0.001"><failure message="AssertionError: (12586.62520540496, 12586.62520540496, 12586.62520540496): expected accepted, got non_convergence">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (12586.62520540496, 12586.62520540496, 12586.62520540496)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+&gt;           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (12586.62520540496, 12586.62520540496, 12586.62520540496)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+            raise GeodeticDomainError("overflow")
+        if converged:
+&gt;           raise GeodeticDomainError("non_convergence")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: the DQ-1 stop test was not met within 60 iterations
+
+../campaign/mutation/MN-02/src/tars/sim/geodesy.py:182: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+&gt;       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MN-02/src/tars/sim/geodesy.py'&gt;
+r = (12586.62520540496, 12586.62520540496, 12586.62520540496)
+
+    def _accepted(geo, r) -&gt; tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (12586.62520540496, 12586.62520540496, 12586.62520540496): expected accepted, got non_convergence
+
+tests/test_s2_geodetic.py:139: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g15_protected_sets_are_accepted[PS-A]" time="0.039"><failure message="AssertionError: stop 16: PS-A entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 16 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'PS-A'
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = []
+        for e in entries:
+            try:
+                h, phi = geo.geodetic((e.x, e.y, e.z))
+            except geo.GeodeticDomainError as exc:
+                bad.append((e.index, exc.reason))
+                continue
+            if not (math.isfinite(h) and math.isfinite(phi)):
+                bad.append((e.index, "non-finite output"))
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: PS-A entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 16 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:768: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g15_protected_sets_are_accepted[PS-A']" time="0.039"><failure message="AssertionError: stop 16: PS-A' entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 640 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = "PS-A'"
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = []
+        for e in entries:
+            try:
+                h, phi = geo.geodetic((e.x, e.y, e.z))
+            except geo.GeodeticDomainError as exc:
+                bad.append((e.index, exc.reason))
+                continue
+            if not (math.isfinite(h) and math.isfinite(phi)):
+                bad.append((e.index, "non-finite output"))
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: PS-A' entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 640 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:768: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g15_protected_sets_are_accepted[PS-OPS]" time="0.074"><failure message="AssertionError: stop 16: PS-OPS entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 6498 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'PS-OPS'
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = []
+        for e in entries:
+            try:
+                h, phi = geo.geodetic((e.x, e.y, e.z))
+            except geo.GeodeticDomainError as exc:
+                bad.append((e.index, exc.reason))
+                continue
+            if not (math.isfinite(h) and math.isfinite(phi)):
+                bad.append((e.index, "non-finite output"))
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: PS-OPS entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 6498 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:768: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g15_protected_sets_are_accepted[PS-GRID]" time="0.053"><failure message="AssertionError: stop 16: PS-GRID entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]&#10;assert [(0, 'non_con...rgence'), ...] == []&#10;  &#10;  Left contains 2072 more items, first extra item: (0, 'non_convergence')&#10;  Use -v to get more diff">set_name = 'PS-GRID'
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = []
+        for e in entries:
+            try:
+                h, phi = geo.geodetic((e.x, e.y, e.z))
+            except geo.GeodeticDomainError as exc:
+                bad.append((e.index, exc.reason))
+                continue
+            if not (math.isfinite(h) and math.isfinite(phi)):
+                bad.append((e.index, "non-finite output"))
+&gt;       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: PS-GRID entries not accepted: [(0, 'non_convergence'), (1, 'non_convergence'), (2, 'non_convergence'), (3, 'non_convergence'), (4, 'non_convergence'), (5, 'non_convergence'), (6, 'non_convergence'), (7, 'non_convergence'), (8, 'non_convergence'), (9, 'non_convergence')]
+E       assert [(0, 'non_con...rgence'), ...] == []
+E         
+E         Left contains 2072 more items, first extra item: (0, 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:768: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,525 @@
+FFFFFFF.FFFF                                                             [100%]
+=================================== FAILURES ===================================
+______________ test_g03_boundary_pair_outside_point_accepted[+x] _______________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (42697.67270717997, 0.0, 0.0)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (42697.67270717997, 0.0, 0.0)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '+x'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (42697.67270717997, 0.0, 0.0)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (42697.67270717997, 0.0, 0.0): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+______________ test_g03_boundary_pair_outside_point_accepted[x=y] ______________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (30191.81391213073, 30191.81391213073, 0.0)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (30191.81391213073, 30191.81391213073, 0.0)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = 'x=y'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (30191.81391213073, 30191.81391213073, 0.0)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (30191.81391213073, 30191.81391213073, 0.0): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+______________ test_g03_boundary_pair_outside_point_accepted[+z] _______________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (0.0, 0.0, 42841.31151331358)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (0.0, 0.0, 42841.31151331358)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '+z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (0.0, 0.0, 42841.31151331358)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (0.0, 0.0, 42841.31151331358): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+______________ test_g03_boundary_pair_outside_point_accepted[-z] _______________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (0.0, 0.0, -42841.31151331358)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (0.0, 0.0, -42841.31151331358)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '-z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (0.0, 0.0, -42841.31151331358)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (0.0, 0.0, -42841.31151331358): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+____________ test_g03_boundary_pair_outside_point_accepted[(1,0,1)] ____________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (15121.263417223727, 0.0, 15121.263417223727)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (15121.263417223727, 0.0, 15121.263417223727)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (15121.263417223727, 0.0, 15121.263417223727)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (15121.263417223727, 0.0, 15121.263417223727): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+____________ test_g03_boundary_pair_outside_point_accepted[(2,0,1)] ____________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (20544.799187243247, 0.0, 10272.399593621623)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (20544.799187243247, 0.0, 10272.399593621623)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (20544.799187243247, 0.0, 10272.399593621623)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (20544.799187243247, 0.0, 10272.399593621623): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+____________ test_g03_boundary_pair_outside_point_accepted[(1,0,2)] ____________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (10280.23472671227, 0.0, 20560.46945342454)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+>           out = geo.geodetic(r)
+                  ^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:137: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (10280.23472671227, 0.0, 20560.46945342454)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 or y == 0.0 or z == 0.0:
+>           raise GeodeticDomainError("origin")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the origin has no geodetic height
+
+../campaign/mutation/MG-04/src/tars/sim/geodesy.py:153: GeodeticDomainError
+
+The above exception was the direct cause of the following exception:
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-04/src/tars/sim/geodesy.py'>
+r = (10280.23472671227, 0.0, 20560.46945342454)
+
+    def _accepted(geo, r) -> tuple[float, float]:
+        try:
+            out = geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+>           raise AssertionError(f"{r!r}: expected accepted, got {exc.reason}") from exc
+E           AssertionError: (10280.23472671227, 0.0, 20560.46945342454): expected accepted, got origin
+
+tests/test_s2_geodetic.py:139: AssertionError
+____________ test_g14_enumerated_acceptance_sets_are_accepted[S-EQ] ____________
+
+set_name = 'S-EQ'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+>       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-EQ entries not accepted: [(0, 'origin'), (1, 'origin'), (2, 'origin'), (3, 'origin'), (4, 'origin'), (5, 'origin'), (6, 'origin'), (7, 'origin'), (8, 'origin'), (9, 'origin')]
+E       assert [(0, 'origin'...origin'), ...] == []
+E         
+E         Left contains 167 more items, first extra item: (0, 'origin')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError
+____________ test_g14_enumerated_acceptance_sets_are_accepted[S-AX] ____________
+
+set_name = 'S-AX'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+>       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-AX entries not accepted: [(0, 'origin'), (1, 'origin'), (2, 'origin'), (3, 'origin'), (4, 'origin'), (5, 'origin'), (6, 'origin'), (7, 'origin'), (8, 'origin'), (9, 'origin')]
+E       assert [(0, 'origin'...origin'), ...] == []
+E         
+E         Left contains 310 more items, first extra item: (0, 'origin')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError
+___________ test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR] ___________
+
+set_name = 'S-NEAR'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+>       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-NEAR entries not accepted: [(0, 'origin'), (1, 'origin'), (3, 'origin'), (4, 'origin'), (6, 'origin'), (7, 'origin'), (9, 'origin'), (10, 'origin'), (12, 'origin'), (13, 'origin')]
+E       assert [(0, 'origin'...origin'), ...] == []
+E         
+E         Left contains 40 more items, first extra item: (0, 'origin')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError
+___________ test_g14_enumerated_acceptance_sets_are_accepted[S-BIG] ____________
+
+set_name = 'S-BIG'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+        geo = _geo()
+        entries = [e for e in _frozen() if e.set == set_name]
+        assert len(entries) == gen.SET_COUNTS[set_name]
+        bad = [(e.index, _reason(geo, (e.x, e.y, e.z))) for e in entries]
+        bad = [b for b in bad if b[1] is not None]
+>       assert bad == [], f"stop 16: {set_name} entries not accepted: {bad[:10]}"
+E       AssertionError: stop 16: S-BIG entries not accepted: [(0, 'origin'), (2, 'origin'), (3, 'origin'), (4, 'origin'), (5, 'origin')]
+E       assert [(0, 'origin'...(5, 'origin')] == []
+E         
+E         Left contains 5 more items, first extra item: (0, 'origin')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:748: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[+x]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[x=y]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[+z]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[-z]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(2,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,0,2)]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-EQ]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-AX]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-BIG]
+11 failed, 1 passed in 0.75s

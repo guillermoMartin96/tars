@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.741" timestamp="2026-11-06T15:14:04.923626-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi11_stop_test_met_at_update_60_is_accepted" time="0.002"><failure message="AssertionError: GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations')&#10;assert 'raised' == 'returned'&#10;  &#10;  - returned&#10;  + raised">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x111b20230&gt;
+
+    def test_g16_fi11_stop_test_met_at_update_60_is_accepted(monkeypatch):
+        def atan2(i):
+            return (59 - i) * 1e-10 if i &lt;= 59 else 1e-15
+    
+        kind, value = _run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07)
+&gt;       assert kind == "returned", value
+E       AssertionError: GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations')
+E       assert 'raised' == 'returned'
+E         
+E         - returned
+E         + raised
+
+tests/test_s2_geodetic.py:898: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic_conformance" name="test_g08_component_equals_twin_at_every_passes_entry" time="0.548"><failure message="AssertionError: stop 3: 145 G-08 mismatches: [('DG-CUSP', 117, 'accepted', 'non_convergence'), ('DG-CUSP', 118, 'accepted', 'non_convergence'), ('DG-CUSP', 119, 'accepted', 'non_convergence'), ('DG-CUSP', 120, 'accepted', 'non_convergence'), ('DG-CUSP', 121, 'accepted', 'non_convergence'), ('DG-CUSP', 122, 'accepted', 'non_convergence'), ('DG-CUSP', 123, 'accepted', 'non_convergence'), ('DG-CUSP', 124, 'accepted', 'non_convergence'), ('DG-CUSP', 125, 'accepted', 'non_convergence'), ('DG-CUSP', 126, 'accepted', 'non_convergence')]&#10;assert [('DG-CUSP', ...rgence'), ...] == []&#10;  &#10;  Left contains 145 more items, first extra item: ('DG-CUSP', 117, 'accepted', 'non_convergence')&#10;  Use -v to get more diff">def test_g08_component_equals_twin_at_every_passes_entry():
+        """For every listing entry labelled `passes`, on this platform, in one process: the
+        expected outcome from the twin (§3.10 adapter) equals the component's outcome, and
+        accepted h and phi are bit-identical (signed zeros included). Any twin exception other
+        than ArithmeticError or ValueError raises TwinStopError: a STOP, never a skipped point."""
+        from tars.sim import geodesy
+        from tests import s2_dl4_point_sets as gen
+        from tests.s2_dl4_geodetic_twin import twin_outcome
+    
+        entries = gen.parse_listing((REPO_ROOT / "tests" / "s2_dl4_points.txt").read_text())
+        passes = [e for e in entries if e.label == "passes"]
+        assert len(passes) == 22601
+        mismatches = []
+        for e in passes:
+            expected = twin_outcome(e.x, e.y, e.z)
+            try:
+                h, phi = geodesy.geodetic((e.x, e.y, e.z))
+                actual = "accepted"
+            except geodesy.GeodeticDomainError as exc:
+                actual = exc.reason
+            if actual != expected.outcome:
+                mismatches.append((e.set, e.index, expected.outcome, actual))
+            elif actual == "accepted":
+                rec = expected.record
+                same_h = struct.pack("&lt;d", h) == struct.pack("&lt;d", rec.h)
+                same_phi = struct.pack("&lt;d", phi) == struct.pack("&lt;d", rec.phi)
+                if not (same_h and same_phi):
+                    mismatches.append((e.set, e.index, "accepted bits", h.hex(), rec.h.hex()))
+&gt;       assert mismatches == [], f"stop 3: {len(mismatches)} G-08 mismatches: {mismatches[:10]}"
+E       AssertionError: stop 3: 145 G-08 mismatches: [('DG-CUSP', 117, 'accepted', 'non_convergence'), ('DG-CUSP', 118, 'accepted', 'non_convergence'), ('DG-CUSP', 119, 'accepted', 'non_convergence'), ('DG-CUSP', 120, 'accepted', 'non_convergence'), ('DG-CUSP', 121, 'accepted', 'non_convergence'), ('DG-CUSP', 122, 'accepted', 'non_convergence'), ('DG-CUSP', 123, 'accepted', 'non_convergence'), ('DG-CUSP', 124, 'accepted', 'non_convergence'), ('DG-CUSP', 125, 'accepted', 'non_convergence'), ('DG-CUSP', 126, 'accepted', 'non_convergence')]
+E       assert [('DG-CUSP', ...rgence'), ...] == []
+E         
+E         Left contains 145 more items, first extra item: ('DG-CUSP', 117, 'accepted', 'non_convergence')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic_conformance.py:133: AssertionError</failure></testcase></testsuite></testsuites>

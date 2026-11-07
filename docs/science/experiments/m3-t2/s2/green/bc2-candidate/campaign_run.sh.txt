@@ -1,0 +1,19 @@
+#!/bin/bash
+# I-102 step 4: corrected campaign and full local gates against the corrected candidate:
+# fresh clone of BC from GitHub + the frozen corrected tests/test_s2_geodetic.py.
+set -u
+E=$HOME/tars-evidence/I-102; O=$E/campaign; C=$E/clone-bc-candidate
+BC=2b975d626e92c76a18efc873e0991084db30617a
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"; date -u +%FT%TZ > "$O/start-utc.txt"
+git clone -q https://github.com/guillermoMartin96/tars.git "$C" && git -C "$C" checkout -q --detach "$BC"
+cd "$C" || exit 99
+uv sync --locked -q; echo $? > "$O/uv-sync.exit"
+cp "$E/frozen/test_s2_geodetic.py" tests/test_s2_geodetic.py
+{ git rev-parse HEAD; git status --porcelain --untracked-files=all; echo "$(git hash-object tests/test_s2_geodetic.py) tests/test_s2_geodetic.py"; } > "$O/candidate-state.txt"
+.venv/bin/python -c "import json,sys,platform,hashlib,os;print(json.dumps({'base commit':'$BC','candidate':'BC + frozen tests/test_s2_geodetic.py','sys.version':sys.version,'platform.platform()':platform.platform(),'platform.machine()':platform.machine(),'uv.lock sha256':hashlib.sha256(open('uv.lock','rb').read()).hexdigest(),'interpreter realpath sha256':hashlib.sha256(open(os.path.realpath(sys.executable),'rb').read()).hexdigest()},indent=1))" > "$O/run-record-host.json"
+.venv/bin/python -I "$E/scripts/mutate.py" "$C" "$O/mutation" > "$O/mutation.log" 2>&1; echo $? > "$O/mutation.exit"
+uv run ruff check . > "$O/ruff-check.log" 2>&1; echo $? > "$O/ruff-check.exit"
+uv run ruff format --check . > "$O/ruff-format.log" 2>&1; echo $? > "$O/ruff-format.exit"
+uv run pytest -ra -p no:cacheprovider --junitxml="$O/pytest-junit.xml" > "$O/pytest.log" 2>&1; echo $? > "$O/pytest.exit"
+date -u +%FT%TZ > "$O/end-utc.txt"; touch "$O/DONE"

@@ -1,0 +1,18 @@
+original red nodes of tests/test_s2_geodetic.py: 112  supplemental: 112
+node sets equal: True
+status differences: []
+component-free guard nodes (pass, not required to fail):
+   tests.test_s2_geodetic::test_g10_w1_round_to_nearest_excludes_toward_zero_and_down
+   tests.test_s2_geodetic::test_g10_w2_round_to_nearest_excludes_up
+   tests.test_s2_geodetic::test_g10_w3_ties_to_even_excludes_ties_away
+   tests.test_s2_geodetic::test_g10_w4_tie_to_even_upward
+   tests.test_s2_geodetic::test_g10_w5_no_flush_to_zero
+   tests.test_s2_geodetic::test_g10_w6_no_denormals_are_zero
+   tests.test_s2_geodetic::test_g10_w7_subnormal_tie_to_even
+   tests.test_s2_geodetic::test_g13_existing_statements_are_ast_identical_to_k[src/tars/sim/constants.py]
+   tests.test_s2_geodetic::test_g13_existing_statements_are_ast_identical_to_k[tests/test_constants.py]
+   tests.test_s2_geodetic::test_g13_protected_files_are_byte_identical_to_k
+assertion failures:
+   tests.test_s2_geodetic::test_g09_architecture_scan_covers_geodesy
+   tests.test_s2_geodetic::test_g11_geodesy_imports_only_math_fractions_numbers_typing_and_constants
+corrected node: ['tests.test_s2_geodetic::test_g06_float_subclass_overrides_never_run', 'tests.test_s2_geodetic::test_g06_int_subclass_overrides_never_run'] ['fail:ImportError', 'fail:ImportError']

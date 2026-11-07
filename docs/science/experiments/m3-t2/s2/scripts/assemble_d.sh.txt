@@ -1,0 +1,116 @@
+#!/bin/bash
+# S2 commit D: assemble docs/science/experiments/m3-t2/s2/ (outside commit-a/) into a staging tree from the
+# recorded evidence (copies only; nothing is recomputed or edited here, except absolute-path scrubbing
+# of text logs, which SCRUBBED.txt records with the original sha256). Usage: assemble_d.sh STAGE_DIR BC2_RUN_ID
+set -u
+ST=$1; RUN2=$2
+EV=$HOME/tars-evidence
+I1=$EV/I-101; I2=$EV/I-102; I3=$EV/I-103
+rm -rf "$ST"; mkdir -p "$ST"
+cpd() { mkdir -p "$ST/$2"; cp "$1" "$ST/$2/${3:-$(basename "$1")}"; }
+
+# 1. Original red run (I-101; bound to BC)
+for f in README.md head.txt start-utc.txt end-utc.txt git-status-porcelain.txt test-file-identities.txt \
+         absence-proof.txt draft-identities-before-copy.txt red-pytest.log red-pytest.exit red-junit.xml \
+         red-classification.json; do cpd "$I1/red/$f" red-original; done
+cpd "$I1/red/record_red_run.sh" red-original record_red_run.sh.txt
+cpd "$I1/red/classify_red.py" red-original classify_red.py.txt
+
+# 2. Supplemental red run (I-102; bound to BC2)
+for f in head.txt start-utc.txt end-utc.txt git-status-porcelain.txt test-file-identities.txt absence-proof.txt \
+         red-pytest.log red-pytest.exit red-junit.xml red-classification.json classify.stdout \
+         comparison-with-original-red.txt uv-sync.exit; do cpd "$I2/supp-red/$f" red-supplemental; done
+cpd "$I2/scripts/supp_red_run.sh" red-supplemental supp_red_run.sh.txt
+for f in identities.txt correction.diff; do cpd "$I2/frozen/$f" red-supplemental frozen-$f; done
+
+# 3. Bindings
+cpd "$I3/bc2/pre-commit.txt" binding bc2-pre-commit.txt
+cpd "$I3/bc2/scope.txt" binding bc2-scope.txt
+cpd "$I3/bc2/candidate-equals-bc2.txt" binding candidate-equals-bc2.txt
+cpd "$I3/bc2/g13_scope_check_BC2.json" binding
+cpd "$I3/binding-bc.txt" binding
+
+# 4. Green records
+for f in tree-at-start.txt untracked-identities.txt ruff-check.log ruff-check.exit ruff-format.log ruff-format.exit \
+         pytest.log pytest.exit pytest-junit.xml start-utc.txt end-utc.txt g13_scope_check_BC.json; do
+  cpd "$I1/bc-gates/$f" green/bc-pre-commit; done
+cpd "$I1/bc-gates/run_gates.sh" green/bc-pre-commit run_gates.sh.txt
+for f in clone-state.txt test-blobs-at-BC.txt uv-sync.exit ruff-check.log ruff-check.exit ruff-format.log ruff-format.exit \
+         pytest.log pytest.exit pytest-junit.xml start-utc.txt end-utc.txt; do cpd "$I1/commit-d/green-bc/$f" green/bc-fresh-clone; done
+cpd "$I1/commit-d/scripts/green_bc.sh" green/bc-fresh-clone green_bc.sh.txt
+for f in candidate-state.txt run-record-host.json uv-sync.exit ruff-check.log ruff-check.exit ruff-format.log ruff-format.exit \
+         pytest.log pytest.exit pytest-junit.xml start-utc.txt end-utc.txt; do cpd "$I2/campaign/$f" green/bc2-candidate; done
+cpd "$I2/scripts/campaign_run.sh" green/bc2-candidate campaign_run.sh.txt
+
+# 4b. Host pytest logs (2.7 MB each: the warnings summary embeds the full X-P3 listing) stay in the sealed
+# external evidence; D keeps their sha256 and their last 60 lines (summary). JUnit is kept in full.
+for g in bc-pre-commit bc-fresh-clone bc2-candidate; do
+  f="$ST/green/$g/pytest.log"
+  { echo "$(shasum -a 256 "$f" | cut -d' ' -f1)  pytest.log ($(wc -c < "$f" | tr -d ' ') bytes; kept externally under ~/tars-evidence, see README)"; } > "$ST/green/$g/pytest.log.sha256"
+  tail -n 60 "$f" > "$ST/green/$g/pytest-tail-60.txt"; rm "$f"; done
+
+# 5. Mutation campaigns (history preserved; the final one is i103-bc2)
+mcp() { # src_dir dst
+  mkdir -p "$ST/$2"; cp "$1"/mutation_results.json "$ST/$2/"
+  mkdir -p "$ST/$2/junit" "$ST/$2/stdout"
+  for x in "$1"/*.xml; do cp "$x" "$ST/$2/junit/"; done
+  for x in "$1"/*.stdout.txt; do cp "$x" "$ST/$2/stdout/"; done; }
+mcp "$I1/commit-d/out/mutation" mutation/i101-bc-incomplete
+cp "$I1/commit-d/out/mutation.log" "$I1/commit-d/out/mutation.exit" "$ST/mutation/i101-bc-incomplete/"
+cp "$I1/commit-d/scripts/mutate.py" "$ST/mutation/i101-bc-incomplete/mutate.py.txt"
+cp "$I1/commit-d/STOP-RECORD.md" "$ST/mutation/i101-bc-incomplete/STOP-RECORD.md"
+mkdir -p "$ST/mutation/i101-mn17-diagnostic"; cp "$I1/commit-d/diagnostic-MN17/"* "$ST/mutation/i101-mn17-diagnostic/"
+mcp "$I2/campaign/mutation" mutation/i102-bc2-candidate
+cp "$I2/campaign/mutation.log" "$I2/campaign/mutation.exit" "$ST/mutation/i102-bc2-candidate/"
+cp "$I2/scripts/mutate.py" "$ST/mutation/i102-bc2-candidate/mutate.py.txt"
+cp "$EV/I-102/STATUS.md" "$ST/mutation/i102-bc2-candidate/I-102-STATUS.md"
+cp "$I2/MI-03-DESIGNATION.md" "$ST/mutation/i102-bc2-candidate/"
+mcp "$I3/campaign/mutation" mutation/i103-bc2
+cp "$I3/campaign/mutation.log" "$I3/campaign/mutation.exit" "$I3/campaign/start-utc.txt" "$I3/campaign/end-utc.txt" \
+   "$I3/campaign/comparison-with-I102.txt" "$I3/candidate-state.txt" "$ST/mutation/i103-bc2/"
+cp "$I3/scripts/mutate.py" "$ST/mutation/i103-bc2/mutate.py.txt"
+cp "$I3/scripts/mutate-I102-to-I103.diff" "$ST/mutation/i103-bc2/"
+
+# 6. Derivation output, M1 listing cross-check, G-13 at BC
+cpd "$I1/commit-d/out/derivation_crosscheck.json" derivation
+cpd "$I1/commit-d/out/derivation_crosscheck.exit" derivation
+cpd "$I1/commit-d/out/g13_scope_check_BC.json" derivation
+
+# 7. Report-only (host at BC; CI log route at BC and BC2)
+mkdir -p "$ST/report-only/host-bc"; cp "$I1/commit-d/out/report_only/"* "$ST/report-only/host-bc/"
+cp "$I1/commit-d/out/report_only.log" "$I1/commit-d/out/report_only.exit" "$ST/report-only/host-bc/"
+cpd "$I1/commit-d/out-ci/rp8_rp9_ci.json" report-only/ci-bc-42301740647
+cpd "$I3/out-ci/rp8_rp9_ci.json" report-only/ci-bc2-$RUN2
+
+# 8. CI provenance and log-derived records (A, BC, BC2). Raw job logs stay external (sha256 in ci/*/raw-logs.sha256)
+for pair in "A:$I1/ci-A-42265640238" "BC:$I1/ci-BC-42301740647" "BC2:$I3/ci-BC2-$RUN2"; do
+  tag=${pair%%:*}; src=${pair#*:}; d="ci/$tag-$(basename "$src" | sed 's/^ci-[A-Z0-9]*-//')"
+  mkdir -p "$ST/$d"; cp "$src/run.json" "$src/jobs-attempt1.json" "$ST/$d/"
+  (cd "$src" && shasum -a 256 logs/*.log derived/*.log) > "$ST/$d/raw-logs.sha256"
+  for j in "$src"/records/job-*; do
+    jd="$ST/$d/records/$(basename "$j")"; mkdir -p "$jd"
+    cp "$j"/S2-ENV-RECORD.json "$j"/S2-G17A-REPORT.json "$j"/S2-G17B-RECORD.json "$j"/extraction-status.json "$jd/"
+    if [ "$tag" = BC2 ]; then cp "$j"/S2-XP3-LISTING.csv "$jd/"; fi
+  done
+done
+cp "$I1/ci-A-42265640238/strip_gh_timestamps.py" "$ST/ci/strip_gh_timestamps.py.txt"
+cp "$I1/extract_s2_records.py" "$ST/ci/extract_s2_records.py.txt"
+
+# 9. Run records and scripts
+mkdir -p "$ST/run_records"
+cp "$I1/commit-d/out/run-record-host.json" "$ST/run_records/d-scripts-at-bc.json"
+cp "$I2/campaign/run-record-host.json" "$ST/run_records/bc2-candidate-gates-and-campaigns.json"
+mkdir -p "$ST/scripts"
+for f in derivation_crosscheck.py report_only.py g13_scope_check.py d_run.sh rp8_rp9_ci.py s2_rgates.sh; do
+  cp "$I1/commit-d/scripts/$f" "$ST/scripts/$f.txt"; done
+cp "$I3/scripts/build_derivation_note.py" "$ST/scripts/build_derivation_note.py.txt"
+cp "$0" "$ST/scripts/assemble_d.sh.txt"
+
+# 10. Scrub absolute home paths in text files; record originals
+: > "$ST/SCRUBBED.txt.tmp"
+grep -rlI --exclude=SCRUBBED.txt.tmp "$HOME" "$ST" | sort | while read -r f; do
+  echo "$(shasum -a 256 "$f" | cut -d' ' -f1)  ${f#$ST/}" >> "$ST/SCRUBBED.txt.tmp"
+  LC_ALL=C sed -i '' "s#$HOME#\$HOME#g" "$f"; done
+{ echo "# Files in which the absolute home path was replaced by \$HOME: original sha256 and path."; cat "$ST/SCRUBBED.txt.tmp"; } > "$ST/SCRUBBED.txt"
+rm "$ST/SCRUBBED.txt.tmp"
+echo assembled

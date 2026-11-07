@@ -1,0 +1,129 @@
+....FFFF........                                                         [100%]
+=================================== FAILURES ===================================
+_________________ test_g03_boundary_pair_inside_point[(1,0,1)] _________________
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-02/src/tars/sim/geodesy.py'>
+r = (15121.263417223725, 0.0, 15121.263417223725), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+>       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (15121.263417223725, 0.0, 15121.263417223725): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError
+_________________ test_g03_boundary_pair_inside_point[(2,0,1)] _________________
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-02/src/tars/sim/geodesy.py'>
+r = (20544.799187243243, 0.0, 10272.399593621622), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+>       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (20544.799187243243, 0.0, 10272.399593621622): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError
+_________________ test_g03_boundary_pair_inside_point[(1,0,2)] _________________
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-02/src/tars/sim/geodesy.py'>
+r = (10280.234726712268, 0.0, 20560.469453424535), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+>       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (10280.234726712268, 0.0, 20560.469453424535): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError
+_________________ test_g03_boundary_pair_inside_point[(1,1,1)] _________________
+
+ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-02/src/tars/sim/geodesy.py'>
+r = (12586.625205404958, 12586.625205404958, 12586.625205404958)
+reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+>       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (12586.625205404958, 12586.625205404958, 12586.625205404958): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(2,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,0,2)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,1,1)]
+4 failed, 12 passed in 0.25s

@@ -1,0 +1,97 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_g05_overflow_rows_far_from_the_edge ___________________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MI-02/src/tars/sim/geodesy.py'>
+r = (1.5e+308, 1.5e+308, 0.0), reason = 'overflow'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+>           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (1.5e+308, 1.5e+308, 0.0)
+
+    def geodetic(r) -> tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) <= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+>           raise OverflowError("overflow")
+E           OverflowError: overflow
+
+../campaign/mutation/MI-02/src/tars/sim/geodesy.py:180: OverflowError
+
+The above exception was the direct cause of the following exception:
+
+    def test_g05_overflow_rows_far_from_the_edge():
+        geo = _geo()
+        for r in ((1.5e308, 1.5e308, 0.0), (1.5e308, 0.0, 1.5e308)):
+>           exc = _raises_reason(geo, r, "overflow")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:251: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MI-02/src/tars/sim/geodesy.py'>
+r = (1.5e+308, 1.5e+308, 0.0), reason = 'overflow'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+>           raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+E           AssertionError: (1.5e+308, 1.5e+308, 0.0): expected overflow, got OverflowError: overflow
+
+tests/test_s2_geodetic.py:121: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g05_overflow_rows_far_from_the_edge - ...
+1 failed in 0.16s

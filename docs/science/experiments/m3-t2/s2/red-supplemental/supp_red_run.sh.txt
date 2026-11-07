@@ -1,0 +1,22 @@
+#!/bin/bash
+# I-102 step 3: supplemental red run. Fresh clone of commit A from GitHub; geodesy.py absent;
+# constants.py unchanged (K); the frozen corrected tests/test_s2_geodetic.py installed alone.
+set -u
+E=$HOME/tars-evidence/I-102; O=$E/supp-red; C=$E/clone-a-red
+A=6c05e53c5ffcb892dacaa6f84e12a163830a4119
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"; date -u +%FT%TZ > "$O/start-utc.txt"
+git clone -q https://github.com/guillermoMartin96/tars.git "$C" && git -C "$C" checkout -q --detach "$A"
+cd "$C" || exit 99
+uv sync --locked -q; echo $? > "$O/uv-sync.exit"
+cp "$E/frozen/test_s2_geodetic.py" tests/test_s2_geodetic.py
+git rev-parse HEAD > "$O/head.txt"
+git status --porcelain --untracked-files=all > "$O/git-status-porcelain.txt"
+echo "$(git hash-object tests/test_s2_geodetic.py) $(shasum -a 256 tests/test_s2_geodetic.py | cut -d' ' -f1) tests/test_s2_geodetic.py" > "$O/test-file-identities.txt"
+{ echo "src/tars/sim/geodesy.py present: $(test -e src/tars/sim/geodesy.py && echo YES || echo no)"
+  echo "git ls-files src/tars/sim/geodesy.py: '$(git ls-files src/tars/sim/geodesy.py)'"
+  echo "constants.py blob $(git hash-object src/tars/sim/constants.py) (K bcda30e2d008a008986b58790820d7b3de12fd68)"; } > "$O/absence-proof.txt"
+uv run pytest -v -rA -p no:cacheprovider --junitxml="$O/red-junit.xml" tests/test_s2_geodetic.py > "$O/red-pytest.log" 2>&1
+echo $? > "$O/red-pytest.exit"
+.venv/bin/python -I "$E/scripts/classify_red.py" "$O/red-junit.xml" "$O/red-classification.json" > "$O/classify.stdout" 2>&1; echo $? > "$O/classify.exit"
+date -u +%FT%TZ > "$O/end-utc.txt"; touch "$O/DONE"

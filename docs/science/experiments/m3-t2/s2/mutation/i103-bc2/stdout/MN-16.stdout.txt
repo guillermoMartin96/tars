@@ -1,0 +1,42 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_g06_class_faking_object_is_a_type_error _________________
+
+    def test_g06_class_faking_object_is_a_type_error():
+        geo = _geo()
+    
+        class Fake:
+            """Claims float through __class__ and converts to 7e6, so an isinstance-based
+            normalization would accept it (the designated killer of that mutant)."""
+    
+            @property
+            def __class__(self):
+                return float
+    
+            def __float__(self):
+                return 7.0e6
+    
+        assert isinstance(Fake(), float)
+>       _raises_type(geo, (Fake(), 0.0, 1.0), TypeError)
+
+tests/test_s2_geodetic.py:439: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MN-16/src/tars/sim/geodesy.py'>
+r = (<tests.test_s2_geodetic.test_g06_class_faking_object_is_a_type_error.<locals>.Fake object at 0x10fa4e2a0>, 0.0, 1.0)
+exc_type = <class 'TypeError'>
+
+    def _raises_type(geo, r, exc_type):
+        try:
+            geo.geodetic(r)
+        except BaseException as exc:
+            assert type(exc) is exc_type, (r, type(exc))
+            assert not isinstance(exc, geo.GeodeticDomainError)
+            return exc
+>       raise AssertionError(f"{r!r}: expected {exc_type.__name__}, but it was accepted")
+E       AssertionError: (<tests.test_s2_geodetic.test_g06_class_faking_object_is_a_type_error.<locals>.Fake object at 0x10fa4e2a0>, 0.0, 1.0): expected TypeError, but it was accepted
+
+tests/test_s2_geodetic.py:132: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g06_class_faking_object_is_a_type_error
+1 failed in 0.17s

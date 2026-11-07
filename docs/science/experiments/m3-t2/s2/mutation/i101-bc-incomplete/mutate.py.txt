@@ -1,0 +1,247 @@
+"""S2 commit D: the §3.12 mutation campaign (proposal v11; I-40 §10 and S1 precedent).
+
+Usage: mutate.py TREE_ROOT OUT_DIR, where TREE_ROOT is a fresh clone at commit BC with its
+.venv synced. Mutants are applied to copies of `src/` under OUT_DIR, never to the clone or
+the implementation worktree, and run through PYTHONPATH.
+
+A mutant is KILLED only if at least one designated node fails and every failure is
+assertion-type (AssertionError, a bare assert, or "Failed: DID NOT RAISE"). A failure by any
+other exception is KILLED_WRONG_REASON (not a kill). A mutant with no failing designated node
+is SURVIVED, which is stop 8 unless it is one of the documented equivalent survivors (each
+with its written proof in the derivation note). The unmutated control must pass every
+designated node. JUnit is recorded for every run.
+"""
+
+import json
+import re
+import shutil
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+PROTO, OUT = Path(sys.argv[1]), Path(sys.argv[2])
+G = "src/tars/sim/geodesy.py"
+T = "tests/test_s2_geodetic.py"
+C = "tests/test_s2_geodetic_conformance.py"
+ASSERT = r"^(AssertionError|assert |Failed: DID NOT RAISE)"
+
+G03_IN = f"{T}::test_g03_boundary_pair_inside_point"
+G03_OUTG = f"{T}::test_g03_boundary_pair_outside_point_geometric"
+G03_OUTA = f"{T}::test_g03_boundary_pair_outside_point_accepted"
+G08 = f"{C}::test_g08_component_equals_twin_at_every_passes_entry"
+G14R = f"{T}::test_g14_rejection_points_raise_non_convergence"
+G14A = f"{T}::test_g14_enumerated_acceptance_sets_are_accepted"
+G14N = f"{T}::test_g14_named_acceptance_points_are_accepted"
+G15 = f"{T}::test_g15_protected_sets_are_accepted"
+G17 = f"{T}::test_g17_every_listing_entry_has_its_geometric_outcome"
+
+
+def fi(n: str) -> str:
+    names = {
+        "01": "fi01_sin_nan", "02": "fi02_sqrt_raises_value_error", "03": "fi03_sqrt_zero_divides",
+        "04": "fi04_atan2_raises_overflow_error", "05": "fi05_sin_raises_type_error_propagates",
+        "06": "fi06_missing_cos_propagates_attribute_error",
+        "07": "fi07_overflow_before_non_convergence",
+        "08": "fi08_nan_before_overflow_and_non_convergence", "09": "fi09_nan_before_overflow",
+        "11": "fi11_stop_test_met_at_update_60_is_accepted",
+        "12": "fi12_stop_test_first_met_at_61_is_non_convergence",
+        "13": "fi13_failure_in_final_height_before_non_convergence",
+        "14": "fi14_sin_raises_name_error_propagates",
+        "15": "fi15_post_check_exception_is_not_wrapped",
+    }
+    return f"{T}::test_g16_{names[n]}"
+
+
+NONFINITE = "    if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):\n"
+ORIGIN = "    if x == 0.0 and y == 0.0 and z == 0.0:\n"
+EVOLUTE = '    if _in_evolute_region(x, y, z):\n        raise GeodeticDomainError("evolute_region")\n'
+PRED = "    return d >= 0 and d**3 >= 27 * _K * _W * p2 * z2\n"
+DPRIME = "    d = _K - p2 - _W * z2\n"
+PRE = "    if abs(x) >= _PREFILTER or abs(y) >= _PREFILTER or abs(z) >= _PREFILTER:\n"
+N2 = '    if _isnan(p) or _isnan(phi) or _isnan(h):\n        raise GeodeticDomainError("numerical_failure")\n'
+N3 = '    if _isinf(p) or _isinf(phi) or _isinf(h):\n        raise GeodeticDomainError("overflow")\n'
+N4 = '    if not converged:\n        raise GeodeticDomainError("non_convergence")\n'
+EXC = "    except (ArithmeticError, ValueError) as exc:  # N1\n"
+LOOP = "        for _k in range(1, 61):\n"
+STOP = "            stop = abs(phi_new - phi) <= 1e-15\n"
+UPD = ("            stop = abs(phi_new - phi) <= 1e-15\n            phi = phi_new\n"
+       "            if stop:\n                converged = True\n                break\n")
+STRUCT = ('    if len(r) != 3:\n        raise TypeError("geodetic input: r must have exactly 3 components")\n'
+          "    c0, c1, c2 = r[0], r[1], r[2]\n")
+GUARD = ("    x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)\n" + "    # Step 2: non_finite.\n"
+         + NONFINITE + '        raise GeodeticDomainError("non_finite")\n' + "    # Step 3: origin.\n" + ORIGIN
+         + '        raise GeodeticDomainError("origin")\n' + "    # Step 4: evolute_region.\n" + EVOLUTE)
+
+
+def indent(block: str) -> str:
+    return "".join("    " + ln if ln.strip() else ln for ln in block.splitlines(keepends=True))
+
+
+def wrap(block: str) -> str:
+    return ("    try:\n" + indent(block) + "    except GeodeticDomainError:\n        raise\n"
+            "    except (ArithmeticError, ValueError) as exc:\n"
+            '        raise GeodeticDomainError("numerical_failure") from exc\n')
+
+
+# (id, description, [(path, old, new)], designated nodes, reason regex or None for a documented
+# equivalent survivor)
+M = [
+    # Guard removal (r2 §8.3)
+    ("MG-01", "non-finite check removed", [(G, NONFINITE, "    if False:\n")],
+     [f"{T}::test_g04_non_finite_component_in_each_position", f"{T}::test_g04_mixed_non_finite_cases"], ASSERT),
+    ("MG-02", "non-finite check applied to x only", [(G, NONFINITE, "    if not math.isfinite(x):\n")],
+     [f"{T}::test_g04_non_finite_component_in_each_position"], ASSERT),
+    ("MG-03", "origin check removed", [(G, ORIGIN, "    if False:\n")], [f"{T}::test_g03_all_eight_signed_zero_origins"], ASSERT),
+    ("MG-04", "origin check with or", [(G, ORIGIN, "    if x == 0.0 or y == 0.0 or z == 0.0:\n")], [G03_OUTA, G14A], ASSERT),
+    ("MG-05", "evolute check removed", [(G, EVOLUTE, "")], [f"{T}::test_g03_point_inside_the_evolute_region", G17], ASSERT),
+    ("MG-06", "overflow check removed", [(G, N3, "")], [f"{T}::test_g05_overflow_rows_far_from_the_edge"], ASSERT),
+    # Predicate and pre-filter
+    ("MP-01", "coefficient 27 -> 26", [(G, PRED, PRED.replace("27", "26"))], [G03_IN, G03_OUTG], ASSERT),
+    ("MP-02", "coefficient 27 -> 28", [(G, PRED, PRED.replace("27", "28"))], [G03_IN, G03_OUTG], ASSERT),
+    ("MP-03", "W -> 1 (spherical)", [(G, "_W = 1 - Fraction(_E2)\n", "_W = Fraction(1)\n")], [G03_IN, G03_OUTG], ASSERT),
+    ("MP-04", "p and z roles swapped", [(G, DPRIME, "    d = _K - z2 - _W * p2\n")], [G03_IN, G03_OUTG], ASSERT),
+    ("MP-05", "pre-filter bound 2^16 -> 2^15", [(G, "_PREFILTER = 65536.0\n", "_PREFILTER = 32768.0\n")], [G03_IN], ASSERT),
+    ("MP-06", "K transcribed with e2 for e2^2", [(G, "_K = Fraction(_A) ** 2 * Fraction(_E2) ** 2\n",
+                                                  "_K = Fraction(_A) ** 2 * Fraction(_E2)\n")], [G03_IN, G03_OUTG], ASSERT),
+    # Documented equivalent survivors (proofs: §3.7.4, §3.7.5, §3.7.6, §3.12 M-W2)
+    ("ME-01", "pre-filter bound raised to 2^17", [(G, "_PREFILTER = 65536.0\n", "_PREFILTER = 131072.0\n")],
+     [G03_IN, G03_OUTG, f"{T}::test_g03_point_inside_the_evolute_region", G17], None),
+    ("ME-02", "pre-filter >= -> >", [(G, PRE, PRE.replace(">=", ">"))],
+     [G03_IN, G03_OUTG, f"{T}::test_g03_point_inside_the_evolute_region", G17], None),
+    ("ME-03", "D' >= 0 clause dropped", [(G, PRED, "    return d**3 >= 27 * _K * _W * p2 * z2\n")],
+     [G03_IN, G03_OUTG, f"{T}::test_g03_point_inside_the_evolute_region", G17], None),
+    ("ME-04", "closed -> open region (>= -> >)", [(G, PRED, PRED.replace("d**3 >=", "d**3 >"))],
+     [G03_IN, G03_OUTG, f"{T}::test_g03_point_inside_the_evolute_region", G17], None),
+    # Numerical rules [OPT-b]
+    ("MN-01", "non-convergence check removed", [(G, N4, "")], [G14R, G08, fi("12")], ASSERT),
+    ("MN-02", "non-convergence check inverted", [(G, N4, N4.replace("if not converged", "if converged"))],
+     [G14A, G03_OUTA, G15], ASSERT),
+    ("MN-03", "stop test evaluated after phi is replaced (before the update)",
+     [(G, UPD, "            phi_prev = phi\n            phi = phi_new\n            stop = abs(phi_new - phi) <= 1e-15\n"
+                "            if stop:\n                converged = True\n                break\n")], [G08, fi("11")], ASSERT),
+    ("MN-04", "pre-update iterate returned (converged set before the update)",
+     [(G, UPD, "            stop = abs(phi_new - phi) <= 1e-15\n            if stop:\n                converged = True\n"
+                "                break\n            phi = phi_new\n")], [G08, fi("11")], ASSERT),
+    ("MN-05", "stop met at k = 60 treated as non-convergence",
+     [(G, "            if stop:\n", "            if stop and _k < 60:\n")], [fi("11"), G08], ASSERT),
+    ("MN-06", "N2 (NaN check) removed", [(G, N2, "")], [fi("01"), fi("08"), fi("09")], ASSERT),
+    ("MN-07", "N1 wrapping removed", [(G, EXC, "    except () as exc:  # N1\n")], [fi("02"), fi("03"), fi("04"), fi("13")], ASSERT),
+    ("MN-08", "catch broadened to Exception", [(G, EXC, "    except Exception as exc:  # N1\n")], [fi("05"), fi("06"), fi("14")], ASSERT),
+    ("M-W1", "try widened over structural access", [(G, STRUCT, wrap(STRUCT))],
+     [f"{T}::test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity",
+      f"{T}::test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity"], ASSERT),
+    ("M-W2", "try widened over the guard, steps 1 to 4 only (documented equivalent)", [(G, GUARD, wrap(GUARD))],
+     [f"{T}::test_g06_section_3_8_order_table", f"{T}::test_g04_non_finite_component_in_each_position",
+      f"{T}::test_g03_all_eight_signed_zero_origins", G03_IN, G03_OUTG], None),
+    ("M-W3", "try widened over the post-check predicates", [(G, N2 + N3 + N4, wrap(N2 + N3 + N4))], [fi("15")], ASSERT),
+    ("MN-09", "numerical_failure checked after overflow", [(G, N2 + N3, N3 + N2)], [fi("09")], ASSERT),
+    ("MN-10", "numerical_failure checked after non_convergence", [(G, N2 + N3 + N4, N3 + N4 + N2)], [fi("08")], ASSERT),
+    ("MN-11", "overflow checked after non_convergence", [(G, N3 + N4, N4 + N3)], [fi("07")], ASSERT),
+    ("MN-12", "iteration cap 60 -> 59", [(G, LOOP, "        for _k in range(1, 60):\n")], [fi("11"), fi("13")], ASSERT),
+    ("MN-13", "iteration cap 60 -> 61", [(G, LOOP, "        for _k in range(1, 62):\n")], [fi("12")], ASSERT),
+    ("MN-14", "stop test <= -> <", [(G, STOP, STOP.replace("<=", "<"))], [fi("11")], ASSERT),
+    ("MN-15", "category mapping altered (numerical_failure -> numerical)",
+     [(G, '    "numerical_failure": (\n        "failure",\n', '    "numerical_failure": (\n        "numerical",\n')],
+     [f"{T}::test_g06_fixed_message_and_category_per_reason", fi("01")], ASSERT),
+    ("MN-16", "normalization by isinstance instead of type()",
+     [(G, "    t = type(v)\n    if issubclass(t, bool):\n",
+       "    if isinstance(v, float) and not isinstance(v, bool):\n        return float(v)\n"
+       "    t = type(v)\n    if issubclass(t, bool):\n")],
+     [f"{T}::test_g06_class_faking_object_is_a_type_error"], ASSERT),
+    ("MN-17", "component value used as given (no base-slot read)",
+     [(G, "        return float.__float__(v)  # type: ignore[arg-type]\n", "        return v  # type: ignore[return-value]\n")],
+     [f"{T}::test_g06_float_subclass_overrides_never_run"], ASSERT),
+    # DQ-1 sequence (designated killer G-08)
+    ("MD-01", "truncation after 2 iterations", [(G, LOOP, "        for _k in range(1, 3):\n")], [G08], ASSERT),
+    ("MD-02", "truncation after 3 iterations", [(G, LOOP, "        for _k in range(1, 4):\n")], [G08], ASSERT),
+    ("MD-03", "stopping tolerance 1e-9", [(G, STOP, STOP.replace("1e-15", "1e-9"))], [G08], ASSERT),
+    ("MD-04", "start latitude atan2(z, p)", [(G, "        phi = _LIB.atan2(z, p * (1.0 - _E2))\n",
+                                               "        phi = _LIB.atan2(z, p)\n")], [G08], ASSERT),
+    ("MD-05", "pole-safe height replaced by p/cos(phi) - N",
+     [(G, "        h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)\n",
+       "        h = p / c - _A / _LIB.sqrt(1.0 - _E2 * s * s)\n")], [G08], ASSERT),
+    ("MD-06", "e2 formed as 1 - (1 - f)^2", [(G, "_E2 = _F * (2.0 - _F)\n", "_E2 = 1.0 - (1.0 - _F) * (1.0 - _F)\n")],
+     [G08, f"{T}::test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step"], ASSERT),
+    ("MD-07", "e2 * n * s regrouped as e2 * (n * s)",
+     [(G, "            phi_new = _LIB.atan2(z + _E2 * n * s, p)\n", "            phi_new = _LIB.atan2(z + _E2 * (n * s), p)\n")],
+     [G08], ASSERT),
+    # Height datum (strategy §3.8)
+    ("MH-01", "spherical instead of geodetic (e2 = 0 in the evaluation)",
+     [(G, "        phi = _LIB.atan2(z, p * (1.0 - _E2))\n", "        _e = 0.0\n        phi = _LIB.atan2(z, p * (1.0 - _e))\n"),
+      (G, "            n = _A / _LIB.sqrt(1.0 - _E2 * s * s)\n            phi_new = _LIB.atan2(z + _E2 * n * s, p)\n",
+       "            n = _A / _LIB.sqrt(1.0 - _e * s * s)\n            phi_new = _LIB.atan2(z + _e * n * s, p)\n"),
+      (G, "        h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)\n", "        h = p * c + z * s - _A * _LIB.sqrt(1.0 - _e * s * s)\n")],
+     [G08], ASSERT),
+    ("MH-02", "altitude datum offset (+1 m)",
+     [(G, "        h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)\n",
+       "        h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s) + 1.0\n")], [G08], ASSERT),
+    ("MH-03", "flattening dropped (F = 0)", [(G, "_F = 1.0 / WGS84_INVERSE_FLATTENING\n", "_F = 0.0 * WGS84_INVERSE_FLATTENING\n")],
+     [G08, f"{T}::test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step"], ASSERT),
+    # Interface and error
+    ("MI-01", "return order (phi, h)", [(G, "    return h, phi\n", "    return phi, h\n")],
+     [f"{T}::test_g07_returns_h_then_phi_as_builtin_floats", G08], ASSERT),
+    ("MI-02", "OverflowError raised for reason overflow", [(G, N3, N3.replace('raise GeodeticDomainError("overflow")', 'raise OverflowError("overflow")'))],
+     [f"{T}::test_g05_overflow_rows_far_from_the_edge"], ASSERT),
+    ("MI-03", "precedence swap: non-finite after evolute",
+     [(G, "    # Step 2: non_finite.\n" + NONFINITE + '        raise GeodeticDomainError("non_finite")\n', ""),
+      (G, EVOLUTE, EVOLUTE + "    if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):\n"
+                             '        raise GeodeticDomainError("non_finite")\n')],
+     [f"{T}::test_g06_section_3_8_order_table"], ASSERT),
+]
+EQUIVALENT = {"ME-01", "ME-02", "ME-03", "ME-04", "M-W2"}
+
+
+def run(tag, src, nodes):
+    xml = OUT / f"{tag}.xml"
+    env = {"PYTHONPATH": str(src), "PYTHONDONTWRITEBYTECODE": "1", "PATH": "/usr/bin:/bin"}
+    proc = subprocess.run([str(PROTO / ".venv/bin/python"), "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider",
+                           f"--junitxml={xml}", *nodes], cwd=PROTO, env=env, capture_output=True, text=True)
+    (OUT / f"{tag}.stdout.txt").write_text(proc.stdout + proc.stderr)
+    exits[tag] = proc.returncode
+    res = []
+    for tc in ET.parse(xml).getroot().iter("testcase"):
+        f = tc.find("failure") if tc.find("failure") is not None else tc.find("error")
+        res.append({"node": f"{tc.get('classname')}::{tc.get('name')}",
+                    "status": "pass" if f is None else ("error" if tc.find("error") is not None else "fail"),
+                    "message": None if f is None else (f.get("message") or "")[:300]})
+    return res
+
+
+OUT.mkdir(parents=True, exist_ok=True)
+exits = {}
+report = {"control": run("control", PROTO / "src", sorted({n for m in M for n in m[3]}))}
+if not all(r["status"] == "pass" for r in report["control"]):
+    print("CONTROL FAILED", json.dumps(report["control"], indent=1))
+    sys.exit(2)
+print(f"control: {len(report['control'])} nodes pass")
+for mid, desc, edits, nodes, reason in M:
+    d = OUT / mid / "src"
+    if d.exists():
+        shutil.rmtree(d)
+    shutil.copytree(PROTO / "src", d)
+    for path, old, new in edits:
+        p = d / path.removeprefix("src/")
+        s = p.read_text()
+        assert s.count(old) == 1, (mid, old)
+        p.write_text(s.replace(old, new))
+    res = run(mid, d, nodes)
+    fails = [r for r in res if r["status"] != "pass"]
+    if reason is None:
+        verdict = "SURVIVED (documented equivalent)" if not fails else "KILLED (expected equivalent!)"
+    elif not fails:
+        verdict = "SURVIVED"
+    else:
+        verdict = "KILLED" if all(re.search(reason, f["message"] or "") for f in fails) else "KILLED_WRONG_REASON"
+    report[mid] = {"description": desc, "nodes": nodes, "reason": reason, "verdict": verdict,
+                   "failed": len(fails), "total": len(res), "pytest_exit": exits[mid],
+                   "edits": [{"path": p, "old": o, "new": n} for p, o, n in edits], "results": res}
+    msgs = "; ".join(sorted({(f["message"] or "")[:50].replace("\n", " ") for f in fails}))
+    print(f"{mid:6s} {desc[:58]:58s} {verdict:33s} {len(fails):3d}/{len(res):3d} {msgs[:150]}")
+report["control_pytest_exit"] = exits["control"]
+bad = [k for k, v in report.items() if isinstance(v, dict) and "verdict" in v
+       and not (v["verdict"] == "KILLED" or (k in EQUIVALENT and v["verdict"].startswith("SURVIVED")))]
+report["not_ok"] = bad
+(OUT / "mutation_results.json").write_text(json.dumps(report, indent=1))
+print("NOT OK:", bad)
+sys.exit(1 if bad else 0)

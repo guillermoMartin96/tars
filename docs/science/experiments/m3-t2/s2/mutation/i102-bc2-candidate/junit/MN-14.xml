@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.154" timestamp="2026-11-06T20:22:34.655084-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi11_stop_test_met_at_update_60_is_accepted" time="0.002"><failure message="AssertionError: GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations')&#10;assert 'raised' == 'returned'&#10;  &#10;  - returned&#10;  + raised">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b910d40&gt;
+
+    def test_g16_fi11_stop_test_met_at_update_60_is_accepted(monkeypatch):
+        def atan2(i):
+            return (59 - i) * 1e-10 if i &lt;= 59 else 1e-15
+    
+        kind, value = _run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07)
+&gt;       assert kind == "returned", value
+E       AssertionError: GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations')
+E       assert 'raised' == 'returned'
+E         
+E         - returned
+E         + raised
+
+tests/test_s2_geodetic.py:910: AssertionError</failure></testcase></testsuite></testsuites>

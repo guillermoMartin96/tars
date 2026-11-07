@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="8" time="0.190" timestamp="2026-11-06T20:22:55.910657-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r0-non_finite]" time="0.002"><failure message="AssertionError: (nan, 0.0, 0.0): expected non_finite, got ValueError: cannot convert NaN to integer ratio">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MI-03/src/tars/sim/geodesy.py'&gt;
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+&gt;           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../campaign/mutation/MI-03/src/tars/sim/geodesy.py:152: in geodetic
+    if _in_evolute_region(x, y, z):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../campaign/mutation/MI-03/src/tars/sim/geodesy.py:130: in _in_evolute_region
+    p2 = Fraction(x) ** 2 + Fraction(y) ** 2
+         ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'fractions.Fraction'&gt;, numerator = nan, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        &gt;&gt;&gt; Fraction(10, -8)
+        Fraction(-5, 4)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        &gt;&gt;&gt; Fraction('314')
+        Fraction(314, 1)
+        &gt;&gt;&gt; Fraction('-35/4')
+        Fraction(-35, 4)
+        &gt;&gt;&gt; Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        &gt;&gt;&gt; Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        &gt;&gt;&gt; Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        &gt;&gt;&gt; Fraction(2.25)
+        Fraction(9, 4)
+        &gt;&gt;&gt; Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+&gt;               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               ValueError: cannot convert NaN to integer ratio
+
+../../../.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: ValueError
+
+The above exception was the direct cause of the following exception:
+
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+&gt;       _raises_reason(_geo(), r, reason)
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MI-03/src/tars/sim/geodesy.py'&gt;
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+&gt;           raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+E           AssertionError: (nan, 0.0, 0.0): expected non_finite, got ValueError: cannot convert NaN to integer ratio
+
+tests/test_s2_geodetic.py:121: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r1-non_finite]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r2-origin]" time="0.000" /><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r3-evolute_region]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r4-not_binary64]" time="0.000" /><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r5-not_binary64]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r6-non_convergence]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g06_section_3_8_order_table[r7-overflow]" time="0.000" /></testsuite></testsuites>

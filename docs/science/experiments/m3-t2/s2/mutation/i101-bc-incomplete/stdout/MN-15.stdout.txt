@@ -1,0 +1,46 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+________________ test_g06_fixed_message_and_category_per_reason ________________
+
+    def test_g06_fixed_message_and_category_per_reason():
+        geo = _geo()
+        for reason, category in CATEGORY.items():
+            exc = geo.GeodeticDomainError(reason)
+            assert exc.reason == reason
+>           assert exc.category == category
+E           AssertionError: assert 'numerical' == 'failure'
+E             
+E             - failure
+E             + numerical
+
+tests/test_s2_geodetic.py:502: AssertionError
+____________________________ test_g16_fi01_sin_nan _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10ec5f0b0>
+
+    def test_g16_fi01_sin_nan(monkeypatch):  # departs from S-4, S-9
+>       _expect_reason(_run_case(monkeypatch, _rules(sin=math.nan), _SCHED_00), "numerical_failure")
+
+tests/test_s2_geodetic.py:843: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification'))
+reason = 'numerical_failure', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+        assert value.reason == reason
+>       assert value.category == CATEGORY[reason]
+E       AssertionError: assert 'numerical' == 'failure'
+E         
+E         - failure
+E         + numerical
+
+tests/test_s2_geodetic.py:821: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g06_fixed_message_and_category_per_reason
+FAILED tests/test_s2_geodetic.py::test_g16_fi01_sin_nan - AssertionError: ass...
+2 failed in 0.19s

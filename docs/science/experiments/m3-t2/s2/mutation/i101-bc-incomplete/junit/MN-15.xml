@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.188" timestamp="2026-11-06T15:14:19.315111-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_fixed_message_and_category_per_reason" time="0.002"><failure message="AssertionError: assert 'numerical' == 'failure'&#10;  &#10;  - failure&#10;  + numerical">def test_g06_fixed_message_and_category_per_reason():
+        geo = _geo()
+        for reason, category in CATEGORY.items():
+            exc = geo.GeodeticDomainError(reason)
+            assert exc.reason == reason
+&gt;           assert exc.category == category
+E           AssertionError: assert 'numerical' == 'failure'
+E             
+E             - failure
+E             + numerical
+
+tests/test_s2_geodetic.py:502: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi01_sin_nan" time="0.001"><failure message="AssertionError: assert 'numerical' == 'failure'&#10;  &#10;  - failure&#10;  + numerical">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10ec5f0b0&gt;
+
+    def test_g16_fi01_sin_nan(monkeypatch):  # departs from S-4, S-9
+&gt;       _expect_reason(_run_case(monkeypatch, _rules(sin=math.nan), _SCHED_00), "numerical_failure")
+
+tests/test_s2_geodetic.py:843: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification'))
+reason = 'numerical_failure', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+        assert value.reason == reason
+&gt;       assert value.category == CATEGORY[reason]
+E       AssertionError: assert 'numerical' == 'failure'
+E         
+E         - failure
+E         + numerical
+
+tests/test_s2_geodetic.py:821: AssertionError</failure></testcase></testsuite></testsuites>

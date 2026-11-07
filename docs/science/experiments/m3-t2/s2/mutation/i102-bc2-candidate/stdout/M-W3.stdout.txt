@@ -1,0 +1,25 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_g16_fi15_post_check_exception_is_not_wrapped _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10970ed80>
+
+    def test_g16_fi15_post_check_exception_is_not_wrapped(monkeypatch):
+        class SentinelError(ValueError):
+            pass
+    
+        sentinel = SentinelError("injected into _isnan")
+    
+        def isnan(v):
+            raise sentinel
+    
+        kind, value = _run_case(monkeypatch, _rules(), _SCHED_00, isnan=isnan)
+>       assert kind == "raised" and value is sentinel
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is SentinelError('injected into _isnan'))
+
+tests/test_s2_geodetic.py:947: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi15_post_check_exception_is_not_wrapped
+1 failed in 0.16s

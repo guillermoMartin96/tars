@@ -1,0 +1,24 @@
+#!/bin/bash
+# S2 red run (D-S2-12 (i); §3.14 step 2): uncommitted tests on top of commit A, geodesy.py
+# absent, constants.py unchanged. Records git status, blob ids and sha256 of every new or
+# changed test file, the absence proof, and per-node pytest output (JUnit + verbose log).
+set -u
+W="$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic"
+OUT="$1"
+UV="$HOME/Library/Python/3.9/bin/uv"
+mkdir -p "$OUT"
+cd "$W" || exit 99
+date -u +%FT%TZ > "$OUT/start-utc.txt"
+git rev-parse HEAD > "$OUT/head.txt"
+git status --porcelain --untracked-files=all > "$OUT/git-status-porcelain.txt"
+{ for f in $(git status --porcelain --untracked-files=all | awk '{print $2}'); do
+    echo "$(git hash-object "$f") $(shasum -a 256 "$f" | cut -d' ' -f1) $f"; done; } > "$OUT/test-file-identities.txt"
+{ echo "src/tars/sim/geodesy.py present: $(test -e src/tars/sim/geodesy.py && echo YES || echo no)";
+  echo "git ls-files src/tars/sim/geodesy.py: '$(git ls-files src/tars/sim/geodesy.py)'";
+  echo "constants.py blob $(git hash-object src/tars/sim/constants.py) (K bcda30e2d008a008986b58790820d7b3de12fd68)"; } > "$OUT/absence-proof.txt"
+"$UV" run pytest -v -rA -p no:cacheprovider --junitxml="$OUT/red-junit.xml" \
+  tests/test_s2_geodetic.py tests/test_s2_geodetic_conformance.py tests/test_constants.py \
+  > "$OUT/red-pytest.log" 2>&1
+echo $? > "$OUT/red-pytest.exit"
+date -u +%FT%TZ > "$OUT/end-utc.txt"
+touch "$OUT/DONE"

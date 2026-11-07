@@ -1,0 +1,191 @@
+{
+ "label": "RP-8 / RP-9 (CI log route): report-only; not a bound; not a gate",
+ "platforms": {
+  "macos-arm64": {
+   "listing_body_sha256": "2d4be24e9d0ba14550d0e25b2ed06b51eb02b99a8d337a4ae3ee64fe4ea1a8cf",
+   "run": "https://github.com/guillermoMartin96/tars/actions/runs/42301740647/attempts/1"
+  },
+  "ubuntu": {
+   "listing_body_sha256": "a0a1c131d112689309b71e67020b0cecb7fc0706198974ee98d8e9693a242d4e",
+   "run": "https://github.com/guillermoMartin96/tars/actions/runs/42301740647/attempts/1"
+  },
+  "macos-intel": {
+   "listing_body_sha256": "5a3e1acc32f8d100bb8b3321ba926503b1402468a6f62f2a21ccb9ad877152ab",
+   "run": "https://github.com/guillermoMartin96/tars/actions/runs/42301740647/attempts/1"
+  }
+ },
+ "census": {
+  "macos-arm64": {
+   "entries": 22665,
+   "outcomes": {
+    "accepted": 19154,
+    "evolute_region": 64,
+    "non_convergence": 3447
+   }
+  },
+  "ubuntu": {
+   "entries": 22665,
+   "outcomes": {
+    "accepted": 19154,
+    "evolute_region": 64,
+    "non_convergence": 3447
+   }
+  },
+  "macos-intel": {
+   "entries": 22665,
+   "outcomes": {
+    "accepted": 19154,
+    "evolute_region": 64,
+    "non_convergence": 3447
+   }
+  }
+ },
+ "pairs": {
+  "macos-arm64 vs ubuntu": {
+   "outcome_differences": 0,
+   "outcome_difference_entries": [],
+   "iteration_count_differences": 18,
+   "accepted_on_both": 19154,
+   "h_ulp_histogram": {
+    "0": 18695,
+    "1": 60,
+    "2": 17,
+    "4": 88,
+    "8": 28,
+    "16": 23,
+    "32": 9,
+    "64": 82,
+    "128": 16,
+    "512": 20,
+    "1024": 2,
+    "8192": 32,
+    "4194304": 28,
+    "8388608": 20,
+    "4503599627370496": 4,
+    "4472074429978902528": 26,
+    "4476578029606273024": 4
+   },
+   "phi_ulp_histogram": {
+    "0": 18676,
+    "1": 451,
+    "2": 22,
+    "3": 4,
+    "40": 1
+   },
+   "max_h_ulps": [
+    4476578029606273024,
+    "PS-OPS:1648"
+   ],
+   "max_phi_ulps": [
+    40,
+    "DG-CUSP:7009"
+   ],
+   "signed_zero_only_differences": 0,
+   "sign_or_zero_crossings": 30,
+   "max_abs_dh_m": [
+    "7.450580596923828e-09",
+    "PS-OPS:5880"
+   ],
+   "max_abs_dphi_rad": [
+    "5.551115123125783e-16",
+    "DG-CUSP:7009"
+   ]
+  },
+  "macos-arm64 vs macos-intel": {
+   "outcome_differences": 0,
+   "outcome_difference_entries": [],
+   "iteration_count_differences": 10,
+   "accepted_on_both": 19154,
+   "h_ulp_histogram": {
+    "0": 18664,
+    "1": 63,
+    "2": 33,
+    "4": 108,
+    "8": 18,
+    "16": 32,
+    "32": 2,
+    "64": 90,
+    "128": 6,
+    "512": 16,
+    "1024": 2,
+    "8192": 28,
+    "4194304": 50,
+    "8388608": 16,
+    "4503599627370496": 4,
+    "4472074429978902528": 22
+   },
+   "phi_ulp_histogram": {
+    "0": 19114,
+    "1": 30,
+    "2": 2,
+    "3": 8
+   },
+   "max_h_ulps": [
+    4472074429978902528,
+    "PS-OPS:1548"
+   ],
+   "max_phi_ulps": [
+    3,
+    "DG-DEEP:2951"
+   ],
+   "signed_zero_only_differences": 0,
+   "sign_or_zero_crossings": 22,
+   "max_abs_dh_m": [
+    "1.4901161193847656e-08",
+    "PS-OPS:5912"
+   ],
+   "max_abs_dphi_rad": [
+    "3.3306690738754696e-16",
+    "DG-DEEP:2951"
+   ]
+  },
+  "ubuntu vs macos-intel": {
+   "outcome_differences": 0,
+   "outcome_difference_entries": [],
+   "iteration_count_differences": 24,
+   "accepted_on_both": 19154,
+   "h_ulp_histogram": {
+    "0": 18560,
+    "1": 89,
+    "2": 43,
+    "4": 102,
+    "8": 38,
+    "16": 45,
+    "32": 11,
+    "64": 120,
+    "128": 12,
+    "512": 28,
+    "8192": 36,
+    "4194304": 22,
+    "8388608": 20,
+    "4472074429978902528": 24,
+    "4476578029606273024": 4
+   },
+   "phi_ulp_histogram": {
+    "0": 18656,
+    "1": 465,
+    "2": 24,
+    "3": 8,
+    "40": 1
+   },
+   "max_h_ulps": [
+    4476578029606273024,
+    "PS-OPS:1648"
+   ],
+   "max_phi_ulps": [
+    40,
+    "DG-CUSP:7009"
+   ],
+   "signed_zero_only_differences": 0,
+   "sign_or_zero_crossings": 28,
+   "max_abs_dh_m": [
+    "1.4901161193847656e-08",
+    "PS-OPS:5912"
+   ],
+   "max_abs_dphi_rad": [
+    "5.551115123125783e-16",
+    "DG-CUSP:7009"
+   ]
+  }
+ }
+}

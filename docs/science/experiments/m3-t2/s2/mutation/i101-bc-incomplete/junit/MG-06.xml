@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.183" timestamp="2026-11-06T15:13:44.384515-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g05_overflow_rows_far_from_the_edge" time="0.002"><failure message="AssertionError: (1.5e+308, 1.5e+308, 0.0): expected overflow, but it was accepted">def test_g05_overflow_rows_far_from_the_edge():
+        geo = _geo()
+        for r in ((1.5e308, 1.5e308, 0.0), (1.5e308, 0.0, 1.5e308)):
+&gt;           exc = _raises_reason(geo, r, "overflow")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:251: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-101/commit-d/out/mutation/MG-06/src/tars/sim/geodesy.py'&gt;
+r = (1.5e+308, 1.5e+308, 0.0), reason = 'overflow'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (1.5e+308, 1.5e+308, 0.0): expected overflow, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase></testsuite></testsuites>

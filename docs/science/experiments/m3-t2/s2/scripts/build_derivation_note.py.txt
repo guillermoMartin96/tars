@@ -1,0 +1,190 @@
+"""Build docs/science/experiments/m3-t2/s2/evolute-guard-derivation.md (S2 commit D).
+
+Usage: python -I build_derivation_note.py <repo root> <v11 path>
+
+It holds §3.7 of the pinned proposal v11 verbatim ("as reviewed"; §3.7.9), the §3.12
+equivalence arguments verbatim, the author's operation-by-operation record of the component
+against r1 §5 (author record only: the independent IN-1 is the §5.2 review's), the exact
+definition a versioned model identifier would version (D-S2-2 (c)), the D-S2-11 (b-iv)
+record, and the I-101 owner determination. Every verbatim block is checked against v11.
+"""
+
+import hashlib
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT, V11 = Path(sys.argv[1]), Path(sys.argv[2])
+V11_SHA = "f7d88086632e38a773594231c5aae44f86993dd3a6496e5d559d0989a3072809"
+assert hashlib.sha256(V11.read_bytes()).hexdigest() == V11_SHA
+v = V11.read_text().split("\n")
+
+
+def span(a, b):
+    return "\n".join(v[a - 1 : b]).rstrip("\n")
+
+
+def blob(path):
+    return subprocess.run(["git", "-C", str(ROOT), "hash-object", path], capture_output=True, text=True,
+                          check=True).stdout.strip()
+
+
+g = (ROOT / "src/tars/sim/geodesy.py").read_text().split("\n")
+
+
+def line_of(text):
+    hits = [i + 1 for i, ln in enumerate(g) if text in ln]
+    assert len(hits) == 1, (text, hits)
+    return hits[0]
+
+
+IN1 = [
+    ("1", "a = 6378137.0", "_A = WGS84.equatorial_radius", "_A = WGS84.equatorial_radius"),
+    ("1", "F = 1.0/INV_F", "_F = 1.0 / WGS84_INVERSE_FLATTENING", "_F = 1.0 / WGS84_INVERSE_FLATTENING"),
+    ("1", "e2 = F·(2.0 − F)", "_E2 = _F * (2.0 - _F)", "_E2 = _F * (2.0 - _F)"),
+    ("2", "p = hypot(x, y)", "p = _LIB.hypot(x, y)", "p = _LIB.hypot(x, y)"),
+    ("3", "φ = atan2(z, p·(1.0 − e2))", "phi = _LIB.atan2(z, p * (1.0 - _E2))", "phi = _LIB.atan2(z, p * (1.0 - _E2))"),
+    ("4", "at most 60 times", "for _k in range(1, 61):", "for _k in range(1, 61):"),
+    ("4", "s = sin φ", "s = _LIB.sin(phi)", "            s = _LIB.sin(phi)"),
+    ("4", "n = a/√(1.0 − e2·s·s)", "n = _A / _LIB.sqrt(1.0 - _E2 * s * s)", "n = _A / _LIB.sqrt(1.0 - _E2 * s * s)"),
+    ("4", "φ_new = atan2(z + e2·n·s, p)", "phi_new = _LIB.atan2(z + _E2 * n * s, p)", "phi_new = _LIB.atan2(z + _E2 * n * s, p)"),
+    ("4", "Stop after the update when |φ_new − φ| ≤ 1e-15", "stop = abs(phi_new - phi) <= 1e-15; phi = phi_new; if stop: converged = True; break",
+     "stop = abs(phi_new - phi) <= 1e-15"),
+    ("5", "s = sin φ, c = cos φ", "s = _LIB.sin(phi); c = _LIB.cos(phi)", "        c = _LIB.cos(phi)"),
+    ("5", "h = p·c + z·s − a·√(1.0 − e2·s·s)", "h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)",
+     "h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)"),
+]
+assert g[line_of("p = _LIB.hypot(x, y)") - 2].strip() == "try:"
+rows = "\n".join(f"| {s} | {r.replace('|', chr(92) + '|')} | `{c}` | {line_of(anchor)} |" for s, r, c, anchor in IN1)
+
+doc = f"""# S2 evolute-guard derivation note (M3 T2 S2, commit D)
+
+Authorized by PC-7(S2) (issued, I-99), with owner determinations I-101, I-102 and I-103. Pinned proposal v11, sha256 `{V11_SHA}`.
+Component `src/tars/sim/geodesy.py`, git blob `{blob("src/tars/sim/geodesy.py")}`.
+
+**What this note is.** §3.7.9 of v11 requires "a derivation note … holding §3.7 as reviewed". §3.7 is
+reproduced verbatim below, and checked byte for byte against the pinned file. It remains the
+implementer's derivation [DER]. The I-72, I-75 and later reviews confirmed parts of it at proposal
+level (I-97 decision A). Implementation-level verification (IN-1, OB-11, OB-19) is the
+independent §5.2 review's, and nothing here marks an obligation MET.
+
+**What it is not.** Not an accuracy claim. Acceptance means only that DQ-1's stop test was met and
+the outputs are finite (OD-12 item 3). Accepted points below the ellipsoid are report-only (P8).
+
+## 1. Owner determination I-101 (generation environment; pinned v11 only)
+
+For v11 §3.10 and the G-17a/G-17b replay rules, "the generation environment" means equality of
+these recorded fields:
+- `sys.version`;
+- `platform.platform()`;
+- `platform.machine()`;
+- the `uv.lock` sha256;
+- the sha256 of the interpreter executable, with its real path resolved before hashing.
+
+Path equality is not compared. The commit SHA and the CI-only run-record fields stay mandatory
+under §3.16 and are excluded from this equality. Equal fields select the replay-policy case only.
+They do not prove library or build identity, as r83:83 states: "ENV fields with unobservable values
+do not certify a perfectly reproduced library/build environment; a controlled regeneration
+comparison must record that limitation rather than assume matching proxy fields prove identity."
+
+The author chose these fields during commit-A preparation. I-101 subsequently approved that author
+interpretation; it was not prior owner authorization.
+
+## 2. Author's operation-by-operation record against r1 §5 (lines 89-94, blob 4537bcad…)
+
+Author record only, for the reviewer's comparison; the independent IN-1 is the §5.2 review's.
+
+| r1 step | r1 text | geodesy.py | line |
+|---|---|---|---|
+{rows}
+
+Additions to r1 §5, and only these (§3.7.10 E.1):
+- the boolean `converged` and the `break` on the stop branch;
+- the loop counter `_k`;
+- the `try` (lines {line_of("p = _LIB.hypot(x, y)") - 1} to {line_of("    except (ArithmeticError, ValueError) as exc:  # N1")}), which covers exactly E.1 and catches only `ArithmeticError` and `ValueError`.
+
+The post-checks N2 to N4 (lines {line_of("if _isnan(p)")}, {line_of("if _isinf(p)")}, {line_of("if not converged")}) use `_isnan` and `_isinf`, bound at import, never `_LIB`. `_LIB` is bound to `math` at line {line_of("_LIB = math")} and is used only in E.1.
+
+Guard (author record against §3.7.4 and §3.7.5):
+- `_K` = a²·e2² (line {line_of("_K = Fraction(_A) ** 2 * Fraction(_E2) ** 2")});
+- `_W` = 1 − e2 (line {line_of("_W = 1 - Fraction(_E2)")});
+- D′ = K − p² − W·z² (line {line_of("d = _K - p2 - _W * z2")});
+- the closed-region test D′ ≥ 0 and D′³ ≥ 27·K·W·p²·z² (line {line_of("return d >= 0 and d**3 >= 27")});
+- the pre-filter at 65536.0 (lines {line_of("_PREFILTER = 65536.0")} and {line_of("if abs(x) >= _PREFILTER")}).
+
+All in exact `Fraction` arithmetic; no libm.
+
+## 3. What a versioned model identifier would version (D-S2-2 (c); assigned in S4, OB-31)
+
+No identifier is assigned in S2. The definition an identifier would version:
+- **Constants:**
+  - a = `WGS84.equatorial_radius` = 6378137.0;
+  - 1/f = `WGS84_INVERSE_FLATTENING` = 298.257223563;
+  - F = `0x1.b775a84f3e128p-9`;
+  - e2 = `0x1.b6b90f1fe94f0p-8`;
+  - the guard constants K = a²e2² and W = 1 − e2 as exact rationals;
+  - the pre-filter 65536.0.
+- **Sequence:** DQ-1 (α), r1 §5 lines 89-94, with the E.1 additions above.
+- **Guard:** the §3.8 steps 0 to 4, in that order, with the closed region.
+- **Numerical rules:** N1 to N5 in the order `numerical_failure` → `overflow` → `non_convergence` (D-S2-11 (b-i)); the 60-iteration cap and the 1e-15 stop test unchanged.
+
+## 4. D-S2-11 (b-iv): the P8 evidence sentence
+
+`docs/decisions/requests/DR-0029-m3-t0-proposals.md:568` reads: "Both inverse algorithms are valid
+outside the evolute region near the centre."
+
+For DQ-1 as specified (60-iteration cap), this is contradicted near the equatorial cusp outside E
+(v11 §3.20; F-01). There, the iteration does not meet its stop test within 60 iterations, and S2
+rejects such points with `non_convergence`. On the frozen listing, the host census records 3 081
+such DG-CUSP points and 366 DG-DEEP points (RP-6b).
+
+This is recorded here and in the S2 report. DR-0029 is not edited, and no status note is added
+(the owner's option, not taken).
+
+## 5. Owner amendments I-102 and I-103 (external; v11 itself unchanged)
+
+**I-102 (sequence adjustment, MN-17).** The I-101 campaign at BC stopped at stop 8. MN-17 ("the
+component value used as given, instead of the base-slot value") failed its G-06 override node only
+by an uncaught `GeodeticDomainError`, which v11 §3.12 does not count as a kill. The campaign's
+MN-17 node list had also omitted the `__abs__` case.
+
+I-102 authorized:
+- a narrow test correction: the override case captures a `GeodeticDomainError` as an observed wrong
+  outcome and rejects it by an explicit assertion;
+- a supplemental red run at A;
+- one supplemental corrective commit after BC, designated BC2.
+
+The uncaught-exception failure is not counted as a kill, and MN-17 is not equivalent.
+
+**I-103 (owner amendment to §3.12, MI-03's designated killer).** Quoted:
+
+> For the mutant “Precedence swap, non-finite after evolute,” designated MI-03 in the campaign,
+> replace the designated killer:
+> G-06 (inf, 0, 0)
+> with:
+> G-06 (nan, 0, 0), node test_g06_section_3_8_order_table[r0-non_finite].
+
+Reason: the §3.7.5 pre-filter returns False for any input with an infinite component before any
+`Fraction` is built, so the mutant is unobservable at (inf, 0, 0). At (nan, 0, 0), `Fraction(nan)`
+raises `ValueError` outside E.1, and `_raises_reason` rejects it by an explicit `AssertionError`.
+This corrects the designated witness only. It grants no equivalence exemption.
+
+## 6. Equivalence arguments for the documented equivalent mutation survivors (v11 §3.12, verbatim)
+
+<!-- BEGIN VERBATIM v11 P:2185-2189 -->
+{span(2185, 2189)}
+<!-- END VERBATIM -->
+
+<!-- BEGIN VERBATIM v11 P:2226-2241 -->
+{span(2226, 2241)}
+<!-- END VERBATIM -->
+
+## 7. v11 §3.7, verbatim (v11 P:898-1410)
+
+<!-- BEGIN VERBATIM v11 P:898-1410 -->
+{span(898, 1410)}
+<!-- END VERBATIM -->
+"""
+out = ROOT / "docs/science/experiments/m3-t2/s2/evolute-guard-derivation.md"
+out.write_text(doc)
+print(out, hashlib.sha256(out.read_bytes()).hexdigest())

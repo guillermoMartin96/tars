@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________________ test_g16_fi09_nan_before_overflow _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108c92b70>
+
+    def test_g16_fi09_nan_before_overflow(monkeypatch):  # S-4, S-6
+        out = _run_case(monkeypatch, _rules(hypot=math.inf, sin=math.nan), _SCHED_00)
+>       _expect_reason(out, "numerical_failure")
+
+tests/test_s2_geodetic.py:898: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation: a result left the binary64 range'))
+reason = 'numerical_failure', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+>       assert value.reason == reason
+E       AssertionError: assert 'overflow' == 'numerical_failure'
+E         
+E         - numerical_failure
+E         + overflow
+
+tests/test_s2_geodetic.py:832: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi09_nan_before_overflow - Asserti...
+1 failed in 0.17s

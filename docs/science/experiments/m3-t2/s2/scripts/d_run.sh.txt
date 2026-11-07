@@ -1,0 +1,22 @@
+#!/bin/bash
+# S2 commit D evidence driver (I-99/I-101; v11 §3.14 step 4). Fresh clone of pushed BC from GitHub;
+# every record is recomputed there. Each step writes its own .exit; DONE marks completion.
+set -u
+E=$HOME/tars-evidence/I-101/commit-d; S=$E/scripts; O=$E/out; C=$E/clone-bc
+BC=2b975d626e92c76a18efc873e0991084db30617a
+URL=https://github.com/guillermoMartin96/tars.git
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"
+date -u +%FT%TZ > "$O/start-utc.txt"
+git clone -q "$URL" "$C" && git -C "$C" checkout -q --detach "$BC"
+(cd "$C" && uv sync --locked -q); echo $? > "$O/uv-sync.exit"
+{ git -C "$C" rev-parse HEAD; git -C "$C" status --porcelain; } > "$O/clone-state.txt"
+PY=$C/.venv/bin/python
+(cd "$C" && $PY -B -c "import json,sys,platform,hashlib,subprocess,os;print(json.dumps({'commit':subprocess.run(['git','rev-parse','HEAD'],capture_output=True,text=True).stdout.strip(),'sys.version':sys.version,'platform.platform()':platform.platform(),'platform.machine()':platform.machine(),'uv.lock sha256':hashlib.sha256(open('uv.lock','rb').read()).hexdigest(),'interpreter realpath sha256':hashlib.sha256(open(os.path.realpath(sys.executable),'rb').read()).hexdigest()},indent=1))") > "$O/run-record-host.json"
+$PY -I "$S/g13_scope_check.py" "$C" "$BC" > "$O/g13_scope_check_BC.json" 2>&1; echo $? > "$O/g13.exit"
+$PY -I "$S/derivation_crosscheck.py" "$C" > "$O/derivation_crosscheck.json" 2> "$O/derivation_crosscheck.err"; echo $? > "$O/derivation_crosscheck.exit" &
+(cd "$C" && $PY -I "$S/report_only.py" "$C" "$O/report_only" > "$O/report_only.log" 2>&1; echo $? > "$O/report_only.exit") &
+$PY -I "$S/mutate.py" "$C" "$O/mutation" > "$O/mutation.log" 2>&1; echo $? > "$O/mutation.exit"
+wait
+date -u +%FT%TZ > "$O/end-utc.txt"
+touch "$O/DONE"

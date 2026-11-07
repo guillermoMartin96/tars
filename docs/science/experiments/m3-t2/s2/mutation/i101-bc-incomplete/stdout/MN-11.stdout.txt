@@ -1,0 +1,31 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_g16_fi07_overflow_before_non_convergence _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x102bcba40>
+
+    def test_g16_fi07_overflow_before_non_convergence(monkeypatch):  # S-6, S-9
+        out = _run_case(monkeypatch, _rules(hypot=math.inf, atan2=_atan2_never_converging), _SCHED_07)
+>       _expect_reason(out, "overflow")
+
+tests/test_s2_geodetic.py:876: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations'))
+reason = 'overflow', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+>       assert value.reason == reason
+E       AssertionError: assert 'non_convergence' == 'overflow'
+E         
+E         - overflow
+E         + non_convergence
+
+tests/test_s2_geodetic.py:820: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi07_overflow_before_non_convergence
+1 failed in 0.19s

@@ -1,0 +1,76 @@
+............FFFF                                                         [100%]
+=================================== FAILURES ===================================
+___________ test_g03_boundary_pair_outside_point_geometric[(1,0,1)] ____________
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+E       AssertionError: assert 'evolute_region' not in ('origin', 'evolute_region')
+E        +  where 'evolute_region' = _reason(<module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'>, (15121.263417223727, 0.0, 15121.263417223727))
+E        +    where <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'> = _geo()
+E        +    and   (15121.263417223727, 0.0, 15121.263417223727) = <function <lambda> at 0x1066c93a0>(15121.263417223727)
+
+tests/test_s2_geodetic.py:209: AssertionError
+___________ test_g03_boundary_pair_outside_point_geometric[(2,0,1)] ____________
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+E       AssertionError: assert 'evolute_region' not in ('origin', 'evolute_region')
+E        +  where 'evolute_region' = _reason(<module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'>, (20544.799187243247, 0.0, 10272.399593621623))
+E        +    where <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'> = _geo()
+E        +    and   (20544.799187243247, 0.0, 10272.399593621623) = <function <lambda> at 0x1066c9440>(10272.399593621623)
+
+tests/test_s2_geodetic.py:209: AssertionError
+___________ test_g03_boundary_pair_outside_point_geometric[(1,0,2)] ____________
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+E       AssertionError: assert 'evolute_region' not in ('origin', 'evolute_region')
+E        +  where 'evolute_region' = _reason(<module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'>, (10280.23472671227, 0.0, 20560.46945342454))
+E        +    where <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'> = _geo()
+E        +    and   (10280.23472671227, 0.0, 20560.46945342454) = <function <lambda> at 0x1066c94e0>(10280.23472671227)
+
+tests/test_s2_geodetic.py:209: AssertionError
+___________ test_g03_boundary_pair_outside_point_geometric[(1,1,1)] ____________
+
+ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+E       AssertionError: assert 'evolute_region' not in ('origin', 'evolute_region')
+E        +  where 'evolute_region' = _reason(<module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'>, (12586.62520540496, 12586.62520540496, 12586.62520540496))
+E        +    where <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MP-01/src/tars/sim/geodesy.py'> = _geo()
+E        +    and   (12586.62520540496, 12586.62520540496, 12586.62520540496) = <function <lambda> at 0x1066c9580>(12586.62520540496)
+
+tests/test_s2_geodetic.py:209: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(2,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,0,2)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,1,1)]
+4 failed, 12 passed in 0.23s

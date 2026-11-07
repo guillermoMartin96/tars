@@ -1,0 +1,62 @@
+"""Extract the S2 records from an unaltered pytest log (warnings summary) into separate files.
+
+Usage: python -I extract_s2_records.py <pytest.log> <outdir>
+
+The pytest warnings summary prints each warning as
+    <path>:<line>: <Category>: <message>
+followed by the source line. Pytest indents every line of the message by two spaces;
+exactly that two-space prefix is removed from the listing lines, and the header's
+body sha256 (computed by the test before emission) verifies the reconstruction. The S2 messages begin with S2-ENV-RECORD, S2-XP3-LISTING,
+S2-G17A-REPORT or S2-G17B-RECORD. The X-P3 listing spans many lines and ends with the
+marker S2-XP3-LISTING-END. This reads the log; it never edits it. A missing record, or a
+listing whose body sha256 or entry count does not match its header, is reported as
+INCOMPLETE (stop 18). Nothing is reconstructed.
+"""
+
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+log = Path(sys.argv[1]).read_text()
+out = Path(sys.argv[2])
+out.mkdir(parents=True, exist_ok=True)
+status = {"log": str(sys.argv[1]), "log_sha256": hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest()}
+
+for tag in ("S2-ENV-RECORD", "S2-G17A-REPORT", "S2-G17B-RECORD"):
+    m = re.search(rf"{tag} (sha256=([0-9a-f]{{64}}) )?(\{{.*\}})\n", log)
+    if not m:
+        status[tag] = "INCOMPLETE: not found"
+        continue
+    body = m.group(3)
+    rec = json.loads(body)
+    ok = True
+    if m.group(2):
+        ok = hashlib.sha256(body.encode()).hexdigest() == m.group(2)
+    (out / f"{tag}.json").write_text(json.dumps(rec, indent=1, sort_keys=True) + "\n")
+    status[tag] = "ok" if ok else "INCOMPLETE: sha256 mismatch"
+
+m = re.search(r"S2-XP3-LISTING entries=(\d+) body_sha256=([0-9a-f]{64}) outcomes=(\{[^\n]*\})\n"
+              r"  (set,index,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source\n)"
+              r"(.*?)  S2-XP3-LISTING-END", log, re.S)
+if not m:
+    status["S2-XP3-LISTING"] = "INCOMPLETE: not found"
+else:
+    n, digest, outcomes, header, raw = int(m.group(1)), m.group(2), m.group(3), m.group(4), m.group(5)
+    raw_lines = raw.split("\n")[:-1]
+    if not all(ln.startswith("  ") for ln in raw_lines):
+        status["S2-XP3-LISTING"] = "INCOMPLETE: unexpected indentation"
+        raise SystemExit(json.dumps(status, indent=1))
+    body = "\n".join(ln[2:] for ln in raw_lines) + "\n"
+    lines = body.split("\n")[:-1]
+    ok = hashlib.sha256(body.encode()).hexdigest() == digest and len(lines) == n
+    (out / "S2-XP3-LISTING.csv").write_text(header + body)
+    status["S2-XP3-LISTING"] = {"entries": n, "body_sha256": digest, "outcomes": outcomes,
+                                "verified": ok}
+    if not ok:
+        status["S2-XP3-LISTING"]["status"] = "INCOMPLETE: count or sha256 mismatch"
+summary = re.findall(r"^=+ (.*(?:passed|failed|error).*) =+$", log, re.M)
+status["pytest_summary_line"] = summary[-1] if summary else "INCOMPLETE: no summary line"
+(out / "extraction-status.json").write_text(json.dumps(status, indent=1) + "\n")
+print(json.dumps(status, indent=1))

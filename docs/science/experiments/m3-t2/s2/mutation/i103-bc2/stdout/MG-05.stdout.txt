@@ -1,0 +1,56 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+___________________ test_g03_point_inside_the_evolute_region ___________________
+
+    def test_g03_point_inside_the_evolute_region():
+>       _raises_reason(_geo(), (30_000.0, 30_000.0, 0.0), "evolute_region")
+
+tests/test_s2_geodetic.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MG-05/src/tars/sim/geodesy.py'>
+r = (30000.0, 30000.0, 0.0), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+>       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (30000.0, 30000.0, 0.0): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError
+____________ test_g17_every_listing_entry_has_its_geometric_outcome ____________
+
+    def test_g17_every_listing_entry_has_its_geometric_outcome():
+        geo = _geo()
+        entries = _frozen()
+        assert len(entries) == gen.TOTAL_ENTRIES
+        bad = []
+        rejects = 0
+        for e in entries:
+            reason = _reason(geo, (e.x, e.y, e.z))
+            if e.label in ("origin", "evolute_region"):
+                rejects += 1
+                if reason != e.label:
+                    bad.append((e.set, e.index, e.label, reason))
+            elif reason in ("origin", "evolute_region"):
+                bad.append((e.set, e.index, e.label, reason))
+>       assert bad == [], f"stop 15: {bad[:10]}"
+E       AssertionError: stop 15: [('DG-INT', 6, 'evolute_region', None), ('DG-INT', 8, 'evolute_region', None), ('DG-INT', 10, 'evolute_region', None), ('DG-INT', 12, 'evolute_region', None), ('DG-INT', 14, 'evolute_region', None), ('DG-INT', 16, 'evolute_region', None), ('DG-INT', 18, 'evolute_region', None), ('DG-INT', 20, 'evolute_region', None), ('DG-DEEP', 2513, 'evolute_region', None), ('DG-DEEP', 2871, 'evolute_region', None)]
+E       assert [('DG-INT', 6...', None), ...] == []
+E         
+E         Left contains 64 more items, first extra item: ('DG-INT', 6, 'evolute_region', None)
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:967: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g03_point_inside_the_evolute_region - ...
+FAILED tests/test_s2_geodetic.py::test_g17_every_listing_entry_has_its_geometric_outcome
+2 failed in 0.40s

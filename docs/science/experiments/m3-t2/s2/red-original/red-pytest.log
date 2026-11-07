@@ -1,0 +1,2318 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0 -- $HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/.venv/bin/python
+rootdir: $HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic
+configfile: pyproject.toml
+collecting ... collected 131 items
+
+tests/test_s2_geodetic.py::test_g01_inverse_flattening_is_the_nga_value FAILED [  0%]
+tests/test_s2_geodetic.py::test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step FAILED [  1%]
+tests/test_s2_geodetic.py::test_g03_point_inside_the_evolute_region FAILED [  2%]
+tests/test_s2_geodetic.py::test_g03_all_eight_signed_zero_origins FAILED [  3%]
+tests/test_s2_geodetic.py::test_g03_non_origin_subnormal_is_in_the_evolute_region FAILED [  3%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[+x] FAILED [  4%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[x=y] FAILED [  5%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[+z] FAILED [  6%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[-z] FAILED [  6%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,0,1)] FAILED [  7%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(2,0,1)] FAILED [  8%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,0,2)] FAILED [  9%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,1,1)] FAILED [  9%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[+x] FAILED [ 10%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[x=y] FAILED [ 11%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[+z] FAILED [ 12%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[-z] FAILED [ 12%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,0,1)] FAILED [ 13%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(2,0,1)] FAILED [ 14%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,0,2)] FAILED [ 15%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,1,1)] FAILED [ 16%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[+x] FAILED [ 16%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[x=y] FAILED [ 17%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[+z] FAILED [ 18%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[-z] FAILED [ 19%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,0,1)] FAILED [ 19%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(2,0,1)] FAILED [ 20%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,0,2)] FAILED [ 21%]
+tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,1,1)] FAILED [ 22%]
+tests/test_s2_geodetic.py::test_g04_non_finite_component_in_each_position FAILED [ 22%]
+tests/test_s2_geodetic.py::test_g04_mixed_non_finite_cases FAILED        [ 23%]
+tests/test_s2_geodetic.py::test_g05_overflow_rows_far_from_the_edge FAILED [ 24%]
+tests/test_s2_geodetic.py::test_g05_large_finite_rows_are_accepted FAILED [ 25%]
+tests/test_s2_geodetic.py::test_g05_no_overflow_or_zero_division_error_escapes FAILED [ 25%]
+tests/test_s2_geodetic.py::test_g06_error_class_is_a_value_error_with_reason_and_category FAILED [ 26%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r0-non_finite] FAILED [ 27%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r1-non_finite] FAILED [ 28%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r2-origin] FAILED [ 29%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r3-evolute_region] FAILED [ 29%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r4-not_binary64] FAILED [ 30%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r5-not_binary64] FAILED [ 31%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r6-non_convergence] FAILED [ 32%]
+tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r7-overflow] FAILED [ 32%]
+tests/test_s2_geodetic.py::test_g06_fraction_component_is_a_type_error FAILED [ 33%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r0] FAILED [ 34%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r1] FAILED [ 35%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r2] FAILED [ 35%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r3] FAILED [ 36%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r4] FAILED [ 37%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r5] FAILED [ 38%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r6] FAILED [ 38%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r7] FAILED [ 39%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r8] FAILED [ 40%]
+tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r9] FAILED [ 41%]
+tests/test_s2_geodetic.py::test_g06_numpy_float64_is_accepted_bit_identical_to_float FAILED [ 41%]
+tests/test_s2_geodetic.py::test_g06_float_subclass_whose_abs_raises_is_normalized FAILED [ 42%]
+tests/test_s2_geodetic.py::test_g06_float_subclass_overrides_never_run FAILED [ 43%]
+tests/test_s2_geodetic.py::test_g06_int_subclass_overrides_never_run FAILED [ 44%]
+tests/test_s2_geodetic.py::test_g06_class_faking_object_is_a_type_error FAILED [ 45%]
+tests/test_s2_geodetic.py::test_g06_structural_key_error_propagates_unchanged FAILED [ 45%]
+tests/test_s2_geodetic.py::test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity FAILED [ 46%]
+tests/test_s2_geodetic.py::test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity FAILED [ 47%]
+tests/test_s2_geodetic.py::test_g06_fixed_message_and_category_per_reason FAILED [ 48%]
+tests/test_s2_geodetic.py::test_g07_returns_h_then_phi_as_builtin_floats FAILED [ 48%]
+tests/test_s2_geodetic.py::test_g07_list_tuple_and_float64_ndarray_are_bit_identical FAILED [ 49%]
+tests/test_s2_geodetic.py::test_g07_inputs_are_not_mutated FAILED        [ 50%]
+tests/test_s2_geodetic.py::test_g09_repeated_in_process_evaluation_is_byte_identical FAILED [ 51%]
+tests/test_s2_geodetic.py::test_g09_second_subprocess_is_byte_identical FAILED [ 51%]
+tests/test_s2_geodetic.py::test_g09_module_state_is_unchanged_after_calls FAILED [ 52%]
+tests/test_s2_geodetic.py::test_g09_architecture_scan_covers_geodesy FAILED [ 53%]
+tests/test_s2_geodetic.py::test_g10_w1_round_to_nearest_excludes_toward_zero_and_down PASSED [ 54%]
+tests/test_s2_geodetic.py::test_g10_w2_round_to_nearest_excludes_up PASSED [ 54%]
+tests/test_s2_geodetic.py::test_g10_w3_ties_to_even_excludes_ties_away PASSED [ 55%]
+tests/test_s2_geodetic.py::test_g10_w4_tie_to_even_upward PASSED         [ 56%]
+tests/test_s2_geodetic.py::test_g10_w5_no_flush_to_zero PASSED           [ 57%]
+tests/test_s2_geodetic.py::test_g10_w6_no_denormals_are_zero PASSED      [ 58%]
+tests/test_s2_geodetic.py::test_g10_w7_subnormal_tie_to_even PASSED      [ 58%]
+tests/test_s2_geodetic.py::test_g11_geodesy_imports_only_math_fractions_numbers_typing_and_constants FAILED [ 59%]
+tests/test_s2_geodetic.py::test_g13_protected_files_are_byte_identical_to_k PASSED [ 60%]
+tests/test_s2_geodetic.py::test_g13_existing_statements_are_ast_identical_to_k[src/tars/sim/constants.py] PASSED [ 61%]
+tests/test_s2_geodetic.py::test_g13_existing_statements_are_ast_identical_to_k[tests/test_constants.py] PASSED [ 61%]
+tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r0] FAILED [ 62%]
+tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r1] FAILED [ 63%]
+tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r2] FAILED [ 64%]
+tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r3] FAILED [ 64%]
+tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r4] FAILED [ 65%]
+tests/test_s2_geodetic.py::test_g14_named_acceptance_points_are_accepted FAILED [ 66%]
+tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-EQ] FAILED [ 67%]
+tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-AX] FAILED [ 67%]
+tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR] FAILED [ 68%]
+tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-BIG] FAILED [ 69%]
+tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-A] FAILED [ 70%]
+tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-A'] FAILED [ 70%]
+tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-OPS] FAILED [ 71%]
+tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-GRID] FAILED [ 72%]
+tests/test_s2_geodetic.py::test_g16_fi00_control FAILED                  [ 73%]
+tests/test_s2_geodetic.py::test_g16_fi01_sin_nan FAILED                  [ 74%]
+tests/test_s2_geodetic.py::test_g16_fi02_sqrt_raises_value_error FAILED  [ 74%]
+tests/test_s2_geodetic.py::test_g16_fi03_sqrt_zero_divides FAILED        [ 75%]
+tests/test_s2_geodetic.py::test_g16_fi04_atan2_raises_overflow_error FAILED [ 76%]
+tests/test_s2_geodetic.py::test_g16_fi05_sin_raises_type_error_propagates FAILED [ 77%]
+tests/test_s2_geodetic.py::test_g16_fi06_missing_cos_propagates_attribute_error FAILED [ 77%]
+tests/test_s2_geodetic.py::test_g16_fi07_overflow_before_non_convergence FAILED [ 78%]
+tests/test_s2_geodetic.py::test_g16_fi08_nan_before_overflow_and_non_convergence FAILED [ 79%]
+tests/test_s2_geodetic.py::test_g16_fi09_nan_before_overflow FAILED      [ 80%]
+tests/test_s2_geodetic.py::test_g16_fi10_huge_cos_overflows FAILED       [ 80%]
+tests/test_s2_geodetic.py::test_g16_fi11_stop_test_met_at_update_60_is_accepted FAILED [ 81%]
+tests/test_s2_geodetic.py::test_g16_fi12_stop_test_first_met_at_61_is_non_convergence FAILED [ 82%]
+tests/test_s2_geodetic.py::test_g16_fi13_failure_in_final_height_before_non_convergence FAILED [ 83%]
+tests/test_s2_geodetic.py::test_g16_fi14_sin_raises_name_error_propagates FAILED [ 83%]
+tests/test_s2_geodetic.py::test_g16_fi15_post_check_exception_is_not_wrapped FAILED [ 84%]
+tests/test_s2_geodetic.py::test_g17_every_listing_entry_has_its_geometric_outcome FAILED [ 85%]
+tests/test_s2_geodetic_conformance.py::test_g12a_twin_imports_only_math_and_typing PASSED [ 86%]
+tests/test_s2_geodetic_conformance.py::test_twin_constants_are_r1_step_1 PASSED [ 87%]
+tests/test_s2_geodetic_conformance.py::test_twin_equator_gives_plus_zero_latitude_and_h_x_minus_a PASSED [ 87%]
+tests/test_s2_geodetic_conformance.py::test_twin_records_the_cap_without_convergence_as_not_converged PASSED [ 88%]
+tests/test_s2_geodetic_conformance.py::test_g12b_component_exists_and_imports_nothing_from_tests FAILED [ 89%]
+tests/test_s2_geodetic_conformance.py::test_g08_component_equals_twin_at_every_passes_entry FAILED [ 90%]
+tests/test_constants.py::test_wgs84_defining_parameters PASSED           [ 90%]
+tests/test_constants.py::test_constants_are_immutable_and_validated PASSED [ 91%]
+tests/test_constants.py::test_wgs84_literals_only_in_constants_module PASSED [ 92%]
+tests/test_constants.py::test_standard_gravity_literal_only_in_constants_module PASSED [ 93%]
+tests/test_constants.py::test_c20_is_the_published_nga_value PASSED      [ 93%]
+tests/test_constants.py::test_m3_set_reuses_the_wgs84_gm_and_radius PASSED [ 94%]
+tests/test_constants.py::test_j2_is_derived_not_stored PASSED            [ 95%]
+tests/test_constants.py::test_j2_derivation_is_correctly_rounded_binary64 PASSED [ 96%]
+tests/test_constants.py::test_j2_binary64_value_is_the_p10_recorded_value PASSED [ 96%]
+tests/test_constants.py::test_q1_decimal_is_the_11_digit_display_form_of_derived_j2 PASSED [ 97%]
+tests/test_constants.py::test_j2_identity_constants_validated PASSED     [ 98%]
+tests/test_constants.py::test_c20_literal_only_in_constants_and_no_j2_literal_anywhere PASSED [ 99%]
+tests/test_constants.py::test_wgs84_inverse_flattening_literal_only_in_constants_module FAILED [100%]
+
+=================================== FAILURES ===================================
+_________________ test_g01_inverse_flattening_is_the_nga_value _________________
+
+    def test_g01_inverse_flattening_is_the_nga_value():
+>       from tars.sim.constants import WGS84_INVERSE_FLATTENING
+E       ImportError: cannot import name 'WGS84_INVERSE_FLATTENING' from 'tars.sim.constants' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/constants.py)
+
+tests/test_s2_geodetic.py:155: ImportError
+_________ test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step _________
+
+    def test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step():
+        """_F = RN(1/RN(298.257223563)); _E2 = RN(_F * RN(2 - _F)), each step from exact
+        rationals (Fraction -> float is correctly rounded), and fixed hex strings."""
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g03_point_inside_the_evolute_region ___________________
+
+    def test_g03_point_inside_the_evolute_region():
+>       _raises_reason(_geo(), (30_000.0, 30_000.0, 0.0), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:184: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g03_all_eight_signed_zero_origins ____________________
+
+    def test_g03_all_eight_signed_zero_origins():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:188: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g03_non_origin_subnormal_is_in_the_evolute_region ____________
+
+    def test_g03_non_origin_subnormal_is_in_the_evolute_region():
+>       _raises_reason(_geo(), (5e-324, 0.0, 0.0), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:194: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g03_boundary_pair_inside_point[+x] ____________________
+
+ray = '+x'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g03_boundary_pair_inside_point[x=y] ___________________
+
+ray = 'x=y'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g03_boundary_pair_inside_point[+z] ____________________
+
+ray = '+z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g03_boundary_pair_inside_point[-z] ____________________
+
+ray = '-z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g03_boundary_pair_inside_point[(1,0,1)] _________________
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g03_boundary_pair_inside_point[(2,0,1)] _________________
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g03_boundary_pair_inside_point[(1,0,2)] _________________
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g03_boundary_pair_inside_point[(1,1,1)] _________________
+
+ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+>       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_geometric[+x] ______________
+
+ray = '+x'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g03_boundary_pair_outside_point_geometric[x=y] ______________
+
+ray = 'x=y'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_geometric[+z] ______________
+
+ray = '+z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_geometric[-z] ______________
+
+ray = '-z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________ test_g03_boundary_pair_outside_point_geometric[(1,0,1)] ____________
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________ test_g03_boundary_pair_outside_point_geometric[(2,0,1)] ____________
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________ test_g03_boundary_pair_outside_point_geometric[(1,0,2)] ____________
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________ test_g03_boundary_pair_outside_point_geometric[(1,1,1)] ____________
+
+ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_geometric(ray):
+        """Exact on all platforms: neither origin nor evolute_region (U-20, r2 §8.2 ±1 ulp)."""
+        inside_hex, make = RAYS[ray]
+        outside = gen.next_up(float.fromhex(inside_hex))
+        assert outside.hex() == OUTSIDE_HEX[ray]
+>       assert _reason(_geo(), make(outside)) not in ("origin", "evolute_region")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_accepted[+x] _______________
+
+ray = '+x'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_accepted[x=y] ______________
+
+ray = 'x=y'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_accepted[+z] _______________
+
+ray = '+z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g03_boundary_pair_outside_point_accepted[-z] _______________
+
+ray = '-z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g03_boundary_pair_outside_point_accepted[(1,0,1)] ____________
+
+ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g03_boundary_pair_outside_point_accepted[(2,0,1)] ____________
+
+ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g03_boundary_pair_outside_point_accepted[(1,0,2)] ____________
+
+ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g03_boundary_pair_outside_point_accepted[(1,1,1)] ____________
+
+ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_outside_point_accepted(ray):
+        """[OPT-b] Outcome assertion: accepted (a rejection here is stop 5, never a change
+        of the point set)."""
+        _, make = RAYS[ray]
+>       _accepted(_geo(), make(float.fromhex(OUTSIDE_HEX[ray])))
+                  ^^^^^^
+
+tests/test_s2_geodetic.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g04_non_finite_component_in_each_position ________________
+
+    def test_g04_non_finite_component_in_each_position():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:224: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______________________ test_g04_mixed_non_finite_cases ________________________
+
+    def test_g04_mixed_non_finite_cases():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g05_overflow_rows_far_from_the_edge ___________________
+
+    def test_g05_overflow_rows_far_from_the_edge():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:249: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________________ test_g05_large_finite_rows_are_accepted ____________________
+
+    def test_g05_large_finite_rows_are_accepted():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g05_no_overflow_or_zero_division_error_escapes ______________
+
+    def test_g05_no_overflow_or_zero_division_error_escapes():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:274: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________ test_g06_error_class_is_a_value_error_with_reason_and_category ________
+
+    def test_g06_error_class_is_a_value_error_with_reason_and_category():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:295: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______________ test_g06_section_3_8_order_table[r0-non_finite] ________________
+
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______________ test_g06_section_3_8_order_table[r1-non_finite] ________________
+
+r = (inf, 0.0, 0.0), reason = 'non_finite'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g06_section_3_8_order_table[r2-origin] __________________
+
+r = (0.0, -0.0, 0.0), reason = 'origin'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g06_section_3_8_order_table[r3-evolute_region] ______________
+
+r = (5e-324, 0.0, 0.0), reason = 'evolute_region'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g06_section_3_8_order_table[r4-not_binary64] _______________
+
+r = (100000000000000000...0000000000000000000, 0, 0), reason = 'not_binary64'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g06_section_3_8_order_table[r5-not_binary64] _______________
+
+r = (9007199254740993, 0, 0), reason = 'not_binary64'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g06_section_3_8_order_table[r6-non_convergence] _____________
+
+r = (42697.67270722267, 0.0, 30.0), reason = 'non_convergence'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g06_section_3_8_order_table[r7-overflow] _________________
+
+r = (1.5e+308, 0.0, 1.5e+308), reason = 'overflow'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g06_fraction_component_is_a_type_error __________________
+
+    def test_g06_fraction_component_is_a_type_error():
+>       _raises_type(_geo(), (Fraction(1, 3), 0.0, 7.0e6), TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:318: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r0] ____________________
+
+r = (7000000.0, 0.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r1] ____________________
+
+r = (7000000.0, 0.0, 1.0, 0.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r2] ____________________
+
+r = ('7e6', 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r3] ____________________
+
+r = (True, 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r4] ____________________
+
+r = (None, 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r5] ____________________
+
+r = (Fraction(7000000, 1), 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r6] ____________________
+
+r = (Decimal('7E+6'), 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r7] ____________________
+
+r = (np.float32(7e+06), 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r8] ____________________
+
+r = (np.int64(7000000), 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g06_structure_and_type_errors[r9] ____________________
+
+r = (np.longdouble('7000000.0'), 0.0, 1.0)
+
+    @pytest.mark.parametrize(
+        "r",
+        [
+            (7.0e6, 0.0),
+            (7.0e6, 0.0, 1.0, 0.0),
+            ("7e6", 0.0, 1.0),
+            (True, 0.0, 1.0),
+            (None, 0.0, 1.0),
+            (Fraction(7_000_000), 0.0, 1.0),
+            (Decimal("7e6"), 0.0, 1.0),
+            (np.float32(7.0e6), 0.0, 1.0),
+            (np.int64(7_000_000), 0.0, 1.0),
+            (np.longdouble(7.0e6), 0.0, 1.0),
+        ],
+    )
+    def test_g06_structure_and_type_errors(r):
+>       _raises_type(_geo(), r, TypeError)
+                     ^^^^^^
+
+tests/test_s2_geodetic.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________ test_g06_numpy_float64_is_accepted_bit_identical_to_float ___________
+
+    def test_g06_numpy_float64_is_accepted_bit_identical_to_float():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:341: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g06_float_subclass_whose_abs_raises_is_normalized ____________
+
+    def test_g06_float_subclass_whose_abs_raises_is_normalized():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:348: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g06_float_subclass_overrides_never_run __________________
+
+    def test_g06_float_subclass_overrides_never_run():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:361: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________________ test_g06_int_subclass_overrides_never_run ___________________
+
+    def test_g06_int_subclass_overrides_never_run():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:386: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g06_class_faking_object_is_a_type_error _________________
+
+    def test_g06_class_faking_object_is_a_type_error():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:413: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g06_structural_key_error_propagates_unchanged ______________
+
+    def test_g06_structural_key_error_propagates_unchanged():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:431: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______ test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity _______
+
+    def test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:450: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______ test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity ________
+
+    def test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:474: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g06_fixed_message_and_category_per_reason ________________
+
+    def test_g06_fixed_message_and_category_per_reason():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:498: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g07_returns_h_then_phi_as_builtin_floats _________________
+
+    def test_g07_returns_h_then_phi_as_builtin_floats():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:510: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________ test_g07_list_tuple_and_float64_ndarray_are_bit_identical ___________
+
+    def test_g07_list_tuple_and_float64_ndarray_are_bit_identical():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:520: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______________________ test_g07_inputs_are_not_mutated ________________________
+
+    def test_g07_inputs_are_not_mutated():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:529: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________ test_g09_repeated_in_process_evaluation_is_byte_identical ___________
+
+    def test_g09_repeated_in_process_evaluation_is_byte_identical():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:554: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g09_second_subprocess_is_byte_identical _________________
+
+    def test_g09_second_subprocess_is_byte_identical():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:561: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g09_module_state_is_unchanged_after_calls ________________
+
+    def test_g09_module_state_is_unchanged_after_calls():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:574: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________________ test_g09_architecture_scan_covers_geodesy ___________________
+
+    def test_g09_architecture_scan_covers_geodesy():
+        from tars.validation.architecture import scan
+    
+>       assert GEODESY.exists()
+E       AssertionError: assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/geodesy.py').exists
+
+tests/test_s2_geodetic.py:584: AssertionError
+__ test_g11_geodesy_imports_only_math_fractions_numbers_typing_and_constants ___
+
+    def test_g11_geodesy_imports_only_math_fractions_numbers_typing_and_constants():
+>       assert GEODESY.exists(), "src/tars/sim/geodesy.py is absent"
+E       AssertionError: src/tars/sim/geodesy.py is absent
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/geodesy.py').exists
+
+tests/test_s2_geodetic.py:640: AssertionError
+_____________ test_g14_rejection_points_raise_non_convergence[r0] ______________
+
+r = (42697.67270722267, 0.0, 30.0)
+
+    @pytest.mark.parametrize("r", G14_REJECTION_POINTS)
+    def test_g14_rejection_points_raise_non_convergence(r):
+>       _raises_reason(_geo(), r, "non_convergence")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g14_rejection_points_raise_non_convergence[r1] ______________
+
+r = (42697.67270722267, 0.0, 1.0)
+
+    @pytest.mark.parametrize("r", G14_REJECTION_POINTS)
+    def test_g14_rejection_points_raise_non_convergence(r):
+>       _raises_reason(_geo(), r, "non_convergence")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g14_rejection_points_raise_non_convergence[r2] ______________
+
+r = (42697.67270722267, 0.0, 0.001)
+
+    @pytest.mark.parametrize("r", G14_REJECTION_POINTS)
+    def test_g14_rejection_points_raise_non_convergence(r):
+>       _raises_reason(_geo(), r, "non_convergence")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g14_rejection_points_raise_non_convergence[r3] ______________
+
+r = (42701.94247445068, 0.0, 1.0)
+
+    @pytest.mark.parametrize("r", G14_REJECTION_POINTS)
+    def test_g14_rejection_points_raise_non_convergence(r):
+>       _raises_reason(_geo(), r, "non_convergence")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g14_rejection_points_raise_non_convergence[r4] ______________
+
+r = (44832.55634253897, 0.0, 30.0)
+
+    @pytest.mark.parametrize("r", G14_REJECTION_POINTS)
+    def test_g14_rejection_points_raise_non_convergence(r):
+>       _raises_reason(_geo(), r, "non_convergence")
+                       ^^^^^^
+
+tests/test_s2_geodetic.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g14_named_acceptance_points_are_accepted _________________
+
+    def test_g14_named_acceptance_points_are_accepted():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:723: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g14_enumerated_acceptance_sets_are_accepted[S-EQ] ____________
+
+set_name = 'S-EQ'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:731: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g14_enumerated_acceptance_sets_are_accepted[S-AX] ____________
+
+set_name = 'S-AX'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:731: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________ test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR] ___________
+
+set_name = 'S-NEAR'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:731: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+___________ test_g14_enumerated_acceptance_sets_are_accepted[S-BIG] ____________
+
+set_name = 'S-BIG'
+
+    @pytest.mark.parametrize("set_name", ["S-EQ", "S-AX", "S-NEAR", "S-BIG"])
+    def test_g14_enumerated_acceptance_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:731: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________________ test_g15_protected_sets_are_accepted[PS-A] __________________
+
+set_name = 'PS-A'
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:744: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g15_protected_sets_are_accepted[PS-A'] __________________
+
+set_name = "PS-A'"
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:744: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________________ test_g15_protected_sets_are_accepted[PS-OPS] _________________
+
+set_name = 'PS-OPS'
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:744: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g15_protected_sets_are_accepted[PS-GRID] _________________
+
+set_name = 'PS-GRID'
+
+    @pytest.mark.parametrize("set_name", ["PS-A", "PS-A'", "PS-OPS", "PS-GRID"])
+    def test_g15_protected_sets_are_accepted(set_name):
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:744: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________________ test_g16_fi00_control _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d542420>
+
+    def test_g16_fi00_control(monkeypatch):
+>       kind, value = _run_case(monkeypatch, _rules(), _SCHED_00)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:837: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________________ test_g16_fi01_sin_nan _____________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d5435c0>
+
+    def test_g16_fi01_sin_nan(monkeypatch):  # departs from S-4, S-9
+>       _expect_reason(_run_case(monkeypatch, _rules(sin=math.nan), _SCHED_00), "numerical_failure")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:843: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________________ test_g16_fi02_sqrt_raises_value_error _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d5414f0>
+
+    def test_g16_fi02_sqrt_raises_value_error(monkeypatch):  # S-4
+>       out = _run_case(monkeypatch, _rules(sqrt=_Raise(ValueError("injected"))), _SCHED_00[:4])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:847: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______________________ test_g16_fi03_sqrt_zero_divides ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d5437d0>
+
+    def test_g16_fi03_sqrt_zero_divides(monkeypatch):  # S-2, S-9
+>       out = _run_case(monkeypatch, _rules(sqrt=0.0), _SCHED_00[:4])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:852: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________________ test_g16_fi04_atan2_raises_overflow_error ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d5ed730>
+
+    def test_g16_fi04_atan2_raises_overflow_error(monkeypatch):  # S-5
+>       out = _run_case(monkeypatch, _rules(atan2=_Raise(OverflowError("injected"))), _SCHED_00[:2])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:857: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g16_fi05_sin_raises_type_error_propagates ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d5ee120>
+
+    def test_g16_fi05_sin_raises_type_error_propagates(monkeypatch):
+        sentinel = TypeError("injected")
+>       kind, value = _run_case(monkeypatch, _rules(sin=_Raise(sentinel)), _SCHED_00[:3])
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:863: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g16_fi06_missing_cos_propagates_attribute_error _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d540140>
+
+    def test_g16_fi06_missing_cos_propagates_attribute_error(monkeypatch):
+        rules = _rules()
+        del rules["cos"]
+>       kind, value = _run_case(monkeypatch, rules, _SCHED_00[:6])
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:870: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g16_fi07_overflow_before_non_convergence _________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c95ecf0>
+
+    def test_g16_fi07_overflow_before_non_convergence(monkeypatch):  # S-6, S-9
+>       out = _run_case(monkeypatch, _rules(hypot=math.inf, atan2=_atan2_never_converging), _SCHED_07)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:875: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g16_fi08_nan_before_overflow_and_non_convergence _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c95d820>
+
+    def test_g16_fi08_nan_before_overflow_and_non_convergence(monkeypatch):  # S-6
+>       out = _run_case(monkeypatch, _rules(hypot=math.nan, atan2=_atan2_never_converging), _SCHED_07)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:880: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________________ test_g16_fi09_nan_before_overflow _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d541d90>
+
+    def test_g16_fi09_nan_before_overflow(monkeypatch):  # S-4, S-6
+>       out = _run_case(monkeypatch, _rules(hypot=math.inf, sin=math.nan), _SCHED_00)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:885: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_______________________ test_g16_fi10_huge_cos_overflows _______________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d541910>
+
+    def test_g16_fi10_huge_cos_overflows(monkeypatch):  # S-9 (I-75 countermodel)
+>       _expect_reason(_run_case(monkeypatch, _rules(cos=1e308), _SCHED_00), "overflow")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:890: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_____________ test_g16_fi11_stop_test_met_at_update_60_is_accepted _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d515790>
+
+    def test_g16_fi11_stop_test_met_at_update_60_is_accepted(monkeypatch):
+        def atan2(i):
+            return (59 - i) * 1e-10 if i <= 59 else 1e-15
+    
+>       kind, value = _run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:897: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________ test_g16_fi12_stop_test_first_met_at_61_is_non_convergence __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10d517410>
+
+    def test_g16_fi12_stop_test_first_met_at_61_is_non_convergence(monkeypatch):
+        def atan2(i):
+            return (60 - i) * 1e-10 if i <= 60 else 1e-15
+    
+>       _expect_reason(_run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07), "non_convergence")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:908: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+_________ test_g16_fi13_failure_in_final_height_before_non_convergence _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c9255e0>
+
+    def test_g16_fi13_failure_in_final_height_before_non_convergence(monkeypatch):  # S-4
+        def sqrt(i):
+            return 1.0 if i < 60 else _Raise(ValueError("injected"))
+    
+>       out = _run_case(monkeypatch, _rules(atan2=_atan2_never_converging, sqrt=sqrt), _SCHED_07)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:915: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+________________ test_g16_fi14_sin_raises_name_error_propagates ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c9dabd0>
+
+    def test_g16_fi14_sin_raises_name_error_propagates(monkeypatch):
+        sentinel = NameError("injected")
+>       kind, value = _run_case(monkeypatch, _rules(sin=_Raise(sentinel)), _SCHED_00[:3])
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:921: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+______________ test_g16_fi15_post_check_exception_is_not_wrapped _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10c9d7320>
+
+    def test_g16_fi15_post_check_exception_is_not_wrapped(monkeypatch):
+        class SentinelError(ValueError):
+            pass
+    
+        sentinel = SentinelError("injected into _isnan")
+    
+        def isnan(v):
+            raise sentinel
+    
+>       kind, value = _run_case(monkeypatch, _rules(), _SCHED_00, isnan=isnan)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:934: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_s2_geodetic.py:796: in _run_case
+    geo = _geo()
+          ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+____________ test_g17_every_listing_entry_has_its_geometric_outcome ____________
+
+    def test_g17_every_listing_entry_has_its_geometric_outcome():
+>       geo = _geo()
+              ^^^^^^
+
+tests/test_s2_geodetic.py:942: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _geo():
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic.py:93: ImportError
+__________ test_g12b_component_exists_and_imports_nothing_from_tests ___________
+
+    def test_g12b_component_exists_and_imports_nothing_from_tests():
+        geodesy = REPO_ROOT / "src" / "tars" / "sim" / "geodesy.py"
+>       assert geodesy.exists(), "src/tars/sim/geodesy.py is absent"
+E       AssertionError: src/tars/sim/geodesy.py is absent
+E       assert False
+E        +  where False = exists()
+E        +    where exists = PosixPath('$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/geodesy.py').exists
+
+tests/test_s2_geodetic_conformance.py:97: AssertionError
+_____________ test_g08_component_equals_twin_at_every_passes_entry _____________
+
+    def test_g08_component_equals_twin_at_every_passes_entry():
+        """For every listing entry labelled `passes`, on this platform, in one process: the
+        expected outcome from the twin (§3.10 adapter) equals the component's outcome, and
+        accepted h and phi are bit-identical (signed zeros included). Any twin exception other
+        than ArithmeticError or ValueError raises TwinStopError: a STOP, never a skipped point."""
+>       from tars.sim import geodesy
+E       ImportError: cannot import name 'geodesy' from 'tars.sim' ($HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/src/tars/sim/__init__.py)
+
+tests/test_s2_geodetic_conformance.py:110: ImportError
+________ test_wgs84_inverse_flattening_literal_only_in_constants_module ________
+
+    def test_wgs84_inverse_flattening_literal_only_in_constants_module():
+        """U-10 (1/f part), G-01: the NGA 1/f literal 298.257223563 appears exactly once in
+        src/, in constants.py (DR-0003)."""
+        pattern = re.compile(r"298\.257223563")
+        hits = {}
+        for path in (REPO_ROOT / "src").rglob("*.py"):
+            n = len(pattern.findall(path.read_text()))
+            if n:
+                hits[path.relative_to(REPO_ROOT).as_posix()] = n
+>       assert hits == {"src/tars/sim/constants.py": 1}
+E       AssertionError: assert {} == {'src/tars/si...stants.py': 1}
+E         
+E         Right contains 1 more item:
+E         {'src/tars/sim/constants.py': 1}
+E         
+E         Full diff:
+E         + {}
+E         - {
+E         -     'src/tars/sim/constants.py': 1,
+E         - }
+
+tests/test_constants.py:154: AssertionError
+==================================== PASSES ====================================
+- generated xml file: $HOME/tars-evidence/I-101/red/red-junit.xml -
+=========================== short test summary info ============================
+PASSED tests/test_s2_geodetic.py::test_g10_w1_round_to_nearest_excludes_toward_zero_and_down
+PASSED tests/test_s2_geodetic.py::test_g10_w2_round_to_nearest_excludes_up
+PASSED tests/test_s2_geodetic.py::test_g10_w3_ties_to_even_excludes_ties_away
+PASSED tests/test_s2_geodetic.py::test_g10_w4_tie_to_even_upward
+PASSED tests/test_s2_geodetic.py::test_g10_w5_no_flush_to_zero
+PASSED tests/test_s2_geodetic.py::test_g10_w6_no_denormals_are_zero
+PASSED tests/test_s2_geodetic.py::test_g10_w7_subnormal_tie_to_even
+PASSED tests/test_s2_geodetic.py::test_g13_protected_files_are_byte_identical_to_k
+PASSED tests/test_s2_geodetic.py::test_g13_existing_statements_are_ast_identical_to_k[src/tars/sim/constants.py]
+PASSED tests/test_s2_geodetic.py::test_g13_existing_statements_are_ast_identical_to_k[tests/test_constants.py]
+PASSED tests/test_s2_geodetic_conformance.py::test_g12a_twin_imports_only_math_and_typing
+PASSED tests/test_s2_geodetic_conformance.py::test_twin_constants_are_r1_step_1
+PASSED tests/test_s2_geodetic_conformance.py::test_twin_equator_gives_plus_zero_latitude_and_h_x_minus_a
+PASSED tests/test_s2_geodetic_conformance.py::test_twin_records_the_cap_without_convergence_as_not_converged
+PASSED tests/test_constants.py::test_wgs84_defining_parameters
+PASSED tests/test_constants.py::test_constants_are_immutable_and_validated
+PASSED tests/test_constants.py::test_wgs84_literals_only_in_constants_module
+PASSED tests/test_constants.py::test_standard_gravity_literal_only_in_constants_module
+PASSED tests/test_constants.py::test_c20_is_the_published_nga_value
+PASSED tests/test_constants.py::test_m3_set_reuses_the_wgs84_gm_and_radius
+PASSED tests/test_constants.py::test_j2_is_derived_not_stored
+PASSED tests/test_constants.py::test_j2_derivation_is_correctly_rounded_binary64
+PASSED tests/test_constants.py::test_j2_binary64_value_is_the_p10_recorded_value
+PASSED tests/test_constants.py::test_q1_decimal_is_the_11_digit_display_form_of_derived_j2
+PASSED tests/test_constants.py::test_j2_identity_constants_validated
+PASSED tests/test_constants.py::test_c20_literal_only_in_constants_and_no_j2_literal_anywhere
+FAILED tests/test_s2_geodetic.py::test_g01_inverse_flattening_is_the_nga_value
+FAILED tests/test_s2_geodetic.py::test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step
+FAILED tests/test_s2_geodetic.py::test_g03_point_inside_the_evolute_region - ...
+FAILED tests/test_s2_geodetic.py::test_g03_all_eight_signed_zero_origins - Im...
+FAILED tests/test_s2_geodetic.py::test_g03_non_origin_subnormal_is_in_the_evolute_region
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[+x] - I...
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[x=y] - ...
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[+z] - I...
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[-z] - I...
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(2,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,0,2)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_inside_point[(1,1,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[+x]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[x=y]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[+z]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[-z]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(2,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,0,2)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_geometric[(1,1,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[+x]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[x=y]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[+z]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[-z]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(2,0,1)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,0,2)]
+FAILED tests/test_s2_geodetic.py::test_g03_boundary_pair_outside_point_accepted[(1,1,1)]
+FAILED tests/test_s2_geodetic.py::test_g04_non_finite_component_in_each_position
+FAILED tests/test_s2_geodetic.py::test_g04_mixed_non_finite_cases - ImportErr...
+FAILED tests/test_s2_geodetic.py::test_g05_overflow_rows_far_from_the_edge - ...
+FAILED tests/test_s2_geodetic.py::test_g05_large_finite_rows_are_accepted - I...
+FAILED tests/test_s2_geodetic.py::test_g05_no_overflow_or_zero_division_error_escapes
+FAILED tests/test_s2_geodetic.py::test_g06_error_class_is_a_value_error_with_reason_and_category
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r0-non_finite]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r1-non_finite]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r2-origin]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r3-evolute_region]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r4-not_binary64]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r5-not_binary64]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r6-non_convergence]
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r7-overflow]
+FAILED tests/test_s2_geodetic.py::test_g06_fraction_component_is_a_type_error
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r0] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r1] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r2] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r3] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r4] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r5] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r6] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r7] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r8] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_structure_and_type_errors[r9] - Im...
+FAILED tests/test_s2_geodetic.py::test_g06_numpy_float64_is_accepted_bit_identical_to_float
+FAILED tests/test_s2_geodetic.py::test_g06_float_subclass_whose_abs_raises_is_normalized
+FAILED tests/test_s2_geodetic.py::test_g06_float_subclass_overrides_never_run
+FAILED tests/test_s2_geodetic.py::test_g06_int_subclass_overrides_never_run
+FAILED tests/test_s2_geodetic.py::test_g06_class_faking_object_is_a_type_error
+FAILED tests/test_s2_geodetic.py::test_g06_structural_key_error_propagates_unchanged
+FAILED tests/test_s2_geodetic.py::test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity
+FAILED tests/test_s2_geodetic.py::test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity
+FAILED tests/test_s2_geodetic.py::test_g06_fixed_message_and_category_per_reason
+FAILED tests/test_s2_geodetic.py::test_g07_returns_h_then_phi_as_builtin_floats
+FAILED tests/test_s2_geodetic.py::test_g07_list_tuple_and_float64_ndarray_are_bit_identical
+FAILED tests/test_s2_geodetic.py::test_g07_inputs_are_not_mutated - ImportErr...
+FAILED tests/test_s2_geodetic.py::test_g09_repeated_in_process_evaluation_is_byte_identical
+FAILED tests/test_s2_geodetic.py::test_g09_second_subprocess_is_byte_identical
+FAILED tests/test_s2_geodetic.py::test_g09_module_state_is_unchanged_after_calls
+FAILED tests/test_s2_geodetic.py::test_g09_architecture_scan_covers_geodesy
+FAILED tests/test_s2_geodetic.py::test_g11_geodesy_imports_only_math_fractions_numbers_typing_and_constants
+FAILED tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r0]
+FAILED tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r1]
+FAILED tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r2]
+FAILED tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r3]
+FAILED tests/test_s2_geodetic.py::test_g14_rejection_points_raise_non_convergence[r4]
+FAILED tests/test_s2_geodetic.py::test_g14_named_acceptance_points_are_accepted
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-EQ]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-AX]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR]
+FAILED tests/test_s2_geodetic.py::test_g14_enumerated_acceptance_sets_are_accepted[S-BIG]
+FAILED tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-A]
+FAILED tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-A']
+FAILED tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-OPS]
+FAILED tests/test_s2_geodetic.py::test_g15_protected_sets_are_accepted[PS-GRID]
+FAILED tests/test_s2_geodetic.py::test_g16_fi00_control - ImportError: cannot...
+FAILED tests/test_s2_geodetic.py::test_g16_fi01_sin_nan - ImportError: cannot...
+FAILED tests/test_s2_geodetic.py::test_g16_fi02_sqrt_raises_value_error - Imp...
+FAILED tests/test_s2_geodetic.py::test_g16_fi03_sqrt_zero_divides - ImportErr...
+FAILED tests/test_s2_geodetic.py::test_g16_fi04_atan2_raises_overflow_error
+FAILED tests/test_s2_geodetic.py::test_g16_fi05_sin_raises_type_error_propagates
+FAILED tests/test_s2_geodetic.py::test_g16_fi06_missing_cos_propagates_attribute_error
+FAILED tests/test_s2_geodetic.py::test_g16_fi07_overflow_before_non_convergence
+FAILED tests/test_s2_geodetic.py::test_g16_fi08_nan_before_overflow_and_non_convergence
+FAILED tests/test_s2_geodetic.py::test_g16_fi09_nan_before_overflow - ImportE...
+FAILED tests/test_s2_geodetic.py::test_g16_fi10_huge_cos_overflows - ImportEr...
+FAILED tests/test_s2_geodetic.py::test_g16_fi11_stop_test_met_at_update_60_is_accepted
+FAILED tests/test_s2_geodetic.py::test_g16_fi12_stop_test_first_met_at_61_is_non_convergence
+FAILED tests/test_s2_geodetic.py::test_g16_fi13_failure_in_final_height_before_non_convergence
+FAILED tests/test_s2_geodetic.py::test_g16_fi14_sin_raises_name_error_propagates
+FAILED tests/test_s2_geodetic.py::test_g16_fi15_post_check_exception_is_not_wrapped
+FAILED tests/test_s2_geodetic.py::test_g17_every_listing_entry_has_its_geometric_outcome
+FAILED tests/test_s2_geodetic_conformance.py::test_g12b_component_exists_and_imports_nothing_from_tests
+FAILED tests/test_s2_geodetic_conformance.py::test_g08_component_equals_twin_at_every_passes_entry
+FAILED tests/test_constants.py::test_wgs84_inverse_flattening_literal_only_in_constants_module
+======================== 105 failed, 26 passed in 2.52s ========================

@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_g16_fi11_stop_test_met_at_update_60_is_accepted _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b910d40>
+
+    def test_g16_fi11_stop_test_met_at_update_60_is_accepted(monkeypatch):
+        def atan2(i):
+            return (59 - i) * 1e-10 if i <= 59 else 1e-15
+    
+        kind, value = _run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07)
+>       assert kind == "returned", value
+E       AssertionError: GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations')
+E       assert 'raised' == 'returned'
+E         
+E         - returned
+E         + raised
+
+tests/test_s2_geodetic.py:910: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi11_stop_test_met_at_update_60_is_accepted
+1 failed in 0.15s

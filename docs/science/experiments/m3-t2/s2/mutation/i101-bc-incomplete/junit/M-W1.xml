@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.230" timestamp="2026-11-06T15:14:09.874423-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity" time="0.002"><failure message="AssertionError: assert GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is SentinelError('caller __getitem__')">self = &lt;tests.test_s2_geodetic.test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity.&lt;locals&gt;.Seq object at 0x110949b20&gt;
+i = 0
+
+    def __getitem__(self, i):
+&gt;       raise sentinel
+E       tests.test_s2_geodetic.test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity.&lt;locals&gt;.SentinelError: caller __getitem__
+
+tests/test_s2_geodetic.py:462: SentinelError
+
+The above exception was the direct cause of the following exception:
+
+    def test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity():
+        geo = _geo()
+    
+        class SentinelError(ValueError):
+            pass
+    
+        sentinel = SentinelError("caller __getitem__")
+    
+        class Seq:
+            def __len__(self):
+                return 3
+    
+            def __getitem__(self, i):
+                raise sentinel
+    
+        try:
+&gt;           geo.geodetic(Seq())
+
+tests/test_s2_geodetic.py:465: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = &lt;tests.test_s2_geodetic.test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity.&lt;locals&gt;.Seq object at 0x110949b20&gt;
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        try:
+            if len(r) != 3:
+                raise TypeError("geodetic input: r must have exactly 3 components")
+            c0, c1, c2 = r[0], r[1], r[2]
+        except GeodeticDomainError:
+            raise
+        except (ArithmeticError, ValueError) as exc:
+&gt;           raise GeodeticDomainError("numerical_failure") from exc
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation failed; the cause is undetermined and this is not a domain classification
+
+../out/mutation/M-W1/src/tars/sim/geodesy.py:149: GeodeticDomainError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity():
+        geo = _geo()
+    
+        class SentinelError(ValueError):
+            pass
+    
+        sentinel = SentinelError("caller __getitem__")
+    
+        class Seq:
+            def __len__(self):
+                return 3
+    
+            def __getitem__(self, i):
+                raise sentinel
+    
+        try:
+            geo.geodetic(Seq())
+        except BaseException as exc:
+&gt;           assert exc is sentinel
+E           AssertionError: assert GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is SentinelError('caller __getitem__')
+
+tests/test_s2_geodetic.py:467: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity" time="0.001"><failure message="AssertionError: assert GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is SentinelError('caller __len__')">self = &lt;tests.test_s2_geodetic.test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity.&lt;locals&gt;.Seq object at 0x11094b860&gt;
+
+    def __len__(self):
+&gt;       raise sentinel
+E       tests.test_s2_geodetic.test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity.&lt;locals&gt;.SentinelError: caller __len__
+
+tests/test_s2_geodetic.py:483: SentinelError
+
+The above exception was the direct cause of the following exception:
+
+    def test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity():
+        geo = _geo()
+    
+        class SentinelError(OverflowError):
+            pass
+    
+        sentinel = SentinelError("caller __len__")
+    
+        class Seq:
+            def __len__(self):
+                raise sentinel
+    
+            def __getitem__(self, i):
+                return 0.0
+    
+        try:
+&gt;           geo.geodetic(Seq())
+
+tests/test_s2_geodetic.py:489: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = &lt;tests.test_s2_geodetic.test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity.&lt;locals&gt;.Seq object at 0x11094b860&gt;
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        try:
+            if len(r) != 3:
+                raise TypeError("geodetic input: r must have exactly 3 components")
+            c0, c1, c2 = r[0], r[1], r[2]
+        except GeodeticDomainError:
+            raise
+        except (ArithmeticError, ValueError) as exc:
+&gt;           raise GeodeticDomainError("numerical_failure") from exc
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation failed; the cause is undetermined and this is not a domain classification
+
+../out/mutation/M-W1/src/tars/sim/geodesy.py:149: GeodeticDomainError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity():
+        geo = _geo()
+    
+        class SentinelError(OverflowError):
+            pass
+    
+        sentinel = SentinelError("caller __len__")
+    
+        class Seq:
+            def __len__(self):
+                raise sentinel
+    
+            def __getitem__(self, i):
+                return 0.0
+    
+        try:
+            geo.geodetic(Seq())
+        except BaseException as exc:
+&gt;           assert exc is sentinel
+E           AssertionError: assert GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is SentinelError('caller __len__')
+
+tests/test_s2_geodetic.py:491: AssertionError</failure></testcase></testsuite></testsuites>

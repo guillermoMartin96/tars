@@ -1,0 +1,16 @@
+#!/bin/bash
+# S2 commit D: green record at BC, recomputed in a fresh clone from GitHub (v11 §3.14 step 4).
+set -u
+E=$HOME/tars-evidence/I-101/commit-d; O=$E/green-bc; C=$E/clone-bc-green
+BC=2b975d626e92c76a18efc873e0991084db30617a
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"; date -u +%FT%TZ > "$O/start-utc.txt"
+git clone -q https://github.com/guillermoMartin96/tars.git "$C" && git -C "$C" checkout -q --detach "$BC"
+cd "$C" || exit 99
+uv sync --locked -q; echo $? > "$O/uv-sync.exit"
+{ git rev-parse HEAD; git status --porcelain --untracked-files=all; } > "$O/clone-state.txt"
+for f in tests/test_constants.py tests/test_s2_geodetic.py tests/test_s2_geodetic_conformance.py; do echo "$(git hash-object $f) $f"; done > "$O/test-blobs-at-BC.txt"
+uv run ruff check . > "$O/ruff-check.log" 2>&1; echo $? > "$O/ruff-check.exit"
+uv run ruff format --check . > "$O/ruff-format.log" 2>&1; echo $? > "$O/ruff-format.exit"
+uv run pytest -ra -p no:cacheprovider --junitxml="$O/pytest-junit.xml" > "$O/pytest.log" 2>&1; echo $? > "$O/pytest.exit"
+date -u +%FT%TZ > "$O/end-utc.txt"; touch "$O/DONE"

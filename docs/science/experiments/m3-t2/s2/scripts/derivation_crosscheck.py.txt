@@ -1,0 +1,213 @@
+"""S2 commit D: independent boundary-reference derivation (§3.7.6, OB-19) and the M1
+cross-check of every listing label (§3.10, OB-02). Host evidence; report-only except that a
+disagreement is stop 15.
+
+Usage: python -I derivation_crosscheck.py <repo root>
+
+Imports nothing from tars and does not import the test-side predicate. It defines:
+- M1, the parametric centre-of-curvature (evolute) form, in 90-digit Decimal: the centres of
+  curvature of the meridian ellipse are ((a^2 - b^2)/a cos^3 t, (a^2 - b^2)/b sin^3 t); a
+  point is in E (closed) iff its distance from the axis p is at most that of the evolute
+  point on the same ray in the meridian half-plane (I-73 f05 M1; I-75 method);
+- M2, the normal count: for p > 0 and z != 0, in E iff f(lam) = p^2 a^2/(a^2+lam)^2 +
+  z^2 b^2/(b^2+lam)^2 - 1 has a non-positive minimum on (-a^2, -b^2) (convex there);
+- the classical cusp values for the equator (p^2 vs a^2 e2^2) and the axis
+  (z^2 vs a^2 e2^2 / (1 - e2)), exactly in rationals;
+- the polynomial predicate of §3.7.4, transcribed here independently, only as a cross-check.
+
+All on the MODEL ellipsoid (a = 6378137, e2 = the binary64 value of DQ-1 step 1, exact
+rationals; F-15). "Ideal" means the WGS 84 ellipsoid with the exact decimal 1/f; the pair
+offsets against it are reported as a constant-definition term, never as a tolerance.
+
+Each pair is LOCATED by bisection over binary64 values using M1 only (never the
+polynomial), then M2, the classical values (axes) and the polynomial are applied as
+cross-checks, and the result is compared with the G-03 hex constants.
+"""
+
+from __future__ import annotations
+
+import decimal
+import json
+import struct
+import sys
+from fractions import Fraction as Q
+from pathlib import Path
+
+D = decimal.Decimal
+decimal.getcontext().prec = 90
+A = 6378137.0
+F = 1.0 / 298.257223563
+E2 = F * (2.0 - F)
+
+
+def ellipsoid(e2q: Q):
+    da = D(A)
+    de2 = D(e2q.numerator) / D(e2q.denominator)
+    db2 = da * da * (1 - de2)
+    db = db2.sqrt()
+    c = da * da - db2
+    return {"e2q": e2q, "da": da, "db": db, "da2": da * da, "db2": db2, "c": c}
+
+
+MODEL = ellipsoid(Q(E2))
+_FEX = 1 / Q("298.257223563")
+IDEAL = ellipsoid(_FEX * (2 - _FEX))
+
+
+def m1(x: float, y: float, z: float, el=MODEL) -> tuple[bool, D]:
+    """(inside E, relative margin (p - p_evolute)/p_evolute). Closed region."""
+    p = (D(x) ** 2 + D(y) ** 2).sqrt()
+    zz = abs(D(z))
+    if zz == 0:
+        lim = el["c"] / el["da"]
+        return p <= lim, (p - lim) / lim
+    if p == 0:
+        lim = el["c"] / el["db"]
+        return zz <= lim, (zz - lim) / lim
+    k = (zz * el["db"]) / (p * el["da"])  # tan^3 t
+    tt = k ** (D(1) / 3)
+    cos_t = 1 / (1 + tt * tt).sqrt()
+    pc = el["c"] / el["da"] * cos_t**3
+    return p <= pc, (p - pc) / pc
+
+
+def m2(x: float, y: float, z: float, el=MODEL):
+    """True/False for p > 0 and z != 0; None if undecided (|min f| < 1e-40) or not applicable."""
+    P = D(x) ** 2 + D(y) ** 2
+    Z = D(z) ** 2
+    if P == 0 or Z == 0:
+        return None
+    da2, db2 = el["da2"], el["db2"]
+
+    def f(lam):
+        return P * da2 / (da2 + lam) ** 2 + Z * db2 / (db2 + lam) ** 2 - 1
+
+    def fp(lam):
+        return -2 * P * da2 / (da2 + lam) ** 3 - 2 * Z * db2 / (db2 + lam) ** 3
+
+    lo, hi = -da2, -db2
+    for _ in range(320):
+        mid = (lo + hi) / 2
+        if fp(mid) < 0:
+            lo = mid
+        else:
+            hi = mid
+    v = f((lo + hi) / 2)
+    if abs(v) < D(10) ** -40:
+        return None
+    return v <= 0
+
+
+def classical(x: float, y: float, z: float, el=MODEL):
+    """Exact rational cusp comparison on the equator or the axis; None elsewhere."""
+    a2 = Q(A) ** 2
+    e2q = el["e2q"]
+    if z == 0.0:
+        return Q(x) ** 2 + Q(y) ** 2 <= a2 * e2q * e2q
+    if x == 0.0 and y == 0.0:
+        return Q(z) ** 2 <= a2 * e2q * e2q / (1 - e2q)
+    return None
+
+
+def poly(x: float, y: float, z: float, el=MODEL) -> bool:
+    e2q = el["e2q"]
+    K = Q(A) ** 2 * e2q * e2q
+    W = 1 - e2q
+    p2 = Q(x) ** 2 + Q(y) ** 2
+    z2 = Q(z) ** 2
+    d = K - p2 - W * z2
+    return d >= 0 and d**3 >= 27 * K * W * p2 * z2
+
+
+def _enc(v: float) -> int:
+    return struct.unpack("<Q", struct.pack("<d", v))[0]
+
+
+def _dec(n: int) -> float:
+    return struct.unpack("<d", struct.pack("<Q", n))[0]
+
+
+def locate(ray, el=MODEL) -> tuple[float, float]:
+    """Bisection over binary64 encodings with M1 only: the last inside t and the next up."""
+    lo, hi = _enc(1.0), _enc(1e5)
+    assert m1(*ray(_dec(lo)), el=el)[0] and not m1(*ray(_dec(hi)), el=el)[0]
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        if m1(*ray(_dec(mid)), el=el)[0]:
+            lo = mid
+        else:
+            hi = mid
+    return _dec(lo), _dec(hi)
+
+
+RAYS = {
+    "+x": (lambda t: (t, 0.0, 0.0), "0x1.4d93586d13537p+15"),
+    "x=y": (lambda t: (t, t, 0.0), "0x1.d7bf41722e7d2p+14"),
+    "+z": (lambda t: (0.0, 0.0, t), "0x1.4eb29f7eac4c2p+15"),
+    "-z": (lambda t: (0.0, 0.0, -t), "0x1.4eb29f7eac4c2p+15"),
+    "(1,0,1)": (lambda t: (t, 0.0, t), "0x1.d88a1b7a7d48dp+13"),
+    "(2,0,1)": (lambda t: (2 * t, 0.0, t), "0x1.4103325e24047p+13"),
+    "(1,0,2)": (lambda t: (t, 0.0, 2 * t), "0x1.4141e0b866058p+13"),
+    "(1,1,1)": (lambda t: (t, t, t), "0x1.8955006bb0fcap+13"),
+}
+
+
+def main() -> int:
+    root = Path(sys.argv[1])
+    out = {"model_e2_hex": E2.hex(), "decimal_precision": 90, "pairs": {}, "listing": {}}
+    stop15 = []
+    for name, (ray, g03_inside_hex) in RAYS.items():
+        tin, tout = locate(ray)
+        pin, pout = ray(tin), ray(tout)
+        row = {
+            "located_by": "M1 bisection over binary64 (no polynomial)",
+            "inside_t_hex": tin.hex(),
+            "outside_t_hex": tout.hex(),
+            "equals_G03_constant": tin.hex() == g03_inside_hex,
+            "M1": [m1(*pin)[0], m1(*pout)[0]],
+            "M1_relative_margins": [f"{m1(*pin)[1]:.3e}", f"{m1(*pout)[1]:.3e}"],
+            "M2": [m2(*pin), m2(*pout)],
+            "classical": [classical(*pin), classical(*pout)],
+            "polynomial": [poly(*pin), poly(*pout)],
+        }
+        itin, _itout = locate(ray, IDEAL)
+        row["ideal_pair_inside_t_hex"] = itin.hex()
+        row["ideal_differs_from_model"] = itin != tin
+        checks = [row["M1"] == [True, False], row["polynomial"] == [True, False],
+                  row["equals_G03_constant"]]
+        if row["M2"][0] is not None:
+            checks.append(row["M2"] == [True, False])
+        if row["classical"][0] is not None:
+            checks.append(row["classical"] == [True, False])
+        row["all_agree"] = all(checks)
+        if not row["all_agree"]:
+            stop15.append(name)
+        out["pairs"][name] = row
+    lines = (root / "tests/s2_dl4_points.txt").read_text().split("\n")[1:-1]
+    disagree, smallest, n = [], None, 0
+    for line in lines:
+        s, i, x, y, z, label = line.split(",")
+        xf, yf, zf = float.fromhex(x), float.fromhex(y), float.fromhex(z)
+        n += 1
+        if xf == 0.0 and yf == 0.0 and zf == 0.0:
+            m1_label = "origin"
+        else:
+            inside, margin = m1(xf, yf, zf)
+            m1_label = "evolute_region" if inside else "passes"
+            mag = abs(margin)
+            smallest = mag if smallest is None or mag < smallest else smallest
+        if m1_label != label:
+            disagree.append([s, int(i), label, m1_label])
+    out["listing"] = {"entries": n, "M1_disagreements": disagree,
+                      "smallest_abs_M1_relative_margin": f"{smallest:.3e}"}
+    if disagree:
+        stop15.append("listing labels")
+    out["e2_model_minus_e2_ideal"] = f"{float(Q(E2) - IDEAL['e2q']):.6e}"
+    out["stop15"] = stop15
+    out["python"] = sys.version
+    print(json.dumps(out, indent=1))
+    return 1 if stop15 else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

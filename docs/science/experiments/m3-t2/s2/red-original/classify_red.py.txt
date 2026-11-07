@@ -1,0 +1,26 @@
+"""Classify every red-run node from JUnit: each failing node must fail for a declared reason
+(per-test ImportError/ModuleNotFoundError/AttributeError from the absent interface, or an
+assertion); each passing node must be a guard or an unchanged pre-existing test."""
+import json, re, sys, xml.etree.ElementTree as ET
+from collections import Counter
+x = ET.parse(sys.argv[1]).getroot()
+GUARD = re.compile(r"test_g10_|test_g13_|test_g12a_|test_twin_")
+rows, bad = [], []
+for tc in x.iter("testcase"):
+    name = f"{tc.get('classname')}::{tc.get('name')}"
+    f = tc.find("failure"); e = tc.find("error")
+    if f is None and e is None:
+        kind = "pass"
+        ok = bool(GUARD.search(name)) or ("test_constants" in name and "inverse_flattening" not in name)
+    elif e is not None:
+        kind, ok = "error:" + (e.get("message") or "")[:80], False
+    else:
+        msg = f.get("message") or ""
+        m = re.match(r"(ModuleNotFoundError|ImportError|AttributeError|AssertionError|assert )", msg)
+        kind = "fail:" + (m.group(1) if m else msg[:60])
+        ok = bool(m)
+    rows.append({"node": name, "status": kind, "declared_reason_ok": ok})
+    if not ok: bad.append(name)
+summary = {"nodes": len(rows), "by_status": dict(Counter(r["status"] for r in rows)), "not_ok": bad}
+json.dump({"summary": summary, "nodes": rows}, open(sys.argv[2], "w"), indent=1)
+print(json.dumps(summary, indent=1))

@@ -1,0 +1,47 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+_________________ test_g06_float_subclass_overrides_never_run __________________
+
+    def test_g06_float_subclass_overrides_never_run():
+        geo = _geo()
+        called = []
+    
+        class F(float):
+            def __eq__(self, other):
+                called.append("__eq__")
+                return True
+    
+            __hash__ = float.__hash__
+    
+            def __mul__(self, other):
+                called.append("__mul__")
+                return 0.0
+    
+            def __float__(self):
+                called.append("__float__")
+                return 0.0
+    
+        def outcome(r):
+            # A GeodeticDomainError here is an observed wrong outcome (the stored values 7e6, 0
+            # and 1 are accepted), so it is captured and rejected by the assertions below rather
+            # than escaping as an exception (I-102, MN-17). Any other exception propagates.
+            try:
+                return ("returned", geo.geodetic(r))
+            except geo.GeodeticDomainError as exc:
+                return ("raised", exc.reason)
+    
+        expected = ("returned", geo.geodetic((7.0e6, 0.0, 1.0)))
+        one = outcome((F(7.0e6), 0.0, 1.0))
+        # __eq__ returning True does not make it the origin.
+        three = outcome((F(7.0e6), F(0.0), F(1.0)))
+>       assert one == expected, (one, expected, called)
+E       AssertionError: (('raised', 'not_binary64'), ('returned', (621863.0000000717, 1.4373387168729454e-07)), ['__float__', '__float__'])
+E       assert ('raised', 'not_binary64') == ('returned', ...68729454e-07))
+E         
+E         At index 0 diff: 'raised' != 'returned'
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:392: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g06_float_subclass_overrides_never_run
+1 failed, 1 passed in 0.15s

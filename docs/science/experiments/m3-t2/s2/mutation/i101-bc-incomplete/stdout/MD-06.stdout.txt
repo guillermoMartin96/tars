@@ -1,0 +1,62 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_____________ test_g08_component_equals_twin_at_every_passes_entry _____________
+
+    def test_g08_component_equals_twin_at_every_passes_entry():
+        """For every listing entry labelled `passes`, on this platform, in one process: the
+        expected outcome from the twin (§3.10 adapter) equals the component's outcome, and
+        accepted h and phi are bit-identical (signed zeros included). Any twin exception other
+        than ArithmeticError or ValueError raises TwinStopError: a STOP, never a skipped point."""
+        from tars.sim import geodesy
+        from tests import s2_dl4_point_sets as gen
+        from tests.s2_dl4_geodetic_twin import twin_outcome
+    
+        entries = gen.parse_listing((REPO_ROOT / "tests" / "s2_dl4_points.txt").read_text())
+        passes = [e for e in entries if e.label == "passes"]
+        assert len(passes) == 22601
+        mismatches = []
+        for e in passes:
+            expected = twin_outcome(e.x, e.y, e.z)
+            try:
+                h, phi = geodesy.geodetic((e.x, e.y, e.z))
+                actual = "accepted"
+            except geodesy.GeodeticDomainError as exc:
+                actual = exc.reason
+            if actual != expected.outcome:
+                mismatches.append((e.set, e.index, expected.outcome, actual))
+            elif actual == "accepted":
+                rec = expected.record
+                same_h = struct.pack("<d", h) == struct.pack("<d", rec.h)
+                same_phi = struct.pack("<d", phi) == struct.pack("<d", rec.phi)
+                if not (same_h and same_phi):
+                    mismatches.append((e.set, e.index, "accepted bits", h.hex(), rec.h.hex()))
+>       assert mismatches == [], f"stop 3: {len(mismatches)} G-08 mismatches: {mismatches[:10]}"
+E       AssertionError: stop 3: 6621 G-08 mismatches: [("PS-A'", 363, 'accepted bits', '0x1.fffffff800000p-1', '0x1.fffffff800000p-1'), ("PS-A'", 364, 'accepted bits', '0x1.869ffffffff00p+14', '0x1.869ffffffff00p+14'), ("PS-A'", 366, 'accepted bits', '0x1.e847fffffffe0p+17', '0x1.e847fffffffc0p+17'), ("PS-A'", 373, 'accepted bits', '0x1.fffffff800000p-1', '0x1.fffffff800000p-1'), ("PS-A'", 374, 'accepted bits', '0x1.869ffffffff00p+14', '0x1.869ffffffff00p+14'), ("PS-A'", 376, 'accepted bits', '0x1.e847fffffffe0p+17', '0x1.e847fffffffc0p+17'), ("PS-A'", 383, 'accepted bits', '0x1.fffffff800000p-1', '0x1.fffffff800000p-1'), ("PS-A'", 384, 'accepted bits', '0x1.869ffffffff00p+14', '0x1.869ffffffff00p+14'), ("PS-A'", 386, 'accepted bits', '0x1.e847fffffffe0p+17', '0x1.e847fffffffc0p+17'), ("PS-A'", 393, 'accepted bits', '0x1.fffffff800000p-1', '0x1.fffffff800000p-1')]
+E       assert [("PS-A'", 36...c0p+17'), ...] == []
+E         
+E         Left contains 6621 more items, first extra item: ("PS-A'", 363, 'accepted bits', '0x1.fffffff800000p-1', '0x1.fffffff800000p-1')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic_conformance.py:133: AssertionError
+_________ test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step _________
+
+    def test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step():
+        """_F = RN(1/RN(298.257223563)); _E2 = RN(_F * RN(2 - _F)), each step from exact
+        rationals (Fraction -> float is correctly rounded), and fixed hex strings."""
+        geo = _geo()
+        inv = float(Fraction("298.257223563"))
+        f = float(1 / Fraction(inv))
+        two_minus_f = float(2 - Fraction(f))
+        e2 = float(Fraction(f) * Fraction(two_minus_f))
+        assert _bits(geo._F) == _bits(f)
+>       assert _bits(geo._E2) == _bits(e2)
+E       AssertionError: assert b'\x00\x95\xfe\xf1\x90k{?' == b'\xf0\x94\xfe\xf1\x90k{?'
+E         
+E         At index 0 diff: b'\x00' != b'\xf0'
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:174: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic_conformance.py::test_g08_component_equals_twin_at_every_passes_entry
+FAILED tests/test_s2_geodetic.py::test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step
+2 failed in 0.73s

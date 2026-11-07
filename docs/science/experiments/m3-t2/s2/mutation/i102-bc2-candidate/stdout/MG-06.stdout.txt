@@ -1,0 +1,34 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________________ test_g05_overflow_rows_far_from_the_edge ___________________
+
+    def test_g05_overflow_rows_far_from_the_edge():
+        geo = _geo()
+        for r in ((1.5e308, 1.5e308, 0.0), (1.5e308, 0.0, 1.5e308)):
+>           exc = _raises_reason(geo, r, "overflow")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:251: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-102/campaign/mutation/MG-06/src/tars/sim/geodesy.py'>
+r = (1.5e+308, 1.5e+308, 0.0), reason = 'overflow'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+>       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (1.5e+308, 1.5e+308, 0.0): expected overflow, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g05_overflow_rows_far_from_the_edge - ...
+1 failed in 0.20s

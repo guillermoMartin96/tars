@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.190" timestamp="2026-11-06T20:22:31.184474-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi07_overflow_before_non_convergence" time="0.003"><failure message="AssertionError: assert 'non_convergence' == 'overflow'&#10;  &#10;  - overflow&#10;  + non_convergence">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b20adb0&gt;
+
+    def test_g16_fi07_overflow_before_non_convergence(monkeypatch):  # S-6, S-9
+        out = _run_case(monkeypatch, _rules(hypot=math.inf, atan2=_atan2_never_converging), _SCHED_07)
+&gt;       _expect_reason(out, "overflow")
+
+tests/test_s2_geodetic.py:888: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations'))
+reason = 'overflow', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+&gt;       assert value.reason == reason
+E       AssertionError: assert 'non_convergence' == 'overflow'
+E         
+E         - overflow
+E         + non_convergence
+
+tests/test_s2_geodetic.py:832: AssertionError</failure></testcase></testsuite></testsuites>

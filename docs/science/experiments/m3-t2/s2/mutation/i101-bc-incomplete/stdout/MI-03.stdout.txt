@@ -1,0 +1,119 @@
+F.......                                                                 [100%]
+=================================== FAILURES ===================================
+_______________ test_g06_section_3_8_order_table[r0-non_finite] ________________
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-101/commit-d/out/mutation/MI-03/src/tars/sim/geodesy.py'>
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+>           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../out/mutation/MI-03/src/tars/sim/geodesy.py:152: in geodetic
+    if _in_evolute_region(x, y, z):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../out/mutation/MI-03/src/tars/sim/geodesy.py:130: in _in_evolute_region
+    p2 = Fraction(x) ** 2 + Fraction(y) ** 2
+         ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = <class 'fractions.Fraction'>, numerator = nan, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        >>> Fraction(10, -8)
+        Fraction(-5, 4)
+        >>> Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        >>> Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        >>> Fraction('314')
+        Fraction(314, 1)
+        >>> Fraction('-35/4')
+        Fraction(-35, 4)
+        >>> Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        >>> Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        >>> Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        >>> Fraction(2.25)
+        Fraction(9, 4)
+        >>> Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+>               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               ValueError: cannot convert NaN to integer ratio
+
+../../../../.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: ValueError
+
+The above exception was the direct cause of the following exception:
+
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    @pytest.mark.parametrize(
+        ("r", "reason"),
+        [
+            ((math.nan, 0.0, 0.0), "non_finite"),
+            ((math.inf, 0.0, 0.0), "non_finite"),
+            ((0.0, -0.0, 0.0), "origin"),
+            ((5e-324, 0.0, 0.0), "evolute_region"),
+            ((10**400, 0, 0), "not_binary64"),
+            ((2**53 + 1, 0, 0), "not_binary64"),
+            ((42697.67270722267, 0.0, 30.0), "non_convergence"),
+            ((1.5e308, 0.0, 1.5e308), "overflow"),  # [F-11] libm-dependent, 18% margin
+        ],
+    )
+    def test_g06_section_3_8_order_table(r, reason):
+>       _raises_reason(_geo(), r, reason)
+
+tests/test_s2_geodetic.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-101/commit-d/out/mutation/MI-03/src/tars/sim/geodesy.py'>
+r = (nan, 0.0, 0.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+>           raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+E           AssertionError: (nan, 0.0, 0.0): expected non_finite, got ValueError: cannot convert NaN to integer ratio
+
+tests/test_s2_geodetic.py:121: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g06_section_3_8_order_table[r0-non_finite]
+1 failed, 7 passed in 0.24s

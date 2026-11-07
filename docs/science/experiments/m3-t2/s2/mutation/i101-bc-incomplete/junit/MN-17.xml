@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.169" timestamp="2026-11-06T15:14:21.328466-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_float_subclass_overrides_never_run" time="0.002"><failure message="tars.sim.geodesy.GeodeticDomainError: geodetic input: an integer component is not exactly a binary64 value">def test_g06_float_subclass_overrides_never_run():
+        geo = _geo()
+        called = []
+    
+        class F(float):
+            def __eq__(self, other):
+                called.append("__eq__")
+                return True
+    
+            __hash__ = float.__hash__
+    
+            def __mul__(self, other):
+                called.append("__mul__")
+                return 0.0
+    
+            def __float__(self):
+                called.append("__float__")
+                return 0.0
+    
+&gt;       assert geo.geodetic((F(7.0e6), 0.0, 1.0)) == geo.geodetic((7.0e6, 0.0, 1.0))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../out/mutation/MN-17/src/tars/sim/geodesy.py:147: in geodetic
+    x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+              ^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+v = 7000000.0
+
+    def _to_binary64(v: float | int) -&gt; float:
+        """Step 1 on a normalized value: an int must be exactly a binary64 value."""
+        if type(v) is float:
+            return v
+        try:
+            f = float(v)
+        except OverflowError:
+            raise GeodeticDomainError("not_binary64") from None
+        if f != v:
+&gt;           raise GeodeticDomainError("not_binary64")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: an integer component is not exactly a binary64 value
+
+../out/mutation/MN-17/src/tars/sim/geodesy.py:122: GeodeticDomainError</failure></testcase></testsuite></testsuites>

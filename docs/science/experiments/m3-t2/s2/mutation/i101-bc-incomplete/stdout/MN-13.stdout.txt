@@ -1,0 +1,48 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_g16_fi12_stop_test_first_met_at_61_is_non_convergence __________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10edeefc0>
+
+    def test_g16_fi12_stop_test_first_met_at_61_is_non_convergence(monkeypatch):
+        def atan2(i):
+            return (60 - i) * 1e-10 if i <= 60 else 1e-15
+    
+>       _expect_reason(_run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07), "non_convergence")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:908: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10edeefc0>
+rules = {'hypot': 7000000.0, 'atan2': <function test_g16_fi12_stop_test_first_met_at_61_is_non_convergence.<locals>.atan2 at 0x10f2920c0>, 'sin': 0.0, 'cos': 1.0, ...}
+schedule = ['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], isnan = None
+
+    def _run_case(monkeypatch, rules, schedule, *, isnan=None):
+        geo = _geo()
+        log: list = []
+        lib = _fixture(rules, log)
+        assert set(vars(lib)) == set(rules)
+        monkeypatch.setattr(geo, "_LIB", lib)
+        if isnan is not None:
+            monkeypatch.setattr(geo, "_isnan", isnan)
+        else:
+            assert geo._isnan is math.isnan and geo._isinf is math.isinf
+        try:
+            outcome = ("returned", geo.geodetic(_POINT))
+        except BaseException as exc:
+            outcome = ("raised", exc)
+        monkeypatch.undo()
+        assert geo._LIB is math and geo._isnan is math.isnan and geo._isinf is math.isinf
+>       assert log == schedule, (log[:12], len(log))
+E       AssertionError: (['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], 188)
+E       assert ['hypot', 'at...', 'sin', ...] == ['hypot', 'at...', 'sin', ...]
+E         
+E         At index 183 diff: 'sqrt' != 'cos'
+E         Left contains 3 more items, first extra item: 'sin'
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:811: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi12_stop_test_first_met_at_61_is_non_convergence
+1 failed in 0.17s

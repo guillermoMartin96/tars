@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.160" timestamp="2026-11-06T15:14:20.319142-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_class_faking_object_is_a_type_error" time="0.002"><failure message="AssertionError: (&lt;tests.test_s2_geodetic.test_g06_class_faking_object_is_a_type_error.&lt;locals&gt;.Fake object at 0x10ef22150&gt;, 0.0, 1.0): expected TypeError, but it was accepted">def test_g06_class_faking_object_is_a_type_error():
+        geo = _geo()
+    
+        class Fake:
+            """Claims float through __class__ and converts to 7e6, so an isinstance-based
+            normalization would accept it (the designated killer of that mutant)."""
+    
+            @property
+            def __class__(self):
+                return float
+    
+            def __float__(self):
+                return 7.0e6
+    
+        assert isinstance(Fake(), float)
+&gt;       _raises_type(geo, (Fake(), 0.0, 1.0), TypeError)
+
+tests/test_s2_geodetic.py:427: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-101/commit-d/out/mutation/MN-16/src/tars/sim/geodesy.py'&gt;
+r = (&lt;tests.test_s2_geodetic.test_g06_class_faking_object_is_a_type_error.&lt;locals&gt;.Fake object at 0x10ef22150&gt;, 0.0, 1.0)
+exc_type = &lt;class 'TypeError'&gt;
+
+    def _raises_type(geo, r, exc_type):
+        try:
+            geo.geodetic(r)
+        except BaseException as exc:
+            assert type(exc) is exc_type, (r, type(exc))
+            assert not isinstance(exc, geo.GeodeticDomainError)
+            return exc
+&gt;       raise AssertionError(f"{r!r}: expected {exc_type.__name__}, but it was accepted")
+E       AssertionError: (&lt;tests.test_s2_geodetic.test_g06_class_faking_object_is_a_type_error.&lt;locals&gt;.Fake object at 0x10ef22150&gt;, 0.0, 1.0): expected TypeError, but it was accepted
+
+tests/test_s2_geodetic.py:132: AssertionError</failure></testcase></testsuite></testsuites>

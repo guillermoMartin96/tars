@@ -1,0 +1,11 @@
+"""Remove exactly the GitHub Actions per-line timestamp prefix ('YYYY-MM-DDTHH:MM:SS.fffffffZ ')
+from a raw job log, writing a derived copy. The raw log is never modified. Lines without the
+prefix are kept unchanged. GitHub's stored job logs are concatenated chunks, and a chunk can
+begin with a U+FEFF byte-order mark directly before the timestamp; that one character is
+removed with the prefix. The S2 records' own sha256 values verify the derived content."""
+import re, sys
+pat = re.compile(r"^\ufeff?\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d+Z ")
+src, dst = sys.argv[1], sys.argv[2]
+with open(src, encoding="utf-8", errors="strict") as f, open(dst, "w", encoding="utf-8") as g:
+    for line in f:
+        g.write(pat.sub("", line, count=1))

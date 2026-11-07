@@ -1,0 +1,48 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_g16_fi05_sin_raises_type_error_propagates ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1119b3530>
+
+    def test_g16_fi05_sin_raises_type_error_propagates(monkeypatch):
+        sentinel = TypeError("injected")
+        kind, value = _run_case(monkeypatch, _rules(sin=_Raise(sentinel)), _SCHED_00[:3])
+>       assert kind == "raised" and value is sentinel
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is TypeError('injected'))
+
+tests/test_s2_geodetic.py:876: AssertionError
+_____________ test_g16_fi06_missing_cos_propagates_attribute_error _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x111a94a10>
+
+    def test_g16_fi06_missing_cos_propagates_attribute_error(monkeypatch):
+        rules = _rules()
+        del rules["cos"]
+        kind, value = _run_case(monkeypatch, rules, _SCHED_00[:6])
+>       assert kind == "raised" and type(value) is AttributeError
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and <class 'tars.sim.geodesy.GeodeticDomainError'> is AttributeError)
+E        +  where <class 'tars.sim.geodesy.GeodeticDomainError'> = type(GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification'))
+
+tests/test_s2_geodetic.py:883: AssertionError
+________________ test_g16_fi14_sin_raises_name_error_propagates ________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x112063830>
+
+    def test_g16_fi14_sin_raises_name_error_propagates(monkeypatch):
+        sentinel = NameError("injected")
+        kind, value = _run_case(monkeypatch, _rules(sin=_Raise(sentinel)), _SCHED_00[:3])
+>       assert kind == "raised" and value is sentinel
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is NameError('injected'))
+
+tests/test_s2_geodetic.py:934: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi05_sin_raises_type_error_propagates
+FAILED tests/test_s2_geodetic.py::test_g16_fi06_missing_cos_propagates_attribute_error
+FAILED tests/test_s2_geodetic.py::test_g16_fi14_sin_raises_name_error_propagates
+3 failed in 0.19s

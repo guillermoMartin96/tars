@@ -1,0 +1,111 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+____________________ test_g16_fi02_sqrt_raises_value_error _____________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10666e420>
+
+    def test_g16_fi02_sqrt_raises_value_error(monkeypatch):  # S-4
+        out = _run_case(monkeypatch, _rules(sqrt=_Raise(ValueError("injected"))), _SCHED_00[:4])
+>       _expect_reason(out, "numerical_failure", ValueError)
+
+tests/test_s2_geodetic.py:860: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', ValueError('injected')), reason = 'numerical_failure'
+cause = <class 'ValueError'>
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+>       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: <class 'ValueError'>
+E       assert <class 'ValueError'> is <class 'tars.sim.geodesy.GeodeticDomainError'>
+E        +  where <class 'ValueError'> = type(ValueError('injected'))
+E        +  and   <class 'tars.sim.geodesy.GeodeticDomainError'> = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MN-07/src/tars/sim/geodesy.py'>.GeodeticDomainError
+
+tests/test_s2_geodetic.py:831: AssertionError
+_______________________ test_g16_fi03_sqrt_zero_divides ________________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10674cbf0>
+
+    def test_g16_fi03_sqrt_zero_divides(monkeypatch):  # S-2, S-9
+        out = _run_case(monkeypatch, _rules(sqrt=0.0), _SCHED_00[:4])
+>       _expect_reason(out, "numerical_failure", ZeroDivisionError)
+
+tests/test_s2_geodetic.py:865: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', ZeroDivisionError('float division by zero'))
+reason = 'numerical_failure', cause = <class 'ZeroDivisionError'>
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+>       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: <class 'ZeroDivisionError'>
+E       assert <class 'ZeroDivisionError'> is <class 'tars.sim.geodesy.GeodeticDomainError'>
+E        +  where <class 'ZeroDivisionError'> = type(ZeroDivisionError('float division by zero'))
+E        +  and   <class 'tars.sim.geodesy.GeodeticDomainError'> = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MN-07/src/tars/sim/geodesy.py'>.GeodeticDomainError
+
+tests/test_s2_geodetic.py:831: AssertionError
+__________________ test_g16_fi04_atan2_raises_overflow_error ___________________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1067db170>
+
+    def test_g16_fi04_atan2_raises_overflow_error(monkeypatch):  # S-5
+        out = _run_case(monkeypatch, _rules(atan2=_Raise(OverflowError("injected"))), _SCHED_00[:2])
+>       _expect_reason(out, "numerical_failure", OverflowError)
+
+tests/test_s2_geodetic.py:870: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', OverflowError('injected')), reason = 'numerical_failure'
+cause = <class 'OverflowError'>
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+>       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: <class 'OverflowError'>
+E       assert <class 'OverflowError'> is <class 'tars.sim.geodesy.GeodeticDomainError'>
+E        +  where <class 'OverflowError'> = type(OverflowError('injected'))
+E        +  and   <class 'tars.sim.geodesy.GeodeticDomainError'> = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MN-07/src/tars/sim/geodesy.py'>.GeodeticDomainError
+
+tests/test_s2_geodetic.py:831: AssertionError
+_________ test_g16_fi13_failure_in_final_height_before_non_convergence _________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1067dbc50>
+
+    def test_g16_fi13_failure_in_final_height_before_non_convergence(monkeypatch):  # S-4
+        def sqrt(i):
+            return 1.0 if i < 60 else _Raise(ValueError("injected"))
+    
+        out = _run_case(monkeypatch, _rules(atan2=_atan2_never_converging, sqrt=sqrt), _SCHED_07)
+>       _expect_reason(out, "numerical_failure", ValueError)
+
+tests/test_s2_geodetic.py:928: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', ValueError('injected')), reason = 'numerical_failure'
+cause = <class 'ValueError'>
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+>       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: <class 'ValueError'>
+E       assert <class 'ValueError'> is <class 'tars.sim.geodesy.GeodeticDomainError'>
+E        +  where <class 'ValueError'> = type(ValueError('injected'))
+E        +  and   <class 'tars.sim.geodesy.GeodeticDomainError'> = <module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-103/campaign/mutation/MN-07/src/tars/sim/geodesy.py'>.GeodeticDomainError
+
+tests/test_s2_geodetic.py:831: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_s2_geodetic.py::test_g16_fi02_sqrt_raises_value_error - Ass...
+FAILED tests/test_s2_geodetic.py::test_g16_fi03_sqrt_zero_divides - Assertion...
+FAILED tests/test_s2_geodetic.py::test_g16_fi04_atan2_raises_overflow_error
+FAILED tests/test_s2_geodetic.py::test_g16_fi13_failure_in_final_height_before_non_convergence
+4 failed in 0.24s
