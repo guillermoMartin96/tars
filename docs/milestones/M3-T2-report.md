@@ -781,3 +781,305 @@ manifest is written after this commit, so it cannot be quoted here.
 - **S2:** NOT AUTHORIZED.
 - **Push of this correction:** NOT AUTHORIZED at the time of writing.
 - **Further independent review:** NOT STARTED.
+
+## S2 — Geodetic height and latitude behind a domain guard (PC-7(S2))
+
+**Status (commit E): S2 IMPLEMENTED / VALIDATED LOCALLY AND ON CI / NOT REVIEWED / NOT ACCEPTED / NOT
+MERGED.** The §5.2 independent implementation review has not been launched. Every S2 and S2-C
+obligation (OB-01 to OB-29, OB-32, OB-33) is PENDING. OB-30 and OB-31 are carried forward (L).
+Nothing in this section is an accuracy claim. A geodetic acceptance means only that DQ-1's stop
+test was met within its limit and the outputs are finite (OD-12 item 3).
+
+This section is appended. Every earlier line of this report is byte-identical to K.
+
+### S2.0 Governing documents and owner determinations
+
+| Record | Where | sha256 |
+|---|---|---|
+| S2 proposal v11, approved by I-97 (A/B/C; OD-12 resolved) | external, `~/tars-evidence/I-93/S2-proposal-v11.md` | `f7d88086632e38a773594231c5aae44f86993dd3a6496e5d559d0989a3072809` |
+| I-97 decision record | external, `~/tars-evidence/I-97/DECISION-RECORD.md` | `71e2fc58f2eba721558175125d75cf792b8b521524f2df95e7a6d3219d7e32ed` |
+| PC-7(S2), issued by I-99 (2026-11-05) | external, `~/tars-evidence/I-99/PC-7-S2-ISSUED.md` | `940a3244ad532b86c0893f1bdfedafea19727ee0a607f7993c9f7214c80ebe6d` |
+| I-101: "the generation environment" | external, `~/tars-evidence/I-101/I-101.md` | `3bfe20a92c8dd3bab96e8c6d79eefde6c333970cbfa93f1a237502d39398d2d2` |
+| I-102: MN-17 test correction; supplemental commit BC2 | external, `~/tars-evidence/I-102/I-102.md` | `790e5492ead6a3c370e9cea96747a14112fe8794a9ccdd3b4c1eb0fd6b0114ab` |
+| I-103: external amendment to v11 §3.12, MI-03's designated killer | external, `~/tars-evidence/I-103/I-103.md` | `9358b879ca835d937d5501c3047462e57464f536c3aacb6c97d684b809de9855` |
+
+- These records are not on this branch. Recording them on the planning branch needs its own
+  authorization (D-S2-8 (a), D-S2-9 (a)).
+- v11 is unchanged. I-101, I-102 and I-103 are external owner records.
+- Their texts and effect are reproduced in `docs/science/experiments/m3-t2/s2/README.md` and
+  `evolute-guard-derivation.md` §1 and §5.
+
+**I-101, quoted in substance.** For v11 §3.10 and the G-17a/G-17b replay rules, "the generation
+environment" means equality of these fields:
+- `sys.version`;
+- `platform.platform()`;
+- `platform.machine()`;
+- the `uv.lock` sha256;
+- the sha256 of the interpreter executable, with its real path resolved before hashing.
+
+Path equality is not compared. The commit SHA and the CI-only fields are excluded from the equality
+but stay mandatory under §3.16. Equal fields select the replay case only. They do not prove library or
+build identity (r83:83). The author chose these fields before I-101 approved them; it was not prior
+authorization.
+
+### S2.1 Branch, base, commits and CI
+
+The branch is `milestone-3-t2-s2-geodetic`, from K `83d573bdb4933f5d2376423d6b8e9f3348a4ab6f` (`main`).
+The history is linear. Every commit was pushed alone and is a push tip with its own CI run, and
+every job executed in attempt 1.
+
+| Commit | SHA | Content | CI run |
+|---|---|---|---|
+| A | `6c05e53c5ffcb892dacaa6f84e12a163830a4119` | DL-4 twin, generator, frozen listing, G-17a/G-17b, G-10, G-12a, ENV and X-P3 record tests, `commit-a/` record | 42265640238, 4/4 success |
+| BC | `2b975d626e92c76a18efc873e0991084db30617a` | `src/tars/sim/geodesy.py`; `WGS84_INVERSE_FLATTENING` added to `constants.py`; S2 gate tests (byte-identical to the red record) | 42301740647, 4/4 success |
+| BC2 | `5bd8340255d673965a2525f19e9fb32210de54b7` | I-102 correction of one G-06 test (`tests/test_s2_geodetic.py` only) | 42394082295, 4/4 success |
+| D | `37251004406c9d9959123ed862d1ab6b13d7dccc` | evidence: `docs/science/experiments/m3-t2/s2/` (outside `commit-a/`) | 42398881403, 4/4 success |
+| E | this commit | this section only | recorded outside this commit |
+
+No commit was amended, rebased, squashed or force-pushed. No CI job was rerun, and nothing was
+merged.
+
+Per-job provenance is in `docs/science/experiments/m3-t2/s2/ci/*/run.json` and
+`jobs-attempt1.json`. That covers each job's log URL, the attempt, the head SHA, and that the job was
+executed rather than carried over.
+
+### S2.2 Changed paths (K..D) and protected paths
+
+- **Added:**
+  - `src/tars/sim/geodesy.py`;
+  - `tests/s2_dl4_geodetic_twin.py`, `tests/s2_dl4_point_sets.py`, `tests/s2_dl4_points.txt`;
+  - `tests/test_s2_dl4_points.py`, `tests/test_s2_environment_record.py`;
+  - `tests/test_s2_geodetic.py`, `tests/test_s2_geodetic_conformance.py`, `tests/test_s2_xp3_listing.py`;
+  - `docs/science/experiments/m3-t2/s2/**`.
+- **Modified (additive, AST-checked by G-13):**
+  - `src/tars/sim/constants.py`: one constant with its comment;
+  - `tests/test_constants.py`: one test function.
+- **E** adds only this appended section.
+- **G-13 scope check: PASS for K..BC, K..BC2 and K..D.** `forces.py`, `simulator.py` and
+  `docs/science/assumptions.md` are byte-identical to K (D-S2-13 (a): no `assumptions.md` entry).
+- No dependency, CI, `.python-version` or protected-path change was made.
+
+### S2.3 Implemented behaviour
+
+`tars.sim.geodesy.geodetic(r) -> (h, phi)`:
+- **Evaluation:** DQ-1 (α), the operation sequence of packet r1 §5 lines 89-94, operation for
+  operation, with f and e2 derived from `WGS84_INVERSE_FLATTENING` and never stored.
+- **Checks, in this order (§3.8):**
+  - structure and type-exact normalization (`bool` and other types raise `TypeError`;
+    float and int subclasses are read from their base slot);
+  - `not_binary64`;
+  - `non_finite`;
+  - `origin`;
+  - `evolute_region`: the exact closed rational predicate on the model ellipsoid, behind the proven
+    2^16 pre-filter;
+  - evaluation in a `try` that covers exactly E.1 and catches only `ArithmeticError`/`ValueError`
+    (`numerical_failure`);
+  - post-checks `numerical_failure` → `overflow` → `non_convergence` (60 updates, stop test
+    `|dphi| <= 1e-15`).
+- **Errors:** every rejection is a `GeodeticDomainError(ValueError)` with a fixed `reason`,
+  `category` and message.
+- **No caller:** nothing in `forces.py`, `simulator.py` or elsewhere calls `geodetic` (S4 scope).
+
+### S2.4 Red and green evidence
+
+- **Original red run** (uncommitted on A; `geodesy.py` absent; `constants.py` = K):
+  - 131 nodes: 101 fail with a per-test `ImportError`, and 4 fail by assertion.
+  - 26 pass: guards (G-10, G-12a, G-13, twin sanity) and unchanged existing tests.
+  - 0 collection errors, and no node fails for an undeclared reason.
+  - The test files came from drafts recreated on 2026-11-06 (new working material, recorded as such).
+  - All three test blobs at BC equal the red record (stop 14 not reached).
+- **Supplemental red run (I-102)** on a fresh clone of A, with the frozen corrected
+  `tests/test_s2_geodetic.py` (blob `0d817de456cf837c06979a5fab601db6be7b6567`, sha256
+  `9059ff375993cf156e28fb76b5a3eb95a3601ea99c3572890cc1c1033fa8b661`):
+  - 112 nodes: 100 `ImportError`, 2 assertion, and 10 component-free guards pass
+    (G-10 W1–W7, G-13 ×3).
+  - Identical per node to the original red run of that file.
+  - BC2's blob equals the supplemental record.
+- **Green** (host, macOS x86_64, CPython 3.12.15):
+  - **BC:** pre-commit worktree and a fresh clone both give 1 518 passed, ruff check and format exit 0.
+  - **BC2 tree:** 1 518 passed, ruff exit 0.
+  - **CI:** 1 515 passed, 3 skipped on each `check` job, at A, BC, BC2 and D.
+
+### S2.5 Mutation campaign (v11 §3.12, amended by I-103 for MI-03 only)
+
+- **Rule.** Each mutant is applied to a scratch copy. A kill counts only if a designated node fails
+  and every failure is assertion-type. The unmutated control must pass, and JUnit is recorded.
+- **I-101 campaign at BC: INCOMPLETE (stop 8).**
+  - Control 73/73.
+  - 43 KILLED; 5 documented equivalents.
+  - MN-17 ("the component value used as given, instead of the base-slot value") failed its G-06
+    override node only by an uncaught `GeodeticDomainError`, which is not a kill.
+  - The campaign's MN-17 node list had also omitted the designated `__abs__` case.
+  - Stop record: `mutation/i101-bc-incomplete/STOP-RECORD.md`.
+- **I-102 correction.**
+  - The override test now captures that `GeodeticDomainError` as an observed wrong outcome and
+    rejects it by an explicit assertion. The stored-value result and the no-override assertion are
+    kept, and any other exception propagates.
+  - MN-17's node list gained the `__abs__` node.
+  - No production change. The uncaught exception is not counted, and MN-17 is not equivalent.
+- **I-103 amendment.**
+  - v11's MI-03 killer "G-06 (inf, 0, 0)" cannot distinguish the mutant: the pre-filter returns
+    before any `Fraction` is built for an infinite component.
+  - The owner replaced it with "G-06 (nan, 0, 0), node
+    `test_g06_section_3_8_order_table[r0-non_finite]`". The transformation is unchanged, and no
+    exemption is granted.
+- **Final campaign (I-103, BC2 tree): PASS.**
+  - Control 74/74.
+  - 49 mutants: 44 KILLED by assertion on their designated nodes.
+  - 5 documented equivalent survivors (ME-01 to ME-04, M-W2), with v11's proofs reproduced in the
+    derivation note §6.
+  - NOT OK: none.
+  - MN-17 is killed at `test_g06_float_subclass_overrides_never_run`
+    (`('raised', 'not_binary64') != ('returned', …)`). MI-03 is killed at the NaN node.
+- **History kept** in `mutation/`: i101 (incomplete), the MN-17 diagnostic, i102 (earlier MI-03
+  designation), and i103 (final).
+
+### S2.6 Listing, derivation and DL-4
+
+- **The frozen listing** (`tests/s2_dl4_points.txt`, sha256 `0983900a…7c31`, committed in A):
+  22 665 entries (22 601 `passes`, 64 `evolute_region`) and 8 853 class X entries.
+- **G-17b:** 0 class X differences on every CI job (A, BC, BC2, D) and on the host.
+- **G-17a:** class X, label and witness-slot differences are 0 everywhere. Class P coordinate
+  differences are report-only: 2 188 (macOS arm64), 2 305 (Ubuntu), 0 (macOS x86_64, the
+  generation environment under I-101).
+- **M1 derivation (§3.7.6; OB-19):**
+  - all 8 G-03 boundary pairs were located by M1 bisection without the polynomial;
+  - each equals its G-03 constant, and M2, the classical values and the polynomial agree.
+- **M1 cross-check of every listing label (OB-02):** 0 of 22 665 disagree; smallest |relative
+  margin| 2.569e-19. Stop 15 not reached.
+- **G-08 (DL-4 outcome conformance, bitwise at accepted points):** green on every CI job and the host.
+
+### S2.7 Report-only rows (not gates; not bounds)
+
+- **Host RP-1 to RP-7 and RP-9** at BC; the component bytes are identical at BC2 and D.
+  - RP-6a PS-NEG dispatch 18/2/180, max |dh| 1.18e-9 m.
+  - RP-7 X-D1: 0 bit differences over 656 points.
+  - RP-9: the census equals the component at 22 665 of 22 665 entries.
+- **RP-8 / RP-9 by the CI log route** (BC and BC2, identical):
+  - 0 outcome differences between any two platforms;
+  - 19 154 accepted, 64 `evolute_region`, 3 447 `non_convergence` on each;
+  - max |dh| 1.49e-8 m, max |dphi| 5.6e-16 rad.
+- **Ulp distances near h = 0.** Where h = 0 on one platform and h = −2^-30 m on another, the ulp
+  distance is enormous. Those 22 to 30 pairs per platform pair are counted separately.
+- No `numerical_failure` occurred on any platform for any non-injected input (stop 17 not reached).
+
+### S2.8 Regression (§3.13) at D
+
+R-1 to R-4 ran in fresh clones of D (`37251004406c9d9959123ed862d1ab6b13d7dccc`, tree
+`6fa4a31d1236edc48ccfaa03111de4bd9fdb3c0f`), with BASE = K recomputed in separate fresh clones from
+GitHub. The host was macOS x86_64 with CPython 3.12.15, on 2026-11-07, from 18:50Z to 19:32Z.
+
+- Driver: `docs/science/experiments/m3-t2/s2/scripts/s2_rgates.sh.txt`, the I-101 version. The run
+  used an I-103 adaptation that generalizes the clone-path normalization and adds R-S1 and R-S2.
+- Full record: external, `~/tars-evidence/I-103/regression/`.
+
+| Gate | D | BASE K (recomputed) |
+|---|---|---|
+| **R-1** M1 Proof | PASS, 9/9 steps; golden `7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4` | PASS, 9/9; same golden |
+| **R-2** M2 Proof | PASS, 20/20 steps; `m2_proof` 228 [PASS] / 0 [FAIL] | PASS, 20/20; 228 / 0 |
+| **R-3** T1 | 110 passed: T1's 109 plus the one new `test_constants.py` function. r01/r02 correction checks byte-identical to the committed results, and between D and K | 109 passed; identical |
+| **R-4** T0 | 314 passed | 314 passed |
+| **R-5** | G-13 PASS for K..D; protected paths byte-identical to K | — |
+| **R-6** | CI 4/4 `success`, attempt 1, on every pushed commit: A, BC, BC2, D (E: see the S2 handoff) | — |
+| **R-7** | K..D changes no completed M3 record. Every changed path is in §3.6's allowlist (S2.2) | — |
+| **R-S1** | S1's 100 tests pass unchanged; S1's `SHA256SUMS` verifies (96 OK, 0 failed) | — |
+| **R-S2** | full suite 1 518 passed (K: 1 390 on the host), exit 0 | — |
+
+**R-2 semantic comparison.**
+- In `m2_final_states_record.json`, only `revision` and the record's `sha256` differ.
+- The `missions` block is identical. Substituting K's revision reproduces K's record `sha256`.
+- All 229 PASS/FAIL, digest, golden, snapshot, manifest and threshold lines of `m2_proof_stdout.txt`
+  are identical after temp-path normalization. 0 other lines differ.
+
+**Metadata-only differences in the proof logs:**
+- revision and date;
+- uv timings;
+- pytest count, 1 390 → 1 518;
+- `ruff format` file count, 274 → 290;
+- the S2 tests' warnings-summary output, which includes the X-P3 listing.
+
+### S2.9 Merge record (§3.17; r1 §9 item 4; D-S2-9 as proposed)
+
+- **S1 merge.** BASE `ee602c5bfe3176d8f8b62dfa3d59af5dfe52b8fd` → K
+  `83d573bdb4933f5d2376423d6b8e9f3348a4ab6f`, on 2026-11-03.
+  - It was a fast-forward by ordinary push (`ee602c5..83d573b main -> main`).
+  - 10 linear commits, with no merge commit (re-verified: `git rev-list --count` 10,
+    `--merges` 0).
+  - K tree `03e01038bf9b84060a8a7d7b126dfa225cb9f513` (re-verified).
+- **Post-merge CI: run 41672716486.**
+  - Attempts 1 and 2 failed because the arm64 runner was not provisioned.
+  - Attempt 3 succeeded, 4/4 at K.
+  - Two of the four jobs, `check (ubuntu-latest)` and `check (macos-15-intel)`, are attempt-1
+    results that GitHub carried over, and were not executed again. Re-verified: their attempt-3
+    start times equal attempt 1's (16:17:50Z, 16:17:54Z). See the OD-9 record §2.3.
+- **Post-merge fresh-clone validation:** PASS (OD-9 record §2.4).
+- **S1 acceptance:** I-65, recorded at planning O in `docs/milestones/M3-T2-S1-acceptance-I65.md`
+  (blob `ffc4875a07892326d61f010fb0958b2726fc8707`).
+- **Merge and OD-9 record:** planning O `6498957d354c8230273d116aa9495fffe762c141`,
+  `docs/milestones/M3-T2-OD9-merge-model-I66.md` (blob
+  `de959954d9f8bd47e6b50ebb78bd7b6e8e58c228`), §2 and §4.
+- **Supersession, stated without editing the lines.**
+  - The element "NOT MERGED" in this report at K, lines 3, 537, 687 and 778, is superseded by the
+    merge.
+  - Every other element of those lines is unchanged, as the OD-9 record §3.3 states.
+  - The earlier text of this report stays byte-identical.
+- **Observation, not acted on.** Line 13 of this report at K, inside the I-60 superseding note, reads
+  "**S1 is NOT ACCEPTED and NOT MERGED.**". It is not listed in the OD-9 record §3.3 or in v11's
+  proposed merge record. This record does not extend the supersession to it on the author's
+  authority. It is noted for the owner and the §5.2 review.
+- **Planning integration** is not performed and stays deferred.
+
+### S2.10 Carry-forward for S4 and T3 (§5.4 OB-29)
+
+- **F-17.** `GeodeticDomainError` subclasses `ValueError`, so a broad `except ValueError` would catch
+  it. S4 and T3 must design their error handling with that in mind.
+- **§3.18 item 15.** `numerical_failure` has an undetermined cause and is not a domain
+  classification. S4 and T3 must not handle it as an ordinary numerical domain rejection.
+- **D-S2-2 (c), owner's destination for the versioned model identifiers** (r1 §2 item 9;
+  ADR-0009 item 5): **S4** (I-97). No identifier is assigned in S2.
+  - The exact definition an identifier would version is recorded in
+    `docs/science/experiments/m3-t2/s2/evolute-guard-derivation.md` §3.
+  - OB-31 is PENDING in S4.
+- **OB-30** (S4 and T3 each address F-17 and §3.18 item 15 in their own designs, verified by
+  their own reviews) is PENDING in those scopes and is never marked MET by S2.
+
+### S2.11 D-S2-11 (b-iv): the P8 evidence sentence
+
+`docs/decisions/requests/DR-0029-m3-t0-proposals.md:568` reads: "Both inverse algorithms are valid
+outside the evolute region near the centre."
+- For DQ-1 as specified, with its 60-iteration cap, this is contradicted near the equatorial cusp
+  outside E (v11 §3.20; F-01).
+- There the iteration does not meet its stop test within 60 iterations, and S2 rejects such points
+  with `non_convergence`. On the frozen listing these are 3 081 DG-CUSP and 366 DG-DEEP points
+  (RP-6b; host, CI identical).
+- DR-0029 is not edited, and no status note is added.
+
+### S2.12 Stops, deviations and open items
+
+1. **Interrupted gate run (I-99/I-100).** The first host run of A's gates was killed at 61% when a
+   session ended. It is preserved as incomplete evidence and was never counted as PASS. I-101
+   authorized the replacement run, which passed.
+2. **Generation-environment fields.** The author applied an interpretation without authority. I-100
+   reported it, and I-101 approved it afterwards (S2.0).
+3. **Stop 8 (MN-17), then I-102 and BC2.** See S2.5.
+4. **MI-03 designation, then I-103.** See S2.5. This is an owner amendment of a designated witness
+   only.
+5. **A defect caught before BC.** A `geodesy.py` comment repeated the `6378137.0` literal, and the
+   existing test `test_wgs84_literals_only_in_constants_module` failed on it. The comment was
+   corrected before BC was committed, and no test changed.
+6. **Recreated drafts.** `/tmp` was cleared between sessions. The red-run test drafts were recreated
+   and recorded as new working material, not as recovered originals.
+7. **Log-format handling (documented, verified by sha256).** Two changes are made only when
+   extracting records, and the extracted records are checked against the sha256 each test computed.
+   - pytest indents warning-summary lines by two spaces. Exactly that indent is removed.
+   - GitHub job logs carry a timestamp on every line and a U+FEFF at chunk starts. Both are removed.
+8. **Open:** the line-13 observation in S2.9.
+
+### S2.13 Obligations
+
+- **PENDING:** OB-01 to OB-29, OB-32 and OB-33. They are marked MET only by the §5.2 independent
+  implementation review, from implementation evidence. Nothing is MET now.
+- **Carried forward (L):** OB-30 (S4, T3) and OB-31 (S4).
+
+**Status after E: S2 IMPLEMENTED / VALIDATED (local and CI) / NOT REVIEWED / NOT ACCEPTED / NOT
+MERGED.** The independent implementation review is not started, and merging is not authorized.
