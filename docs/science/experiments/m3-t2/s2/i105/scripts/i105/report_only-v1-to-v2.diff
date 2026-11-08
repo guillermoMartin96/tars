@@ -1,0 +1,41 @@
+1c1,2
+< """S2 commit D: report-only rows RP-1 to RP-7 and the host RP-9 census (proposal v11 §3.11
+---
+> """S2 report-only rows RP-1 to RP-7 and the host RP-9 census, census schema 2 (I-105, I104-01;
+> only the RP-9 section differs from the commit-D script report_only.py) (proposal v11 §3.11
+327c328,332
+< # RP-9 host census: component outcome next to the twin census at every entry
+---
+> # RP-9 host census: component outcome next to the twin census at every entry.
+> # I-105 (I104-01), census schema 2: every v11 §3.10 field (set, index, hex input, listing label,
+> # outcome, iteration count, hex final step, source); the component's outcome is an extra column.
+> # The hex input is the entry's own float.hex() text, as the frozen listing stores it.
+> NE, TWIN = "not_evaluated", "twin record (G-08 adapter)"
+330a336,337
+>     entry = (e.set, e.index, e.x.hex(), e.y.hex(), e.z.hex(), e.label)
+>     comp = outcome(e.x, e.y, e.z)[0]
+332,333c339
+<         comp = outcome(e.x, e.y, e.z)[0]
+<         census.append((e.set, e.index, e.label, e.label, "not_evaluated", "not_evaluated", comp))
+---
+>         census.append((*entry, e.label, NE, NE, "listing label", comp))
+337,339c343,347
+<     comp = outcome(e.x, e.y, e.z)[0]
+<     rec = tw.record
+<     census.append((e.set, e.index, e.label, tw.outcome, rec.iterations, rec.last_step.hex(), comp))
+---
+>     rec = tw.record
+>     if rec is None:
+>         census.append((*entry, tw.outcome, "raised", "raised", TWIN, comp))
+>     else:
+>         census.append((*entry, tw.outcome, rec.iterations, rec.last_step.hex(), TWIN, comp))
+343c351,352
+<     w.writerow(["set", "index", "label", "census_outcome", "iterations", "final_step_hex", "component_outcome"])
+---
+>     w.writerow(["set", "index", "x_hex", "y_hex", "z_hex", "label", "outcome", "iterations",
+>                 "final_step_hex", "source", "component_outcome"])
+345c354,355
+< summary["RP-9 host census"] = {"entries": len(census), "component_equals_census": agree, "label": LABEL}
+---
+> summary["RP-9 host census"] = {"entries": len(census), "component_equals_census": agree,
+>                                "schema": "2 (I-105)", "label": LABEL}

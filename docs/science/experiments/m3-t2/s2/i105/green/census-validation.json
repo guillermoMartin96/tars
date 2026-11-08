@@ -1,0 +1,45 @@
+{
+ "census": "$HOME/tars-evidence/I-105/green/records/S2-XP3-LISTING.csv",
+ "census_sha256": "485fac744a6eaf7a65748da33f9b1cf96cf9b95385642a0533efe72005a587ff",
+ "kind": "ci",
+ "listing_sha256": "0983900a9d1733a71000e6e91aeb8373c5b4fe320ba972f363f540f0e52d7c31",
+ "header_ok": true,
+ "records": 22665,
+ "listing_entries": 22665,
+ "record_count_equals_listing": true,
+ "outcomes": {
+  "accepted": 19154,
+  "evolute_region": 64,
+  "non_convergence": 3447
+ },
+ "labels": {
+  "evolute_region": 64,
+  "passes": 22601
+ },
+ "problems": {},
+ "valid": true,
+ "projection_comparisons": [
+  {
+   "schema-1 census": "$HOME/tars-evidence/I-105/red/records/S2-XP3-LISTING.csv",
+   "label": "I-105 supplemental red run census (schema 2), same environment; compared as a projection only if schema 1, so compared directly here",
+   "sha256": "485fac744a6eaf7a65748da33f9b1cf96cf9b95385642a0533efe72005a587ff",
+   "schema-1 columns": [
+    "set",
+    "index",
+    "x_hex",
+    "y_hex",
+    "z_hex",
+    "label",
+    "outcome",
+    "iterations",
+    "final_step_hex",
+    "h_hex",
+    "phi_hex",
+    "source"
+   ],
+   "rows": 22665,
+   "rows differing from the schema-2 projection": 0,
+   "method": "schema-2 rows projected onto the schema-1 columns (hex input dropped); comparison only, no join written"
+  }
+ ]
+}

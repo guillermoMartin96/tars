@@ -1,0 +1,119 @@
+"""I-105 historical-gap inventory (I104-02). Reads only each execution's own sealed files.
+
+For every historical execution it reports the mandatory records actually present in that
+execution's own output, and those missing. Nothing is inferred from another run.
+Checked per execution:
+  DL-5 ENV record (S2-ENV-RECORD), X-P3/RP-9 listing (S2-XP3-LISTING), G-17a report, G-17b record,
+  and the §3.16 run-record fields: commit SHA, sys.version, platform.platform(), platform.machine(),
+  uv.lock sha256 (plus the I-101 interpreter executable sha256).
+"""
+import glob, hashlib, json, os
+from pathlib import Path
+
+H = Path.home() / "tars-evidence"
+W = Path.home() / ".superset/worktrees/tars/milestone-3-t2-s2-geodetic/docs/science/experiments/m3-t2/s2"
+RF = ["commit SHA", "sys.version", "platform.platform()", "platform.machine()", "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"]
+TAGS = {"DL-5 ENV record": "S2-ENV-RECORD", "X-P3/RP-9 listing": "S2-XP3-LISTING", "G-17a report": "S2-G17A-REPORT",
+        "G-17b record": "S2-G17B-RECORD"}
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def rel(p):
+    return str(p).replace(str(H), "~/tars-evidence").replace(str(W), "<repo>/docs/science/experiments/m3-t2/s2")
+
+
+def records_in(log):
+    t = Path(log).read_text(errors="replace")
+    return {k: (v in t) for k, v in TAGS.items()}
+
+
+def fields_from(rec_path):
+    if rec_path is None or not Path(rec_path).exists():
+        return {f: False for f in RF}
+    r = json.loads(Path(rec_path).read_text())
+    has = lambda *ks: any(k in r for k in ks)
+    return {"commit SHA": has("commit", "base commit", "commit (HEAD)"), "sys.version": has("sys.version"),
+            "platform.platform()": has("platform.platform()"), "platform.machine()": has("platform.machine()"),
+            "uv.lock sha256": has("uv.lock sha256"),
+            "interpreter executable sha256 (I-101)": has("interpreter realpath sha256")}
+
+
+inv = []
+# 1-2. The two formal red runs
+for rid, d, committed, note in [
+    ("RED-ORIGINAL", H / "I-101/red", W / "red-original", "original red run, uncommitted on A with the 3 test files (D-S2-12 (i))"),
+    ("RED-SUPPLEMENTAL", H / "I-102/supp-red", W / "red-supplemental", "I-102 supplemental red run, fresh clone of A with the corrected test file"),
+]:
+    log = d / "red-pytest.log"
+    present = records_in(log)
+    head = (d / "head.txt").read_text().strip()
+    rf = {f: False for f in RF}
+    rf["commit SHA"] = True  # head.txt: the base commit; the executed test bytes are bound by blob
+    inv.append({"id": rid, "execution": note, "gate role": "formal red-first evidence (§3.14 step 2; stop 14 binding)",
+                "external original": rel(d), "committed copy": rel(committed),
+                "hashes": {"red-pytest.log": sha(log), "red-junit.xml": sha(d / "red-junit.xml"),
+                           "head.txt": sha(d / "head.txt"), "test-file-identities.txt": sha(d / "test-file-identities.txt"),
+                           "absence-proof.txt": sha(d / "absence-proof.txt")},
+                "recorded facts": {"base commit (head.txt)": head,
+                                   "test-file identities": (d / "test-file-identities.txt").read_text().strip().splitlines(),
+                                   "absence proof": (d / "absence-proof.txt").read_text().strip().splitlines()},
+                "records present in its own output": present, "run-record fields present": rf,
+                "missing": [k for k, v in present.items() if not v] + [k for k, v in rf.items() if not v]})
+# 3-5. Mutation executions, per execution
+for cid, d, rr, committed, note in [
+    ("I101-CAMPAIGN", H / "I-101/commit-d/out/mutation", H / "I-101/commit-d/out/run-record-host.json", W / "mutation/i101-bc-incomplete",
+     "I-101 campaign at BC (INCOMPLETE: stop 8); campaign-level run record probed in the same d_run"),
+    ("I102-CAMPAIGN", H / "I-102/campaign/mutation", H / "I-102/campaign/run-record-host.json", W / "mutation/i102-bc2-candidate",
+     "I-102 campaign on the BC2 candidate; campaign-level run record probed at the start of the I-102 candidate run"),
+    ("I103-CAMPAIGN", H / "I-103/campaign/mutation", None, W / "mutation/i103-bc2",
+     "I-103 final campaign on the BC2 candidate (same clone as I-102); NO run record of its own (only I-103/candidate-state.txt)"),
+]:
+    execs = []
+    for so in sorted(glob.glob(str(d / "*.stdout.txt"))):
+        tag = os.path.basename(so).removesuffix(".stdout.txt")
+        xml = d / f"{tag}.xml"
+        present = records_in(so)
+        execs.append({"execution": tag, "stdout": rel(so), "stdout sha256": sha(so),
+                      "junit sha256": sha(xml) if xml.exists() else "absent",
+                      "records present in its own output": present,
+                      "missing": [k for k, v in present.items() if not v] + RF})
+    camp = fields_from(rr)
+    inv.append({"id": cid, "execution": note, "gate role": "§3.12 mutation campaign (OB-10)",
+                "external original": rel(d), "committed copy": rel(committed),
+                "campaign-level run record": rel(rr) if rr else "none",
+                "campaign-level run record sha256": sha(rr) if rr else "none",
+                "campaign-level run-record fields present": camp,
+                "executions": len(execs),
+                "executions with any S2 record": sum(any(e["records present in its own output"].values()) for e in execs),
+                "per-execution": execs,
+                "missing in every execution": list(TAGS) + ["per-execution run record (" + ", ".join(RF) + ")"]})
+# 6. Not gate evidence, listed for completeness
+inv.append({"id": "MN17-DIAGNOSTIC", "execution": "I-101 one-off MN-17 diagnostic (not campaign or gate evidence)",
+            "gate role": "none (diagnostic; never counted)", "external original": rel(H / "I-101/commit-d/diagnostic-MN17"),
+            "hashes": {"mn17-diagnostic.log": sha(H / "I-101/commit-d/diagnostic-MN17/mn17-diagnostic.log")},
+            "records present in its own output": records_in(H / "I-101/commit-d/diagnostic-MN17/mn17-diagnostic.log"),
+            "missing": "all; listed only because it is not gate evidence and no acceptance relies on it"})
+# 7. Scripted derivation/report-only runs at BC: not named by I-104
+dd = H / "I-101/commit-d/out"
+inv.append({"id": "D-SCRIPTS-AT-BC", "execution": "derivation_crosscheck.py (OB-02/OB-19 evidence, stop 15) and report_only.py (report-only) at BC, one d_run",
+            "gate role": "derivation is stop-15 evidence; report-only rows are not gates. NOT named by I-104",
+            "external original": rel(dd), "committed copy": rel(W / "derivation") + ", " + rel(W / "report-only/host-bc"),
+            "hashes": {"derivation_crosscheck.json": sha(dd / "derivation_crosscheck.json"), "report_only.log": sha(dd / "report_only.log"),
+                       "run-record-host.json": sha(dd / "run-record-host.json")},
+            "run-record fields present": fields_from(dd / "run-record-host.json"),
+            "records present in its own output": {k: False for k in TAGS},
+            "missing": list(TAGS),
+            "note": "Not pytest runs, so the component-free recorders were not part of them. Whether these scripted runs are 'gate-evidence runs' that need a DL-5 record is an owner classification question."})
+# Complete historical runs, for contrast
+complete = []
+for p in ["I-101/commit-a-gates/pytest.log", "I-101/bc-gates/pytest.log", "I-101/commit-d/green-bc/pytest.log", "I-102/campaign/pytest.log"]:
+    complete.append({"log": "~/tars-evidence/" + p, "sha256": sha(H / p), "records present": records_in(H / p)})
+out = {"method": __doc__, "inventory": inv, "historical host gate runs with all four records (for contrast)": complete,
+       "CI": "all archived CI job logs at A, BC, BC2, D and E carry all four records (I-104 ci/checks.json; I-105 comparison/environment-table.json)"}
+Path(H / "I-105/gap/historical-gap-inventory.json").write_text(json.dumps(out, indent=1) + "\n")
+for e in inv:
+    print(e["id"], "|", e.get("executions", ""), "|", e.get("missing") if not isinstance(e.get("missing"), list) or len(e["missing"]) < 12 else e["missing"][:4], "|", e.get("campaign-level run-record fields present", ""))

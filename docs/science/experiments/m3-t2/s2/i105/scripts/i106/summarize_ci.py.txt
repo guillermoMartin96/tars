@@ -1,0 +1,79 @@
+"""I-106: per-job summary of one collected CI run (observed values only).
+
+Usage: python3 -I summarize_ci.py <ci dir> <E records dir or -> <out.json>
+
+For each check job: name, job id, conclusion, attempt, extraction completeness, the census validation
+result, G-17b (class X compared, differences, environment_kind), G-17a counts, the ENV record's
+sys.version / platform / machine, and the pytest summary line. If an E records dir (the I-105
+extraction of E's CI logs, schema 1) is given, each job's schema-2 census is projected onto the
+schema-1 columns and compared with the same platform's E census: an observation, not a gate.
+"""
+import csv
+import json
+import sys
+from pathlib import Path
+
+ci, edir, out = Path(sys.argv[1]), sys.argv[2], Path(sys.argv[3])
+jobs = {f"job-{j['id']}": j for j in json.load(open(ci / "jobs-attempt1.json"))["jobs"]}
+run = json.load(open(ci / "run-check.json"))
+e_by_name = {}
+if edir != "-":
+    ejobs = json.load(open(Path.home() / "tars-evidence/I-103/ci-E-42406804206/jobs-attempt1.json"))["jobs"]
+    e_by_name = {j["name"]: Path(edir) / f"job-{j['id']}" for j in ejobs}
+
+
+def find(d, key):
+    if isinstance(d, dict):
+        for k, v in d.items():
+            if key in k:
+                return v
+            r = find(v, key)
+            if r is not None:
+                return r
+    return None
+
+
+res = {"run": run["run"], "attempt": run["attempt"], "headSha": run["headSha"], "run_ok": run["ok"], "jobs": {}}
+for d in sorted(p for p in (ci / "records").glob("job-*") if p.is_dir()):
+    jid = d.name
+    st = json.load(open(d / "extraction-status.json"))
+    g = json.load(open(d / "S2-G17B-RECORD.json"))
+    a = json.load(open(d / "S2-G17A-REPORT.json"))
+    env = json.load(open(d / "S2-ENV-RECORD.json"))
+    v = json.load(open(ci / "validation" / f"{jid}.json"))
+    j = jobs[jid]
+    r = {"name": j["name"], "conclusion": j["conclusion"], "run_attempt": j["run_attempt"],
+         "html_url": j["html_url"], "extraction_complete": st["complete"],
+         "listing": {k: st["S2-XP3-LISTING"][k] for k in ("schema", "entries", "body_sha256", "verified")},
+         "census_valid": v["valid"], "census_outcomes": v["outcomes"], "census_problems": v["problems"],
+         "G17B": {"class_X_entries_compared": g["class_X_entries_compared"],
+                  "differences": len(g["differences"]) if isinstance(g["differences"], list) else g["differences"],
+                  "environment_kind": g["environment_kind"]},
+         "G17A": {"environment_kind": a["environment_kind"], "entries_compared": a["entries_compared"],
+                  "class_X_coordinate_differences": a["class_X_coordinate_differences"],
+                  "class_P_coordinate_differences": a["class_P_coordinate_differences"],
+                  "label_differences_at_identical_coordinates": a["label_differences_at_identical_coordinates"],
+                  "witness_slot_comparison_failures": a["witness_slot_comparison_failures"]},
+         "ENV": {"sys.version": find(env, "sys.version"), "platform.platform()": find(env, "platform.platform()"),
+                 "machine": find(env, "machine"), "commit": find(env, "commit (git rev-parse HEAD)"),
+                 "CI run URL": find(env, "run URL")},
+         "pytest_summary": st.get("pytest_summary_line")}
+    for k in ("class_X_coordinate_differences", "class_P_coordinate_differences",
+              "label_differences_at_identical_coordinates", "witness_slot_comparison_failures"):
+        x = r["G17A"][k]
+        r["G17A"][k] = len(x) if isinstance(x, (list, dict)) else x
+    if j["name"] in e_by_name:
+        cols = ["set", "index", "label", "outcome", "iterations", "final_step_hex", "h_hex", "phi_hex", "source"]
+        new = list(csv.DictReader(open(d / "S2-XP3-LISTING.csv")))
+        old = list(csv.DictReader(open(e_by_name[j["name"]] / "S2-XP3-LISTING.csv")))
+        common = [c for c in cols if c in old[0] and c in new[0]]
+        diff = sum(1 for p, q in zip(new, old) if any(p[c] != q[c] for c in common))
+        r["projection_vs_E_same_platform (observation)"] = {"E_job": e_by_name[j["name"]].name, "columns": common,
+                                                            "rows": [len(new), len(old)], "differing_rows": diff}
+    res["jobs"][jid] = r
+out.write_text(json.dumps(res, indent=1, default=str) + "\n")
+for k, r in res["jobs"].items():
+    print(k, r["name"], r["conclusion"], "| census valid", r["census_valid"], r["census_outcomes"],
+          "| G17B", r["G17B"], "| G17A", r["G17A"], "| ENV", r["ENV"]["sys.version"][:8] if r["ENV"]["sys.version"] else None,
+          r["ENV"]["platform.platform()"], "| proj vs E", r.get("projection_vs_E_same_platform (observation)", {}).get("differing_rows"),
+          "|", r["pytest_summary"])

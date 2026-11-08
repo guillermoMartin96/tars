@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="1.820" timestamp="2026-11-07T16:49:55.501609-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi12_stop_test_first_met_at_61_is_non_convergence" time="0.003"><failure message="AssertionError: (['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], 188)&#10;assert ['hypot', 'at...', 'sin', ...] == ['hypot', 'at...', 'sin', ...]&#10;  &#10;  At index 183 diff: 'sqrt' != 'cos'&#10;  Left contains 3 more items, first extra item: 'sin'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1124ad8e0&gt;
+
+    def test_g16_fi12_stop_test_first_met_at_61_is_non_convergence(monkeypatch):
+        def atan2(i):
+            return (60 - i) * 1e-10 if i &lt;= 60 else 1e-15
+    
+&gt;       _expect_reason(_run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07), "non_convergence")
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:932: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1124ad8e0&gt;
+rules = {'hypot': 7000000.0, 'atan2': &lt;function test_g16_fi12_stop_test_first_met_at_61_is_non_convergence.&lt;locals&gt;.atan2 at 0x1130f2020&gt;, 'sin': 0.0, 'cos': 1.0, ...}
+schedule = ['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], isnan = None
+
+    def _run_case(monkeypatch, rules, schedule, *, isnan=None):
+        geo = _geo()
+        log: list = []
+        lib = _fixture(rules, log)
+        assert set(vars(lib)) == set(rules)
+        monkeypatch.setattr(geo, "_LIB", lib)
+        if isnan is not None:
+            monkeypatch.setattr(geo, "_isnan", isnan)
+        else:
+            assert geo._isnan is math.isnan and geo._isinf is math.isinf
+        try:
+            outcome = ("returned", geo.geodetic(_POINT))
+        except BaseException as exc:
+            outcome = ("raised", exc)
+        monkeypatch.undo()
+        assert geo._LIB is math and geo._isnan is math.isnan and geo._isinf is math.isinf
+&gt;       assert log == schedule, (log[:12], len(log))
+E       AssertionError: (['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], 188)
+E       assert ['hypot', 'at...', 'sin', ...] == ['hypot', 'at...', 'sin', ...]
+E         
+E         At index 183 diff: 'sqrt' != 'cos'
+E         Left contains 3 more items, first extra item: 'sin'
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:835: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.226" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.386" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.005" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.050" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.314" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.523" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.066" /></testsuite></testsuites>

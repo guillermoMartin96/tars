@@ -1,0 +1,3883 @@
+{
+ "method": "I-105 historical-gap inventory (I104-02). Reads only each execution's own sealed files.\n\nFor every historical execution it reports the mandatory records actually present in that\nexecution's own output, and those missing. Nothing is inferred from another run.\nChecked per execution:\n  DL-5 ENV record (S2-ENV-RECORD), X-P3/RP-9 listing (S2-XP3-LISTING), G-17a report, G-17b record,\n  and the \u00a73.16 run-record fields: commit SHA, sys.version, platform.platform(), platform.machine(),\n  uv.lock sha256 (plus the I-101 interpreter executable sha256).\n",
+ "inventory": [
+  {
+   "id": "RED-ORIGINAL",
+   "execution": "original red run, uncommitted on A with the 3 test files (D-S2-12 (i))",
+   "gate role": "formal red-first evidence (\u00a73.14 step 2; stop 14 binding)",
+   "external original": "~/tars-evidence/I-101/red",
+   "committed copy": "<repo>/docs/science/experiments/m3-t2/s2/red-original",
+   "hashes": {
+    "red-pytest.log": "0ef7d85f8474fe357985262c4acfbc503f777b5e3e9935ad54ce4e3fbe064d11",
+    "red-junit.xml": "0c26e9be422d4aea1370dd68565a6a1d8cd9f86bac9449da7910dc073f135095",
+    "head.txt": "aa4bdf92d794b999eccc902910a60fc537bac12807189bc7e20827f78dc99681",
+    "test-file-identities.txt": "3ce4450ce382a2846148fc341954b2398baeab8607759984f4db80abf063ac08",
+    "absence-proof.txt": "e189b8b78f1f0803987923cc74f4913313188db1413098c4662857a7cea578cf"
+   },
+   "recorded facts": {
+    "base commit (head.txt)": "6c05e53c5ffcb892dacaa6f84e12a163830a4119",
+    "test-file identities": [
+     "c575bf0c4caeb6e3f12fe9fd383d6b40eee09360 1f01f41db24dfacd2eac4f360ba95a990dd489c04cb0ffa48f9256f4f9e4f81c tests/test_constants.py",
+     "53c97c41ef2f3060821d5114b862aa0ddc7982cb fd3d32f7c82a79ed1862d7c07d027a29ad4bcc235c153db38f74d36dd9fe27d8 tests/test_s2_geodetic.py",
+     "4b3b67b3b93a39ca15ae05c1b9a4f855efece7fa 2ea2f9f2335e7c9a7f5479e893f5c0b4226cb56dac10456990bc49f4b91dee91 tests/test_s2_geodetic_conformance.py"
+    ],
+    "absence proof": [
+     "src/tars/sim/geodesy.py present: no",
+     "git ls-files src/tars/sim/geodesy.py: ''",
+     "constants.py blob bcda30e2d008a008986b58790820d7b3de12fd68 (K bcda30e2d008a008986b58790820d7b3de12fd68)"
+    ]
+   },
+   "records present in its own output": {
+    "DL-5 ENV record": false,
+    "X-P3/RP-9 listing": false,
+    "G-17a report": false,
+    "G-17b record": false
+   },
+   "run-record fields present": {
+    "commit SHA": true,
+    "sys.version": false,
+    "platform.platform()": false,
+    "platform.machine()": false,
+    "uv.lock sha256": false,
+    "interpreter executable sha256 (I-101)": false
+   },
+   "missing": [
+    "DL-5 ENV record",
+    "X-P3/RP-9 listing",
+    "G-17a report",
+    "G-17b record",
+    "sys.version",
+    "platform.platform()",
+    "platform.machine()",
+    "uv.lock sha256",
+    "interpreter executable sha256 (I-101)"
+   ]
+  },
+  {
+   "id": "RED-SUPPLEMENTAL",
+   "execution": "I-102 supplemental red run, fresh clone of A with the corrected test file",
+   "gate role": "formal red-first evidence (\u00a73.14 step 2; stop 14 binding)",
+   "external original": "~/tars-evidence/I-102/supp-red",
+   "committed copy": "<repo>/docs/science/experiments/m3-t2/s2/red-supplemental",
+   "hashes": {
+    "red-pytest.log": "f664cfb53234173920a0dbdc9734f7d32fd7c9b960a14a3159a5f029f99eb0b9",
+    "red-junit.xml": "cd18170ac565484a0d7f30f0875402b3dd3632adf03ef400712a5c6cd9ce443e",
+    "head.txt": "aa4bdf92d794b999eccc902910a60fc537bac12807189bc7e20827f78dc99681",
+    "test-file-identities.txt": "736a90285582a3a952ac0d42788f33150c9b0eeb9191d25518c162212e6211ee",
+    "absence-proof.txt": "e189b8b78f1f0803987923cc74f4913313188db1413098c4662857a7cea578cf"
+   },
+   "recorded facts": {
+    "base commit (head.txt)": "6c05e53c5ffcb892dacaa6f84e12a163830a4119",
+    "test-file identities": [
+     "0d817de456cf837c06979a5fab601db6be7b6567 9059ff375993cf156e28fb76b5a3eb95a3601ea99c3572890cc1c1033fa8b661 tests/test_s2_geodetic.py"
+    ],
+    "absence proof": [
+     "src/tars/sim/geodesy.py present: no",
+     "git ls-files src/tars/sim/geodesy.py: ''",
+     "constants.py blob bcda30e2d008a008986b58790820d7b3de12fd68 (K bcda30e2d008a008986b58790820d7b3de12fd68)"
+    ]
+   },
+   "records present in its own output": {
+    "DL-5 ENV record": false,
+    "X-P3/RP-9 listing": false,
+    "G-17a report": false,
+    "G-17b record": false
+   },
+   "run-record fields present": {
+    "commit SHA": true,
+    "sys.version": false,
+    "platform.platform()": false,
+    "platform.machine()": false,
+    "uv.lock sha256": false,
+    "interpreter executable sha256 (I-101)": false
+   },
+   "missing": [
+    "DL-5 ENV record",
+    "X-P3/RP-9 listing",
+    "G-17a report",
+    "G-17b record",
+    "sys.version",
+    "platform.platform()",
+    "platform.machine()",
+    "uv.lock sha256",
+    "interpreter executable sha256 (I-101)"
+   ]
+  },
+  {
+   "id": "I101-CAMPAIGN",
+   "execution": "I-101 campaign at BC (INCOMPLETE: stop 8); campaign-level run record probed in the same d_run",
+   "gate role": "\u00a73.12 mutation campaign (OB-10)",
+   "external original": "~/tars-evidence/I-101/commit-d/out/mutation",
+   "committed copy": "<repo>/docs/science/experiments/m3-t2/s2/mutation/i101-bc-incomplete",
+   "campaign-level run record": "~/tars-evidence/I-101/commit-d/out/run-record-host.json",
+   "campaign-level run record sha256": "753292537dea5a0ef2a3b8e64a8d1fb5652f49efaa8f3a42a80447d2689a4dc0",
+   "campaign-level run-record fields present": {
+    "commit SHA": true,
+    "sys.version": true,
+    "platform.platform()": true,
+    "platform.machine()": true,
+    "uv.lock sha256": true,
+    "interpreter executable sha256 (I-101)": true
+   },
+   "executions": 50,
+   "executions with any S2 record": 0,
+   "per-execution": [
+    {
+     "execution": "M-W1",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/M-W1.stdout.txt",
+     "stdout sha256": "f8c1fb9a8e8ac1b41009517daed1ddcb752231697af063e42558e8bc79d76aad",
+     "junit sha256": "ae8eaa3291a40f4cad06770c4dc7672fb22885225d34fb7910cd21670f705bb4",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "M-W2",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/M-W2.stdout.txt",
+     "stdout sha256": "1fbee58dab055071797fb259ac1b2157a18e651e0e141c4829ba14d36821be15",
+     "junit sha256": "3cedeed939373af5a3e6f1faa592329b9484ea97ecce73a7482fecc25f83c1be",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "M-W3",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/M-W3.stdout.txt",
+     "stdout sha256": "4c36fe28785f6f35fb8e5e7b1d8798e80b36dea788c2f180c4be14de291ae965",
+     "junit sha256": "12eba2d9870b773da09af817318679a7d2c84c21a111b0eac77b6d01a5c9e231",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-01.stdout.txt",
+     "stdout sha256": "f0646bbe853ddc83d000536b2857c0f3d9321317b9c07512c1b56fb673731945",
+     "junit sha256": "f7f77dcf0a7334f30454da3f5d628063effc4fd81fac0f1c4fb2149d1b273379",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-02.stdout.txt",
+     "stdout sha256": "3efa82eb4046d7ba449879adddb1d341f2895f31186011d9cf108da30e46a237",
+     "junit sha256": "ff809ae53f12e339d86952ba66811582345cc16273d0a9338f3f5b2802d803b0",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-03.stdout.txt",
+     "stdout sha256": "a186f49332039be5bbc380af0b0f2a86b745b0d684229fe3cde6bf64390f86cb",
+     "junit sha256": "3293b54a351b55267a639f4e16135ac8c5f90ed78fc832550052435354ce4a75",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-04",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-04.stdout.txt",
+     "stdout sha256": "7d1a8781664c7b401484b1ca690d7af62f997cf5e268b59a136afbcf143a283e",
+     "junit sha256": "e3290a89c324cee9a52094e2937434ab953fd7add417659ef6857e013fba78f0",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-05",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-05.stdout.txt",
+     "stdout sha256": "d6a8658fa2f05df2ce44980808b50f668a4d49ad85d16f4949cac68a7034751c",
+     "junit sha256": "ae5ad4e26401245354e817a9953ec74cad6217bfd3f69c044cfa1f036dedddd9",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-06",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-06.stdout.txt",
+     "stdout sha256": "8e4d2574cba95dad4d66cf97c31c339a6b2b6a29f6d7f4a3dc09d2fe400d53ba",
+     "junit sha256": "9a85285f6457bd24f10e10343f2a734ac1e433f4555d3fee7097fc9a16528ca5",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-07",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MD-07.stdout.txt",
+     "stdout sha256": "e1aa7d06d25a59c6ea6814ce341249454db373231e36dcbf1fe42e0b270429cd",
+     "junit sha256": "174613fb23c4debd68f3b68aeda562075a09b3fdc4524494a7d0b3762f0436eb",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/ME-01.stdout.txt",
+     "stdout sha256": "13044bacc6307829903f6644f6acc927db932aea5040256690ae58aee2d982ed",
+     "junit sha256": "1ed549155a4445a45d88a2a492f4f82d8c8c598f04cc186e82b65433bc0a1974",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/ME-02.stdout.txt",
+     "stdout sha256": "f05c57d1ada6bacb60013513040188f81172a9178b11ab9a80f44a6d89bcadde",
+     "junit sha256": "8cdb06d165fb07f12c22de32edaca7f787704fabc13db8f72683550120f6eb07",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/ME-03.stdout.txt",
+     "stdout sha256": "1806c91c527d3727c7d7277f71c5678ec751086afc9d9a421bdf8c6a51977a0e",
+     "junit sha256": "b177fe427c566aeb9bcb6175a59dba7a5e5984a76475949be68f2cdacfbfcd06",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-04",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/ME-04.stdout.txt",
+     "stdout sha256": "f05c57d1ada6bacb60013513040188f81172a9178b11ab9a80f44a6d89bcadde",
+     "junit sha256": "d949001b6669a05947cec1f4e5a3a8a4856ed4436dd5b4abd0f471d837790331",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MG-01.stdout.txt",
+     "stdout sha256": "ff346cfbf26c515ce2b751d42af04cc2e674e6484486e40a111361632dc3e1f7",
+     "junit sha256": "22d24672c326325a7f464a2ac11ca5934935c775cbbdfa507651d37cd0bbc5f8",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MG-02.stdout.txt",
+     "stdout sha256": "631e75fc3cd07b686e9685a9c751e9ef6abff145423dbb5190c2926ea5f8b33e",
+     "junit sha256": "a853eb55bb92fea70e422f336c30c9ce222e210d6bba2595c67bdb9bbab47962",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MG-03.stdout.txt",
+     "stdout sha256": "ec03cbfcd22048318f0bc1a2feb7a2b339b42961f1817b7f951fcf52e4d13b3b",
+     "junit sha256": "0514bb5dddc16bff1c9df550f227491ded8fda7ec2011619dcb319c09d090c9b",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-04",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MG-04.stdout.txt",
+     "stdout sha256": "e8dddb35eeab0f7c11673505251de358d72a89f2fa13c3ee15c262efc4dee831",
+     "junit sha256": "3788185c13169f2899cc24ef137913f9c2def0ed3c5d678b4744fe88dc462a82",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-05",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MG-05.stdout.txt",
+     "stdout sha256": "766a51ae1d557076325a2d637c8bbf2fd04f8d96ba615dda8a47a8ed380a0889",
+     "junit sha256": "0046140676b184375b2c69c2a37f5144814ac093ce8d346d60acac0e2973bd0e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-06",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MG-06.stdout.txt",
+     "stdout sha256": "02f4461853c4ac8e790bf7e7d2644096844ca81d3f951aaea9f4d8b99023e894",
+     "junit sha256": "709e182a27698f892c17a9268aa7fde261c17c6f195f2d3e3543829174bb44b1",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MH-01.stdout.txt",
+     "stdout sha256": "2da2d839b7b8feb0c286291b37ec02102183f131187ea89000948990a7be7cf9",
+     "junit sha256": "411415d695837c9372990e32d78581ba3805cc7c1fbb2d3de5bcdc1423641995",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MH-02.stdout.txt",
+     "stdout sha256": "01c716aa7b46d4643e816d9ad51db397f22e983b579f78b058cc5f60729cdda0",
+     "junit sha256": "c803b41c9198cbad945eb51e13ee03725f905d5bc76c99e57a1484eca115d8d4",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MH-03.stdout.txt",
+     "stdout sha256": "3d1af7c3c5005e67f77127afce339b41b278e035dab5fae21895bf50b6099136",
+     "junit sha256": "33e6122d6169b4e1e5f4847950baabbc9682b446be0ef410d5ee8d4052865455",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MI-01.stdout.txt",
+     "stdout sha256": "6e710188e3cee513edcf929fcf388da589e73186f153d8b10cf61aebf29ecdc3",
+     "junit sha256": "edb2840c05e18d37618a3681e41cdd64a174f68f1ae0f418694afb290778f39c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MI-02.stdout.txt",
+     "stdout sha256": "9bc2908614d98dd3cf4cccaf11d392e4155ff8598e44ae81dc52bee676359c00",
+     "junit sha256": "3d22638a76080f900ff3dda0124cd23576fc69afc934031c99308c2741aa18d5",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MI-03.stdout.txt",
+     "stdout sha256": "0c1f2e9b8e7487cfce8def654ab0168ec8d7b1f5b7171333b9f18a4f2e94e2dd",
+     "junit sha256": "aba1561a4e73d92a4d83b8325489f6d28927a880dc27d940e856a955d1332a5e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-01.stdout.txt",
+     "stdout sha256": "1d87f59713e56f2976fea2f4022a9c2cc5232dbe1107346db543b87c26007ec9",
+     "junit sha256": "b7abf2d8838bf835ab3fead8d1c96db716a7bf6933b2762ed38d77ddc3847a18",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-02.stdout.txt",
+     "stdout sha256": "e7202037d219f9938d410de9b5cd30635c83acccdfd6a1b03b76554217bfe118",
+     "junit sha256": "c87300c424d00424784f8158568e2748c5e8cfe028a591c097451c2e61738404",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-03.stdout.txt",
+     "stdout sha256": "0f72e29ea56fb18f658fa577eece6926c6e4422c0a62d327f54d570a5b9209d1",
+     "junit sha256": "e748c20410b18d1bf06239dd1ac8dcb5337d51cc1b27f8a038820107882da8b2",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-04",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-04.stdout.txt",
+     "stdout sha256": "661f9fd00f1f0f173ae7e4ba1cdecd582ebfcf2f07414dc536c207322980bac4",
+     "junit sha256": "a045f8f733bc63928d90cd4a8f61752e972c3de8e33154245a914b5ab2a32cc1",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-05",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-05.stdout.txt",
+     "stdout sha256": "b4499902fd485c90044feb04f92f46b677aa2bb2dd0eb16f55e85d1d03572673",
+     "junit sha256": "ebfbf99785edc308ed15638d15e3500f40b1c967e90f2112f33322ee540bbbeb",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-06",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-06.stdout.txt",
+     "stdout sha256": "1b29952a311dbacc946f756d345bfab3c4e17f012de7c7a3204a25b45410f22e",
+     "junit sha256": "98b76f83876000016aeaf4458642903adfad188cf9d3efcb6f141bcb5a05e81b",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-07",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-07.stdout.txt",
+     "stdout sha256": "b3f8e5c6f655f39ed5f0df3de1b701b43947b5f05c3009f0c784c5489f4e12bd",
+     "junit sha256": "0fe218d0c2d62fe9fdb02aba80aa089f85a2a65f215865037fcf27b65db9051c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-08",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-08.stdout.txt",
+     "stdout sha256": "7497a1f1aab719680a4e16fd8c56f70373d5848d1e90dc112f01ecc36c75f312",
+     "junit sha256": "afab03cf217dc535fd36e00cf936a3f8ebc43f586a1d7727bc6137788d975ca5",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-09",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-09.stdout.txt",
+     "stdout sha256": "73900750751a91f05e1b4b099f36ecc832b24a9ad5ecd206ccdaff95b5ba60af",
+     "junit sha256": "7b9dfe91948751de2dbb5a3b791e87bf65975393f47c716b6d9029c1e8d55f0c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-10",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-10.stdout.txt",
+     "stdout sha256": "0e1246cd09d406979b7dd709562a92e5a004d56acf469e2a38e2c40e0eb8efa9",
+     "junit sha256": "c358341a30cba8ba8dfc0647467bf7f3093ca72f6b304ca3f5581554c31bdf43",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-11",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-11.stdout.txt",
+     "stdout sha256": "29e036f6c8fed8d594a646b891bab69ee8a8b100a5d57e15616b6c8668ad9e3f",
+     "junit sha256": "c7dc5bd771bb806f9c1c0513af49200a0cd908e7aedac39d2ef017c5bd8966a7",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-12",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-12.stdout.txt",
+     "stdout sha256": "f1dd6bd6fea73e73a20521f91e7012464cfa8e3af501f9e045027232e6819fcd",
+     "junit sha256": "78c78830ebb63ec65788c41e63fca64882a4d49a74f64a058955da405bcbeecc",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-13",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-13.stdout.txt",
+     "stdout sha256": "6aa33c49d3f1865d1ff365d9bbd808c3d6808ade1c27915f5281f0da6790ee73",
+     "junit sha256": "f17a9ea7607412b23844780b3333aa0250e8b78ca624a36a848f7460ddcad60c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-14",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-14.stdout.txt",
+     "stdout sha256": "5509a50029a4477e42d3a9e571849fc83a006f41396ba29a0d6d8929c300f88a",
+     "junit sha256": "21101ecf50b61695ab891607e650113edd422bc6f1e4972d55aa7ae5ddd18ff0",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-15",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-15.stdout.txt",
+     "stdout sha256": "4aa5fcaa10a017dc4643a6852af9c08eceb9514c1443e94e6aa6a6b042b57c45",
+     "junit sha256": "8c04b20ae8bb402cf9a59322b446b6e12f31ed87d8c3b6f0bb329b20985ea4c8",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-16",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-16.stdout.txt",
+     "stdout sha256": "da1bd9f055e66fe3271206d1189e471750cc13c2550d5d292f3200550ea08956",
+     "junit sha256": "fa9d9cac4a40499d75e43b048d2a8b292cd05e3890b5eb86e93b4a8e4c6176f6",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-17",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MN-17.stdout.txt",
+     "stdout sha256": "a20bd9cb676790b51328158407748be9255ecf87322b5df6e2e2a336bd21cdaf",
+     "junit sha256": "948def0831b194f18917cd3bd8c87bce60d65ab1f883fac9e926084ba2f695b3",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-01",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MP-01.stdout.txt",
+     "stdout sha256": "fc0bdccca95e3fe686f42e0148a9b918e03d735f9dd3cea1512e72359f60e1f7",
+     "junit sha256": "a3385d35ef27b4fefb11446c5340726d83a1867bedd040916c5cc8c3dd074796",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-02",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MP-02.stdout.txt",
+     "stdout sha256": "1f2be13c6092d14a1bc94a94d307bb59bf1020b95892e72cb4ae05dbbbac236b",
+     "junit sha256": "d5c2a7b6089d52899096e355b9637b07cbca8bd8a5b3861e2ae8657839334fad",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-03",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MP-03.stdout.txt",
+     "stdout sha256": "8d29509379045fc825e1c17a58d61470a4f9995ff6a17639b36086a8665f17df",
+     "junit sha256": "af7d9650018b1e1ff2e33cb637287c9489e65581e8b2908f6e3fe9ebee6c1ec2",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-04",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MP-04.stdout.txt",
+     "stdout sha256": "177d9b1618199aebc87f1cf50c2920d4bdfd1d47e90a3efd4c1214d17055b1ab",
+     "junit sha256": "cf72d4a83121799430b818cfe4115d75edc80ebf8a44541c427c2d4e00767b11",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-05",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MP-05.stdout.txt",
+     "stdout sha256": "b2b699717382edba10be9724f732bb41bfe53060e4b3112f1a1a89485ffb5458",
+     "junit sha256": "31e8954251cb0f205580454659bb7b9b1127436f6807fb3243bcf4887f737533",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-06",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/MP-06.stdout.txt",
+     "stdout sha256": "d095e7002bef2182e657aa72dd76906ca0eadc57be7ca2b389ec0d46f18b4c3c",
+     "junit sha256": "25b33a6aaaf69b492fb8071844f75f648543e5d22ff4d57ecc1cd0dde9921327",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "control",
+     "stdout": "~/tars-evidence/I-101/commit-d/out/mutation/control.stdout.txt",
+     "stdout sha256": "44efbfd4160a0c5a4b0b245872fe1210540a6ee20f21ab5216e89fe8999ffbe0",
+     "junit sha256": "2a8d94b0a158841301a9a8729e6adec8f2c9d17108b7a6f58ea81d2e11a7a2d2",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    }
+   ],
+   "missing in every execution": [
+    "DL-5 ENV record",
+    "X-P3/RP-9 listing",
+    "G-17a report",
+    "G-17b record",
+    "per-execution run record (commit SHA, sys.version, platform.platform(), platform.machine(), uv.lock sha256, interpreter executable sha256 (I-101))"
+   ]
+  },
+  {
+   "id": "I102-CAMPAIGN",
+   "execution": "I-102 campaign on the BC2 candidate; campaign-level run record probed at the start of the I-102 candidate run",
+   "gate role": "\u00a73.12 mutation campaign (OB-10)",
+   "external original": "~/tars-evidence/I-102/campaign/mutation",
+   "committed copy": "<repo>/docs/science/experiments/m3-t2/s2/mutation/i102-bc2-candidate",
+   "campaign-level run record": "~/tars-evidence/I-102/campaign/run-record-host.json",
+   "campaign-level run record sha256": "36db11b06014b6b5a90c3499379704a7cc36867c22e5b9cff85c9e9f781f6107",
+   "campaign-level run-record fields present": {
+    "commit SHA": true,
+    "sys.version": true,
+    "platform.platform()": true,
+    "platform.machine()": true,
+    "uv.lock sha256": true,
+    "interpreter executable sha256 (I-101)": true
+   },
+   "executions": 50,
+   "executions with any S2 record": 0,
+   "per-execution": [
+    {
+     "execution": "M-W1",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/M-W1.stdout.txt",
+     "stdout sha256": "c1e75ce29a2c726fe663aafcbf7dc50890bc766b57b1827160fc533498bda9ec",
+     "junit sha256": "a88b1ebf17b9fe23a86f1a95db6f2a2af58b94cef2b1678f55aca134c29a3802",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "M-W2",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/M-W2.stdout.txt",
+     "stdout sha256": "91fd22231105d3671f360091a933864a78468c4ebeed30fce306fd2dad67821e",
+     "junit sha256": "87fd1ee8e82727204cc6966da21098a6cd4af5f9298afcf67e4987f1823a9c41",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "M-W3",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/M-W3.stdout.txt",
+     "stdout sha256": "958022acb56dd32b9df4b175559528425e528fb7221b2fadb7772121b7b57339",
+     "junit sha256": "50f98fb6f0eec419ce07a50b9ee846332607716956898912f72f988d935d7459",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-01.stdout.txt",
+     "stdout sha256": "d474b418bcfc93a872c5253fa5afb5307788cf03f83c07b9b8cec02d2971091c",
+     "junit sha256": "66da2d47cfb75c605d4b635295b6d574a80064d9551470460aec6a248916ba4e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-02.stdout.txt",
+     "stdout sha256": "3efa82eb4046d7ba449879adddb1d341f2895f31186011d9cf108da30e46a237",
+     "junit sha256": "23882347b5ea93eb6bbca729300b73f42ca083a0d4e6c56da2483fdb17bfdd0c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-03.stdout.txt",
+     "stdout sha256": "b55431f698267ea8bca41356ba1821b79ed1cd7952edeeacd3f6d199fa52f63d",
+     "junit sha256": "f3d9e4709b01c5347966dd2466b1384cb68a2f47d75c912b6bb7e1d73240f750",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-04",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-04.stdout.txt",
+     "stdout sha256": "745f07d5c27a3e281a61ef131c817dbfef08f377e1dc7ef144bfe57836a3826d",
+     "junit sha256": "617aa5ccd9f4eafeb920a77e3509f7a15b6a77d8c55807c20991370045ea55eb",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-05",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-05.stdout.txt",
+     "stdout sha256": "4d571d01322b587d879d82c0ff2ea121f126c2c62b3c51d3175312566429050a",
+     "junit sha256": "74b4d199621f882b642460e37beb77ba4082a8259dbe805e351f2ac154ce22a9",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-06",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-06.stdout.txt",
+     "stdout sha256": "f74724161aa40306f083c93b6946795049a06dc7516eb8dfe1203343c15229aa",
+     "junit sha256": "f35bdb7887a1a843d074beb9158b5d5b1c3f04a548409ace9e003bbb0548e496",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-07",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MD-07.stdout.txt",
+     "stdout sha256": "40c306aface5adb845cfad466ae0869654774a25070514b1eb0f2d25da087928",
+     "junit sha256": "064f2d96ade12a6f044c09b6762ee37f17752de5d059fe0e7e3307b3153096d1",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/ME-01.stdout.txt",
+     "stdout sha256": "1806c91c527d3727c7d7277f71c5678ec751086afc9d9a421bdf8c6a51977a0e",
+     "junit sha256": "ca0d7a92bd6d1e95b8dade39744456e31c36952417aef9df481bb1206d8502d6",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/ME-02.stdout.txt",
+     "stdout sha256": "b46025b1d427f8774da4563f99377ca562b9c386c558370f939b88b28322e649",
+     "junit sha256": "bfe0fa0e04a08a6780bed25be76e4d10dc518ac808da5bde7ea7e1d112a39eac",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/ME-03.stdout.txt",
+     "stdout sha256": "cb78442d1f7c6f44cecb96e05740a23c518fd8a8572acceb2be233b9a150b987",
+     "junit sha256": "926beeb77a95dc18c6ffa443ce59ac1580d652d3103b8d0ef57691f7f8ce1c00",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-04",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/ME-04.stdout.txt",
+     "stdout sha256": "387865f562d7f3475f2da8f2681c5075ce5a2238a2afd234b7628c6afdd6da5a",
+     "junit sha256": "7c916c8360098d235c3dddd6eedfc503849dcbc3c9482e078b095c22289bfda9",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MG-01.stdout.txt",
+     "stdout sha256": "a5fd436f03acfbb972c15d29b454552212f9973736277fc1d1d97700286d9b9b",
+     "junit sha256": "efdcee659a9141e63dfceff084ec51e3965c407f84d17e494485c09479842ea2",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MG-02.stdout.txt",
+     "stdout sha256": "74d0d66f0525f253ebbbe4ea55afab0a1a4bb5c8b4e6fae4cccf3b017b14e751",
+     "junit sha256": "c258fe4c35c448b81cff8ef7e8bbfd123b1c02a82aac5f6b7bdb92f81e891971",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MG-03.stdout.txt",
+     "stdout sha256": "0149c584b12e2d1d8cdd209e97d07c69be9d9f1b97a4e54a6833294d29a52855",
+     "junit sha256": "474102281a372f4369bc0e9f986425b088f1c19d14cf13521042d1a5fc087f07",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-04",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MG-04.stdout.txt",
+     "stdout sha256": "b851d97cceffe266a622e3d99447c3dea0734ba803679c1d2afbd1c840b20549",
+     "junit sha256": "1181e19ee2a60480c70a5dbdd003af9febc6a967f31dac38a61c15af49fced68",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-05",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MG-05.stdout.txt",
+     "stdout sha256": "5ba2c0bb2ff01533b2e505b26a4a0d0b7a0e65f67cd4539b0f6670c71d27d0db",
+     "junit sha256": "05c6e130771bd9a8298e551981412b79162f011f9ef5e76d9b6061ba46d3007c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-06",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MG-06.stdout.txt",
+     "stdout sha256": "b5ce575a7ede926463dbfe1cb7afe5100f7f96541f90b8f27e9823c6cad0330e",
+     "junit sha256": "f5eaa29e42ec7cf7e7157d9a2a01ff5a1951563ca3680ed373aeee1908d74469",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MH-01.stdout.txt",
+     "stdout sha256": "8a53cb7ed2326f5395a26b35680df709d6deae0d5f54df5b4efa9e312fa74ee0",
+     "junit sha256": "c0ff1875b23ef399ce9b486f1a82d71293f53b492b1735300adab647e7adf498",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MH-02.stdout.txt",
+     "stdout sha256": "8fd0f0853d7a90cceedd3d2140d3ecaa93fd57152ef8a788ffbd27897d8e2ab1",
+     "junit sha256": "c2a139fd064d1f85b97113f3a5ee4b31ad23232f5347916f8536c008f18d611e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MH-03.stdout.txt",
+     "stdout sha256": "46d8f1de23e851ba4ca058bb0091d6272bb47102be3cd77f9e96159daaa04e53",
+     "junit sha256": "b758439e3e2e77d0c6cfc7c5c480f746f7f1c01d13522e7b06e9cb7b6a73f397",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MI-01.stdout.txt",
+     "stdout sha256": "7341b1552a02fa1d426ba38e145852e8771ca16eaf272b6893a747ec2e0b0a41",
+     "junit sha256": "6e89243579aa235d2f456a63ff0d8131fd3a82b24e5521e87846f4669bca6fa3",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MI-02.stdout.txt",
+     "stdout sha256": "242173db703e70aa51a2da513437543ecfba77869b64146751301aaccea0543f",
+     "junit sha256": "d043392735f9d8ecce9ce7ee3a949f5ef9db7720c988fde98269d85f89cf1a58",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MI-03.stdout.txt",
+     "stdout sha256": "eecf8f28ca1a2a45120e242a2cf613a2dd7109f409a90ba97de2f5f9fb2cb24e",
+     "junit sha256": "4e41cdc19a71d577476c3420d20e6e6fed992d086b7195a8ed3fbecfe67aed59",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-01.stdout.txt",
+     "stdout sha256": "8627d36f1861f29ef240b700fe6d9e8be01078983831bb6308de2b8152b956bd",
+     "junit sha256": "f677c96bf1f4fb32ecb6f8c192d7bb959bbfe0a0a60012e66b27b4b8881b8885",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-02.stdout.txt",
+     "stdout sha256": "abcf07f03754741cad1b22677002279a4b76fa58436f369d4266b9acfe1671f5",
+     "junit sha256": "a93909f60fa4d7b9aed8fcaf7c6b96511b4a3b9820492b088df77bb51d225e2f",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-03.stdout.txt",
+     "stdout sha256": "fd950b6b2317b28554808cf9de70ff828fd9d8917862edda264d5cb1f46ac804",
+     "junit sha256": "94ad0bf2de563da7dd7dcd088cd87d2d1e0723c8e524ff2e2b9dfb257b231477",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-04",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-04.stdout.txt",
+     "stdout sha256": "97559fd5fe950fa52f82b9914945904d3e7c1e53e03b6c687696ecbaa0b3b166",
+     "junit sha256": "e98ef5eda05c2a2c0d6be3b68922d6696adf582132ee565656c7ba2f209ad2f6",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-05",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-05.stdout.txt",
+     "stdout sha256": "643cc505a2a4cc576952c256fe498219910c62b045e2a42f9a093a3c2629dddb",
+     "junit sha256": "ffbd86dbc30cd74fc85805eb8348d58eda21693e903bba886e70095c0c630f8a",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-06",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-06.stdout.txt",
+     "stdout sha256": "6e69bc226d68d21a09d98923b50ea742fc4510c245d864c817c8ce279cba1e6a",
+     "junit sha256": "04e938695409a23fecea1df231ebbf0d29ec2c598dfb62d73bc8c1bc2f5a7443",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-07",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-07.stdout.txt",
+     "stdout sha256": "d64032051d1e3e2e2cb3f09609d5b03e5dc563fd2245bfa6766d2c6df4a472af",
+     "junit sha256": "6c41c6e21f8cd9a56426e5e486aa5aa5ff35c56175d8f49d57b0a0eb5cb1127b",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-08",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-08.stdout.txt",
+     "stdout sha256": "4d37561a9bea51054b60156057d7b741f33fa0be92453f9917edf9c22479eb93",
+     "junit sha256": "bda4c7f059ee56a180f7deb7401d9d723ab478edf2a05a24634aa66f6f0dca3e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-09",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-09.stdout.txt",
+     "stdout sha256": "368b334ae724b67d819064d46bf3bac67e478af205d8fc404e841c82922b937e",
+     "junit sha256": "4eae80a81d52c544867fd8ed494a93c66ab556bfc4e407d8b344499f5e107950",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-10",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-10.stdout.txt",
+     "stdout sha256": "70bcd0f338af77d3215a01ee60d3d2ad4950fec5458e1f7101294c80e5c5dfef",
+     "junit sha256": "6129da71c500fec2194af7474bf0e6e7e10d98ec18296a602a0b571400ee9607",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-11",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-11.stdout.txt",
+     "stdout sha256": "6a0712031ff258ceb8209b57146edb93d2631f91917b0ab67c1c5fdabe842048",
+     "junit sha256": "b62502d275d45f41d1b3c386938c4f588f75153e99876ddf92c81717d1a95c48",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-12",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-12.stdout.txt",
+     "stdout sha256": "3a07d1f95ca27f40a10c22fee86184f22ed0584d3db4074ab53a7ea6fc49f778",
+     "junit sha256": "4ac015554bd6578bf15800906c942751a6feebbbdebbd5389f9710f9f3e92f52",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-13",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-13.stdout.txt",
+     "stdout sha256": "0af567b588529d6bfdc70675ecf8caffe6be37419b30efff6947f88ed02005bf",
+     "junit sha256": "a9a33b134fd924c338f3fe2ce1c932cef09c1c8d92535ad4797506bce7cc16cf",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-14",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-14.stdout.txt",
+     "stdout sha256": "d2649dbcf093f5d30e8bd630b64b2cd2dc507daa47a28ae591de5527a1aa281d",
+     "junit sha256": "c97a95c846388db0289bbc15fd680988dc3d6f9a7f535f787b67a9f09ddae489",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-15",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-15.stdout.txt",
+     "stdout sha256": "cac32bff50ce8d7142a3b09a051da03dafb996dad14e790f989f71a75b06139c",
+     "junit sha256": "5096082ea256e038bcfc9152359a66953bb1a7f53c4662c4b558ffd078375828",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-16",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-16.stdout.txt",
+     "stdout sha256": "64546310179cce2882c6379f84c5ca901df6e781ad56ae4cbe0a0b64811f2735",
+     "junit sha256": "0113850040e2f16b5d27707fce0e3a4a62bd3501c9a02fd7743db090a57eebcc",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-17",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MN-17.stdout.txt",
+     "stdout sha256": "f4d179dd84d52b31ecb2373ef0be41835f6228a7ce71cb0151291d089e215eb3",
+     "junit sha256": "f8ffaa563d3180eea4023a45a3e3a560d9296180770b7a0edd5dbbdaa2ed9fe6",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-01",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MP-01.stdout.txt",
+     "stdout sha256": "9d91fec53184f6e3cbb7bdcf3b71fa62129691f542fb49e46e26b9c51111cb22",
+     "junit sha256": "e9aa087545cc6ee8b8da4bf13a9601e63e8ca4a452ab59cb6708f8685094b51c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-02",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MP-02.stdout.txt",
+     "stdout sha256": "f5b6b8f8f63d4fe5468bdb549cd0be9d4800b2d75702bf3851144022474cfe82",
+     "junit sha256": "c085202a404a301fa4c4547783fd9e0bf301c3350e2403f8908a9a1d7365ca63",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-03",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MP-03.stdout.txt",
+     "stdout sha256": "dfc02dba409f398c02214f6fae91f3e1b2527f30e30164bbd35b8c18059b21b2",
+     "junit sha256": "8d9a9ea54fef7694ddb9c2f4b894593f0f64ff86e29016197d60611b8a7d4efb",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-04",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MP-04.stdout.txt",
+     "stdout sha256": "134d20cfbb257d65ac100dc40a51e33d9953deb09022f1881ffe0a08bda5cdae",
+     "junit sha256": "2f2d1c07521c43eb74834d6b16beba711af7ef236bae735d3badd0c5fd089440",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-05",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MP-05.stdout.txt",
+     "stdout sha256": "2862182735fd293b00c52c95da69357bd28946de7bb1564d5a09d8f3b3abaa07",
+     "junit sha256": "4bcf8705dfe4c116036b5cc237de94505835ffa82f857b86c834075e7662f552",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-06",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/MP-06.stdout.txt",
+     "stdout sha256": "896dcbfff0be4bada2b78d46b7a120a276046c24d7bfe5c3213a6a7006962309",
+     "junit sha256": "736b0ef8f4a5ae6f426407297aefbc7ea1c427bf0a1dd2155668501abb82d435",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "control",
+     "stdout": "~/tars-evidence/I-102/campaign/mutation/control.stdout.txt",
+     "stdout sha256": "b7b920da30fa353b8b25f455633ba126cb8c6dacba920617df49de21fef1ce65",
+     "junit sha256": "ade7548439879599b1ad56adc275230f4770ec614da95c090bb7a10c332daf50",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    }
+   ],
+   "missing in every execution": [
+    "DL-5 ENV record",
+    "X-P3/RP-9 listing",
+    "G-17a report",
+    "G-17b record",
+    "per-execution run record (commit SHA, sys.version, platform.platform(), platform.machine(), uv.lock sha256, interpreter executable sha256 (I-101))"
+   ]
+  },
+  {
+   "id": "I103-CAMPAIGN",
+   "execution": "I-103 final campaign on the BC2 candidate (same clone as I-102); NO run record of its own (only I-103/candidate-state.txt)",
+   "gate role": "\u00a73.12 mutation campaign (OB-10)",
+   "external original": "~/tars-evidence/I-103/campaign/mutation",
+   "committed copy": "<repo>/docs/science/experiments/m3-t2/s2/mutation/i103-bc2",
+   "campaign-level run record": "none",
+   "campaign-level run record sha256": "none",
+   "campaign-level run-record fields present": {
+    "commit SHA": false,
+    "sys.version": false,
+    "platform.platform()": false,
+    "platform.machine()": false,
+    "uv.lock sha256": false,
+    "interpreter executable sha256 (I-101)": false
+   },
+   "executions": 50,
+   "executions with any S2 record": 0,
+   "per-execution": [
+    {
+     "execution": "M-W1",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/M-W1.stdout.txt",
+     "stdout sha256": "121999e6ed41008a28beb405b340bacded67012fe2edb14b2118f1a5e2a62134",
+     "junit sha256": "307adc3def8d07e2b807eecce2680ece59c505c2bc6b41c701db2663a4ff755e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "M-W2",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/M-W2.stdout.txt",
+     "stdout sha256": "91fd22231105d3671f360091a933864a78468c4ebeed30fce306fd2dad67821e",
+     "junit sha256": "77c25eed3512c44de6a07ea0ac713e35213ce48ff60c4002a8ea7b644fb578bd",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "M-W3",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/M-W3.stdout.txt",
+     "stdout sha256": "c425bc8ef8bfaa76a9564f6fd1a3622320c09fbe6b511f5cebee365be9c2e199",
+     "junit sha256": "73ac5374726ec0df082f1ed17b5052b4e10449b3760d266a55167bc16441f2e3",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-01.stdout.txt",
+     "stdout sha256": "a545a2553dd7c8322bd1a733c015757d8f774f01b7eb174b5d9ede34f8b0b43b",
+     "junit sha256": "fd36d478e5ff304cc7febe947c85ed7b5dfad562b476cc7c938054a315aa3908",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-02.stdout.txt",
+     "stdout sha256": "3efa82eb4046d7ba449879adddb1d341f2895f31186011d9cf108da30e46a237",
+     "junit sha256": "8f545c82bcd7f1bc7d29b03aafaf7ce7c2bd81f8dfc99e3c1e02bf72411b1574",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-03.stdout.txt",
+     "stdout sha256": "b55431f698267ea8bca41356ba1821b79ed1cd7952edeeacd3f6d199fa52f63d",
+     "junit sha256": "37eee64a1babeb5cf0308ce0a3c291d1d7962c01c5e9e80012075f57b2190751",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-04",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-04.stdout.txt",
+     "stdout sha256": "fe7104c6a2a5973f59919bd477e51b037109585fb2cc2a34f8f24eb0f382c14a",
+     "junit sha256": "499b81b6095dec2bad95c77b6ae8619a0c5b5147e87bb8e3591fca40bda61940",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-05",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-05.stdout.txt",
+     "stdout sha256": "379d0455c0ddf7b23249fef58618c48d33ff1cd4a844a1c43234ca8f5ab63340",
+     "junit sha256": "e3e147dd13823a82e20c73156650c3e711f08725bfb8d55dd216aa522e92eaec",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-06",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-06.stdout.txt",
+     "stdout sha256": "94bb71733269cdb348d40aea8843f00ee6cec09f450ea22d06e6d92c8df333f3",
+     "junit sha256": "ee5670906608abd76582ca8eede9584245a7018df0204731663228f6ea54e5dc",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MD-07",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MD-07.stdout.txt",
+     "stdout sha256": "b0f301ac70df437f5a93b0abefe1bbc763585dbb5e126080823eb1b6d6d3bab2",
+     "junit sha256": "06f86cf94a38fa8ddbef17b5864a5bf1df96e318598844a8fd9a5e0a35717641",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/ME-01.stdout.txt",
+     "stdout sha256": "9a805625d639d39537ef7f9b008856366b514a28a350b274374acfef25c3787a",
+     "junit sha256": "8deab22caa8e7573c051289bb2629ade97d6d338f00b6d309de5b1230308f61c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/ME-02.stdout.txt",
+     "stdout sha256": "387865f562d7f3475f2da8f2681c5075ce5a2238a2afd234b7628c6afdd6da5a",
+     "junit sha256": "4911bc3e0d199afa88314946ca5df88bc156884cd21b8d875ab0d72b049c2b0c",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/ME-03.stdout.txt",
+     "stdout sha256": "9a805625d639d39537ef7f9b008856366b514a28a350b274374acfef25c3787a",
+     "junit sha256": "3fb36a0e48adacb1c1f7cd8c8c91940f26a32dd2d82256ec3c60acaec92a483d",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "ME-04",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/ME-04.stdout.txt",
+     "stdout sha256": "e9e74f858424c916f5a85e2343e672052211bef02ebbc9e2b7575dedc4a24ab7",
+     "junit sha256": "69fdfd83083861dd7c438e63a6b3ea97055775edbc397b65840ac91c76e3ce17",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MG-01.stdout.txt",
+     "stdout sha256": "cf07a8a246e2be77f3fe3743838057b026e628fd6f67a8ea75b40d443b62956e",
+     "junit sha256": "9582258831c022de17422503d2bb33900f7aa7cea5c7d6a51cba14f03c54f1f7",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MG-02.stdout.txt",
+     "stdout sha256": "6cc3527882ebd7c6152c9db683e73403fd9596dfc9b3e19be8fdfda04b82de18",
+     "junit sha256": "049726831f8a8ce8542a290f6c7b00e5fb5448dfc61da42ab4da56d0936156e3",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MG-03.stdout.txt",
+     "stdout sha256": "83ca6b2cbfe1178a65f72a508e98e9400fd18f1427cf69201d1b4255f1cfcf0d",
+     "junit sha256": "7fb17a3c7bc4d7111b0d1f2ef678000115f12d06b0e8407b1083a278ac650ec2",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-04",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MG-04.stdout.txt",
+     "stdout sha256": "f55ee7d89792f1e9f017ba288a765b3eeb32b66b23f3aacbafe05aa3793509a6",
+     "junit sha256": "5e9c44dd138dc62c4ecb8be33c07da63daa2886ece4f1a9613aa64e864686dd1",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-05",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MG-05.stdout.txt",
+     "stdout sha256": "c473c08ab759088cceca119ba68a4e9ddeb0835ac29b3ad2c6f750b89edd8c08",
+     "junit sha256": "f86a51cc70fcecf7b0942ce37768774eece0fde59f70c137757e007148820992",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MG-06",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MG-06.stdout.txt",
+     "stdout sha256": "ae29b73aed557afff2996de7bf70fd0d1729c7f0645c5339f0c3bedf1ca8542a",
+     "junit sha256": "fab6113e77f6123bf30d73886f4a09acc0a3be04e6a903be57cf5559fae43716",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MH-01.stdout.txt",
+     "stdout sha256": "33d2a561537470e2da341121ccfd6435361c9a16c6f74ae6f48d37f83cf7e811",
+     "junit sha256": "66f18cdce20ed289911ca80186cd0ff6776035acdd8668d55f9a0c33e29cfb35",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MH-02.stdout.txt",
+     "stdout sha256": "2ee75d081357cb9dc1a1fe7120668e978379992de9a104d961550a105eb06697",
+     "junit sha256": "03c991e48d70765da40db4f57741402fa67f7bd940d2f405d651ee64246fa05b",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MH-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MH-03.stdout.txt",
+     "stdout sha256": "f6ee44a3ccdfaadf30d8d3da86d2568b74bedf804e740f58c08ca0ee3884ea28",
+     "junit sha256": "7941d1d525f5d48df972a8900a3a1952ce36d45a04bd3743988fab1b44f9793b",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MI-01.stdout.txt",
+     "stdout sha256": "7eefd7b645e598831224af752bfff13968f6a1d0cf87f0c1a8b43d7bd4d33c55",
+     "junit sha256": "9d3bffd37ea5ecd78c90354d91f1545c7043577969ec341dd39f56d3fece389e",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MI-02.stdout.txt",
+     "stdout sha256": "34ed6befc13c3af083b844da16fcb8413f489b0006fc3a9e5e67f88446037347",
+     "junit sha256": "8d4eae2f4b10d94d191e558675c3885b76c9a406bb05a2ad72ce63cad975b2bf",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MI-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MI-03.stdout.txt",
+     "stdout sha256": "37821b48cf5f483318840a36359b3e284da986858d61f315762ea28b95b987be",
+     "junit sha256": "f744d2bfc3429ccf5e5daec018dfea7aeea7151835e34e49ca31125aa93ccb5d",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-01.stdout.txt",
+     "stdout sha256": "21ac97ac6b99c20c05b884003ba8a763c810304baa38369335ba4f7bc3953b7d",
+     "junit sha256": "7d27a82ada5637b6c9d72a45bfcaed197a5d8e91a73ee4fbb8c54490ac919e61",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-02.stdout.txt",
+     "stdout sha256": "9b8270c8be33e1d1fe7bec0cc4115012f8bc865bdcd7d9ca48482ca02cfb69dd",
+     "junit sha256": "dff4f97888fe4275f6143202700a767fa6d4620091ab0ca99bf0044cefb14eb0",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-03.stdout.txt",
+     "stdout sha256": "68708df2acbd305b7ddc65765bb093a9cbb2a4de63b086c25bb606aabf067d0d",
+     "junit sha256": "083a681084c5fdf1e368bf2bd93055b52771214501b38a1eb00562bd3fc64dcc",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-04",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-04.stdout.txt",
+     "stdout sha256": "ba8f09cba2ede6f64f520187053ca35c62ee40ab9d2b79cb19100f063c58aa01",
+     "junit sha256": "e09b805c38b498d25fbcd74a4d3de786bcaa02dcc3d2f2ef6b6b3e84d802aa66",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-05",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-05.stdout.txt",
+     "stdout sha256": "cd6d1c0e3ff9ae274f256986037e9680b1b105d0381389efcecc905bcfcbe7aa",
+     "junit sha256": "341a4858f93561d234b5fc56d95250dad6488aafce4c22dc25fa5b197e28091d",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-06",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-06.stdout.txt",
+     "stdout sha256": "94a9b9d32b50c429f831762864b20a72a591f7469dc6ec9394b51f4c9e94b064",
+     "junit sha256": "0c1132d7e36ddb418fbe085018645ce993defd80882d53cec9906e925f8b3587",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-07",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-07.stdout.txt",
+     "stdout sha256": "7ab034b8d262a5a9b4f99a0fa726f670eb006eaf16c02c2b7ba9999b9d776167",
+     "junit sha256": "54aabe6c26f28bf741ab4fbee370ce1748c65faad66d6c94da91e985a37534bf",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-08",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-08.stdout.txt",
+     "stdout sha256": "31ddc9d0cb70e7834ecd31c50d4ebbb17341ea264b6ab90393bc6404449db95a",
+     "junit sha256": "63cd7c1f3942435c2e5303477ad4556ecc3cce5a7cce1f579a3fa283841e489d",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-09",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-09.stdout.txt",
+     "stdout sha256": "574483ab87230d28a8602857b102265e84719b3a15a04f8eed1c2a5f681a0068",
+     "junit sha256": "d4c115a10292e6e22189bfc8d9db2a5eb88a78cb73da5d556075a7ee52accd05",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-10",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-10.stdout.txt",
+     "stdout sha256": "04d1969482943c8cb41d67833dd22e8c60f5eb268f5f5a84a40d8ae55fbd903c",
+     "junit sha256": "4274efe0b0f4a1ed020e77241ddeaf0223de044af6ab2e132ca777779d09be5b",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-11",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-11.stdout.txt",
+     "stdout sha256": "1ce68d18d667099f0c2cd2efb10d5b43238ea354bcbb72cb46229af0594121a6",
+     "junit sha256": "5d9efc81c7498579946ce988f0ddab9f15be39e899efab9677c7a1291a5b441f",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-12",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-12.stdout.txt",
+     "stdout sha256": "2a9bb33cbc140e8e9d08206de0bb7e248dff9013f80062c2580ebfb251ef4a43",
+     "junit sha256": "928ed5af648e210ae99d7a46198ee16a59014feec9dd62b82a7420c2af80c760",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-13",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-13.stdout.txt",
+     "stdout sha256": "c784cc370d55d4eb8b329fc783671b1853c83ae4191fdf32333f8493defbbdb2",
+     "junit sha256": "6c8317bb746c4e7634160f4d7b4dd5c7731daabdd5958333211ebd4bbfd3b5e1",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-14",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-14.stdout.txt",
+     "stdout sha256": "c3403fbe82c8d6c53c0726235c83807fc85fb306443fbf84a3e0f427d9550ae2",
+     "junit sha256": "8f8af815044e04c38d51e455308f2b67320dd1cc9cc9469d36fc65e0448f87d4",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-15",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-15.stdout.txt",
+     "stdout sha256": "060c54a3828fb6d43320d2e8557987e413a8df028a175d21599a0e297fc7af8a",
+     "junit sha256": "d97b4a8bddf32db8be02bbd418908863016d8604b0a46089c6c3441fa2137fd9",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-16",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-16.stdout.txt",
+     "stdout sha256": "a9233a1a043ee5b111148813ce0527ba7ec60c1cb1adb3d1bb135a2ceaa3bbb8",
+     "junit sha256": "7e4c07e8ee5ffba525f21c350fa79db3fa210c01d6984faf2fe109000ea96b86",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MN-17",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MN-17.stdout.txt",
+     "stdout sha256": "c5fcb5900752f2e398b87e0a0ef7ad49c9663a6043210b8a0f80bbcddf3ad5e7",
+     "junit sha256": "f09c74087447e41c3232581398b006e2529359eb018663aa9980d6aaf399de09",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-01",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MP-01.stdout.txt",
+     "stdout sha256": "b02a7663439320bd827b22b59044ffd4ccfc954647aa2f9419b5d954748f040a",
+     "junit sha256": "5c1fc5bb5b3490fdcca5892f06805bfa573de339f24785f1f9344b26c3dbb32d",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-02",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MP-02.stdout.txt",
+     "stdout sha256": "255f0cb073550aadda434552fc9946d8333ca788279f3718e54dfc3bd4808491",
+     "junit sha256": "57538f9a8d8ca732f911a6fa5e93eabfa2b768279d3cf40c682346b064138845",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-03",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MP-03.stdout.txt",
+     "stdout sha256": "47692fbd7d9a5771a9d69b22ed52d6159bc5913ef6d9f4d846703026436c6e32",
+     "junit sha256": "bfd9ad749161aabc144710861d317ff7ac64bc0d8eb28e4d465f9b74748baa46",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-04",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MP-04.stdout.txt",
+     "stdout sha256": "5d5229b5a9f9b4bd4715f0dc2a68986817ce0e684613dea1acfeffbdded831cd",
+     "junit sha256": "439178627c9b91b6145e4b59ff6e32fe934445f7e240846cf5d6526307175c2f",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-05",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MP-05.stdout.txt",
+     "stdout sha256": "169835658d98cb22b391c34a83861ee54d8f82956252ca908d42a05bb6d51127",
+     "junit sha256": "e2c4a11991afdc478ad1b5ce7fb74067af915212eaeaa2cc5a88c4e461e87cf6",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "MP-06",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/MP-06.stdout.txt",
+     "stdout sha256": "aeedea41075598422245e50ba3036862431c930d7d31dc6778a4b5d60c14b548",
+     "junit sha256": "27914e8273ff506fdc4146b2e58a13b35d1bb11420a91c68d4930a22ff76002a",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    },
+    {
+     "execution": "control",
+     "stdout": "~/tars-evidence/I-103/campaign/mutation/control.stdout.txt",
+     "stdout sha256": "dfc29fa50abd9ba7ef1e2a4f8fe732c84557de4e6f91f23eb025197c68f74281",
+     "junit sha256": "664697846855533834ce1c628d5ee7797519a884ac6a2e59d5c7ac574310c10f",
+     "records present in its own output": {
+      "DL-5 ENV record": false,
+      "X-P3/RP-9 listing": false,
+      "G-17a report": false,
+      "G-17b record": false
+     },
+     "missing": [
+      "DL-5 ENV record",
+      "X-P3/RP-9 listing",
+      "G-17a report",
+      "G-17b record",
+      "commit SHA",
+      "sys.version",
+      "platform.platform()",
+      "platform.machine()",
+      "uv.lock sha256",
+      "interpreter executable sha256 (I-101)"
+     ]
+    }
+   ],
+   "missing in every execution": [
+    "DL-5 ENV record",
+    "X-P3/RP-9 listing",
+    "G-17a report",
+    "G-17b record",
+    "per-execution run record (commit SHA, sys.version, platform.platform(), platform.machine(), uv.lock sha256, interpreter executable sha256 (I-101))"
+   ]
+  },
+  {
+   "id": "MN17-DIAGNOSTIC",
+   "execution": "I-101 one-off MN-17 diagnostic (not campaign or gate evidence)",
+   "gate role": "none (diagnostic; never counted)",
+   "external original": "~/tars-evidence/I-101/commit-d/diagnostic-MN17",
+   "hashes": {
+    "mn17-diagnostic.log": "9a5d4f09f37a8cd49c12f765a8fe5f59f348183bf9f93d5870ca3ce1f0a90e5c"
+   },
+   "records present in its own output": {
+    "DL-5 ENV record": false,
+    "X-P3/RP-9 listing": false,
+    "G-17a report": false,
+    "G-17b record": false
+   },
+   "missing": "all; listed only because it is not gate evidence and no acceptance relies on it"
+  },
+  {
+   "id": "D-SCRIPTS-AT-BC",
+   "execution": "derivation_crosscheck.py (OB-02/OB-19 evidence, stop 15) and report_only.py (report-only) at BC, one d_run",
+   "gate role": "derivation is stop-15 evidence; report-only rows are not gates. NOT named by I-104",
+   "external original": "~/tars-evidence/I-101/commit-d/out",
+   "committed copy": "<repo>/docs/science/experiments/m3-t2/s2/derivation, <repo>/docs/science/experiments/m3-t2/s2/report-only/host-bc",
+   "hashes": {
+    "derivation_crosscheck.json": "b5beb333b3c500ce66f7d6c9df27652ca08d4e92edc4f692cb83dd64bb556319",
+    "report_only.log": "b48b1456b7c159eb529abe6a8b66c155b7a92ce1e43337d6a57fb7bd06053684",
+    "run-record-host.json": "753292537dea5a0ef2a3b8e64a8d1fb5652f49efaa8f3a42a80447d2689a4dc0"
+   },
+   "run-record fields present": {
+    "commit SHA": true,
+    "sys.version": true,
+    "platform.platform()": true,
+    "platform.machine()": true,
+    "uv.lock sha256": true,
+    "interpreter executable sha256 (I-101)": true
+   },
+   "records present in its own output": {
+    "DL-5 ENV record": false,
+    "X-P3/RP-9 listing": false,
+    "G-17a report": false,
+    "G-17b record": false
+   },
+   "missing": [
+    "DL-5 ENV record",
+    "X-P3/RP-9 listing",
+    "G-17a report",
+    "G-17b record"
+   ],
+   "note": "Not pytest runs, so the component-free recorders were not part of them. Whether these scripted runs are 'gate-evidence runs' that need a DL-5 record is an owner classification question."
+  }
+ ],
+ "historical host gate runs with all four records (for contrast)": [
+  {
+   "log": "~/tars-evidence/I-101/commit-a-gates/pytest.log",
+   "sha256": "24d4bb45768f18ad07ed9d5c4992a15d3ff7759f6a106317e2d2cc338e56f5f5",
+   "records present": {
+    "DL-5 ENV record": true,
+    "X-P3/RP-9 listing": true,
+    "G-17a report": true,
+    "G-17b record": true
+   }
+  },
+  {
+   "log": "~/tars-evidence/I-101/bc-gates/pytest.log",
+   "sha256": "2919d796e3d9c6677f5b4eff8f68f2fb1d5941848fa2631cf71fe503eb50a14d",
+   "records present": {
+    "DL-5 ENV record": true,
+    "X-P3/RP-9 listing": true,
+    "G-17a report": true,
+    "G-17b record": true
+   }
+  },
+  {
+   "log": "~/tars-evidence/I-101/commit-d/green-bc/pytest.log",
+   "sha256": "8e5f02a068fd527005d1a7a0dbcc9da61a71583b9e33379959828fac130e240c",
+   "records present": {
+    "DL-5 ENV record": true,
+    "X-P3/RP-9 listing": true,
+    "G-17a report": true,
+    "G-17b record": true
+   }
+  },
+  {
+   "log": "~/tars-evidence/I-102/campaign/pytest.log",
+   "sha256": "420914be78790a96553601781db62cba0666b40ad6f55c4c66e81cd6a2081c95",
+   "records present": {
+    "DL-5 ENV record": true,
+    "X-P3/RP-9 listing": true,
+    "G-17a report": true,
+    "G-17b record": true
+   }
+  }
+ ],
+ "CI": "all archived CI job logs at A, BC, BC2, D and E carry all four records (I-104 ci/checks.json; I-105 comparison/environment-table.json)"
+}

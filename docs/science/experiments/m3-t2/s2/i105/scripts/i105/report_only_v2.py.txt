@@ -1,0 +1,357 @@
+"""S2 report-only rows RP-1 to RP-7 and the host RP-9 census, census schema 2 (I-105, I104-01;
+only the RP-9 section differs from the commit-D script report_only.py) (proposal v11 §3.11
+Part B). Every output is labelled "report-only; not a bound; host only". Nothing here is a
+gate, a threshold or an accuracy claim (stop 9). Differences are observations.
+
+Usage: python -I report_only.py <repo root> <out dir>   (run with the repository's .venv)
+
+References follow the §3.20.1 dispatch, always for the ROUNDED binary64 input, on the exact
+model ellipsoid (a = 6378137 and e2 = the binary64 value of DQ-1 step 1, as exact rationals):
+  RD-0 geometric reject: no reference; RD-1 equator (z = 0, p > 0): phi* = 0 with the sign of z,
+  h* = sqrt(x^2 + y^2) - a with 60-digit outward rounding (exact when y = 0); RD-2 axis:
+  phi* = sign(z) pi/2, h* = |z| - a sqrt(1 - e2), outward rounding; RD-3 (p > 0, z != 0): the
+  I-73 lambda method, the root enclosed in exact rationals, phi* and h* derived at 90 digits and
+  NOT rigorously enclosed. The reference code is adapted from the author's own proposal probe
+  ~/tars-evidence/I-80/research/reference_dispatch_probe.py (RES-80), unchanged in method.
+eps_h (U-17, U-19 (c), PM-5, PM-6) is T0's E1 bound `t0_termination.height_error_bound`,
+which rests on A-FP-2 (not accepted) and holds only at true height >= 0: every comparison with
+it is an observation, never a gate (r2 §6.7; strategy §6.2).
+"""
+
+from __future__ import annotations
+
+import csv
+import decimal
+import json
+import math
+import sys
+from fractions import Fraction as Fr
+from pathlib import Path
+
+ROOT, OUT = Path(sys.argv[1]), Path(sys.argv[2])
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "docs/science/experiments/m3-t0"))
+import t0_model  # noqa: E402
+import t0_termination  # noqa: E402
+
+from tars.sim import geodesy  # noqa: E402
+from tests import s2_dl4_point_sets as gen  # noqa: E402
+from tests.s2_dl4_geodetic_twin import twin_geodetic, twin_outcome  # noqa: E402
+
+D = decimal.Decimal
+decimal.getcontext().prec = 90
+A = 6378137.0
+E2 = geodesy._E2
+A2, E2Q = Fr(A) ** 2, Fr(E2)
+B2 = A2 * (1 - E2Q)
+DA, DE2 = D(A), D(E2)
+DA2, DB2 = DA * DA, DA * DA * (1 - DE2)
+EPS = D(10) ** -88
+DOWN = decimal.Context(prec=60, rounding=decimal.ROUND_FLOOR)
+UP = decimal.Context(prec=60, rounding=decimal.ROUND_CEILING)
+LABEL = "report-only; not a bound; host only"
+
+
+def _atan_small(x):
+    t, s, k = x, x, 1
+    while abs(t) > EPS:
+        t = -t * x * x
+        s += t / (2 * k + 1)
+        k += 1
+    return s
+
+
+PI = 16 * _atan_small(D(1) / 5) - 4 * _atan_small(D(1) / 239)
+HALF_PI = PI / 2
+
+
+def _atan(x):
+    m = 1
+    for _ in range(4):
+        x = x / (1 + (1 + x * x).sqrt())
+        m *= 2
+    return m * _atan_small(x)
+
+
+def _f_dec(lam, P, Z):
+    return P * DA2 / (DA2 + lam) ** 2 + Z * DB2 / (DB2 + lam) ** 2 - 1
+
+
+def _f_fr(lam, P, Z):
+    return P * A2 / (A2 + lam) ** 2 + Z * B2 / (B2 + lam) ** 2 - 1
+
+
+def _outward_sqrt(q):
+    n, d = D(q.numerator), D(q.denominator)
+    s = (n / d).sqrt()
+    delta = abs(s) * D(10) ** -60 + D(10) ** -80
+    while True:
+        lo, hi = s - delta, s + delta
+        if Fr(lo) ** 2 <= q <= Fr(hi) ** 2 and lo >= 0:
+            return lo, hi
+        delta *= 10
+
+
+def reference(x, y, z):
+    """(branch, phi*, (h_lo, h_hi), enclosed)."""
+    if z == 0.0:
+        if y == 0.0:
+            h = Fr(abs(x)) - Fr(A)
+            v = D(h.numerator) / D(h.denominator)
+            return "RD-1", D(0).copy_sign(D(z)), (v, v), True
+        lo, hi = _outward_sqrt(Fr(x) ** 2 + Fr(y) ** 2)
+        return "RD-1", D(0).copy_sign(D(z)), (DOWN.subtract(lo, DA), UP.subtract(hi, DA)), True
+    if x == 0.0 and y == 0.0:
+        blo, bhi = _outward_sqrt(A2 * (1 - E2Q))
+        az = D(abs(z))
+        return "RD-2", HALF_PI.copy_sign(D(z)), (DOWN.subtract(az, bhi), UP.subtract(az, blo)), True
+    P = D(x) ** 2 + D(y) ** 2
+    Z = D(z) ** 2
+    p = P.sqrt()
+    r = (P + Z).sqrt()
+    lo = -DB2 + abs(D(z)) * DA.sqrt() * (1 - DE2).sqrt() * DA.sqrt() / 2
+    hi = 2 * DA * (r + 1)
+    assert _f_dec(lo, P, Z) > 0 > _f_dec(hi, P, Z)
+    for _ in range(330):
+        mid = (lo + hi) / 2
+        if _f_dec(mid, P, Z) > 0:
+            lo = mid
+        else:
+            hi = mid
+    lam = (lo + hi) / 2
+    w = (abs(lam) + 1) * D(10) ** -60
+    pf, zf = Fr(x) ** 2 + Fr(y) ** 2, Fr(z) ** 2
+    enclosed = _f_fr(Fr(lam - w), pf, zf) > 0 > _f_fr(Fr(lam + w), pf, zf)
+    phi = _atan(D(z) * (DA2 + lam) / (p * (DB2 + lam)))
+    p0 = p * DA2 / (DA2 + lam)
+    z0 = D(z) * DB2 / (DB2 + lam)
+    h = lam * ((p0 / DA2) ** 2 + (z0 / DB2) ** 2).sqrt()
+    return "RD-3", phi, (h, h), enclosed
+
+
+def outcome(x, y, z):
+    try:
+        h, phi = geodesy.geodetic((x, y, z))
+    except geodesy.GeodeticDomainError as exc:
+        return exc.reason, None, None
+    return "accepted", h, phi
+
+
+def diffs(h, phi, ref):
+    branch, phis, (hlo, hhi), enc = ref
+    dh = D(0) if hlo <= D(h) <= hhi else min(abs(D(h) - hlo), abs(D(h) - hhi))
+    return branch, float(dh), float(abs(D(phi) - phis)), enc, float(hlo)
+
+
+def eps_h(h):
+    return t0_termination.height_error_bound(max(h, 0.0))
+
+
+entries = gen.parse_listing((ROOT / "tests/s2_dl4_points.txt").read_text())
+by_set = {}
+for e in entries:
+    by_set.setdefault(e.set, []).append(e)
+OUT.mkdir(parents=True, exist_ok=True)
+summary = {"label": LABEL, "python": sys.version}
+
+
+def accuracy_rows(name, items, nominal=None):
+    rows = []
+    for k, e in enumerate(items):
+        out, h, phi = outcome(e.x, e.y, e.z)
+        row = {"set": e.set, "index": e.index, "x": e.x.hex(), "y": e.y.hex(), "z": e.z.hex(),
+               "label": e.label, "outcome": out, "nominal_h_label": "" if nominal is None else nominal[k]}
+        if e.label != "passes":
+            row.update(branch="RD-0", note="geometric reject; no reference")
+        elif out != "accepted":
+            row.update(branch="none", note="not accepted; pair discarded (E.3)")
+        else:
+            branch, dh, dphi, enc, href = diffs(h, phi, reference(e.x, e.y, e.z))
+            row.update(branch=branch, h=h.hex(), phi=phi.hex(), abs_dh_m=f"{dh:.3e}",
+                       abs_dphi_rad=f"{dphi:.3e}", ref_enclosed=enc, h_ref=f"{href:.6f}",
+                       eps_h_at_href=f"{eps_h(href):.3e}" if href >= 0 else "n/a (true height < 0)")
+        rows.append(row)
+    keys = sorted({k for r in rows for k in r})
+    with open(OUT / f"{name}.csv", "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=keys)
+        w.writeheader()
+        w.writerows(rows)
+    acc = [r for r in rows if "abs_dh_m" in r]
+    return {
+        "entries": len(rows),
+        "accepted_with_reference": len(acc),
+        "branches": {b: sum(1 for r in rows if r.get("branch") == b) for b in ("RD-0", "RD-1", "RD-2", "RD-3", "none")},
+        "max_abs_dh_m": max((float(r["abs_dh_m"]) for r in acc), default=None),
+        "max_abs_dphi_rad": max((float(r["abs_dphi_rad"]) for r in acc), default=None),
+        "all_references_enclosed": all(r["ref_enclosed"] for r in acc),
+        "label": LABEL,
+    }
+
+
+# RP-1, U-17: equator x >= a (S-EQ and PS-A equator, y = 0) and axis |z| >= b (S-AX, PS-A axis)
+rp1 = [e for e in by_set["S-EQ"]] + [e for e in by_set["S-AX"]] + [e for e in by_set["PS-A"] if e.y == 0.0]
+summary["RP-1 U-17 exact answers"] = accuracy_rows("RP-1_U-17", rp1)
+# RP-2, U-18: PS-A' (the original P8 (a') 640 points); nominal height is a label only
+nom_a1 = [h for _la in gen.LATS_DEG for _lo in gen.LONS_DEG for h in gen.HEIGHTS_M]
+summary["RP-2 U-18 forward-constructed"] = accuracy_rows("RP-2_U-18", by_set["PS-A'"], nom_a1)
+# RP-6a: PS-NEG = PS-A and PS-A' members with nominal height <= 0 (200)
+nom_psa = [-10_000.0] * 3 + [0.0] * 3 + [250_000.0] * 3 + [2_000_000.0] * 3 + [-10_000.0, 0.0, 250_000.0, 250_000.0]
+ps_neg = [e for e, h in zip(by_set["PS-A"], nom_psa, strict=True) if h <= 0]
+ps_neg += [e for e, h in zip(by_set["PS-A'"], nom_a1, strict=True) if h <= 0]
+nom_neg = [h for h in nom_psa if h <= 0] + [h for h in nom_a1 if h <= 0]
+summary["RP-6a PS-NEG"] = accuracy_rows("RP-6a_PS-NEG", ps_neg, nom_neg)
+assert summary["RP-6a PS-NEG"]["entries"] == 200
+
+
+# RP-6b: DG-INT, DG-CUSP, DG-DEEP; for non_convergence the host iteration history (no new
+# transcription: the twin is run with a recording library that logs its atan2 iterates)
+class Recorder:
+    def __init__(self):
+        self.atan2_values = []
+
+    hypot, sin, cos, sqrt = staticmethod(math.hypot), staticmethod(math.sin), staticmethod(math.cos), staticmethod(math.sqrt)
+
+    def atan2(self, y, x):
+        v = math.atan2(y, x)
+        self.atan2_values.append(v)
+        return v
+
+
+rp6b = {}
+for s in ("DG-INT", "DG-CUSP", "DG-DEEP"):
+    rp6b[s] = accuracy_rows(f"RP-6b_{s}", by_set[s])
+    hist = []
+    for e in by_set[s]:
+        if e.label != "passes" or outcome(e.x, e.y, e.z)[0] != "non_convergence":
+            continue
+        rec = Recorder()
+        twin_geodetic(e.x, e.y, e.z, lib=rec)
+        steps = [abs(b - a) for a, b in zip(rec.atan2_values, rec.atan2_values[1:])]
+        hist.append({"set": s, "index": e.index, "step_60_hex": steps[-1].hex(),
+                     "min_step": f"{min(steps):.3e}", "max_step_last10": f"{max(steps[-10:]):.3e}"})
+    with open(OUT / f"RP-6b_{s}_non_convergence_history.json", "w") as fh:
+        json.dump(hist, fh, indent=0)
+    rp6b[s]["non_convergence_points"] = len(hist)
+summary["RP-6b diagnostics"] = rp6b
+
+# RP-3, U-19 symmetry on the exterior protected sets (PS-A', PS-OPS with nominal h >= 0)
+ext = [e for e in by_set["PS-OPS"] if outcome(e.x, e.y, e.z)[0] == "accepted"]
+quarter = refl = bounded_viol = 0
+max_rot = 0.0
+for e in ext:
+    _, h, _ = outcome(e.x, e.y, e.z)
+    hq = outcome(-e.y, e.x, e.z)[1]
+    hr = outcome(e.x, e.y, -e.z)[1]
+    quarter += hq != h
+    refl += hr != h
+    if h >= 0:
+        bound = 2 * Fr(eps_h(h))
+        bounded_viol += abs(Fr(h) - Fr(hq)) > bound or abs(Fr(h) - Fr(hr)) > bound
+    c, s_ = math.cos(0.3), math.sin(0.3)
+    hg = outcome(c * e.x - s_ * e.y, s_ * e.x + c * e.y, e.z)[1]
+    max_rot = max(max_rot, abs(hg - h))
+summary["RP-3 U-19 symmetry (PS-OPS accepted)"] = {
+    "points": len(ext), "(a) quarter-turn bit differences": quarter,
+    "(b) z-reflection bit differences (diagnostic)": refl,
+    "(c) exterior pairs with |h - h_sigma| > 2 eps_h (conditional on A-FP-2)": bounded_viol,
+    "(d) max |h - h_rot(0.3 rad)| (rotation not exact in binary64)": f"{max_rot:.3e}", "label": LABEL}
+
+# RP-4, U-21 normal from (phi, lambda); dh/dt = n.v against a central difference
+u21 = {"label": LABEL}
+mx_norm = 0.0
+for e in by_set["PS-OPS"][::7]:
+    o, h, phi = outcome(e.x, e.y, e.z)
+    if o != "accepted":
+        continue
+    lam = math.atan2(e.y, e.x)
+    n = (math.cos(phi) * math.cos(lam), math.cos(phi) * math.sin(lam), math.sin(phi))
+    mx_norm = max(mx_norm, abs(float(sum(Fr(c) ** 2 for c in n) - 1)))
+u21["max ||n|^2 - 1| (exact sum of squares of the binary64 components)"] = f"{mx_norm:.3e}"
+axis = outcome(0.0, 0.0, 7.0e6)
+u21["axis (0,0,7e6): phi, cos(phi) (I-24: fl(pi/2) gives a nonzero x component)"] = [axis[2].hex(), math.cos(axis[2])]
+eq = outcome(7.0e6, 0.0, 0.0)
+u21["equator (7e6,0,0): phi bits (A-LM-0: +0 expected)"] = eq[2].hex()
+dhdt = []
+for (x, y, z), v in (((6.778e6, 0.0, 0.0), (0.0, 7.67e3, 0.0)), ((4.0e6, 3.0e6, 4.5e6), (-5.0e3, 2.0e3, 5.0e3))):
+    _, h, phi = outcome(x, y, z)
+    lam = math.atan2(y, x)
+    n = (math.cos(phi) * math.cos(lam), math.cos(phi) * math.sin(lam), math.sin(phi))
+    rate = sum(a * b for a, b in zip(n, v, strict=True))
+    dt = 1e-2
+    hp = outcome(x + v[0] * dt, y + v[1] * dt, z + v[2] * dt)[1]
+    hm = outcome(x - v[0] * dt, y - v[1] * dt, z - v[2] * dt)[1]
+    dhdt.append({"r": [x, y, z], "v": list(v), "n_dot_v": rate, "central_difference": (hp - hm) / (2 * dt)})
+u21["dh/dt"] = dhdt
+summary["RP-4 U-21 normal"] = u21
+
+# RP-5, PM-5 (1-Lipschitz, exterior pairs) and PM-6 (|r| - a - eps <= h <= |r| - b + eps)
+pm5_viol = pm6_viol = n5 = n6 = 0
+bq_hi = _outward_sqrt(B2)[1]
+seq = [e for e in by_set["PS-OPS"] if outcome(e.x, e.y, e.z)[0] == "accepted"]
+for e1, e2 in zip(seq, seq[1:]):
+    _, h1, _ = outcome(e1.x, e1.y, e1.z)
+    _, h2, _ = outcome(e2.x, e2.y, e2.z)
+    if h1 < 0 or h2 < 0:
+        continue
+    n5 += 1
+    lhs = abs(Fr(h1) - Fr(h2)) - Fr(eps_h(h1)) - Fr(eps_h(h2))
+    d2 = (Fr(e1.x) - Fr(e2.x)) ** 2 + (Fr(e1.y) - Fr(e2.y)) ** 2 + (Fr(e1.z) - Fr(e2.z)) ** 2
+    pm5_viol += lhs > 0 and lhs * lhs > d2
+for e in seq:
+    _, h, _ = outcome(e.x, e.y, e.z)
+    if h < 0:
+        continue
+    n6 += 1
+    r = (D(e.x) ** 2 + D(e.y) ** 2 + D(e.z) ** 2).sqrt()  # squares exact at 90 digits
+    eh = D(eps_h(h))
+    pm6_viol += not (r - DA - eh <= D(h) <= r - bq_hi + eh)
+summary["RP-5 PM-5/PM-6 (PS-OPS exterior, conditional on A-FP-2)"] = {
+    "PM-5 consecutive pairs": n5, "PM-5 pairs outside the inequality": pm5_viol,
+    "PM-6 points": n6, "PM-6 points outside the inequality": pm6_viol, "label": LABEL}
+
+# RP-7, X-D1: component, twin and T0 geodetic_iterative bitwise on the T0 sample sets
+xd1 = {"compared": 0, "component_vs_twin_bit_differences": 0, "component_vs_t0_bit_differences": 0,
+       "not_accepted": 0, "label": LABEL}
+for e in by_set["PS-A"] + by_set["PS-A'"]:
+    o, h, phi = outcome(e.x, e.y, e.z)
+    if o != "accepted":
+        xd1["not_accepted"] += 1
+        continue
+    xd1["compared"] += 1
+    t = twin_geodetic(e.x, e.y, e.z)
+    lat0, h0 = t0_model.geodetic_iterative(t0_model.np.array([e.x, e.y, e.z]))
+    xd1["component_vs_twin_bit_differences"] += (h.hex(), phi.hex()) != (t.h.hex(), t.phi.hex())
+    xd1["component_vs_t0_bit_differences"] += (h.hex(), phi.hex()) != (float(h0).hex(), float(lat0).hex())
+summary["RP-7 X-D1"] = xd1
+
+# RP-9 host census: component outcome next to the twin census at every entry.
+# I-105 (I104-01), census schema 2: every v11 §3.10 field (set, index, hex input, listing label,
+# outcome, iteration count, hex final step, source); the component's outcome is an extra column.
+# The hex input is the entry's own float.hex() text, as the frozen listing stores it.
+NE, TWIN = "not_evaluated", "twin record (G-08 adapter)"
+census = []
+agree = 0
+for e in entries:
+    entry = (e.set, e.index, e.x.hex(), e.y.hex(), e.z.hex(), e.label)
+    comp = outcome(e.x, e.y, e.z)[0]
+    if e.label != "passes":
+        census.append((*entry, e.label, NE, NE, "listing label", comp))
+        agree += comp == e.label
+        continue
+    tw = twin_outcome(e.x, e.y, e.z)
+    rec = tw.record
+    if rec is None:
+        census.append((*entry, tw.outcome, "raised", "raised", TWIN, comp))
+    else:
+        census.append((*entry, tw.outcome, rec.iterations, rec.last_step.hex(), TWIN, comp))
+    agree += comp == tw.outcome
+with open(OUT / "RP-9_host_census.csv", "w", newline="") as fh:
+    w = csv.writer(fh)
+    w.writerow(["set", "index", "x_hex", "y_hex", "z_hex", "label", "outcome", "iterations",
+                "final_step_hex", "source", "component_outcome"])
+    w.writerows(census)
+summary["RP-9 host census"] = {"entries": len(census), "component_equals_census": agree,
+                               "schema": "2 (I-105)", "label": LABEL}
+(OUT / "report_only_summary.json").write_text(json.dumps(summary, indent=1, default=str) + "\n")
+print(json.dumps(summary, indent=1, default=str))

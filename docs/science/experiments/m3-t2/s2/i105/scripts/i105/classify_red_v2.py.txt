@@ -1,0 +1,58 @@
+"""I-105 red classification. Same per-node rule as I-102's classify_red.py for the component
+test file; in addition the nine component-free recorder nodes (ENV, X-P3/RP-9 listing,
+G-17a, G-17b) must pass, the two new designated-witness nodes must fail for the declared red
+reason (the absent component), and every node common to the I-102 supplemental red run must have
+the same status as there.
+
+Usage: python -I classify_red_v2.py <junit.xml> <i102 red-classification.json> <out.json>
+"""
+import json, re, sys, xml.etree.ElementTree as ET
+from collections import Counter
+
+x = ET.parse(sys.argv[1]).getroot()
+i102 = {r["node"]: r["status"] for r in json.load(open(sys.argv[2]))["nodes"]}
+GUARD = re.compile(r"test_g10_|test_g13_|test_g12a_|test_twin_")
+RECORDER = ("tests.test_s2_environment_record", "tests.test_s2_xp3_listing", "tests.test_s2_dl4_points")
+NEW = {"tests.test_s2_geodetic::test_g04_designated_witness_0_nan_7e6",
+       "tests.test_s2_geodetic::test_g03_g07_designated_witness_accepted_axis_point_0_0_7e6"}
+rows, bad = [], []
+for tc in x.iter("testcase"):
+    name = f"{tc.get('classname')}::{tc.get('name')}"
+    f, e = tc.find("failure"), tc.find("error")
+    recorder = tc.get("classname") in RECORDER
+    if f is None and e is None:
+        kind = "pass"
+        ok = recorder or bool(GUARD.search(name))
+    elif e is not None:
+        kind, ok = "error:" + (e.get("message") or "")[:80], False
+    else:
+        msg = f.get("message") or ""
+        m = re.match(r"(ModuleNotFoundError|ImportError|AttributeError|AssertionError|assert )", msg)
+        kind = "fail:" + (m.group(1) if m else msg[:60])
+        ok = bool(m) and not recorder
+    if name in NEW:
+        ok = ok and kind == "fail:ImportError"
+    same = None
+    if name in i102:
+        same = i102[name] == kind
+        ok = ok and same
+    rows.append({"node": name, "role": "recorder" if recorder else ("new designated witness" if name in NEW else "component test file"),
+                 "status": kind, "declared_reason_ok": ok, "same_status_as_I102_supplemental": same})
+    if not ok:
+        bad.append(name)
+seen = {r["node"] for r in rows}
+summary = {
+    "nodes": len(rows),
+    "by_role_and_status": {f"{k[0]} | {k[1]}": v for k, v in sorted(Counter((r["role"], r["status"]) for r in rows).items())},
+    "recorders_passed": sum(r["role"] == "recorder" and r["status"] == "pass" for r in rows),
+    "new_witness_nodes": {n: next((r["status"] for r in rows if r["node"] == n), "MISSING") for n in sorted(NEW)},
+    "i102_nodes_compared": sum(r["same_status_as_I102_supplemental"] is not None for r in rows),
+    "i102_nodes_missing_here": sorted(set(i102) - seen),
+    "not_ok": bad,
+}
+ok_all = not bad and not summary["i102_nodes_missing_here"] and summary["recorders_passed"] == 9 and all(
+    v == "fail:ImportError" for v in summary["new_witness_nodes"].values())
+summary["verdict"] = "OK" if ok_all else "NOT OK"
+json.dump({"summary": summary, "nodes": rows}, open(sys.argv[3], "w"), indent=1)
+print(json.dumps(summary, indent=1))
+sys.exit(0 if ok_all else 1)

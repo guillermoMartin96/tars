@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="2.383" timestamp="2026-11-07T16:49:15.369111-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic_conformance" name="test_g08_component_equals_twin_at_every_passes_entry" time="0.432"><failure message="AssertionError: stop 3: 20547 G-08 mismatches: [(&quot;PS-A'&quot;, 80, 'accepted bits', '-0x1.3880000000200p+13', '-0x1.3880000000000p+13'), (&quot;PS-A'&quot;, 81, 'accepted bits', '-0x1.9000000000000p+6', '-0x1.9000000000000p+6'), (&quot;PS-A'&quot;, 83, 'accepted bits', '0x1.0000000000000p+0', '0x1.fffffff800000p-1'), (&quot;PS-A'&quot;, 84, 'accepted bits', '0x1.86a0000000000p+14', '0x1.86a0000000000p+14'), (&quot;PS-A'&quot;, 85, 'accepted bits', '0x1.86a0000000000p+16', '0x1.869ffffffffc0p+16'), (&quot;PS-A'&quot;, 86, 'accepted bits', '0x1.e847fffffff80p+17', '0x1.e848000000000p+17'), (&quot;PS-A'&quot;, 87, 'accepted bits', '0x1.b773fffffff30p+19', '0x1.b774000000000p+19'), (&quot;PS-A'&quot;, 88, 'accepted bits', '0x1.e847fffffff10p+19', '0x1.e848000000000p+19'), (&quot;PS-A'&quot;, 89, 'accepted bits', '0x1.e847ffffffea8p+20', '0x1.e848000000000p+20'), (&quot;PS-A'&quot;, 90, 'accepted bits', '-0x1.3880000000200p+13', '-0x1.3880000000000p+13')]&#10;assert [(&quot;PS-A'&quot;, 80...00p+17'), ...] == []&#10;  &#10;  Left contains 20547 more items, first extra item: (&quot;PS-A'&quot;, 80, 'accepted bits', '-0x1.3880000000200p+13', '-0x1.3880000000000p+13')&#10;  Use -v to get more diff">def test_g08_component_equals_twin_at_every_passes_entry():
+        """For every listing entry labelled `passes`, on this platform, in one process: the
+        expected outcome from the twin (§3.10 adapter) equals the component's outcome, and
+        accepted h and phi are bit-identical (signed zeros included). Any twin exception other
+        than ArithmeticError or ValueError raises TwinStopError: a STOP, never a skipped point."""
+        from tars.sim import geodesy
+        from tests import s2_dl4_point_sets as gen
+        from tests.s2_dl4_geodetic_twin import twin_outcome
+    
+        entries = gen.parse_listing((REPO_ROOT / "tests" / "s2_dl4_points.txt").read_text())
+        passes = [e for e in entries if e.label == "passes"]
+        assert len(passes) == 22601
+        mismatches = []
+        for e in passes:
+            expected = twin_outcome(e.x, e.y, e.z)
+            try:
+                h, phi = geodesy.geodetic((e.x, e.y, e.z))
+                actual = "accepted"
+            except geodesy.GeodeticDomainError as exc:
+                actual = exc.reason
+            if actual != expected.outcome:
+                mismatches.append((e.set, e.index, expected.outcome, actual))
+            elif actual == "accepted":
+                rec = expected.record
+                same_h = struct.pack("&lt;d", h) == struct.pack("&lt;d", rec.h)
+                same_phi = struct.pack("&lt;d", phi) == struct.pack("&lt;d", rec.phi)
+                if not (same_h and same_phi):
+                    mismatches.append((e.set, e.index, "accepted bits", h.hex(), rec.h.hex()))
+&gt;       assert mismatches == [], f"stop 3: {len(mismatches)} G-08 mismatches: {mismatches[:10]}"
+E       AssertionError: stop 3: 20547 G-08 mismatches: [("PS-A'", 80, 'accepted bits', '-0x1.3880000000200p+13', '-0x1.3880000000000p+13'), ("PS-A'", 81, 'accepted bits', '-0x1.9000000000000p+6', '-0x1.9000000000000p+6'), ("PS-A'", 83, 'accepted bits', '0x1.0000000000000p+0', '0x1.fffffff800000p-1'), ("PS-A'", 84, 'accepted bits', '0x1.86a0000000000p+14', '0x1.86a0000000000p+14'), ("PS-A'", 85, 'accepted bits', '0x1.86a0000000000p+16', '0x1.869ffffffffc0p+16'), ("PS-A'", 86, 'accepted bits', '0x1.e847fffffff80p+17', '0x1.e848000000000p+17'), ("PS-A'", 87, 'accepted bits', '0x1.b773fffffff30p+19', '0x1.b774000000000p+19'), ("PS-A'", 88, 'accepted bits', '0x1.e847fffffff10p+19', '0x1.e848000000000p+19'), ("PS-A'", 89, 'accepted bits', '0x1.e847ffffffea8p+20', '0x1.e848000000000p+20'), ("PS-A'", 90, 'accepted bits', '-0x1.3880000000200p+13', '-0x1.3880000000000p+13')]
+E       assert [("PS-A'", 80...00p+17'), ...] == []
+E         
+E         Left contains 20547 more items, first extra item: ("PS-A'", 80, 'accepted bits', '-0x1.3880000000200p+13', '-0x1.3880000000000p+13')
+E         Use -v to get more diff
+
+tests/test_s2_geodetic_conformance.py:133: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi11_stop_test_met_at_update_60_is_accepted" time="0.001"><failure message="AssertionError: (['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], 8)&#10;assert ['hypot', 'at...', 'sin', ...] == ['hypot', 'at...', 'sin', ...]&#10;  &#10;  At index 6 diff: 'cos' != 'sqrt'&#10;  Right contains 177 more items, first extra item: 'sin'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10566a420&gt;
+
+    def test_g16_fi11_stop_test_met_at_update_60_is_accepted(monkeypatch):
+        def atan2(i):
+            return (59 - i) * 1e-10 if i &lt;= 59 else 1e-15
+    
+&gt;       kind, value = _run_case(monkeypatch, _rules(atan2=atan2), _SCHED_07)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_s2_geodetic.py:921: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10566a420&gt;
+rules = {'hypot': 7000000.0, 'atan2': &lt;function test_g16_fi11_stop_test_met_at_update_60_is_accepted.&lt;locals&gt;.atan2 at 0x10466cae0&gt;, 'sin': 0.0, 'cos': 1.0, ...}
+schedule = ['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], isnan = None
+
+    def _run_case(monkeypatch, rules, schedule, *, isnan=None):
+        geo = _geo()
+        log: list = []
+        lib = _fixture(rules, log)
+        assert set(vars(lib)) == set(rules)
+        monkeypatch.setattr(geo, "_LIB", lib)
+        if isnan is not None:
+            monkeypatch.setattr(geo, "_isnan", isnan)
+        else:
+            assert geo._isnan is math.isnan and geo._isinf is math.isinf
+        try:
+            outcome = ("returned", geo.geodetic(_POINT))
+        except BaseException as exc:
+            outcome = ("raised", exc)
+        monkeypatch.undo()
+        assert geo._LIB is math and geo._isnan is math.isnan and geo._isinf is math.isinf
+&gt;       assert log == schedule, (log[:12], len(log))
+E       AssertionError: (['hypot', 'atan2', 'sin', 'sqrt', 'atan2', 'sin', ...], 8)
+E       assert ['hypot', 'at...', 'sin', ...] == ['hypot', 'at...', 'sin', ...]
+E         
+E         At index 6 diff: 'cos' != 'sqrt'
+E         Right contains 177 more items, first extra item: 'sin'
+E         Use -v to get more diff
+
+tests/test_s2_geodetic.py:835: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.218" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.438" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.057" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.335" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.575" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.066" /></testsuite></testsuites>

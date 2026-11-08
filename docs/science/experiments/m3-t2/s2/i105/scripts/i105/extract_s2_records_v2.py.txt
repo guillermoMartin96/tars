@@ -1,0 +1,59 @@
+"""I-105 extractor: the S2 records from an unaltered pytest log (warnings summary).
+
+Usage: python -I extract_s2_records_v2.py <pytest.log> <outdir>
+
+Same method as I-101's extract_s2_records.py (which is unchanged and still applies to the
+schema-1 records emitted at A to E): pytest's two-space message indent is removed from the
+listing lines only, and the body sha256 and entry count in the header verify the reconstruction.
+This version reads the schema-2 census header written since I-105 (I104-01):
+    S2-XP3-LISTING schema=2 entries=N body_sha256=... outcomes={...}
+    set,index,x_hex,y_hex,z_hex,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source
+A missing record, a listing with another schema, or a count/sha256 mismatch is INCOMPLETE
+(stop 18). Nothing is reconstructed; the log is never edited.
+"""
+import hashlib, json, re, sys
+from pathlib import Path
+
+COLUMNS = "set,index,x_hex,y_hex,z_hex,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source"
+log = Path(sys.argv[1]).read_text()
+out = Path(sys.argv[2]); out.mkdir(parents=True, exist_ok=True)
+status = {"log": str(sys.argv[1]), "log_sha256": hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest(),
+          "extractor": "I-105 extract_s2_records_v2.py (census schema 2)"}
+for tag in ("S2-ENV-RECORD", "S2-G17A-REPORT", "S2-G17B-RECORD"):
+    found = re.findall(rf"{tag} (?:sha256=([0-9a-f]{{64}}) )?(\{{.*\}})\n", log)
+    if len(found) != 1:
+        status[tag] = f"INCOMPLETE: found {len(found)} records"
+        continue
+    digest, body = found[0]
+    rec = json.loads(body)
+    ok = (hashlib.sha256(body.encode()).hexdigest() == digest) if digest else True
+    (out / f"{tag}.json").write_text(json.dumps(rec, indent=1, sort_keys=True) + "\n")
+    status[tag] = "ok" if ok else "INCOMPLETE: sha256 mismatch"
+ms = list(re.finditer(r"S2-XP3-LISTING schema=(\S+) entries=(\d+) body_sha256=([0-9a-f]{64}) outcomes=(\{[^\n]*\})\n"
+                      r"  ([^\n]*)\n(.*?)  S2-XP3-LISTING-END", log, re.S))
+if len(ms) != 1:
+    status["S2-XP3-LISTING"] = f"INCOMPLETE: found {len(ms)} schema-tagged listings"
+else:
+    m = ms[0]
+    schema, n, digest, outcomes, header, raw = m.group(1), int(m.group(2)), m.group(3), m.group(4), m.group(5), m.group(6)
+    raw_lines = raw.split("\n")[:-1]
+    st = {"schema": schema, "entries": n, "body_sha256": digest, "outcomes": outcomes, "columns": header}
+    if schema != "2" or header != COLUMNS:
+        st["status"] = "INCOMPLETE: unexpected schema or columns"
+    elif not all(ln.startswith("  ") for ln in raw_lines):
+        st["status"] = "INCOMPLETE: unexpected indentation"
+    else:
+        body = "\n".join(ln[2:] for ln in raw_lines) + "\n"
+        lines = body.split("\n")[:-1]
+        st["verified"] = hashlib.sha256(body.encode()).hexdigest() == digest and len(lines) == n
+        if not st["verified"]:
+            st["status"] = "INCOMPLETE: count or sha256 mismatch"
+        (out / "S2-XP3-LISTING.csv").write_text(header + "\n" + body)
+    status["S2-XP3-LISTING"] = st
+summary = re.findall(r"^=+ (.*(?:passed|failed|error).*) =+$", log, re.M)
+status["pytest_summary_line"] = summary[-1] if summary else "INCOMPLETE: no summary line"
+status["complete"] = all(status[t] == "ok" for t in ("S2-ENV-RECORD", "S2-G17A-REPORT", "S2-G17B-RECORD")) and \
+    isinstance(status["S2-XP3-LISTING"], dict) and status["S2-XP3-LISTING"].get("verified") is True
+(out / "extraction-status.json").write_text(json.dumps(status, indent=1) + "\n")
+print(json.dumps(status, indent=1))
+sys.exit(0 if status["complete"] else 3)

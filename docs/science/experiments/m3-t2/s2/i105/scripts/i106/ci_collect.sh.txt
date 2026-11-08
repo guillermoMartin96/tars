@@ -1,0 +1,49 @@
+#!/bin/bash
+# I-106: collect and validate one CI run of a corrected commit (F, G or H).
+# Usage: ci_collect.sh <run id> <label e.g. F> <expected head sha> <out dir>
+# Raw job logs are fetched from the GitHub API and never modified. Derived logs strip only the
+# timestamp prefix (committed strip_gh_timestamps.py). Records are extracted with the I-105
+# schema-2 extractor and every census is validated against the frozen listing.
+set -u
+RUN=$1; LABEL=$2; SHA=$3; O=$4
+REPO=guillermoMartin96/tars
+S=$HOME/tars-evidence/I-106/scripts
+X=$HOME/tars-evidence/I-105/scripts
+W=$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic
+PY=$W/.venv/bin/python
+LISTING=$W/tests/s2_dl4_points.txt
+mkdir -p "$O"/{logs,derived,records,validation}
+date -u +%FT%TZ > "$O/collect-utc.txt"
+gh run view -R "$REPO" "$RUN" --json attempt,conclusion,createdAt,databaseId,event,headBranch,headSha,jobs,name,number,startedAt,status,updatedAt,url,workflowName > "$O/run.json"
+gh api "repos/$REPO/actions/runs/$RUN/attempts/1/jobs" > "$O/jobs-attempt1.json"
+gh run view -R "$REPO" "$RUN" --log > "$O/logs/run-$RUN-attempt1.log" 2> "$O/logs/run-log.err"
+for id in $($PY -I -c "import json,sys;print(' '.join(str(j['id']) for j in json.load(open(sys.argv[1]))['jobs']))" "$O/jobs-attempt1.json"); do
+  gh api --allow-escape-sequences "repos/$REPO/actions/jobs/$id/logs" > "$O/logs/job-$id.log" 2> "$O/logs/job-$id.err"
+done
+(cd "$O" && shasum -a 256 logs/*.log > raw-logs.sha256)
+$PY -I - "$O" "$SHA" <<'PY' > "$O/run-check.json"
+import json, sys
+O, sha = sys.argv[1], sys.argv[2]
+r = json.load(open(f"{O}/run.json")); j = json.load(open(f"{O}/jobs-attempt1.json"))["jobs"]
+res = {"run": r["databaseId"], "attempt": r["attempt"], "headSha": r["headSha"], "expected": sha,
+       "status": r["status"], "conclusion": r["conclusion"], "url": r["url"],
+       "jobs": [{"id": x["id"], "name": x["name"], "conclusion": x["conclusion"], "run_attempt": x["run_attempt"],
+                 "head_sha": x["head_sha"], "started_at": x["started_at"], "completed_at": x["completed_at"],
+                 "html_url": x["html_url"],
+                 "steps_succeeded": sum(s["conclusion"] == "success" for s in x["steps"]), "steps": len(x["steps"]),
+                 "executed (not carried over)": x["run_attempt"] == 1 and bool(x["started_at"]) and sum(s["conclusion"] == "success" for s in x["steps"]) > 0}
+                for x in j]}
+res["ok"] = (r["attempt"] == 1 and r["headSha"] == sha and r["conclusion"] == "success" and len(j) == 4
+             and all(x["conclusion"] == "success" and x["run_attempt"] == 1 and x["head_sha"] == sha for x in j))
+print(json.dumps(res, indent=1))
+PY
+for f in "$O"/logs/job-*.log; do id=$(basename "$f" .log)
+  name=$($PY -I -c "import json,sys;print([x['name'] for x in json.load(open(sys.argv[1]))['jobs'] if 'job-'+str(x['id'])==sys.argv[2]][0])" "$O/jobs-attempt1.json" "$id")
+  case "$name" in check*) ;; *) echo "$id $name: no S2 records expected (not a check job)" >> "$O/records/skipped.txt"; continue;; esac
+  $PY -I "$W/docs/science/experiments/m3-t2/s2/ci/strip_gh_timestamps.py.txt" "$f" "$O/derived/$id.stripped.log"
+  $PY -I "$X/extract_s2_records_v2.py" "$O/derived/$id.stripped.log" "$O/records/$id" > "$O/records/$id.extract.stdout" 2>&1; echo $? > "$O/records/$id.extract.exit"
+  $PY -I "$X/validate_census.py" "$LISTING" "$O/records/$id/S2-XP3-LISTING.csv" ci "$O/validation/$id.json" > "$O/validation/$id.stdout" 2>&1; echo $? > "$O/validation/$id.exit"
+  grep -E "^=+ .*(passed|failed).* =+$" "$O/derived/$id.stripped.log" | tail -1 > "$O/records/$id.pytest-summary.txt"
+done
+(cd "$O" && shasum -a 256 derived/*.log >> raw-logs.sha256)
+echo done

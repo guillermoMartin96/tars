@@ -1,0 +1,94 @@
+#!/bin/bash
+# S2 (I-99/I-101/I-103/I-106), v11 §3.14 step 5: formal R-1..R-4, R-S1, R-S2 at the corrected tip (I-106: G, before H),
+# in fresh clones; adapted from the I-103 s2_rgates.sh. I-106 changes: every execution gets its own §3.16 run record
+# (I-105 run_record.py) and a directly captured DL-5 ENV record (env_probe_at.py); the R-S2 full suite's own
+# S2 records are extracted (I-105 extract_s2_records_v2.py) and its census validated. Logic otherwise unchanged.
+# STAGE is the implementation worktree at pushed commit D (CI 4/4 green). BASE = K is recomputed in
+# separate fresh clones for comparison
+# (I-40 §13.9: recompute, never read stored values).
+# Usage: d_rgates.sh D_STAGE OUT_DIR
+set -u
+STAGE=$1; O=$2
+BASE=83d573bdb4933f5d2376423d6b8e9f3348a4ab6f
+URL=https://github.com/guillermoMartin96/tars.git
+G=7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+mkdir -p "$O"/{logs,r1,r2,r3,r4,run_records}; L=$O/logs; C=$O/clones; mkdir -p "$C"
+log() { echo "[$(date -u +%H:%M:%S)] $*" | tee -a "$L/summary.txt"; }
+DSHA=$(git -C "$STAGE" rev-parse HEAD); log "D stage commit $DSHA tree $(git -C "$STAGE" rev-parse 'HEAD^{tree}')"
+for c in dA dB dC; do git clone -q --no-local "$STAGE" "$C/$c" && git -C "$C/$c" checkout -q --detach "$DSHA"; done
+for c in bA bB bC; do git clone -q "$URL" "$C/$c" && git -C "$C/$c" checkout -q --detach "$BASE"; done
+for c in dA dB dC bA bB bC; do (cd "$C/$c" && uv sync --locked -q); log "clone $c $(git -C "$C/$c" rev-parse HEAD) status [$(git -C "$C/$c" status --porcelain)]"; done
+RR=I-106
+S6=$HOME/tars-evidence/I-106/scripts; S5=$HOME/tars-evidence/I-105/scripts
+REC=$C/dC/tests/test_s2_environment_record.py   # corrected-tip recorder, used for every clone's probe
+rr() { (cd "$1" && .venv/bin/python -I -B "$S5/run_record.py" "$1" "$O/run_records/$3.json" "$2" src/tars/sim/geodesy.py tests/s2_dl4_points.txt uv.lock > /dev/null 2>&1; echo $? > "$O/run_records/$3.exit"
+        .venv/bin/python -I -B "$S6/env_probe_at.py" "$REC" "$1" "$O/run_records/$3.env.json" > "$O/run_records/$3.env.stdout" 2>&1; echo $? > "$O/run_records/$3.env.exit"); }
+for n in dA:m1 bA:m1 dB:m2 bB:m2; do c=${n%%:*}; k=${n##*:}
+  (cd "$C/$c" && toolbox/scripts/run_${k}_proof.sh > "$L/proof_$c.log" 2>&1; echo "exit=$?" >> "$L/proof_$c.log") &
+done
+rr "$C/dA" "S2 R-1 M1 proof at D (local host)" R1_D; rr "$C/dB" "S2 R-2 M2 proof at D (local host)" R2_D
+rr "$C/bA" "S2 R-1 M1 proof at BASE, comparison (local host)" R1_BASE; rr "$C/bB" "S2 R-2 M2 proof at BASE, comparison (local host)" R2_BASE
+
+# R-3 (T1) and R-4 (T0) at D and at BASE
+for t in dC bC; do c=$C/$t; mkdir -p "$O/r3/$t/old" "$O/r3/$t/old2"
+  (cd "$c" && git archive 97b69ef src | tar -x -C "$O/r3/$t/old" && git archive b1566ae src | tar -x -C "$O/r3/$t/old2")
+  (cd "$c" && .venv/bin/python -B docs/science/experiments/m3-t1/t1_review01_correction_check.py "$O/r3/$t/old/src" "$O/r3/$t/r01.json" > "$O/r3/$t/r01.stdout" 2>&1); e1=$?
+  (cd "$c" && .venv/bin/python -B docs/science/experiments/m3-t1/t1_review02_correction_check.py "$O/r3/$t/old2/src" "$O/r3/$t/r02.json" > "$O/r3/$t/r02.stdout" 2>&1); e2=$?
+  cmp -s "$O/r3/$t/r01.json" "$c/docs/science/experiments/m3-t1/t1_review01_correction_check_results.json" && r1=identical || r1=DIFFERS
+  cmp -s "$O/r3/$t/r02.json" "$c/docs/science/experiments/m3-t1/t1_review02_correction_check_results.json" && r2=identical || r2=DIFFERS
+  (cd "$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider -rA --junitxml="$O/r3/$t/t1_junit.xml" tests/test_zonal_j2.py tests/test_constants.py > "$O/r3/$t/t1_tests.txt" 2>&1)
+  log "R-3 $t: r01 exit=$e1 $r1; r02 exit=$e2 $r2 (vs committed results); T1 tests $(tail -1 "$O/r3/$t/t1_tests.txt")"
+  (cd "$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider docs/science/experiments/m3-t0/check_review0*.py > "$O/r4/$t.txt" 2>&1)
+  log "R-4 $t: $(tail -1 "$O/r4/$t.txt")"
+done
+cmp -s "$O/r3/dC/r01.json" "$O/r3/bC/r01.json" && cmp -s "$O/r3/dC/r02.json" "$O/r3/bC/r02.json" && log "R-3 correction outputs D vs BASE: byte-identical (recomputed in both)" || log "R-3 correction outputs D vs BASE: DIFFER"
+rr "$C/dC" "S2 R-3 T1 and R-4 T0 at D (local host)" R3_R4_D; rr "$C/bC" "S2 R-3 T1 and R-4 T0 at BASE, comparison (local host)" R3_R4_BASE
+(cd "$C/dC" && .venv/bin/ruff check --no-cache . > "$O/logs/ruff_check_D.txt" 2>&1; echo "exit=$?" >> "$O/logs/ruff_check_D.txt"; .venv/bin/ruff format --no-cache --check . > "$O/logs/ruff_format_D.txt" 2>&1; echo "exit=$?" >> "$O/logs/ruff_format_D.txt")
+log "ruff at D: check $(tail -1 "$O/logs/ruff_check_D.txt"), format $(tail -2 "$O/logs/ruff_format_D.txt" | tr '\n' ' ')"
+
+# R-S1 and R-S2 at D (I-103 adaptation): S1 tests unchanged and S1 manifest verifies; full suite
+rr "$C/dC" "S2 R-S1 and R-S2 at the corrected tip (local host)" RS1_RS2_D
+for c in dC; do
+  (cd "$C/$c" && .venv/bin/python -B -m pytest -q -p no:cacheprovider -rA --junitxml="$O/rs1_junit.xml" tests/test_s1_force_context.py tests/test_s1_failure_paths.py > "$O/rs1_tests.txt" 2>&1; echo "exit=$?" >> "$O/rs1_tests.txt")
+  (cd "$C/$c/docs/science/experiments/m3-t2/s1" && shasum -a 256 -c SHA256SUMS > "$O/rs1_manifest.txt" 2>&1; echo "exit=$?" >> "$O/rs1_manifest.txt")
+  log "R-S1: S1 tests $(tail -2 "$O/rs1_tests.txt" | tr '\n' ' '); S1 SHA256SUMS non-OK lines $(grep -vc ': OK$' "$O/rs1_manifest.txt") (includes exit line)"
+  (cd "$C/$c" && .venv/bin/python -B -m pytest -ra -p no:cacheprovider --junitxml="$O/rs2_junit.xml" > "$O/rs2_full_suite.txt" 2>&1; echo "exit=$?" >> "$O/rs2_full_suite.txt")
+  log "R-S2: full suite at D $(tail -2 "$O/rs2_full_suite.txt" | tr '\n' ' ')"
+  "$C/$c/.venv/bin/python" -I -B "$S5/extract_s2_records_v2.py" "$O/rs2_full_suite.txt" "$O/rs2_records" > "$O/rs2_extract.stdout" 2>&1; echo "exit=$?" >> "$O/rs2_extract.stdout"
+  "$C/$c/.venv/bin/python" -I -B "$S5/validate_census.py" "$C/$c/tests/s2_dl4_points.txt" "$O/rs2_records/S2-XP3-LISTING.csv" ci "$O/rs2_census_validation.json" > "$O/rs2_census_validation.stdout" 2>&1; echo "exit=$?" >> "$O/rs2_census_validation.stdout"
+  log "R-S2 records: extract $(tail -1 "$O/rs2_extract.stdout"); census validation $(tail -1 "$O/rs2_census_validation.stdout")"
+done
+wait
+for c in dA bA dB bB; do log "proof $c: $(grep -E '^overall' "$L/proof_$c.log" | tail -1) $(tail -1 "$L/proof_$c.log")"; done
+for c in dA bA; do cp -R "$C/$c/proof/records/evidence/M1" "$O/r1/$c"; log "R-1 $c golden in M1 evidence: $(grep -rho "$G" "$C/$c/proof/records/evidence/M1/" | head -1)"; done
+for c in dB bB; do cp -R "$C/$c/proof/records/evidence/M2" "$O/r2/$c"; done
+"$C/dC/.venv/bin/python" -B - "$O" <<'PY' | tee -a "$L/summary.txt"
+import json, re, sys, hashlib
+O = sys.argv[1]
+def norm(p):
+    t = open(p).read()
+    t = re.sub(r"/var/folders/[^ \"']*/T/tmp\.[A-Za-z0-9]+", "<TMP>", t)
+    t = re.sub(r"(/private)?/tmp/claude-[^ \"']*?/clones/(dA|bA|dB|bB)", "<CLONE>", t)
+    t = re.sub(r"/[^ \"']*?/clones/(dA|bA|dB|bB)", "<CLONE>", t)  # I-103: any clone root
+    return t.splitlines()
+# R-2 semantic: final-states record
+a = json.load(open(f"{O}/r2/bB/m2_final_states_record.json")); b = json.load(open(f"{O}/r2/dB/m2_final_states_record.json"))
+diff = sorted(k for k in a.keys() | b.keys() if a.get(k) != b.get(k))
+print("R-2 m2_final_states_record keys differing BASE vs D:", diff)
+print("R-2 missions (final r, v, final_tick, final_t, status, events_sha256) identical:", a["missions"] == b["missions"])
+body = {k: v for k, v in b.items() if k != "sha256"}; body["revision"] = a["revision"]
+print("R-2 record sha256 recomputed with BASE revision substituted equals BASE record sha256:",
+      hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest() == a["sha256"])
+# R-2 stdout: every [PASS]/[FAIL] line and every digest/golden/snapshot/manifest/threshold line
+for name in ("m2_proof_stdout.txt",):
+    x, y = norm(f"{O}/r2/bB/{name}"), norm(f"{O}/r2/dB/{name}")
+    print(f"R-2 {name}: [PASS] BASE {sum(l.startswith('[PASS]') for l in x)} D {sum(l.startswith('[PASS]') for l in y)}; [FAIL] BASE {sum(l.startswith('[FAIL]') for l in x)} D {sum(l.startswith('[FAIL]') for l in y)}")
+    sem = lambda ls: [l for l in ls if re.search(r"^\[(PASS|FAIL)\]|digest|sha256|golden|snapshot|manifest|threshold", l, re.I)]
+    sx, sy = sem(x), sem(y)
+    print(f"R-2 {name}: semantic lines (PASS/FAIL/digest/golden/snapshot/manifest/threshold) after temp-path normalization identical: {sx == sy} ({len(sx)} lines)")
+    other = [(i, p, q) for i, (p, q) in enumerate(zip(x, y)) if p != q]
+    print(f"R-2 {name}: remaining differing lines after normalization: {len(other)}", [o[1][:80] + ' | ' + o[2][:80] for o in other][:5], "len", len(x), len(y))
+PY
+for k in M1:r1/bA:r1/dA M2:r2/bB:r2/dB; do n=${k%%:*}; r=${k#*:}; diff -r "$O/${r%%:*}" "$O/${r#*:}" > "$L/proofdiff_$n.txt" 2>&1; done
+log DONE

@@ -1,0 +1,884 @@
+{
+ "summary": {
+  "nodes": 123,
+  "by_role_and_status": {
+   "component test file | fail:AssertionError": 2,
+   "component test file | fail:ImportError": 100,
+   "component test file | pass": 10,
+   "new designated witness | fail:ImportError": 2,
+   "recorder | pass": 9
+  },
+  "recorders_passed": 9,
+  "new_witness_nodes": {
+   "tests.test_s2_geodetic::test_g03_g07_designated_witness_accepted_axis_point_0_0_7e6": "fail:ImportError",
+   "tests.test_s2_geodetic::test_g04_designated_witness_0_nan_7e6": "fail:ImportError"
+  },
+  "i102_nodes_compared": 112,
+  "i102_nodes_missing_here": [],
+  "not_ok": [],
+  "verdict": "OK"
+ },
+ "nodes": [
+  {
+   "node": "tests.test_s2_geodetic::test_g01_inverse_flattening_is_the_nga_value",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g02_derived_f_and_e2_are_correctly_rounded_step_by_step",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_point_inside_the_evolute_region",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_all_eight_signed_zero_origins",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_non_origin_subnormal_is_in_the_evolute_region",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[+x]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[x=y]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[+z]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[-z]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[(1,0,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[(2,0,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[(1,0,2)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_inside_point[(1,1,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[+x]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[x=y]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[+z]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[-z]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[(1,0,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[(2,0,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[(1,0,2)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_geometric[(1,1,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[+x]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[x=y]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[+z]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[-z]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[(1,0,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[(2,0,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[(1,0,2)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_boundary_pair_outside_point_accepted[(1,1,1)]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g04_non_finite_component_in_each_position",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g04_mixed_non_finite_cases",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g04_designated_witness_0_nan_7e6",
+   "role": "new designated witness",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g05_overflow_rows_far_from_the_edge",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g05_large_finite_rows_are_accepted",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g05_no_overflow_or_zero_division_error_escapes",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_error_class_is_a_value_error_with_reason_and_category",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r0-non_finite]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r1-non_finite]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r2-origin]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r3-evolute_region]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r4-not_binary64]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r5-not_binary64]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r6-non_convergence]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_section_3_8_order_table[r7-overflow]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_fraction_component_is_a_type_error",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r0]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r1]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r2]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r3]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r4]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r5]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r6]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r7]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r8]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structure_and_type_errors[r9]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_numpy_float64_is_accepted_bit_identical_to_float",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_float_subclass_whose_abs_raises_is_normalized",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_float_subclass_overrides_never_run",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_int_subclass_overrides_never_run",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_class_faking_object_is_a_type_error",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_structural_key_error_propagates_unchanged",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_sv1_getitem_value_error_sentinel_propagates_by_identity",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_sv2_len_overflow_error_sentinel_propagates_by_identity",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g06_fixed_message_and_category_per_reason",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g07_returns_h_then_phi_as_builtin_floats",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g03_g07_designated_witness_accepted_axis_point_0_0_7e6",
+   "role": "new designated witness",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g07_list_tuple_and_float64_ndarray_are_bit_identical",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g07_inputs_are_not_mutated",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g09_repeated_in_process_evaluation_is_byte_identical",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g09_second_subprocess_is_byte_identical",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g09_module_state_is_unchanged_after_calls",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g09_architecture_scan_covers_geodesy",
+   "role": "component test file",
+   "status": "fail:AssertionError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w1_round_to_nearest_excludes_toward_zero_and_down",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w2_round_to_nearest_excludes_up",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w3_ties_to_even_excludes_ties_away",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w4_tie_to_even_upward",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w5_no_flush_to_zero",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w6_no_denormals_are_zero",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g10_w7_subnormal_tie_to_even",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g11_geodesy_imports_only_math_fractions_numbers_typing_and_constants",
+   "role": "component test file",
+   "status": "fail:AssertionError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g13_protected_files_are_byte_identical_to_k",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g13_existing_statements_are_ast_identical_to_k[src/tars/sim/constants.py]",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g13_existing_statements_are_ast_identical_to_k[tests/test_constants.py]",
+   "role": "component test file",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_rejection_points_raise_non_convergence[r0]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_rejection_points_raise_non_convergence[r1]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_rejection_points_raise_non_convergence[r2]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_rejection_points_raise_non_convergence[r3]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_rejection_points_raise_non_convergence[r4]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_named_acceptance_points_are_accepted",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_enumerated_acceptance_sets_are_accepted[S-EQ]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_enumerated_acceptance_sets_are_accepted[S-AX]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_enumerated_acceptance_sets_are_accepted[S-NEAR]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g14_enumerated_acceptance_sets_are_accepted[S-BIG]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g15_protected_sets_are_accepted[PS-A]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g15_protected_sets_are_accepted[PS-A']",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g15_protected_sets_are_accepted[PS-OPS]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g15_protected_sets_are_accepted[PS-GRID]",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi00_control",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi01_sin_nan",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi02_sqrt_raises_value_error",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi03_sqrt_zero_divides",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi04_atan2_raises_overflow_error",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi05_sin_raises_type_error_propagates",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi06_missing_cos_propagates_attribute_error",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi07_overflow_before_non_convergence",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi08_nan_before_overflow_and_non_convergence",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi09_nan_before_overflow",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi10_huge_cos_overflows",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi11_stop_test_met_at_update_60_is_accepted",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi12_stop_test_first_met_at_61_is_non_convergence",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi13_failure_in_final_height_before_non_convergence",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi14_sin_raises_name_error_propagates",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g16_fi15_post_check_exception_is_not_wrapped",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_geodetic::test_g17_every_listing_entry_has_its_geometric_outcome",
+   "role": "component test file",
+   "status": "fail:ImportError",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": true
+  },
+  {
+   "node": "tests.test_s2_environment_record::test_s2_environment_record_is_emitted",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_xp3_listing::test_s2_xp3_rp9_listing_is_emitted",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17a_frozen_file_sha256_equals_commit_a_record",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17a_set_sequence_indices_and_counts",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17a_s_ax_boundary_entries",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17a_dg_cusp_witness_slots",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17a_labels_recomputed_from_the_file",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17a_rerun_exact_self_checks_structure_labels_and_report",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  },
+  {
+   "node": "tests.test_s2_dl4_points::test_g17b_class_x_replay_equality",
+   "role": "recorder",
+   "status": "pass",
+   "declared_reason_ok": true,
+   "same_status_as_I102_supplemental": null
+  }
+ ]
+}

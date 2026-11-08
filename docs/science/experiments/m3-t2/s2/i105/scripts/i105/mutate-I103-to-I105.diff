@@ -1,0 +1,95 @@
+12a13,23
+> 
+> I-105 (I104-04, I104-02):
+> - MG-02 and MG-04 are bound to their exact v11 §3.12 witnesses, each alone in its own node:
+>   G-04 (0, nan, 7e6) and the G-03/G-07 accepted axis point (0, 0, 7.0e6). The transformations are
+>   unchanged. A kill of either also requires the exact witness in the assertion message (WITNESS).
+> - Every execution (control and each mutant) also runs the nine component-free recorders (ENV,
+>   X-P3/RP-9 listing, G-17a, G-17b) in the same pytest process, and gets its own run record
+>   (run_record.py with the same interpreter) and an extraction status. A recorder node that does
+>   not pass, or a record that is missing or fails its digest, makes that execution INCOMPLETE
+>   (stop 18), which is NOT OK. Recorder nodes are never designated nodes.
+> - Failure messages are kept in full (no 300-character truncation).
+14a26,27
+> import datetime
+> import hashlib
+94c107
+<      [f"{T}::test_g04_non_finite_component_in_each_position"], ASSERT),
+---
+>      [f"{T}::test_g04_designated_witness_0_nan_7e6"], ASSERT),  # I-105: exact (0, nan, 7e6)
+96c109,110
+<     ("MG-04", "origin check with or", [(G, ORIGIN, "    if x == 0.0 or y == 0.0 or z == 0.0:\n")], [G03_OUTA, G14A], ASSERT),
+---
+>     ("MG-04", "origin check with or", [(G, ORIGIN, "    if x == 0.0 or y == 0.0 or z == 0.0:\n")],
+>      [f"{T}::test_g03_g07_designated_witness_accepted_axis_point_0_0_7e6"], ASSERT),  # I-105: exact (0, 0, 7e6)
+193a208,213
+> WITNESS = {"MG-02": "(0.0, nan, 7000000.0)", "MG-04": "(0.0, 0.0, 7000000.0)"}  # I-105
+> RECORDERS = ["tests/test_s2_environment_record.py", "tests/test_s2_xp3_listing.py", "tests/test_s2_dl4_points.py"]
+> RECORDER_CLASSES = ("tests.test_s2_environment_record", "tests.test_s2_xp3_listing", "tests.test_s2_dl4_points")
+> SCRIPTS = Path(__file__).resolve().parent
+> PROBE_PATHS = [G, T, C, "tests/test_s2_xp3_listing.py", "tests/test_s2_environment_record.py",
+>                "tests/test_s2_dl4_points.py", "tests/s2_dl4_points.txt"]
+199,201c219,240
+<     proc = subprocess.run([str(PROTO / ".venv/bin/python"), "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider",
+<                            f"--junitxml={xml}", *nodes], cwd=PROTO, env=env, capture_output=True, text=True)
+<     (OUT / f"{tag}.stdout.txt").write_text(proc.stdout + proc.stderr)
+---
+>     py = str(PROTO / ".venv/bin/python")
+>     rr = subprocess.run([py, "-I", str(SCRIPTS / "run_record.py"), str(PROTO), str(OUT / f"{tag}.run-record.json"),
+>                          f"I-105 campaign execution {tag}; component source {src}", *PROBE_PATHS],
+>                         capture_output=True, text=True)
+>     rec = json.loads((OUT / f"{tag}.run-record.json").read_text())
+>     rec["executed component"] = {"path": str(Path(src) / "tars/sim/geodesy.py"),
+>                                  "sha256": hashlib.sha256((Path(src) / "tars/sim/geodesy.py").read_bytes()).hexdigest()}
+>     cmd = [py, "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", f"--junitxml={xml}", *nodes, *RECORDERS]
+>     rec["command"] = cmd
+>     rec["start utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+>     proc = subprocess.run(cmd, cwd=PROTO, env=env, capture_output=True, text=True)
+>     rec["end utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+>     log = OUT / f"{tag}.stdout.txt"
+>     log.write_text(proc.stdout + proc.stderr)
+>     ex = subprocess.run([py, "-I", str(SCRIPTS / "extract_s2_records_v2.py"), str(log), str(OUT / f"{tag}.records")],
+>                         capture_output=True, text=True)
+>     status = json.loads((OUT / f"{tag}.records" / "extraction-status.json").read_text())
+>     rec.update({"pytest exit": proc.returncode, "probe exit": rr.returncode,
+>                 "stdout sha256": hashlib.sha256(log.read_bytes()).hexdigest(),
+>                 "junit sha256": hashlib.sha256(xml.read_bytes()).hexdigest(),
+>                 "records complete": status.get("complete") is True, "extract exit": ex.returncode})
+>     (OUT / f"{tag}.run-record.json").write_text(json.dumps(rec, indent=1) + "\n")
+203c242
+<     res = []
+---
+>     res, recs = [], []
+206,208c245,254
+<         res.append({"node": f"{tc.get('classname')}::{tc.get('name')}",
+<                     "status": "pass" if f is None else ("error" if tc.find("error") is not None else "fail"),
+<                     "message": None if f is None else (f.get("message") or "")[:300]})
+---
+>         row = {"node": f"{tc.get('classname')}::{tc.get('name')}",
+>                "status": "pass" if f is None else ("error" if tc.find("error") is not None else "fail"),
+>                "message": None if f is None else (f.get("message") or "")}
+>         (recs if tc.get("classname") in RECORDER_CLASSES else res).append(row)
+>     complete = (rec["records complete"] and rr.returncode == 0 and len(recs) == 9
+>                 and all(r["status"] == "pass" for r in recs))
+>     records[tag] = {"complete": complete, "recorder_nodes": len(recs),
+>                     "recorder_nodes_passed": sum(r["status"] == "pass" for r in recs),
+>                     "records": {k: status.get(k) for k in ("S2-ENV-RECORD", "S2-G17A-REPORT", "S2-G17B-RECORD")},
+>                     "listing": status.get("S2-XP3-LISTING"), "run_record": f"{tag}.run-record.json"}
+213a260
+> records = {}
+215c262
+< if not all(r["status"] == "pass" for r in report["control"]):
+---
+> if not all(r["status"] == "pass" for r in report["control"]) or not records["control"]["complete"]:
+236a284,287
+>         if verdict == "KILLED" and mid in WITNESS and not all(WITNESS[mid] in (f["message"] or "") for f in fails):
+>             verdict = "KILLED_OTHER_WITNESS"  # I-105: the exact designated witness must be the failing case
+>     if not records[mid]["complete"]:
+>         verdict += " / INCOMPLETE RECORDS (stop 18)"
+242a294
+> report["execution_records"] = records
+244c296,297
+<        and not (v["verdict"] == "KILLED" or (k in EQUIVALENT and v["verdict"].startswith("SURVIVED")))]
+---
+>        and not (v["verdict"] == "KILLED" or (k in EQUIVALENT and v["verdict"] == "SURVIVED (documented equivalent)"))]
+> bad += [k for k, v in records.items() if not v["complete"]]  # I-105: incomplete records (stop 18)

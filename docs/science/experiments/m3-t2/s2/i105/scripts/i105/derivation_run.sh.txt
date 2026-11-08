@@ -1,0 +1,17 @@
+#!/bin/bash
+# I-105 replacement execution of the commit-D derivation script on the candidate, with its own
+# run record and host DL-5 probe (D-SCRIPTS-AT-BC in the gap inventory). The script is the
+# unchanged I-101 derivation_crosscheck.py; its output is compared with the committed D output.
+set -u
+E=$HOME/tars-evidence/I-105; S=$E/scripts; C=$E/clone-candidate; O=$E/derivation
+W=$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/docs/science/experiments/m3-t2/s2
+export PYTHONDONTWRITEBYTECODE=1 PATH="/usr/bin:/bin:/usr/sbin:/sbin"
+mkdir -p "$O"; cd "$C" || exit 99
+.venv/bin/python -I "$S/run_record.py" "$C" "$O/run-record.json" "I-105 derivation_crosscheck.py on the candidate" \
+  src/tars/sim/geodesy.py tests/s2_dl4_points.txt > /dev/null 2>&1
+.venv/bin/python -I "$S/env_probe.py" "$C" "$O/env-record.json" > "$O/env-probe.stdout" 2>&1; echo $? > "$O/env-probe.exit"
+date -u +%FT%TZ > "$O/start-utc.txt"
+.venv/bin/python -I "$HOME/tars-evidence/I-101/commit-d/scripts/derivation_crosscheck.py" "$C" > "$O/derivation_crosscheck.json" 2> "$O/derivation_crosscheck.err"; echo $? > "$O/derivation_crosscheck.exit"
+date -u +%FT%TZ > "$O/end-utc.txt"
+cmp "$O/derivation_crosscheck.json" "$W/derivation/derivation_crosscheck.json" > "$O/equals-committed-D.txt" 2>&1 && echo "IDENTICAL to the committed D derivation output" >> "$O/equals-committed-D.txt"
+touch "$O/DONE"

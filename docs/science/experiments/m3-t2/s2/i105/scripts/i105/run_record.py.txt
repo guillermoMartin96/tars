@@ -1,0 +1,49 @@
+"""I-105 per-run provenance probe (v11 §3.16 S2 run record, plus the I-101 comparison fields).
+
+Usage: <repo>/.venv/bin/python -I run_record.py <repo root> <out.json> [label] [extra paths...]
+
+Run with the SAME interpreter that runs the gate execution. It records the commit the tree is
+based on, the tree's porcelain status, the git blob and sha256 of each named path (the
+uncommitted bytes actually executed), sys.version, platform.platform(), platform.machine(), the
+uv.lock sha256 and the sha256 of the interpreter executable (real path resolved). A value that
+cannot be observed is written "[U] unavailable: ..." and never left empty.
+"""
+import datetime, hashlib, json, os, platform, subprocess, sys
+from pathlib import Path
+
+root, out = Path(sys.argv[1]), Path(sys.argv[2])
+label = sys.argv[3] if len(sys.argv) > 3 else ""
+paths = sys.argv[4:]
+
+
+def git(*a):
+    r = subprocess.run(["git", "-C", str(root), *a], capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else f"[U] unavailable: git {' '.join(a)} exit {r.returncode}: {r.stderr.strip()}"
+
+
+def sha(p):
+    try:
+        return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+    except OSError as exc:
+        return f"[U] unavailable: {type(exc).__name__}: {exc}"
+
+
+real = os.path.realpath(sys.executable)
+rec = {
+    "label": label,
+    "utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    "repo root": str(root),
+    "commit (HEAD)": git("rev-parse", "HEAD"),
+    "git status --porcelain --untracked-files=all": git("status", "--porcelain", "--untracked-files=all").splitlines(),
+    "executed file identities": {p: {"blob": git("hash-object", p) if (root / p).exists() else "absent",
+                                     "sha256": sha(root / p) if (root / p).exists() else "absent"} for p in paths},
+    "sys.version": sys.version,
+    "platform.platform()": platform.platform(),
+    "platform.machine()": platform.machine(),
+    "uv.lock sha256": sha(root / "uv.lock"),
+    "sys.executable": sys.executable,
+    "interpreter realpath": real,
+    "interpreter realpath sha256": sha(real),
+}
+out.write_text(json.dumps(rec, indent=1) + "\n")
+print(json.dumps({k: rec[k] for k in ("commit (HEAD)", "sys.version", "platform.platform()", "platform.machine()", "uv.lock sha256", "interpreter realpath sha256")}, indent=1))

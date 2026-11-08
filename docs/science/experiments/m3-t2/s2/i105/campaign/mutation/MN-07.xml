@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="13" time="1.827" timestamp="2026-11-07T16:49:29.045755-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi02_sqrt_raises_value_error" time="0.003"><failure message="AssertionError: &lt;class 'ValueError'&gt;&#10;assert &lt;class 'ValueError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;&#10; +  where &lt;class 'ValueError'&gt; = type(ValueError('injected'))&#10; +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b9211f0&gt;
+
+    def test_g16_fi02_sqrt_raises_value_error(monkeypatch):  # S-4
+        out = _run_case(monkeypatch, _rules(sqrt=_Raise(ValueError("injected"))), _SCHED_00[:4])
+&gt;       _expect_reason(out, "numerical_failure", ValueError)
+
+tests/test_s2_geodetic.py:872: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', ValueError('injected')), reason = 'numerical_failure'
+cause = &lt;class 'ValueError'&gt;
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+&gt;       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: &lt;class 'ValueError'&gt;
+E       assert &lt;class 'ValueError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;
+E        +  where &lt;class 'ValueError'&gt; = type(ValueError('injected'))
+E        +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError
+
+tests/test_s2_geodetic.py:843: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi03_sqrt_zero_divides" time="0.001"><failure message="AssertionError: &lt;class 'ZeroDivisionError'&gt;&#10;assert &lt;class 'ZeroDivisionError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;&#10; +  where &lt;class 'ZeroDivisionError'&gt; = type(ZeroDivisionError('float division by zero'))&#10; +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b9b5d30&gt;
+
+    def test_g16_fi03_sqrt_zero_divides(monkeypatch):  # S-2, S-9
+        out = _run_case(monkeypatch, _rules(sqrt=0.0), _SCHED_00[:4])
+&gt;       _expect_reason(out, "numerical_failure", ZeroDivisionError)
+
+tests/test_s2_geodetic.py:877: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', ZeroDivisionError('float division by zero'))
+reason = 'numerical_failure', cause = &lt;class 'ZeroDivisionError'&gt;
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+&gt;       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: &lt;class 'ZeroDivisionError'&gt;
+E       assert &lt;class 'ZeroDivisionError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;
+E        +  where &lt;class 'ZeroDivisionError'&gt; = type(ZeroDivisionError('float division by zero'))
+E        +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError
+
+tests/test_s2_geodetic.py:843: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi04_atan2_raises_overflow_error" time="0.001"><failure message="AssertionError: &lt;class 'OverflowError'&gt;&#10;assert &lt;class 'OverflowError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;&#10; +  where &lt;class 'OverflowError'&gt; = type(OverflowError('injected'))&#10; +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b9b4d70&gt;
+
+    def test_g16_fi04_atan2_raises_overflow_error(monkeypatch):  # S-5
+        out = _run_case(monkeypatch, _rules(atan2=_Raise(OverflowError("injected"))), _SCHED_00[:2])
+&gt;       _expect_reason(out, "numerical_failure", OverflowError)
+
+tests/test_s2_geodetic.py:882: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', OverflowError('injected')), reason = 'numerical_failure'
+cause = &lt;class 'OverflowError'&gt;
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+&gt;       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: &lt;class 'OverflowError'&gt;
+E       assert &lt;class 'OverflowError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;
+E        +  where &lt;class 'OverflowError'&gt; = type(OverflowError('injected'))
+E        +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError
+
+tests/test_s2_geodetic.py:843: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi13_failure_in_final_height_before_non_convergence" time="0.001"><failure message="AssertionError: &lt;class 'ValueError'&gt;&#10;assert &lt;class 'ValueError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;&#10; +  where &lt;class 'ValueError'&gt; = type(ValueError('injected'))&#10; +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b9f9370&gt;
+
+    def test_g16_fi13_failure_in_final_height_before_non_convergence(monkeypatch):  # S-4
+        def sqrt(i):
+            return 1.0 if i &lt; 60 else _Raise(ValueError("injected"))
+    
+        out = _run_case(monkeypatch, _rules(atan2=_atan2_never_converging, sqrt=sqrt), _SCHED_07)
+&gt;       _expect_reason(out, "numerical_failure", ValueError)
+
+tests/test_s2_geodetic.py:940: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', ValueError('injected')), reason = 'numerical_failure'
+cause = &lt;class 'ValueError'&gt;
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+&gt;       assert type(value) is geo.GeodeticDomainError, type(value)
+E       AssertionError: &lt;class 'ValueError'&gt;
+E       assert &lt;class 'ValueError'&gt; is &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt;
+E        +  where &lt;class 'ValueError'&gt; = type(ValueError('injected'))
+E        +  and   &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MN-07/src/tars/sim/geodesy.py'&gt;.GeodeticDomainError
+
+tests/test_s2_geodetic.py:843: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.203" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.359" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.007" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.052" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.304" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.522" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.067" /></testsuite></testsuites>

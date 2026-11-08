@@ -1,0 +1,10 @@
+I-106 pre-F checks, 2026-11-08T03:23:57Z
+HEAD 495590033ddc0456b2b93ce08700152fae5a3123
+tests/test_s2_geodetic.py worktree blob 50c75e31db308358795d0c34ccd4b1457a787360 sha256 8383d526a52d3dfc4683c0733ecfecc1c902da8f0e7cae5548da43e643040410 | red-record blob 50c75e31db308358795d0c34ccd4b1457a787360 | frozen blob 0d817de456cf837c06979a5fab601db6be7b6567 | green-candidate sha256 8383d526a52d3dfc4683c0733ecfecc1c902da8f0e7cae5548da43e643040410 | I-106 pinned 50c75e31db308358795d0c34ccd4b1457a787360
+  MISMATCH
+tests/test_s2_xp3_listing.py worktree blob 9cfe6c1c7e9be031c702810aa8ed469d88c462cb sha256 1bf080ab5097249b2ce2c6321a8419694ca48b3af2d96810357ad91f0ffde828 | red-record blob 9cfe6c1c7e9be031c702810aa8ed469d88c462cb | frozen blob 06e74ce862a30d04f79e6a152426b7644b5118cc | green-candidate sha256 1bf080ab5097249b2ce2c6321a8419694ca48b3af2d96810357ad91f0ffde828 | I-106 pinned 9cfe6c1c7e9be031c702810aa8ed469d88c462cb
+  MISMATCH
+red run: start 2026-11-08T00:40:07Z end 2026-11-08T00:40:18Z; green run: start 2026-11-08T00:44:33Z end 2026-11-08T01:18:54Z
+red verdict: None
+green pytest exit 0; last line: ================ 1520 passed, 7 warnings in 1846.19s (0:30:46) =================
+candidate-equals-worktree: only i105/ERRATUM.md differed (no test reads it)

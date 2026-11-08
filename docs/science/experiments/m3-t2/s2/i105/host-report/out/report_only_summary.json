@@ -1,0 +1,166 @@
+{
+ "label": "report-only; not a bound; host only",
+ "python": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+ "RP-1 U-17 exact answers": {
+  "entries": 485,
+  "accepted_with_reference": 485,
+  "branches": {
+   "RD-0": 0,
+   "RD-1": 171,
+   "RD-2": 314,
+   "RD-3": 0,
+   "none": 0
+  },
+  "max_abs_dh_m": 2.037e-10,
+  "max_abs_dphi_rad": 6.123e-17,
+  "all_references_enclosed": true,
+  "label": "report-only; not a bound; host only"
+ },
+ "RP-2 U-18 forward-constructed": {
+  "entries": 640,
+  "accepted_with_reference": 640,
+  "branches": {
+   "RD-0": 0,
+   "RD-1": 40,
+   "RD-2": 0,
+   "RD-3": 600,
+   "none": 0
+  },
+  "max_abs_dh_m": 1.36e-09,
+  "max_abs_dphi_rad": 1.431e-16,
+  "all_references_enclosed": true,
+  "label": "report-only; not a bound; host only"
+ },
+ "RP-6a PS-NEG": {
+  "entries": 200,
+  "accepted_with_reference": 200,
+  "branches": {
+   "RD-0": 0,
+   "RD-1": 18,
+   "RD-2": 2,
+   "RD-3": 180,
+   "none": 0
+  },
+  "max_abs_dh_m": 1.177e-09,
+  "max_abs_dphi_rad": 1.431e-16,
+  "all_references_enclosed": true,
+  "label": "report-only; not a bound; host only"
+ },
+ "RP-6b diagnostics": {
+  "DG-INT": {
+   "entries": 22,
+   "accepted_with_reference": 14,
+   "branches": {
+    "RD-0": 8,
+    "RD-1": 2,
+    "RD-2": 2,
+    "RD-3": 10,
+    "none": 0
+   },
+   "max_abs_dh_m": 6.506e-10,
+   "max_abs_dphi_rad": 1.015e-16,
+   "all_references_enclosed": true,
+   "label": "report-only; not a bound; host only",
+   "non_convergence_points": 0
+  },
+  "DG-CUSP": {
+   "entries": 7282,
+   "accepted_with_reference": 4201,
+   "branches": {
+    "RD-0": 0,
+    "RD-1": 0,
+    "RD-2": 0,
+    "RD-3": 4201,
+    "none": 3081
+   },
+   "max_abs_dh_m": 1.309e-09,
+   "max_abs_dphi_rad": 3.07e-15,
+   "all_references_enclosed": true,
+   "label": "report-only; not a bound; host only",
+   "non_convergence_points": 3081
+  },
+  "DG-DEEP": {
+   "entries": 3590,
+   "accepted_with_reference": 3168,
+   "branches": {
+    "RD-0": 56,
+    "RD-1": 10,
+    "RD-2": 0,
+    "RD-3": 3158,
+    "none": 366
+   },
+   "max_abs_dh_m": 1.869e-09,
+   "max_abs_dphi_rad": 1.337e-15,
+   "all_references_enclosed": true,
+   "label": "report-only; not a bound; host only",
+   "non_convergence_points": 366
+  }
+ },
+ "RP-3 U-19 symmetry (PS-OPS accepted)": {
+  "points": 6498,
+  "(a) quarter-turn bit differences": 0,
+  "(b) z-reflection bit differences (diagnostic)": 0,
+  "(c) exterior pairs with |h - h_sigma| > 2 eps_h (conditional on A-FP-2)": 0,
+  "(d) max |h - h_rot(0.3 rad)| (rotation not exact in binary64)": "1.490e-08",
+  "label": "report-only; not a bound; host only"
+ },
+ "RP-4 U-21 normal": {
+  "label": "report-only; not a bound; host only",
+  "max ||n|^2 - 1| (exact sum of squares of the binary64 components)": "2.893e-16",
+  "axis (0,0,7e6): phi, cos(phi) (I-24: fl(pi/2) gives a nonzero x component)": [
+   "0x1.921fb54442d18p+0",
+   6.123233995736766e-17
+  ],
+  "equator (7e6,0,0): phi bits (A-LM-0: +0 expected)": "0x0.0p+0",
+  "dh/dt": [
+   {
+    "r": [
+     6778000.0,
+     0.0,
+     0.0
+    ],
+    "v": [
+     0.0,
+     7670.0,
+     0.0
+    ],
+    "n_dot_v": 0.0,
+    "central_difference": 0.0
+   },
+   {
+    "r": [
+     4000000.0,
+     3000000.0,
+     4500000.0
+    ],
+    "v": [
+     -5000.0,
+     2000.0,
+     5000.0
+    ],
+    "n_dot_v": 1281.273420551477,
+    "central_difference": 1281.2734205275774
+   }
+  ]
+ },
+ "RP-5 PM-5/PM-6 (PS-OPS exterior, conditional on A-FP-2)": {
+  "PM-5 consecutive pairs": 4766,
+  "PM-5 pairs outside the inequality": 0,
+  "PM-6 points": 4842,
+  "PM-6 points outside the inequality": 0,
+  "label": "report-only; not a bound; host only"
+ },
+ "RP-7 X-D1": {
+  "compared": 656,
+  "component_vs_twin_bit_differences": 0,
+  "component_vs_t0_bit_differences": 0,
+  "not_accepted": 0,
+  "label": "report-only; not a bound; host only"
+ },
+ "RP-9 host census": {
+  "entries": 22665,
+  "component_equals_census": 22665,
+  "schema": "2 (I-105)",
+  "label": "report-only; not a bound; host only"
+ }
+}

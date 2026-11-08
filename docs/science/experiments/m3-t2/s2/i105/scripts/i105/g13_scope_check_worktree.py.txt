@@ -1,0 +1,91 @@
+"""S2 G-13 scope check (host script; §3.6, §3.11 G-13, R-5). Read-only.
+
+Usage: python -I g13_scope_check.py <repo root> <tip ref>
+
+Asserts that `git diff --name-only K..tip` is within the §3.6 allowlist; that `forces.py`,
+`simulator.py` and `docs/science/assumptions.md` (protected under D-S2-13 (a)) are
+byte-identical to K; that every existing top-level statement of `constants.py` and every
+existing statement of `tests/test_constants.py` is AST-identical to K, with only the one
+permitted addition in each; and that `docs/milestones/M3-T2-report.md` keeps K's text as an
+exact prefix (append-only).
+"""
+
+from __future__ import annotations
+
+import ast
+from pathlib import Path
+import json
+import subprocess
+import sys
+
+K = "83d573bdb4933f5d2376423d6b8e9f3348a4ab6f"
+ALLOWED_NEW = {
+    "src/tars/sim/geodesy.py",
+    "tests/test_s2_geodetic.py",
+    "tests/test_s2_geodetic_conformance.py",
+    "tests/s2_dl4_geodetic_twin.py",
+    "tests/s2_dl4_point_sets.py",
+    "tests/s2_dl4_points.txt",
+    "tests/test_s2_dl4_points.py",
+    "tests/test_s2_environment_record.py",  # D-S2-5 (i), approved
+    "tests/test_s2_xp3_listing.py",  # D-S2-6 (b'), approved
+}
+ALLOWED_DIR = "docs/science/experiments/m3-t2/s2/"
+ALLOWED_EDIT = {"src/tars/sim/constants.py", "tests/test_constants.py", "docs/milestones/M3-T2-report.md"}
+PROTECTED_BYTES = ("src/tars/sim/forces.py", "src/tars/sim/simulator.py", "docs/science/assumptions.md")
+ADDED = {
+    "src/tars/sim/constants.py": lambda s: isinstance(s, ast.Assign)
+    and len(s.targets) == 1
+    and isinstance(s.targets[0], ast.Name)
+    and s.targets[0].id == "WGS84_INVERSE_FLATTENING",
+    "tests/test_constants.py": lambda s: isinstance(s, ast.FunctionDef)
+    and s.name == "test_wgs84_inverse_flattening_literal_only_in_constants_module",
+}
+
+
+def git(root, *args) -> str:
+    return subprocess.run(["git", "-C", root, *args], capture_output=True, text=True, check=True).stdout
+
+
+def main() -> int:
+    # I-105 working-tree form: the candidate is the uncommitted tree (nothing may be committed),
+    # compared with K. Tracked changes from `git diff --name-status K` (tree vs K), plus every
+    # untracked, non-ignored file as an addition. Contents are read from disk.
+    root = sys.argv[1]
+    tip_sha = "WORKING TREE at " + git(root, "rev-parse", "HEAD").strip()
+    status = git(root, "diff", "--name-status", "--no-renames", K).splitlines()
+    status += ["A\t" + p for p in git(root, "ls-files", "--others", "--exclude-standard").splitlines()]
+    disk = lambda p: (Path(root) / p).read_text()
+    rows, problems = [], []
+    for line in status:
+        code, path = line.split("\t", 1)
+        ok = (code == "A" and (path in ALLOWED_NEW or path.startswith(ALLOWED_DIR))) or (
+            code == "M" and path in ALLOWED_EDIT
+        )
+        rows.append({"status": code, "path": path, "allowed": ok})
+        if not ok:
+            problems.append(f"outside the allowlist: {code} {path}")
+    for path in PROTECTED_BYTES:
+        if git(root, "rev-parse", f"{K}:{path}") != git(root, "hash-object", path):
+            problems.append(f"protected file changed: {path}")
+    for path, is_added in ADDED.items():
+        old = ast.parse(git(root, "show", f"{K}:{path}")).body
+        new = ast.parse(disk(path)).body
+        added = [s for s in new if is_added(s)]
+        kept = [s for s in new if not is_added(s)]
+        if len(added) > 1:
+            problems.append(f"{path}: more than one permitted addition")
+        if [ast.dump(s) for s in kept] != [ast.dump(s) for s in old]:
+            problems.append(f"{path}: an existing statement is not AST-identical to K")
+    rep_k = git(root, "show", f"{K}:docs/milestones/M3-T2-report.md")
+    rep_t = disk("docs/milestones/M3-T2-report.md")
+    if not rep_t.startswith(rep_k):
+        problems.append("M3-T2-report.md: K text is not an exact prefix (not append-only)")
+    out = {"K": K, "tip": tip_sha, "changed_paths": rows, "problems": problems,
+           "result": "PASS" if not problems else "STOP 2"}
+    print(json.dumps(out, indent=1))
+    return 0 if not problems else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

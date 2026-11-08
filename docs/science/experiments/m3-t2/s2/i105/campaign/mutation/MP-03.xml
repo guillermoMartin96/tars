@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="25" time="2.026" timestamp="2026-11-07T16:48:39.597753-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[+x]" time="0.003" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[x=y]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[+z]" time="0.001"><failure message="AssertionError: (0.0, 0.0, 42841.31151331357): expected evolute_region, but it was accepted">ray = '+z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+&gt;       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MP-03/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, 42841.31151331357), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (0.0, 0.0, 42841.31151331357): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[-z]" time="0.001"><failure message="AssertionError: (0.0, 0.0, -42841.31151331357): expected evolute_region, but it was accepted">ray = '-z'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+&gt;       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MP-03/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, -42841.31151331357), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (0.0, 0.0, -42841.31151331357): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[(1,0,1)]" time="0.001"><failure message="AssertionError: (15121.263417223725, 0.0, 15121.263417223725): expected evolute_region, but it was accepted">ray = '(1,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+&gt;       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MP-03/src/tars/sim/geodesy.py'&gt;
+r = (15121.263417223725, 0.0, 15121.263417223725), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (15121.263417223725, 0.0, 15121.263417223725): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[(2,0,1)]" time="0.001"><failure message="AssertionError: (20544.799187243243, 0.0, 10272.399593621622): expected evolute_region, but it was accepted">ray = '(2,0,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+&gt;       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MP-03/src/tars/sim/geodesy.py'&gt;
+r = (20544.799187243243, 0.0, 10272.399593621622), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (20544.799187243243, 0.0, 10272.399593621622): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[(1,0,2)]" time="0.001"><failure message="AssertionError: (10280.234726712268, 0.0, 20560.469453424535): expected evolute_region, but it was accepted">ray = '(1,0,2)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+&gt;       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MP-03/src/tars/sim/geodesy.py'&gt;
+r = (10280.234726712268, 0.0, 20560.469453424535), reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (10280.234726712268, 0.0, 20560.469453424535): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_inside_point[(1,1,1)]" time="0.001"><failure message="AssertionError: (12586.625205404958, 12586.625205404958, 12586.625205404958): expected evolute_region, but it was accepted">ray = '(1,1,1)'
+
+    @pytest.mark.parametrize("ray", list(RAYS))
+    def test_g03_boundary_pair_inside_point(ray):
+        inside_hex, make = RAYS[ray]
+&gt;       _raises_reason(_geo(), make(float.fromhex(inside_hex)), "evolute_region")
+
+tests/test_s2_geodetic.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/I-105/campaign/mutation/MP-03/src/tars/sim/geodesy.py'&gt;
+r = (12586.625205404958, 12586.625205404958, 12586.625205404958)
+reason = 'evolute_region'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+            raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+&gt;       raise AssertionError(f"{r!r}: expected {reason}, but it was accepted")
+E       AssertionError: (12586.625205404958, 12586.625205404958, 12586.625205404958): expected evolute_region, but it was accepted
+
+tests/test_s2_geodetic.py:122: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[+x]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[x=y]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[+z]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[-z]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[(1,0,1)]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[(2,0,1)]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[(1,0,2)]" time="0.001" /><testcase classname="tests.test_s2_geodetic" name="test_g03_boundary_pair_outside_point_geometric[(1,1,1)]" time="0.001" /><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.227" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.370" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.057" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.339" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.570" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.071" /></testsuite></testsuites>

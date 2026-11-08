@@ -1,0 +1,15 @@
+"""I-105 host DL-5 probe for a scripted (non-pytest) run (v11 §3.11 ENV: "host by probe").
+
+Usage: <repo>/.venv/bin/python -I env_probe.py <repo root> <out.json>
+Builds the record with the committed tests/test_s2_environment_record.py build_record() (the same
+code the pytest recorder uses; it does not import the component) and writes it with the same
+sha256 convention as the S2-ENV-RECORD warning.
+"""
+import hashlib, json, sys
+from pathlib import Path
+root = Path(sys.argv[1]); sys.path.insert(0, str(root))
+from tests.test_s2_environment_record import build_record  # noqa: E402
+rec = build_record()
+text = json.dumps(rec, sort_keys=True, default=str)
+Path(sys.argv[2]).write_text(json.dumps({"S2-ENV-RECORD sha256": hashlib.sha256(text.encode()).hexdigest(), "record": rec}, indent=1, default=str) + "\n")
+print("S2-ENV-RECORD sha256=" + hashlib.sha256(text.encode()).hexdigest())

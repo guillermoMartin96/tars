@@ -1,0 +1,165 @@
+# Erratum: S2 evidence statements corrected after the I-104 review (I-105)
+
+The I-104 independent implementation review returned REQUEST_CHANGES for commit E
+`495590033ddc0456b2b93ce08700152fae5a3123` (external record `~/tars-evidence/I-104/`, manifest
+sha256 `0a63820fb424587ded8c63c59615bcfe3afcdf954fa97708d16503d829d0f3f1`). Owner instruction
+I-105 authorizes these corrections.
+
+**This erratum is additive.** No file committed in A, BC, BC2, D or E is edited, and no historical
+record is relabelled. Each superseded statement below is quoted exactly as it stands at E, with
+its path and line. The quoted statement stays in place; this erratum supersedes it. Statements not
+listed here are not changed by it.
+
+## 1. I104-03: the CI environment was called the generation environment
+
+### Superseded statements
+
+1. `docs/science/experiments/m3-t2/s2/README.md` line 78, in the row "ENV, G-17a, G-17b per CI job",
+   only the parenthesis after the macOS x86_64 count:
+
+   > 0 (macOS x86_64; the generation environment under I-101)
+
+2. `docs/milestones/M3-T2-report.md` lines 943–944 (§S2.6, G-17a bullet), only the parenthesis after
+   the macOS x86_64 count:
+
+   > 0 (macOS x86_64, the
+   > generation environment under I-101).
+
+### Corrected statement
+
+- **All 15 CI test executions are `other` under I-101.** These are the three `check` jobs at each of
+  A, BC, BC2, D and E. Their own G-17b records say `other`, and so does the macOS x86_64 (Intel) job.
+- **Why the Intel job is `other`.** Three of the five I-101 fields differ from the generation record:
+  - `sys.version`: 3.12.10, against 3.12.15;
+  - `platform.platform()`: `macOS-15.7.9-x86_64-i386-64bit`, against
+    `macOS-26.2-x86_64-i386-64bit`;
+  - the interpreter executable sha256: `d4f152f2…3d08b`, against `de2897e0…7e9`.
+
+  Only `platform.machine()` and the `uv.lock` sha256 are equal.
+- **What the Intel job's 0 class P differences mean.** They are an observation made in an `other`
+  environment. They are not environment equality, and I-101 does not make them a replay in the
+  generation environment.
+- **The generation-environment replays are the host runs.** In each of these, all five recorded
+  I-101 fields equal the generation record, and the G-17b record says `generation`:
+  - the commit-A gate run;
+  - the BC pre-commit and BC fresh-clone gate runs;
+  - the BC2-candidate gate run;
+  - the I-105 runs.
+
+  The I-104 reviewer's host also recorded `generation` (I-104 `host-records/S2-G17B-RECORD.json`).
+- **What the records do not establish.** Equal recorded fields do not certify unrecorded library or
+  build identity. The r83:83 limitation, as every G-17b record carries it, still applies:
+
+  > ENV fields with unobservable values do not certify a perfectly reproduced library/build
+  > environment; a controlled regeneration comparison must record that limitation rather than assume
+  > matching proxy fields prove identity. (r83:83)
+
+The rest of both statements stands as recorded. That covers G-17b's 0 differences on 8 853 class X
+entries on every job, G-17a's zero class X, label and witness differences, and the class P counts
+2 188, 2 305 and 0. The CI records, the G-17b comparator and the I-101 classification were correct;
+only the summary wording was wrong.
+
+## 2. I104-04: the MG-02 and MG-04 designated witnesses were not executed
+
+### Superseded statements
+
+1. `docs/science/experiments/m3-t2/s2/README.md` line 73 (row "Mutation (final)"):
+
+   > 49 mutants: 44 KILLED by assertion on designated nodes
+
+2. `docs/milestones/M3-T2-report.md` line 928 (§S2.5, final campaign):
+
+   > 49 mutants: 44 KILLED by assertion on their designated nodes.
+
+### Corrected statement
+
+**MG-02 ("non-finite check applied to x only").** v11 §3.12 designates G-04 `(0, nan, 7e6)`.
+- In `mutation/i103-bc2/`, MG-02 was run only on
+  `test_g04_non_finite_component_in_each_position`.
+- That node's first failing case is `(7e6, nan, 1)`, not the designated witness.
+
+**MG-04 ("origin check with `or` instead of `and`").** v11 §3.12 designates the G-03/G-07 accepted
+axis point `(0, 0, 7.0e6)`.
+- In `mutation/i103-bc2/`, MG-04 was run on G-03's outside boundary points and on G-14's enumerated
+  acceptance sets.
+- Neither of those contains `(0, 0, 7.0e6)`.
+
+**What follows for the final campaign.**
+- Both mutants were killed by assertion, but at inputs other than their designated witnesses. The
+  claim that all 44 kills were on designated nodes is withdrawn for these two mutants.
+- This erratum does not restate it for the other 42 beyond what I-104 recorded.
+- The `i103-bc2` record and its script stay unchanged as history.
+- The I-105 correction leaves both transformations unchanged. It adds one node per witness, each
+  containing only that exact point:
+  - `test_g04_designated_witness_0_nan_7e6`;
+  - `test_g03_g07_designated_witness_accepted_axis_point_0_0_7e6`.
+
+  It then reruns the complete campaign with those nodes as the only designated nodes for MG-02 and
+  MG-04.
+
+## 3. I104-01: census records lacked the hex input (and, on the host, the source)
+
+v11 §3.10 requires each census record to carry eight fields: set, index, hex input, listing label,
+outcome, iteration count, hex final step and source.
+
+**Which records fall short.**
+- The census records emitted at A to E by `tests/test_s2_xp3_listing.py`, and recorded under
+  `ci/*/records/*/S2-XP3-LISTING.csv`, have no hex input.
+- The host census `report-only/host-bc/RP-9_host_census.csv` also has no source field.
+
+**Status of those records.** They are kept exactly as emitted. They are not rewritten, and no
+enriched copy of them is presented as an emitted record. Their completeness under §3.10 is not
+claimed.
+
+**The correction.** Census schema 2 emits every field:
+- `tests/test_s2_xp3_listing.py` and the host script `report_only_v2.py` now write it;
+- the schema-2 header is `S2-XP3-LISTING schema=2 …`;
+- its columns are `set,index,x_hex,y_hex,z_hex,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source`.
+
+## 4. I104-02: red-run and mutation executions without DL-5 records
+
+### Superseded statement
+
+`docs/science/experiments/m3-t2/s2/README.md` lines 93–94 (section "Run records"):
+
+> Host runs: macOS x86_64, CPython 3.12.15, `uv.lock` sha256
+> `6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf` (`run_records/`).
+
+### Corrected statement
+
+The statement holds only for the host runs whose own records give those fields:
+- the gate runs whose logs carry the S2-ENV-RECORD;
+- the two runs recorded in `run_records/`.
+
+It does not apply to two groups of executions, which recorded no DL-5 record and no environment
+fields of their own:
+- the original red run (`red-original/`) and the I-102 supplemental red run (`red-supplemental/`);
+- the individual mutation executions in `mutation/`.
+
+Two of the campaigns have a campaign-level run record. Neither is a per-execution DL-5 record, and
+neither covers the red runs.
+- **I-101 campaign:** the external `I-101/commit-d/out/run-record-host.json`.
+- **I-102 campaign:** `run_records/bc2-candidate-gates-and-campaigns.json`, a byte copy of
+  `I-102/campaign/run-record-host.json`. It was probed once, at the start of the I-102
+  candidate run (gates and I-102 campaign).
+- **I-103 campaign:** no run record of its own. It was run later, in the same clone, and recorded
+  only its candidate state (`I-103/candidate-state.txt`). The plural file name "…-and-campaigns"
+  does not make the I-102 probe a record of the I-103 campaign. This is an additional gap found
+  under I-105.
+
+The environment of the red runs and of the individual executions is not inferred from any other
+run.
+
+**This is a recorded nonconformance with v11 §3.11 ENV, §3.16 and OB-16/OB-17. It is not closed.**
+- New, fully recorded executions supplement it; they do not complete the historical records.
+- **Owner decision issued (I-106).** The owner granted a bounded, conditional exception that waives
+  only the missing-record duties of exactly the listed historical executions. The issued text is in
+  `DISPOSITION-I106.md` in this directory. The I-105 proposal it answered is kept, unchanged, as a
+  proposal in `gap/PROPOSED-OWNER-DISPOSITION-I104-02.md`. Whether the exception's conditions hold
+  is for an independent implementation review to establish.
+
+## 5. Scope of the D checksum file
+
+`docs/science/experiments/m3-t2/s2/README.md` line 118 says that `SHA256SUMS` "covers every file in
+this directory except itself and `commit-a/`". From I-105 on, this directory also contains `i105/`.
+D's `SHA256SUMS` does not cover `i105/`, which has its own `SHA256SUMS`.

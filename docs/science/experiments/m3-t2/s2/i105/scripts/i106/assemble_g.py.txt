@@ -1,0 +1,157 @@
+"""I-106: assemble commit G's evidence under docs/science/experiments/m3-t2/s2/i105/ (new paths only).
+
+Usage: python3 -I assemble_g.py <i105 dir in the worktree> <F CI evidence dir> <F CI label, e.g. F-42442590220>
+
+Copies selected I-105 and I-106 evidence into the existing i105/ directory, which so far holds only
+ERRATUM.md, DISPOSITION-I106.md and README.md (left untouched here). Rules:
+- Every copied file is a byte copy. The one exception is the scrub: the absolute home path is
+  replaced by "$HOME" (whole-path replacement), and each scrubbed file's original sha256 is listed
+  in SCRUBBED.txt.
+- Files kept external (large logs, mutant source trees, campaign listings, duplicate censuses) are
+  listed in EXTERNAL.sha256 with their sha256 and external path; logs over 1 MB keep a 60-line tail.
+- Scripts are stored as .txt.
+- SHA256SUMS covers every file under i105/ except itself.
+Nothing outside i105/ is written. Re-running into a non-empty target is refused.
+"""
+import hashlib
+import os
+import shutil
+import sys
+from pathlib import Path
+
+HOME = os.path.expanduser("~")
+I105 = Path(HOME) / "tars-evidence/I-105"
+I106 = Path(HOME) / "tars-evidence/I-106"
+dst = Path(sys.argv[1])
+ci_src, ci_label = Path(sys.argv[2]), sys.argv[3]
+PRESET = {"ERRATUM.md", "DISPOSITION-I106.md", "README.md"}
+existing = {p.name for p in dst.iterdir()}
+assert existing <= PRESET, f"target not fresh: {sorted(existing - PRESET)}"
+
+external, scrubbed, copied = [], [], []
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def ext(p, why):
+    external.append(f"{sha(p)}  {str(p).replace(HOME, '~')}  ({why})")
+
+
+def put(src, rel):
+    src = Path(src)
+    out = dst / rel
+    out.parent.mkdir(parents=True, exist_ok=True)
+    data = src.read_bytes()
+    if HOME.encode() in data:
+        scrubbed.append(f"{hashlib.sha256(data).hexdigest()}  {rel}")
+        data = data.replace(HOME.encode(), b"$HOME")
+    out.write_bytes(data)
+    copied.append(rel)
+
+
+def tail(src, rel, n=60):
+    lines = Path(src).read_bytes().splitlines(keepends=True)[-n:]
+    tmp = I106 / "scratch-tail.tmp"
+    tmp.write_bytes(b"".join(lines))
+    put(tmp, rel)
+    tmp.unlink()
+
+
+def tree(src, rel, skip=lambda p: None):
+    """Copy src/** to rel/**; skip(p) returns a reason to keep p external, or None."""
+    src = Path(src)
+    for p in sorted(src.rglob("*")):
+        if p.is_dir():
+            continue
+        r = p.relative_to(src)
+        why = skip(p)
+        if why:
+            ext(p, why)
+            if why.startswith("log over 1 MB"):
+                tail(p, f"{rel}/{r}.tail-60.txt")
+            continue
+        name = f"{rel}/{r}"
+        if p.suffix in (".py", ".sh"):
+            name += ".txt"
+        put(p, name)
+
+
+MB = 1 << 20
+
+
+def big_log(p):
+    return "log over 1 MB; tail kept" if p.suffix in (".log", ".txt") and p.stat().st_size > MB else None
+
+
+# Owner instructions and the I-105 packet documents (the proposal stays a proposal).
+put(I105 / "I-105.md", "owner/I-105.md")
+put(I106 / "I-106.md", "owner/I-106.md")
+put(I106 / "DECISION-RECORD.md", "owner/I-106-DECISION-RECORD.md")
+for f in ("RESPONSE.md", "REPLACEMENT-EXECUTIONS.md", "PROPOSED-COMMIT-PUSH-SEQUENCE.md", "README.md",
+          "clone-inventory.txt"):
+    put(I105 / f, f"i105-packet/{f}")
+put(I105 / "MANIFEST.sha256", "i105-packet/MANIFEST.sha256")
+
+# Replacement executions.
+tree(I105 / "red", "red", big_log)
+tree(I105 / "green", "green",
+     lambda p: big_log(p) or ("census byte-identical to red/records/S2-XP3-LISTING.csv (green/census-equals-red.txt)"
+                              if p.name == "S2-XP3-LISTING.csv" else None))
+
+
+def campaign_skip(p):
+    r = p.relative_to(I105 / "campaign")
+    parts = r.parts
+    if p.name.endswith(".stdout.txt"):
+        return "campaign execution stdout; sha256 also in mutation_results.json and REPLACEMENT-EXECUTIONS.md"
+    if p.name == "S2-XP3-LISTING.csv":
+        return "campaign execution listing; body sha256 verified in its extraction-status.json"
+    if len(parts) >= 3 and parts[0] == "mutation" and not parts[1].endswith(".records"):
+        return "mutant source tree"
+    return big_log(p)
+
+
+tree(I105 / "campaign", "campaign", campaign_skip)
+tree(I105 / "host-report", "host-report", big_log)
+tree(I105 / "derivation", "derivation", big_log)
+tree(I105 / "gap", "gap", big_log)
+tree(I105 / "frozen", "binding/i105-frozen", big_log)
+tree(I105 / "diff", "binding/i105-local-diff", big_log)
+tree(I105 / "final-worktree-checks", "final-worktree-checks", big_log)
+tree(I105 / "checkpoint", "checkpoint", big_log)
+tree(I106 / "F-precommit", "binding/F", big_log)
+
+
+def comparison_skip(p):
+    if p.name.endswith(".stripped.log"):
+        return "derived log of an archived CI job (raw-log sha256 in the I-103 archive)"
+    if p.name == "S2-XP3-LISTING.csv":
+        return "schema-1 listing copy; the original is committed or archived and unchanged"
+    return big_log(p)
+
+
+tree(I105 / "comparison", "comparison", comparison_skip)
+tree(I105 / "scripts", "scripts/i105")
+tree(I106 / "scripts", "scripts/i106", lambda p: "scratch" if p.name.endswith(".tmp") else None)
+tree(I106 / "tooling-smoke", "scripts/i106-tooling-smoke")
+tree(ci_src, f"ci/{ci_label}",
+     lambda p: "raw CI job log; sha256 in raw-logs.sha256" if p.parent.name in ("logs", "derived") and p.suffix == ".log"
+     else big_log(p))
+
+(dst / "EXTERNAL.sha256").write_text(
+    "# Files kept outside the repository: sha256, external path (~ = the author's home), reason.\n"
+    + "\n".join(sorted(external)) + "\n")
+(dst / "SCRUBBED.txt").write_text(
+    "# Files in which the absolute home path was replaced by $HOME: original sha256 and path.\n"
+    + "\n".join(sorted(scrubbed)) + "\n")
+FRAG = os.path.basename(HOME).encode()  # the user-name fragment, derived so this script does not contain it
+left = [str(p.relative_to(dst)) for p in dst.rglob("*") if p.is_file() and FRAG in p.read_bytes()]
+(dst / "SCRUB-CHECK.txt").write_text(
+    "Files under i105/ still containing the user-name fragment after whole-path replacement:\n"
+    + ("\n".join(sorted(left)) if left else "none") + "\n")
+files = sorted(p for p in dst.rglob("*") if p.is_file() and p.name != "SHA256SUMS")
+(dst / "SHA256SUMS").write_text("".join(f"{sha(p)}  {p.relative_to(dst)}\n" for p in files))
+print(f"copied {len(copied)}; external {len(external)}; scrubbed {len(scrubbed)}; fragment left in {len(left)}; "
+      f"SHA256SUMS entries {len(files)}")

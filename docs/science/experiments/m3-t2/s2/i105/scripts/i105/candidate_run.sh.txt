@@ -1,0 +1,43 @@
+#!/bin/bash
+# I-105 candidate validation, after the supplemental red run. Fresh clone of E from GitHub with the
+# uncommitted I-105 working-tree changes copied in (verified byte-equal to the worktree), then:
+# green gates (ruff, full suite with ENV/listing/G-17a/G-17b records and run record), census
+# validation, G-13 scope (working-tree form), the corrected host report script, and the complete
+# corrected mutation campaign with per-execution records.
+set -u
+E=$HOME/tars-evidence/I-105; S=$E/scripts; C=$E/clone-candidate; G=$E/green; W=$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic
+EH=495590033ddc0456b2b93ce08700152fae5a3123
+export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:/usr/bin:/bin:/usr/sbin:/sbin" UV_PYTHON_DOWNLOADS=never
+mkdir -p "$G"; date -u +%FT%TZ > "$G/start-utc.txt"
+git clone -q https://github.com/guillermoMartin96/tars.git "$C" && git -C "$C" checkout -q --detach "$EH" || exit 98
+{ git -C "$W" diff --name-only HEAD; git -C "$W" ls-files --others --exclude-standard; } | sort -u > "$G/changed-paths.txt"
+while read -r p; do mkdir -p "$C/$(dirname "$p")"; cp "$W/$p" "$C/$p"; done < "$G/changed-paths.txt"
+( cd "$W" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$G/worktree-files.sha256"
+( cd "$C" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$G/candidate-files.sha256"
+if cmp -s "$G/worktree-files.sha256" "$G/candidate-files.sha256"; then echo "EQUAL: every tracked and untracked (non-ignored) file of the candidate clone equals the worktree ($(wc -l < "$G/candidate-files.sha256" | tr -d ' ') files)"; else echo "DIFFERENT"; diff "$G/worktree-files.sha256" "$G/candidate-files.sha256"; fi > "$G/candidate-equals-worktree.txt"
+git -C "$C" rev-parse HEAD > "$G/head.txt"; git -C "$C" status --porcelain --untracked-files=all > "$G/git-status-porcelain.txt"
+git -C "$C" diff HEAD > "$G/candidate.diff"
+cd "$C" || exit 99
+uv sync --locked -q > "$G/uv-sync.log" 2>&1; echo $? > "$G/uv-sync.exit"
+.venv/bin/python -I "$S/run_record.py" "$C" "$G/run-record.json" "I-105 green: candidate = E + uncommitted I-105 changes" \
+  $(cat "$G/changed-paths.txt") src/tars/sim/geodesy.py src/tars/sim/constants.py tests/s2_dl4_points.txt > "$G/run-record.stdout" 2>&1
+.venv/bin/ruff check . > "$G/ruff-check.log" 2>&1; echo $? > "$G/ruff-check.exit"
+.venv/bin/ruff format --check . > "$G/ruff-format.log" 2>&1; echo $? > "$G/ruff-format.exit"
+.venv/bin/python -I "$S/g13_scope_check_worktree.py" "$C" > "$G/g13_scope_check_candidate.json" 2>&1; echo $? > "$G/g13.exit"
+# host report script (corrected) and the campaign start alongside the full suite
+( mkdir -p "$E/host-report"; .venv/bin/python -I "$S/run_record.py" "$C" "$E/host-report/run-record.json" "I-105 host report_only_v2.py on the candidate" \
+    src/tars/sim/geodesy.py tests/s2_dl4_points.txt tests/s2_dl4_geodetic_twin.py > /dev/null 2>&1
+  date -u +%FT%TZ > "$E/host-report/start-utc.txt"
+  .venv/bin/python -I "$S/report_only_v2.py" "$C" "$E/host-report/out" > "$E/host-report/report_only.log" 2>&1; echo $? > "$E/host-report/report_only.exit"
+  date -u +%FT%TZ > "$E/host-report/end-utc.txt"; touch "$E/host-report/DONE" ) &
+( mkdir -p "$E/campaign"; date -u +%FT%TZ > "$E/campaign/start-utc.txt"
+  .venv/bin/python -I "$S/mutate.py" "$C" "$E/campaign/mutation" > "$E/campaign/mutation.log" 2>&1; echo $? > "$E/campaign/mutation.exit"
+  date -u +%FT%TZ > "$E/campaign/end-utc.txt"; touch "$E/campaign/DONE" ) &
+.venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml="$G/pytest-junit.xml" > "$G/pytest.log" 2>&1; echo $? > "$G/pytest.exit"
+.venv/bin/python -I "$S/extract_s2_records_v2.py" "$G/pytest.log" "$G/records" > "$G/extract.stdout" 2>&1; echo $? > "$G/extract.exit"
+python3 -I "$S/validate_census.py" tests/s2_dl4_points.txt "$G/records/S2-XP3-LISTING.csv" ci "$G/census-validation.json" \
+  "$E/red/records/S2-XP3-LISTING.csv" "I-105 supplemental red run census (schema 2), same environment; compared as a projection only if schema 1, so compared directly here" \
+  > "$G/census-validation.stdout" 2>&1; echo $? > "$G/census-validation.exit"
+cmp "$G/records/S2-XP3-LISTING.csv" "$E/red/records/S2-XP3-LISTING.csv" > "$G/census-equals-red.txt" 2>&1 && echo "IDENTICAL: green census CSV equals the red-run census CSV byte for byte" >> "$G/census-equals-red.txt"
+date -u +%FT%TZ > "$G/end-utc.txt"; touch "$G/DONE"
+wait

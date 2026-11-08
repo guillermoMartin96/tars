@@ -1,0 +1,40 @@
+{
+ "census": "host-report/out/RP-9_host_census.csv",
+ "census_sha256": "8c1b7d6e67fa3c70f4cd9c1c6b676f85d8d74a2f00942e3db6345125539d100a",
+ "kind": "host",
+ "listing_sha256": "0983900a9d1733a71000e6e91aeb8373c5b4fe320ba972f363f540f0e52d7c31",
+ "header_ok": true,
+ "records": 22665,
+ "listing_entries": 22665,
+ "record_count_equals_listing": true,
+ "outcomes": {
+  "accepted": 19154,
+  "evolute_region": 64,
+  "non_convergence": 3447
+ },
+ "labels": {
+  "evolute_region": 64,
+  "passes": 22601
+ },
+ "problems": {},
+ "valid": true,
+ "projection_comparisons": [
+  {
+   "schema-1 census": "$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/docs/science/experiments/m3-t2/s2/report-only/host-bc/RP-9_host_census.csv",
+   "label": "committed D host census at BC (schema 1), compared as a projection only",
+   "sha256": "42f2df039bcd82eb412b945b8a9abfbb9c8de59a28bc7e9bd16542493c83568b",
+   "schema-1 columns": [
+    "set",
+    "index",
+    "label",
+    "census_outcome",
+    "iterations",
+    "final_step_hex",
+    "component_outcome"
+   ],
+   "rows": 22665,
+   "rows differing from the schema-2 projection": 0,
+   "method": "schema-2 rows projected onto the schema-1 columns (hex input dropped); comparison only, no join written"
+  }
+ ]
+}

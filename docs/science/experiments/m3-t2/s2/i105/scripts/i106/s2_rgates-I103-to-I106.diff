@@ -1,0 +1,23 @@
+2c2,5
+< # S2 (I-99/I-101/I-103), v11 §3.14 step 5: formal R-1..R-4 at commit D, in fresh clones; adapted from I-52 d_rgates.sh.
+---
+> # S2 (I-99/I-101/I-103/I-106), v11 §3.14 step 5: formal R-1..R-4, R-S1, R-S2 at the corrected tip (I-106: G, before H),
+> # in fresh clones; adapted from the I-103 s2_rgates.sh. I-106 changes: every execution gets its own §3.16 run record
+> # (I-105 run_record.py) and a directly captured DL-5 ENV record (env_probe_at.py); the R-S2 full suite's own
+> # S2 records are extracted (I-105 extract_s2_records_v2.py) and its census validated. Logic otherwise unchanged.
+19,21c22,26
+< RR=inline
+< rr() { (cd "$1" && .venv/bin/python -B -c "import json,sys,platform,hashlib,subprocess;print(json.dumps({\"label\":sys.argv[1],\"commit\":subprocess.run([\"git\",\"rev-parse\",\"HEAD\"],capture_output=True,text=True).stdout.strip(),\"sys.version\":sys.version,\"platform\":platform.platform(),\"machine\":platform.machine(),\"uv.lock sha256\":hashlib.sha256(open(\"uv.lock\",\"rb\").read()).hexdigest()},indent=1))" "$2" > "$O/run_records/$3.json"); }
+< 
+---
+> RR=I-106
+> S6=$HOME/tars-evidence/I-106/scripts; S5=$HOME/tars-evidence/I-105/scripts
+> REC=$C/dC/tests/test_s2_environment_record.py   # corrected-tip recorder, used for every clone's probe
+> rr() { (cd "$1" && .venv/bin/python -I -B "$S5/run_record.py" "$1" "$O/run_records/$3.json" "$2" src/tars/sim/geodesy.py tests/s2_dl4_points.txt uv.lock > /dev/null 2>&1; echo $? > "$O/run_records/$3.exit"
+>         .venv/bin/python -I -B "$S6/env_probe_at.py" "$REC" "$1" "$O/run_records/$3.env.json" > "$O/run_records/$3.env.stdout" 2>&1; echo $? > "$O/run_records/$3.env.exit"); }
+45a51
+> rr "$C/dC" "S2 R-S1 and R-S2 at the corrected tip (local host)" RS1_RS2_D
+51a58,60
+>   "$C/$c/.venv/bin/python" -I -B "$S5/extract_s2_records_v2.py" "$O/rs2_full_suite.txt" "$O/rs2_records" > "$O/rs2_extract.stdout" 2>&1; echo "exit=$?" >> "$O/rs2_extract.stdout"
+>   "$C/$c/.venv/bin/python" -I -B "$S5/validate_census.py" "$C/$c/tests/s2_dl4_points.txt" "$O/rs2_records/S2-XP3-LISTING.csv" ci "$O/rs2_census_validation.json" > "$O/rs2_census_validation.stdout" 2>&1; echo "exit=$?" >> "$O/rs2_census_validation.stdout"
+>   log "R-S2 records: extract $(tail -1 "$O/rs2_extract.stdout"); census validation $(tail -1 "$O/rs2_census_validation.stdout")"
