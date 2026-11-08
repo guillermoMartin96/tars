@@ -3,7 +3,12 @@
 For every entry of the frozen listing ``tests/s2_dl4_points.txt`` it emits one census
 record into the pytest warnings summary, which every CI job already prints:
 
-    set,index,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source
+    set,index,x_hex,y_hex,z_hex,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source
+
+These are the v11 §3.10 census fields (set, index, hex input, listing label, outcome,
+iteration count, hex final step, source), plus the X-P3 output bits. The hex input is the
+entry's own ``float.hex()`` text, as the listing stores it. Schema 2 (I-105, I104-01): the
+schema-1 records emitted at A to E have no hex input, and stay as they were recorded.
 
 - a ``passes`` entry takes the DL-4 twin's record through the G-08 adapter (§3.10); the
   accepted (h, phi) bits are listed for X-P3, and a non-accepted pair is ``discarded``
@@ -33,6 +38,8 @@ from tests.s2_dl4_geodetic_twin import twin_outcome
 
 LISTING = REPO_ROOT / "tests" / "s2_dl4_points.txt"
 NE = "not_evaluated"
+SCHEMA = "2"
+COLUMNS = "set,index,x_hex,y_hex,z_hex,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source"
 
 
 class XP3Listing(UserWarning):
@@ -43,22 +50,21 @@ def census_lines() -> tuple[list[str], Counter]:
     lines = []
     outcomes: Counter = Counter()
     for e in gen.parse_listing(LISTING.read_text()):
+        entry = (e.set, str(e.index), e.x.hex(), e.y.hex(), e.z.hex(), e.label)
         if e.label != "passes":
-            row = (e.set, str(e.index), e.label, e.label, NE, NE, NE, NE, "listing label")
+            row = (*entry, e.label, NE, NE, NE, NE, "listing label")
             outcomes[e.label] += 1
         else:
             res = twin_outcome(e.x, e.y, e.z)
             rec = res.record
             outcomes[res.outcome] += 1
             if rec is None:
-                row = (e.set, str(e.index), e.label, res.outcome, "raised", "raised")
+                row = (*entry, res.outcome, "raised", "raised")
                 row += ("discarded", "discarded", "twin record (G-08 adapter)")
             else:
                 accepted = res.outcome == "accepted"
                 row = (
-                    e.set,
-                    str(e.index),
-                    e.label,
+                    *entry,
                     res.outcome,
                     str(rec.iterations),
                     rec.last_step.hex(),
@@ -73,11 +79,12 @@ def census_lines() -> tuple[list[str], Counter]:
 def test_s2_xp3_rp9_listing_is_emitted():
     lines, outcomes = census_lines()
     assert len(lines) == gen.TOTAL_ENTRIES
+    assert all(len(ln.split(",")) == len(COLUMNS.split(",")) for ln in lines)
     body = "\n".join(lines) + "\n"
     header = (
-        f"S2-XP3-LISTING entries={len(lines)} "
+        f"S2-XP3-LISTING schema={SCHEMA} entries={len(lines)} "
         f"body_sha256={hashlib.sha256(body.encode()).hexdigest()} "
         f"outcomes={dict(sorted(outcomes.items()))}\n"
-        "set,index,label,outcome,iterations,final_step_hex,h_hex,phi_hex,source\n"
+        f"{COLUMNS}\n"
     )
     warnings.warn(header + body + "S2-XP3-LISTING-END", XP3Listing, stacklevel=1)

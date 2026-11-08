@@ -242,6 +242,12 @@ def test_g04_mixed_non_finite_cases():
         _raises_reason(geo, r, "non_finite")
 
 
+def test_g04_designated_witness_0_nan_7e6():
+    """v11 §3.12 designated witness for "non-finite check applied to x only" (MG-02):
+    exactly G-04 (0, nan, 7e6), alone in this node, so no earlier case can mask it (I-105)."""
+    _raises_reason(_geo(), (0.0, math.nan, 7.0e6), "non_finite")
+
+
 # --- G-05, overflow ---------------------------------------------------------------------
 
 
@@ -526,6 +532,12 @@ def test_g07_returns_h_then_phi_as_builtin_floats():
     assert type(h) is float and type(phi) is float
     assert h == 7.0e6 - 6378137.0  # (h, phi): the height comes first
     assert _bits(phi) == _bits(0.0)
+
+
+def test_g03_g07_designated_witness_accepted_axis_point_0_0_7e6():
+    """v11 §3.12 designated witness for "origin check with or instead of and" (MG-04):
+    exactly the G-03/G-07 accepted axis point (0, 0, 7.0e6), alone in this node (I-105)."""
+    _accepted(_geo(), (0.0, 0.0, 7.0e6))
 
 
 def test_g07_list_tuple_and_float64_ndarray_are_bit_identical():
