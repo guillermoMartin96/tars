@@ -1083,3 +1083,86 @@ outside the evolute region near the centre."
 
 **Status after E: S2 IMPLEMENTED / VALIDATED (local and CI) / NOT REVIEWED / NOT ACCEPTED / NOT
 MERGED.** The independent implementation review is not started, and merging is not authorized.
+
+### S2.14 Correction record after the I-104 review (added under I-105, 2026-11-07)
+
+**What was reviewed.** The independent §5.2 implementation review I-104 examined E
+`495590033ddc0456b2b93ce08700152fae5a3123`.
+- **Result: REQUEST_CHANGES**, with findings I104-01 (MINOR, must fix) and I104-02, I104-03 and
+  I104-04 (MAJOR).
+- **Obligations at E:** 26 MET, and 5 FAILED (OB-10, OB-14, OB-16, OB-17, OB-27). OB-30 and OB-31
+  remain later-scope PENDING.
+- The external record is `~/tars-evidence/I-104/`, whose manifest sha256 is
+  `0a63820fb424587ded8c63c59615bcfe3afcdf954fa97708d16503d829d0f3f1`.
+- Those MET rows are I-104's findings for E. They do not carry forward automatically to a corrected
+  candidate.
+
+**How this record works.** It is append-only. Every byte of §S2.0 to §S2.13 is unchanged. The
+statements it supersedes are quoted there exactly and stay in place. The full text of each
+correction is in `docs/science/experiments/m3-t2/s2/i105/ERRATUM.md`.
+
+**Superseded statements in this report**
+1. **Line 928 (§S2.5): "49 mutants: 44 KILLED by assertion on their designated nodes."**
+   - Withdrawn for MG-02 and MG-04 (I104-04).
+   - The `i103-bc2` campaign killed both by assertion, but did not execute their v11 §3.12 witnesses:
+     G-04 `(0, nan, 7e6)` for MG-02, and the accepted axis point `(0, 0, 7.0e6)` for MG-04.
+2. **Lines 943–944 (§S2.6): "0 (macOS x86_64, the generation environment under I-101)."**
+   - Corrected (I104-03). All 15 CI test executions at A, BC, BC2, D and E are `other` under I-101,
+     the macOS x86_64 job included.
+   - On that job, `sys.version`, `platform.platform()` and the interpreter sha256 differ from the
+     generation record.
+   - Its 0 class P differences are an observation in an `other` environment, not environment
+     equality.
+   - The generation-environment replays are the host runs, whose five recorded fields equal the
+     generation record.
+   - The r83:83 limitation applies: equal recorded fields do not certify unrecorded library or
+     build identity.
+
+**Findings that supersede no statement in this report**
+- **I104-01.** The schema-1 census records emitted at A to E lack the hex input, and the host census
+  also lacks the source. They stay exactly as emitted, and their §3.10 completeness is not claimed.
+  The correction is census schema 2.
+- **I104-02.** The two formal red runs and the individual mutation executions have no DL-5 record and
+  no per-run environment fields. This is a recorded nonconformance. New, fully recorded executions
+  supplement the historical ones; they do not complete them.
+  - **Owner exception (I-106, issued 2026-11-08).** For OB-16, OB-17, §3.11 ENV and §3.15 stop 18,
+    the owner waived only the missing-record duties of exactly these executions: RED-ORIGINAL,
+    RED-SUPPLEMENTAL, the 50 executions of each of the I-101, I-102 and I-103 campaigns, and the two
+    D-SCRIPTS-AT-BC scripts (`derivation_crosscheck.py`, `report_only.py`). Their scope is fixed by
+    the inventory sha256 `8116984313a017126014abf3cbdd87ec65d2db4ab8fce82697d31188e9e2f7e9`.
+  - Their nonconformances are retained; nothing is backfilled or relabelled, and no environment is
+    inferred for them. MN17-DIAGNOSTIC is not acceptance evidence and is not included.
+  - The exception is conditional on an independent implementation review establishing the five
+    conditions in `docs/science/experiments/m3-t2/s2/i105/DISPOSITION-I106.md`. It grants nothing
+    for future runs, and v11 is textually unchanged.
+  - I104-02 is **not closed**, and OB-16 and OB-17 are **not MET**. Both await that review.
+
+**Corrected commits and their validation (added under I-106, 2026-11-08).** The facts below are
+observed; none of them closes a finding or makes an obligation MET.
+- **F `9ff5ca903332f4ca3c05b697e6d9bd4224ec8932`** holds the two corrected test files only. Their
+  blobs are `50c75e31…` (`tests/test_s2_geodetic.py`) and `9cfe6c1c…` (`tests/test_s2_xp3_listing.py`),
+  equal to the I-105 supplemental red run, which ran before the candidate's green validation.
+  - CI run 42442590220 succeeded on attempt 1, 4/4.
+  - On each check job (ubuntu-latest, macos-latest, macos-15-intel): 1 517 passed and 3 skipped; a
+    complete, valid schema-2 census of 22 665 records (19 154 accepted, 64 evolute_region, 3 447
+    non_convergence); G-17b with 0 differences on 8 853 class X entries, `environment_kind` `other`.
+  - RP-8/RP-9 recomputed over the three listings (report-only): 0 cross-platform outcome
+    differences.
+- **G `878a03221727c19583453d5570c64100f4fa210d`** adds `docs/science/experiments/m3-t2/s2/i105/`
+  only. It holds the erratum, the issued I-106 disposition, the replacement executions with their
+  own records, F's CI evidence and its own `SHA256SUMS`.
+  - CI run 42446905381 succeeded on attempt 1, 4/4, with the same per-job observations as F.
+- **Regression on G** (fresh scratch clones, external record `~/tars-evidence/I-106/regression/`;
+  each execution has its own run record and DL-5 ENV record):
+  - R-1 and R-2: the M1 and M2 proofs pass at G and at K, with identical semantic output.
+  - R-3 and R-4: the T1 correction outputs are byte-identical at G and K; the T0 checks pass, 314 at
+    each.
+  - R-S1: the S1 tests pass (100), and the S1 `SHA256SUMS` verifies.
+  - R-S2: the full suite passes (1 520), with complete S2 records (G-17b `generation`, 0
+    differences) and a valid census.
+  - Ruff check and format pass.
+- H, which appends this paragraph, is pushed alone. Its CI and the CI records for G and H are kept
+  in the external record `~/tars-evidence/I-106/`.
+
+**Status: S2 IMPLEMENTED / REVIEWED (I-104: REQUEST_CHANGES) / CORRECTED (F, G, H) / RE-REVIEW
+NOT LAUNCHED / NOT ACCEPTED / NOT MERGED.**
