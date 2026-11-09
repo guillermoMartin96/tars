@@ -1,0 +1,25 @@
+preconditions 2026-11-09T04:12:01Z
+manifest S2-H01-correction sha256 b0ea705039b483359886a77b44911eb6117c1a5775ed5b86b5eef7c0d895e584 entries 795 non-OK 0
+manifest S2-REREVIEW-H-8074a19/continuation-20261108T211523Z sha256 8400c3bfd78b5457d5cd06360efb0401c05db9d407765fa30c3f60bf2f61922f entries 783 non-OK 0
+manifest I-104 sha256 0a63820fb424587ded8c63c59615bcfe3afcdf954fa97708d16503d829d0f3f1 entries 3831 non-OK 0
+manifest I-105 sha256 554b93b2c908cf34d5ad7d048c56eaa92b78561a117b3624d6253481540af5cd entries 2207 non-OK 0
+manifest I-106 sha256 c7cb3cb3e16779f39d9b0b55c00a69a90fdb7252f52dcd97f7edf310900b56c9 entries 26184 non-OK 0
+manifest I-106-handoff-correction sha256 8723d436a4a03528995a11aa4f34f736ff5567a9ed947ae42f85ab077a883673 entries 8 non-OK 0
+manifest I-106-review-tooling sha256 798b5b229ef66c82ca20613008feb566b3ebd2cad09a152404fb4ac5ee27d523 entries 11 non-OK 0
+branch refs/heads/milestone-3-t2-s2-geodetic
+HEAD 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 tree 3b70b865abfa4137227ccce0d070ba6484cdef26
+local origin ref 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93
+remote url https://github.com/guillermoMartin96/tars.git
+git ls-remote (network: remote identity):
+83d573bdb4933f5d2376423d6b8e9f3348a4ab6f	refs/heads/main
+8074a19bf33cf5b6d20f7d211ff44f82bf28ba93	refs/heads/milestone-3-t2-s2-geodetic
+status --porcelain=v1 --untracked-files=all --ignored=no:
+ M src/tars/sim/geodesy.py
+ M tests/test_s2_geodetic.py
+index vs HEAD (cached diff): []
+stash list count: 0
+worktree 82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb 290fb095634db31a0e37c23c5e095ee54ad84db74c630aceef327118d7fdaeda src/tars/sim/geodesy.py
+worktree d68c7a7d1645068a34a6c430b98845beb26e9f65 67f9b9e4b7fb1bcee825b95974f66cdd2ea63e14f6c86a112cfec50d80b7eac0 tests/test_s2_geodetic.py
+geodesy.py == packet red-green/geodesy.py.green-executed
+test == packet red-green/test_s2_geodetic.py.executed
+git diff == packet diff/H01-correction.diff

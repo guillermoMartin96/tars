@@ -1,0 +1,32 @@
+9a10,15
+> # S2 H-01 correction adaptation (offline; uncommitted candidate): D_STAGE is the implementation worktree at
+> # H with the uncommitted H-01 changes. The candidate clones dA/dB/dC are fresh --no-local --no-hardlinks
+> # clones of the local repository at H, with the worktree's changed paths copied in and verified byte-equal
+> # (labels D/dA/dB/dC therefore mean the CANDIDATE = H + H-01 changes, never H itself). K clones come from
+> # the local repository too. uv runs --offline (UV_OFFLINE=1, UV_PYTHON_DOWNLOADS=never). Run under
+> # sandbox-exec with network denied. Logic otherwise unchanged from I-106.
+13c19
+< URL=https://github.com/guillermoMartin96/tars.git
+---
+> URL=$HOME/projects/tars
+15,16c21,22
+< export PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:$PATH"
+< mkdir -p "$O"/{logs,r1,r2,r3,r4,run_records}; L=$O/logs; C=$O/clones; mkdir -p "$C"
+---
+> export UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never PYTHONDONTWRITEBYTECODE=1 PATH="$HOME/Library/Python/3.9/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+> mkdir -p "$O"/{logs,r1,r2,r3,r4,run_records}; L=$O/logs; C=${CLONES:-$O/clones}; mkdir -p "$C"
+19,21c25,34
+< for c in dA dB dC; do git clone -q --no-local "$STAGE" "$C/$c" && git -C "$C/$c" checkout -q --detach "$DSHA"; done
+< for c in bA bB bC; do git clone -q "$URL" "$C/$c" && git -C "$C/$c" checkout -q --detach "$BASE"; done
+< for c in dA dB dC bA bB bC; do (cd "$C/$c" && uv sync --locked -q); log "clone $c $(git -C "$C/$c" rev-parse HEAD) status [$(git -C "$C/$c" status --porcelain)]"; done
+---
+> { git -C "$STAGE" diff --name-only HEAD; git -C "$STAGE" ls-files --others --exclude-standard; } | sort -u > "$O/candidate-changed-paths.txt"
+> log "candidate changed paths: $(tr '\n' ' ' < "$O/candidate-changed-paths.txt")"
+> for c in dA dB dC; do git clone -q --no-local --no-hardlinks "$URL" "$C/$c" && git -C "$C/$c" checkout -q --detach "$DSHA"
+>   while read -r p; do cp "$STAGE/$p" "$C/$c/$p"; done < "$O/candidate-changed-paths.txt"
+>   ( cd "$C/$c" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$O/candidate-files-$c.sha256"
+> done
+> ( cd "$STAGE" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$O/worktree-files.sha256"
+> for c in dA dB dC; do cmp -s "$O/worktree-files.sha256" "$O/candidate-files-$c.sha256" && log "candidate clone $c equals the worktree file for file ($(wc -l < "$O/worktree-files.sha256" | tr -d ' ') files)" || { log "STOP candidate clone $c differs from the worktree"; exit 5; }; done
+> for c in bA bB bC; do git clone -q --no-local --no-hardlinks "$URL" "$C/$c" && git -C "$C/$c" checkout -q --detach "$BASE"; done
+> for c in dA dB dC bA bB bC; do (cd "$C/$c" && uv sync --locked --offline -q); log "clone $c $(git -C "$C/$c" rev-parse HEAD) status [$(git -C "$C/$c" status --porcelain)]"; done

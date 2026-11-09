@@ -1,0 +1,103 @@
+"""S2 commit D: RP-8 (X-P3 cross-platform ulp differences) and the RP-9 cross-platform census,
+by the log route (v11 §3.11 Part B; D-S2-6 (b'); OB-15). Report-only; not a bound; not a gate.
+
+Usage: python -I rp8_rp9_ci.py <out.json> <label>=<records dir> ...
+
+Each records dir holds S2-XP3-LISTING.csv and S2-ENV-RECORD.json extracted from one CI job log
+(verified by its own body sha256 in extraction-status.json). Pairs of platforms are compared
+entry by entry: outcome equality, iteration equality, and for entries accepted on both the ulp
+distance of h and of phi (ordered-integer distance of the binary64 bit patterns; signed zeros
+count as different bit patterns and are reported separately). The ordered-integer distance
+between values of opposite sign, or between zero and a nonzero value, counts every binary64
+value in between and is therefore enormous for values near zero (for example h = 0 against
+h = -2^-30 m); such pairs are counted separately as sign/zero crossings, and the absolute
+difference |dh| [m] and |dphi| [rad] is reported beside the ulp histogram.
+"""
+
+import csv
+import itertools
+import json
+import struct
+import sys
+from pathlib import Path
+
+
+def ordered(v: float) -> int:
+    i = struct.unpack("<q", struct.pack("<d", v))[0]
+    return i if i >= 0 else -(i & 0x7FFFFFFFFFFFFFFF)
+
+
+def ulps(a: float, b: float) -> int:
+    return abs(ordered(a) - ordered(b))
+
+
+out = Path(sys.argv[1])
+plats = {}
+for arg in sys.argv[2:]:
+    label, d = arg.split("=", 1)
+    d = Path(d)
+    st = json.loads((d / "extraction-status.json").read_text())
+    assert st["S2-XP3-LISTING"]["verified"] is True, (label, "listing not verified: stop 18")
+    env = json.loads((d / "S2-ENV-RECORD.json").read_text())
+    rows = list(csv.DictReader((d / "S2-XP3-LISTING.csv").open()))
+    assert len(rows) == 22665, (label, len(rows))
+    plats[label] = {"rows": rows, "body_sha256": st["S2-XP3-LISTING"]["body_sha256"],
+                    "run": env["run"]["ci"]["run URL (derived)"], "job_log": str(d)}
+
+report = {"label": "RP-8 / RP-9 (CI log route): report-only; not a bound; not a gate",
+          "platforms": {k: {"listing_body_sha256": v["body_sha256"], "run": v["run"]}
+                        for k, v in plats.items()},
+          "census": {}, "pairs": {}}
+for k, v in plats.items():
+    c = {}
+    for r in v["rows"]:
+        c[r["outcome"]] = c.get(r["outcome"], 0) + 1
+    report["census"][k] = {"entries": len(v["rows"]), "outcomes": c}
+
+for (ka, va), (kb, vb) in itertools.combinations(plats.items(), 2):
+    outcome_diff, iter_diff, h_hist, phi_hist, zero_sign = [], 0, {}, {}, 0
+    max_h = max_phi = (0, None)
+    max_dh = max_dphi = (0.0, None)
+    crossings = 0
+    both = 0
+    for ra, rb in zip(va["rows"], vb["rows"]):
+        assert (ra["set"], ra["index"], ra["label"]) == (rb["set"], rb["index"], rb["label"])
+        if ra["outcome"] != rb["outcome"]:
+            outcome_diff.append((ra["set"], ra["index"], ra["outcome"], rb["outcome"]))
+            continue
+        if ra["iterations"] != rb["iterations"]:
+            iter_diff += 1
+        if ra["outcome"] != "accepted":
+            continue
+        both += 1
+        ha, hb = float.fromhex(ra["h_hex"]), float.fromhex(rb["h_hex"])
+        pa, pb = float.fromhex(ra["phi_hex"]), float.fromhex(rb["phi_hex"])
+        if (ha == hb and ha.hex() != hb.hex()) or (pa == pb and pa.hex() != pb.hex()):
+            zero_sign += 1
+        uh, up = ulps(ha, hb), ulps(pa, pb)
+        if (ha < 0) != (hb < 0) or (ha == 0) != (hb == 0) or (pa < 0) != (pb < 0) or (pa == 0) != (pb == 0):
+            crossings += 1
+        if abs(ha - hb) > max_dh[0]:
+            max_dh = (abs(ha - hb), f"{ra['set']}:{ra['index']}")
+        if abs(pa - pb) > max_dphi[0]:
+            max_dphi = (abs(pa - pb), f"{ra['set']}:{ra['index']}")
+        h_hist[uh] = h_hist.get(uh, 0) + 1
+        phi_hist[up] = phi_hist.get(up, 0) + 1
+        if uh > max_h[0]:
+            max_h = (uh, f"{ra['set']}:{ra['index']}")
+        if up > max_phi[0]:
+            max_phi = (up, f"{ra['set']}:{ra['index']}")
+    report["pairs"][f"{ka} vs {kb}"] = {
+        "outcome_differences": len(outcome_diff), "outcome_difference_entries": outcome_diff,
+        "iteration_count_differences": iter_diff, "accepted_on_both": both,
+        "h_ulp_histogram": {str(k): h_hist[k] for k in sorted(h_hist)},
+        "phi_ulp_histogram": {str(k): phi_hist[k] for k in sorted(phi_hist)},
+        "max_h_ulps": list(max_h), "max_phi_ulps": list(max_phi),
+        "signed_zero_only_differences": zero_sign,
+        "sign_or_zero_crossings": crossings,
+        "max_abs_dh_m": [repr(max_dh[0]), max_dh[1]], "max_abs_dphi_rad": [repr(max_dphi[0]), max_dphi[1]]}
+
+out.write_text(json.dumps(report, indent=1) + "\n")
+print(json.dumps({k: {kk: vv for kk, vv in v.items() if kk != "outcome_difference_entries"}
+                  for k, v in report["pairs"].items()}, indent=1))
+print(json.dumps(report["census"], indent=1))

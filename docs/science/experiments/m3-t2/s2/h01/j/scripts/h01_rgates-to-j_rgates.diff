@@ -1,0 +1,28 @@
+15a16,20
+> # S2 H-01 commit J adaptation (clean committed tip): D = pushed commit J. dA/dB/dC are fresh --no-local
+> # --no-hardlinks clones of the local repository checked out detached at exact J, with NOTHING copied in;
+> # each must report HEAD == J, tree == b5b9e928..., and an empty porcelain status, or the script stops.
+> # The R-2 comparison block is byte-unchanged from the I-106/H-01 driver (revision substitution only).
+> # Usage: j_rgates.sh J_SHA OUT_DIR
+17c22,23
+< STAGE=$1; O=$2
+---
+> JSHA=$1; O=$2
+> JTREE=b5b9e928d4203ea82ea5178be945490ce705a1d8
+24,26c30
+< DSHA=$(git -C "$STAGE" rev-parse HEAD); log "D stage commit $DSHA tree $(git -C "$STAGE" rev-parse 'HEAD^{tree}')"
+< { git -C "$STAGE" diff --name-only HEAD; git -C "$STAGE" ls-files --others --exclude-standard; } | sort -u > "$O/candidate-changed-paths.txt"
+< log "candidate changed paths: $(tr '\n' ' ' < "$O/candidate-changed-paths.txt")"
+---
+> DSHA=$JSHA; log "D = J commit $DSHA (expected tree $JTREE)"
+28,29c32,35
+<   while read -r p; do cp "$STAGE/$p" "$C/$c/$p"; done < "$O/candidate-changed-paths.txt"
+<   ( cd "$C/$c" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$O/candidate-files-$c.sha256"
+---
+>   h=$(git -C "$C/$c" rev-parse HEAD); t=$(git -C "$C/$c" rev-parse 'HEAD^{tree}'); s=$(git -C "$C/$c" status --porcelain --untracked-files=all)
+>   alt=$(cat "$C/$c/.git/objects/info/alternates" 2>/dev/null)
+>   log "clone $c HEAD $h tree $t alternates [$alt] status-before-sync [$s]"
+>   [ "$h" = "$DSHA" ] && [ "$t" = "$JTREE" ] && [ -z "$s" ] && [ -z "$alt" ] || { log "STOP clone $c is not a clean checkout of exact J"; exit 5; }
+31,32d36
+< ( cd "$STAGE" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$O/worktree-files.sha256"
+< for c in dA dB dC; do cmp -s "$O/worktree-files.sha256" "$O/candidate-files-$c.sha256" && log "candidate clone $c equals the worktree file for file ($(wc -l < "$O/worktree-files.sha256" | tr -d ' ') files)" || { log "STOP candidate clone $c differs from the worktree"; exit 5; }; done

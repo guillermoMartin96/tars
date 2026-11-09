@@ -1,0 +1,65 @@
+#!/bin/bash
+# S2 H-01 correction: red-before-green for the H-01 regression (one node, plus the nine component-free
+# recorders in the same pytest process, so each execution carries its own DL-5 ENV, X-P3/RP-9 listing,
+# G-17a and G-17b records; plus an I-105 run_record.py §3.16 run record with the executed bytes).
+# Disposable clone of the local repository at exact H (--no-local --no-hardlinks), offline locked setup.
+# Run the whole script under: sandbox-exec -p '(version 1)(allow default)(deny network*)'
+# Usage: red_green.sh setup|red|green <out dir> <clone parent dir>
+set -u
+PHASE=$1; O=$2; PARENT=$3
+H=8074a19bf33cf5b6d20f7d211ff44f82bf28ba93; HT=3b70b865abfa4137227ccce0d070ba6484cdef26
+H_GEO=9df9a3e97fa9b1b917a44c502d5c6409419f1ce1f4f475cf180c9d02e7db9430
+W=$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic
+UV=$HOME/Library/Python/3.9/bin/uv
+S5=$HOME/tars-evidence/I-105/scripts
+NODE="tests/test_s2_geodetic.py::test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook"
+RECORDERS="tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py tests/test_s2_dl4_points.py"
+export PYTHONDONTWRITEBYTECODE=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never
+C=$PARENT/h01-redgreen-clone
+mkdir -p "$O"; L=$O/sequence.log
+log() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$L"; }
+idents() { for f in src/tars/sim/geodesy.py tests/test_s2_geodetic.py; do echo "$(git -C "$C" hash-object "$C/$f") $(shasum -a 256 "$C/$f" | cut -c1-64) $f"; done; }
+case $PHASE in
+setup)
+  log "setup: git clone --no-local --no-hardlinks --no-checkout $HOME/projects/tars $C"
+  git clone -q --no-local --no-hardlinks --no-checkout $HOME/projects/tars "$C" || exit 98
+  git -C "$C" checkout -q --detach "$H" || exit 98
+  head=$(git -C "$C" rev-parse HEAD); tree=$(git -C "$C" rev-parse 'HEAD^{tree}')
+  log "clone HEAD $head tree $tree alternates [$(cat "$C/.git/objects/info/alternates" 2>/dev/null)] status [$(git -C "$C" status --porcelain --untracked-files=all)]"
+  [ "$head" = "$H" ] && [ "$tree" = "$HT" ] || { log "STOP identity mismatch"; exit 2; }
+  log "uv: $UV $($UV --version) sha256 $(shasum -a 256 $UV | cut -c1-64)"
+  log "cmd (cwd clone): UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never $UV sync --locked --offline"
+  (cd "$C" && "$UV" sync --locked --offline) > "$O/uv-sync.log" 2>&1; e=$?; log "uv sync exit $e"; [ $e -eq 0 ] || exit 3
+  ;;
+red|green)
+  R=$O/$PHASE; mkdir -p "$R"
+  [ "$(git -C "$C" rev-parse HEAD)" = "$H" ] || { log "STOP clone not at H"; exit 2; }
+  if [ $PHASE = red ]; then
+    cp "$W/tests/test_s2_geodetic.py" "$C/tests/test_s2_geodetic.py"
+    cp "$W/tests/test_s2_geodetic.py" "$O/test_s2_geodetic.py.executed"   # frozen copy of the new test bytes
+    g=$(shasum -a 256 "$C/src/tars/sim/geodesy.py" | cut -c1-64)
+    [ "$g" = "$H_GEO" ] || { log "STOP red: geodesy.py is not H's bytes ($g)"; exit 4; }
+    [ -z "$(git -C "$C" diff --name-only HEAD -- src)" ] || { log "STOP red: src differs from H"; exit 4; }
+  else
+    t=$(shasum -a 256 "$C/tests/test_s2_geodetic.py" | cut -c1-64); t0=$(shasum -a 256 "$O/test_s2_geodetic.py.executed" | cut -c1-64)
+    w=$(shasum -a 256 "$W/tests/test_s2_geodetic.py" | cut -c1-64)
+    [ "$t" = "$t0" ] && [ "$w" = "$t0" ] || { log "STOP green: test bytes changed ($t / $w vs $t0)"; exit 4; }
+    cp "$W/src/tars/sim/geodesy.py" "$C/src/tars/sim/geodesy.py"
+    cp "$W/src/tars/sim/geodesy.py" "$O/geodesy.py.green-executed"
+  fi
+  git -C "$C" status --porcelain --untracked-files=all > "$R/git-status-porcelain.txt"
+  git -C "$C" diff HEAD > "$R/executed-vs-H.diff"
+  idents > "$R/executed-identities.txt"; log "$PHASE executed identities: $(tr '\n' ';' < "$R/executed-identities.txt")"
+  (cd "$C" && .venv/bin/python -I "$S5/run_record.py" "$C" "$R/run-record.json" "S2 H-01 $PHASE: H + H-01 regression test$([ $PHASE = green ] && echo ' + H-01 source correction')" \
+     src/tars/sim/geodesy.py tests/test_s2_geodetic.py tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py \
+     tests/test_s2_dl4_points.py tests/s2_dl4_points.txt src/tars/sim/constants.py uv.lock) > "$R/run-record.stdout" 2>&1
+  echo $? > "$R/run-record.exit"
+  CMD=".venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$R/junit.xml $NODE $RECORDERS"
+  echo "$CMD" > "$R/command.txt"
+  log "$PHASE start; cmd (cwd $C): $CMD"
+  (cd "$C" && $CMD) > "$R/pytest.log" 2>&1; e=$?; echo $e > "$R/pytest.exit"
+  log "$PHASE end; pytest exit $e"
+  (cd "$C" && .venv/bin/python -I "$S5/extract_s2_records_v2.py" "$R/pytest.log" "$R/records") > "$R/extract.stdout" 2>&1; echo $? > "$R/extract.exit"
+  log "$PHASE records extraction exit $(cat "$R/extract.exit"): $(tail -1 "$R/extract.stdout")"
+  ;;
+esac

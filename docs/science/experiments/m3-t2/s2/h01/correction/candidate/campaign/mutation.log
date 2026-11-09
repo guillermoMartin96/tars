@@ -1,0 +1,51 @@
+control: 76 nodes pass
+MG-01  non-finite check removed                                   KILLED                              2/  2 AssertionError: ((nan, inf, 0.0), 'overflow') asse; AssertionError: (nan, 0.0, 1.0): expected non_fini
+MG-02  non-finite check applied to x only                         KILLED                              1/  1 AssertionError: ((0.0, nan, 7000000.0), 'numerical
+MG-03  origin check removed                                       KILLED                              1/  1 AssertionError: ((0.0, 0.0, 0.0), 'evolute_region'
+MG-04  origin check with or                                       KILLED                              1/  1 AssertionError: (0.0, 0.0, 7000000.0): expected ac
+MG-05  evolute check removed                                      KILLED                              2/  2 AssertionError: (30000.0, 30000.0, 0.0): expected ; AssertionError: stop 15: [('DG-INT', 6, 'evolute_r
+MG-06  overflow check removed                                     KILLED                              1/  1 AssertionError: (1.5e+308, 1.5e+308, 0.0): expecte
+MP-01  coefficient 27 -> 26                                       KILLED                              4/ 16 AssertionError: assert 'evolute_region' not in ('o
+MP-02  coefficient 27 -> 28                                       KILLED                              4/ 16 AssertionError: (10280.234726712268, 0.0, 20560.46; AssertionError: (12586.625205404958, 12586.6252054; AssertionError: (15121.263417223725, 0.0, 1512
+MP-03  W -> 1 (spherical)                                         KILLED                              6/ 16 AssertionError: (0.0, 0.0, -42841.31151331357): ex; AssertionError: (0.0, 0.0, 42841.31151331357): exp; AssertionError: (10280.234726712268, 0.0, 2056
+MP-04  p and z roles swapped                                      KILLED                              7/ 16 AssertionError: (0.0, 0.0, -42841.31151331357): ex; AssertionError: (0.0, 0.0, 42841.31151331357): exp; AssertionError: (10280.234726712268, 0.0, 2056
+MP-05  pre-filter bound 2^16 -> 2^15                              KILLED                              3/  8 AssertionError: (0.0, 0.0, -42841.31151331357): ex; AssertionError: (0.0, 0.0, 42841.31151331357): exp; AssertionError: (42697.67270717996, 0.0, 0.0):
+MP-06  K transcribed with e2 for e2^2                             KILLED                              8/ 16 AssertionError: assert 'evolute_region' not in ('o
+ME-01  pre-filter bound raised to 2^17                            SURVIVED (documented equivalent)    0/ 18 
+ME-02  pre-filter >= -> >                                         SURVIVED (documented equivalent)    0/ 18 
+ME-03  D' >= 0 clause dropped                                     SURVIVED (documented equivalent)    0/ 18 
+ME-04  closed -> open region (>= -> >)                            SURVIVED (documented equivalent)    0/ 18 
+MN-01  non-convergence check removed                              KILLED                              7/  7 AssertionError: ('returned', (621863.0, 0.0)) asse; AssertionError: (42697.67270722267, 0.0, 0.001): e; AssertionError: (42697.67270722267, 0.0, 1.0):
+MN-02  non-convergence check inverted                             KILLED                             16/ 16 AssertionError: (0.0, 0.0, -42841.31151331358): ex; AssertionError: (0.0, 0.0, 42841.31151331358): exp; AssertionError: (10280.23472671227, 0.0, 20560
+MN-03  stop test evaluated after phi is replaced (before the upda KILLED                              2/  2 AssertionError: (['hypot', 'atan2', 'sin', 'sqrt',; AssertionError: stop 3: 20547 G-08 mismatches: [("
+MN-04  pre-update iterate returned (converged set before the upda KILLED                              2/  2 AssertionError: assert b'\x00\x00\x0...0\x00\x00\x; AssertionError: stop 3: 12244 G-08 mismatches: [("
+MN-05  stop met at k = 60 treated as non-convergence              KILLED                              2/  2 AssertionError: GeodeticDomainError('geodetic eval; AssertionError: stop 3: 145 G-08 mismatches: [('DG
+MN-06  N2 (NaN check) removed                                     KILLED                              3/  3 AssertionError: ('returned', (nan, 0.0)) assert 'r; AssertionError: assert 'non_convergence' == 'numer; AssertionError: assert 'overflow' == 'numerica
+MN-07  N1 wrapping removed                                        KILLED                              4/  4 AssertionError: <class 'OverflowError'> assert <cl; AssertionError: <class 'ValueError'> assert <class; AssertionError: <class 'ZeroDivisionError'> as
+MN-08  catch broadened to Exception                               KILLED                              3/  3 AssertionError: assert ('raised' == 'raised'      
+M-W1   try widened over structural access                         KILLED                              2/  2 AssertionError: assert GeodeticDomainError('geodet
+M-W2   try widened over the guard, steps 1 to 4 only (documented  SURVIVED (documented equivalent)    0/ 26 
+M-W3   try widened over the post-check predicates                 KILLED                              1/  1 AssertionError: assert ('raised' == 'raised'      
+MN-09  numerical_failure checked after overflow                   KILLED                              1/  1 AssertionError: assert 'overflow' == 'numerical_fa
+MN-10  numerical_failure checked after non_convergence            KILLED                              1/  1 AssertionError: assert 'non_convergence' == 'numer
+MN-11  overflow checked after non_convergence                     KILLED                              1/  1 AssertionError: assert 'non_convergence' == 'overf
+MN-12  iteration cap 60 -> 59                                     KILLED                              2/  2 AssertionError: (['hypot', 'atan2', 'sin', 'sqrt',
+MN-13  iteration cap 60 -> 61                                     KILLED                              1/  1 AssertionError: (['hypot', 'atan2', 'sin', 'sqrt',
+MN-14  stop test <= -> <                                          KILLED                              1/  1 AssertionError: GeodeticDomainError('geodetic eval
+MN-15  category mapping altered (numerical_failure -> numerical)  KILLED                              2/  2 AssertionError: assert 'numerical' == 'failure'   
+MN-16  normalization by isinstance instead of type()              KILLED                              1/  1 AssertionError: (<tests.test_s2_geodetic.test_g06_
+MN-17  component value used as given (no base-slot read)          KILLED                              1/  2 AssertionError: (('raised', 'not_binary64'), ('ret
+MD-01  truncation after 2 iterations                              KILLED                              1/  1 AssertionError: stop 3: 17072 G-08 mismatches: [("
+MD-02  truncation after 3 iterations                              KILLED                              1/  1 AssertionError: stop 3: 16512 G-08 mismatches: [("
+MD-03  stopping tolerance 1e-9                                    KILLED                              1/  1 AssertionError: stop 3: 19776 G-08 mismatches: [("
+MD-04  start latitude atan2(z, p)                                 KILLED                              1/  1 AssertionError: stop 3: 4102 G-08 mismatches: [("P
+MD-05  pole-safe height replaced by p/cos(phi) - N                KILLED                              1/  1 AssertionError: stop 3: 10220 G-08 mismatches: [('
+MD-06  e2 formed as 1 - (1 - f)^2                                 KILLED                              2/  2 AssertionError: assert b'\x00\x95\xfe\xf1\x90k{?' ; AssertionError: stop 3: 6621 G-08 mismatches: [("P
+MD-07  e2 * n * s regrouped as e2 * (n * s)                       KILLED                              1/  1 AssertionError: stop 3: 1835 G-08 mismatches: [('D
+MH-01  spherical instead of geodetic (e2 = 0 in the evaluation)   KILLED                              1/  1 AssertionError: stop 3: 22288 G-08 mismatches: [('
+MH-02  altitude datum offset (+1 m)                               KILLED                              1/  1 AssertionError: stop 3: 19146 G-08 mismatches: [('
+MH-03  flattening dropped (F = 0)                                 KILLED                              2/  2 AssertionError: assert b'\x00\x00\x0...0\x00\x00\x; AssertionError: stop 3: 22288 G-08 mismatches: [('
+MI-01  return order (phi, h)                                      KILLED                              2/  2 AssertionError: stop 3: 19133 G-08 mismatches: [('; assert 0.0 == (7000000.0 - 6378137.0)
+MI-02  OverflowError raised for reason overflow                   KILLED                              1/  1 AssertionError: (1.5e+308, 1.5e+308, 0.0): expecte
+MI-03  precedence swap: non-finite after evolute                  KILLED                              1/  1 AssertionError: (nan, 0.0, 0.0): expected non_fini
+NOT OK: []

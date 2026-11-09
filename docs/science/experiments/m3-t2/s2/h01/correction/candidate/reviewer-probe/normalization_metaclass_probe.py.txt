@@ -1,0 +1,20 @@
+# Independent diagnostic on exact H; no source or test mutation.
+import json
+from tars.sim.geodesy import geodetic
+calls=[]
+sentinel=ValueError('unsupported component metaclass __name__ sentinel')
+class Meta(type):
+    def __getattribute__(cls,name):
+        if name=='__name__':
+            calls.append(name)
+            raise sentinel
+        return super().__getattribute__(name)
+class Unsupported(metaclass=Meta):
+    pass
+try:
+    result=geodetic((Unsupported(),0.0,7.0e6))
+    outcome={'kind':'returned','value':result}
+except BaseException as exc:
+    outcome={'kind':'raised','exact_type':type(exc).__name__,'message':str(exc),'is_sentinel':exc is sentinel,'is_TypeError':isinstance(exc,TypeError)}
+print(json.dumps({'input_structure':'ordinary built-in tuple of length 3; first component is an unsupported custom object','metaclass_hook_calls':calls,'outcome':outcome,'required_by_v11_3_8_step_0':'Every other type raises TypeError'},indent=2))
+assert outcome['kind']=='raised' and outcome['is_sentinel'] and not outcome['is_TypeError'] and calls==['__name__']

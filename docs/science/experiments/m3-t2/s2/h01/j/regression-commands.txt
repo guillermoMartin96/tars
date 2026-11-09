@@ -1,0 +1,2 @@
+sandbox-exec -p '(version 1)(allow default)(deny network*)' bash $HOME/tars-evidence/S2-H01-J/scripts/j_h01_node.sh $HOME/tars-evidence/S2-H01-J/h01-node-at-J $SCRATCH/j/node
+CLONES=$SCRATCH/j/rg/clones sandbox-exec -p '(version 1)(allow default)(deny network*)' bash $HOME/tars-evidence/S2-H01-J/scripts/j_rgates.sh 42ec8d6170447429ec1be8208f71cb4ee5512496 $HOME/tars-evidence/S2-H01-J/regression

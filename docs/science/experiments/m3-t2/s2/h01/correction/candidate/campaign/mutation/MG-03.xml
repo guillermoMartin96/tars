@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="2.004" timestamp="2026-11-08T16:30:13.204155-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g03_all_eight_signed_zero_origins" time="0.002"><failure message="AssertionError: ((0.0, 0.0, 0.0), 'evolute_region')&#10;assert 'evolute_region' == 'origin'&#10;  &#10;  - origin&#10;  + evolute_region">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-03/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, 0.0), reason = 'origin'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+&gt;           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (0.0, 0.0, 0.0)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if False:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+&gt;           raise GeodeticDomainError("evolute_region")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic input: the point lies in the evolute region (DR-0029 P8)
+
+$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-03/src/tars/sim/geodesy.py:157: GeodeticDomainError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g03_all_eight_signed_zero_origins():
+        geo = _geo()
+        for sx, sy, sz in gen.SIGNS:
+&gt;           _raises_reason(geo, (sx * 0.0, sy * 0.0, sz * 0.0), "origin")
+
+tests/test_s2_geodetic.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-03/src/tars/sim/geodesy.py'&gt;
+r = (0.0, 0.0, 0.0), reason = 'origin'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           assert exc.reason == reason, (r, exc.reason)
+E           AssertionError: ((0.0, 0.0, 0.0), 'evolute_region')
+E           assert 'evolute_region' == 'origin'
+E             
+E             - origin
+E             + evolute_region
+
+tests/test_s2_geodetic.py:116: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.224" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.387" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.059" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.335" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.626" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.068" /></testsuite></testsuites>

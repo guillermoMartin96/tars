@@ -1,0 +1,306 @@
+{
+  "R2-F1_legitimate_results": {
+    "exact_subnormal_intermediate": {
+      "corrected": {
+        "dtype": "float64",
+        "result": [
+          "-1.4444474582904269e-34",
+          "-0.0",
+          "-0.0"
+        ]
+      },
+      "exact": [
+        "-1.4444474582904269e-34",
+        "0.0",
+        "0.0"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-1.4444474582904269e-34",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "exact_zero_factor_and_coordinate": {
+      "corrected": {
+        "dtype": "float64",
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-9.891604774494805e-268"
+        ]
+      },
+      "exact": [
+        "0.0",
+        "0.0",
+        "-9.891604774494805e-268"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-9.891604774494805e-268"
+        ]
+      }
+    },
+    "j2_zero": {
+      "corrected": {
+        "dtype": "float64",
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-0.0"
+        ]
+      },
+      "exact": [
+        "0.0",
+        "0.0",
+        "0.0"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "subnormal_final_component": {
+      "corrected": {
+        "dtype": "float64",
+        "result": [
+          "-1.1247726104217232e-241",
+          "-6.2167845e-317",
+          "-0.0"
+        ]
+      },
+      "exact": [
+        "-1.1247726104217232e-241",
+        "-6.2167845e-317",
+        "0.0"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-1.1247726104217232e-241",
+          "-6.2167845e-317",
+          "-0.0"
+        ]
+      }
+    }
+  },
+  "R2-F1_underflow": {
+    "coefficient_chain": {
+      "corrected": {
+        "message": "-(3/2) J2 mu R^2: an intermediate product underflows",
+        "raises": "ValueError"
+      },
+      "exact": [
+        "-2.1666711874356403e-34",
+        "0.0",
+        "0.0"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-1.925929944387236e-34",
+          "-0.0",
+          "-0.0"
+        ]
+      }
+    },
+    "x_factor_review02": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: a component product underflows",
+        "raises": "ValueError"
+      },
+      "exact": [
+        "-4.303918780958246e-284",
+        "0.0",
+        "-2.2250738585072015e-268"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-2.2250738585072012e-268"
+        ]
+      }
+    },
+    "y_factor": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: a component product underflows",
+        "raises": "ValueError"
+      },
+      "exact": [
+        "0.0",
+        "-4.303918780958246e-284",
+        "-2.2250738585072015e-268"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "-0.0",
+          "-0.0",
+          "-2.2250738585072012e-268"
+        ]
+      }
+    },
+    "z_factor": {
+      "corrected": {
+        "message": "outside the J2 numerical domain: a component product underflows",
+        "raises": "ValueError"
+      },
+      "exact": [
+        "5.785192032118724e-268",
+        "0.0",
+        "-1.3478448085169703e-283"
+      ],
+      "reviewed_b1566ae": {
+        "dtype": "float64",
+        "result": [
+          "5.78519203211872e-268",
+          "0.0",
+          "-3.025521829374199e-283"
+        ]
+      }
+    }
+  },
+  "R2-F2": {
+    "canonical_python_floats": {
+      "dtype": "float64",
+      "result": [
+        "-0.01591182047796651",
+        "-0.0",
+        "-0.0"
+      ]
+    },
+    "corrected": {
+      "bool_j2": {
+        "message": "j2 must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not bool",
+        "raises": "TypeError"
+      },
+      "float32_parameters": {
+        "dtype": "float64",
+        "result": [
+          "-0.015911820615666403",
+          "-0.0",
+          "-0.0"
+        ]
+      },
+      "int_mu_10**400": {
+        "message": "mu is not representable as a binary64 number",
+        "raises": "ValueError"
+      },
+      "list_mu": {
+        "message": "mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not list",
+        "raises": "TypeError"
+      },
+      "mu_array_set_to_-1_after_construction": {
+        "dtype": "float64",
+        "result": [
+          "-0.01591182047796651",
+          "-0.0",
+          "-0.0"
+        ]
+      },
+      "str_mu": {
+        "message": "mu must be a real number (int, float, or a NumPy integer or floating scalar or zero-dimensional array), not str",
+        "raises": "TypeError"
+      }
+    },
+    "float_conversion_of_float32_values": {
+      "dtype": "float64",
+      "result": [
+        "-0.015911820615666403",
+        "-0.0",
+        "-0.0"
+      ]
+    },
+    "reviewed_b1566ae": {
+      "bool_j2": {
+        "dtype": "float64",
+        "result": [
+          "-14.69742821878095",
+          "-0.0",
+          "-0.0"
+        ]
+      },
+      "float32_parameters": {
+        "dtype": "float32",
+        "result": [
+          "-0.01591181941330433",
+          "-0.0",
+          "-0.0"
+        ]
+      },
+      "int_mu_10**400": {
+        "message": "int too large to convert to float",
+        "raises": "OverflowError"
+      },
+      "list_mu": {
+        "message": "must be real number, not list",
+        "raises": "TypeError"
+      },
+      "mu_array_set_to_-1_after_construction": {
+        "dtype": "float64",
+        "result": [
+          "3.991922438949618e-17",
+          "0.0",
+          "0.0"
+        ]
+      },
+      "str_mu": {
+        "message": "must be real number, not str",
+        "raises": "TypeError"
+      }
+    }
+  },
+  "bit_identity_rk4_trajectories": [
+    {
+      "bit_identical": true,
+      "inclination_deg": 28.5,
+      "states": 6001
+    },
+    {
+      "bit_identical": true,
+      "inclination_deg": 51.6,
+      "states": 6001
+    },
+    {
+      "bit_identical": true,
+      "inclination_deg": 97.0,
+      "states": 6001
+    }
+  ],
+  "bit_identity_valid_states": {
+    "differing": 0,
+    "seed": 20261023,
+    "states": 200004
+  },
+  "canonical_reach": {
+    "coefficient_chain": [
+      -0.001623939260778334,
+      -647302906802.6094,
+      -4.1285866200852746e+18
+    ],
+    "is_normal": true,
+    "k0": -2.6332691079270833e+25,
+    "smallest_abs_k_in_domain": 1.464804563615783e-283,
+    "times_2^-53": 1.6262597531022472e-299
+  },
+  "numerical_domain_equatorial_canonical": {
+    "largest_accepted_x_m": 4.476546622757235e+61,
+    "review01_values": [
+      4.476546622757235e+61,
+      3.3773820261812166e-57
+    ],
+    "smallest_accepted_x_m": 3.3773820261812166e-57
+  },
+  "reference": "OLD_SRC = src/ at b1566ae (forces.py as at a27f288)"
+}

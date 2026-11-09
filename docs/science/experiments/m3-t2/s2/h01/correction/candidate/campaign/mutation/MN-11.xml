@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="1.985" timestamp="2026-11-08T16:32:01.908973-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi07_overflow_before_non_convergence" time="0.003"><failure message="AssertionError: assert 'non_convergence' == 'overflow'&#10;  &#10;  - overflow&#10;  + non_convergence">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1087e4530&gt;
+
+    def test_g16_fi07_overflow_before_non_convergence(monkeypatch):  # S-6, S-9
+        out = _run_case(monkeypatch, _rules(hypot=math.inf, atan2=_atan2_never_converging), _SCHED_07)
+&gt;       _expect_reason(out, "overflow")
+
+tests/test_s2_geodetic.py:935: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation: the DQ-1 stop test was not met within 60 iterations'))
+reason = 'overflow', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+&gt;       assert value.reason == reason
+E       AssertionError: assert 'non_convergence' == 'overflow'
+E         
+E         - overflow
+E         + non_convergence
+
+tests/test_s2_geodetic.py:879: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.227" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.411" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.058" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.341" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.581" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.071" /></testsuite></testsuites>

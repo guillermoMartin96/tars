@@ -1,0 +1,48 @@
+preconditions 2026-11-09T17:33:42Z
+repository instructions read: $HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic/CLAUDE.md sha256 c3e6e2ac216fe0750f5d1830fa40d5e55ee2b005e07be0f2ffd77e00863c3d8a (no AGENTS.md)
+branch refs/heads/milestone-3-t2-s2-geodetic
+HEAD 42ec8d6170447429ec1be8208f71cb4ee5512496
+HEAD parents: 42ec8d6170447429ec1be8208f71cb4ee5512496 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93
+HEAD tree b5b9e928d4203ea82ea5178be945490ce705a1d8
+local tracking ref 42ec8d6170447429ec1be8208f71cb4ee5512496
+upstream config: origin/milestone-3-t2-s2-geodetic
+git ls-remote (network: target remote verification) https://github.com/guillermoMartin96/tars.git:
+83d573bdb4933f5d2376423d6b8e9f3348a4ab6f	refs/heads/main
+42ec8d6170447429ec1be8208f71cb4ee5512496	refs/heads/milestone-3-t2-s2-geodetic
+status: []
+stash count 0
+manifest S2-H01-J sha256 a6a808615df46091e3075a40988d6459317ae8e574800b8bd5c620bbbf1ee130 entries 335 non-OK 0
+manifest S2-H01-correction sha256 b0ea705039b483359886a77b44911eb6117c1a5775ed5b86b5eef7c0d895e584 entries 795 non-OK 0
+manifest S2-REREVIEW-H-8074a19/continuation-20261108T211523Z sha256 8400c3bfd78b5457d5cd06360efb0401c05db9d407765fa30c3f60bf2f61922f entries 783 non-OK 0
+manifest I-104 sha256 0a63820fb424587ded8c63c59615bcfe3afcdf954fa97708d16503d829d0f3f1 entries 3831 non-OK 0
+manifest I-105 sha256 554b93b2c908cf34d5ad7d048c56eaa92b78561a117b3624d6253481540af5cd entries 2207 non-OK 0
+manifest I-106 sha256 c7cb3cb3e16779f39d9b0b55c00a69a90fdb7252f52dcd97f7edf310900b56c9 entries 26184 non-OK 0
+manifest I-106-handoff-correction sha256 8723d436a4a03528995a11aa4f34f736ff5567a9ed947ae42f85ab077a883673 entries 8 non-OK 0
+manifest I-106-review-tooling sha256 798b5b229ef66c82ca20613008feb566b3ebd2cad09a152404fb4ac5ee27d523 entries 11 non-OK 0
+archived J records:
+ CI run 42560535876 attempt 1 headSha==J True conclusion success jobs 4 all success att1 head J True ok True
+ census job-128975752378.json valid True
+ census job-128975752470.json valid True
+ census job-128975752481.json valid True
+ G17B job-128975752378 8853 diffs 0 other
+ G17B job-128975752470 8853 diffs 0 other
+ G17B job-128975752481 8853 diffs 0 other
+ ENV job-128975752378 True 1
+ ENV job-128975752470 True 1
+ ENV job-128975752481 True 1
+ run record R1_D.json True status []
+ run record R2_D.json True status []
+ run record R3_R4_D.json True status []
+ run record RS1_RS2_D.json True status []
+ run record run-record.json True status []
+  [05:07:29] D = J commit 42ec8d6170447429ec1be8208f71cb4ee5512496 (expected tree b5b9e928d4203ea82ea5178be945490ce705a1d8)
+  [05:54:59] R-S2: full suite at D ================ 1521 passed, 7 warnings in 2262.85s (0:37:42) ================= exit=0 
+  R-2 m2_final_states_record keys differing BASE vs D: ['revision', 'sha256']
+  R-2 missions (final r, v, final_tick, final_t, status, events_sha256) identical: True
+  R-2 record sha256 recomputed with BASE revision substituted equals BASE record sha256: True
+  R-2 m2_proof_stdout.txt: [PASS] BASE 228 D 228; [FAIL] BASE 0 D 0
+  R-2 m2_proof_stdout.txt: semantic lines (PASS/FAIL/digest/golden/snapshot/manifest/threshold) after temp-path normalization identical: True (229 lines)
+  R-2 m2_proof_stdout.txt: remaining differing lines after normalization: 0 [] len 229 229
+ R-2 J record revision 42ec8d6170447429ec1be8208f71cb4ee5512496 tree_clean True
+j_rgates.sh R-2 block identical to h01_rgates.sh (no tree_clean substitution):
+0

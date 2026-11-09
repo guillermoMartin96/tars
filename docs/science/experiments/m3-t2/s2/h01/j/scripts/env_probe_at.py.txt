@@ -1,0 +1,29 @@
+"""I-106 host DL-5 probe for a scripted (non-pytest) regression execution (v11 §3.11 ENV: "host by probe").
+
+Usage: <clone>/.venv/bin/python -I env_probe_at.py <recorder file> <clone root> <out.json>
+
+Loads build_record() from the named tests/test_s2_environment_record.py (the corrected tip's
+committed recorder, the same code the pytest recorder runs) and sets its REPO_ROOT to the clone
+being probed. The record is then built by the clone's own interpreter, about the clone's own
+commit, status and uv.lock. This lets the K (BASE) comparison clones, which predate the recorder,
+carry the same DL-5 record. The record is written with the S2-ENV-RECORD sha256 convention.
+"""
+import hashlib
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+recorder, root, out = Path(sys.argv[1]).resolve(), Path(sys.argv[2]).resolve(), Path(sys.argv[3])
+sys.path.insert(0, str(recorder.parent.parent))  # the recorder imports tests.conftest from its own tree
+spec = importlib.util.spec_from_file_location("s2_env_recorder", recorder)
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+mod.REPO_ROOT = root
+rec = mod.build_record()
+text = json.dumps(rec, sort_keys=True, default=str)
+digest = hashlib.sha256(text.encode()).hexdigest()
+out.write_text(json.dumps({"S2-ENV-RECORD sha256": digest, "recorder file": str(recorder),
+                           "recorder sha256": hashlib.sha256(recorder.read_bytes()).hexdigest(),
+                           "REPO_ROOT set to": str(root), "record": rec}, indent=1, default=str) + "\n")
+print("S2-ENV-RECORD sha256=" + digest)

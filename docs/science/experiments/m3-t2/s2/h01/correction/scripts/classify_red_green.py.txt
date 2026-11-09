@@ -1,0 +1,72 @@
+"""S2 H-01: classify the red and green executions of the H-01 regression and bind their ordering.
+
+Usage: python3 -I classify_red_green.py <red-green dir> <out.json>
+Red qualifies only if the target node has a JUnit <failure> (not <error>, not a collection error, not a
+skip) whose message starts with AssertionError and reports the escaped sentinel, the executed component is
+H's exact bytes, and all nine recorders pass with complete records. Green qualifies only if the target
+node passes with byte-identical test bytes and all recorders pass with complete records.
+"""
+import hashlib, json, re, sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+d, out = Path(sys.argv[1]), Path(sys.argv[2])
+NODE = "tests.test_s2_geodetic::test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook"
+H_GEO = {"blob": "e409e26341ec40a0adf8123e5ea47d5fc9788d9d",
+         "sha256": "9df9a3e97fa9b1b917a44c502d5c6409419f1ce1f4f475cf180c9d02e7db9430"}
+
+
+def junit(p):
+    rows = {}
+    root = ET.parse(p).getroot()
+    for tc in root.iter("testcase"):
+        k = f"{tc.get('classname')}::{tc.get('name')}"
+        f, e, s = tc.find("failure"), tc.find("error"), tc.find("skipped")
+        rows[k] = {"status": "failure" if f is not None else "error" if e is not None else "skipped" if s is not None else "pass",
+                   "message": (f.get("message") if f is not None else e.get("message") if e is not None else None)}
+    errors = sum(int(ts.get("errors", 0)) for ts in root.iter("testsuite"))
+    return rows, errors
+
+
+res = {}
+for ph in ("red", "green"):
+    rows, errs = junit(d / ph / "junit.xml")
+    rr = json.loads((d / ph / "run-record.json").read_text())
+    st = json.loads((d / ph / "records" / "extraction-status.json").read_text())
+    rec = {k: v for k, v in rows.items() if k != NODE}
+    ids = rr["executed file identities"]
+    res[ph] = {"target": rows.get(NODE), "junit_suite_errors": errs, "recorder_nodes": len(rec),
+               "recorders_all_pass": all(v["status"] == "pass" for v in rec.values()),
+               "records_complete": st.get("complete") is True,
+               "listing": st.get("S2-XP3-LISTING"),
+               "pytest_exit": int((d / ph / "pytest.exit").read_text()),
+               "run_record_commit": rr["commit (HEAD)"], "run_record_status": rr["git status --porcelain --untracked-files=all"],
+               "executed_geodesy": ids["src/tars/sim/geodesy.py"], "executed_test": ids["tests/test_s2_geodetic.py"],
+               "interpreter_sha256": rr["interpreter realpath sha256"], "sys.version": rr["sys.version"],
+               "pytest_log_sha256": hashlib.sha256((d / ph / "pytest.log").read_bytes()).hexdigest(),
+               "junit_sha256": hashlib.sha256((d / ph / "junit.xml").read_bytes()).hexdigest()}
+r, g = res["red"], res["green"]
+seq = (d / "sequence.log").read_text()
+t = lambda pat: re.search(r"\[([^\]]+)\] " + pat, seq).group(1)
+times = {"red_start": t("red start"), "red_end": t("red end"), "green_start": t("green start"), "green_end": t("green end")}
+edit = (d / "worktree-edit-times.txt").read_text()
+times["worktree_geodesy_mtime"] = re.search(r"src/tars/sim/geodesy.py mtime (\S+)", edit).group(1)
+times["worktree_test_mtime"] = re.search(r"tests/test_s2_geodetic.py mtime (\S+)", edit).group(1)
+checks = {
+    "red: target node is a JUnit failure (not error/skip/collection)": r["target"] is not None and r["target"]["status"] == "failure" and r["junit_suite_errors"] == 0,
+    "red: failure is an AssertionError reporting the escaped sentinel and the hook call": bool(r["target"] and re.match(r"^AssertionError: H-01: the metaclass sentinel escaped; hook calls \['__name__'\]", r["target"]["message"] or "")),
+    "red: executed component is H's exact geodesy.py": r["executed_geodesy"] == H_GEO,
+    "red: commit H, only the test file differs": r["run_record_commit"] == "8074a19bf33cf5b6d20f7d211ff44f82bf28ba93" and [s.strip() for s in r["run_record_status"]] == ["M tests/test_s2_geodetic.py"],
+    "red: nine recorders pass and records complete": r["recorder_nodes"] == 9 and r["recorders_all_pass"] and r["records_complete"],
+    "green: target node passes": g["target"] == {"status": "pass", "message": None} and g["junit_suite_errors"] == 0,
+    "green: test bytes identical to red": g["executed_test"] == r["executed_test"],
+    "green: component differs from H": g["executed_geodesy"] != H_GEO,
+    "green: nine recorders pass and records complete": g["recorder_nodes"] == 9 and g["recorders_all_pass"] and g["records_complete"],
+    "green: pytest exit 0; red: pytest exit 1": g["pytest_exit"] == 0 and r["pytest_exit"] == 1,
+    "order: test edited < red start < red end < source edited < green start": times["worktree_test_mtime"] < times["red_start"] <= times["red_end"] < times["worktree_geodesy_mtime"] < times["green_start"],
+    "same interpreter": r["interpreter_sha256"] == g["interpreter_sha256"],
+}
+outd = {"node": NODE, "red": r, "green": g, "times_utc": times, "checks": checks, "all_ok": all(checks.values())}
+out.write_text(json.dumps(outd, indent=1) + "\n")
+print(json.dumps(checks, indent=1)); print("ALL OK" if outd["all_ok"] else "NOT OK")
+sys.exit(0 if outd["all_ok"] else 1)

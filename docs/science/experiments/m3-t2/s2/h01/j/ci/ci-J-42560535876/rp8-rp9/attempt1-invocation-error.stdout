@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "$HOME/tars-evidence/S2-H01-J/scripts/rp8_rp9_ci.py", line 39, in <module>
+    st = json.loads((d / "extraction-status.json").read_text())
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$HOME/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$HOME/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '$HOME/tars-evidence/S2-H01-J/ci/ci-J-42560535876/records/job-128975752378 macos-latest=$HOME/tars-evidence/S2-H01-J/ci/ci-J-42560535876/records/job-128975752470 macos-15-intel=$HOME/tars-evidence/S2-H01-J/ci/ci-J-42560535876/records/job-128975752481/extraction-status.json'

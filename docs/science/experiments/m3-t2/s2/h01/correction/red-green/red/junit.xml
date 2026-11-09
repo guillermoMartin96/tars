@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="1.837" timestamp="2026-11-08T16:23:37.487705-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook" time="0.002"><failure message="AssertionError: H-01: the metaclass sentinel escaped; hook calls ['__name__']&#10;assert ValueError('unsupported component metaclass __name__ sentinel') is not ValueError('unsupported component metaclass __name__ sentinel')">def test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook():
+        """H-01 (independent S2 re-review of H): every unsupported type raises TypeError (v11
+        §3.8 step 0), and the rejection reads nothing through the caller's class. The reviewer's
+        exact witness: an ordinary built-in tuple of length 3 whose first component is an
+        unsupported object; its metaclass raises a ValueError sentinel when ``__name__`` is read.
+        No caller len/index code runs, so no structural exception propagation applies."""
+        geo = _geo()
+        calls = []
+        sentinel = ValueError("unsupported component metaclass __name__ sentinel")
+    
+        class Meta(type):
+            def __getattribute__(cls, name):
+                if name == "__name__":
+                    calls.append(name)
+                    raise sentinel
+                return super().__getattribute__(name)
+    
+        class Unsupported(metaclass=Meta):
+            pass
+    
+        r = (Unsupported(), 0.0, 7.0e6)
+        assert type(r) is tuple and len(r) == 3
+        try:
+            geo.geodetic(r)
+        except BaseException as exc:
+            raised = exc
+        else:
+            raise AssertionError("H-01 witness: expected TypeError, but it was accepted")
+&gt;       assert raised is not sentinel, f"H-01: the metaclass sentinel escaped; hook calls {calls}"
+E       AssertionError: H-01: the metaclass sentinel escaped; hook calls ['__name__']
+E       assert ValueError('unsupported component metaclass __name__ sentinel') is not ValueError('unsupported component metaclass __name__ sentinel')
+
+tests/test_s2_geodetic.py:476: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.227" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.369" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.055" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.302" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.545" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.064" /></testsuite></testsuites>

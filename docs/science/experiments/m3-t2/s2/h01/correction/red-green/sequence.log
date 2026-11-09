@@ -1,0 +1,13 @@
+[2026-11-09T00:23:25Z] setup: git clone --no-local --no-hardlinks --no-checkout $HOME/projects/tars $SCRATCH/h01/h01-redgreen-clone
+[2026-11-09T00:23:29Z] clone HEAD 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 tree 3b70b865abfa4137227ccce0d070ba6484cdef26 alternates [] status []
+[2026-11-09T00:23:29Z] uv: $HOME/Library/Python/3.9/bin/uv uv 0.12.23 (46b84fd0b 2026-10-03 x86_64-apple-darwin) sha256 566a27247ff63f72260ed10c241fe4cf815b6c1b9439e17bdc808cf2d1c0d80f
+[2026-11-09T00:23:29Z] cmd (cwd clone): UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never $HOME/Library/Python/3.9/bin/uv sync --locked --offline
+[2026-11-09T00:23:29Z] uv sync exit 0
+[2026-11-09T00:23:34Z] red executed identities: e409e26341ec40a0adf8123e5ea47d5fc9788d9d 9df9a3e97fa9b1b917a44c502d5c6409419f1ce1f4f475cf180c9d02e7db9430 src/tars/sim/geodesy.py;d68c7a7d1645068a34a6c430b98845beb26e9f65 67f9b9e4b7fb1bcee825b95974f66cdd2ea63e14f6c86a112cfec50d80b7eac0 tests/test_s2_geodetic.py;
+[2026-11-09T00:23:35Z] red start; cmd (cwd $SCRATCH/h01/h01-redgreen-clone): .venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$HOME/tars-evidence/S2-H01-correction/red-green/red/junit.xml tests/test_s2_geodetic.py::test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py tests/test_s2_dl4_points.py
+[2026-11-09T00:23:39Z] red end; pytest exit 1
+[2026-11-09T00:23:39Z] red records extraction exit 0: }
+[2026-11-09T00:23:51Z] green executed identities: 82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb 290fb095634db31a0e37c23c5e095ee54ad84db74c630aceef327118d7fdaeda src/tars/sim/geodesy.py;d68c7a7d1645068a34a6c430b98845beb26e9f65 67f9b9e4b7fb1bcee825b95974f66cdd2ea63e14f6c86a112cfec50d80b7eac0 tests/test_s2_geodetic.py;
+[2026-11-09T00:23:52Z] green start; cmd (cwd $SCRATCH/h01/h01-redgreen-clone): .venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$HOME/tars-evidence/S2-H01-correction/red-green/green/junit.xml tests/test_s2_geodetic.py::test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py tests/test_s2_dl4_points.py
+[2026-11-09T00:23:55Z] green end; pytest exit 0
+[2026-11-09T00:23:55Z] green records extraction exit 0: }

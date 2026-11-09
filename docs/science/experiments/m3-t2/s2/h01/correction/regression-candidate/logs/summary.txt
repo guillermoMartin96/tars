@@ -1,0 +1,36 @@
+[00:25:39] D stage commit 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 tree 3b70b865abfa4137227ccce0d070ba6484cdef26
+[00:25:39] candidate changed paths: src/tars/sim/geodesy.py tests/test_s2_geodetic.py 
+[00:34:31] candidate clone dA equals the worktree file for file (4785 files)
+[00:34:31] candidate clone dB equals the worktree file for file (4785 files)
+[00:34:31] candidate clone dC equals the worktree file for file (4785 files)
+[00:34:39] clone dA 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 status [ M src/tars/sim/geodesy.py
+ M tests/test_s2_geodetic.py]
+[00:34:40] clone dB 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 status [ M src/tars/sim/geodesy.py
+ M tests/test_s2_geodetic.py]
+[00:34:40] clone dC 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 status [ M src/tars/sim/geodesy.py
+ M tests/test_s2_geodetic.py]
+[00:34:41] clone bA 83d573bdb4933f5d2376423d6b8e9f3348a4ab6f status []
+[00:34:41] clone bB 83d573bdb4933f5d2376423d6b8e9f3348a4ab6f status []
+[00:34:41] clone bC 83d573bdb4933f5d2376423d6b8e9f3348a4ab6f status []
+[00:35:13] R-3 dC: r01 exit=0 identical; r02 exit=0 identical (vs committed results); T1 tests 110 passed in 6.02s
+[00:40:45] R-4 dC: 314 passed in 331.18s (0:05:31)
+[00:41:07] R-3 bC: r01 exit=0 identical; r02 exit=0 identical (vs committed results); T1 tests 109 passed in 8.11s
+[00:45:49] R-4 bC: 314 passed in 281.67s (0:04:41)
+[00:45:49] R-3 correction outputs D vs BASE: byte-identical (recomputed in both)
+[00:45:55] ruff at D: check exit=0, format 302 files already formatted exit=0 
+[00:46:00] R-S1: S1 tests 100 passed in 0.77s exit=0 ; S1 SHA256SUMS non-OK lines 1 (includes exit line)
+[01:29:57] R-S2: full suite at D ================ 1521 passed, 7 warnings in 2635.48s (0:43:55) ================= exit=0 
+[01:29:57] R-S2 records: extract exit=0; census validation exit=0
+[01:29:57] proof dA: overall: PASS exit=0
+[01:29:57] proof bA: overall: PASS exit=0
+[01:29:57] proof dB: overall: PASS exit=0
+[01:29:57] proof bB: overall: PASS exit=0
+[01:29:58] R-1 dA golden in M1 evidence: 7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4
+[01:29:58] R-1 bA golden in M1 evidence: 7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4
+R-2 m2_final_states_record keys differing BASE vs D: ['revision', 'sha256', 'tree_clean']
+R-2 missions (final r, v, final_tick, final_t, status, events_sha256) identical: True
+R-2 record sha256 recomputed with BASE revision substituted equals BASE record sha256: False
+R-2 m2_proof_stdout.txt: [PASS] BASE 228 D 228; [FAIL] BASE 0 D 0
+R-2 m2_proof_stdout.txt: semantic lines (PASS/FAIL/digest/golden/snapshot/manifest/threshold) after temp-path normalization identical: True (229 lines)
+R-2 m2_proof_stdout.txt: remaining differing lines after normalization: 0 [] len 229 229
+[01:29:59] DONE

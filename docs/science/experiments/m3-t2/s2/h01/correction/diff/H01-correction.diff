@@ -1,0 +1,60 @@
+diff --git a/src/tars/sim/geodesy.py b/src/tars/sim/geodesy.py
+index e409e26..82ca9aa 100644
+--- a/src/tars/sim/geodesy.py
++++ b/src/tars/sim/geodesy.py
+@@ -107,7 +107,8 @@ def _normalize(v: object) -> float | int:
+         return float.__float__(v)  # type: ignore[arg-type]
+     if issubclass(t, int):
+         return int.__index__(v)  # type: ignore[arg-type]
+-    raise TypeError(f"geodetic input: unsupported component type {t.__name__}")
++    # A fixed message: reading t.__name__ would run a caller metaclass's hook (H-01).
++    raise TypeError("geodetic input: unsupported component type")
+ 
+ 
+ def _to_binary64(v: float | int) -> float:
+diff --git a/tests/test_s2_geodetic.py b/tests/test_s2_geodetic.py
+index 50c75e3..d68c7a7 100644
+--- a/tests/test_s2_geodetic.py
++++ b/tests/test_s2_geodetic.py
+@@ -445,6 +445,41 @@ def test_g06_class_faking_object_is_a_type_error():
+     _raises_type(geo, (Fake(), 0.0, 1.0), TypeError)
+ 
+ 
++def test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook():
++    """H-01 (independent S2 re-review of H): every unsupported type raises TypeError (v11
++    §3.8 step 0), and the rejection reads nothing through the caller's class. The reviewer's
++    exact witness: an ordinary built-in tuple of length 3 whose first component is an
++    unsupported object; its metaclass raises a ValueError sentinel when ``__name__`` is read.
++    No caller len/index code runs, so no structural exception propagation applies."""
++    geo = _geo()
++    calls = []
++    sentinel = ValueError("unsupported component metaclass __name__ sentinel")
++
++    class Meta(type):
++        def __getattribute__(cls, name):
++            if name == "__name__":
++                calls.append(name)
++                raise sentinel
++            return super().__getattribute__(name)
++
++    class Unsupported(metaclass=Meta):
++        pass
++
++    r = (Unsupported(), 0.0, 7.0e6)
++    assert type(r) is tuple and len(r) == 3
++    try:
++        geo.geodetic(r)
++    except BaseException as exc:
++        raised = exc
++    else:
++        raise AssertionError("H-01 witness: expected TypeError, but it was accepted")
++    assert raised is not sentinel, f"H-01: the metaclass sentinel escaped; hook calls {calls}"
++    assert type(raised) is TypeError, f"H-01: expected TypeError, got {type(raised)}"
++    assert not isinstance(raised, geo.GeodeticDomainError)
++    assert raised.__context__ is None and raised.__cause__ is None
++    assert calls == [], f"H-01: the rejection invoked the metaclass hook: {calls}"
++
++
+ def test_g06_structural_key_error_propagates_unchanged():
+     geo = _geo()
+     sentinel = KeyError("caller")

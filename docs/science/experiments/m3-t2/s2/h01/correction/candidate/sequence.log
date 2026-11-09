@@ -1,0 +1,20 @@
+[2026-11-09T00:25:36Z] git clone --no-local --no-hardlinks --no-checkout $HOME/projects/tars $SCRATCH/h01/cand/h01-candidate-clone; checkout --detach 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93
+[2026-11-09T00:25:40Z] clone HEAD 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93 tree 3b70b865abfa4137227ccce0d070ba6484cdef26 alternates [] status-before-copy []
+[2026-11-09T00:29:56Z] candidate clone equals the worktree file for file (4785 tracked+untracked non-ignored files)
+[2026-11-09T00:29:57Z] candidate tree (H tree + working-tree changes, temporary index, no commit): b5b9e928d4203ea82ea5178be945490ce705a1d8
+[2026-11-09T00:29:57Z] candidate identities: 82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb 290fb095634db31a0e37c23c5e095ee54ad84db74c630aceef327118d7fdaeda src/tars/sim/geodesy.py;d68c7a7d1645068a34a6c430b98845beb26e9f65 67f9b9e4b7fb1bcee825b95974f66cdd2ea63e14f6c86a112cfec50d80b7eac0 tests/test_s2_geodetic.py;
+[2026-11-09T00:29:58Z] uv uv 0.12.23 (46b84fd0b 2026-10-03 x86_64-apple-darwin) sha256 566a27247ff63f72260ed10c241fe4cf815b6c1b9439e17bdc808cf2d1c0d80f; cmd: UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never $HOME/Library/Python/3.9/bin/uv sync --locked --offline
+[2026-11-09T00:29:58Z] uv sync exit 0
+[2026-11-09T00:29:59Z] ruff check exit 0; ruff format --check exit 0
+[2026-11-09T00:29:59Z] G-13 scope (working-tree form vs K) exit 0
+[2026-11-09T00:30:01Z] reviewer probe exit 1 (probe asserts the defect; nonzero expected on a corrected component): {   "input_structure": "ordinary built-in tuple of length 3; first component is an unsupported custom object",   "metaclass_hook_calls": [],   "outcome": {     "kind": "raised",     "exact_type": "TypeError",     "message": "geodetic input: unsupported component type",     "is_sentinel": false,     "is_TypeError": true   },   "required_by_v11_3_8_step_0": "Every other type raises TypeError" } Trac
+[2026-11-09T00:30:02Z] s2-suite start: .venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$HOME/tars-evidence/S2-H01-correction/candidate/s2-suite/junit.xml tests/test_s2_geodetic.py tests/test_s2_geodetic_conformance.py tests/test_s2_dl4_points.py tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py
+[2026-11-09T00:30:06Z] s2-suite end: exit 0; ======================= 130 passed, 4 warnings in 3.78s ========================
+[2026-11-09T00:30:07Z] s2-suite records: extract exit 0; census validation exit 0
+[2026-11-09T00:30:07Z] full-suite start: .venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$HOME/tars-evidence/S2-H01-correction/candidate/full-suite/junit.xml 
+[2026-11-09T01:16:02Z] full-suite end: exit 0; ================ 1521 passed, 7 warnings in 2753.19s (0:45:53) =================
+[2026-11-09T01:16:03Z] full-suite records: extract exit 0; census validation exit 0
+[2026-11-09T01:16:03Z] host report exit 0; vs reviewer H: IDENTICAL RP-1_U-17.csv IDENTICAL RP-2_U-18.csv IDENTICAL RP-6a_PS-NEG.csv IDENTICAL RP-6b_DG-CUSP.csv IDENTICAL RP-6b_DG-CUSP_non_convergence_history.json IDENTICAL RP-6b_DG-DEEP.csv IDENTICAL RP-6b_DG-DEEP_non_convergence_history.json IDENTICAL RP-6b_DG-INT.csv IDENTICAL RP-6b_DG-INT_non_convergence_history.json IDENTICAL RP-9_host_census.csv IDENTICAL report_only_summary.json 
+[2026-11-09T01:16:03Z] campaign exit 0; NOT OK: []
+[2026-11-09T01:16:03Z] clone status unchanged by validation
+[2026-11-09T01:16:03Z] DONE

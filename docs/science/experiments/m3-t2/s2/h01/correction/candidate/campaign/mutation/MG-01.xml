@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="1.985" timestamp="2026-11-08T16:30:05.943085-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g04_non_finite_component_in_each_position" time="0.002"><failure message="AssertionError: (nan, 0.0, 1.0): expected non_finite, got ValueError: cannot convert NaN to integer ratio">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py'&gt;
+r = (nan, 0.0, 1.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+&gt;           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py:156: in geodetic
+    if _in_evolute_region(x, y, z):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py:131: in _in_evolute_region
+    p2 = Fraction(x) ** 2 + Fraction(y) ** 2
+         ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+cls = &lt;class 'fractions.Fraction'&gt;, numerator = nan, denominator = None
+
+    def __new__(cls, numerator=0, denominator=None):
+        """Constructs a Rational.
+    
+        Takes a string like '3/2' or '1.5', another Rational instance, a
+        numerator/denominator pair, or a float.
+    
+        Examples
+        --------
+    
+        &gt;&gt;&gt; Fraction(10, -8)
+        Fraction(-5, 4)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), 5)
+        Fraction(1, 35)
+        &gt;&gt;&gt; Fraction(Fraction(1, 7), Fraction(2, 3))
+        Fraction(3, 14)
+        &gt;&gt;&gt; Fraction('314')
+        Fraction(314, 1)
+        &gt;&gt;&gt; Fraction('-35/4')
+        Fraction(-35, 4)
+        &gt;&gt;&gt; Fraction('3.1415') # conversion from numeric string
+        Fraction(6283, 2000)
+        &gt;&gt;&gt; Fraction('-47e-2') # string may include a decimal exponent
+        Fraction(-47, 100)
+        &gt;&gt;&gt; Fraction(1.47)  # direct construction from float (exact conversion)
+        Fraction(6620291452234629, 4503599627370496)
+        &gt;&gt;&gt; Fraction(2.25)
+        Fraction(9, 4)
+        &gt;&gt;&gt; Fraction(Decimal('1.47'))
+        Fraction(147, 100)
+    
+        """
+        self = super(Fraction, cls).__new__(cls)
+    
+        if denominator is None:
+            if type(numerator) is int:
+                self._numerator = numerator
+                self._denominator = 1
+                return self
+    
+            elif isinstance(numerator, numbers.Rational):
+                self._numerator = numerator.numerator
+                self._denominator = numerator.denominator
+                return self
+    
+            elif isinstance(numerator, (float, Decimal)):
+                # Exact conversion
+&gt;               self._numerator, self._denominator = numerator.as_integer_ratio()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               ValueError: cannot convert NaN to integer ratio
+
+$HOME/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/python3.12/fractions.py:232: ValueError
+
+The above exception was the direct cause of the following exception:
+
+    def test_g04_non_finite_component_in_each_position():
+        geo = _geo()
+        for bad in (math.nan, math.inf, -math.inf):
+            for pos in range(3):
+                r = [7.0e6, 0.0, 1.0]
+                r[pos] = bad
+&gt;               _raises_reason(geo, tuple(r), "non_finite")
+
+tests/test_s2_geodetic.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py'&gt;
+r = (nan, 0.0, 1.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+            assert exc.reason == reason, (r, exc.reason)
+            assert exc.category == CATEGORY[reason], (r, exc.category)
+            assert str(exc) == MESSAGE[reason], (r, str(exc))
+            return exc
+        except BaseException as exc:  # any other exception is a failure of this node
+&gt;           raise AssertionError(f"{r!r}: expected {reason}, got {type(exc).__name__}: {exc}") from exc
+E           AssertionError: (nan, 0.0, 1.0): expected non_finite, got ValueError: cannot convert NaN to integer ratio
+
+tests/test_s2_geodetic.py:121: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g04_mixed_non_finite_cases" time="0.001"><failure message="AssertionError: ((nan, inf, 0.0), 'overflow')&#10;assert 'overflow' == 'non_finite'&#10;  &#10;  - non_finite&#10;  + overflow">geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py'&gt;
+r = (nan, inf, 0.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+&gt;           geo.geodetic(r)
+
+tests/test_s2_geodetic.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+r = (nan, inf, 0.0)
+
+    def geodetic(r) -&gt; tuple[float, float]:
+        """Geodetic height h [m] and latitude phi [rad] of r = (x, y, z) [m], returned as
+        (h, phi). Raises GeodeticDomainError (reason, category) or TypeError; see the module
+        docstring for the check order. Accepted means DQ-1's stop test was met; it is not a
+        statement of accuracy."""
+        # Step 0: structure (caller code; its exceptions propagate unchanged) and normalization.
+        if len(r) != 3:
+            raise TypeError("geodetic input: r must have exactly 3 components")
+        c0, c1, c2 = r[0], r[1], r[2]
+        n0, n1, n2 = _normalize(c0), _normalize(c1), _normalize(c2)
+        # Step 1: not_binary64.
+        x, y, z = _to_binary64(n0), _to_binary64(n1), _to_binary64(n2)
+        # Step 2: non_finite.
+        if False:
+            raise GeodeticDomainError("non_finite")
+        # Step 3: origin.
+        if x == 0.0 and y == 0.0 and z == 0.0:
+            raise GeodeticDomainError("origin")
+        # Step 4: evolute_region.
+        if _in_evolute_region(x, y, z):
+            raise GeodeticDomainError("evolute_region")
+        # Step 5: E.1, DQ-1 steps 2 to 5 (r1 §5), unchanged; the try covers exactly E.1.
+        try:
+            p = _LIB.hypot(x, y)
+            phi = _LIB.atan2(z, p * (1.0 - _E2))
+            converged = False
+            for _k in range(1, 61):
+                s = _LIB.sin(phi)
+                n = _A / _LIB.sqrt(1.0 - _E2 * s * s)
+                phi_new = _LIB.atan2(z + _E2 * n * s, p)
+                stop = abs(phi_new - phi) &lt;= 1e-15
+                phi = phi_new
+                if stop:
+                    converged = True
+                    break
+            s = _LIB.sin(phi)
+            c = _LIB.cos(phi)
+            h = p * c + z * s - _A * _LIB.sqrt(1.0 - _E2 * s * s)
+        except (ArithmeticError, ValueError) as exc:  # N1
+            raise GeodeticDomainError("numerical_failure") from exc
+        # Post-checks (outside the try), in order N2 to N5.
+        if _isnan(p) or _isnan(phi) or _isnan(h):
+            raise GeodeticDomainError("numerical_failure")
+        if _isinf(p) or _isinf(phi) or _isinf(h):
+&gt;           raise GeodeticDomainError("overflow")
+E           tars.sim.geodesy.GeodeticDomainError: geodetic evaluation: a result left the binary64 range
+
+$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py:181: GeodeticDomainError
+
+During handling of the above exception, another exception occurred:
+
+    def test_g04_mixed_non_finite_cases():
+        geo = _geo()
+        for r in (
+            (math.nan, math.inf, 0.0),
+            (math.inf, -math.inf, math.nan),
+            (0.0, math.nan, 0.0),
+            (0.0, 0.0, math.inf),
+            (0.0, math.nan, 7.0e6),
+            (30_000.0, 30_000.0, math.nan),
+        ):
+&gt;           _raises_reason(geo, r, "non_finite")
+
+tests/test_s2_geodetic.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+geo = &lt;module 'tars.sim.geodesy' from '$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-01/src/tars/sim/geodesy.py'&gt;
+r = (nan, inf, 0.0), reason = 'non_finite'
+
+    def _raises_reason(geo, r, reason: str):
+        """Assert that geodetic(r) raises GeodeticDomainError with ``reason`` (exact type)."""
+        try:
+            geo.geodetic(r)
+        except geo.GeodeticDomainError as exc:
+&gt;           assert exc.reason == reason, (r, exc.reason)
+E           AssertionError: ((nan, inf, 0.0), 'overflow')
+E           assert 'overflow' == 'non_finite'
+E             
+E             - non_finite
+E             + overflow
+
+tests/test_s2_geodetic.py:116: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.213" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.373" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.059" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.328" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.561" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.065" /></testsuite></testsuites>

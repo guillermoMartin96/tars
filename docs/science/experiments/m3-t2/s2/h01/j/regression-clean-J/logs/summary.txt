@@ -1,0 +1,32 @@
+[05:07:29] D = J commit 42ec8d6170447429ec1be8208f71cb4ee5512496 (expected tree b5b9e928d4203ea82ea5178be945490ce705a1d8)
+[05:07:33] clone dA HEAD 42ec8d6170447429ec1be8208f71cb4ee5512496 tree b5b9e928d4203ea82ea5178be945490ce705a1d8 alternates [] status-before-sync []
+[05:07:36] clone dB HEAD 42ec8d6170447429ec1be8208f71cb4ee5512496 tree b5b9e928d4203ea82ea5178be945490ce705a1d8 alternates [] status-before-sync []
+[05:07:39] clone dC HEAD 42ec8d6170447429ec1be8208f71cb4ee5512496 tree b5b9e928d4203ea82ea5178be945490ce705a1d8 alternates [] status-before-sync []
+[05:07:47] clone dA 42ec8d6170447429ec1be8208f71cb4ee5512496 status []
+[05:07:47] clone dB 42ec8d6170447429ec1be8208f71cb4ee5512496 status []
+[05:07:48] clone dC 42ec8d6170447429ec1be8208f71cb4ee5512496 status []
+[05:07:48] clone bA 83d573bdb4933f5d2376423d6b8e9f3348a4ab6f status []
+[05:07:48] clone bB 83d573bdb4933f5d2376423d6b8e9f3348a4ab6f status []
+[05:07:48] clone bC 83d573bdb4933f5d2376423d6b8e9f3348a4ab6f status []
+[05:08:17] R-3 dC: r01 exit=0 identical; r02 exit=0 identical (vs committed results); T1 tests 110 passed in 5.43s
+[05:13:02] R-4 dC: 314 passed in 283.75s (0:04:43)
+[05:13:19] R-3 bC: r01 exit=0 identical; r02 exit=0 identical (vs committed results); T1 tests 109 passed in 6.26s
+[05:17:06] R-4 bC: 314 passed in 226.66s (0:03:46)
+[05:17:06] R-3 correction outputs D vs BASE: byte-identical (recomputed in both)
+[05:17:11] ruff at D: check exit=0, format 302 files already formatted exit=0 
+[05:17:15] R-S1: S1 tests 100 passed in 0.55s exit=0 ; S1 SHA256SUMS non-OK lines 1 (includes exit line)
+[05:54:59] R-S2: full suite at D ================ 1521 passed, 7 warnings in 2262.85s (0:37:42) ================= exit=0 
+[05:54:59] R-S2 records: extract exit=0; census validation exit=0
+[05:54:59] proof dA: overall: PASS exit=0
+[05:54:59] proof bA: overall: PASS exit=0
+[05:54:59] proof dB: overall: PASS exit=0
+[05:54:59] proof bB: overall: PASS exit=0
+[05:54:59] R-1 dA golden in M1 evidence: 7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4
+[05:54:59] R-1 bA golden in M1 evidence: 7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4
+R-2 m2_final_states_record keys differing BASE vs D: ['revision', 'sha256']
+R-2 missions (final r, v, final_tick, final_t, status, events_sha256) identical: True
+R-2 record sha256 recomputed with BASE revision substituted equals BASE record sha256: True
+R-2 m2_proof_stdout.txt: [PASS] BASE 228 D 228; [FAIL] BASE 0 D 0
+R-2 m2_proof_stdout.txt: semantic lines (PASS/FAIL/digest/golden/snapshot/manifest/threshold) after temp-path normalization identical: True (229 lines)
+R-2 m2_proof_stdout.txt: remaining differing lines after normalization: 0 [] len 229 229
+[05:55:01] DONE

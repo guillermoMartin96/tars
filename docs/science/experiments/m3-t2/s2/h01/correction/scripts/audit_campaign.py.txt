@@ -1,0 +1,63 @@
+"""S2 H-01: independent audit of the candidate campaign (does not trust mutate.py's verdicts or exit code).
+
+Usage: python3 -I audit_campaign.py <campaign mutation dir> <candidate geodesy.py> <reviewer H mutation_results.json> <out.json>
+For every execution: 9 recorder nodes pass and records complete; for every non-equivalent mutant: at least one
+designated node is a JUnit <failure> (never <error>), every failing node's message starts with an assertion
+form, and MG-02/MG-04 failures carry the exact witness; equivalents have zero failures; the control passes all
+nodes; each executed mutant source equals the candidate geodesy.py with exactly the recorded edits applied.
+Verdicts are compared, mutant by mutant, with the reviewer's H campaign.
+"""
+import hashlib, json, re, sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+d, geo, rev, out = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]), Path(sys.argv[4])
+R = json.loads((d / "mutation_results.json").read_text()); RV = json.loads(rev.read_text())
+EQ = {"ME-01", "ME-02", "ME-03", "ME-04", "M-W2"}; WIT = {"MG-02": "(0.0, nan, 7000000.0)", "MG-04": "(0.0, 0.0, 7000000.0)"}
+REC = ("tests.test_s2_environment_record", "tests.test_s2_xp3_listing", "tests.test_s2_dl4_points")
+ASSERT = re.compile(r"^(AssertionError|assert |Failed: DID NOT RAISE)")
+base = geo.read_text()
+problems, rows = [], {}
+def xml(tag):
+    out = []
+    for tc in ET.parse(d / f"{tag}.xml").getroot().iter("testcase"):
+        f, e, s = tc.find("failure"), tc.find("error"), tc.find("skipped")
+        out.append((tc.get("classname"), tc.get("name"), "failure" if f is not None else "error" if e is not None else "skipped" if s is not None else "pass",
+                    (f if f is not None else e).get("message") if (f is not None or e is not None) else None))
+    return out
+for tag in ["control"] + [k for k in R if k[:2] in ("MG", "MP", "ME", "MN", "M-", "MD", "MH", "MI")]:
+    x = xml(tag); rec = [r for r in x if r[0] in REC]; des = [r for r in x if r[0] not in REC]
+    st = json.loads((d / f"{tag}.records" / "extraction-status.json").read_text())
+    rr = json.loads((d / f"{tag}.run-record.json").read_text())
+    ok_rec = len(rec) == 9 and all(r[2] == "pass" for r in rec) and st.get("complete") is True and rr.get("probe exit") == 0
+    fails = [r for r in des if r[2] != "pass"]
+    row = {"designated": len(des), "failing": len(fails), "records_complete": ok_rec,
+           "errors_or_skips": [r[1] for r in x if r[2] in ("error", "skipped")]}
+    if tag == "control":
+        row["ok"] = ok_rec and not fails and not row["errors_or_skips"]
+    else:
+        m = R[tag]; src = base
+        for e in m["edits"]:
+            assert src.count(e["old"]) == 1; src = src.replace(e["old"], e["new"])
+        exp = hashlib.sha256(src.encode()).hexdigest()
+        row["executed_sha256_matches_candidate_plus_edits"] = rr["executed component"]["sha256"] == exp
+        if tag in EQ:
+            row["kind"] = "equivalent"; kill_ok = not fails
+        else:
+            row["kind"] = "kill"
+            kill_ok = bool(fails) and all(r[2] == "failure" and ASSERT.match(r[3] or "") for r in fails)
+            if tag in WIT:
+                kill_ok = kill_ok and all(WIT[tag] in (r[3] or "") for r in fails); row["witness"] = WIT[tag]
+        row["verdict_here"] = ("SURVIVED (documented equivalent)" if tag in EQ else "KILLED") if kill_ok else "NOT OK"
+        row["verdict_mutate_py"] = m["verdict"]; row["verdict_reviewer_H"] = RV.get(tag, {}).get("verdict")
+        row["edits_identical_to_reviewer_H"] = m["edits"] == RV.get(tag, {}).get("edits") and m["nodes"] == RV.get(tag, {}).get("nodes")
+        row["ok"] = kill_ok and ok_rec and row["executed_sha256_matches_candidate_plus_edits"] and not row["errors_or_skips"] \
+            and row["verdict_mutate_py"] == row["verdict_here"] == row["verdict_reviewer_H"] and row["edits_identical_to_reviewer_H"]
+    rows[tag] = row
+    if not row["ok"]: problems.append(tag)
+summary = {"executions": len(rows), "mutants": len(rows) - 1,
+           "kills": sum(r.get("kind") == "kill" and r["ok"] for r in rows.values()),
+           "equivalents": sum(r.get("kind") == "equivalent" and r["ok"] for r in rows.values()),
+           "control_designated_nodes": rows["control"]["designated"], "problems": problems, "all_ok": not problems}
+out.write_text(json.dumps({"summary": summary, "rows": rows}, indent=1) + "\n")
+print(json.dumps(summary, indent=1)); sys.exit(0 if not problems else 1)

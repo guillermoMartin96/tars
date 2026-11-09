@@ -1,0 +1,73 @@
+{
+ "label": "I-105 campaign execution MG-02; component source $HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-02/src",
+ "utc": "2026-11-09T00:30:08.381785+00:00",
+ "repo root": "$SCRATCH/h01/cand/h01-candidate-clone",
+ "commit (HEAD)": "8074a19bf33cf5b6d20f7d211ff44f82bf28ba93",
+ "git status --porcelain --untracked-files=all": [
+  "M src/tars/sim/geodesy.py",
+  " M tests/test_s2_geodetic.py"
+ ],
+ "executed file identities": {
+  "src/tars/sim/geodesy.py": {
+   "blob": "82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb",
+   "sha256": "290fb095634db31a0e37c23c5e095ee54ad84db74c630aceef327118d7fdaeda"
+  },
+  "tests/test_s2_geodetic.py": {
+   "blob": "d68c7a7d1645068a34a6c430b98845beb26e9f65",
+   "sha256": "67f9b9e4b7fb1bcee825b95974f66cdd2ea63e14f6c86a112cfec50d80b7eac0"
+  },
+  "tests/test_s2_geodetic_conformance.py": {
+   "blob": "4b3b67b3b93a39ca15ae05c1b9a4f855efece7fa",
+   "sha256": "2ea2f9f2335e7c9a7f5479e893f5c0b4226cb56dac10456990bc49f4b91dee91"
+  },
+  "tests/test_s2_xp3_listing.py": {
+   "blob": "9cfe6c1c7e9be031c702810aa8ed469d88c462cb",
+   "sha256": "1bf080ab5097249b2ce2c6321a8419694ca48b3af2d96810357ad91f0ffde828"
+  },
+  "tests/test_s2_environment_record.py": {
+   "blob": "90ad18ca9bdef57673a462d487eef45f7c29301a",
+   "sha256": "fe3df292812ef2e6ef0194692ce1c681e9c8134dcf5703c4f7ba2536a661b92c"
+  },
+  "tests/test_s2_dl4_points.py": {
+   "blob": "bb6dc86a9e881a8cab38bcff2b55b20208070e79",
+   "sha256": "ac368424027364d8808078dda23bf5a1a6b79168ded20eea7ee6afabc21b00e0"
+  },
+  "tests/s2_dl4_points.txt": {
+   "blob": "d3774dc3d1f790ee1524b3d5861f35a8af810f7d",
+   "sha256": "0983900a9d1733a71000e6e91aeb8373c5b4fe320ba972f363f540f0e52d7c31"
+  }
+ },
+ "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+ "platform.platform()": "macOS-26.2-x86_64-i386-64bit",
+ "platform.machine()": "x86_64",
+ "uv.lock sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+ "sys.executable": "$SCRATCH/h01/cand/h01-candidate-clone/.venv/bin/python",
+ "interpreter realpath": "$HOME/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+ "interpreter realpath sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+ "executed component": {
+  "path": "$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-02/src/tars/sim/geodesy.py",
+  "sha256": "a3b3dd96bf8a20ca34acd08ce6b22cbc41847a08dcac7f1421a45c20845b965f"
+ },
+ "command": [
+  "$SCRATCH/h01/cand/h01-candidate-clone/.venv/bin/python",
+  "-B",
+  "-m",
+  "pytest",
+  "-q",
+  "-p",
+  "no:cacheprovider",
+  "--junitxml=$HOME/tars-evidence/S2-H01-correction/candidate/campaign/mutation/MG-02.xml",
+  "tests/test_s2_geodetic.py::test_g04_designated_witness_0_nan_7e6",
+  "tests/test_s2_environment_record.py",
+  "tests/test_s2_xp3_listing.py",
+  "tests/test_s2_dl4_points.py"
+ ],
+ "start utc": "2026-11-09T00:30:08.739615+00:00",
+ "end utc": "2026-11-09T00:30:11.632360+00:00",
+ "pytest exit": 1,
+ "probe exit": 0,
+ "stdout sha256": "5dbbb351d3dacb3a5e81de1fcd1c7b651e609ac2f891ae85e40a9d7d9271fc18",
+ "junit sha256": "6caa52477448d2c9381a19c8ca2eeab5fbf5d8c03604e7bb5ab3b15ef6575792",
+ "records complete": true,
+ "extract exit": 0
+}

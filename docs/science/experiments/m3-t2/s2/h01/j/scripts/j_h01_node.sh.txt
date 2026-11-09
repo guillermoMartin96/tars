@@ -1,0 +1,44 @@
+#!/bin/bash
+# S2 H-01 commit J: the H-01 regression node at exact, clean, committed J (one pytest process: the node plus
+# the nine component-free recorders, so the execution carries its own DL-5 ENV, X-P3/RP-9 listing, G-17a and
+# G-17b records), with an I-105 run_record.py §3.16 run record. Derived from the H-01 red_green.sh green phase,
+# with nothing copied into the clone: the executed bytes are J's committed bytes.
+# Run under: sandbox-exec -p '(version 1)(allow default)(deny network*)'
+# Usage: j_h01_node.sh <out dir> <clone parent dir>
+set -u
+O=$1; PARENT=$2
+J=42ec8d6170447429ec1be8208f71cb4ee5512496; JT=b5b9e928d4203ea82ea5178be945490ce705a1d8
+UV=$HOME/Library/Python/3.9/bin/uv
+S5=$HOME/tars-evidence/I-105/scripts
+NODE="tests/test_s2_geodetic.py::test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook"
+RECORDERS="tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py tests/test_s2_dl4_points.py"
+export PYTHONDONTWRITEBYTECODE=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never
+C=$PARENT/j-h01-node-clone
+mkdir -p "$O"; L=$O/sequence.log
+log() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$L"; }
+log "git clone --no-local --no-hardlinks --no-checkout $HOME/projects/tars $C; checkout --detach $J"
+git clone -q --no-local --no-hardlinks --no-checkout $HOME/projects/tars "$C" || exit 98
+git -C "$C" checkout -q --detach "$J" || exit 98
+head=$(git -C "$C" rev-parse HEAD); tree=$(git -C "$C" rev-parse 'HEAD^{tree}'); st=$(git -C "$C" status --porcelain --untracked-files=all)
+log "clone HEAD $head tree $tree alternates [$(cat "$C/.git/objects/info/alternates" 2>/dev/null)] status [$st]"
+[ "$head" = "$J" ] && [ "$tree" = "$JT" ] && [ -z "$st" ] || { log "STOP not a clean checkout of exact J"; exit 2; }
+for f in src/tars/sim/geodesy.py tests/test_s2_geodetic.py; do echo "$(git -C "$C" hash-object "$C/$f") $(shasum -a 256 "$C/$f" | cut -c1-64) $f"; done > "$O/executed-identities.txt"
+log "executed identities: $(tr '\n' ';' < "$O/executed-identities.txt")"
+log "uv: $UV $($UV --version) sha256 $(shasum -a 256 $UV | cut -c1-64); cmd: UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never $UV sync --locked --offline"
+(cd "$C" && "$UV" sync --locked --offline) > "$O/uv-sync.log" 2>&1; e=$?; log "uv sync exit $e"; [ $e -eq 0 ] || exit 3
+git -C "$C" status --porcelain --untracked-files=all > "$O/git-status-porcelain.txt"
+log "status after sync [$(cat "$O/git-status-porcelain.txt")]"
+(cd "$C" && .venv/bin/python -I "$S5/run_record.py" "$C" "$O/run-record.json" "S2 H-01 regression node at exact committed J (local host)" \
+   src/tars/sim/geodesy.py tests/test_s2_geodetic.py tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py \
+   tests/test_s2_dl4_points.py tests/s2_dl4_points.txt src/tars/sim/constants.py uv.lock) > "$O/run-record.stdout" 2>&1
+echo $? > "$O/run-record.exit"
+CMD=".venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$O/junit.xml $NODE $RECORDERS"
+echo "$CMD" > "$O/command.txt"
+log "start; cmd (cwd $C): $CMD"
+(cd "$C" && $CMD) > "$O/pytest.log" 2>&1; e=$?; echo $e > "$O/pytest.exit"
+log "end; pytest exit $e"
+(cd "$C" && .venv/bin/python -I "$S5/extract_s2_records_v2.py" "$O/pytest.log" "$O/records") > "$O/extract.stdout" 2>&1; echo $? > "$O/extract.exit"
+log "records extraction exit $(cat "$O/extract.exit"): $(tail -1 "$O/extract.stdout")"
+(cd "$C" && .venv/bin/python -I "$S5/validate_census.py" tests/s2_dl4_points.txt "$O/records/S2-XP3-LISTING.csv" ci "$O/census-validation.json") > "$O/census-validation.stdout" 2>&1; echo $? > "$O/census-validation.exit"
+log "census validation exit $(cat "$O/census-validation.exit")"
+log "status after run [$(git -C "$C" status --porcelain --untracked-files=all)]"

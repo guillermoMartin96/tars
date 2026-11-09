@@ -1,0 +1,14 @@
+Binding of the earlier AUTHOR evidence (S2-H01-correction, manifest b0ea7050...e584) to J's exact bytes. 2026-11-09T05:07:49Z
+These earlier executions ran UNCOMMITTED candidate bytes on top of H; they are NOT runs at J. This file only shows the executed bytes equal J's committed bytes.
+J tree:                         b5b9e928d4203ea82ea5178be945490ce705a1d8
+packet candidate/candidate-tree: b5b9e928d4203ea82ea5178be945490ce705a1d8
+J blobs:
+100644 blob 82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb	src/tars/sim/geodesy.py
+100644 blob d68c7a7d1645068a34a6c430b98845beb26e9f65	tests/test_s2_geodetic.py
+red executed (packet red-green/classification.json): geodesy e409e26341ec40a0adf8123e5ea47d5fc9788d9d test d68c7a7d1645068a34a6c430b98845beb26e9f65  [red component = H's blob, by design]
+green executed: geodesy 82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb test d68c7a7d1645068a34a6c430b98845beb26e9f65
+J:src/tars/sim/geodesy.py == packet red-green/geodesy.py.green-executed (byte-identical)
+J:tests/test_s2_geodetic.py == packet red-green/test_s2_geodetic.py.executed (byte-identical)
+campaign: packet candidate/campaign ran pinned mutate.py on copies of the candidate src; candidate tree == J tree above; candidate/candidate-identities.txt:
+82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb 290fb095634db31a0e37c23c5e095ee54ad84db74c630aceef327118d7fdaeda src/tars/sim/geodesy.py
+d68c7a7d1645068a34a6c430b98845beb26e9f65 67f9b9e4b7fb1bcee825b95974f66cdd2ea63e14f6c86a112cfec50d80b7eac0 tests/test_s2_geodetic.py

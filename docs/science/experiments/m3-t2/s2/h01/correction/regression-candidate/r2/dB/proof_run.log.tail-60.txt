@@ -1,0 +1,60 @@
+[PASS] accounting[dr0018/stop_at_ignition]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=0, thrust_direction_error_max=1.66533e-16, final_propellant_kg=300, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=0, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=0, sample_delta_v_rel_error_max=0, sample_delta_v_excess_over_simpson_rel_max=0
+[PASS] dr0018_boundary[stop_at_cutoff]: violations=0
+[PASS] event_order[dr0018/stop_at_cutoff]: violations=0
+[PASS] traceability[dr0018/stop_at_cutoff]: violations=0
+[PASS] outcomes[dr0018/stop_at_cutoff]: violations=0
+[PASS] identities[dr0018/stop_at_cutoff]: violations=0
+[PASS] orbit_events_contract[dr0018/stop_at_cutoff]: violations=0
+[PASS] o4_reference[dr0018/stop_at_cutoff]: initial_position_rel_error=0, initial_velocity_rel_error=0, ignition_position_error_max_m=0.000690236, ignition_velocity_error_max_mps=1.02791e-06, thrust_direction_vs_reference_max=1.42194e-10, cutoff_position_error_max_m=0.000814956, cutoff_velocity_error_max_mps=1.32473e-06, sample_position_error_max_m=0.000814956, sample_velocity_error_max_mps=1.32473e-06, final_position_error_m=0.000814956, final_velocity_error_mps=1.32473e-06
+[PASS] o5_coast_kepler[dr0018/stop_at_cutoff]: coast_position_error_max_m=0.000690237, coast_velocity_error_max_mps=1.02791e-06, post_burn_coast_position_error_max_m=0
+[PASS] orbit_events[dr0018/stop_at_cutoff]: node_crossing_time_error_max_s=0, min_altitude_error_m=0.000467602, max_altitude_error_m=0.000641203
+[PASS] accounting[dr0018/stop_at_cutoff]: propellant_accounting_rel_error=0, delta_v_accounting_rel_error=0, thrust_acceleration_rel_error_max=1.46549e-16, thrust_direction_error_max=1.66533e-16, final_propellant_kg=280.782, plan_propellant_rel_error_max=0, transition_propellant_rel_error_max=1.74903e-16, thrust_unit_vector_error_max=1.66533e-16, sample_propellant_rel_error_max=1.74903e-16, sample_delta_v_rel_error_max=2.13622e-14, sample_delta_v_excess_over_simpson_rel_max=4.93507e-15
+[PASS] o1_mass_law[dr0018/stop_at_cutoff]: propellant_used_rel_error_max=1.66704e-16, depletion_residual_over_bound_max=0
+[PASS] o2_rocket_equation[dr0018/stop_at_cutoff]: sensed_delta_v_rel_error_max=1.32539e-14, sensed_delta_v_excess_over_simpson_rel_max=0, reported_rocket_equation_rel_error_max=1.79318e-14
+[PASS] o7_direction[dr0018/stop_at_cutoff]: sign_violations=0, plane_rotation_max_rad=1.0524e-16, inclination_change_max_rad=2.22045e-16, burn000001_sma_change_m=79055.4, burn000001_apoapsis_alt_km=408.047, burn000001_periapsis_alt_km=250.064
+[PASS] same_tick_submission_reporting: violations=0
+[PASS] o3_free_space: velocity_rel_error_max=1.8339e-14, propellant_rel_error_max=2.148e-16, timing_violations=0, prograde_position_error_dt10_m=4.25844e-09, prograde_position_order=3.80491, retrograde_position_error_dt10_m=4.24543e-09, retrograde_position_order=3.88294, position_order_deviation_from_4_max=0.195091
+[PASS] reference_snapshot: violations=0
+[PASS] reference_snapshot_margins: violations=0
+[PASS] thresholds_all_consumed: violations=0
+[PASS] thresholds_cover_all_metrics: violations=0
+[PASS] report_only_metrics_finite: violations=0
+thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmpsrt14u8j/m2.json
+  independent agreement, max burn anchor end m: 6.51e-07
+  independent agreement, max burn anchor ticks m: 6.51e-07
+  independent agreement, max burn segment end m: 6.47e-07
+  independent agreement, max burn segment end m/s: 1.06e-09
+  independent agreement, max closed form rel: 1.4e-16
+  independent agreement, max coast anchor end m: 2.08e-09
+  independent agreement, max coast anchor ticks m: 2.13e-09
+  independent agreement, max coast segment end m: 2.83e-09
+  independent agreement, max coast segment end m/s: 3.28e-12
+  independent agreement, max dop853 vs gmat m: 4.66e-06
+  independent agreement, max dop853 vs gmat m/s: 5.39e-09
+  independent agreement, max gmat kepler m: 2.91e-07
+  independent agreement, max gmat kepler m/s: 4.08e-10
+  independent agreement, max initial state rel: 0
+  independent agreement, max node crossing time s: 0
+  independent agreement, max o5 kepler m: 2.74e-07
+  independent agreement, max o5 kepler m/s: 4.08e-10
+  independent agreement, max o6 kepler m: 1.14e-09
+  independent agreement, max o6 kepler m/s: 1.36e-12
+  independent agreement, max o6 sma rel: 5.66e-16
+  independent agreement, max simpson rel: 0
+baseline verification: PASS
+   exit=0
+== m2_proof (O1-O9, contract, golden cross-platform): sh -c "uv" run python toolbox/validators/m2_proof.py --out "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/m2_proof_report.json" > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/m2_proof_stdout.txt"
+   exit=0
+== run_mission m2_burn_to_depletion: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_burn_to_depletion
+m2_burn_to_depletion: success, 9 orbits, events sha256 6bd23e707020686d... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_burn_to_depletion
+   exit=0
+== run_mission m2_invalid_commands: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_invalid_commands
+m2_invalid_commands: success, 9 orbits, events sha256 7e52dd1d276b309c... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_invalid_commands
+   exit=0
+== run_mission m2_prograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_prograde_burn
+m2_prograde_burn: success, 9 orbits, events sha256 42316356a4c2b093... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_prograde_burn
+   exit=0
+== run_mission m2_retrograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_retrograde_burn
+m2_retrograde_burn: success, 10 orbits, events sha256 1c0037c202bb1d86... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.nh02L7SfXw/mission_m2_retrograde_burn
+   exit=0
+overall: PASS

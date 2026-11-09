@@ -1,0 +1,60 @@
+>   S-RAND(ii),999,0x1.5a20f7ecd3d88p+20,-0x1.ea51443bfde40p+19,0x1.1fb2175e050a8p+21,passes,accepted,7,0x1.0000000000000p-53,-0x1.a3777c563b04bp+21,0x1.e291165ce6919p-1,twin record (G-08 adapter)
+>   S2-XP3-LISTING-END
+>     warnings.warn(header + body + "S2-XP3-LISTING-END", XP3Listing, stacklevel=1)
+> 
+50c22735
+< 1390 passed, 3 warnings in 2384.94s (0:39:44)
+---
+> 1521 passed, 7 warnings in 2372.92s (0:39:32)
+55c22740
+< == m1 cross-platform: sh -c "uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/m1_cross_platform.json"
+---
+> == m1 cross-platform: sh -c "uv" run python toolbox/validators/cross_platform.py > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/m1_cross_platform.json"
+57c22742
+< == m1_proof (non-GMAT): uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/m1_non_gmat.json
+---
+> == m1_proof (non-GMAT): uv run python toolbox/validators/m1_proof.py --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/m1_non_gmat.json
+73c22758
+< thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/m1_non_gmat.json
+---
+> thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/m1_non_gmat.json
+75c22760
+< == gmat m1 compare: sh -c "uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/gmat_m1_reference.json"
+---
+> == gmat m1 compare: sh -c "uv" run python toolbox/scripts/gmat_m1.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/gmat_m1_reference.json"
+89c22774
+< == gmat m2 compare: sh -c "uv" run python toolbox/scripts/gmat_m2.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/gmat_m2_reference.json"
+---
+> == gmat m2 compare: sh -c "uv" run python toolbox/scripts/gmat_m2.py compare > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/gmat_m2_reference.json"
+320c23005
+< thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmpo9_jcdvc/m2.json
+---
+> thresholds: approved; overall: PASS -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmpkzj4vxrt/m2.json
+344c23029
+< == m2_proof (O1-O9, contract, golden cross-platform): sh -c "uv" run python toolbox/validators/m2_proof.py --out "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/m2_proof_report.json" > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/m2_proof_stdout.txt"
+---
+> == m2_proof (O1-O9, contract, golden cross-platform): sh -c "uv" run python toolbox/validators/m2_proof.py --out "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/m2_proof_report.json" > "/var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/m2_proof_stdout.txt"
+346,347c23031,23032
+< == run_mission m2_burn_to_depletion: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_burn_to_depletion
+< m2_burn_to_depletion: success, 9 orbits, events sha256 6bd23e707020686d... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_burn_to_depletion
+---
+> == run_mission m2_burn_to_depletion: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_burn_to_depletion.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_burn_to_depletion
+> m2_burn_to_depletion: success, 9 orbits, events sha256 6bd23e707020686d... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_burn_to_depletion
+349,350c23034,23035
+< == run_mission m2_invalid_commands: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_invalid_commands
+< m2_invalid_commands: success, 9 orbits, events sha256 7e52dd1d276b309c... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_invalid_commands
+---
+> == run_mission m2_invalid_commands: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_invalid_commands.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_invalid_commands
+> m2_invalid_commands: success, 9 orbits, events sha256 7e52dd1d276b309c... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_invalid_commands
+352,353c23037,23038
+< == run_mission m2_prograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_prograde_burn
+< m2_prograde_burn: success, 9 orbits, events sha256 42316356a4c2b093... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_prograde_burn
+---
+> == run_mission m2_prograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_prograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_prograde_burn
+> m2_prograde_burn: success, 9 orbits, events sha256 42316356a4c2b093... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_prograde_burn
+355,356c23040,23041
+< == run_mission m2_retrograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_retrograde_burn
+< m2_retrograde_burn: success, 10 orbits, events sha256 1c0037c202bb1d86... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.YHWE2DSkZY/mission_m2_retrograde_burn
+---
+> == run_mission m2_retrograde_burn: uv run python toolbox/scripts/run_mission.py --scenario scenarios/m2_retrograde_burn.json --out /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_retrograde_burn
+> m2_retrograde_burn: success, 10 orbits, events sha256 1c0037c202bb1d86... -> /var/folders/5w/95lz54h147x314g_8mg441380000gn/T/tmp.70OK7t9uR4/mission_m2_retrograde_burn

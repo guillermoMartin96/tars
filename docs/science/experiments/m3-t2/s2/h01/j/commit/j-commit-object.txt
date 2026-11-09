@@ -1,0 +1,32 @@
+tree b5b9e928d4203ea82ea5178be945490ce705a1d8
+parent 8074a19bf33cf5b6d20f7d211ff44f82bf28ba93
+author Guillermo Martin <g_martin96@yahoo.com> 1794197556 -0800
+committer Guillermo Martin <g_martin96@yahoo.com> 1794197556 -0800
+
+fix(M3-T2-S2): unsupported-type rejection reads no caller class attribute (H-01)
+
+The independent S2 re-review of H (8074a19; REQUEST_CHANGES; review
+manifest 8400c3bf...922f) found H-01: _normalize's final branch formatted
+t.__name__ into its TypeError message, so a caller metaclass's
+__getattribute__ hook ran and its exception escaped in place of the
+TypeError. v11 §3.8 step 0 requires "Every other type raises TypeError"
+and permits caller exceptions to propagate only from len(r) and
+r[0]/r[1]/r[2]; it prescribes no message text.
+
+The rejection now raises TypeError with a fixed message. Nothing else
+changes: not the E.1 try, base-slot normalization, check order or
+arithmetic.
+
+Adds G-06 node test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook
+with the reviewer's exact witness: no sentinel escape, exactly TypeError,
+no exception chaining, no hook call.
+
+Red/green binding (local; S2-H01-correction manifest b0ea7050...e584):
+- red: geodesy.py blob e409e26341ec40a0adf8123e5ea47d5fc9788d9d (H) with
+  test blob d68c7a7d1645068a34a6c430b98845beb26e9f65: AssertionError,
+  sentinel escaped, hook calls ['__name__'];
+- green: geodesy.py blob 82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb with the
+  same test blob: passed.
+H-01 stays open pending independent review.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>

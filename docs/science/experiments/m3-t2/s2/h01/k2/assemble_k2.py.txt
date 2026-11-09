@@ -1,0 +1,157 @@
+"""S2 H-01, commit K2: assemble docs/science/experiments/m3-t2/s2/h01/ (a new directory only).
+
+Usage: python3 -I assemble_k2.py <h01 dir in the worktree (must not exist)> <README source> <tail scratch dir>
+
+Adapted from the I-106 assemble_g.py rules (G, i105/):
+- Every copied file is a byte copy, except the scrub: the absolute home path is replaced by "$HOME" and
+  the session scratch directory by "$SCRATCH" (whole-path replacements); each scrubbed file's original
+  sha256 is listed in SCRUBBED.txt.
+- Files kept external are listed in EXTERNAL.sha256 with sha256, external path and reason:
+  logs/text over 1 MB (a 60-line tail is kept), raw and derived CI job logs (sha256 also in
+  raw-logs.sha256), campaign execution stdout and campaign listings (sha256 in their records), and
+  census CSVs byte-identical to one already kept (the kept path is named).
+- Scripts (.py, .sh) are stored as .txt.
+- SHA256SUMS covers every file under h01/ except itself.
+Nothing outside h01/ is written, except one temporary tail file in the given scratch dir.
+"""
+import hashlib
+import os
+import sys
+from pathlib import Path
+
+HOME = os.path.expanduser("~")
+SCRATCH = "$SCRATCH"
+EV = Path(HOME) / "tars-evidence"
+COR = EV / "S2-H01-correction"
+JP = EV / "S2-H01-J"
+KL = EV / "S2-H01-K2-L"
+dst, readme, tmpdir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
+assert not dst.exists(), f"target exists: {dst}"
+dst.mkdir(parents=True)
+
+external, scrubbed, copied = [], [], []
+kept_csv = {}  # sha256 -> kept relative path
+MB = 1 << 20
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def ext(p, why):
+    external.append(f"{sha(p)}  {str(p).replace(HOME, '~')}  ({why})")
+
+
+def put(src, rel):
+    data = Path(src).read_bytes()
+    orig = hashlib.sha256(data).hexdigest()
+    new = data
+    for full, token in ((SCRATCH, b"$SCRATCH"), (SCRATCH.removeprefix("/private"), b"$SCRATCH"), (HOME, b"$HOME")):
+        new = new.replace(full.encode(), token)
+    if new != data:
+        scrubbed.append(f"{orig}  {rel}")
+    out = dst / rel
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(new)
+    copied.append(rel)
+
+
+def tail(src, rel, n=60):
+    lines = Path(src).read_bytes().splitlines(keepends=True)[-n:]
+    tmp = tmpdir / "k2-tail.tmp"
+    tmp.write_bytes(b"".join(lines))
+    put(tmp, rel)
+    tmp.unlink()
+
+
+def default_skip(p):
+    if p.suffix in (".log", ".txt") and p.stat().st_size > MB:
+        return "log over 1 MB; tail kept"
+    if p.name.endswith(".csv") and "LISTING" in p.name:
+        h = sha(p)
+        if h in kept_csv:
+            return f"census byte-identical to h01/{kept_csv[h]}"
+    return None
+
+
+def tree(src, rel, skip=lambda p: None):
+    src = Path(src)
+    for p in sorted(src.rglob("*")):
+        if p.is_dir():
+            continue
+        r = p.relative_to(src)
+        why = skip(p) or default_skip(p)
+        if why:
+            ext(p, why)
+            if why.startswith("log over 1 MB"):
+                tail(p, f"{rel}/{r}.tail-60.txt")
+            continue
+        name = f"{rel}/{r}"
+        if p.suffix in (".py", ".sh"):
+            name += ".txt"
+        if p.name.endswith(".csv") and "LISTING" in p.name:
+            kept_csv[sha(p)] = name
+        put(p, name)
+
+
+put(readme, "README.md")
+
+# Owner instructions, verbatim.
+put(COR / "INSTRUCTION.md", "owner/H01-CORRECTION-INSTRUCTION.md")
+put(JP / "AUTHORIZATION.md", "owner/J-AUTHORIZATION.md")
+put(KL / "AUTHORIZATION.md", "owner/K2-L-AUTHORIZATION.md")
+
+# The correction packet (author evidence; candidate = H + uncommitted H-01 bytes).
+for f in ("README.md", "OBLIGATION-IMPACT.md", "PROPOSED-COMMIT-SEQUENCE.md", "final-state.txt", "MANIFEST.sha256"):
+    put(COR / f, f"correction/{f}")
+tree(COR / "inputs", "correction/inputs")
+tree(COR / "diff", "correction/diff")
+tree(COR / "red-green", "correction/red-green")
+
+
+def campaign_skip(p):
+    if p.name.endswith(".stdout.txt"):
+        return "campaign execution stdout; sha256 also in its run record and the correction packet manifest"
+    if p.name == "S2-XP3-LISTING.csv":
+        return "campaign execution listing; body sha256 verified in its extraction-status.json"
+    return None
+
+
+tree(COR / "candidate", "correction/candidate",
+     lambda p: campaign_skip(p) if "campaign" in p.parts else None)
+tree(COR / "regression", "correction/regression-candidate")
+tree(COR / "scripts", "correction/scripts")
+
+# J: commit, push, own CI, clean committed-tip validation (author evidence at exact J).
+for f in ("README.md", "final-state.txt", "BINDING-EARLIER-EVIDENCE-TO-J.txt", "regression-commands.txt", "MANIFEST.sha256"):
+    put(JP / f, f"j/{f}")
+tree(JP / "preconditions", "j/preconditions")
+tree(JP / "j", "j/commit")
+tree(JP / "h01-node-at-J", "j/h01-node-at-J")
+tree(JP / "regression", "j/regression-clean-J")
+tree(JP / "scripts", "j/scripts")
+tree(JP / "ci", "j/ci",
+     lambda p: "raw or derived CI job log; sha256 in raw-logs.sha256" if p.parent.name in ("logs", "derived") and p.suffix == ".log" else None)
+
+# K2/L execution preconditions (verified before K2 was assembled).
+tree(KL / "preconditions", "k2/preconditions")
+put(Path(__file__), "k2/assemble_k2.py.txt")
+
+(dst / "EXTERNAL.sha256").write_text(
+    "# Files kept outside the repository: sha256, external path (~ = the author's home), reason.\n"
+    "# They are NOT contained in the repository. Each external packet is sealed by its MANIFEST.sha256\n"
+    "# (copies under correction/MANIFEST.sha256 and j/MANIFEST.sha256).\n"
+    + "\n".join(sorted(external)) + "\n")
+(dst / "SCRUBBED.txt").write_text(
+    "# Files in which the absolute home path was replaced by $HOME and the session scratch directory by\n"
+    "# $SCRATCH (whole-path replacements): original sha256 and path.\n"
+    + "\n".join(sorted(scrubbed)) + "\n")
+FRAG = os.path.basename(HOME).encode()
+left = [str(p.relative_to(dst)) for p in dst.rglob("*") if p.is_file() and FRAG in p.read_bytes()]
+(dst / "SCRUB-CHECK.txt").write_text(
+    "Files under h01/ still containing the user-name fragment after whole-path replacement:\n"
+    + ("\n".join(sorted(left)) if left else "none") + "\n")
+files = sorted(p for p in dst.rglob("*") if p.is_file() and p.name != "SHA256SUMS")
+(dst / "SHA256SUMS").write_text("".join(f"{sha(p)}  {p.relative_to(dst)}\n" for p in files))
+print(f"copied {len(copied)}; external {len(external)}; scrubbed {len(scrubbed)}; fragment left in {len(left)}; "
+      f"SHA256SUMS entries {len(files)}")

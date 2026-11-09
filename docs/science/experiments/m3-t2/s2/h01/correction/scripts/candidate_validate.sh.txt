@@ -1,0 +1,89 @@
+#!/bin/bash
+# S2 H-01 correction: validation of the uncommitted candidate (H + H-01 test and source changes).
+# Fresh --no-local --no-hardlinks clone of the local repository at exact H; the worktree's changed paths
+# copied in and verified byte-equal; offline locked setup. Every pytest execution runs with the nine
+# component-free recorders in the same process (DL-5 ENV, X-P3/RP-9 listing, G-17a, G-17b) and has its
+# own I-105 run_record.py §3.16 record; scripted executions get a direct DL-5 probe (I-106 env_probe_at.py).
+# Run the whole script under: sandbox-exec -p '(version 1)(allow default)(deny network*)'
+# Usage: candidate_validate.sh <out dir> <clone parent dir>
+set -u
+O=$1; PARENT=$2
+H=8074a19bf33cf5b6d20f7d211ff44f82bf28ba93; HT=3b70b865abfa4137227ccce0d070ba6484cdef26
+W=$HOME/.superset/worktrees/tars/milestone-3-t2-s2-geodetic
+UV=$HOME/Library/Python/3.9/bin/uv
+S5=$HOME/tars-evidence/I-105/scripts; S6=$HOME/tars-evidence/I-106/scripts
+REV=$HOME/tars-evidence/S2-REREVIEW-H-8074a19/continuation-20261108T211523Z
+export PYTHONDONTWRITEBYTECODE=1 PATH=/usr/bin:/bin:/usr/sbin:/sbin UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never
+C=$PARENT/h01-candidate-clone
+mkdir -p "$O"; L=$O/sequence.log
+log() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$L"; }
+PROBE="src/tars/sim/geodesy.py tests/test_s2_geodetic.py tests/test_s2_geodetic_conformance.py tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py tests/test_s2_dl4_points.py tests/s2_dl4_points.txt tests/s2_dl4_geodetic_twin.py src/tars/sim/constants.py uv.lock"
+rr() { (cd "$C" && .venv/bin/python -I "$S5/run_record.py" "$C" "$1/run-record.json" "$2" $PROBE) > "$1/run-record.stdout" 2>&1; echo $? > "$1/run-record.exit"; }
+envp() { (cd "$C" && .venv/bin/python -I -B "$S6/env_probe_at.py" "$C/tests/test_s2_environment_record.py" "$C" "$1/env.json") > "$1/env.stdout" 2>&1; echo $? > "$1/env.exit"; }
+
+# --- clone and candidate bytes
+log "git clone --no-local --no-hardlinks --no-checkout $HOME/projects/tars $C; checkout --detach $H"
+git clone -q --no-local --no-hardlinks --no-checkout $HOME/projects/tars "$C" && git -C "$C" checkout -q --detach "$H" || exit 98
+head=$(git -C "$C" rev-parse HEAD); tree=$(git -C "$C" rev-parse 'HEAD^{tree}')
+log "clone HEAD $head tree $tree alternates [$(cat "$C/.git/objects/info/alternates" 2>/dev/null)] status-before-copy [$(git -C "$C" status --porcelain --untracked-files=all)]"
+[ "$head" = "$H" ] && [ "$tree" = "$HT" ] || { log "STOP identity mismatch"; exit 2; }
+{ git -C "$W" diff --name-only HEAD; git -C "$W" ls-files --others --exclude-standard; } | sort -u > "$O/changed-paths.txt"
+while read -r p; do mkdir -p "$C/$(dirname "$p")"; cp "$W/$p" "$C/$p"; done < "$O/changed-paths.txt"
+( cd "$W" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$O/worktree-files.sha256"
+( cd "$C" && git ls-files -co --exclude-standard | sort | while read -r p; do echo "$(shasum -a 256 "$p" | cut -d' ' -f1)  $p"; done ) > "$O/candidate-files.sha256"
+cmp -s "$O/worktree-files.sha256" "$O/candidate-files.sha256" && log "candidate clone equals the worktree file for file ($(wc -l < "$O/candidate-files.sha256" | tr -d ' ') tracked+untracked non-ignored files)" || { log "STOP candidate differs from worktree"; exit 5; }
+git -C "$C" status --porcelain --untracked-files=all > "$O/git-status-porcelain.txt"
+git -C "$C" diff HEAD > "$O/candidate.diff"; git -C "$C" diff --stat HEAD > "$O/candidate.diffstat"
+# candidate tree id via a temporary index in the disposable clone (no commit; the clone's own index untouched)
+TI=$PARENT/h01-candidate-tmp-index; rm -f "$TI"
+GIT_INDEX_FILE=$TI git -C "$C" read-tree HEAD && GIT_INDEX_FILE=$TI git -C "$C" add -A && CT=$(GIT_INDEX_FILE=$TI git -C "$C" write-tree)
+rm -f "$TI"; echo "$CT" > "$O/candidate-tree.txt"
+log "candidate tree (H tree + working-tree changes, temporary index, no commit): $CT"
+for f in src/tars/sim/geodesy.py tests/test_s2_geodetic.py; do echo "$(git -C "$C" hash-object "$C/$f") $(shasum -a 256 "$C/$f" | cut -c1-64) $f"; done > "$O/candidate-identities.txt"
+log "candidate identities: $(tr '\n' ';' < "$O/candidate-identities.txt")"
+log "uv $($UV --version) sha256 $(shasum -a 256 $UV | cut -c1-64); cmd: UV_OFFLINE=1 UV_PYTHON_DOWNLOADS=never $UV sync --locked --offline"
+(cd "$C" && "$UV" sync --locked --offline) > "$O/uv-sync.log" 2>&1; e=$?; log "uv sync exit $e"; [ $e -eq 0 ] || exit 3
+
+# --- background: host report-only script, and the pinned I-105 mutation campaign (copies of src only)
+( D=$O/host-report; mkdir -p "$D"; rr "$D" "S2 H-01 candidate: host report_only_v2.py (RP-1..RP-7, RP-9 host census)"; envp "$D"
+  date -u +%FT%TZ > "$D/start-utc.txt"
+  (cd "$C" && .venv/bin/python -I "$S5/report_only_v2.py" "$C" "$D/out") > "$D/report_only.log" 2>&1; echo $? > "$D/report_only.exit"
+  date -u +%FT%TZ > "$D/end-utc.txt"
+  for f in "$REV"/host-report/results/*; do b=$(basename "$f"); cmp -s "$f" "$D/out/$b" && echo "IDENTICAL $b" || echo "DIFFERS $b"; done > "$D/compare-with-reviewer-H-host-report.txt"
+  touch "$D/DONE" ) &
+( D=$O/campaign; mkdir -p "$D"; date -u +%FT%TZ > "$D/start-utc.txt"
+  echo "$C/.venv/bin/python -I $S5/mutate.py $C $D/mutation" > "$D/command.txt"
+  (cd "$C" && .venv/bin/python -I "$S5/mutate.py" "$C" "$D/mutation") > "$D/mutation.log" 2>&1; echo $? > "$D/mutation.exit"
+  date -u +%FT%TZ > "$D/end-utc.txt"; touch "$D/DONE" ) &
+
+# --- ruff, G-13 scope
+(cd "$C" && .venv/bin/ruff check --no-cache .) > "$O/ruff-check.log" 2>&1; echo $? > "$O/ruff-check.exit"
+(cd "$C" && .venv/bin/ruff format --no-cache --check .) > "$O/ruff-format.log" 2>&1; echo $? > "$O/ruff-format.exit"
+log "ruff check exit $(cat "$O/ruff-check.exit"); ruff format --check exit $(cat "$O/ruff-format.exit")"
+(cd "$C" && .venv/bin/python -I "$S5/g13_scope_check_worktree.py" "$C") > "$O/g13-scope-check.json" 2>&1; echo $? > "$O/g13.exit"
+log "G-13 scope (working-tree form vs K) exit $(cat "$O/g13.exit")"
+
+# --- reviewer's exact H-01 probe, unchanged bytes, on the candidate (it asserts the DEFECT, so exit 1 is expected)
+D=$O/reviewer-probe; mkdir -p "$D"; cp "$REV/reviewer-scripts/normalization_metaclass_probe.py.txt" "$D/normalization_metaclass_probe.py"
+rr "$D" "S2 H-01 candidate: reviewer metaclass probe (unchanged bytes)"; envp "$D"
+(cd "$C" && .venv/bin/python -B "$D/normalization_metaclass_probe.py") > "$D/output.log" 2>&1; echo $? > "$D/exit"
+log "reviewer probe exit $(cat "$D/exit") (probe asserts the defect; nonzero expected on a corrected component): $(tr '\n' ' ' < "$D/output.log" | cut -c1-400)"
+
+# --- S2 suite (all S2 test files, recorders included) and full suite
+for run in s2-suite full-suite; do D=$O/$run; mkdir -p "$D"
+  if [ $run = s2-suite ]; then SEL="tests/test_s2_geodetic.py tests/test_s2_geodetic_conformance.py tests/test_s2_dl4_points.py tests/test_s2_environment_record.py tests/test_s2_xp3_listing.py"; else SEL=""; fi
+  rr "$D" "S2 H-01 candidate: $run"
+  CMD=".venv/bin/python -B -m pytest -v -rA -p no:cacheprovider --junitxml=$D/junit.xml $SEL"; echo "$CMD" > "$D/command.txt"
+  date -u +%FT%TZ > "$D/start-utc.txt"; log "$run start: $CMD"
+  (cd "$C" && $CMD) > "$D/pytest.log" 2>&1; echo $? > "$D/pytest.exit"; date -u +%FT%TZ > "$D/end-utc.txt"
+  log "$run end: exit $(cat "$D/pytest.exit"); $(tail -1 "$D/pytest.log")"
+  (cd "$C" && .venv/bin/python -I "$S5/extract_s2_records_v2.py" "$D/pytest.log" "$D/records") > "$D/extract.stdout" 2>&1; echo $? > "$D/extract.exit"
+  python3 -I "$S5/validate_census.py" "$C/tests/s2_dl4_points.txt" "$D/records/S2-XP3-LISTING.csv" ci "$D/census-validation.json" > "$D/census-validation.stdout" 2>&1; echo $? > "$D/census-validation.exit"
+  log "$run records: extract exit $(cat "$D/extract.exit"); census validation exit $(cat "$D/census-validation.exit")"
+done
+wait
+log "host report exit $(cat "$O/host-report/report_only.exit"); vs reviewer H: $(tr '\n' ' ' < "$O/host-report/compare-with-reviewer-H-host-report.txt")"
+log "campaign exit $(cat "$O/campaign/mutation.exit"); $(tail -1 "$O/campaign/mutation.log")"
+git -C "$C" status --porcelain --untracked-files=all > "$O/git-status-porcelain-after.txt"
+cmp -s "$O/git-status-porcelain.txt" "$O/git-status-porcelain-after.txt" && log "clone status unchanged by validation" || log "clone status CHANGED during validation"
+log DONE

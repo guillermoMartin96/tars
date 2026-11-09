@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="12" time="1.997" timestamp="2026-11-08T16:31:39.433739-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g16_fi05_sin_raises_type_error_propagates" time="0.003"><failure message="AssertionError: assert ('raised' == 'raised'&#10;  &#10;    raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is TypeError('injected'))">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10a9f9670&gt;
+
+    def test_g16_fi05_sin_raises_type_error_propagates(monkeypatch):
+        sentinel = TypeError("injected")
+        kind, value = _run_case(monkeypatch, _rules(sin=_Raise(sentinel)), _SCHED_00[:3])
+&gt;       assert kind == "raised" and value is sentinel
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is TypeError('injected'))
+
+tests/test_s2_geodetic.py:923: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi06_missing_cos_propagates_attribute_error" time="0.001"><failure message="AssertionError: assert ('raised' == 'raised'&#10;  &#10;    raised and &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; is AttributeError)&#10; +  where &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = type(GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification'))">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b4733b0&gt;
+
+    def test_g16_fi06_missing_cos_propagates_attribute_error(monkeypatch):
+        rules = _rules()
+        del rules["cos"]
+        kind, value = _run_case(monkeypatch, rules, _SCHED_00[:6])
+&gt;       assert kind == "raised" and type(value) is AttributeError
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; is AttributeError)
+E        +  where &lt;class 'tars.sim.geodesy.GeodeticDomainError'&gt; = type(GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification'))
+
+tests/test_s2_geodetic.py:930: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi14_sin_raises_name_error_propagates" time="0.001"><failure message="AssertionError: assert ('raised' == 'raised'&#10;  &#10;    raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is NameError('injected'))">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10b473c20&gt;
+
+    def test_g16_fi14_sin_raises_name_error_propagates(monkeypatch):
+        sentinel = NameError("injected")
+        kind, value = _run_case(monkeypatch, _rules(sin=_Raise(sentinel)), _SCHED_00[:3])
+&gt;       assert kind == "raised" and value is sentinel
+E       AssertionError: assert ('raised' == 'raised'
+E         
+E           raised and GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification') is NameError('injected'))
+
+tests/test_s2_geodetic.py:981: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.228" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.402" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.058" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.345" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.572" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.070" /></testsuite></testsuites>

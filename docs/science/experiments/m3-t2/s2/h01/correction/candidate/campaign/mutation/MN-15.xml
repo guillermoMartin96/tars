@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="11" time="1.996" timestamp="2026-11-08T16:32:17.182493-08:00" hostname="Guillermos-MacBook-Pro.local"><testcase classname="tests.test_s2_geodetic" name="test_g06_fixed_message_and_category_per_reason" time="0.003"><failure message="AssertionError: assert 'numerical' == 'failure'&#10;  &#10;  - failure&#10;  + numerical">def test_g06_fixed_message_and_category_per_reason():
+        geo = _geo()
+        for reason, category in CATEGORY.items():
+            exc = geo.GeodeticDomainError(reason)
+            assert exc.reason == reason
+&gt;           assert exc.category == category
+E           AssertionError: assert 'numerical' == 'failure'
+E             
+E             - failure
+E             + numerical
+
+tests/test_s2_geodetic.py:555: AssertionError</failure></testcase><testcase classname="tests.test_s2_geodetic" name="test_g16_fi01_sin_nan" time="0.001"><failure message="AssertionError: assert 'numerical' == 'failure'&#10;  &#10;  - failure&#10;  + numerical">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10c15b770&gt;
+
+    def test_g16_fi01_sin_nan(monkeypatch):  # departs from S-4, S-9
+&gt;       _expect_reason(_run_case(monkeypatch, _rules(sin=math.nan), _SCHED_00), "numerical_failure")
+
+tests/test_s2_geodetic.py:902: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = ('raised', GeodeticDomainError('geodetic evaluation failed; the cause is undetermined and this is not a domain classification'))
+reason = 'numerical_failure', cause = None
+
+    def _expect_reason(outcome, reason, cause=None):
+        geo = _geo()
+        kind, value = outcome
+        assert kind == "raised", outcome
+        assert type(value) is geo.GeodeticDomainError, type(value)
+        assert value.reason == reason
+&gt;       assert value.category == CATEGORY[reason]
+E       AssertionError: assert 'numerical' == 'failure'
+E         
+E         - failure
+E         + numerical
+
+tests/test_s2_geodetic.py:880: AssertionError</failure></testcase><testcase classname="tests.test_s2_environment_record" name="test_s2_environment_record_is_emitted" time="0.224" /><testcase classname="tests.test_s2_xp3_listing" name="test_s2_xp3_rp9_listing_is_emitted" time="0.403" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_frozen_file_sha256_equals_commit_a_record" time="0.006" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_set_sequence_indices_and_counts" time="0.060" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_s_ax_boundary_entries" time="0.001" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_dg_cusp_witness_slots" time="0.002" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_labels_recomputed_from_the_file" time="0.344" /><testcase classname="tests.test_s2_dl4_points" name="test_g17a_rerun_exact_self_checks_structure_labels_and_report" time="0.583" /><testcase classname="tests.test_s2_dl4_points" name="test_g17b_class_x_replay_equality" time="0.070" /></testsuite></testsuites>
