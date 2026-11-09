@@ -1166,3 +1166,106 @@ observed; none of them closes a finding or makes an obligation MET.
 
 **Status: S2 IMPLEMENTED / REVIEWED (I-104: REQUEST_CHANGES) / CORRECTED (F, G, H) / RE-REVIEW
 NOT LAUNCHED / NOT ACCEPTED / NOT MERGED.**
+
+### S2.15 Correction record after the H re-review (H-01)
+
+**What was reviewed.** An independent §5.2 implementation re-review examined H
+`8074a19bf33cf5b6d20f7d211ff44f82bf28ba93` (tree `3b70b865abfa4137227ccce0d070ba6484cdef26`).
+- **Result: REQUEST_CHANGES**, with one new MINOR/must-fix finding, **H-01**, and no BLOCKER or MAJOR
+  finding.
+- The four I-104 findings were independently assessed as resolved at H; I104-02 only under the exact
+  issued I-106 conditional exception, whose five conditions the review established separately.
+- **Obligations at H:** 29 MET; OB-11 and OB-27 FAILED; OB-30 and OB-31 later-scope PENDING.
+- The external record is
+  `~/tars-evidence/S2-REREVIEW-H-8074a19/continuation-20261108T211523Z/`, whose manifest sha256 is
+  `8400c3bfd78b5457d5cd06360efb0401c05db9d407765fa30c3f60bf2f61922f`.
+- That verdict and ledger remain the historical assessment of H. The I-104 dispositions remain as
+  independently assessed at H. Nothing below changes them.
+
+**How this record works.** It is append-only. Every byte of §S2.0 to §S2.14 is unchanged. The facts
+below are author observations; none of them closes H-01 or makes an obligation MET.
+
+**The finding.** At `src/tars/sim/geodesy.py:110` in H, the final `_normalize` branch built its
+TypeError message from `t.__name__`. A caller's metaclass `__getattribute__` could intercept that read,
+and its exception escaped instead of the TypeError. v11 §3.8 step 0 requires "Every other type raises
+`TypeError`" and permits caller exceptions to propagate only from `len(r)` and `r[0]/r[1]/r[2]`; it
+prescribes no message text. The reviewer's witness is an ordinary built-in tuple
+`(Unsupported(), 0.0, 7.0e6)` whose first component's metaclass raises a ValueError sentinel when
+`__name__` is read.
+
+**The correction: J `42ec8d6170447429ec1be8208f71cb4ee5512496`** (sole parent H; tree
+`b5b9e928d4203ea82ea5178be945490ce705a1d8`).
+- One statement: the branch raises `TypeError("geodetic input: unsupported component type")`, with one
+  comment line. The E.1 `try`, base-slot normalization, check order and DQ-1 arithmetic are unchanged.
+- One new G-06 node, `test_g06_h01_unsupported_type_rejection_consults_no_metaclass_hook`, with the
+  reviewer's exact witness. It asserts no sentinel escape, exactly `TypeError`, not a
+  `GeodeticDomainError`, no exception chaining, and no metaclass hook call.
+- Blobs: `geodesy.py` `82ca9aaab0ed63ca63a8c9ff29f6a1425a2769cb` (H: `e409e263…`);
+  `test_s2_geodetic.py` `d68c7a7d1645068a34a6c430b98845beb26e9f65` (H: `50c75e31…`).
+
+**Red before green (author; uncommitted bytes over H).** Red ran H's component blob
+`e409e26341ec40a0adf8123e5ea47d5fc9788d9d` with test blob `d68c7a7d…`: the node failed by assertion
+("the metaclass sentinel escaped; hook calls ['__name__']"). Green ran component blob `82ca9aaa…` with
+the same test bytes: 10 passed (the node and nine recorders). Each run has its own run and DL-5 ENV
+records. These bytes and the candidate tree equal J's, but these runs are not executions at J.
+
+**Candidate validation (author; H plus the uncommitted H-01 bytes; offline).** S2 suite 130 passed; full
+suite 1 521 passed; G-17b 8 853 class X entries with 0 differences; host report-only outputs
+byte-identical to the H reviewer's; mutation campaign 44 qualifying kills and 5 approved equivalents,
+with the exact MG-02/MG-04 witnesses; R-1 to R-4, R-S1 and R-S2 passed against recomputed K, except
+that **the original R-2 comparison returned False** on the uncommitted candidate, whose record has
+`tree_clean` false. A supplementary author comparison substituting revision and `tree_clean` returned
+True; it does not replace the original comparison.
+
+**J's CI and clean-J validation.**
+- CI run 42560535876 succeeded on attempt 1, 4/4, on exact J. On each check job: 1 518 passed and 3
+  skipped; a valid schema-2 census of 22 665 records; G-17b with 0 differences on 8 853 class X
+  entries (`other`). Class P differences (report-only): 2 305 ubuntu-latest, 2 188 macos-latest, 0
+  macos-15-intel. RP-8/RP-9: 0 cross-platform outcome differences (report-only).
+- In fresh clean clones of exact J (offline): the H-01 node passed; R-1 to R-4 passed against
+  recomputed K; **the original R-2 comparison, unchanged, returned True**, with `tree_clean` true at J
+  and at K; R-S1 100 passed; R-S2 1 521 passed with complete records.
+
+**K2 `2b51735718fd63bfc541c271fe2e3cd1b5d4a979`** (sole parent J; tree
+`91f77384f7d22c3edbef2a95f27b9d9896e31321`) adds `docs/science/experiments/m3-t2/s2/h01/` only (1 025
+files, including its own `SHA256SUMS`, `EXTERNAL.sha256`, `SCRUBBED.txt` and `SCRUB-CHECK.txt`). It
+holds the owner instructions, the correction packet and J's evidence, with the attribution rules above
+stated in its `README.md`.
+- CI run 42666382185 succeeded on attempt 1, 4/4, on exact K2, with the same per-job observations as
+  J: on each check job, 1 518 passed and 3 skipped; a valid schema-2 census of 22 665 records; G-17b
+  with 0 differences on 8 853 class X entries (`other`). Class P differences (report-only): 2 305
+  ubuntu-latest, 2 188 macos-latest, 0 macos-15-intel. RP-8/RP-9: 0 cross-platform outcome
+  differences (report-only).
+
+**L**, which appends this section, is pushed alone. Its own CI and the final-tip validation at L are
+recorded in the external record `~/tars-evidence/S2-H01-K2-L/`; this section makes no claim about them.
+
+**Evidence locations.** Committed: `docs/science/experiments/m3-t2/s2/h01/`. External, each sealed by
+its manifest: `~/tars-evidence/S2-H01-correction/` (manifest sha256
+`b0ea705039b483359886a77b44911eb6117c1a5775ed5b86b5eef7c0d895e584`),
+`~/tars-evidence/S2-H01-J/` (manifest sha256
+`a6a808615df46091e3075a40988d6459317ae8e574800b8bd5c620bbbf1ee130`) and
+`~/tars-evidence/S2-H01-K2-L/`.
+
+**Limitations.**
+- The red/green and the mutation campaign were not re-executed at J; they are bound to J by bytes
+  and tree only.
+- The commit-D derivation was not rerun; it does not involve the changed component.
+- CI runs pytest quietly and does not name the H-01 node; node-level evidence comes from host runs.
+- The I-106 exception covers only its issued historical scope (inventory sha256
+  `8116984313a017126014abf3cbdd87ec65d2db4ab8fce82697d31188e9e2f7e9`), never these executions, each of
+  which carries its own run and DL-5 ENV records.
+- Equal recorded ENV fields do not certify unrecorded library or build identity (r83:83).
+
+**Standing.**
+- H's independent verdict remains **REQUEST_CHANGES**.
+- **H-01 awaits independent assessment of the corrected tip.** OB-11 and OB-27 are not marked MET.
+- H's ledger remains its historical assessment; its MET rows do not carry forward automatically.
+- The I-104 dispositions remain as independently assessed at H.
+- OB-30 and OB-31 remain later-scope PENDING.
+- POG accuracy gating remains BLOCKED; A-FP-2 remains unaccepted and unjustified; class P remains
+  report-only.
+- Acceptance and merge are not authorized.
+
+**Status: S2 IMPLEMENTED / RE-REVIEWED AT H (REQUEST_CHANGES, H-01) / CORRECTED (J, K2, L) /
+CORRECTED-TIP REVIEW NOT LAUNCHED / NOT ACCEPTED / NOT MERGED.**
