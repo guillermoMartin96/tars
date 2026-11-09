@@ -107,7 +107,8 @@ def _normalize(v: object) -> float | int:
         return float.__float__(v)  # type: ignore[arg-type]
     if issubclass(t, int):
         return int.__index__(v)  # type: ignore[arg-type]
-    raise TypeError(f"geodetic input: unsupported component type {t.__name__}")
+    # A fixed message: reading t.__name__ would run a caller metaclass's hook (H-01).
+    raise TypeError("geodetic input: unsupported component type")
 
 
 def _to_binary64(v: float | int) -> float:
