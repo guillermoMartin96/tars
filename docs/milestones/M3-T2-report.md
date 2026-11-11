@@ -1269,3 +1269,276 @@ its manifest: `~/tars-evidence/S2-H01-correction/` (manifest sha256
 
 **Status: S2 IMPLEMENTED / RE-REVIEWED AT H (REQUEST_CHANGES, H-01) / CORRECTED (J, K2, L) /
 CORRECTED-TIP REVIEW NOT LAUNCHED / NOT ACCEPTED / NOT MERGED.**
+
+
+## S3 — Earth exponential atmosphere: pinned dataset and density (PC-7(S3))
+
+**Densities are UNVERIFIED ABOVE 1000 KM (DR-0029 P5).** Above the top base (1000 km), the top band
+is extrapolated, with no cutoff and no upper failure.
+
+This section is appended under PC-7(S3) and the owner instruction of 2026-11-11. Every earlier
+section of this report stays byte-identical. This is author evidence: it makes no obligation MET and
+is not a review verdict.
+
+### S3.0 Governing documents
+
+- **Proposal:** v4 (`~/tars-evidence/S3-proposal-v4/`).
+- **Owner decisions:** `~/tars-evidence/S3-owner-decisions-v1/`.
+- **PC-7(S3):** issued 2026-11-10 (`~/tars-evidence/S3-PC7-issuance-v1/`, manifest sha256
+  `c504eb8a188beff020f2399ccf6c1257904fde8c7906d1e7d97103b58c62368d`).
+- **Owner instruction of 2026-11-11:** decides Q-1, Q-2 and Q-3; committed as
+  `docs/science/experiments/m3-t2/s3/provenance/OWNER-INSTRUCTION-2026-11-11.txt`.
+  - Q-2 and Q-3 are new, narrowly scoped dispositions. They are not an extension or
+    reinterpretation of I-106.
+  - The old 54-run mutation campaign remains non-qualifying and is not waived.
+  - Packaging gaps G-1, G-2 and G-3 are not waived.
+- **Owner instruction for the D CI rerun:** authorizes exactly one full rerun of D run
+  43093656546, then D evidence collection, E and the handoff.
+  - Stored as `~/tars-evidence/S3-D-CI-completion-v1/OWNER-INSTRUCTION.txt`; external only.
+  - It grants no CI waiver.
+  - It does not accept the M-29 author judgment.
+- **Selected profile:**
+  - D-S3-14 (b): the twin reads the protected T0 copy.
+  - D-S3-17 (a): twin-model discovery.
+  - D-S3-09 (a1): `density_one_band_250`, domain `h_m >= 0`.
+  - D-S3-10 (a): exact built-in `float` only.
+  - D-S3-13 (a): VAL deferred to S6.
+  - D-S3-18 (a): CI conformance only.
+  - D-S3-01: S3-T-12 is absent; DL-4 for ρ is gated by the S3 records.
+
+### S3.1 Branch, base and commits
+
+Branch `milestone-3-t2-s3-density`, base L `a76470fbbc70471fcea24f26bf6120098e37c57c` (main).
+
+| Commit | SHA | Content | CI |
+|---|---|---|---|
+| A | `1c4d2cc612120feb432befd11f80b20d6849cfea` | DL-4 density twin, observation adapter, point listing (3 758 points), self-tests S3-T-17…S3-T-20, commit-A record | 42921184021 attempt 1, 4/4 |
+| BC | `930e74f6c62719ad8aade6592493d1a1ba16c2a8` | `src/tars/sim/atmosphere.py`, the pinned data file, the S3 gate tests | 42937733985 attempt 1, 4/4 |
+| D | `d31f6eba662eb7c2ede1e850a42a96d6568cc0ef` | phase-D evidence under `docs/science/experiments/m3-t2/s3/` with `SHA256SUMS` | 43093656546 attempt 1 **FAILURE** (see below); attempt 2 (owner-authorized full rerun) 4/4 |
+| E | this commit | this section | recorded externally (it cannot record its own CI) |
+
+Each commit was pushed alone, by ordinary push, after the previous tip's CI was 4/4. There was no
+amend, rebase, squash, force-push or CI dispatch.
+
+**D's CI: attempt 1 failed. It was not repaired, and it is not represented as a pass.**
+
+Run 43093656546, attempt 1, on D (push event):
+- `check (macos-15-intel)` and `m2-cross-platform` succeeded.
+- `check (ubuntu-latest)` and `check (macos-latest)` **failed**. On both, steps 1–15 succeeded,
+  including Lint, Tests, determinism, cross-platform, GMAT comparison and M1/M2 Proof.
+- The only failed step on each was "Upload Proof report" (`actions/upload-artifact@v4`). It failed
+  five times with `Failed to CreateArtifact: Failed to make request after 5 attempts: Unexpected token '<',
+  "<!DOCTYPE "... is not valid JSON`.
+- So the artifacts `proof-ubuntu-latest` and `proof-macos-latest` were never produced by attempt 1.
+- The cause is not established. That it was an artifact-service fault is the author's inference
+  only.
+
+The author stopped there. The owner then authorized exactly one full rerun of that run, with no
+failed-jobs-only rerun, no dispatch and no new commit:
+- **Request:** 2026-11-11T22:10:56Z, `gh run rerun 43093656546 --repo guillermoMartin96/tars`.
+- **Attempt 2:** started 2026-11-11T22:10:57Z and completed with success.
+  - All four jobs executed in attempt 2 (`run_attempt` 2, started after the attempt began), and
+    every step succeeded.
+  - All seven expected artifacts were produced by attempt 2. Each downloaded zip matches the API
+    digest. This includes `proof-ubuntu-latest` 13897575874 and `proof-macos-latest` 13896029191.
+  - On every check job:
+    - the S3 records (S3-POINTS, S3-DATA, S3-TABLE-HEX, S3-DL4, S3-XP3) and the S2 ENV record were
+      extracted, complete and labelled;
+    - the ENV commit is `[O] d31f6eb…`, and the lock pin is unchanged;
+    - DL-4 has 3 758 points with 0 differences;
+    - the R-S2 projections equal main run 42715616493.
+  - Every S3 record body is byte-identical to BC run 42937733985 on the same job.
+
+The resolution of the D CI stop is prospective and narrow. The attempt-1 metadata, logs and
+missing-artifact facts are retained (see S3.3).
+
+### S3.2 Implemented behaviour (BC)
+
+- **Dataset.** `src/tars/sim/data/EarthExponentialAtmosphereData.txt` is GMAT R2026a
+  `data/atmosphere/earth/EarthExponentialAtmosphereData.txt`, copied verbatim.
+  - Identity: git blob `ec7f1e2023adba77711abf0c8c3c84577bbf49fc`, 661 bytes, 28 rows, sha256
+    `75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e` (DR-0027 B-1, option B1).
+  - It is 25 of 28 rows identical to the author-published data file. It is not claimed to agree
+    with any printed textbook table (B-5).
+  - The disputed cells are documented in DR-0027 B-2 and not repaired (B-3).
+- **Checked loader (D-S3-03 (a)).**
+  - It runs once at import, reads the raw bytes and compares their sha256 with the pinned literal
+    before parsing. Parsing and V-1…V-9b validation come after that.
+  - It fails closed with `DatasetIntegrityError`, whose reasons are `missing`, `unreadable`,
+    `digest_mismatch` and `invalid_content`.
+  - There is no bypass. Zip-imported distributions are unsupported: the import fails closed with
+    `unreadable`.
+- **`density(h_m)` (r1 DQ-2, P4), checked in this order:**
+  1. A type that is not exactly built-in `float` raises `UnsupportedHeightTypeError`
+     (`unsupported_type`).
+  2. A non-finite value raises `DensityInputError` (`nonfinite`).
+  3. `h_m < 0` raises `DensityInputError` (`below_zero`); −0.0 is in range.
+  4. Otherwise `h = h_m / 1000.0`. The band is the first `i` with `h < base_km[i+1]`, otherwise the
+     top band, and `ρ = ρ0 · math.exp(−(h − base_km) / H_km)`.
+
+  Results between bases depend on the platform's `exp` (RQ-3).
+- **`density_one_band_250(h_m)` (D-S3-09 (a1)).**
+  - It evaluates the 250 km row alone. The row is derived once from the checked table.
+  - It uses the same input precedence and the domain `h_m >= 0`; below 250 km it extrapolates.
+  - It is a mathematical subset with no accuracy claim.
+
+### S3.3 Evidence (commit D; external packets `~/tars-evidence/S3-provenance-contract-recovery-v1/` and `~/tars-evidence/S3-D-CI-completion-v1/`)
+
+`docs/science/experiments/m3-t2/s3/README.md` indexes the evidence and its disclosures.
+
+- **Mutation (the only kill evidence).**
+  - The single fresh campaign ran on a `git archive` export of the committed BC.
+  - Same-run control: CONTROL-PASSED.
+  - The re-verification from the retained files (`CAMPAIGN-ASSESSMENT.json` and `-2`) claims 53/53
+    designated mutants (45 established, 8 candidate) KILLED by the designated node with the
+    designated tag. 52 of those are the driver's own verdicts; M-29 is the author judgment below.
+  - Equivalents M-13 and M-25c are documented and not counted. M-28a, M-28b and M-28c-a2 are not
+    applicable.
+  - Each execution has its own complete ENV record (S2 ENV node in-process, `uv.lock` pin), and
+    each spawned `-I` child has its own record.
+  - **Disclosed author judgment, unresolved.**
+    - The campaign driver stopped at the last mutant, M-29, on its static child-count heuristic.
+      Its `mutation/CAMPAIGN.json` still records M-29 as INVALID-RECORD, unchanged.
+    - The later re-verification from the retained files reclassifies M-29 as KILLED, because no probe
+      child was created (`provenance/STOP-RESOLUTION.md` §3).
+    - The author's interpretation is that no required record was missing.
+    - The owner instruction "Stop immediately on first missing/invalid record" bears on this
+      judgment. Neither the owner's CI-rerun authorization nor this report accepts the judgment,
+      establishes the kill or waives a missing record.
+    - If the review rejects it, the M-29 kill is not established and D's mutation evidence is
+      incomplete.
+  - Phase-P discovery (Q-3) is discovery, not kill evidence.
+- **Packaging (PK-1…PK-8).**
+  - BA-1…BA-5 (backend `uv-build` 0.12.24) were sealed before any build.
+  - The sdist and both wheels pass PK-3…PK-8. The tree wheel and the wheel built from the sdist are
+    byte-identical.
+  - Every build hook, driver and payload process has its own complete ENV record.
+- **Regression (new phase-D evidence, Q-2).** R-1 through R-5 and R-S1 pass at BC; R-1 to R-4 also
+  ran at L for comparison:
+  - R-1: M1 Proof 9/9.
+  - R-2: M2 Proof 20/20 and `m2_proof` 228/228.
+  - R-3: T1 correction checks byte-identical and BC = L. The T1 tests gave 110 passed, using S2's
+    selection; S2's BC added one node to `tests/test_constants.py`.
+  - R-4: T0 314 passed.
+  - R-5: scope and protected paths.
+  - R-S1: S1 nodes pass.
+
+  R-S2:
+  - **Gate part:** the full suite passed, 1 584 tests on the host.
+  - **CI:** stable projections equal main run 42715616493.
+  - **Host:** projections equal the committed host records at L.
+- **CI records, on every check job:** BC run 42937733985 (attempt 1) and D run 43093656546
+  (attempt 2).
+  - S3-POINTS, S3-DATA, S3-TABLE-HEX, S3-DL4, S3-XP3 and the S2 ENV record were extracted and
+    complete;
+  - DL-4: 3 758 points, 0 differences.
+  - The ubuntu-latest job's CPU differs from the main-run baseline's at both BC and D. This is
+    environment drift and report-only; the projections are equal.
+- **Report-only (S3-R-01…S3-R-05; never gated; no bound or accuracy claim; A-FP-2 unaccepted):**
+  - S3-R-01: no listing point above the E3 upper enclosure.
+  - S3-R-02: no non-increase violation.
+  - S3-R-03: at most 1-ulp differences at ≤ 3 points between platforms.
+  - S3-R-04: bitwise equal to T0's `density(units="km")` at all 3 248 points with h ≥ 0.
+  - S3-R-05: first subnormal at about 181 891 km and first zero at about 191 735 km.
+- **RR-15:** author draft in D; only the independent review completes it.
+- **External evidence made after D was committed** (not in D; cited by sha256):
+  - **Recovery packet** `~/tars-evidence/S3-provenance-contract-recovery-v1/`, sealed by
+    `MANIFEST.sha256` (digest `6d5572072dfd0022f1c06ff7192befaef5e5220e87abcab396c1c54c67df5140`,
+    1 844 entries). The seal excludes `scratch/**` and two bytecode trees. Its `records/SEAL-run.txt`
+    (sha256 `f558566d26e68cadeee333e0d2d09187ad171764408326bad2182ba8168c4235`) was written after the
+    manifest and is not covered by it. The packet holds:
+    - `d/RCOMPARE.json` `f68930638906374d50769fdbb4e7c5494b1843037349c6a43640df5a51a84015`:
+      re-computation, under its own ENV record, of every comparison the `rgates.py` orchestrator made
+      in its own process; ok and in agreement;
+    - `d/local-D/LOCAL.json` `a124df7c7ca9c8a30bb4df6c93857f87a63c57cc1bbe99587c8cc511ba15cd66`:
+      D's full local checks in a fresh clone (14 steps, 1 584 passed, every Python process with a
+      complete ENV record);
+    - D CI attempt 1 as it failed: `d/ci-D-43093656546-FAILED/run.json`
+      `4a6fecbf8b9c9d54bf372057d57720993bd89d2c16ddb5c22f1da1089859c26b` and `failed.log`
+      `ac78d7b5bf1dcce72c5fe6d5f251a139c4ba1b8fe4d5b9ec1fb39460b3d11bba`, with `STOP-REPORT.md`.
+  - **CI completion packet** `~/tars-evidence/S3-D-CI-completion-v1/`, sealed after the handoff is
+    built. It holds:
+    - the owner instruction;
+    - the state checks made before the rerun;
+    - attempt-1 jobs, artifacts and full logs, retained before the rerun:
+      `ci/pre-rerun/attempt1-logs.zip`
+      `da43f0b71bc27c9a57076c60387f705853898af8e7ce53eae617ca2ee19e4a94`;
+    - the rerun request and the attempt chronology;
+    - D attempt-2 collection `d/ci-D-43093656546-a2/COLLECTION.json`
+      `8126d1d5483c016aba5d541c9ceb1678b46e00a24a354ea1ed7f4482341e197a`, whose seven ENV records
+      are complete (`d/CI-D-A2-ENV.json`);
+    - the D verification before E (`d/VERIFY-D.json`);
+    - E's local checks and CI collection.
+- **Historical dispositions:**
+  - Q-2: 22 LOCAL-A/LOCAL-BC non-pytest runs, a limited historical procedural departure.
+  - Q-3: 8 phase-P discovery runs, historical discovery with limited provenance.
+
+  Both are bounded by closed inventories and certify nothing retrospectively.
+
+### S3.4 The S2 merge record (v4 §15.6; C-1)
+
+Re-verified at write time:
+- **Merge.** K `83d573bdb4933f5d2376423d6b8e9f3348a4ab6f` → L
+  `a76470fbbc70471fcea24f26bf6120098e37c57c`.
+  - It was a fast-forward by ordinary push to `main` at 2026-11-09T22:51:52Z.
+  - 11 linear commits, with no merge commit (`git rev-list --count` 11, `--merges` 0).
+  - `main` = L.
+- **Recovery bundle:** `pre_merge_main.bundle`, sha256
+  `890b3cf86508c440cd6cf7a4c806cb7a2c98d21c3ddbaf0df0ba15b14aeea90b`. It verifies and contains K as
+  `refs/heads/main`.
+- **Post-merge CI:** run 42715616493, attempt 1, 4/4, every job executed (not carried over).
+- **Post-merge fresh-clone validation:** PASS. The full suite gave 1 521 passed, and ruff passed.
+- **External-only acceptance pointer** (`~/tars-evidence/S2-acceptance-merge/`):
+  - `ISSUED-ACCEPTANCE-STATEMENT.md`, sha256
+    `a8c324f594bb856c36c72726c27a7606e00a31cc0ec829e88671d9bbb8741a72`: **M3 T2 S2 ACCEPTED** by the
+    owner at exact L, tree `0bb527706cfb03b547bac13c0c3b2459fd5552f9` (2026-11-09).
+  - Closure manifest sha256 `6615785833fb1318a41e5133d86f474381cf41f22e4c55d4f476d68bf61daa60`; it
+    verifies.
+  - Accepted review `~/tars-evidence/S2-REVIEW-L-a76470f/review-20261109T202951Z/`, `MANIFEST.sha256`
+    `158f28754ad4cad13819d3752627cca86291d5fb7169678f4dc571d3f0d1ef75` (2 438 entries).
+- **Supersession, stated without editing the lines.** The S2 status lines of this report that read
+  "NOT ACCEPTED" and "NOT MERGED" are superseded by the acceptance and the merge: lines 787–788
+  (S2 header), 1084–1085 (S2.13), 1167–1168 (S2.14) and 1270–1271 (S2.15) at L. Their other
+  elements and all earlier text stay unchanged. The S1 lines were handled by S2.9; line 3's
+  "S2–S6 are not started" is an observation only and is not acted on.
+- **Planning integration** stays deferred.
+- **S2 boundaries, restated unchanged:**
+  - S2 is accepted only in its limited scope at L.
+  - POG accuracy gating remains BLOCKED.
+  - A-FP-2 remains unaccepted and unjustified.
+  - Class P remains report-only.
+  - The I-106 historical inventory stays exactly
+    `8116984313a017126014abf3cbdd87ec65d2db4ab8fce82697d31188e9e2f7e9`.
+
+### S3.5 Carry-forward notes for S4 and T3 (OB-S3-27)
+
+S3 creates these duties and never discharges them.
+- **Error classes.** `DensityInputError` subclasses `ValueError`, and `UnsupportedHeightTypeError`
+  subclasses `TypeError`. A broad `except ValueError` in S4 or T3 would also catch density domain
+  errors. S4 and T3 must design their error handling with this in mind (OB-30, S4 and T3).
+- **Density model identifier (input to OB-31, S4).** An identifier would version:
+  - the dataset digest `75762f67…a85e`;
+  - the DQ-2 operation sequence of S3.2;
+  - the subset rule (the row with base exactly 250.0 km, derived from the checked table, domain
+    `h_m >= 0`).
+
+  No identifier is assigned in S3.
+- **CF-S3-LABEL** (L; T3/T4): T3 and T4 records that record densities keep the "unverified above
+  1000 km" label.
+- **CF-S3-SUBWIRE** (T3): scenario or configuration selection of `density_one_band_250`.
+- **CF-S3-VAL** (S6, T2 closure): the VAL record and the SCI-0014…0017 status updates move to T2
+  closure. G-T2-8 remains a T2 closure duty.
+- **OB-30** (S4/T3) and **OB-31** (S4) remain PENDING in those scopes.
+
+### S3.6 Obligations, open items and status
+
+- OB-S3-01…OB-S3-30 are PENDING. Only the independent S3 implementation review completes them;
+  author success is not an independent MET claim.
+- CF-S3-LABEL, CF-S3-SUBWIRE and CF-S3-VAL are PENDING in their later scopes and are never MET by S3.
+- OD8, OD10 and OD11 remain OPEN.
+- The independent S3 implementation review (separate provider, fresh session, fresh clone of the
+  exact tip) is prepared as a handoff (`~/tars-evidence/S3-D-CI-completion-v1/handoff/`) and is **not launched**. S3 acceptance and merge are separate
+  owner acts.
+
+**Status: S3 IMPLEMENTED (A, BC) / PHASE-D EVIDENCE (D; CI attempt 1 FAILED, attempt 2 4/4) / NOT REVIEWED /
+NOT ACCEPTED / NOT MERGED.**
