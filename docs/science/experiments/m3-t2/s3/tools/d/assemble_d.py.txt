@@ -1,0 +1,121 @@
+"""Assemble repository-side D evidence (v4 §14 allowlist: docs/science/experiments/m3-t2/s3/**).
+
+Usage: python3.12 -I -B assemble_d.py <worktree>      (refuses if any target file exists)
+Copies retained external evidence (never scratch trees) into the worktree path, writes the record
+citations (red/green, discovery) computed from covered external files, and writes SHA256SUMS over every
+file this D adds (commit-A's own files and its SHA256SUMS are untouched). Writes nothing else.
+"""
+
+import hashlib
+import json
+import shutil
+import sys
+from pathlib import Path
+
+PKT = Path("/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1")
+IMPL = Path("/Users/guillermomartin/tars-evidence/S3-implementation-v1")
+LABEL = "densities are UNVERIFIED ABOVE 1000 KM (P5)"
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def main():
+    wt = Path(sys.argv[1])
+    D = wt / "docs/science/experiments/m3-t2/s3"
+    copies = {
+        "provenance/OWNER-INSTRUCTION-2026-11-11.txt": PKT / "OWNER-INSTRUCTION.txt",
+        "provenance/PROVENANCE-DETERMINATION.md": PKT / "determination/PROVENANCE-DETERMINATION.md",
+        "provenance/Q2-INVENTORY.json": PKT / "determination/Q2-INVENTORY.json",
+        "provenance/Q3-INVENTORY.json": PKT / "determination/Q3-INVENTORY.json",
+        "provenance/CAPTURE-DESIGN.md": PKT / "feasibility/CAPTURE-DESIGN.md",
+        "provenance/FEASIBILITY.json": PKT / "feasibility/run-3/FEASIBILITY.json",
+        "provenance/STOP-RESOLUTION.md": PKT / "assessment/STOP-RESOLUTION.md",
+        "provenance/LOCKED-ENV.json": PKT / "assessment/LOCKED-ENV.json",
+        "mutation/CAMPAIGN.json": PKT / "campaign/CAMPAIGN.json",
+        "mutation/CAMPAIGN-ASSESSMENT.json": PKT / "campaign/CAMPAIGN-ASSESSMENT.json",
+        "mutation/MUTANT-VERIFY-2.json": PKT / "campaign/MUTANT-VERIFY-2.json",
+        "packaging/STAGE0.json": PKT / "packaging/run-2/STAGE0.json",
+        "packaging/STAGE1.json": PKT / "packaging/run-2/STAGE1.json",
+        "packaging/STAGE2.json": PKT / "packaging/run-4/STAGE2.json",
+        "packaging/LISTINGS.json": PKT / "packaging/run-4/LISTINGS.json",
+        "packaging/PK-COVERAGE.json": PKT / "assessment/PK-COVERAGE.json",
+        "packaging/BA-SEAL.sha256": PKT / "packaging/run-2/backend/BA-SEAL.sha256",
+        "packaging/build-constraints.txt": PKT / "packaging/run-2/backend/build-constraints.txt",
+        "regression/RGATES.json": PKT / "d/rgates/RGATES.json",
+        "report-only/REPORT-ONLY.json": PKT / "d/REPORT-ONLY.json",
+        "rr15/RR-15-author-draft.md": PKT / "d/RR-15-author-draft.md",
+        "e-blob/E-BLOB.json": PKT / "d/E-BLOB.json",
+        "regression/full-suite-junit.xml": PKT / "d/rgates/full_junit.xml",
+        "regression/rs1-junit.xml": PKT / "d/rgates/rs1_junit.xml",
+        "regression/rs2-host/RS2-HOST.json": PKT / "d/rs2-host/RS2-HOST.json",
+        "regression/rs2-host/RS2-HOST-ENV.json": PKT / "d/RS2-HOST-ENV.json",
+        "report-only/REPORT-ONLY-ENV.json": PKT / "d/REPORT-ONLY-ENV-2.json",
+        "mutation/CAMPAIGN-ASSESSMENT-2.json": PKT / "campaign/CAMPAIGN-ASSESSMENT-2.json",
+        "mutation/ASSESS-2-ENV-CHECK.txt": PKT / "campaign/ASSESS-2-ENV-CHECK.txt",
+    }
+    for p in sorted((PKT / "d/rs2-host/host-records").iterdir()):
+        copies[f"regression/rs2-host/host-records/{p.name}"] = p
+    for p in sorted((PKT / "superseded/tools-d").iterdir()):
+        copies[f"tools/superseded/{p.name}.txt"] = p
+    for t in ("envcap2.py", "rec/sitecustomize.py", "plugin/s3rec_plugin.py", "common.py", "pk3_run.py",
+              "pk_coverage.py", "feasibility.py", "hist_inventory.py", "mutant_verify.py", "locked_env_check.py",
+              "campaign/campaign2.py", "campaign/assess.py", "campaign/mutants.py", "d/rgates.py", "d/ci_collect.py",
+              "d/report_only.py", "d/local_checks.py", "d/assemble_d.py", "d/rs2_host.py",
+              "d/verify_clone_env.py"):
+        copies[f"tools/{t}.txt"] = PKT / "tools" / t
+    proof_logs = []  # large Proof wrapper logs: cited by sha256 (regression/proof/PROOF-LOGS.sha256), not copied
+    for clone in ("bcA", "lA", "bcB", "lB"):
+        for p in sorted((PKT / "d/rgates/proof" / clone).rglob("*")):
+            if p.is_file() and p.name == "proof_run.log":
+                proof_logs.append(f"{sha(p)}  {p.relative_to(PKT)}\n")
+            elif p.is_file():
+                copies[f"regression/proof/{clone}/{p.relative_to(PKT / 'd/rgates/proof' / clone)}"] = p
+    ci = PKT / "d/ci-BC-42937733985-2"
+    for p in sorted(ci.rglob("*")):
+        rel = p.relative_to(ci)
+        if p.is_file() and rel.parts[0] in ("records",) or rel.name in ("run.json", "jobs-attempt1.json",
+                                                                         "raw-logs.sha256", "COLLECTION.json"):
+            if p.is_file():
+                copies[f"ci/BC-42937733985/{rel}"] = p
+    targets = [D / k for k in copies] + [D / "red-green/RECORDS.json", D / "discovery/DISCOVERY.json",
+                                         D / "SHA256SUMS", D / "regression/proof/PROOF-LOGS.sha256"]
+    occupied = [str(t) for t in targets if t.exists()]
+    if occupied:
+        raise SystemExit(f"occupied: {occupied[:3]}")
+    for k, src in copies.items():
+        (D / k).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, D / k)
+        assert sha(D / k) == sha(src)
+    (D / "regression/proof/PROOF-LOGS.sha256").write_text("".join(proof_logs))
+    # Red/green citations (external, covered by S3-implementation-v1 MANIFEST c137f094…).
+    man = {}
+    for ln in (IMPL / "MANIFEST.sha256").read_text().splitlines():
+        h, p = ln.split("  ", 1)
+        man[p[2:]] = h
+    rg = {"record": "A/BC red and green records (external; cited by hash, covered by S3-implementation-v1 "
+                    "MANIFEST.sha256 c137f094eb5978f179cf72f1ffcefe7f89c8a37f10a3173c6b0a8c4815a38383)",
+          "label": LABEL, "groups": {}}
+    for g in ("A-RED-3", "A-GREEN-2", "R-RED", "G-GREEN"):
+        rg["groups"][g] = {p: h for p, h in man.items() if p.startswith(f"records/{g}/")}
+    for g in ("LOCAL-A", "LOCAL-BC"):
+        rg["groups"][g] = {p: h for p, h in man.items() if p.startswith(f"records/{g}")}
+    rg["note"] = ("A-RED and A-RED-2 (invalid zsh run) and A-GREEN are earlier attempts, retained externally. "
+                  "LOCAL-A/LOCAL-BC non-pytest steps: Q-2 historical procedural departure "
+                  "(provenance/Q2-INVENTORY.json).")
+    (D / "red-green").mkdir(exist_ok=True)
+    (D / "red-green/RECORDS.json").write_text(json.dumps(rg, indent=1, sort_keys=True) + "\n")
+    disc = {"record": "phase-P discovery: DISCOVERY, NOT KILL EVIDENCE (Q-3: historical discovery with limited "
+                      "provenance)", "label": LABEL,
+            "files": {p: man[p] for p in sorted(man) if p.startswith("discovery/") or p.startswith("records/P-")}}
+    (D / "discovery").mkdir(exist_ok=True)
+    (D / "discovery/DISCOVERY.json").write_text(json.dumps(disc, indent=1, sort_keys=True) + "\n")
+    files = sorted(p for p in D.rglob("*") if p.is_file() and p.name != "SHA256SUMS"
+                   and not p.relative_to(D).parts[0] == "commit-a")
+    (D / "SHA256SUMS").write_text("".join(f"{sha(p)}  {p.relative_to(D)}\n" for p in files))
+    print(json.dumps({"files": len(files), "sha256sums": sha(D / "SHA256SUMS")}))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,1512 @@
+{
+ "record": "campaign re-verification from retained files (no re-execution); CAMPAIGN.json unchanged",
+ "campaign_json_sha256": "7d342149f2fc0aa156abfa2876d151d9f59a547c07e8d185e1c6982834ef0b84",
+ "driver_stop": "M-29: invalid record ['process records: 1 (children expected 1), errors 0']",
+ "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+ "executions": [
+  {
+   "id": "control",
+   "exit": 0,
+   "utc": [
+    "2026-11-11T16:32:58Z",
+    "2026-11-11T16:33:01Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 3,
+   "child_records": 3,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T1]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T2]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T3]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02b_fresh_import_order[F-T1]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02c_missing_file": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t03_parsed_table": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_rule_precedence": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-1-nbsp]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-2-blank-line]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-2-crlf]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-2-no-final-lf]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-3-27-rows]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-3-29-rows]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-4-2-fields]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-4-4-fields]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-5-token]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-6-1e999-rho0]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-6-inf-H]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-7-base-1]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-8-equal-bases]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9a-rho0-negative]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9a-rho0-zero]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9b-H-negative]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9b-H-zero]": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t05a_no_io_during_evaluation": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t05b_eager_table_and_unchanged_module_state": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t06_static_guard_and_component_ast": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t09_base_neighbours": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t10_top_band_no_cutoff": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t13_type_contract": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t14a_subset_row": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t14b_derivation_sensitivity": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t14c_no_subset_literals": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density.py::test_s3_t14d_a1_domain_witnesses": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_selftests.py::test_s3_t17_twin_independence_ast": [
+     "passed",
+     ""
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "passed",
+     ""
+    ]
+   },
+   "verdict": "CONTROL-PASSED"
+  },
+  {
+   "id": "M-01",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:08Z",
+    "2026-11-11T16:33:09Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 502 [('-0x0.0000000000001p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x0.00000000001f4p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x0.0000000000001p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x0.0000000000002p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x0.0000000000003p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero'))]\nassert [('-0x0.00000..._zero')), ...] == []\n  \n  Left contains 502 more items, first extra item: ('-0x0.0000000000001p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-02",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:16Z",
+    "2026-11-11T16:33:17Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 2 [('0x0.0p+0', ('raised', 'below_zero'), ('value', '3ff399999999999a')), ('-0x0.0p+0', ('raised', 'below_zero'), ('value', '3ff399999999999a'))]\nassert [('0x0.0p+0',...999999999a'))] == []\n  \n  Left contains 2 more items, first extra item: ('0x0.0p+0', ('raised', 'below_zero'), ('value', '3ff399999999999a'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-03",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:24Z",
+    "2026-11-11T16:33:25Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 1 [('-0x0.0p+0', ('raised', 'below_zero'), ('value', '3ff399999999999a'))]\nassert [('-0x0.0p+0'...999999999a'))] == []\n  \n  Left contains one more item: ('-0x0.0p+0', ('raised', 'below_zero'), ('value', '3ff399999999999a'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-04",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:32Z",
+    "2026-11-11T16:33:33Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 1 [('-inf', ('raised', 'below_zero'), ('raised', 'nonfinite'))]\nassert [('-inf', ('r...'nonfinite'))] == []\n  \n  Left contains one more item: ('-inf', ('raised', 'below_zero'), ('raised', 'nonfinite'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-05a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:40Z",
+    "2026-11-11T16:33:41Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 4 [('nan', ('value', 'fff8000000000000'), ('raised', 'nonfinite')), ('-nan', ('value', '7ff8000000000000'), ('raised', 'nonfinite')), ('inf', ('value', '0000000000000000'), ('raised', 'nonfinite')), ('-inf', ('raised', 'below_zero'), ('raised', 'nonfinite'))]\nassert [('nan', ('va...'nonfinite'))] == []\n  \n  Left contains 4 more items, first extra item: ('nan', ('value', 'fff8000000000000'), ('raised', 'nonfinite'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-05b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:47Z",
+    "2026-11-11T16:33:49Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 2 [('inf', ('value', '0000000000000000'), ('raised', 'nonfinite')), ('-inf', ('raised', 'below_zero'), ('raised', 'nonfinite'))]\nassert [('inf', ('va...'nonfinite'))] == []\n  \n  Left contains 2 more items, first extra item: ('inf', ('value', '0000000000000000'), ('raised', 'nonfinite'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-06",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:33:55Z",
+    "2026-11-11T16:33:57Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t07_guard_and_categories": [
+     "failure",
+     "AssertionError: S3-T-07/OBS 507 [('-0x0.0000000000001p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x0.00000000001f4p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x0.00000000001f5p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x1.56e1fc2f8f359p-997', ('value', '3ff399999999999a'), ('raised', 'below_zero')), ('-0x1.12e0be826d695p-30', ('value', '3ff3999999999c93'), ('raised', 'below_zero'))]\nassert [('-0x0.00000..._zero')), ...] == []\n  \n  Left contains 507 more items, first extra item: ('-0x0.0000000000001p-1022', ('value', '3ff399999999999a'), ('raised', 'below_zero'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-07",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:02Z",
+    "2026-11-11T16:34:04Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "failure",
+     "AssertionError: S3-T-08/OBS [(1, '0x1.86a0000000000p+14', ('value', '3fa3ef8c6aa98a29'), ('value', '3fa3f67f4dbdf8f4')), (2, '0x1.d4c0000000000p+14', ('value', '3f922a3cceec16e4'), ('value', '3f922a6f3f52fc26')), (3, '0x1.3880000000000p+15', ('value', '3f7044eb918f329f'), ('value', '3f7044f1a1986b9c')), (4, '0x1.86a0000000000p+15', ('value', '3f515186a714163a'), ('value', '3f5151611ba3ca75')), (5, '0x1.d4c0000000000p+15', ('value', '3f350293a56e19c5'), ('value', '3f3502c683dd6fb2'))]\nassert [(1, '0x1.86a...6191f')), ...] == []\n  \n  Left contains 27 more items, first extra item: (1, '0x1.86a0000000000p+14', ('value', '3fa3ef8c6aa98a29'), ('value', '3fa3f67f4dbdf8f4'))\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-07', 'P-A:2', '0x1.86a0000000000p+14', ('value', '3fa3ef8c6aa98a29'), ('value', '3fa3f67f4dbdf8f4')), ('M-17', 'P-A:80', '0x1.e848000000000p+19', ('value', '3ceb317388587fb0'), ('value', '3ceb31570d2d5481'))]\nassert [('M-07', 'P-...570d2d5481'))] == []\n  \n  Left contains 2 more items, first extra item: ('M-07', 'P-A:2', '0x1.86a0000000000p+14', ('value', '3fa3ef8c6aa98a29'), ('value', '3fa3f67f4dbdf8f4'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-08a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:10Z",
+    "2026-11-11T16:34:11Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "failure",
+     "AssertionError: S3-T-08/OBS [(0, '0x0.0p+0', ('value', '3fa3f67f4dbdf8f4'), ('value', '3ff399999999999a')), (1, '0x1.86a0000000000p+14', ('value', '3f922a6f3f52fc26'), ('value', '3fa3f67f4dbdf8f4')), (2, '0x1.d4c0000000000p+14', ('value', '3f7044f1a1986b9c'), ('value', '3f922a6f3f52fc26')), (3, '0x1.3880000000000p+15', ('value', '3f5151611ba3ca75'), ('value', '3f7044f1a1986b9c')), (4, '0x1.86a0000000000p+15', ('value', '3f3502c683dd6fb2'), ('value', '3f5151611ba3ca75'))]\nassert [(0, '0x0.0p+...d6fb2')), ...] == []\n  \n  Left contains 27 more items, first extra item: (0, '0x0.0p+0', ('value', '3fa3f67f4dbdf8f4'), ('value', '3ff399999999999a'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-08b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:18Z",
+    "2026-11-11T16:34:19Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "failure",
+     "AssertionError: S3-T-08/OBS [(0, '0x0.0p+0', ('value', '40000020357cb607'), ('value', '3ff399999999999a')), (1, '0x1.86a0000000000p+14', ('value', '3fa332053fce5681'), ('value', '3fa3f67f4dbdf8f4')), (2, '0x1.d4c0000000000p+14', ('value', '3f8e9143caf21f72'), ('value', '3f922a6f3f52fc26')), (3, '0x1.3880000000000p+15', ('value', '3f6c8c91ea5d65f0'), ('value', '3f7044f1a1986b9c')), (4, '0x1.86a0000000000p+15', ('value', '3f5334137f76008e'), ('value', '3f5151611ba3ca75'))]\nassert [(0, '0x0.0p+...d6fb2')), ...] == []\n  \n  Left contains 27 more items, first extra item: (0, '0x0.0p+0', ('value', '40000020357cb607'), ('value', '3ff399999999999a'))\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-07', 'P-A:2', '0x1.86a0000000000p+14', ('value', '3fa332053fce5681'), ('value', '3fa3f67f4dbdf8f4')), ('M-08b', 'P-A:0', '0x0.0p+0', ('value', '40000020357cb607'), ('value', '3ff399999999999a')), ('M-09', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '3fa3f67f4dbdf8f8'), ('value', '3fa3ef8c6aa98a2b')), ('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e423820d9e8ad14'), ('value', '3e4237e44e634246')), ('M-11', 'P-A:9', '0x1.3880000000001p+15', ('value', '3f6c8c91ea5d65e9'), ('value', '3f7044f1a1986b98')), ('M-12', 'P-A:3', '0x1.86a0000000001p+14', ('value', '3fa332053fce567f'), ('value', '3fa3f67f4dbdf8f1')), ('M-14', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '3fa3f67f4dbdf8f8'), ('value', '3fa3ef8c6aa98a2b'))]\nassert [('M-07', 'P-...df8f1')), ...] == []\n  \n  Left contains 7 more items, first extra item: ('M-07', 'P-A:2', '0x1.86a0000000000p+14', ('value', '3fa332053fce5681'), ('value', '3fa3f67f4dbdf8f4'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-09",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:26Z",
+    "2026-11-11T16:34:28Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t09_base_neighbours": [
+     "failure",
+     "AssertionError: S3-T-09/OBS 54 [('0x1.869ffffffffffp+14', ('value', '3ff388534a17e294'), ('value', '3fa3ef8c6aa98a2b')), ('0x1.d4bffffffffffp+14', ('value', '3fa3f2796647e3ca'), ('value', '3f922a3cceec16e7')), ('0x1.387ffffffffffp+15', ('value', '3f92237ae92d5bce'), ('value', '3f7044eb918f32a4')), ('0x1.869ffffffffffp+15', ('value', '3f703f6f17ef44c2'), ('value', '3f515186a714163f')), ('0x1.d4bffffffffffp+15', ('value', '3f514c17e383ecc2'), ('value', '3f350293a56e19c9'))]\nassert [('0x1.869fff...e5b79')), ...] == []\n  \n  Left contains 54 more items, first extra item: ('0x1.869ffffffffffp+14', ('value', '3ff388534a17e294'), ('value', '3fa3ef8c6aa98a2b'))\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point": [
+     "failure",
+     "AssertionError: S3-T-12/OBS 1245 [['P-A', 1, '0x1.869ffffffffffp+14', ['value', '3ff388534a17e294'], ['value', '3fa3ef8c6aa98a2b']], ['P-A', 3, '0x1.86a0000000001p+14', ['value', '3fa3f67f4dbdf8f4'], ['value', '3fa3f67f4dbdf8f1']], ['P-A', 4, '0x1.d4bffffffffffp+14', ['value', '3fa3f2796647e3ca'], ['value', '3f922a3cceec16e7']], ['P-A', 6, '0x1.d4c0000000001p+14', ['value', '3f922a6f3f52fc26'], ['value', '3f922a6f3f52fc23']], ['P-A', 7, '0x1.387ffffffffffp+15', ['value', '3f92237ae92d5bce'], ['value', '3f7044eb918f32a4']]]\nassert [['P-A', 1, '...86b98']], ...] == []\n  \n  Left contains 1245 more items, first extra item: ['P-A', 1, '0x1.869ffffffffffp+14', ['value', '3ff388534a17e294'], ['value', '3fa3ef8c6aa98a2b']]\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-09', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '3ff388534a17e294'), ('value', '3fa3ef8c6aa98a2b')), ('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e5a2673e842f945'), ('value', '3e4237e44e634246')), ('M-11', 'P-A:9', '0x1.3880000000001p+15', ('value', '3f7044f1a1986b9c'), ('value', '3f7044f1a1986b98')), ('M-12', 'P-A:3', '0x1.86a0000000001p+14', ('value', '3fa3f67f4dbdf8f4'), ('value', '3fa3f67f4dbdf8f1')), ('M-14', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '3ff388534a17e294'), ('value', '3fa3ef8c6aa98a2b'))]\nassert [('M-09', 'P-...8c6aa98a2b'))] == []\n  \n  Left contains 5 more items, first extra item: ('M-09', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '3ff388534a17e294'), ('value', '3fa3ef8c6aa98a2b'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-10",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:35Z",
+    "2026-11-11T16:34:36Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point": [
+     "failure",
+     "AssertionError: S3-T-12/OBS 271 [['P-A', 34, '0x1.fbcffffffffffp+16', ['value', '3e423820d9e8ad09'], ['value', '3e4237e44e634246']], ['P-D', 2007, '0x1.5ace360559be3p+27', ['value', '001450d2a7cefd27'], ['value', '001450d2a7ceffb1']], ['P-D', 2008, '0x1.5aceb30559be3p+27', ['value', '00143d73f65c048d'], ['value', '00143d73f65c0714']], ['P-D', 2009, '0x1.5acf300559be3p+27', ['value', '00142a27bcbf1336'], ['value', '00142a27bcbf15bc']], ['P-D', 2010, '0x1.5acfad0559be3p+27', ['value', '001416ede95c6f1a'], ['value', '001416ede95c719d']]]\nassert [['P-A', 34, ...92a8b']], ...] == []\n  \n  Left contains 271 more items, first extra item: ['P-A', 34, '0x1.fbcffffffffffp+16', ['value', '3e423820d9e8ad09'], ['value', '3e4237e44e634246']]\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e423820d9e8ad09'), ('value', '3e4237e44e634246'))]\nassert [('M-10', 'P-...e44e634246'))] == []\n  \n  Left contains one more item: ('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e423820d9e8ad09'), ('value', '3e4237e44e634246'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-11",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:42Z",
+    "2026-11-11T16:34:44Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point": [
+     "failure",
+     "AssertionError: S3-T-12/OBS 791 [['P-A', 9, '0x1.3880000000001p+15', ['value', '3f7044f1a1986b97'], ['value', '3f7044f1a1986b98']], ['P-A', 28, '0x1.adaffffffffffp+16', ['value', '3e79ef854f754d20'], ['value', '3e79ef854f754d1e']], ['P-A', 34, '0x1.fbcffffffffffp+16', ['value', '3e4237e44e63423e'], ['value', '3e4237e44e634246']], ['P-A', 36, '0x1.fbd0000000001p+16', ['value', '3e423820d9e8ad03'], ['value', '3e423820d9e8acfe']], ['P-A', 37, '0x1.116ffffffffffp+17', ['value', '3e3083b394fcb202'], ['value', '3e3083b394fcb201']]]\nassert [['P-A', 9, '...1284f']], ...] == []\n  \n  Left contains 791 more items, first extra item: ['P-A', 9, '0x1.3880000000001p+15', ['value', '3f7044f1a1986b97'], ['value', '3f7044f1a1986b98']]\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e4237e44e63423e'), ('value', '3e4237e44e634246')), ('M-11', 'P-A:9', '0x1.3880000000001p+15', ('value', '3f7044f1a1986b97'), ('value', '3f7044f1a1986b98'))]\nassert [('M-10', 'P-...f1a1986b98'))] == []\n  \n  Left contains 2 more items, first extra item: ('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e4237e44e63423e'), ('value', '3e4237e44e634246'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-12",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:50Z",
+    "2026-11-11T16:34:51Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t09_base_neighbours": [
+     "failure",
+     "AssertionError: S3-T-09/OBS 40 [('0x1.387ffffffffffp+15', ('value', '3f7044eb918f32a7'), ('value', '3f7044eb918f32a4')), ('0x1.869ffffffffffp+15', ('value', '3f515186a7141640'), ('value', '3f515186a714163f')), ('0x1.d4bffffffffffp+15', ('value', '3f350293a56e19ce'), ('value', '3f350293a56e19c9')), ('0x1.116ffffffffffp+16', ('value', '3f16fd06193e5b73'), ('value', '3f16fd06193e5b79')), ('0x1.387ffffffffffp+16', ('value', '3ef3f93484bf3383'), ('value', '3ef3f93484bf338a'))]\nassert [('0x1.387fff...f3b95')), ...] == []\n  \n  Left contains 40 more items, first extra item: ('0x1.387ffffffffffp+15', ('value', '3f7044eb918f32a7'), ('value', '3f7044eb918f32a4'))\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point": [
+     "failure",
+     "AssertionError: S3-T-12/OBS 805 [['P-A', 3, '0x1.86a0000000001p+14', ['value', '3fa3f67f4dbdf8f2'], ['value', '3fa3f67f4dbdf8f1']], ['P-A', 6, '0x1.d4c0000000001p+14', ['value', '3f922a6f3f52fc26'], ['value', '3f922a6f3f52fc23']], ['P-A', 7, '0x1.387ffffffffffp+15', ['value', '3f7044eb918f32a7'], ['value', '3f7044eb918f32a4']], ['P-A', 10, '0x1.869ffffffffffp+15', ['value', '3f515186a7141640'], ['value', '3f515186a714163f']], ['P-A', 13, '0x1.d4bffffffffffp+15', ['value', '3f350293a56e19ce'], ['value', '3f350293a56e19c9']]]\nassert [['P-A', 3, '...e5b79']], ...] == []\n  \n  Left contains 805 more items, first extra item: ['P-A', 3, '0x1.86a0000000001p+14', ['value', '3fa3f67f4dbdf8f2'], ['value', '3fa3f67f4dbdf8f1']]\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-12', 'P-A:3', '0x1.86a0000000001p+14', ('value', '3fa3f67f4dbdf8f2'), ('value', '3fa3f67f4dbdf8f1'))]\nassert [('M-12', 'P-...7f4dbdf8f1'))] == []\n  \n  Left contains one more item: ('M-12', 'P-A:3', '0x1.86a0000000001p+14', ('value', '3fa3f67f4dbdf8f2'), ('value', '3fa3f67f4dbdf8f1'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-14",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:34:58Z",
+    "2026-11-11T16:34:59Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t09_base_neighbours": [
+     "failure",
+     "AssertionError: S3-T-09/OBS 54 [('0x1.869ffffffffffp+14', ('value', '4043451954cc5a42'), ('value', '3fa3ef8c6aa98a2b')), ('0x1.d4bffffffffffp+14', ('value', '3fb5f04fbd4f122a'), ('value', '3f922a3cceec16e7')), ('0x1.387ffffffffffp+15', ('value', '3fb4488be4f1f73f'), ('value', '3f7044eb918f32a4')), ('0x1.869ffffffffffp+15', ('value', '3f8e9143caf21f68'), ('value', '3f515186a714163f')), ('0x1.d4bffffffffffp+15', ('value', '3f6c8c91ea5d65e9'), ('value', '3f350293a56e19c9'))]\nassert [('0x1.869fff...e5b79')), ...] == []\n  \n  Left contains 54 more items, first extra item: ('0x1.869ffffffffffp+14', ('value', '4043451954cc5a42'), ('value', '3fa3ef8c6aa98a2b'))\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point": [
+     "failure",
+     "AssertionError: S3-T-12/OBS 3219 [['P-A', 1, '0x1.869ffffffffffp+14', ['value', '4043451954cc5a42'], ['value', '3fa3ef8c6aa98a2b']], ['P-A', 3, '0x1.86a0000000001p+14', ['value', '3fa3f67f4dbdf8f8'], ['value', '3fa3f67f4dbdf8f1']], ['P-A', 4, '0x1.d4bffffffffffp+14', ['value', '3fb5f04fbd4f122a'], ['value', '3f922a3cceec16e7']], ['P-A', 6, '0x1.d4c0000000001p+14', ['value', '3f922a6f3f52fc28'], ['value', '3f922a6f3f52fc23']], ['P-A', 7, '0x1.387ffffffffffp+15', ['value', '3fb4488be4f1f73f'], ['value', '3f7044eb918f32a4']]]\nassert [['P-A', 1, '...86b98']], ...] == []\n  \n  Left contains 3219 more items, first extra item: ['P-A', 1, '0x1.869ffffffffffp+14', ['value', '4043451954cc5a42'], ['value', '3fa3ef8c6aa98a2b']]\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-09', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '4043451954cc5a42'), ('value', '3fa3ef8c6aa98a2b')), ('M-10', 'P-A:34', '0x1.fbcffffffffffp+16', ('value', '3e72ceb16eb08c37'), ('value', '3e4237e44e634246')), ('M-11', 'P-A:9', '0x1.3880000000001p+15', ('value', '3f7044f1a1986ba0'), ('value', '3f7044f1a1986b98')), ('M-12', 'P-A:3', '0x1.86a0000000001p+14', ('value', '3fa3f67f4dbdf8f8'), ('value', '3fa3f67f4dbdf8f1')), ('M-14', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '4043451954cc5a42'), ('value', '3fa3ef8c6aa98a2b'))]\nassert [('M-09', 'P-...8c6aa98a2b'))] == []\n  \n  Left contains 5 more items, first extra item: ('M-09', 'P-A:1', '0x1.869ffffffffffp+14', ('value', '4043451954cc5a42'), ('value', '3fa3ef8c6aa98a2b'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-15",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:06Z",
+    "2026-11-11T16:35:07Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t10_top_band_no_cutoff": [
+     "failure",
+     "AssertionError: S3-T-10/OBS [('0x1.e848000000001p+19', ('value', '0000000000000000'), ('value', '3ceb31570d2d547e')), ('0x1.e8c5000000000p+19', ('value', '0000000000000000'), ('value', '3ceb1769cdc8e524')), ('0x1.0c8e000000000p+20', ('value', '0000000000000000'), ('value', '3ce2b9639104b806')), ('0x1.6e36000000000p+20', ('value', '0000000000000000'), ('value', '3cc0d63eadf1d00a')), ('0x1.e848000000000p+20', ('value', '0000000000000000'), ('value', '3c94d989e1a11673'))]\nassert [('0x1.e84800...89e1a11673'))] == []\n  \n  Left contains 5 more items, first extra item: ('0x1.e848000000001p+19', ('value', '0000000000000000'), ('value', '3ceb31570d2d547e'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-16",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:14Z",
+    "2026-11-11T16:35:15Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t10_top_band_no_cutoff": [
+     "failure",
+     "AssertionError: S3-T-10/OBS [('0x1.e848000000001p+19', ('raised', 'above_table'), ('value', '3ceb31570d2d547e')), ('0x1.e8c5000000000p+19', ('raised', 'above_table'), ('value', '3ceb1769cdc8e524')), ('0x1.0c8e000000000p+20', ('raised', 'above_table'), ('value', '3ce2b9639104b806')), ('0x1.6e36000000000p+20', ('raised', 'above_table'), ('value', '3cc0d63eadf1d00a')), ('0x1.e848000000000p+20', ('raised', 'above_table'), ('value', '3c94d989e1a11673'))]\nassert [('0x1.e84800...89e1a11673'))] == []\n  \n  Left contains 5 more items, first extra item: ('0x1.e848000000001p+19', ('raised', 'above_table'), ('value', '3ceb31570d2d547e'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-17",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:22Z",
+    "2026-11-11T16:35:24Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t03_parsed_table": [
+     "failure",
+     "AssertionError: S3-T-03/VALUE strings [(27, 1, '3.019e-15', '0x1.b317388587fb0p-49')]\nassert [(27, 1, '3.0...8587fb0p-49')] == []\n  \n  Left contains one more item: (27, 1, '3.019e-15', '0x1.b317388587fb0p-49')\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "failure",
+     "AssertionError: S3-T-08/OBS [(27, '0x1.e848000000000p+19', ('value', '3ceb317388587fb0'), ('value', '3ceb31570d2d5481'))]\nassert [(27, '0x1.e8...570d2d5481'))] == []\n  \n  Left contains one more item: (27, '0x1.e848000000000p+19', ('value', '3ceb317388587fb0'), ('value', '3ceb31570d2d5481'))\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_witnesses.py::test_s3_t22_frozen_witness_inputs": [
+     "failure",
+     "AssertionError: S3-T-22/OBS [('M-17', 'P-A:80', '0x1.e848000000000p+19', ('value', '3ceb317388587fb0'), ('value', '3ceb31570d2d5481'))]\nassert [('M-17', 'P-...570d2d5481'))] == []\n  \n  Left contains one more item: ('M-17', 'P-A:80', '0x1.e848000000000p+19', ('value', '3ceb317388587fb0'), ('value', '3ceb31570d2d5481'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "candidate",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-18",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:30Z",
+    "2026-11-11T16:35:33Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 1,
+   "child_records": 1,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02a/CAT F-T1 ('returned', 'tuple')\nassert ('returned', 'tuple') == ('raised', 'digest_mismatch')\n  \n  At index 0 diff: 'returned' != 'raised'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02b_fresh_import_order[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02b/CAT F-T1 {'calls': 1, 'data_path': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/tmp/M-18/pytest-of-guillermomartin/pytest-0/test_s3_t02b_fresh_import_orde0/copy/src/tars/sim/data/EarthExponentialAtmosphereData.txt', 'module_file': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/tmp/M-18/pytest-of-guillermomartin/pytest-0/test_s3_t02b_fresh_import_orde0/copy/src/tars/sim/atmosphere.py', 'outcome': 'imported', 'qualname': None, 'reason': None, 'rule': None, 'tars_file': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/tmp/M-18/pytest-of-guillermomartin/pytest-0/test_s3_t02b_fresh_import_orde0/copy/src/tars/__init__.py'}\nassert ('imported', None) == ('raised', 'digest_mismatch')\n  \n  At index 0 diff: 'imported' != 'raised'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-19a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:39Z",
+    "2026-11-11T16:35:41Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T2]": [
+     "failure",
+     "AssertionError: S3-T-02a/CAT F-T2 ('returned', 'tuple')\nassert ('returned', 'tuple') == ('raised', 'digest_mismatch')\n  \n  At index 0 diff: 'returned' != 'raised'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T3]": [
+     "failure",
+     "AssertionError: S3-T-02a/CAT F-T3 ('returned', 'tuple')\nassert ('returned', 'tuple') == ('raised', 'digest_mismatch')\n  \n  At index 0 diff: 'returned' != 'raised'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-19b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:47Z",
+    "2026-11-11T16:35:48Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T2]": [
+     "failure",
+     "AssertionError: S3-T-02a/CAT F-T2 ('returned', 'tuple')\nassert ('returned', 'tuple') == ('raised', 'digest_mismatch')\n  \n  At index 0 diff: 'returned' != 'raised'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-20a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:35:55Z",
+    "2026-11-11T16:35:57Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 1,
+   "child_records": 1,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02a/ORDER F-T1 calls=1\nassert 1 == 0\n +  where 1 = len([661])"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02b_fresh_import_order[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02b/ORDER F-T1 {'calls': 1, 'outcome': 'raised', 'qualname': 'DatasetIntegrityError', 'reason': 'digest_mismatch', 'rule': None, 'tars_file': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/tmp/M-20a/pytest-of-guillermomartin/pytest-0/test_s3_t02b_fresh_import_orde0/copy/src/tars/__init__.py'}\nassert 1 == 0"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-20b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:03Z",
+    "2026-11-11T16:36:05Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 1,
+   "child_records": 1,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02a/ORDER F-T1 calls=1\nassert 1 == 0\n +  where 1 = len([661])"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t02b_fresh_import_order[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02b/ORDER F-T1 {'calls': 1, 'outcome': 'raised', 'qualname': 'DatasetIntegrityError', 'reason': 'digest_mismatch', 'rule': None, 'tars_file': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/tmp/M-20b/pytest-of-guillermomartin/pytest-0/test_s3_t02b_fresh_import_orde0/copy/src/tars/__init__.py'}\nassert 1 == 0"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-20c",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:11Z",
+    "2026-11-11T16:36:12Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02a_checked_load_in_process[F-T1]": [
+     "failure",
+     "AssertionError: S3-T-02a/ORDER F-T1 calls=1\nassert 1 == 0\n +  where 1 = len([661])"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-21a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:18Z",
+    "2026-11-11T16:36:20Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t03_parsed_table": [
+     "failure",
+     "AssertionError: S3-T-03/VALUE strings [(5, 1, '3.206e-4', '0x1.502c683dd6fb3p-12')]\nassert [(5, 1, '3.20...3dd6fb3p-12')] == []\n  \n  Left contains one more item: (5, 1, '3.206e-4', '0x1.502c683dd6fb3p-12')\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "failure",
+     "AssertionError: S3-T-08/OBS [(5, '0x1.d4c0000000000p+15', ('value', '3f3502c683dd6fb3'), ('value', '3f3502c683dd6fb2'))]\nassert [(5, '0x1.d4c...c683dd6fb2'))] == []\n  \n  Left contains one more item: (5, '0x1.d4c0000000000p+15', ('value', '3f3502c683dd6fb3'), ('value', '3f3502c683dd6fb2'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-21b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:26Z",
+    "2026-11-11T16:36:28Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t08_exact_bases": [
+     "failure",
+     "AssertionError: S3-T-08/OBS [(5, '0x1.d4c0000000000p+15', ('value', '3f3502c683dd6fb3'), ('value', '3f3502c683dd6fb2'))]\nassert [(5, '0x1.d4c...c683dd6fb2'))] == []\n  \n  Left contains one more item: (5, '0x1.d4c0000000000p+15', ('value', '3f3502c683dd6fb3'), ('value', '3f3502c683dd6fb2'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V1",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:34Z",
+    "2026-11-11T16:36:36Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-1-nbsp]": [
+     "failure",
+     "AssertionError: S3-T-04/V-1 fixture=V-1-nbsp ('unexpected', 'UnicodeDecodeError')\nassert ('unexpected'...eDecodeError') == ('raised', 'i...ntent', 'V-1')\n  \n  At index 0 diff: 'unexpected' != 'raised'\n  Right contains one more item: 'V-1'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V2",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:42Z",
+    "2026-11-11T16:36:44Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-2-no-final-lf]": [
+     "failure",
+     "AssertionError: S3-T-04/V-2 fixture=V-2-no-final-lf ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...ntent', 'V-2')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-2'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-2-crlf]": [
+     "failure",
+     "AssertionError: S3-T-04/V-2 fixture=V-2-crlf ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...ntent', 'V-2')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-2'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-2-blank-line]": [
+     "failure",
+     "AssertionError: S3-T-04/V-2 fixture=V-2-blank-line ('raised', 'invalid_content', 'V-3')\nassert ('raised', 'i...ntent', 'V-3') == ('raised', 'i...ntent', 'V-2')\n  \n  At index 2 diff: 'V-3' != 'V-2'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V3",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:50Z",
+    "2026-11-11T16:36:51Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-3-27-rows]": [
+     "failure",
+     "AssertionError: S3-T-04/V-3 fixture=V-3-27-rows ('accepted', 27)\nassert ('accepted', 27) == ('raised', 'i...ntent', 'V-3')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-3'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-3-29-rows]": [
+     "failure",
+     "AssertionError: S3-T-04/V-3 fixture=V-3-29-rows ('accepted', 29)\nassert ('accepted', 29) == ('raised', 'i...ntent', 'V-3')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-3'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V4",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:36:58Z",
+    "2026-11-11T16:36:59Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-4-2-fields]": [
+     "failure",
+     "AssertionError: S3-T-04/V-4 fixture=V-4-2-fields ('unexpected', 'IndexError')\nassert ('unexpected', 'IndexError') == ('raised', 'i...ntent', 'V-4')\n  \n  At index 0 diff: 'unexpected' != 'raised'\n  Right contains one more item: 'V-4'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-4-4-fields]": [
+     "failure",
+     "AssertionError: S3-T-04/V-4 fixture=V-4-4-fields ('unexpected', 'TypeError')\nassert ('unexpected', 'TypeError') == ('raised', 'i...ntent', 'V-4')\n  \n  At index 0 diff: 'unexpected' != 'raised'\n  Right contains one more item: 'V-4'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V5",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:05Z",
+    "2026-11-11T16:37:07Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-5-token]": [
+     "failure",
+     "AssertionError: S3-T-04/V-5 fixture=V-5-token ('unexpected', 'ValueError')\nassert ('unexpected', 'ValueError') == ('raised', 'i...ntent', 'V-5')\n  \n  At index 0 diff: 'unexpected' != 'raised'\n  Right contains one more item: 'V-5'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V6",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:13Z",
+    "2026-11-11T16:37:15Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-6-inf-H]": [
+     "failure",
+     "AssertionError: S3-T-04/V-6 fixture=V-6-inf-H ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...ntent', 'V-6')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-6'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-6-1e999-rho0]": [
+     "failure",
+     "AssertionError: S3-T-04/V-6 fixture=V-6-1e999-rho0 ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...ntent', 'V-6')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-6'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V7",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:21Z",
+    "2026-11-11T16:37:23Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-7-base-1]": [
+     "failure",
+     "AssertionError: S3-T-04/V-7 fixture=V-7-base-1 ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...ntent', 'V-7')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-7'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V8",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:29Z",
+    "2026-11-11T16:37:31Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-8-equal-bases]": [
+     "failure",
+     "AssertionError: S3-T-04/V-8 fixture=V-8-equal-bases ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...ntent', 'V-8')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-8'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V9a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:37Z",
+    "2026-11-11T16:37:38Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9a-rho0-zero]": [
+     "failure",
+     "AssertionError: S3-T-04/V-9a fixture=V-9a-rho0-zero ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...tent', 'V-9a')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-9a'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9a-rho0-negative]": [
+     "failure",
+     "AssertionError: S3-T-04/V-9a fixture=V-9a-rho0-negative ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...tent', 'V-9a')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-9a'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-V9b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:45Z",
+    "2026-11-11T16:37:46Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9b-H-zero]": [
+     "failure",
+     "AssertionError: S3-T-04/V-9b fixture=V-9b-H-zero ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...tent', 'V-9b')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-9b'\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_validity_rule[V-9b-H-negative]": [
+     "failure",
+     "AssertionError: S3-T-04/V-9b fixture=V-9b-H-negative ('accepted', 28)\nassert ('accepted', 28) == ('raised', 'i...tent', 'V-9b')\n  \n  At index 0 diff: 'accepted' != 'raised'\n  Right contains one more item: 'V-9b'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-22-ORD",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:37:52Z",
+    "2026-11-11T16:37:54Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t04_rule_precedence": [
+     "failure",
+     "AssertionError: S3-T-04/PREC ('raised', 'invalid_content', 'V-9a')\nassert ('raised', 'i...tent', 'V-9a') == ('raised', 'i...ntent', 'V-6')\n  \n  At index 2 diff: 'V-9a' != 'V-6'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-23a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:00Z",
+    "2026-11-11T16:38:01Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t05a_no_io_during_evaluation": [
+     "failure",
+     "AssertionError: S3-T-05a/IO {'Path.read_bytes': 1000, 'Path.open': 1000, 'builtins.open': 0}\nassert {'Path.read_b...tins.open': 0} == {'Path.read_b...tins.open': 0}\n  \n  Omitting 1 identical items, use -vv to show\n  Differing items:\n  {'Path.open': 1000} != {'Path.open': 0}\n  {'Path.read_bytes': 1000} != {'Path.read_bytes': 0}\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-23b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:07Z",
+    "2026-11-11T16:38:09Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 1,
+   "child_records": 1,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t05b_eager_table_and_unchanged_module_state": [
+     "failure",
+     "AssertionError: S3-T-05b/EAGER {'has_table': False, 'table_type': 'NoneType', 'rows': None, 'module_file': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/subjects/M-23b/src/tars/sim/atmosphere.py'}\nassert (False is True)\n +  where False = <built-in method get of dict object at 0x1054fc080>('has_table')\n +    where <built-in method get of dict object at 0x1054fc080> = {'has_table': False, 'table_type': 'NoneType', 'rows': None, 'module_file': '/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/campaign/subjects/M-23b/src/tars/sim/atmosphere.py'}.get"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-24a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:15Z",
+    "2026-11-11T16:38:17Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t06_static_guard_and_component_ast": [
+     "failure",
+     "AssertionError: S3-T-06/AST ['import numpy', 'np.exp', 'math.exp absent']\nassert ['import nump...h.exp absent'] == []\n  \n  Left contains 3 more items, first extra item: 'import numpy'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-24b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:24Z",
+    "2026-11-11T16:38:25Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t06_static_guard_and_component_ast": [
+     "failure",
+     "AssertionError: S3-T-06/AST ['from numpy import', 'math.exp absent']\nassert ['from numpy ...h.exp absent'] == []\n  \n  Left contains 2 more items, first extra item: 'from numpy import'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-24c",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:31Z",
+    "2026-11-11T16:38:33Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t06_static_guard_and_component_ast": [
+     "failure",
+     "AssertionError: S3-T-06/AST ['** at line 178', \"math attributes ['e']\", 'math.exp absent']\nassert ['** at line ...h.exp absent'] == []\n  \n  Left contains 3 more items, first extra item: '** at line 178'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-25a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:39Z",
+    "2026-11-11T16:38:41Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t14a_subset_row": [
+     "failure",
+     "AssertionError: S3-T-14a/ROW\nassert [('4069000000...d70a3d70a3d')] == [('406f400000...5e353f7ced9')]\n  \n  At index 0 diff: ('4069000000000000', '3df32a75efa28581', '40428d70a3d70a3d') != ('406f400000000000', '3dd3ec539a9d9915', '4046c5e353f7ced9')\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-25b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:47Z",
+    "2026-11-11T16:38:48Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t14b_derivation_sensitivity": [
+     "failure",
+     "AssertionError: S3-T-14b/DERIVE (Row(base_km=250.0, rho0=7.248e-11, scale_km=45.546),)\nassert [('406f400000...5e353f7ced9')] == [('406f400000...00000000000')]\n  \n  At index 0 diff: ('406f400000000000', '3dd3ec539a9d9915', '4046c5e353f7ced9') != ('406f400000000000', '3ff8000000000000', '4004000000000000')\n  Use -v to get more diff"
+    ],
+    "tests/test_s3_density.py::test_s3_t14c_no_subset_literals": [
+     "failure",
+     "AssertionError: S3-T-14c/LITERAL [(153, 7.248e-11), (153, 45.546)]\nassert [(153, 7.248e...(153, 45.546)] == []\n  \n  Left contains 2 more items, first extra item: (153, 7.248e-11)\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-28c-a1",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:38:55Z",
+    "2026-11-11T16:38:56Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t14d_a1_domain_witnesses": [
+     "failure",
+     "AssertionError: S3-T-14d/A1-P4 h=-0x1.0p+0\nassert ('value', '3e52d598f58c006f') == ('raised', 'below_zero')\n  \n  At index 0 diff: 'value' != 'raised'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-26a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:02Z",
+    "2026-11-11T16:39:04Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t13_type_contract": [
+     "failure",
+     "AssertionError: S3-T-13/OBS [('density', 'np.float64(1.0)', ('value', '3ff398e86a22dba6')), ('density', 'np.float64(nan)', ('raised', 'nonfinite')), ('density', '1.0', ('value', '3ff398e86a22dba6'))]\nassert [('density', ...e86a22dba6'))] == []\n  \n  Left contains 3 more items, first extra item: ('density', 'np.float64(1.0)', ('value', '3ff398e86a22dba6'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-26b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:10Z",
+    "2026-11-11T16:39:12Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t13_type_contract": [
+     "failure",
+     "AssertionError: S3-T-13/OBS [('density', '1', ('value', '3ff398e86a22dba6')), ('density', 'True', ('value', '3ff398e86a22dba6')), ('density', 'np.float64(1.0)', ('value', '3ff398e86a22dba6')), ('density', 'np.float64(nan)', ('raised', 'nonfinite')), ('density', '1.0', ('value', '3ff398e86a22dba6'))]\nassert [('density', ...e86a22dba6'))] == []\n  \n  Left contains 5 more items, first extra item: ('density', '1', ('value', '3ff398e86a22dba6'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-26c",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:18Z",
+    "2026-11-11T16:39:20Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_density.py::test_s3_t13_type_contract": [
+     "failure",
+     "AssertionError: S3-T-13/OBS [('density', 'np.float64(nan)', ('raised', 'nonfinite')), ('density', \"'1.0'\", ('raised', 'unexpected:TypeError')), ('density', 'None', ('raised', 'unexpected:TypeError'))]\nassert [('density', ...:TypeError'))] == []\n  \n  Left contains 3 more items, first extra item: ('density', 'np.float64(nan)', ('raised', 'nonfinite'))\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-27a",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:26Z",
+    "2026-11-11T16:39:28Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_selftests.py::test_s3_t17_twin_independence_ast": [
+     "failure",
+     "AssertionError: S3-T-17/AST twin imports tars: ['tars']\nassert not ['tars']"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-27b",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:35Z",
+    "2026-11-11T16:39:36Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_selftests.py::test_s3_t17_twin_independence_ast": [
+     "failure",
+     "AssertionError: S3-T-17/AST twin imports tars: ['tars.sim']\nassert not ['tars.sim']"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-27c",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:43Z",
+    "2026-11-11T16:39:45Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_selftests.py::test_s3_t17_twin_independence_ast": [
+     "failure",
+     "AssertionError: S3-T-17/AST twin imports outside the stdlib allowlist: ['importlib']\nassert not ['importlib']"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-27d",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:51Z",
+    "2026-11-11T16:39:52Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_selftests.py::test_s3_t17_twin_independence_ast": [
+     "failure",
+     "AssertionError: S3-T-17/AST twin references ['__import__', \"string 'tars'\"]\nassert not ['__import__', \"string 'tars'\"]"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "KILLED",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  },
+  {
+   "id": "M-29",
+   "exit": 1,
+   "utc": [
+    "2026-11-11T16:39:58Z",
+    "2026-11-11T16:40:00Z"
+   ],
+   "problems": [],
+   "probe_scripts_written": 0,
+   "child_records": 0,
+   "main_records": 1,
+   "cases": {
+    "tests/test_s3_atmosphere_data.py::test_s3_t02c_missing_file": [
+     "failure",
+     "AssertionError: S3-T-02c/CAT in-process ('raised', 'unexpected:FileNotFoundError')\nassert ('raised', 'u...otFoundError') == ('raised', 'missing')\n  \n  At index 1 diff: 'unexpected:FileNotFoundError' != 'missing'\n  Use -v to get more diff"
+    ]
+   },
+   "class": "established",
+   "driver_verdict": "INVALID-RECORD",
+   "edits_ok": true,
+   "verdict": "KILLED"
+  }
+ ],
+ "summary": {
+  "control": "CONTROL-PASSED",
+  "KILLED": [
+   "M-01",
+   "M-02",
+   "M-03",
+   "M-04",
+   "M-05a",
+   "M-05b",
+   "M-06",
+   "M-07",
+   "M-08a",
+   "M-08b",
+   "M-09",
+   "M-10",
+   "M-11",
+   "M-12",
+   "M-14",
+   "M-15",
+   "M-16",
+   "M-17",
+   "M-18",
+   "M-19a",
+   "M-19b",
+   "M-20a",
+   "M-20b",
+   "M-20c",
+   "M-21a",
+   "M-21b",
+   "M-22-V1",
+   "M-22-V2",
+   "M-22-V3",
+   "M-22-V4",
+   "M-22-V5",
+   "M-22-V6",
+   "M-22-V7",
+   "M-22-V8",
+   "M-22-V9a",
+   "M-22-V9b",
+   "M-22-ORD",
+   "M-23a",
+   "M-23b",
+   "M-24a",
+   "M-24b",
+   "M-24c",
+   "M-25a",
+   "M-25b",
+   "M-28c-a1",
+   "M-26a",
+   "M-26b",
+   "M-26c",
+   "M-27a",
+   "M-27b",
+   "M-27c",
+   "M-27d",
+   "M-29"
+  ],
+  "NOT-ESTABLISHED": [],
+  "driver_vs_assessment_differences": [
+   [
+    "M-29",
+    "INVALID-RECORD",
+    "KILLED"
+   ]
+  ]
+ },
+ "ok": true
+}

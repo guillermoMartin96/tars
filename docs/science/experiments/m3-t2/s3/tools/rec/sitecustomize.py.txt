@@ -1,0 +1,33 @@
+"""Recording-only bootstrap (owner instruction 2026-11-11 §3). Inert unless S3REC_DIR is set.
+
+At start-up it only registers one atexit handler (no import of tars/tests/backend, no sys.path,
+profiler, warning-filter, FP or stdout change). At interpreter exit, after the payload ran, the
+handler loads tools/envcap2.py BY PATH (S3REC_ENVCAP) and writes <S3REC_DIR>/<pid>.env.json.
+Every exception is caught and written to <S3REC_DIR>/<pid>.error.txt; it never changes the exit
+status and never writes to stdout/stderr. Processes ending via os._exit or a fatal signal leave no
+record (detected by the drivers' record-count checks).
+"""
+
+import os
+
+if os.environ.get("S3REC_DIR"):
+    import atexit
+
+    def _s3rec_capture():
+        d = os.environ["S3REC_DIR"]
+        try:
+            import importlib.util
+
+            spec = importlib.util.spec_from_file_location("_s3rec_envcap", os.environ["S3REC_ENVCAP"])
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            mod.capture(os.path.join(d, f"{os.getpid()}.env.json"), os.environ["S3REC_SUBJECT"],
+                        os.environ.get("S3REC_LABEL", ""), "sitecustomize-atexit")
+        except BaseException as exc:  # never alters exit status
+            try:
+                with open(os.path.join(d, f"{os.getpid()}.error.txt"), "x", encoding="utf-8") as fh:
+                    fh.write(f"{type(exc).__qualname__}: {exc}\n")
+            except BaseException:
+                pass
+
+    atexit.register(_s3rec_capture)

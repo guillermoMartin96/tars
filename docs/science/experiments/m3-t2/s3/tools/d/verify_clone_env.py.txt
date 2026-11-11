@@ -1,0 +1,55 @@
+"""Verify own-process ENV records made inside a git clone (commit field = clone HEAD, not '[U]').
+
+Usage: python3.12 -I -B verify_clone_env.py <out.json> <clone> <rev> <record dir>...   (out must be new)
+Same predicate as local_checks.env_ok: every common.check_env_record field except the export-only
+commit predicate, plus commit field == "[O] <rev>" and sys.prefix == <clone>/.venv.
+"""
+
+import importlib.util
+import json
+import sys
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).parents[1] / "common.py"))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+
+
+def main():
+    out, clone, rev, dirs = Path(sys.argv[1]), Path(sys.argv[2]).resolve(), sys.argv[3], sys.argv[4:]
+    if out.exists():
+        raise SystemExit("occupied")
+    res = {"record": "clone-ENV verification", "clone": str(clone), "rev": rev, "label": C.LABEL, "dirs": {}}
+    ok = True
+    for d in dirs:
+        rows = []
+        for f in sorted(Path(d).iterdir()):
+            if not f.name.endswith(".env.json"):
+                rows.append({"file": f.name, "ok": False, "why": "not an ENV record (error file?)"})
+                ok = False
+                continue
+            _, x = C.check_env_record(f, expect_prefix=clone / ".venv", expect_subject=clone)
+            good = all([not x["s2_error"], x["s2_body_sha256_verifies"], x["libm_arguments"] == 6235,
+                        x["libm_results"] == 7175, str(x["cpu_brand"]).startswith("[O] "), not x["cpu_artificial_U"],
+                        x["fp_fields"] > 0, x["build_config_present"], x["executable_realpath"] == C.PY,
+                        x["exe_realpath_in_body"] == C.PY,
+                        x["executable_sha256"] == C.PY_SHA, x["exe_sha_in_body"] == "[O] " + C.PY_SHA,
+                        x["libpython_sha256"] == C.LIBPY_SHA, x["libpython_sha_in_body"] == "[O] " + C.LIBPY_SHA,
+                        x["lock_independent"] == C.LOCK_PIN, x["lock_in_body"] == "[O] " + C.LOCK_PIN,
+                        str(x["sys.version"]).startswith("3.12.15 "), x["commit_field"] == f"[O] {rev}",
+                        x["label_p5"] == C.LABEL, Path(x["sys.prefix"]) == clone / ".venv",
+                        Path(x["subject_root"]) == clone])
+            rows.append({"file": f.name, "pid": x["pid"], "label": x["label"], "sha256": C.fsha(f), "ok": good})
+            ok = ok and good
+        if not rows:
+            ok = False
+        res["dirs"][str(d)] = rows
+    res["ok"] = ok
+    with open(out, "x") as fh:
+        fh.write(json.dumps(res, indent=1) + "\n")
+    print(json.dumps({"ok": ok, "records": sum(len(v) for v in res["dirs"].values())}))
+    sys.exit(0 if ok else 1)
+
+
+if __name__ == "__main__":
+    main()

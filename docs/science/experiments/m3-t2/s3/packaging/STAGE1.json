@@ -1,0 +1,413 @@
+{
+ "record": "S3 corrected packaging stage1",
+ "started": "2026-11-11T16:27:11Z",
+ "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+ "checks": {
+  "BA-seal-unchanged": [
+   {
+    "pass": true
+   }
+  ],
+  "ctl-wrong-hash-HOOK-ENV": [
+   {
+    "pass": true,
+    "hook_calls": [],
+    "records": [],
+    "errors": []
+   }
+  ],
+  "ctl-wrong-hash-NO-NETWORK-NO-DIRECT": [
+   {
+    "pass": true,
+    "base_executables": [
+     "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12"
+    ]
+   }
+  ],
+  "CTL-hash-enforced": [
+   {
+    "pass": true,
+    "exit": 2,
+    "outputs": [
+     ".gitignore"
+    ],
+    "stderr_tail": "ers/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-ctl/wheels-v6/index/f7171a8e7111b19d/uv-build/0.12.24-py3-none-macosx_10_12_x86_64.lock`\nerror: Failed to build `/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree`\n  cause: Failed to install requirements from `build-system.requires`\n  cause: Failed to download `uv-build==0.12.24`\n  cause: Hash mismatch for `uv-build==0.12.24`\n\n         Expected:\n           sha256:fa4f087d67b6621501264934ee450db845a84eda2f7f0b7d0a14a7cee38d6dc0\n\n         Computed:\n           sha256:fa4f087d67b6621501264934ee450db845a84eda2f7f0b7d0a14a7cee38d6dc9\nTRACE Released lock at `/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-ctl/.lock`\n"
+   }
+  ],
+  "PK-1-build-HOOK-ENV": [
+   {
+    "pass": true,
+    "hook_calls": [
+     "build_sdist",
+     "build_wheel",
+     "get_requires_for_build_sdist",
+     "get_requires_for_build_wheel"
+    ],
+    "records": [
+     {
+      "pid": 61857,
+      "observer": "sitecustomize-atexit",
+      "label": "PK-1-build uv_build hook",
+      "s2_error": null,
+      "s2_body_sha256_verifies": true,
+      "libm_arguments": 6235,
+      "libm_results": 7175,
+      "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+      "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+      "cpu_artificial_U": [],
+      "fp_fields": 7,
+      "build_config_present": true,
+      "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+      "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+      "sys.prefix": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpHynjbz",
+      "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+      "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+      "ok": "get_requires_for_build_sdist",
+      "file": "packaging/run-2/hook-env/PK-1-build/61857.env.json",
+      "sha256": "30ce0f4f66ede03a4c72dd873cea8c9bc9c5b60c7f8a3001e9b66e456a227198",
+      "hook": "get_requires_for_build_sdist",
+      "uv_build_origin": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpHynjbz/lib/python3.12/site-packages/uv_build/__init__.py",
+      "uv_build_isolated": true,
+      "extra_sys_path": []
+     },
+     {
+      "pid": 61908,
+      "observer": "sitecustomize-atexit",
+      "label": "PK-1-build uv_build hook",
+      "s2_error": null,
+      "s2_body_sha256_verifies": true,
+      "libm_arguments": 6235,
+      "libm_results": 7175,
+      "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+      "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+      "cpu_artificial_U": [],
+      "fp_fields": 7,
+      "build_config_present": true,
+      "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+      "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+      "sys.prefix": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpHynjbz",
+      "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+      "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+      "ok": "build_sdist",
+      "file": "packaging/run-2/hook-env/PK-1-build/61908.env.json",
+      "sha256": "9fd1546d4e8f0e588a5a838ed69f0ab4592745c32078234a1647583f6980bffa",
+      "hook": "build_sdist",
+      "uv_build_origin": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpHynjbz/lib/python3.12/site-packages/uv_build/__init__.py",
+      "uv_build_isolated": true,
+      "extra_sys_path": []
+     },
+     {
+      "pid": 61933,
+      "observer": "sitecustomize-atexit",
+      "label": "PK-1-build uv_build hook",
+      "s2_error": null,
+      "s2_body_sha256_verifies": true,
+      "libm_arguments": 6235,
+      "libm_results": 7175,
+      "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+      "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+      "cpu_artificial_U": [],
+      "fp_fields": 7,
+      "build_config_present": true,
+      "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+      "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+      "sys.prefix": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpuZ4nED",
+      "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+      "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+      "ok": "get_requires_for_build_wheel",
+      "file": "packaging/run-2/hook-env/PK-1-build/61933.env.json",
+      "sha256": "34d772ac048c44696df16384e731f0bc9d4bd621bd9016b472e11df70fbd8512",
+      "hook": "get_requires_for_build_wheel",
+      "uv_build_origin": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpuZ4nED/lib/python3.12/site-packages/uv_build/__init__.py",
+      "uv_build_isolated": true,
+      "extra_sys_path": []
+     },
+     {
+      "pid": 61986,
+      "observer": "sitecustomize-atexit",
+      "label": "PK-1-build uv_build hook",
+      "s2_error": null,
+      "s2_body_sha256_verifies": true,
+      "libm_arguments": 6235,
+      "libm_results": 7175,
+      "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+      "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+      "cpu_artificial_U": [],
+      "fp_fields": 7,
+      "build_config_present": true,
+      "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+      "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+      "sys.prefix": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpuZ4nED",
+      "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+      "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+      "ok": "build_wheel",
+      "file": "packaging/run-2/hook-env/PK-1-build/61986.env.json",
+      "sha256": "9fb5c63dc725be15b6a5999c751f02485a8ff2a6491eaf70e33452dfba4f123b",
+      "hook": "build_wheel",
+      "uv_build_origin": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/builds-v0/.tmpuZ4nED/lib/python3.12/site-packages/uv_build/__init__.py",
+      "uv_build_isolated": true,
+      "extra_sys_path": []
+     }
+    ],
+    "errors": []
+   }
+  ],
+  "PK-1-build-NO-NETWORK-NO-DIRECT": [
+   {
+    "pass": true,
+    "base_executables": [
+     "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12"
+    ]
+   }
+  ],
+  "PK-1": [
+   {
+    "pass": true,
+    "exit": 0,
+    "outputs": [
+     ".gitignore",
+     "tars-0.1.0-py3-none-any.whl",
+     "tars-0.1.0.tar.gz"
+    ],
+    "source_tar_sha256": "35d743be7efeb5702fbfbdf7f63fef122687f47a381cfa2f0f25599a7dd8b6df"
+   }
+  ],
+  "PK-2-build-HOOK-ENV": [
+   {
+    "pass": true,
+    "hook_calls": [
+     "build_wheel",
+     "get_requires_for_build_wheel"
+    ],
+    "records": [
+     {
+      "pid": 62020,
+      "observer": "sitecustomize-atexit",
+      "label": "PK-2-build uv_build hook",
+      "s2_error": null,
+      "s2_body_sha256_verifies": true,
+      "libm_arguments": 6235,
+      "libm_results": 7175,
+      "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+      "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+      "cpu_artificial_U": [],
+      "fp_fields": 7,
+      "build_config_present": true,
+      "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+      "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+      "sys.prefix": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk2/builds-v0/.tmpecYtjk",
+      "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+      "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+      "ok": "get_requires_for_build_wheel",
+      "file": "packaging/run-2/hook-env/PK-2-build/62020.env.json",
+      "sha256": "277c3e4e25c441aaf2cfaed930f122054b8d2d3519d3fd10f7d14c9c9a7e276a",
+      "hook": "get_requires_for_build_wheel",
+      "uv_build_origin": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk2/builds-v0/.tmpecYtjk/lib/python3.12/site-packages/uv_build/__init__.py",
+      "uv_build_isolated": true,
+      "extra_sys_path": []
+     },
+     {
+      "pid": 62046,
+      "observer": "sitecustomize-atexit",
+      "label": "PK-2-build uv_build hook",
+      "s2_error": null,
+      "s2_body_sha256_verifies": true,
+      "libm_arguments": 6235,
+      "libm_results": 7175,
+      "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+      "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+      "cpu_artificial_U": [],
+      "fp_fields": 7,
+      "build_config_present": true,
+      "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+      "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+      "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+      "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+      "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+      "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+      "sys.prefix": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk2/builds-v0/.tmpecYtjk",
+      "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+      "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+      "ok": "build_wheel",
+      "file": "packaging/run-2/hook-env/PK-2-build/62046.env.json",
+      "sha256": "7786dbac463f9798f7b514f14a186fbeb16401b34819b79ccbc54a9607cf1f6b",
+      "hook": "build_wheel",
+      "uv_build_origin": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk2/builds-v0/.tmpecYtjk/lib/python3.12/site-packages/uv_build/__init__.py",
+      "uv_build_isolated": true,
+      "extra_sys_path": []
+     }
+    ],
+    "errors": []
+   }
+  ],
+  "PK-2-build-NO-NETWORK-NO-DIRECT": [
+   {
+    "pass": true,
+    "base_executables": [
+     "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12"
+    ]
+   }
+  ],
+  "PK-2": [
+   {
+    "pass": true,
+    "exit": 0,
+    "outputs": [
+     ".gitignore",
+     "tars-0.1.0-py3-none-any.whl"
+    ],
+    "input_sdist": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/dist-tree/tars-0.1.0.tar.gz",
+    "input_sdist_sha256_before": "37fc65928ba6f953f5989990ea574cb6f4b9ae482bc30fab8b09a7d92cefdee8",
+    "input_sdist_sha256_after": "37fc65928ba6f953f5989990ea574cb6f4b9ae482bc30fab8b09a7d92cefdee8"
+   }
+  ],
+  "BA-binding-PK-1": [
+   {
+    "pass": true,
+    "unpacked": [
+     {
+      "root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk1/archive-v0/3oz62Vqy1xyz-H5f",
+      "members": {
+       "uv_build/__init__.py": "equal",
+       "uv_build/__main__.py": "equal",
+       "uv_build/py.typed": "equal",
+       "uv_build-0.12.24.data/scripts/uv-build": "equal",
+       "uv_build-0.12.24.dist-info/METADATA": "equal",
+       "uv_build-0.12.24.dist-info/WHEEL": "equal",
+       "uv_build-0.12.24.dist-info/licenses/LICENSE-APACHE": "equal",
+       "uv_build-0.12.24.dist-info/licenses/LICENSE-MIT": "equal",
+       "uv_build-0.12.24.dist-info/sboms/uv-build.cyclonedx.json": "equal",
+       "uv_build-0.12.24.dist-info/RECORD": "equal"
+      }
+     }
+    ]
+   }
+  ],
+  "BA-binding-PK-2": [
+   {
+    "pass": true,
+    "unpacked": [
+     {
+      "root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/cache-pk2/archive-v0/-1J-fY81FI4SPEqA",
+      "members": {
+       "uv_build/__init__.py": "equal",
+       "uv_build/__main__.py": "equal",
+       "uv_build/py.typed": "equal",
+       "uv_build-0.12.24.data/scripts/uv-build": "equal",
+       "uv_build-0.12.24.dist-info/METADATA": "equal",
+       "uv_build-0.12.24.dist-info/WHEEL": "equal",
+       "uv_build-0.12.24.dist-info/licenses/LICENSE-APACHE": "equal",
+       "uv_build-0.12.24.dist-info/licenses/LICENSE-MIT": "equal",
+       "uv_build-0.12.24.dist-info/sboms/uv-build.cyclonedx.json": "equal",
+       "uv_build-0.12.24.dist-info/RECORD": "equal"
+      }
+     }
+    ]
+   }
+  ],
+  "DRIVER-ENV": [
+   {
+    "pass": true,
+    "pid": 61847,
+    "observer": "driver-finally",
+    "label": "packaging driver stage1",
+    "s2_error": null,
+    "s2_body_sha256_verifies": true,
+    "libm_arguments": 6235,
+    "libm_results": 7175,
+    "libm_sha256": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+    "cpu_brand": "[O] Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+    "cpu_artificial_U": [],
+    "fp_fields": 7,
+    "build_config_present": true,
+    "exe_realpath_in_body": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+    "exe_sha_in_body": "[O] de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+    "libpython_sha_in_body": "[O] 2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+    "lock_in_body": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+    "lock_independent": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+    "commit_field": "[U] unavailable: exit status 128; stderr: 'fatal: not a git repository (or any of the parent directories): .git'; stdout: ''",
+    "executable_realpath": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12",
+    "executable_sha256": "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9",
+    "libpython_sha256": "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4",
+    "sys.version": "3.12.15 (main, Oct  3 2026, 00:54:36) [Clang 22.1.3 ]",
+    "sys.prefix": "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none",
+    "subject_root": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/tree",
+    "label_p5": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+    "ok": true
+   }
+  ]
+ },
+ "subject": {
+  "bc_sha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+  "bc_tree": "1d2e9cab9b0f084ab0892d4e66d59b12bb84243d"
+ },
+ "stage0": {
+  "sha256": "2fed762b123e134e66f3c7ad44740a3504ce187e0bed801e2ed95b5454f74060"
+ },
+ "artifacts": {
+  "sdist": {
+   "file": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/packaging/run-2/artifacts/sdist/tars-0.1.0.tar.gz",
+   "sha256": "37fc65928ba6f953f5989990ea574cb6f4b9ae482bc30fab8b09a7d92cefdee8"
+  },
+  "tree_wheel": {
+   "file": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/packaging/run-2/artifacts/tree_wheel/tars-0.1.0-py3-none-any.whl",
+   "sha256": "a3ca952c8c3e2ed325193dbc672d0a541b2ccb65a3faa33bc85c758b470af1e1"
+  },
+  "sdist_wheel": {
+   "file": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/packaging/run-2/artifacts/sdist_wheel/tars-0.1.0-py3-none-any.whl",
+   "sha256": "a3ca952c8c3e2ed325193dbc672d0a541b2ccb65a3faa33bc85c758b470af1e1"
+  }
+ },
+ "lineage": {
+  "PK-1 source": "BC export (stage0)",
+  "bc_tar_sha256": "35d743be7efeb5702fbfbdf7f63fef122687f47a381cfa2f0f25599a7dd8b6df",
+  "PK-2 input": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/pk-run-2/dist-tree/tars-0.1.0.tar.gz",
+  "PK-2 input sha256": "37fc65928ba6f953f5989990ea574cb6f4b9ae482bc30fab8b09a7d92cefdee8"
+ },
+ "finished": "2026-11-11T16:27:16Z",
+ "ok": true
+}

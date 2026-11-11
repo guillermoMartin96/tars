@@ -1,0 +1,172 @@
+"""Pre-campaign verification of the frozen mutant population, edits and designations
+(owner instruction §4; v4 §11.4/§11.5; MUTANTS.json; SELECTED-PROFILE-INVENTORY.md §2).
+
+Usage: python3.12 -I -B mutant_verify.py <export-root> <out.json>   (new)
+1. Verifies the original edit definitions file (S3-implementation-v1/tools/phaseD/mutants.py) against
+   its covered manifest hash, then copies it to tools/campaign/mutants.py (byte-identical).
+2. Derives, independently, the expected effective designation of every mutant for the selected
+   combination from (a) the v4 §11.4 markdown matrix, (b) MUTANTS.json, (c) the selected profile
+   table, and compares all three with the edit file's designated (node, tag) pairs.
+3. Checks every edit against the BC export: `old` occurs exactly `count` times; targets are only the
+   component or the twin; every designated test function and tag string exists in the BC test files.
+"""
+
+import ast
+import hashlib
+import importlib.util
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+
+E = Path("/Users/guillermomartin/tars-evidence")
+IMPL = E / "S3-implementation-v1"
+PKT = E / "S3-provenance-contract-recovery-v1"
+SRC_MUT = IMPL / "tools/phaseD/mutants.py"
+DST_MUT = PKT / "tools/campaign/mutants.py"
+V4 = E / "S3-proposal-v4/S3-proposal-v4.md"
+MJ = E / "S3-proposal-v4/MUTANTS.json"
+PROF = E / "S3-owner-decisions-v1/SELECTED-PROFILE-INVENTORY.md"
+PINS = {V4: "0b90e9cfb1c2e6d9348c566ac9a6b313a6c1164bdadd3e4bf34e5c86270154e6",
+        MJ: "715d78aac1c3363c1c37c2c4925ceefd8e4d927c9d7c6ec3fad26149720fd1a8",
+        PROF: "c248acad1d8f51eebb1a43859ce6a4475524e3976460afd2b2303748aa8bbeac"}
+SELECTED = {"D-S3-01": "a", "D-S3-09": "a1", "D-S3-10": "a", "D-S3-17": "a", "D-S3-18": "a"}
+TARGETS = {"src/tars/sim/atmosphere.py", "tests/s3_dl4_density_twin.py"}
+
+
+def sha(p):
+    return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def node_id(tag):
+    return "S3-T-" + re.match(r"S3-T-(\d+)", tag).group(1)
+
+
+def expand(idcell):
+    ids = re.findall(r"M-[0-9A-Za-z-]+", idcell)
+    if "M-22-V1 … M-22-V9b" in idcell:
+        return [f"M-22-V{x}" for x in ("1", "2", "3", "4", "5", "6", "7", "8", "9a", "9b")]
+    if idcell.startswith("M-27a…d"):
+        return ["M-27a", "M-27b", "M-27c", "M-27d"]
+    return ids[:1]
+
+
+def main():
+    root, out = Path(sys.argv[1]), Path(sys.argv[2])
+    if out.exists():
+        raise SystemExit("occupied")
+    res = {"record": "frozen mutant population / designation / edit verification", "checks": {}}
+    ok = [True]
+
+    def check(n, c, **f):
+        ok[0] &= bool(c)
+        res["checks"][n] = {"pass": bool(c), **f}
+
+    man = {}
+    for ln in (IMPL / "MANIFEST.sha256").read_text().splitlines():
+        h, p = ln.split("  ", 1)
+        man[p[2:]] = h
+    check("pins", all(sha(p) == h for p, h in PINS.items()) and man.get("tools/phaseD/mutants.py") == sha(SRC_MUT),
+          mutants_py_sha256=sha(SRC_MUT), manifest_entry=man.get("tools/phaseD/mutants.py"))
+    DST_MUT.parent.mkdir(parents=True, exist_ok=True)
+    if not DST_MUT.exists():      # run-1 made the copy; later runs only re-verify it
+        shutil.copy2(SRC_MUT, DST_MUT)
+    check("copy-identical", sha(DST_MUT) == sha(SRC_MUT), sha256=sha(DST_MUT))
+    spec = importlib.util.spec_from_file_location("frozen_mutants", str(DST_MUT))
+    M = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(M)
+    edit_des = {mid: {node_id(t) for _, t in ds} for mid, _, _, ds in M.MUTANTS}
+    edit_cls = {mid: cls for mid, cls, _, _ in M.MUTANTS}
+
+    # (b) MUTANTS.json effective designation for the selected combination (§11.5 N-1).
+    mj = json.loads(MJ.read_text())["mutants"]
+    exp_b, cls_b, na, eq = {}, {}, [], []
+    for m in mj:
+        ai = m["applies_if"] or {}
+        if any(SELECTED.get(k) not in v for k, v in ai.items()):
+            na.append(m["id"])
+            continue
+        if m["status"] == "equivalent":
+            eq.append(m["id"])
+            continue
+        nodes = set(m["matrix_nodes"])          # all matrix nodes active under (a)/(a1)/(a)
+        if m["status"] == "candidate" and nodes:
+            nodes.add("S3-T-22")
+        exp_b[m["id"]], cls_b[m["id"]] = nodes, m["status"]
+    # (a) v4 §11.4 markdown matrix.
+    text = V4.read_text()
+    sec = text[text.index("### 11.4 Kill matrix"):text.index("### 11.5")]
+    exp_a = {}
+    for row in sec.splitlines():
+        if not row.startswith("| M-"):
+            continue
+        cells = [c.strip() for c in row.strip("|").split("|")]
+        nodes = {node_id(x) for x in re.findall(r"S3-T-\d+", cells[2])}
+        for mid in expand(cells[0]):
+            exp_a[mid] = (nodes, cells[5])
+    # (c) selected profile table.
+    ptxt = PROF.read_text()
+    psec = ptxt[ptxt.index("## 2. Mutant designations"):ptxt.index("## 3.")]
+    exp_c = {}
+    for row in psec.splitlines():
+        if not row.startswith("| M-"):
+            continue
+        ids_cell, status, nodes_cell = [c.strip() for c in row.strip("|").split("|")]
+        nodes = {node_id(x) for x in re.findall(r"S3-T-\d+", nodes_cell)}
+        ids = []
+        for part in ids_cell.split(","):
+            part = part.strip()
+            if part == "M-22-V1…V8":
+                ids += [f"M-22-V{i}" for i in range(1, 9)]
+            else:
+                ids.append(part)
+        for i in ids:
+            exp_c[i] = (status, nodes)
+    diffs = []
+    for mid in sorted(set(exp_b) | set(edit_des)):
+        a_nodes = exp_a.get(mid, (set(), ""))[0]
+        a_eff = a_nodes | ({"S3-T-22"} if cls_b.get(mid) == "candidate" else set())
+        c = exp_c.get(mid, ("", set()))
+        if not (edit_des.get(mid) == exp_b.get(mid) == a_eff == c[1] and edit_cls.get(mid) == cls_b.get(mid) == c[0]):
+            diffs.append({"id": mid, "edit_file": sorted(edit_des.get(mid, [])), "MUTANTS.json": sorted(exp_b.get(mid, [])),
+                          "v4_11_4": sorted(a_eff), "profile": sorted(c[1]), "class": [edit_cls.get(mid), cls_b.get(mid), c[0]]})
+    cnt = {"run": len(M.MUTANTS), "established": sum(c == "established" for c in edit_cls.values()),
+           "candidate": sum(c == "candidate" for c in edit_cls.values())}
+    check("designations-three-way", not diffs and set(exp_b) == set(edit_des), differences=diffs,
+          compared=len(set(exp_b) | set(edit_des)))
+    check("population", cnt == {"run": 53, "established": 45, "candidate": 8} and sorted(eq) == ["M-13", "M-25c"]
+          and sorted(na) == ["M-28a", "M-28b", "M-28c-a2"] and sorted(M.EQUIVALENTS) == ["M-13", "M-25c"]
+          and len(mj) == 58, counts=cnt, equivalents=sorted(eq), not_applicable=sorted(na), transferred=[],
+          orphans=sorted(m for m in exp_b if not exp_b[m]))
+    # Edits against the BC export; designated functions and tags exist in BC test files.
+    erows, bad = [], []
+    for mid, _, edits, ds in M.MUTANTS:
+        for ed in edits:
+            t = (root / ed["path"]).read_text(encoding="utf-8")
+            n = t.count(ed["old"])
+            erows.append({"id": mid, "path": ed["path"], "count": n, "declared": ed["count"],
+                          "edit_sha256": hashlib.sha256(json.dumps(ed, sort_keys=True).encode()).hexdigest()})
+            if n != ed["count"] or ed["path"] not in TARGETS or ed["old"] == ed["new"]:
+                bad.append((mid, ed["path"], n))
+        for node, tag in ds:
+            path, name = node.split("::")
+            fn = name.split("[")[0]
+            src = (root / path).read_text(encoding="utf-8")
+            fns = {x.name for x in ast.walk(ast.parse(src)) if isinstance(x, ast.FunctionDef)}
+            dynamic = False
+            m4 = re.fullmatch(r"S3-T-04/(V-\w+)", tag)
+            if m4 and "[" in name:   # S3-T-04 builds f"S3-T-04/{rule}" with rule = V_FIXTURES[name][0]
+                pid = name.split("[", 1)[1].rstrip("]")
+                dynamic = (f'"{pid}": ("{m4.group(1)}",' in src and 'f"S3-T-04/{rule}' in src)
+            if fn not in fns or not (tag in src or dynamic):
+                bad.append((mid, node, tag))
+    check("edits-and-nodes", not bad, problems=bad, edits=erows)
+    res["ok"] = bool(ok[0])
+    out.write_text(json.dumps(res, indent=1, default=sorted) + "\n")
+    print(json.dumps({"ok": res["ok"], **{k: v["pass"] for k, v in res["checks"].items()}}))
+    sys.exit(0 if res["ok"] else 1)
+
+
+if __name__ == "__main__":
+    main()

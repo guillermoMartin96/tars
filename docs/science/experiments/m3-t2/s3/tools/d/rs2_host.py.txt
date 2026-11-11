@@ -1,0 +1,112 @@
+"""R-S2 host record comparison (v4 §12.2; PC-7 §11): host S2 records of the D full suite vs the committed
+host records at L. Report, with one exact projection check. No re-execution of any gate.
+
+Usage (clone venv python, recorder env set):
+    python -B rs2_host.py <full_suite_stdout> <out dir (new)> <clone> <rev>
+
+1. The I-105 extractor (sha256-pinned) extracts the host S2 records from the unaltered D full-suite log.
+2. Baseline: L a76470f `docs/science/experiments/m3-t2/s2/i105/green/records/` read with `git show` from the
+   local repository; each file's sha256 must equal its line in the committed `s2/i105/SHA256SUMS` at L.
+   Nothing is copied into the S3 records except this comparison's result.
+3. Stable projections (v4 §12.2 table) of S2-G17A-REPORT and S2-G17B-RECORD compared for equality.
+   S2-XP3-LISTING has no committed host baseline at L: its new entry count and outcomes are reported only.
+4. S2-ENV-RECORD provenance validated fresh (body sha256, commit field = "[O] <rev>"); the libm digest
+   and I-101 environment fields vs the baseline are reported as drift indicators only.
+"""
+
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+REPO = "/Users/guillermomartin/projects/tars"
+L = "a76470fbbc70471fcea24f26bf6120098e37c57c"
+I105 = Path("/Users/guillermomartin/tars-evidence/I-105/scripts/extract_s2_records_v2.py")
+I105_SHA = "58323ce9f187165508cd4f846692ae818c0be3700d271b965f7d7c14bd4cb960"
+LABEL = "densities are UNVERIFIED ABOVE 1000 KM (P5)"
+BASE_DIR = "docs/science/experiments/m3-t2/s2/i105"
+A_KEYS = ("check", "entries_compared", "class_X_coordinate_differences",
+          "label_differences_at_identical_coordinates", "witness_slot_comparison_failures",
+          "environment_basis", "limitation")
+B_KEYS = ("check", "class_X_entries_compared", "differences", "environment_basis", "limitation")
+
+
+def sha(b):
+    return hashlib.sha256(b).hexdigest()
+
+
+def git_show(path):
+    p = subprocess.run(["git", "-C", REPO, "show", f"{L}:{path}"], capture_output=True, check=True)
+    return p.stdout
+
+
+def main():
+    log, out, clone, rev = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3]).resolve(), sys.argv[4]
+    if out.exists():
+        raise SystemExit("occupied")
+    out.mkdir(parents=True)
+    if sha(I105.read_bytes()) != I105_SHA:
+        raise SystemExit("STOP: I-105 extractor hash differs")
+    res = {"record": "R-S2 host record comparison (report, with one exact projection check)", "label": LABEL,
+           "subject": {"clone": str(clone), "rev": rev}, "log": str(log), "log_sha256": sha(log.read_bytes()),
+           "baseline": f"{L}:{BASE_DIR}/green/records/"}
+    x = subprocess.run([sys.executable, "-I", "-B", str(I105), str(log), str(out / "host-records")],
+                       capture_output=True)
+    (out / "extract.stdout").write_bytes(x.stdout)
+    (out / "extract.stderr").write_bytes(x.stderr)
+    st = json.loads((out / "host-records/extraction-status.json").read_text())
+    res["extraction"] = {"exit": x.returncode, "complete": st.get("complete"),
+                         "pytest_summary_line": st.get("pytest_summary_line")}
+    sums = {}
+    for ln in git_show(f"{BASE_DIR}/SHA256SUMS").decode().splitlines():
+        h, p = ln.split("  ", 1)
+        sums[p] = h
+    base, base_ok = {}, True
+    for t in ("S2-ENV-RECORD", "S2-G17A-REPORT", "S2-G17B-RECORD"):
+        b = git_show(f"{BASE_DIR}/green/records/{t}.json")
+        good = sums.get(f"green/records/{t}.json") == sha(b)
+        base_ok = base_ok and good
+        base[t] = json.loads(b)
+        res.setdefault("baseline_files", {})[t] = {"sha256": sha(b), "matches_committed_SHA256SUMS": good}
+    new = {t: json.loads((out / "host-records" / f"{t}.json").read_text())
+           for t in ("S2-ENV-RECORD", "S2-G17A-REPORT", "S2-G17B-RECORD")}
+    pa = {k: new["S2-G17A-REPORT"].get(k) for k in A_KEYS}
+    ba = {k: base["S2-G17A-REPORT"].get(k) for k in A_KEYS}
+    pb = {k: new["S2-G17B-RECORD"].get(k) for k in B_KEYS}
+    bb = {k: base["S2-G17B-RECORD"].get(k) for k in B_KEYS}
+    res["projection"] = {
+        "S2-G17A-REPORT": {"equal": pa == ba, "differing_keys": sorted(k for k in A_KEYS if pa[k] != ba[k]),
+                           "new": pa},
+        "S2-G17B-RECORD": {"equal": pb == bb, "differing_keys": sorted(k for k in B_KEYS if pb[k] != bb[k]),
+                           "new": pb},
+        "S2-XP3-LISTING": {"baseline": "none committed for host at L (report only)",
+                           "new_entries": (st.get("S2-XP3-LISTING") or {}).get("entries"),
+                           "new_outcomes": (st.get("S2-XP3-LISTING") or {}).get("outcomes"),
+                           "verified": (st.get("S2-XP3-LISTING") or {}).get("verified")}}
+    res["report_only"] = {
+        "S2-G17A-REPORT class_P_coordinate_differences": [new["S2-G17A-REPORT"].get("class_P_coordinate_differences"),
+                                                          base["S2-G17A-REPORT"].get("class_P_coordinate_differences")],
+        "Class P": "report-only (never gated)"}
+    env = new["S2-ENV-RECORD"]
+    run = env.get("run", {})
+    libm_new = env.get("libm behaviour digest", {}).get("[O] sha256")
+    libm_base = base["S2-ENV-RECORD"].get("libm behaviour digest", {}).get("[O] sha256")
+    res["S2-ENV-RECORD"] = {"commit_field": run.get("[O] commit (git rev-parse HEAD)"),
+                            "commit_is_rev": run.get("[O] commit (git rev-parse HEAD)") == f"[O] {rev}",
+                            "uv_lock": run.get("[O] uv.lock sha256"),
+                            "drift_libm_digest_equal_to_baseline": libm_new == libm_base,
+                            "libm_digest": [libm_new, libm_base]}
+    res["ok"] = bool(x.returncode == 0 and st.get("complete") and base_ok
+                     and res["projection"]["S2-G17A-REPORT"]["equal"]
+                     and res["projection"]["S2-G17B-RECORD"]["equal"] and res["S2-ENV-RECORD"]["commit_is_rev"])
+    with open(out / "RS2-HOST.json", "x") as fh:
+        fh.write(json.dumps(res, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": res["ok"], "A": res["projection"]["S2-G17A-REPORT"]["equal"],
+                      "B": res["projection"]["S2-G17B-RECORD"]["equal"], "libm_drift_equal":
+                      res["S2-ENV-RECORD"]["drift_libm_digest_equal_to_baseline"]}))
+    sys.exit(0 if res["ok"] else 1)
+
+
+if __name__ == "__main__":
+    main()

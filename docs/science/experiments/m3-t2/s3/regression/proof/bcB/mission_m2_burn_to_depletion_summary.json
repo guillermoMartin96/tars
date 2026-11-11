@@ -1,0 +1,65 @@
+{
+  "scenario": "m2_burn_to_depletion",
+  "scenario_hash": "6d83fbd3252f998eb435c9bcbf73f8148732c32ca1f69b85240a1cec76422b95",
+  "status": "success",
+  "failure_cause": null,
+  "orbits_completed": 9,
+  "crossing_times_s": [
+    5502.325250397608,
+    11001.511377607054,
+    16500.697504533808,
+    21999.883631177694,
+    27499.069757538487,
+    32998.255883616344,
+    38497.4420094115,
+    43996.62813492411,
+    49495.81426015432
+  ],
+  "final_tick": 5370,
+  "final_t_s": 53700.0,
+  "final_r_m": [
+    601014.503925784,
+    -4207076.699992377,
+    -5308009.76665286
+  ],
+  "final_v_mps": [
+    7580.203466601922,
+    475.96741723515566,
+    600.5214260289866
+  ],
+  "min_altitude_m": 249999.99953239504,
+  "max_altitude_m": 461174.68006188143,
+  "events_sha256": "6bd23e707020686deef1698849b57a1fcdab8d897ca6c460803977ac2fc56b12",
+  "event_count": 1821,
+  "schema_version": 2,
+  "stop_duration_s": 53700.0,
+  "commands": [
+    {
+      "command_id": "deplete-001",
+      "status": "accepted",
+      "reason": null,
+      "burn_id": "burn#000001",
+      "submit_tick": 60
+    },
+    {
+      "command_id": "after-empty-001",
+      "status": "rejected",
+      "reason": "insufficient_propellant",
+      "burn_id": null,
+      "submit_tick": 120
+    },
+    {
+      "command_id": "after-empty-002",
+      "status": "rejected",
+      "reason": "burn_unschedulable",
+      "burn_id": null,
+      "submit_tick": 120
+    }
+  ],
+  "unsubmitted_command_ids": [],
+  "final_propellant_kg": 1.1102230246251565e-14,
+  "final_total_mass_kg": 1000.0,
+  "final_engine_state": "idle",
+  "active_burn_id_at_stop": null,
+  "pending_burn_ids_at_stop": []
+}

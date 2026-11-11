@@ -1,0 +1,234 @@
+"""Phase-D regression and Proof runs (v4 §12; PC-7 §11; owner instruction 2026-11-11 §5), NEW D evidence.
+
+Usage: python3.12 -I -B rgates.py      -> d/rgates/RGATES.json (new); exit 0 iff every gate holds.
+
+Fresh local clones (`git clone --no-local` of the local repository, no network) of BC (subject; D adds
+evidence files only) and of L (recomputed comparison, never stored values). Each clone's venv is made by
+`uv sync --locked --offline --python <exact 3.12.15>` against a packet-local copy of the existing uv
+cache, then receives the byte-identical external sitecustomize, so EVERY Python process of every step
+(proof wrappers' `uv run` children, pytest and its children, validators) writes its own complete ENV
+record; the S2 ENV node also runs inside every pytest full-suite run. Commit fields are the clone's own
+HEAD (a real checkout): [O] BC or [O] L.
+"""
+
+import importlib.util
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).parents[1] / "common.py"))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+
+L = "a76470fbbc70471fcea24f26bf6120098e37c57c"
+REPO = "/Users/guillermomartin/projects/tars"
+OUT = C.PKT / "d" / "rgates"
+SCR = C.PKT / "scratch" / "d" / "rg"
+UVCACHE = C.PKT / "scratch" / "d" / "uvcache"
+G_M1 = "7a4e18777ccd134b66749e05fba5197f07885bd64e073949692a3baa01f820a4"
+ALLOW = {"src/tars/sim/atmosphere.py", "src/tars/sim/data/EarthExponentialAtmosphereData.txt",
+         "tests/test_s3_package_data.py", "tests/test_s3_atmosphere_data.py", "tests/test_s3_density.py",
+         "tests/test_s3_density_conformance.py", "tests/test_s3_selftests.py", "tests/test_s3_witnesses.py",
+         "tests/s3_dl4_density_twin.py", "tests/s3_observation.py", "tests/s3_dl4_point_sets.py",
+         "tests/s3_dl4_points.txt", "docs/milestones/M3-T2-report.md"}
+ALLOW_PREFIX = ("docs/science/experiments/m3-t2/s3/",)
+PROTECTED = ["pyproject.toml", "uv.lock", ".python-version", ".github", "proof", "toolbox", "scenarios",
+             "src/tars/validation", "src/tars/events", "src/tars/sim/forces.py", "src/tars/sim/simulator.py",
+             "src/tars/sim/geodesy.py", "src/tars/sim/constants.py", "src/tars/sim/runner.py",
+             "src/tars/sim/scenario.py", "src/tars/sim/propulsion.py", "src/tars/sim/integrators.py",
+             "docs/contracts", "tests/conftest.py", "docs/science/experiments/m3-t0",
+             "docs/science/experiments/m3-t1", "docs/science/experiments/m3-t2/s1",
+             "docs/science/experiments/m3-t2/s2", "docs/decisions"]
+RES = {"record": "S3 phase-D regression/Proof runs (NEW D evidence; not reconstructed pre-push evidence)",
+       "started": C.now(), "label": C.LABEL, "subject": {"bc_sha": C.BC, "bc_tree": C.BC_TREE, "base_L": L},
+       "checks": {}, "steps": {}}
+OK = [True]
+
+
+def check(n, c, **f):
+    OK[0] &= bool(c)
+    RES["checks"].setdefault(n, []).append({"pass": bool(c), **f})
+
+
+def main():
+    if OUT.exists() or SCR.exists():
+        raise SystemExit("occupied")
+    OUT.mkdir(parents=True)
+    SCR.mkdir(parents=True)
+    (SCR / "tmp").mkdir()
+    r = C.Runner(OUT / "steps")
+    env0 = {**C.base_env(SCR / "tmp", Path("/nonexistent-ceiling")), "UV_CACHE_DIR": str(UVCACHE),
+            "UV": C.UV, "PYTHONDONTWRITEBYTECODE": "1"}
+    env0.pop("GIT_CEILING_DIRECTORIES")
+    tools = {"uv": r.run("tool-uv", [C.UV, "--version"], SCR, env0)["stdout"].strip(),
+             "uv_sha256": C.fsha(C.UV), "python": C.PY, "python_sha256": C.fsha(C.PY),
+             "git": r.run("tool-git", ["git", "--version"], SCR, env0)["stdout"].strip(),
+             "git_sha256": C.fsha("/usr/bin/git")}
+    RES["tools"] = tools
+    clones = {"bcA": C.BC, "bcB": C.BC, "bcC": C.BC, "lA": L, "lB": L, "lC": L}
+    venv_ok = {}
+    for name, rev in clones.items():
+        c = SCR / name
+        r.run(f"clone-{name}", ["git", "clone", "-q", "--no-local", REPO, c], SCR, env0)
+        r.run(f"checkout-{name}", ["git", "-C", c, "checkout", "-q", "--detach", rev], SCR, env0)
+        h = r.run(f"head-{name}", ["git", "-C", c, "rev-parse", "HEAD", "HEAD^{tree}"], SCR, env0)
+        s = r.run(f"status-{name}", ["git", "-C", c, "status", "--porcelain", "--untracked-files=all"], SCR, env0)
+        u = r.run(f"uvsync-{name}", [C.UV, "sync", "--locked", "--offline", "--python", C.PY], c, env0)
+        site = c / ".venv/lib/python3.12/site-packages"
+        cfg = (c / ".venv/pyvenv.cfg").read_text() if (c / ".venv/pyvenv.cfg").exists() else ""
+        home = re.search(r"^home = (.+)$", cfg, re.M)
+        bound = bool(home) and C.os.path.realpath(home.group(1) + "/python3.12") == C.PY
+        if site.exists():
+            shutil.copy2(C.REC_DIR / "sitecustomize.py", site / "sitecustomize.py")
+        venv_ok[name] = (h["stdout"].split()[0] == rev and s["stdout"] == "" and u["exit"] == 0 and bound
+                         and C.fsha(site / "sitecustomize.py") == C.fsha(C.REC_DIR / "sitecustomize.py")
+                         and C.fsha(c / "uv.lock") == C.LOCK_PIN)
+        check("clone", venv_ok[name], clone=name, rev=rev, head=h["stdout"].split(), status=s["stdout"],
+              uv_sync_exit=u["exit"], pyvenv_cfg=cfg, venv_bound_to_3_12_15=bound)
+    if not all(venv_ok.values()):
+        return finish()
+
+    def step(sid, clone, argv, label, python=True):
+        c = SCR / clone
+        rd = OUT / "env" / sid
+        rd.mkdir(parents=True)
+        e = {**env0, **C.rec_env(rd, c, f"{label} [{clone}]")}
+        p = r.run(sid, argv, c, e, timeout=7200)
+        recs = sorted(rd.glob("*.env.json"))
+        errs = sorted(rd.glob("*.error.txt"))
+        rev = clones[clone]
+        bad = []
+        for f in recs:
+            g, facts = C.check_env_record(f, expect_prefix=c / ".venv", expect_subject=c)
+            # check_env_record requires the export form "[U] not a git repository"; a clone has its HEAD.
+            if not g and facts.get("commit_field") == f"[O] {rev}":
+                facts2 = dict(facts)
+                g = all([not facts2["s2_error"], facts2["s2_body_sha256_verifies"], facts2["libm_arguments"] == 6235,
+                         facts2["libm_results"] == 7175, str(facts2["cpu_brand"]).startswith("[O] "),
+                         not facts2["cpu_artificial_U"], facts2["fp_fields"] > 0, facts2["build_config_present"],
+                         facts2["executable_realpath"] == C.PY, facts2["executable_sha256"] == C.PY_SHA,
+                         facts2["exe_sha_in_body"] == "[O] " + C.PY_SHA,
+                         facts2["libpython_sha_in_body"] == "[O] " + C.LIBPY_SHA,
+                         facts2["libpython_sha256"] == C.LIBPY_SHA, facts2["lock_independent"] == C.LOCK_PIN,
+                         facts2["lock_in_body"] == "[O] " + C.LOCK_PIN, facts2["label_p5"] == C.LABEL,
+                         Path(facts2["sys.prefix"]) == c / ".venv"])
+            if not g:
+                bad.append({"file": f.name, **facts})
+        RES["steps"][sid] = {"exit": p["exit"], "env_records": len(recs), "env_errors": len(errs),
+                             "incomplete_env": bad, "step": p["step"]}
+        check("ENV-complete", (bool(recs) if python else not recs) and not errs and not bad, step=sid,
+              records=len(recs), errors=len(errs), incomplete=[b["file"] for b in bad], python_step=python)
+        return p
+
+    # R-1 / R-2: unmodified proof wrappers in fresh clones (never in the work tree).
+    pr = {}
+    for clone, k in (("bcA", "m1"), ("lA", "m1"), ("bcB", "m2"), ("lB", "m2")):
+        pr[clone] = step(f"R-{'1' if k == 'm1' else '2'}-{clone}", clone, ["bash", f"toolbox/scripts/run_{k}_proof.sh"],
+                         f"R-{'1' if k == 'm1' else '2'} {k} proof wrapper")
+        ev = SCR / clone / "proof/records/evidence" / k.upper()
+        dst = OUT / "proof" / clone
+        shutil.copytree(ev, dst)
+    for clone in ("bcA", "lA"):
+        log = (OUT / "proof" / clone / "proof_run.log").read_text()
+        check("R-1", pr[clone]["exit"] == 0 and "overall: PASS" in log and log.count("   exit=0") == 9
+              and G_M1 in "".join(p.read_text(errors="replace") for p in (OUT / "proof" / clone).rglob("*") if p.is_file()),
+              clone=clone, steps_exit0=log.count("   exit=0"))
+    for clone in ("bcB", "lB"):
+        d = OUT / "proof" / clone
+        log = (d / "proof_run.log").read_text()
+        so = (d / "m2_proof_stdout.txt").read_text()
+        check("R-2", pr[clone]["exit"] == 0 and "overall: PASS" in log and log.count("   exit=0") == 20
+              and sum(ln.startswith("[PASS]") for ln in so.splitlines()) == 228
+              and not any(ln.startswith("[FAIL]") for ln in so.splitlines()), clone=clone,
+              steps_exit0=log.count("   exit=0"), passes=sum(ln.startswith("[PASS]") for ln in so.splitlines()))
+    a = json.loads((OUT / "proof/lB/m2_final_states_record.json").read_text())
+    b = json.loads((OUT / "proof/bcB/m2_final_states_record.json").read_text())
+    body = {k: v for k, v in b.items() if k != "sha256"}
+    body["revision"] = a["revision"]
+    check("R-2-semantic", a["missions"] == b["missions"]
+          and C.sha(json.dumps(body, sort_keys=True).encode()) == a["sha256"],
+          differing_keys=sorted(k for k in a.keys() | b.keys() if a.get(k) != b.get(k)))
+    # R-3 (T1) and R-4 (T0), at BC and recomputed at L.
+    for clone in ("bcC", "lC"):
+        c = SCR / clone
+        o = OUT / "r3" / clone
+        (o / "old").mkdir(parents=True)
+        (o / "old2").mkdir()
+        for rev, dd in (("97b69ef", "old"), ("b1566ae", "old2")):
+            a_ = r.run(f"R-3-archive-{rev}-{clone}", ["bash", "-c", 'git -C "$1" archive "$2" src | tar -x -C "$3"',
+                                                    "_", c, rev, o / dd], SCR, env0)
+            check("R-3-archive", a_["exit"] == 0, clone=clone, rev=rev)
+        py = c / ".venv/bin/python"
+        step(f"R-3-r01-{clone}", clone, [py, "-B", "docs/science/experiments/m3-t1/t1_review01_correction_check.py",
+                                         o / "old/src", o / "r01.json"], "R-3 T1 review01 correction check")
+        step(f"R-3-r02-{clone}", clone, [py, "-B", "docs/science/experiments/m3-t1/t1_review02_correction_check.py",
+                                         o / "old2/src", o / "r02.json"], "R-3 T1 review02 correction check")
+        t1 = step(f"R-3-t1-{clone}", clone, [py, "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rA",
+                                             f"--junitxml={o / 't1_junit.xml'}", "tests/test_zonal_j2.py",
+                                             "tests/test_constants.py"], "R-3 T1 tests")
+        t0files = sorted(str(p.relative_to(c)) for p in (c / "docs/science/experiments/m3-t0").glob("check_review0*.py"))
+        t0 = step(f"R-4-{clone}", clone, [py, "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider",
+                                          f"--junitxml={o / 't0_junit.xml'}", *t0files],
+                  "R-4 T0 checks")
+        same1 = (o / "r01.json").read_bytes() == (c / "docs/science/experiments/m3-t1/t1_review01_correction_check_results.json").read_bytes()
+        same2 = (o / "r02.json").read_bytes() == (c / "docs/science/experiments/m3-t1/t1_review02_correction_check_results.json").read_bytes()
+        n1 = re.search(r"(\d+) passed", t1["stdout"])
+        n0 = re.search(r"(\d+) passed", t0["stdout"])
+        check("R-3", same1 and same2 and t1["exit"] == 0 and n1 and int(n1.group(1)) >= 109, clone=clone,
+              r01_identical=same1, r02_identical=same2, t1_summary=t1["stdout"].strip().splitlines()[-1:])
+        check("R-4", t0["exit"] == 0 and n0 and int(n0.group(1)) == 314, clone=clone,
+              t0_summary=t0["stdout"].strip().splitlines()[-1:])
+    check("R-3-BC-vs-L", (OUT / "r3/bcC/r01.json").read_bytes() == (OUT / "r3/lC/r01.json").read_bytes()
+          and (OUT / "r3/bcC/r02.json").read_bytes() == (OUT / "r3/lC/r02.json").read_bytes())
+    # R-5 / R-S3-scope: changed paths L..BC within the §14 allowlist; protected paths byte-identical to L.
+    c = SCR / "bcC"
+    diff = r.run("R-5-diff", ["git", "-C", c, "diff", "--name-only", L, C.BC], SCR, env0)["stdout"].split()
+    prot = r.run("R-5-protected", ["git", "-C", c, "diff", "--name-only", L, C.BC, "--", *PROTECTED], SCR, env0)
+    check("R-5", all(p in ALLOW or p.startswith(ALLOW_PREFIX) for p in diff) and prot["stdout"].strip() == "",
+          changed=diff, protected_changed=prot["stdout"].split())
+    # R-S1: S1 tests byte-identical to L and passing; S1 SHA256SUMS verifies.
+    s1 = r.run("R-S1-unchanged", ["git", "-C", c, "diff", "--name-only", L, C.BC, "--", "tests/test_s1_force_context.py",
+                                  "tests/test_s1_failure_paths.py", "docs/science/experiments/m3-t2/s1"], SCR, env0)
+    py = c / ".venv/bin/python"
+    s1t = step("R-S1-tests", "bcC", [py, "-B", "-m", "pytest", "-q", "-p", "no:cacheprovider",
+                                     f"--junitxml={OUT / 'rs1_junit.xml'}", "tests/test_s1_force_context.py",
+                                     "tests/test_s1_failure_paths.py"], "R-S1 S1 tests")
+    sums = r.run("R-S1-sha256sums", ["shasum", "-a", "256", "-c", "SHA256SUMS"],
+                 c / "docs/science/experiments/m3-t2/s1", env0)
+    check("R-S1", s1["stdout"] == "" and s1t["exit"] == 0 and sums["exit"] == 0 and "FAILED" not in sums["stdout"],
+          s1_summary=s1t["stdout"].strip().splitlines()[-1:], sums_ok=sums["stdout"].count(": OK"))
+    # Full suite at BC (R-S2 gate part; host S2/S3 records; S2 ENV node in-process).
+    full = step("FULL-SUITE-bcC", "bcC", [py, "-B", "-m", "pytest", "-p", "no:cacheprovider",
+                                          f"--junitxml={OUT / 'full_junit.xml'}", "-W", "always::UserWarning"],
+                "full suite (R-S2 gate part, host S2/S3 records)")
+    (OUT / "full_suite_stdout.txt").write_text(full["stdout"])
+    s2u = r.run("R-S2-unchanged", ["git", "-C", c, "diff", "--name-only", L, C.BC, "--", "tests/test_s2_geodetic.py",
+                                   "tests/test_s2_geodetic_conformance.py", "tests/test_s2_xp3_listing.py",
+                                   "tests/test_s2_dl4_points.py", "tests/test_s2_environment_record.py",
+                                   "tests/s2_dl4_geodetic_twin.py", "tests/s2_dl4_point_sets.py",
+                                   "tests/s2_dl4_points.txt"], SCR, env0)
+    n = re.search(r"(\d+) passed", full["stdout"])
+    check("R-S2-gate", full["exit"] == 0 and s2u["stdout"] == "" and n is not None and " failed" not in full["stdout"].splitlines()[-1],
+          summary=full["stdout"].strip().splitlines()[-1:])
+    ruff = step("ruff-bcC", "bcC", [c / ".venv/bin/ruff", "check", "--no-cache", "."], "ruff check (tool)", False)
+    rfmt = step("ruff-format-bcC", "bcC", [c / ".venv/bin/ruff", "format", "--no-cache", "--check", "."],
+                "ruff format (tool)", False)
+    RES["tools"]["ruff"] = r.run("tool-ruff", [c / ".venv/bin/ruff", "--version"], SCR, env0)["stdout"].strip()
+    RES["tools"]["ruff_sha256"] = C.fsha(c / ".venv/bin/ruff")
+    check("ruff", ruff["exit"] == 0 and rfmt["exit"] == 0)
+    return finish()
+
+
+def finish():
+    RES["finished"] = C.now()
+    RES["ok"] = bool(OK[0])
+    with open(OUT / "RGATES.json", "x") as fh:
+        fh.write(json.dumps(RES, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": RES["ok"], "checks": {k: [c["pass"] for c in v] for k, v in RES["checks"].items()}}))
+    sys.exit(0 if RES["ok"] else 1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,136 @@
+"""Closed historical inventories for owner dispositions Q-2 and Q-3 (OWNER-INSTRUCTION §2).
+
+Usage: python3 -I -B hist_inventory.py <out-dir>   (writes Q2-INVENTORY.json, Q3-INVENTORY.json; refuses
+to overwrite). Reads only manifest-covered regular files of S3-implementation-v1 (hash re-verified at
+read time; no symlink followed; tmp/ never read). Records facts; backfills nothing.
+"""
+
+import hashlib
+import json
+import re
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+IMPL = Path("/Users/guillermomartin/tars-evidence/S3-implementation-v1")
+PIN_LOCK = "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+A_SHA = "1c4d2cc612120feb432befd11f80b20d6849cfea"
+BC_SHA = "930e74f6c62719ad8aade6592493d1a1ba16c2a8"
+# Q-2 bound: non-pytest numerical M1/M2 Proof, determinism, cross-platform and GMAT steps of the
+# LOCAL-A / LOCAL-BC pre-push runs (audit Q-2). Step-name patterns, fixed before reading:
+Q2_STEP = re.compile(r"^(01-m2-xp-collect|05-determinism|06-cross-platform|07-gmat-m1-compare|"
+                     r"08-m1-proof|09-m2-determinism-m2_[a-z_]+|10-gmat-m2-compare|11-m2-proof)$")
+NOT_Q2 = re.compile(r"^(00-head|00-status|02-ruff-check|03-ruff-format|04-pytest|12-status-after)$")
+S2_FIELDS = ["S2 ENV record (r2 §7.1 via the S2 ENV node)", "libm behaviour digest", "FP configuration",
+             "CPU fields", "Python build configuration", "executable sha256 (in-process)",
+             "libpython sha256 (in-process)", "uv.lock sha256"]
+
+
+def cov() -> dict:
+    out = {}
+    for m in ("MANIFEST.sha256", "MANIFEST-2.sha256"):
+        for ln in (IMPL / m).read_text(encoding="utf-8").splitlines():
+            h, p = ln.split("  ", 1)
+            out[p[2:] if p.startswith("./") else p] = h
+    return out
+
+
+def rd(c, rel) -> bytes:
+    p = IMPL / rel
+    if rel not in c or p.is_symlink() or not p.is_file():
+        raise SystemExit(f"STOP: not a covered regular file: {rel}")
+    b = p.read_bytes()
+    if hashlib.sha256(b).hexdigest() != c[rel]:
+        raise SystemExit(f"STOP: hash mismatch {rel}")
+    return b
+
+
+def field(text, name):
+    m = re.search(rf"^{name}: (.*)$", text, re.M)
+    return m.group(1) if m else None
+
+
+def main():
+    od = Path(sys.argv[1])
+    for n in ("Q2-INVENTORY.json", "Q3-INVENTORY.json"):
+        if (od / n).exists():
+            raise SystemExit(f"occupied: {od / n}")
+    c = cov()
+    now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # ---------------- Q-2 ----------------
+    q2 = {"record": "Q-2 closed inventory: LOCAL-A / LOCAL-BC non-pytest numerical pre-push runs "
+          "missing own ENV/lock provenance (LIMITED HISTORICAL NONBLOCKING PROCEDURAL DEPARTURE)",
+          "utc": now, "groups": {}, "unclassified": [], "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)"}
+    for grp, expect_sha in (("LOCAL-A", A_SHA), ("LOCAL-BC", BC_SHA)):
+        files = sorted(r for r in c if re.fullmatch(rf"records/{grp}-[0-9].*\.txt", r))
+        head = rd(c, f"records/{grp}-00-head.txt").decode()
+        head_out = head.split("--- stdout ---\n", 1)[1].split("\n--- stderr ---")[0].split()
+        st = rd(c, f"records/{grp}-00-status.txt").decode()
+        st_out = st.split("--- stdout ---\n", 1)[1].split("--- stderr ---")[0].strip()
+        g = {"subject_head_record": {"file": f"records/{grp}-00-head.txt", "sha256": c[f"records/{grp}-00-head.txt"],
+                                     "head": head_out[0] if head_out else None,
+                                     "tree": head_out[1] if len(head_out) > 1 else None,
+                                     "expected_commit": expect_sha,
+                                     "match": bool(head_out) and head_out[0] == expect_sha},
+             "status_before_clean": st_out == "", "runs": [], "other_steps_not_in_Q2": []}
+        for rel in files:
+            step = rel[len(f"records/{grp}-"):-4]
+            t = rd(c, rel).decode("utf-8", "replace")
+            row = {"file": rel, "sha256": c[rel], "step": step, "argv": field(t, "argv"),
+                   "utc_start": field(t, "utc_start"), "utc_end": field(t, "utc_end"),
+                   "exit": field(t, "exit"), "cwd": field(t, "cwd"),
+                   "has_S2_ENV_RECORD": "S2-ENV-RECORD" in t, "has_uv_lock_pin": PIN_LOCK in t}
+            if Q2_STEP.match(step):
+                row["missing_fields"] = [f for f in S2_FIELDS if not (
+                    (f.startswith("S2 ENV") and row["has_S2_ENV_RECORD"]) or
+                    (f == "uv.lock sha256" and row["has_uv_lock_pin"]))]
+                g["runs"].append(row)
+            elif NOT_Q2.match(step):
+                g["other_steps_not_in_Q2"].append(row)
+            else:
+                q2["unclassified"].append(rel)
+        outs = sorted(r for r in c if r.startswith(f"records/{grp}/"))
+        g["step_outputs"] = {r: c[r] for r in outs}
+        q2["groups"][grp] = g
+    runs = [r for g in q2["groups"].values() for r in g["runs"]]
+    q2["checks"] = {
+        "run_count": len(runs),
+        "all_exit_0": all(r["exit"] == "0" for r in runs),
+        "none_has_S2_ENV_RECORD": not any(r["has_S2_ENV_RECORD"] for r in runs),
+        "subjects_match": all(g["subject_head_record"]["match"] for g in q2["groups"].values()),
+        "status_clean": all(g["status_before_clean"] for g in q2["groups"].values()),
+        "no_unclassified": not q2["unclassified"],
+    }
+    # ---------------- Q-3 ----------------
+    dm_rel, w_rel = "discovery/DISCOVERY-MANIFEST.json", "discovery/WITNESSES.json"
+    dm = json.loads(rd(c, dm_rel))
+    w = json.loads(rd(c, w_rel))
+    run_rels = sorted(r for r in c if r.startswith("discovery/runs/"))
+    rec_rels = sorted(r for r in c if r.startswith("records/P-DISC-"))
+    q3 = {"record": "Q-3 closed inventory: the eight phase-P discovery runs at A (HISTORICAL DISCOVERY "
+          "WITH LIMITED PROVENANCE; input-selection observations, not kill evidence, not complete ENV)",
+          "utc": now, "DISCOVERY-MANIFEST": {"file": dm_rel, "sha256": c[dm_rel], "A_sha": dm.get("A_sha"),
+                                             "interpreter": dm.get("interpreter"),
+                                             "uv_lock_sha256": dm.get("uv_lock_sha256")},
+          "WITNESSES": {"file": w_rel, "sha256": c[w_rel], "mutants": sorted(w) if isinstance(w, dict) else None},
+          "runs": [], "run_command_records": {r: c[r] for r in rec_rels}}
+    for rel in run_rels:
+        d = json.loads(rd(c, rel))
+        env = d.get("env", {})
+        q3["runs"].append({"file": rel, "sha256": c[rel], "mutant": d.get("mutant"), "outcome": d.get("outcome"),
+                           "witness_token": (d.get("witness") or {}).get("token"),
+                           "env_fields_present": sorted(env),
+                           "absent_fields": ["libm behaviour digest", "FP configuration", "CPU fields",
+                                             "Python build configuration", "libpython sha256",
+                                             "uv.lock sha256 (per run)", "commit (per run)"]})
+    q3["checks"] = {"run_count": len(q3["runs"]), "A_sha_matches": dm.get("A_sha") == A_SHA,
+                    "mutants": [r["mutant"] for r in q3["runs"]],
+                    "all_WITNESS": all(r["outcome"] == "WITNESS" for r in q3["runs"]),
+                    "manifest_lock_is_pin": dm.get("uv_lock_sha256") == PIN_LOCK}
+    for n, obj in (("Q2-INVENTORY.json", q2), ("Q3-INVENTORY.json", q3)):
+        (od / n).write_text(json.dumps(obj, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps({"q2": q2["checks"], "q3": q3["checks"]}))
+
+
+if __name__ == "__main__":
+    main()

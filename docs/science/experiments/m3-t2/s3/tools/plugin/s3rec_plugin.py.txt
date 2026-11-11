@@ -1,0 +1,34 @@
+"""Output-only pytest observer for the S3 campaign (loaded with `-p s3rec_plugin`).
+
+Writes, into S3REC_PLUGIN_OUT (a new directory):
+- s2-env-warning.txt: the complete message of every recorded warning whose text starts with
+  "S2-ENV-RECORD " (the unmodified S2 ENV node's record), one per line;
+- binding.json at session finish: realpath of __file__ for every loaded module whose top-level name
+  is tars or tests, plus sys.executable/prefix/base_prefix, pid and the session exit status.
+It changes no test, outcome, filter or report; it adds no assertion.
+"""
+
+import json
+import os
+import sys
+
+
+def _out(name):
+    return os.path.join(os.environ["S3REC_PLUGIN_OUT"], name)
+
+
+def pytest_warning_recorded(warning_message, when, nodeid, location):
+    text = str(warning_message.message)
+    if text.startswith("S2-ENV-RECORD "):
+        with open(_out("s2-env-warning.txt"), "a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"nodeid": nodeid, "when": when, "message": text}) + "\n")
+
+
+def pytest_sessionfinish(session, exitstatus):
+    mods = {n: os.path.realpath(m.__file__) for n, m in list(sys.modules.items())
+            if n.split(".")[0] in ("tars", "tests") and isinstance(getattr(m, "__file__", None), str)}
+    with open(_out("binding.json"), "x", encoding="utf-8") as fh:
+        json.dump({"pid": os.getpid(), "sys.executable": sys.executable,
+                   "executable_realpath": os.path.realpath(sys.executable), "sys.prefix": sys.prefix,
+                   "sys.base_prefix": sys.base_prefix, "exitstatus": int(exitstatus),
+                   "modules": dict(sorted(mods.items()))}, fh, indent=1, sort_keys=True)

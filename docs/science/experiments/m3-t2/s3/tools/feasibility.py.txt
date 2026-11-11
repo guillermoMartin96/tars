@@ -1,0 +1,271 @@
+"""Capture-feasibility checks (owner instruction 2026-11-11 §3), offline, inside the packet only.
+
+Usage: python3.12 -I -B feasibility.py <run>  -> feasibility/<run>/FEASIBILITY.json (new); exit 0 iff all hold.
+run-1 used OUT=feasibility/, SCR=scratch/feas (superseded; its checker had two defects, see report).
+Targets are disposable (a throwaway uv_build project; disposable tests) plus the unmodified S2 ENV
+node read from a fresh BC export (a provenance node, not an S3 gate). Nothing here is S3 evidence of
+any gate or kill. Runtime trees go to scratch/feas (excluded, inventoried).
+"""
+
+import importlib.util
+import json
+import re
+import shutil
+import sys
+import zipfile
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).with_name("common.py")))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+
+RUN = sys.argv[1]
+OUT = C.PKT / "feasibility" / RUN
+SCR = C.PKT / "scratch" / f"feas-{RUN}"
+RES = {"record": "S3 recording-capture feasibility (offline; disposable targets)", "started": C.now(),
+       "label": C.LABEL, "checks": {}}
+OK = [True]
+
+
+def check(name, cond, **facts):
+    OK[0] &= bool(cond)
+    RES["checks"].setdefault(name, []).append({"pass": bool(cond), **facts})
+
+
+def records(d: Path):
+    return sorted(d.glob("*.env.json")), sorted(d.glob("*.error.txt"))
+
+
+def uv_build(r, sid, cache, outdir, src, env):
+    return r.run(sid, [C.UV, "build", "-vv", "--force-pep517", "--offline", "--no-index", "--find-links",
+                       SCR / "backend", "--build-constraints", SCR / "build-constraints.txt",
+                       "--require-hashes", "--python", C.PY, "--no-python-downloads", "--cache-dir", cache,
+                       "--sdist", "--wheel", "--out-dir", outdir, src], SCR, env)
+
+
+def hook_calls(stderr):
+    return [ln for ln in stderr.splitlines() if "Calling `uv_build." in ln]
+
+
+def call_names(stderr):
+    return sorted(re.search(r"Calling `uv_build\.(\w+)\(", ln).group(1) for ln in hook_calls(stderr))
+
+
+def hook_fn(orig_argv):
+    code = (orig_argv or [""])[-1]
+    m = re.search(r"backend\.(build_\w+)\(", code) or re.search(r"getattr\(backend, \"(\w+)\"", code)
+    return m.group(1) if m else None
+
+
+def main():
+    for d in (SCR,):
+        if d.exists():
+            raise SystemExit(f"occupied: {d}")
+    if (OUT / "FEASIBILITY.json").exists():
+        raise SystemExit("occupied: FEASIBILITY.json")
+    SCR.mkdir(parents=True)
+    tmp = SCR / "tmp"
+    tmp.mkdir()
+    r = C.Runner(OUT / "steps")
+    env = C.base_env(tmp, SCR)
+
+    # F-0 static identities of tools, interpreter, retained backend, instrumentation sources.
+    RES["instrumentation"] = {str(p.relative_to(C.PKT)): C.fsha(p) for p in
+                              (C.ENVCAP, C.REC_DIR / "sitecustomize.py", C.PLUGIN_DIR / "s3rec_plugin.py",
+                               C.TOOLS / "common.py", Path(__file__))}
+    # Hook processes run without PYTHONDONTWRITEBYTECODE, so CPython may cache sitecustomize's bytecode in
+    # rec/__pycache__ (a runtime byproduct of the same source; excluded from the seal and inventoried).
+    rec_listing = sorted(str(p.relative_to(C.REC_DIR)) for p in C.REC_DIR.rglob("*"))
+    check("F0-rec-dir-only-sitecustomize", set(rec_listing) <= {"sitecustomize.py", "__pycache__",
+          "__pycache__/sitecustomize.cpython-312.pyc"} and "sitecustomize.py" in rec_listing, listing=rec_listing)
+    check("F0-plugin-dir-only-plugin", sorted(p.name for p in C.PLUGIN_DIR.iterdir()) == ["s3rec_plugin.py"],
+          listing=sorted(p.name for p in C.PLUGIN_DIR.iterdir()))
+    check("F0-python", C.fsha(C.PY) == C.PY_SHA and C.fsha(C.LIBPY) == C.LIBPY_SHA, py=C.fsha(C.PY),
+          libpython=C.fsha(C.LIBPY))
+    check("F0-backend", C.fsha(C.BACKEND_WHL) == C.BACKEND_SHA, sha256=C.fsha(C.BACKEND_WHL))
+    r.run("uv-version", [C.UV, "--version"], SCR, env)
+    (SCR / "backend").mkdir()
+    shutil.copy2(C.BACKEND_WHL, SCR / "backend" / C.BACKEND_WHL.name)
+    (SCR / "build-constraints.txt").write_text(f"uv-build==0.12.24 --hash=sha256:{C.BACKEND_SHA}\n")
+    check("F0-backend-copy", C.fsha(SCR / "backend" / C.BACKEND_WHL.name) == C.BACKEND_SHA)
+
+    # BC export: source of the unmodified S2 ENV node module and subject uv.lock.
+    exp = C.export_bc(r, SCR / "bc", SCR / "bc.tar", env)
+    exp.pop("manifest")
+    check("F0-bc-export", exp["ok"], **exp)
+    bc = SCR / "bc"
+
+    # Disposable build target.
+    tgt = SCR / "target"
+    (tgt / "src/feas_target").mkdir(parents=True)
+    (tgt / "src/feas_target/__init__.py").write_text('"""Disposable feasibility target."""\nVALUE = 1\n')
+    (tgt / "pyproject.toml").write_text(
+        '[project]\nname = "feas-target"\nversion = "0.0.1"\nrequires-python = ">=3.12"\n\n'
+        '[build-system]\nrequires = ["uv_build>=0.12,<0.13"]\nbuild-backend = "uv_build"\n')
+    bad = SCR / "target-bad"
+    (bad / "src").mkdir(parents=True)
+    (bad / "pyproject.toml").write_text((tgt / "pyproject.toml").read_text().replace("feas-target", "feas-bad"))
+
+    # F-1 PEP 517 hooks: uninstrumented control vs instrumented (PYTHONPATH = rec dir only).
+    res = {}
+    for mode in ("plain", "inst"):
+        rd = SCR / f"rec-build-{mode}"
+        rd.mkdir()
+        e = dict(env)
+        if mode == "inst":
+            e.update({"PYTHONPATH": str(C.REC_DIR), **C.rec_env(rd, bc, "feasibility uv build hook")})
+        b = uv_build(r, f"F1-build-{mode}", SCR / f"cache-{mode}", SCR / f"dist-{mode}", tgt, e)
+        outs = {p.name: C.fsha(p) for p in sorted((SCR / f"dist-{mode}").iterdir())}
+        res[mode] = (b, outs, rd)
+    (bp, op, _), (bi, oi, rdi) = res["plain"], res["inst"]
+    calls = hook_calls(bi["stderr"])
+    envs, errs = records(rdi)
+    per = []
+    for f in envs:
+        good, facts = C.check_env_record(f, expect_subject=bc)
+        rec = json.loads(f.read_text())
+        fn = hook_fn(rec.get("orig_argv"))
+        uvb = rec["module_origins_at_capture"].get("uv_build")
+        facts.update({"file": f.name, "orig_argv": rec.get("orig_argv"), "uv_build_origin": uvb,
+                      "uv_build_in_build_cache": bool(uvb) and uvb.startswith(str(SCR / "cache-inst")),
+                      "hook_function": fn, "imports_uv_build_as_backend": "import uv_build as backend" in (rec.get("orig_argv") or [""])[-1],
+                      "rec_dir_on_sys_path": str(C.REC_DIR) in rec["sys.path"],
+                      "sys_path_outside_build_env_and_stdlib": [
+                          p for p in rec["sys.path"] if p and not p.startswith(str(SCR / "cache-inst"))
+                          and not p.startswith("/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15")
+                          and p != str(C.REC_DIR)]})
+        per.append(facts)
+        good = good and facts["uv_build_in_build_cache"] and fn is not None and facts["imports_uv_build_as_backend"]
+        check("F1-hook-record-complete", good, **facts)
+    check("F1-one-record-per-hook-call", len(calls) >= 2 and len(envs) == len(calls) and not errs
+          and sorted(x["hook_function"] for x in per) == call_names(bi["stderr"]),
+          hook_calls=calls, hook_functions=sorted(x["hook_function"] for x in per), records=[f.name for f in envs], errors=[f.name for f in errs])
+    check("F1-exit-and-artifacts-identical", bp["exit"] == bi["exit"] == 0 and op == oi
+          and sum(n.endswith(".whl") for n in op) == 1 and sum(n.endswith(".tar.gz") for n in op) == 1,
+          plain=op, inst=oi, exits=[bp["exit"], bi["exit"]])
+    check("F1-isolation-kept", "--force-pep517" in bi["argv"] and "direct build" not in bi["stderr"].lower()
+          and all(not x["sys_path_outside_build_env_and_stdlib"] for x in per),
+          note="hook sys.path = build venv + 3.12.15 stdlib + rec dir (sitecustomize only)")
+    check("F1-no-network", not re.search(r"GET request|https://", bi["stderr"] + bp["stderr"]))
+    check("F1-stdout-stderr-noninterference", bp["stdout"] == bi["stdout"].replace(str(SCR / "dist-inst"), str(SCR / "dist-plain")),
+          note="stdout equal after out-dir substitution; stderr differs by paths/timings only (not asserted)")
+
+    # F-2 failing build: same non-zero exit with and without instrumentation; records still written.
+    fres = {}
+    for mode in ("plain", "inst"):
+        rd = SCR / f"rec-bad-{mode}"
+        rd.mkdir()
+        e = dict(env)
+        if mode == "inst":
+            e.update({"PYTHONPATH": str(C.REC_DIR), **C.rec_env(rd, bc, "feasibility failing hook")})
+        fres[mode] = (uv_build(r, f"F2-badbuild-{mode}", SCR / f"cache-bad-{mode}", SCR / f"dist-bad-{mode}", bad, e), rd)
+    fb, fi = fres["plain"][0], fres["inst"][0]
+    fenv, ferr = records(fres["inst"][1])
+    check("F2-failure-exit-preserved", fb["exit"] == fi["exit"] != 0 and len(fenv) == len(hook_calls(fi["stderr"]))
+          and not ferr, exits=[fb["exit"], fi["exit"]], hook_calls=len(hook_calls(fi["stderr"])), records=len(fenv))
+
+    # F-3 venv-level sitecustomize for `python -I` children (campaign venv design).
+    v = SCR / "fvenv"
+    vr = SCR / "rec-venv-create"
+    vr.mkdir()
+    cv = r.run("F3-venv-create", [C.PY, "-I", "-m", "venv", "--without-pip", v], SCR,
+               {**env, **C.rec_env(vr, bc, "venv creation")})
+    site = v / "lib/python3.12/site-packages"
+    shutil.copy2(C.REC_DIR / "sitecustomize.py", site / "sitecustomize.py")
+    (site / "zz_s3_locked_env.pth").write_text(str(C.WT_SITE) + "\n")
+    check("F3-venv", cv["exit"] == 0 and C.fsha(site / "sitecustomize.py") == C.fsha(C.REC_DIR / "sitecustomize.py"),
+          note="venv created by the base 3.12.15 process; no recorder in that base process (sitecustomize not on its path)",
+          base_process_records=len(records(vr)[0]))
+    probes = {"exit3": "import sys; sys.exit(3)", "raise": "raise ValueError('feas')",
+              "print": "print('hello')",
+              "arith": "import math; print([float.hex(math.exp(x)) for x in (-1.5, 0.1, 2.0, -700.0)])"}
+    for k, code in probes.items():
+        outs = {}
+        for mode in ("plain", "inst"):
+            rd = SCR / f"rec-I-{k}-{mode}"
+            rd.mkdir()
+            e = dict(env)
+            if mode == "inst":
+                e.update(C.rec_env(rd, bc, f"-I child {k}"))
+            p = r.run(f"F3-I-{k}-{mode}", [v / "bin/python", "-I", "-c", code], SCR, e)
+            outs[mode] = (p, records(rd))
+        (pp, _), (pi, (ie, ierr)) = outs["plain"], outs["inst"]
+        good, facts = (C.check_env_record(ie[0], expect_prefix=v, expect_subject=bc) if len(ie) == 1
+                       else (False, {}))
+        check(f"F3-I-{k}", pp["exit"] == pi["exit"] and pp["stdout"] == pi["stdout"]
+              and pp["stderr"] == pi["stderr"] and len(ie) == 1 and not ierr and good,
+              exits=[pp["exit"], pi["exit"]], stdout_equal=pp["stdout"] == pi["stdout"],
+              stderr_equal=pp["stderr"] == pi["stderr"], record=facts)
+
+    # F-4 pytest in the venv: (a) unmodified S2 ENV node from the BC export, with the observer plugin;
+    # (b) a disposable test spawning `sys.executable -I` children (the committed-test pattern).
+    disp = SCR / "disp"
+    disp.mkdir()
+    (disp / "test_disp.py").write_text(
+        "import subprocess, sys\n\n"
+        "def test_child(tmp_path):\n"
+        "    s = tmp_path / 'child.py'\n"
+        "    s.write_text('import sys; print(\"CHILD\", sys.flags.isolated)')\n"
+        "    p = subprocess.run([sys.executable, '-I', str(s)], capture_output=True, text=True, cwd=tmp_path)\n"
+        "    assert p.stdout.strip() == 'CHILD 1', p\n")
+    for sid, root, nodes in (("F4a-env-node", bc, ["tests/test_s2_environment_record.py::test_s2_environment_record_is_emitted"]),
+                             ("F4b-child", disp, ["test_disp.py::test_child"])):
+        rd = SCR / f"rec-{sid}"
+        po = SCR / f"plug-{sid}"
+        rd.mkdir()
+        po.mkdir()
+        xml = SCR / f"{sid}.xml"
+        e = {**env, **C.rec_env(rd, bc, sid), "PYTHONPATH": f"{root / 'src'}:{C.PLUGIN_DIR}",
+             "PYTHONDONTWRITEBYTECODE": "1", "S3REC_PLUGIN_OUT": str(po)}
+        p = r.run(sid, [v / "bin/python", "-m", "pytest", "-p", "no:cacheprovider", "-p", "s3rec_plugin",
+                        "--rootdir", root, f"--junitxml={xml}", "-W", "always::UserWarning", "-q", *nodes],
+                  root, e)
+        envs, errs = records(rd)
+        recs = [(f, *C.check_env_record(f, expect_prefix=v, expect_subject=bc)) for f in envs]
+        facts = {"exit": p["exit"], "records": [{"file": f.name, "ok": g, "argv": json.loads(f.read_text())["argv"]}
+                                                for f, g, _ in recs], "errors": [f.name for f in errs]}
+        if sid == "F4a-env-node":
+            m = re.findall(r"S2-ENV-RECORD sha256=([0-9a-f]{64}) (\{.*\})\s*$", p["stdout"], re.M)
+            plug = [json.loads(ln) for ln in (po / "s2-env-warning.txt").read_text().splitlines()] \
+                if (po / "s2-env-warning.txt").exists() else []
+            body_ok = len(m) == 1 and C.sha(m[0][1].encode()) == m[0][0]
+            same = len(plug) == 1 and plug[0]["message"] == f"S2-ENV-RECORD sha256={m[0][0]} {m[0][1]}" if m else False
+            body = json.loads(m[0][1]) if m else {}
+            facts.update({"stdout_records": len(m), "stdout_body_hash_verifies": body_ok,
+                          "plugin_records": len(plug), "plugin_equals_stdout": same,
+                          "node_body_cpu_brand": body.get("cpu", {}).get("[O] brand"),
+                          "node_body_lock": body.get("run", {}).get("[O] uv.lock sha256"),
+                          "node_body_commit": body.get("run", {}).get("[O] commit (git rev-parse HEAD)")})
+            good = (p["exit"] == 0 and body_ok and same and len(recs) == 1 and recs[0][1]
+                    and str(facts["node_body_cpu_brand"]).startswith("[O] ")
+                    and facts["node_body_lock"] == "[O] " + C.LOCK_PIN
+                    and "not a git repository" in str(facts["node_body_commit"]))
+        else:
+            kinds = sorted("child" if "-I" in (json.loads(f.read_text()).get("orig_argv") or []) else "main"
+                           for f, _, _ in recs)
+            facts["kinds"] = kinds
+            good = p["exit"] == 0 and kinds == ["child", "main"] and all(g for _, g, _ in recs) and not errs
+        bind = json.loads((po / "binding.json").read_text()) if (po / "binding.json").exists() else {}
+        facts["plugin_binding"] = bind
+        check(sid, good and bind.get("exitstatus") == 0, **facts)
+
+    RES["finished"] = C.now()
+    RES["ok"] = bool(OK[0])
+    RES["limits"] = [
+        "Non-interference is shown only for: identical exit status, identical artifacts (F-1), identical "
+        "stdout/stderr for the -I probes and identical exp() bits (F-3). It is not a proof of total "
+        "non-interference: the recorder runs extra code (S2 build_record, incl. subprocess probes) at "
+        "interpreter exit, after the payload, in the same process.",
+        "A process that ends by os._exit or a fatal signal leaves no record; drivers detect this by "
+        "comparing record counts with the observed process launches.",
+        "Hook processes add one sys.path entry (the rec dir); it holds only sitecustomize.py, so no other "
+        "module name becomes importable.",
+    ]
+    with open(OUT / "FEASIBILITY.json", "x") as fh:
+        fh.write(json.dumps(RES, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": RES["ok"], "checks": {k: [c["pass"] for c in v] for k, v in RES["checks"].items()}}))
+    sys.exit(0 if RES["ok"] else 1)
+
+
+if __name__ == "__main__":
+    main()

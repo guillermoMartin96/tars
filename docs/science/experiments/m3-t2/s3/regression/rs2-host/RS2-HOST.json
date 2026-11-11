@@ -1,0 +1,80 @@
+{
+ "record": "R-S2 host record comparison (report, with one exact projection check)",
+ "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+ "subject": {
+  "clone": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/scratch/d/rg/bcC",
+  "rev": "930e74f6c62719ad8aade6592493d1a1ba16c2a8"
+ },
+ "log": "/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1/d/rgates/full_suite_stdout.txt",
+ "log_sha256": "37dc4f4b92c51b21e0f638de5d48c8bdc7acf80ddf4393fe992412677bc89bcb",
+ "baseline": "a76470fbbc70471fcea24f26bf6120098e37c57c:docs/science/experiments/m3-t2/s2/i105/green/records/",
+ "extraction": {
+  "exit": 0,
+  "complete": true,
+  "pytest_summary_line": "1584 passed, 12 warnings in 1807.24s (0:30:07)"
+ },
+ "baseline_files": {
+  "S2-ENV-RECORD": {
+   "sha256": "b792962b787c5f3386dc78eefeb52b24351be3a0545b6b079472758e7b618373",
+   "matches_committed_SHA256SUMS": true
+  },
+  "S2-G17A-REPORT": {
+   "sha256": "60171b3aab0a31293685b3d330472691f22451e3cd7c931064b8dc7eb339b8b0",
+   "matches_committed_SHA256SUMS": true
+  },
+  "S2-G17B-RECORD": {
+   "sha256": "0ca2c33f0a9ec56eacd22505c51edc099a11f8e9a66bcf6ac488877f1db68214",
+   "matches_committed_SHA256SUMS": true
+  }
+ },
+ "projection": {
+  "S2-G17A-REPORT": {
+   "equal": true,
+   "differing_keys": [],
+   "new": {
+    "check": "G-17a regeneration report (RG-POL-6)",
+    "entries_compared": 22665,
+    "class_X_coordinate_differences": 0,
+    "label_differences_at_identical_coordinates": 0,
+    "witness_slot_comparison_failures": [],
+    "environment_basis": "owner determination I-101: equality of sys.version, platform.platform(), platform.machine(), the uv.lock sha256 and the sha256 of the interpreter executable (real path resolved before hashing); commit SHA and CI-only run fields excluded",
+    "limitation": "ENV fields with unobservable values do not certify a perfectly reproduced library/build environment; a controlled regeneration comparison must record that limitation rather than assume matching proxy fields prove identity. (r83:83)"
+   }
+  },
+  "S2-G17B-RECORD": {
+   "equal": true,
+   "differing_keys": [],
+   "new": {
+    "check": "G-17b class X replay equality (OB-33)",
+    "class_X_entries_compared": 8853,
+    "differences": [],
+    "environment_basis": "owner determination I-101: equality of sys.version, platform.platform(), platform.machine(), the uv.lock sha256 and the sha256 of the interpreter executable (real path resolved before hashing); commit SHA and CI-only run fields excluded",
+    "limitation": "ENV fields with unobservable values do not certify a perfectly reproduced library/build environment; a controlled regeneration comparison must record that limitation rather than assume matching proxy fields prove identity. (r83:83)"
+   }
+  },
+  "S2-XP3-LISTING": {
+   "baseline": "none committed for host at L (report only)",
+   "new_entries": 22665,
+   "new_outcomes": "{'accepted': 19154, 'evolute_region': 64, 'non_convergence': 3447}",
+   "verified": true
+  }
+ },
+ "report_only": {
+  "S2-G17A-REPORT class_P_coordinate_differences": [
+   0,
+   0
+  ],
+  "Class P": "report-only (never gated)"
+ },
+ "S2-ENV-RECORD": {
+  "commit_field": "[O] 930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+  "commit_is_rev": true,
+  "uv_lock": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+  "drift_libm_digest_equal_to_baseline": true,
+  "libm_digest": [
+   "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+   "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e"
+  ]
+ },
+ "ok": true
+}

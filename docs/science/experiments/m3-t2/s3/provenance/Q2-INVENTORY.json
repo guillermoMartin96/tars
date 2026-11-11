@@ -1,0 +1,686 @@
+{
+ "checks": {
+  "all_exit_0": true,
+  "no_unclassified": true,
+  "none_has_S2_ENV_RECORD": true,
+  "run_count": 22,
+  "status_clean": true,
+  "subjects_match": true
+ },
+ "groups": {
+  "LOCAL-A": {
+   "other_steps_not_in_Q2": [
+    {
+     "argv": "git rev-parse HEAD HEAD\\^\\{tree\\}",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-00-head.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "8086ef5520b7032d444d0012320a0349100a1fe8b72477069ebcdc78cf49bc51",
+     "step": "00-head",
+     "utc_end": "2026-11-10T22:38:32Z",
+     "utc_start": "2026-11-10T22:38:32Z"
+    },
+    {
+     "argv": "env GIT_OPTIONAL_LOCKS=0 git status --porcelain=v1 --untracked-files=all",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-00-status.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "46ccca88e8e2e899839269948bf244cfb9d1578ec1cb3edb412062ca00f11541",
+     "step": "00-status",
+     "utc_end": "2026-11-10T22:38:33Z",
+     "utc_start": "2026-11-10T22:38:32Z"
+    },
+    {
+     "argv": "r ruff check .",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-02-ruff-check.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "12353fc2d5c5e6e4c48ffc866a9ae4714977c52ebbed5141fec690cea7f229b9",
+     "step": "02-ruff-check",
+     "utc_end": "2026-11-10T22:38:39Z",
+     "utc_start": "2026-11-10T22:38:38Z"
+    },
+    {
+     "argv": "r ruff format --check .",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-03-ruff-format.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "6eb738053a6c613a50396caf714ab8f02cb8a7d3e06109078b9a66a40fae407d",
+     "step": "03-ruff-format",
+     "utc_end": "2026-11-10T22:38:39Z",
+     "utc_start": "2026-11-10T22:38:39Z"
+    },
+    {
+     "argv": "r python -m pytest -p no:cacheprovider --junitxml=/Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-A/pytest-junit.xml -W always::UserWarning",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-04-pytest.txt",
+     "has_S2_ENV_RECORD": true,
+     "has_uv_lock_pin": true,
+     "sha256": "4197e35d964561d7293f311acdd99c36ba6fdc98ff9deb49fca49e2055e7a901",
+     "step": "04-pytest",
+     "utc_end": "2026-11-10T23:07:33Z",
+     "utc_start": "2026-11-10T22:38:39Z"
+    },
+    {
+     "argv": "env GIT_OPTIONAL_LOCKS=0 git status --porcelain=v1 --untracked-files=all",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-12-status-after.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "399cf89a233ebbd525d8460d2a697b3cb718705f80c5fad59e60cf344c2cb9b3",
+     "step": "12-status-after",
+     "utc_end": "2026-11-10T23:10:44Z",
+     "utc_start": "2026-11-10T23:10:44Z"
+    }
+   ],
+   "runs": [
+    {
+     "argv": "r python toolbox/validators/m2_cross_platform.py collect --out /Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-A/m2-xp-host.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-01-m2-xp-collect.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "b529d84e6daf9006ce51cf712ba54f3dd11e7b670e79b440cf013de93f2ca7a1",
+     "step": "01-m2-xp-collect",
+     "utc_end": "2026-11-10T22:38:38Z",
+     "utc_start": "2026-11-10T22:38:33Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-05-determinism.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "501f14212b1b83a886e99d664a17b3c16746254641ac60927c2d34768792a989",
+     "step": "05-determinism",
+     "utc_end": "2026-11-10T23:07:36Z",
+     "utc_start": "2026-11-10T23:07:34Z"
+    },
+    {
+     "argv": "r python toolbox/validators/cross_platform.py",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-06-cross-platform.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "1b8db052bb5450d7948cf3f7f312f37751930531efe70068ab72afa098a95a9f",
+     "step": "06-cross-platform",
+     "utc_end": "2026-11-10T23:07:37Z",
+     "utc_start": "2026-11-10T23:07:36Z"
+    },
+    {
+     "argv": "r python toolbox/scripts/gmat_m1.py compare",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-07-gmat-m1-compare.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "844eabacd52b81640b63fee00a8922ba15a0b4a70e97dc81ce79da81bdee574b",
+     "step": "07-gmat-m1-compare",
+     "utc_end": "2026-11-10T23:07:38Z",
+     "utc_start": "2026-11-10T23:07:37Z"
+    },
+    {
+     "argv": "r python toolbox/validators/m1_proof.py --out /Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-A/m1_non_gmat_host.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-08-m1-proof.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "dbb74ebbdb09331da6c841171bb543f97029656b2b30f7657909608fde091067",
+     "step": "08-m1-proof",
+     "utc_end": "2026-11-10T23:07:48Z",
+     "utc_start": "2026-11-10T23:07:38Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_burn_to_depletion.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-09-m2-determinism-m2_burn_to_depletion.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "795a7332ce3a529002a15c71ea6d3ac5479f8c462540592e0dd804f1af649d61",
+     "step": "09-m2-determinism-m2_burn_to_depletion",
+     "utc_end": "2026-11-10T23:07:51Z",
+     "utc_start": "2026-11-10T23:07:48Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_invalid_commands.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-09-m2-determinism-m2_invalid_commands.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "729686f907b2f7cf24aa355b45d4d4600820be6f11aa006f9e8445e2ca226990",
+     "step": "09-m2-determinism-m2_invalid_commands",
+     "utc_end": "2026-11-10T23:07:54Z",
+     "utc_start": "2026-11-10T23:07:51Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_prograde_burn.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-09-m2-determinism-m2_prograde_burn.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "d417058ecab6d94bffce879599ecacc2ac844bea4671b25b2e3e27591a7ca657",
+     "step": "09-m2-determinism-m2_prograde_burn",
+     "utc_end": "2026-11-10T23:07:57Z",
+     "utc_start": "2026-11-10T23:07:54Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_retrograde_burn.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-09-m2-determinism-m2_retrograde_burn.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "f36f2b3e7ae870caa9e59670cd5f362697a8c5e3f72fcdae6709f7d4582f22b9",
+     "step": "09-m2-determinism-m2_retrograde_burn",
+     "utc_end": "2026-11-10T23:08:00Z",
+     "utc_start": "2026-11-10T23:07:57Z"
+    },
+    {
+     "argv": "r python toolbox/scripts/gmat_m2.py compare",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-10-gmat-m2-compare.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "bbcc4e641a1dd1d0e35fe4ca4b4ba1b551d49777cf5acff439d5c84ca42fedfd",
+     "step": "10-gmat-m2-compare",
+     "utc_end": "2026-11-10T23:08:35Z",
+     "utc_start": "2026-11-10T23:08:00Z"
+    },
+    {
+     "argv": "r python toolbox/validators/m2_proof.py --out /Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-A/m2_host.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-A-11-m2-proof.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "12f9ef1aee7b2ed41b8525ba3148e2aa9dda0b3007160ba1a581e98e2d20e9ef",
+     "step": "11-m2-proof",
+     "utc_end": "2026-11-10T23:10:44Z",
+     "utc_start": "2026-11-10T23:08:35Z"
+    }
+   ],
+   "status_before_clean": true,
+   "step_outputs": {
+    "records/LOCAL-A/m1_non_gmat_host.json": "2f2625c2544d3f07d0b9e42c9644281041ce10aa75ea8180f485880b468c7d6e",
+    "records/LOCAL-A/m2-xp-host.json": "1eb77364589b5af6688118f8d8492de46bf08444067c4fc66ce8f6ad8d690711",
+    "records/LOCAL-A/m2_host.json": "5995399ca7c78fd22cc2d7b9ccf9b17e2f07a00ce50c1df5fadfb7d18f4136ab",
+    "records/LOCAL-A/pytest-junit.xml": "80615f6d70f3736d029c6b192e84c607d8db18a68ba49f66b54764a9aa923e67"
+   },
+   "subject_head_record": {
+    "expected_commit": "1c4d2cc612120feb432befd11f80b20d6849cfea",
+    "file": "records/LOCAL-A-00-head.txt",
+    "head": "1c4d2cc612120feb432befd11f80b20d6849cfea",
+    "match": true,
+    "sha256": "8086ef5520b7032d444d0012320a0349100a1fe8b72477069ebcdc78cf49bc51",
+    "tree": "d5df8c7fcac20bb9db39e08e92960e4c728050ed"
+   }
+  },
+  "LOCAL-BC": {
+   "other_steps_not_in_Q2": [
+    {
+     "argv": "git rev-parse HEAD HEAD\\^\\{tree\\}",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-00-head.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "9a334d48f63ce96fea0c759eac7eeb898f6e33fd62e343fe17087472e0ef03d4",
+     "step": "00-head",
+     "utc_end": "2026-11-11T00:44:03Z",
+     "utc_start": "2026-11-11T00:44:03Z"
+    },
+    {
+     "argv": "env GIT_OPTIONAL_LOCKS=0 git status --porcelain=v1 --untracked-files=all",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-00-status.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "b592779bf1b7b98b2ee8959e713d8d0c34592b05d5e9d1f39975413ab56ea798",
+     "step": "00-status",
+     "utc_end": "2026-11-11T00:44:03Z",
+     "utc_start": "2026-11-11T00:44:03Z"
+    },
+    {
+     "argv": "r ruff check .",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-02-ruff-check.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "4fed124bd433971743c2929b16a884d88c53ffb3edef3d5edb45f17131943387",
+     "step": "02-ruff-check",
+     "utc_end": "2026-11-11T00:44:08Z",
+     "utc_start": "2026-11-11T00:44:08Z"
+    },
+    {
+     "argv": "r ruff format --check .",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-03-ruff-format.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "cf4c8fd5d1d8933d3aea0ce04450df7f2f3dcf1493b9873c088f78dafa777c33",
+     "step": "03-ruff-format",
+     "utc_end": "2026-11-11T00:44:08Z",
+     "utc_start": "2026-11-11T00:44:08Z"
+    },
+    {
+     "argv": "r python -m pytest -p no:cacheprovider --junitxml=/Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-BC/pytest-junit.xml -W always::UserWarning",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-04-pytest.txt",
+     "has_S2_ENV_RECORD": true,
+     "has_uv_lock_pin": true,
+     "sha256": "2c57fa3a8c8d1d7d1f66244523a4d33bc41efd0ec9ce9bbdadf9c6106260c71e",
+     "step": "04-pytest",
+     "utc_end": "2026-11-11T01:13:09Z",
+     "utc_start": "2026-11-11T00:44:08Z"
+    },
+    {
+     "argv": "env GIT_OPTIONAL_LOCKS=0 git status --porcelain=v1 --untracked-files=all",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-12-status-after.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "sha256": "2451f723b178cba0951f369a2be1be7000b6533974b3cd8e79626018cd6c2370",
+     "step": "12-status-after",
+     "utc_end": "2026-11-11T01:16:13Z",
+     "utc_start": "2026-11-11T01:16:13Z"
+    }
+   ],
+   "runs": [
+    {
+     "argv": "r python toolbox/validators/m2_cross_platform.py collect --out /Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-BC/m2-xp-host.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-01-m2-xp-collect.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "503a14f123adea81d65744f18932d1f31841619a9840ad284acf4626fb19fb67",
+     "step": "01-m2-xp-collect",
+     "utc_end": "2026-11-11T00:44:08Z",
+     "utc_start": "2026-11-11T00:44:03Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-05-determinism.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "3086d1c72ae28655623dee04c15be30b478191d355c54ba69997db39d19d49ca",
+     "step": "05-determinism",
+     "utc_end": "2026-11-11T01:13:11Z",
+     "utc_start": "2026-11-11T01:13:09Z"
+    },
+    {
+     "argv": "r python toolbox/validators/cross_platform.py",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-06-cross-platform.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "bf6732b3f04b044244647e6ab7e4452f4be86cd55a593ef61a04937ebdc8f520",
+     "step": "06-cross-platform",
+     "utc_end": "2026-11-11T01:13:12Z",
+     "utc_start": "2026-11-11T01:13:11Z"
+    },
+    {
+     "argv": "r python toolbox/scripts/gmat_m1.py compare",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-07-gmat-m1-compare.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "cb70cc7311d3dd51c6a1d10f5dd53852f73bb293dc2d2e6c45167752ec9787ca",
+     "step": "07-gmat-m1-compare",
+     "utc_end": "2026-11-11T01:13:13Z",
+     "utc_start": "2026-11-11T01:13:12Z"
+    },
+    {
+     "argv": "r python toolbox/validators/m1_proof.py --out /Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-BC/m1_non_gmat_host.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-08-m1-proof.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "43686aaf366cfe7ef5d7f0bf2f92ba1a2d06c7fd4537f1b4a68d44b7ae0b7220",
+     "step": "08-m1-proof",
+     "utc_end": "2026-11-11T01:13:23Z",
+     "utc_start": "2026-11-11T01:13:13Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_burn_to_depletion.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-09-m2-determinism-m2_burn_to_depletion.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "cc7ec3cc5625b30e5f928a6af2e986467c81914c7f7235dfd13f77907886aad0",
+     "step": "09-m2-determinism-m2_burn_to_depletion",
+     "utc_end": "2026-11-11T01:13:25Z",
+     "utc_start": "2026-11-11T01:13:23Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_invalid_commands.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-09-m2-determinism-m2_invalid_commands.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "0c3e120f1caa9cda98a3ca83dd2d312519fc03f0c1312b2559eb34a3d576ff22",
+     "step": "09-m2-determinism-m2_invalid_commands",
+     "utc_end": "2026-11-11T01:13:28Z",
+     "utc_start": "2026-11-11T01:13:25Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_prograde_burn.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-09-m2-determinism-m2_prograde_burn.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "ef295851f6d31a2c6177874cf79c68f110fb59b4e6866f712c9411a150d7cc7d",
+     "step": "09-m2-determinism-m2_prograde_burn",
+     "utc_end": "2026-11-11T01:13:31Z",
+     "utc_start": "2026-11-11T01:13:28Z"
+    },
+    {
+     "argv": "r python toolbox/validators/determinism.py --scenario scenarios/m2_retrograde_burn.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-09-m2-determinism-m2_retrograde_burn.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "b75d41f5a5118e521824f713d7b98341f2517977ce083c836d68d0687dfc84d9",
+     "step": "09-m2-determinism-m2_retrograde_burn",
+     "utc_end": "2026-11-11T01:13:33Z",
+     "utc_start": "2026-11-11T01:13:31Z"
+    },
+    {
+     "argv": "r python toolbox/scripts/gmat_m2.py compare",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-10-gmat-m2-compare.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "a4b831d059581bf19508a541490023518bfcb65def5786e754054c894816489f",
+     "step": "10-gmat-m2-compare",
+     "utc_end": "2026-11-11T01:14:09Z",
+     "utc_start": "2026-11-11T01:13:33Z"
+    },
+    {
+     "argv": "r python toolbox/validators/m2_proof.py --out /Users/guillermomartin/tars-evidence/S3-implementation-v1/records/LOCAL-BC/m2_host.json",
+     "cwd": null,
+     "exit": "0",
+     "file": "records/LOCAL-BC-11-m2-proof.txt",
+     "has_S2_ENV_RECORD": false,
+     "has_uv_lock_pin": false,
+     "missing_fields": [
+      "S2 ENV record (r2 \u00a77.1 via the S2 ENV node)",
+      "libm behaviour digest",
+      "FP configuration",
+      "CPU fields",
+      "Python build configuration",
+      "executable sha256 (in-process)",
+      "libpython sha256 (in-process)",
+      "uv.lock sha256"
+     ],
+     "sha256": "5324c869c814cff81c54aeba20df82b406ffd03b2166e8c59975a883cb6de7c3",
+     "step": "11-m2-proof",
+     "utc_end": "2026-11-11T01:16:13Z",
+     "utc_start": "2026-11-11T01:14:09Z"
+    }
+   ],
+   "status_before_clean": true,
+   "step_outputs": {
+    "records/LOCAL-BC/m1_non_gmat_host.json": "2f2625c2544d3f07d0b9e42c9644281041ce10aa75ea8180f485880b468c7d6e",
+    "records/LOCAL-BC/m2-xp-host.json": "24cb35a221ea37cc88064449d9f18f9a730907794840439bc688a2f575dbf3b6",
+    "records/LOCAL-BC/m2_host.json": "5995399ca7c78fd22cc2d7b9ccf9b17e2f07a00ce50c1df5fadfb7d18f4136ab",
+    "records/LOCAL-BC/pytest-junit.xml": "75a4d94028cd0ae2e45fbfdba6fb7343fc54a17008507950af5dc340effcd51d"
+   },
+   "subject_head_record": {
+    "expected_commit": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+    "file": "records/LOCAL-BC-00-head.txt",
+    "head": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+    "match": true,
+    "sha256": "9a334d48f63ce96fea0c759eac7eeb898f6e33fd62e343fe17087472e0ef03d4",
+    "tree": "1d2e9cab9b0f084ab0892d4e66d59b12bb84243d"
+   }
+  }
+ },
+ "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+ "record": "Q-2 closed inventory: LOCAL-A / LOCAL-BC non-pytest numerical pre-push runs missing own ENV/lock provenance (LIMITED HISTORICAL NONBLOCKING PROCEDURAL DEPARTURE)",
+ "unclassified": [],
+ "utc": "2026-11-11T16:16:20Z"
+}

@@ -1,0 +1,157 @@
+"""Shared constants and helpers for S3-provenance-contract-recovery-v1 drivers (loaded by path)."""
+
+import hashlib
+import json
+import os
+import subprocess
+import tarfile
+from datetime import UTC, datetime
+from pathlib import Path
+
+PKT = Path("/Users/guillermomartin/tars-evidence/S3-provenance-contract-recovery-v1")
+TOOLS = PKT / "tools"
+REC_DIR = TOOLS / "rec"            # contains ONLY sitecustomize.py
+PLUGIN_DIR = TOOLS / "plugin"      # contains ONLY s3rec_plugin.py
+ENVCAP = TOOLS / "envcap2.py"
+WT = Path("/Users/guillermomartin/.superset/worktrees/tars/milestone-3-t2-s3-density")
+WT_SITE = WT / ".venv/lib/python3.12/site-packages"
+BC = "930e74f6c62719ad8aade6592493d1a1ba16c2a8"
+BC_TREE = "1d2e9cab9b0f084ab0892d4e66d59b12bb84243d"
+UV = "/Users/guillermomartin/Library/Python/3.9/bin/uv"
+UV_SHA = "566a2724"  # prefix recorded in earlier packets; full value re-measured per run
+PY = "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/bin/python3.12"
+PY_SHA = "de2897e09ad77b506256de7d39ef317cb8c432b8396fb169af0395adc57147e9"
+LIBPY = "/Users/guillermomartin/.local/share/uv/python/cpython-3.12.15-macos-x86_64-none/lib/libpython3.12.dylib"
+LIBPY_SHA = "2ecb77efa34b943e87aba4a6ad5bc1bef8a5e20f2b984df0c7b9e768da2c69c4"
+REC_PKT = Path("/Users/guillermomartin/tars-evidence/S3-phaseD-recovery-v1")
+BACKEND_WHL = REC_PKT / "backend/dist/uv_build-0.12.24-py3-none-macosx_10_12_x86_64.whl"
+BACKEND_SHA = "fa4f087d67b6621501264934ee450db845a84eda2f7f0b7d0a14a7cee38d6dc9"
+LOCK_PIN = "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+PIN = "75762f679f82e089a4a6eadaa1251c797a2151aab5311b36b2ae96cffefda85e"
+DATA_BLOB = "ec7f1e2023adba77711abf0c8c3c84577bbf49fc"
+LABEL = "densities are UNVERIFIED ABOVE 1000 KM (P5)"
+SYS_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"   # /usr/sbin: sysctl (legitimate CPU probes)
+
+
+def now():
+    return datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def sha(b: bytes) -> str:
+    return hashlib.sha256(b).hexdigest()
+
+
+def fsha(p) -> str:
+    return sha(Path(p).read_bytes())
+
+
+def git_blob(b: bytes) -> str:
+    return hashlib.sha1(b"blob %d\0" % len(b) + b).hexdigest()
+
+
+def base_env(tmp: Path, ceiling: Path) -> dict:
+    return {"PATH": SYS_PATH, "HOME": os.environ["HOME"], "TMPDIR": str(tmp), "LANG": "C.UTF-8",
+            "GIT_CEILING_DIRECTORIES": str(ceiling), "UV_OFFLINE": "1", "UV_PYTHON_DOWNLOADS": "never",
+            "UV_NO_PROGRESS": "1"}
+
+
+def rec_env(rec_out: Path, subject: Path, label: str) -> dict:
+    return {"S3REC_DIR": str(rec_out), "S3REC_SUBJECT": str(subject), "S3REC_LABEL": label,
+            "S3REC_ENVCAP": str(ENVCAP)}
+
+
+class Runner:
+    """Runs exact argv with an explicitly constructed env; writes <dir>/<NNN-id>.{json,stdout,stderr}."""
+
+    def __init__(self, d: Path, start: int = 0):
+        self.d = d
+        self.n = start
+        d.mkdir(parents=True, exist_ok=False)
+
+    def run(self, sid, argv, cwd, env, timeout=3600):
+        self.n += 1
+        name = f"{self.n:03d}-{sid}"
+        argv = [str(a) for a in argv]
+        s = now()
+        p = subprocess.run(argv, cwd=str(cwd), env=env, capture_output=True, timeout=timeout)
+        e = now()
+        (self.d / f"{name}.stdout").write_bytes(p.stdout)
+        (self.d / f"{name}.stderr").write_bytes(p.stderr)
+        rec = {"step": name, "argv": argv, "cwd": str(cwd), "env_passed": env, "utc_start": s,
+               "utc_end": e, "exit": p.returncode, "stdout_sha256": sha(p.stdout),
+               "stderr_sha256": sha(p.stderr), "label": LABEL}
+        with open(self.d / f"{name}.json", "x") as fh:
+            fh.write(json.dumps(rec, indent=1) + "\n")
+        rec["stdout"], rec["stderr"] = p.stdout.decode(errors="replace"), p.stderr.decode(errors="replace")
+        return rec
+
+
+def export_bc(r: Runner, dest: Path, tar_path: Path, env: dict) -> dict:
+    """git archive of exact BC into dest; verify every file against BC ls-tree blob ids."""
+    genv = {**env, "GIT_CEILING_DIRECTORIES": ""}
+    a = r.run("bc-archive", ["git", "-C", WT, "archive", "--format=tar", "-o", tar_path, BC], dest.parent, genv)
+    ls = r.run("bc-ls-tree", ["git", "-C", WT, "ls-tree", "-r", "--full-tree", BC], dest.parent, genv)
+    dest.mkdir()
+    with tarfile.open(tar_path) as tf:
+        tf.extractall(dest, filter="data")
+    want = {ln.split("\t", 1)[1]: ln.split("\t", 1)[0].split()[2] for ln in ls["stdout"].splitlines()}
+    got = {str(p.relative_to(dest)): git_blob(p.read_bytes()) for p in sorted(dest.rglob("*"))
+           if p.is_file() or p.is_symlink()}
+    mism = sorted(k for k in set(want) | set(got) if want.get(k) != got.get(k))
+    data = (dest / "src/tars/sim/data/EarthExponentialAtmosphereData.txt").read_bytes()
+    return {"ok": a["exit"] == 0 and ls["exit"] == 0 and not mism and sha(data) == PIN
+            and git_blob(data) == DATA_BLOB and fsha(dest / "uv.lock") == LOCK_PIN,
+            "tar_sha256": fsha(tar_path), "files": len(got), "blob_mismatches": mism,
+            "data_sha256": sha(data), "uv_lock_sha256": fsha(dest / "uv.lock"),
+            "manifest": got}
+
+
+def check_env_record(path, expect_prefix=None, expect_subject=None) -> tuple[bool, dict]:
+    """Completeness of one own-process ENV record (the declared contract)."""
+    try:
+        e = json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return False, {"error": f"missing/unreadable: {exc}"}
+    s2 = e.get("s2_env_record", {})
+    b = s2.get("body") or {}
+    run = b.get("run", {})
+    cpu = b.get("cpu", {})
+    libm = b.get("libm behaviour digest", {})
+    py = b.get("python", {})
+    body_text = json.dumps(b, sort_keys=True, default=str) if b else ""
+    f = {
+        "pid": e.get("pid"), "observer": e.get("observer"), "label": e.get("label"),
+        "s2_error": s2.get("error"),
+        "s2_body_sha256_verifies": bool(b) and sha(body_text.encode()) == s2.get("S2-ENV-RECORD body sha256"),
+        "libm_arguments": libm.get("[O] arguments"), "libm_results": libm.get("[O] results hashed"),
+        "libm_sha256": libm.get("[O] sha256"),
+        "cpu_brand": cpu.get("[O] brand"),
+        "cpu_artificial_U": sorted(k for k, v in cpu.items() if isinstance(v, str) and "No such file" in v),
+        "fp_fields": len(b.get("floating_point", {})),
+        "build_config_present": bool(b.get("build_config [P]")),
+        "exe_realpath_in_body": py.get("[O] executable realpath"),
+        "exe_sha_in_body": py.get("[O] executable sha256"),
+        "libpython_sha_in_body": py.get("[P] libpython sha256"),
+        "lock_in_body": run.get("[O] uv.lock sha256"),
+        "lock_independent": e.get("subject_uv_lock_sha256_independent"),
+        "commit_field": run.get("[O] commit (git rev-parse HEAD)"),
+        "executable_realpath": e.get("executable_realpath"), "executable_sha256": e.get("executable_sha256"),
+        "libpython_sha256": e.get("libpython_sha256"), "sys.version": e.get("sys.version"),
+        "sys.prefix": e.get("sys.prefix"), "subject_root": e.get("subject_root"),
+        "label_p5": e.get("label_p5"),
+    }
+    commit = f["commit_field"] or ""
+    ok = (not f["s2_error"] and f["s2_body_sha256_verifies"] and f["libm_arguments"] == 6235
+          and f["libm_results"] == 7175 and isinstance(f["cpu_brand"], str) and f["cpu_brand"].startswith("[O] ")
+          and not f["cpu_artificial_U"] and f["fp_fields"] > 0 and f["build_config_present"]
+          and f["exe_realpath_in_body"] == PY and f["exe_sha_in_body"] == "[O] " + PY_SHA
+          and f["libpython_sha_in_body"] == "[O] " + LIBPY_SHA
+          and f["lock_in_body"] == "[O] " + LOCK_PIN and f["lock_independent"] == LOCK_PIN
+          and f["executable_realpath"] == PY and f["executable_sha256"] == PY_SHA
+          and f["libpython_sha256"] == LIBPY_SHA and str(f["sys.version"]).startswith("3.12.15 ")
+          and commit.startswith("[U] unavailable") and "not a git repository" in commit
+          and f["label_p5"] == LABEL
+          and (expect_subject is None or Path(f["subject_root"]) == Path(expect_subject))
+          and (expect_prefix is None or Path(f["sys.prefix"]) == Path(expect_prefix)))
+    f["ok"] = bool(ok)
+    return bool(ok), f

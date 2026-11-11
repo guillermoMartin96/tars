@@ -1,0 +1,144 @@
+"""Independent re-verification of the single campaign from its RETAINED files (no re-execution).
+
+Usage: python3.12 -I -B assess.py <out.json> (new)
+
+Written after campaign2.py stopped at M-29 (the last mutant) with "INVALID-RECORD: process records 1
+(children expected 1)". campaign2.py derived the expected child count statically (one child per
+designated node of a spawning test). That is wrong when a test fails before reaching its spawn: a
+committed test writes its probe script into its tmp_path immediately before `subprocess.run`
+(tests/test_s3_atmosphere_data.py `_probe`; tests/test_s3_density.py t05b). This assessment therefore
+binds children to the probe scripts actually written in each execution's tmp tree: every written
+probe script must have exactly one complete child ENV record whose argv names it, and every child
+record must name a written probe script. CAMPAIGN.json is NOT modified; its driver verdicts stand as
+recorded. Kill criterion unchanged (v4 §10.1): designated node JUnit failure, message starts with
+AssertionError and carries the designated tag; ENV node passed; same-campaign control passed.
+"""
+
+import importlib.util
+import json
+import re
+import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).parents[1] / "common.py"))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+_m = importlib.util.spec_from_file_location("frozen_mutants", str(Path(__file__).with_name("mutants.py")))
+M = importlib.util.module_from_spec(_m)
+_m.loader.exec_module(M)
+
+OUT = C.PKT / "campaign"
+SCR = C.PKT / "scratch" / "campaign"
+VENV = SCR / "cvenv"
+ENV_NODE = "tests.test_s2_environment_record::test_s2_environment_record_is_emitted"
+PROBES = ("s3_probe.py", "s3_fresh_import.py")
+
+
+def key(node):
+    path, name = node.split("::")
+    return f"{path[:-3].replace('/', '.')}::{name}"
+
+
+def junit(xml):
+    cases = {}
+    for c in ET.parse(xml).getroot().iter("testcase"):
+        f, er, sk = c.find("failure"), c.find("error"), c.find("skipped")
+        o = "failure" if f is not None else "error" if er is not None else "skipped" if sk is not None else "passed"
+        el = f if f is not None else er
+        cases[f"{c.get('classname')}::{c.get('name')}"] = (o, el.get("message", "") if el is not None else "")
+    return cases
+
+
+def verify(eid, nodes):
+    rd, subj, tmp = OUT / "runs" / eid, SCR / "subjects" / eid, SCR / "tmp" / eid
+    run = json.loads(next((rd / "run").glob("*-pytest.json")).read_text())
+    so = next((rd / "run").glob("*-pytest.stdout")).read_text()
+    probs = []
+    if C.fsha(next((rd / "run").glob("*-pytest.stdout"))) != run["stdout_sha256"]:
+        probs.append("stdout hash")
+    cases = junit(rd / "junit.xml")
+    if cases.get(ENV_NODE, ("absent",))[0] != "passed":
+        probs.append("ENV node not passed")
+    m = re.findall(r"S2-ENV-RECORD sha256=([0-9a-f]{64}) (\{.*\})\s*$", so, re.M)
+    plug = [json.loads(x) for x in (rd / "plugin/s2-env-warning.txt").read_text().splitlines()]
+    if not (len(m) == 1 and C.sha(m[0][1].encode()) == m[0][0] and len(plug) == 1
+            and plug[0]["message"] == f"S2-ENV-RECORD sha256={m[0][0]} {m[0][1]}"):
+        probs.append("S2 ENV node record")
+    else:
+        b = json.loads(m[0][1])
+        if not (b["cpu"]["[O] brand"].startswith("[O] ") and b["run"]["[O] uv.lock sha256"] == "[O] " + C.LOCK_PIN
+                and "not a git repository" in b["run"]["[O] commit (git rev-parse HEAD)"]
+                and b["python"]["[O] executable sha256"] == "[O] " + C.PY_SHA):
+            probs.append("S2 ENV node fields")
+    bind = json.loads((rd / "plugin/binding.json").read_text())
+    mods = bind["modules"]
+    if not ("tars" in mods and "tests.conftest" in mods and all(Path(f).is_relative_to(subj) for f in mods.values())
+            and bind["executable_realpath"] == C.PY):
+        probs.append("plugin binding")
+    written = sorted(str(p.resolve()) for p in tmp.rglob("*") if p.name in PROBES)
+    mains, children = [], []
+    for f in sorted((rd / "rec").glob("*.env.json")):
+        g, facts = C.check_env_record(f, expect_prefix=VENV, expect_subject=subj)
+        j = json.loads(f.read_text())
+        argv = j.get("orig_argv") or []
+        if j["pid"] == bind["pid"]:
+            mains.append((f.name, g, Path(j["module_origins_at_capture"].get("tars", "/")).is_relative_to(subj)))
+        else:
+            scripts = [str(Path(a).resolve()) for a in argv if a.endswith(".py")]
+            tars_o = j["module_origins_at_capture"].get("tars", "")
+            children.append((f.name, g, "-I" in argv, scripts,
+                             Path(tars_o).is_relative_to(subj) or Path(tars_o).is_relative_to(tmp.resolve())))
+    if list((rd / "rec").glob("*.error.txt")):
+        probs.append("recorder error file")
+    if len(mains) != 1 or not all(x[1] and x[2] for x in mains):
+        probs.append("main process record")
+    child_scripts = sorted(s for c in children for s in c[3])
+    if child_scripts != written or not all(c[1] and c[2] and c[4] and len(c[3]) == 1 for c in children):
+        probs.append(f"children: written probes {len(written)}, child records {len(children)}")
+    if C.fsha(subj / "uv.lock") != C.LOCK_PIN:
+        probs.append("subject uv.lock")
+    return {"id": eid, "exit": run["exit"], "utc": [run["utc_start"], run["utc_end"]], "problems": probs,
+            "probe_scripts_written": len(written), "child_records": len(children), "main_records": len(mains),
+            "cases": {n: cases.get(key(n)) for n in nodes}}
+
+
+def main():
+    out = Path(sys.argv[1])
+    if out.exists():
+        raise SystemExit("occupied")
+    camp = json.loads((OUT / "CAMPAIGN.json").read_text())
+    res = {"record": "campaign re-verification from retained files (no re-execution); CAMPAIGN.json unchanged",
+           "campaign_json_sha256": C.fsha(OUT / "CAMPAIGN.json"), "driver_stop": camp["stop"],
+           "label": C.LABEL, "executions": []}
+    union = sorted({n for _, _, _, ds in M.MUTANTS for n, _ in ds})
+    ctl = verify("control", union)
+    ctl["verdict"] = "CONTROL-PASSED" if (not ctl["problems"] and ctl["exit"] == 0
+                                          and all(v and v[0] == "passed" for v in ctl["cases"].values())) else "CONTROL-FAILED"
+    res["executions"].append(ctl)
+    for mid, cls, edits, ds in M.MUTANTS:
+        r = verify(mid, [n for n, _ in ds])
+        dv = next(x for x in camp["results"] if x["id"] == mid)
+        r.update({"class": cls, "driver_verdict": dv["verdict"], "edits_ok": dv.get("only_targets_changed") is True
+                  and all(e["count"] == e["declared"] for e in dv["edits"])})
+        kills = [(n, t, r["cases"][n]) for n, t in ds]
+        killed = all(c and c[0] == "failure" and c[1].startswith("AssertionError") and t in c[1] for n, t, c in kills)
+        r["verdict"] = ("KILLED" if killed and not r["problems"] and r["edits_ok"] and ctl["verdict"] == "CONTROL-PASSED"
+                        else "NOT-ESTABLISHED")
+        res["executions"].append(r)
+    res["summary"] = {"control": ctl["verdict"],
+                      "KILLED": [e["id"] for e in res["executions"][1:] if e["verdict"] == "KILLED"],
+                      "NOT-ESTABLISHED": [e["id"] for e in res["executions"][1:] if e["verdict"] != "KILLED"],
+                      "driver_vs_assessment_differences": [
+                          [e["id"], e["driver_verdict"], e["verdict"]] for e in res["executions"][1:]
+                          if e["driver_verdict"] != e["verdict"]]}
+    res["ok"] = ctl["verdict"] == "CONTROL-PASSED" and len(res["summary"]["KILLED"]) == 53
+    with open(out, "x") as fh:
+        fh.write(json.dumps(res, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": res["ok"], **{k: (v if not isinstance(v, list) or len(v) < 8 else len(v))
+                                          for k, v in res["summary"].items()}}))
+    sys.exit(0 if res["ok"] else 1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,254 @@
+{
+ "record": "CI collection and record extraction: BC run 42937733985",
+ "collect_utc": "2026-11-11T16:43:04Z",
+ "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+ "expected_head_sha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+ "jobs": {
+  "130251857367": {
+   "name": "check (macos-15-intel)",
+   "id": 130251857367,
+   "conclusion": "success",
+   "run_attempt": 1,
+   "head_sha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "started_at": "2026-11-11T01:16:28Z",
+   "completed_at": "2026-11-11T02:07:39Z",
+   "steps_succeeded": 19,
+   "steps": 19,
+   "raw_log_sha256": "8cfe72a9fc08f2d9d68b868af5d6a5993fd2935125350e75f90c24abe6a042c8",
+   "executed (not carried over)": true,
+   "strip_exit": 0,
+   "s2_extract_exit": 0,
+   "s2_status_complete": true,
+   "s3_records": {
+    "S3-POINTS": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "80e078dbffd939b0573218103aabd27347b90d0b4e50efb7e0adfccf774d29cb",
+     "label_present": true
+    },
+    "S3-DATA": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "993bd2548e8e23e2e4247ca9e4e3af032290d2d3b1519109fbd3f91a23493a19",
+     "label_present": true
+    },
+    "S3-TABLE-HEX": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "d7c91d965228b6897c667f6358867dd798467984e7e0037ac37536337d2bf0e6",
+     "label_present": true
+    },
+    "S3-DL4": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "3fe72f5db2c0ab10f75f066c47f7d5ce3805720d55ef3325bf83e255a0b291d1",
+     "label_present": true
+    },
+    "S3-XP3": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "6e14d63e85fb1024749841d49188785e0cda428f4b5cac499000f66609afb7b9",
+     "label_present": true
+    }
+   },
+   "env_commit": "[O] 930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "env_uv_lock": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+   "env_sys_version": "3.12.10 (v3.12.10:0cc81280367, Apr  8 2025, 08:47:00) [Clang 13.0.0 (clang-1300.0.29.30)]",
+   "dl4_points_compared": 3758,
+   "dl4_differences": [],
+   "points": {
+    "listing_sha256": "01d88386a41738f4c595afdd3e231cf6be8784513e980208834fd06e54355919",
+    "count": 3758
+   },
+   "pytest_summary": "1581 passed, 3 skipped, 12 warnings in 2772.52s (0:46:12)",
+   "R-S2": {
+    "baseline_job": 129496246579,
+    "projection_equal": true,
+    "differing": [],
+    "environment": "same",
+    "libm_digest": {
+     "new": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e",
+     "baseline": "d795fa002cabc6cdd2712b1bf58cf5f8fea6f0af93374376f7e81dec72383a3e"
+    },
+    "class_P_report_only": {
+     "new": 0,
+     "baseline": 0
+    }
+   },
+   "ok": true
+  },
+  "130251857625": {
+   "name": "check (macos-latest)",
+   "id": 130251857625,
+   "conclusion": "success",
+   "run_attempt": 1,
+   "head_sha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "started_at": "2026-11-11T01:16:28Z",
+   "completed_at": "2026-11-11T01:34:12Z",
+   "steps_succeeded": 19,
+   "steps": 19,
+   "raw_log_sha256": "54736e9a6154bf7515542a970eb540645afefebd8df1c9295661c0c83e632b41",
+   "executed (not carried over)": true,
+   "strip_exit": 0,
+   "s2_extract_exit": 0,
+   "s2_status_complete": true,
+   "s3_records": {
+    "S3-POINTS": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "80e078dbffd939b0573218103aabd27347b90d0b4e50efb7e0adfccf774d29cb",
+     "label_present": true
+    },
+    "S3-DATA": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "993bd2548e8e23e2e4247ca9e4e3af032290d2d3b1519109fbd3f91a23493a19",
+     "label_present": true
+    },
+    "S3-TABLE-HEX": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "d7c91d965228b6897c667f6358867dd798467984e7e0037ac37536337d2bf0e6",
+     "label_present": true
+    },
+    "S3-DL4": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "3fe72f5db2c0ab10f75f066c47f7d5ce3805720d55ef3325bf83e255a0b291d1",
+     "label_present": true
+    },
+    "S3-XP3": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "005cc132f84983e8da0539702a8dbd8a935a47b71c0188f2f4a451556d5ad57a",
+     "label_present": true
+    }
+   },
+   "env_commit": "[O] 930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "env_uv_lock": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+   "env_sys_version": "3.12.10 (v3.12.10:0cc81280367, Apr  8 2025, 08:46:59) [Clang 13.0.0 (clang-1300.0.29.30)]",
+   "dl4_points_compared": 3758,
+   "dl4_differences": [],
+   "points": {
+    "listing_sha256": "01d88386a41738f4c595afdd3e231cf6be8784513e980208834fd06e54355919",
+    "count": 3758
+   },
+   "pytest_summary": "1581 passed, 3 skipped, 11 warnings in 938.87s (0:15:38)",
+   "R-S2": {
+    "baseline_job": 129496246541,
+    "projection_equal": true,
+    "differing": [],
+    "environment": "same",
+    "libm_digest": {
+     "new": "36a552ed89c035c48958dffe0738e8c6e3811d64e176024262c0aaad9614a4fb",
+     "baseline": "36a552ed89c035c48958dffe0738e8c6e3811d64e176024262c0aaad9614a4fb"
+    },
+    "class_P_report_only": {
+     "new": 2188,
+     "baseline": 2188
+    }
+   },
+   "ok": true
+  },
+  "130251857686": {
+   "name": "check (ubuntu-latest)",
+   "id": 130251857686,
+   "conclusion": "success",
+   "run_attempt": 1,
+   "head_sha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "started_at": "2026-11-11T01:16:28Z",
+   "completed_at": "2026-11-11T01:30:27Z",
+   "steps_succeeded": 19,
+   "steps": 19,
+   "raw_log_sha256": "753609c44a93fe0aa9baf967f11764a2e443e50ba699828a3b5b661c95b8dde9",
+   "executed (not carried over)": true,
+   "strip_exit": 0,
+   "s2_extract_exit": 0,
+   "s2_status_complete": true,
+   "s3_records": {
+    "S3-POINTS": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "80e078dbffd939b0573218103aabd27347b90d0b4e50efb7e0adfccf774d29cb",
+     "label_present": true
+    },
+    "S3-DATA": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "993bd2548e8e23e2e4247ca9e4e3af032290d2d3b1519109fbd3f91a23493a19",
+     "label_present": true
+    },
+    "S3-TABLE-HEX": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "d7c91d965228b6897c667f6358867dd798467984e7e0037ac37536337d2bf0e6",
+     "label_present": true
+    },
+    "S3-DL4": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "3fe72f5db2c0ab10f75f066c47f7d5ce3805720d55ef3325bf83e255a0b291d1",
+     "label_present": true
+    },
+    "S3-XP3": {
+     "found": 1,
+     "verified": true,
+     "body_sha256": "818d30632ed270847fad3939361137ae759314bf3b2abbc0ec5e421f5fa1d66a",
+     "label_present": true
+    }
+   },
+   "env_commit": "[O] 930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "env_uv_lock": "[O] 6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+   "env_sys_version": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+   "dl4_points_compared": 3758,
+   "dl4_differences": [],
+   "points": {
+    "listing_sha256": "01d88386a41738f4c595afdd3e231cf6be8784513e980208834fd06e54355919",
+    "count": 3758
+   },
+   "pytest_summary": "1581 passed, 3 skipped, 12 warnings in 750.08s (0:12:30)",
+   "R-S2": {
+    "baseline_job": 129496246127,
+    "projection_equal": true,
+    "differing": [],
+    "environment": "drifted: ['cpu']",
+    "libm_digest": {
+     "new": "fb7fa080b432605b44bce33f454117ca02f1406e612cce7025c71cffa5acd7b9",
+     "baseline": "fb7fa080b432605b44bce33f454117ca02f1406e612cce7025c71cffa5acd7b9"
+    },
+    "class_P_report_only": {
+     "new": 2305,
+     "baseline": 2305
+    }
+   },
+   "ok": true
+  },
+  "130271683493": {
+   "name": "m2-cross-platform",
+   "id": 130271683493,
+   "conclusion": "success",
+   "run_attempt": 1,
+   "head_sha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+   "started_at": "2026-11-11T02:07:41Z",
+   "completed_at": "2026-11-11T02:07:54Z",
+   "steps_succeeded": 10,
+   "steps": 10,
+   "raw_log_sha256": "9fbfb4c2409263645fdc2f279bd60034ecfb5b62baf0f499c09b621f2b2e3ebb",
+   "executed (not carried over)": true,
+   "ok": true
+  }
+ },
+ "run": {
+  "databaseId": 42937733985,
+  "attempt": 1,
+  "headSha": "930e74f6c62719ad8aade6592493d1a1ba16c2a8",
+  "headBranch": "milestone-3-t2-s3-density",
+  "event": "push",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/guillermoMartin96/tars/actions/runs/42937733985",
+  "createdAt": "2026-11-11T01:16:26Z",
+  "updatedAt": "2026-11-11T02:07:54Z"
+ },
+ "ok": true
+}

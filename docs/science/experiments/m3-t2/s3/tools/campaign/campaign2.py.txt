@@ -1,0 +1,303 @@
+"""The single fresh committed-BC mutation campaign (owner instruction 2026-11-11 §4; v4 §10.1, §11.3 step 7,
+§11.4, §11.5; PC-7 §8, §9). Output-only external driver; committed tests and ENV definitions unchanged.
+
+Usage: python3.12 -I -B campaign2.py     (writes campaign/ and scratch/campaign; refuses if occupied)
+
+- Subjects: a fresh `git archive` of exact BC (blob-verified); one fresh extraction per execution.
+- Every pytest execution (control, then each mutant in frozen order) runs in the packet venv
+  (exact 3.12.15; venv site-packages = byte-identical external sitecustomize + one .pth to the existing
+  locked worktree site-packages) and includes the unmodified S2 ENV node in THE SAME process.
+- Per execution: run record (UTC, argv, cwd, env as passed, exit, stdout/stderr + sha256), JUnit, the
+  S2 ENV node's record from stdout (hash-verified) and from the observer plugin (must be equal), the
+  sitecustomize record of the pytest process and of every `-I` child, plugin import binding, subject
+  manifest vs BC blobs (control: identical; mutant: only declared targets differ), edit records.
+- STOP immediately at the first invalid record, binding failure, invalid edit, control failure,
+  survivor, error/skip/collection problem or ENV-node failure. No retry.
+"""
+
+import importlib.util
+import io
+import json
+import re
+import shutil
+import sys
+import tarfile
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).parents[1] / "common.py"))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+_m = importlib.util.spec_from_file_location("frozen_mutants", str(Path(__file__).with_name("mutants.py")))
+M = importlib.util.module_from_spec(_m)
+_m.loader.exec_module(M)
+
+OUT = C.PKT / "campaign"
+RUNS = OUT / "runs"
+SCR = C.PKT / "scratch" / "campaign"
+CEIL = C.PKT / "scratch"
+ENV_NODE = "tests/test_s2_environment_record.py::test_s2_environment_record_is_emitted"
+SPAWNERS = ("tests/test_s3_atmosphere_data.py::test_s3_t02b_fresh_import_order",
+            "tests/test_s3_atmosphere_data.py::test_s3_t02c_missing_file",
+            "tests/test_s3_density.py::test_s3_t05b_eager_table_and_unchanged_module_state")
+WRAP = '''import sys
+_env = sys.argv[-3:]
+del sys.argv[-3:]
+try:
+    import runpy
+    sys.argv = ["venv"] + sys.argv[1:]
+    runpy.run_module("venv", run_name="__main__", alter_sys=True)
+finally:
+    import importlib.util as _u
+    _sp = _u.spec_from_file_location("_envcap2", {envcap!r})
+    _m = _u.module_from_spec(_sp)
+    _sp.loader.exec_module(_m)
+    _m.capture(_env[0], _env[1], _env[2], "wrapper-finally")
+'''
+
+
+def node_key(node):
+    path, name = node.split("::")
+    return path[:-3].replace("/", "."), name
+
+
+def blob_manifest(root: Path) -> dict:
+    return {str(p.relative_to(root)): C.git_blob(p.read_bytes()) for p in sorted(root.rglob("*"))
+            if (p.is_file() or p.is_symlink()) and "__pycache__" not in p.parts}
+
+
+def parse_junit(xml: Path) -> dict:
+    cases = {}
+    if xml.exists():
+        for c in ET.parse(xml).getroot().iter("testcase"):
+            f, er, sk = c.find("failure"), c.find("error"), c.find("skipped")
+            outcome = "failure" if f is not None else "error" if er is not None else \
+                "skipped" if sk is not None else "passed"
+            el = f if f is not None else er
+            cases[(c.get("classname"), c.get("name"))] = {
+                "outcome": outcome, "message": el.get("message", "") if el is not None else ""}
+    return cases
+
+
+class Stop(Exception):
+    pass
+
+
+def main():
+    for d in (OUT / "CAMPAIGN.json", RUNS, SCR):
+        if d.exists():
+            raise SystemExit(f"occupied: {d}")
+    mv = json.loads((OUT / "MUTANT-VERIFY-2.json").read_text())
+    if not mv["ok"] or mv["checks"]["copy-identical"]["sha256"] != C.fsha(Path(__file__).with_name("mutants.py")):
+        raise SystemExit("STOP: mutant verification missing or mutants.py differs from the verified copy")
+    SCR.mkdir(parents=True)
+    (SCR / "tmp").mkdir()
+    RUNS.mkdir()
+    r = C.Runner(OUT / "steps")
+    env0 = C.base_env(SCR / "tmp", CEIL)
+    res = {"record": "S3 single fresh committed-BC mutation campaign (host kill evidence)", "started": C.now(),
+           "label": C.LABEL, "bc_sha": C.BC, "bc_tree": C.BC_TREE,
+           "mutants_py_sha256": C.fsha(Path(__file__).with_name("mutants.py")),
+           "mutant_verification": {"file": "campaign/MUTANT-VERIFY-2.json", "sha256": C.fsha(OUT / "MUTANT-VERIFY-2.json")},
+           "equivalents_not_run": M.EQUIVALENTS, "not_applicable": ["M-28a", "M-28b", "M-28c-a2"],
+           "env_node": ENV_NODE, "executions": [], "stop": None}
+    try:
+        exp = C.export_bc(r, SCR / "bc", SCR / "bc.tar", env0)
+        bc_man = exp.pop("manifest")
+        res["export"] = exp
+        if not exp["ok"]:
+            raise Stop("BC export verification failed")
+        tar_bytes = (SCR / "bc.tar").read_bytes()
+        # Packet venv (setup; its creating process records its own ENV).
+        venv = SCR / "cvenv"
+        vrec = OUT / "venv-create.env.json"
+        v = r.run("venv-create", [C.PY, "-I", "-c", WRAP.format(envcap=str(C.ENVCAP)), "--without-pip", venv,
+                                  vrec, SCR / "bc", "campaign venv creation (setup)"], SCR, env0)
+        site = venv / "lib/python3.12/site-packages"
+        shutil.copy2(C.REC_DIR / "sitecustomize.py", site / "sitecustomize.py")
+        (site / "zz_s3_locked_env.pth").write_text(str(C.WT_SITE) + "\n")
+        vg, vf = C.check_env_record(vrec, expect_subject=SCR / "bc")
+        res["venv"] = {"path": str(venv), "create_exit": v["exit"], "create_env": vf,
+                       "pyvenv.cfg": (venv / "pyvenv.cfg").read_text(),
+                       "sitecustomize_sha256": C.fsha(site / "sitecustomize.py"),
+                       "pth": (site / "zz_s3_locked_env.pth").read_text(),
+                       "locked_env_check": {"file": "assessment/LOCKED-ENV.json",
+                                            "sha256": C.fsha(C.PKT / "assessment/LOCKED-ENV.json")}}
+        if not (v["exit"] == 0 and vg and C.fsha(site / "sitecustomize.py") == C.fsha(C.REC_DIR / "sitecustomize.py")
+                and json.loads((C.PKT / "assessment/LOCKED-ENV.json").read_text())["ok"]):
+            raise Stop("campaign venv setup failed")
+
+        def execute(eid, nodes, edits):
+            subj = SCR / "subjects" / eid
+            subj.mkdir(parents=True)
+            with tarfile.open(fileobj=io.BytesIO(tar_bytes)) as tf:
+                tf.extractall(subj, filter="data")
+            rec = {"id": eid, "subject": str(subj), "edits": [], "nodes": nodes}
+            for ed in edits:
+                t = subj / ed["path"]
+                text = t.read_text(encoding="utf-8")
+                n = text.count(ed["old"])
+                er = {"path": ed["path"], "count": n, "declared": ed["count"], "before": C.fsha(t),
+                      "edit_sha256": C.sha(json.dumps(ed, sort_keys=True).encode())}
+                rec["edits"].append(er)
+                if n != ed["count"]:
+                    rec["verdict"] = "INVALID-EDIT"
+                    return rec
+                t.write_text(text.replace(ed["old"], ed["new"], 1), encoding="utf-8")
+                er["after"] = C.fsha(t)
+            man = blob_manifest(subj)
+            changed = sorted(k for k in set(man) | set(bc_man) if man.get(k) != bc_man.get(k))
+            targets = sorted({e["path"] for e in edits})
+            rec.update({"subject_manifest_sha256": C.sha(json.dumps(man, sort_keys=True).encode()),
+                        "changed_files": changed, "only_targets_changed": changed == targets})
+            if changed != targets:
+                rec["verdict"] = "INVALID-EDIT"
+                return rec
+            rd = RUNS / eid
+            (rd / "rec").mkdir(parents=True)
+            (rd / "plugin").mkdir()
+            tmp = SCR / "tmp" / eid
+            tmp.mkdir()
+            xml = rd / "junit.xml"
+            env = {**C.base_env(tmp, CEIL), **C.rec_env(rd / "rec", subj, f"campaign {eid}"),
+                   "PYTHONPATH": f"{subj / 'src'}:{C.PLUGIN_DIR}", "PYTHONDONTWRITEBYTECODE": "1",
+                   "S3REC_PLUGIN_OUT": str(rd / "plugin")}
+            argv = [venv / "bin/python", "-m", "pytest", "-p", "no:cacheprovider", "-p", "s3rec_plugin",
+                    "--rootdir", subj, f"--junitxml={xml}", "-W", "always::UserWarning", "-q", *nodes, ENV_NODE]
+            run = C.Runner(rd / "run").run("pytest", argv, subj, env)
+            rec["run"] = {k: run[k] for k in ("step", "argv", "utc_start", "utc_end", "exit", "stdout_sha256",
+                                              "stderr_sha256")}
+            rec["junit_sha256"] = C.fsha(xml) if xml.exists() else None
+            cases = parse_junit(xml)
+            rec["cases"] = {f"{k[0]}::{k[1]}": v for k, v in cases.items()}
+            # --- record validation (all must hold, for control and mutants alike) ---
+            prob = []
+            envc = cases.get(node_key(ENV_NODE), {}).get("outcome")
+            if envc != "passed":
+                prob.append(f"ENV node outcome {envc}")
+            m = re.findall(r"S2-ENV-RECORD sha256=([0-9a-f]{64}) (\{.*\})\s*$", run["stdout"], re.M)
+            pw = rd / "plugin/s2-env-warning.txt"
+            plug = [json.loads(x) for x in pw.read_text().splitlines()] if pw.exists() else []
+            if len(m) != 1 or C.sha(m[0][1].encode()) != m[0][0]:
+                prob.append(f"stdout S2 record count/hash ({len(m)})")
+            elif len(plug) != 1 or plug[0]["message"] != f"S2-ENV-RECORD sha256={m[0][0]} {m[0][1]}":
+                prob.append("plugin S2 record differs from stdout")
+            else:
+                body = json.loads(m[0][1])
+                rec["env_node_record"] = {"body_sha256": m[0][0],
+                                          "cpu_brand": body["cpu"].get("[O] brand"),
+                                          "uv_lock": body["run"].get("[O] uv.lock sha256"),
+                                          "commit": body["run"].get("[O] commit (git rev-parse HEAD)"),
+                                          "executable_realpath": body["python"].get("[O] executable realpath"),
+                                          "executable_sha256": body["python"].get("[O] executable sha256"),
+                                          "libpython_sha256": body["python"].get("[P] libpython sha256"),
+                                          "libm": body["libm behaviour digest"].get("[O] sha256")}
+                b = rec["env_node_record"]
+                if not (str(b["cpu_brand"]).startswith("[O] ") and b["uv_lock"] == "[O] " + C.LOCK_PIN
+                        and "not a git repository" in str(b["commit"]) and b["executable_realpath"] == C.PY
+                        and b["executable_sha256"] == "[O] " + C.PY_SHA
+                        and b["libpython_sha256"] == "[O] " + C.LIBPY_SHA):
+                    prob.append("ENV node record fields")
+            bind = json.loads((rd / "plugin/binding.json").read_text()) if (rd / "plugin/binding.json").exists() else {}
+            rec["binding"] = bind
+            mods = bind.get("modules", {})
+            if not bind or "tars" not in mods or "tests.conftest" not in mods or \
+                    not all(Path(f).is_relative_to(subj.resolve()) for f in mods.values()):
+                prob.append("plugin binding missing or a tars/tests module outside the subject")
+            if bind and bind.get("executable_realpath") != C.PY:
+                prob.append("pytest executable is not 3.12.15")
+            recs = sorted((rd / "rec").glob("*.env.json"))
+            errs = sorted((rd / "rec").glob("*.error.txt"))
+            procs = []
+            for f in recs:
+                g, facts = C.check_env_record(f, expect_prefix=venv, expect_subject=subj)
+                j = json.loads(f.read_text())
+                kind = "main" if j["pid"] == bind.get("pid") else "child"
+                tars_o = j["module_origins_at_capture"].get("tars", "")
+                bound = Path(tars_o).is_relative_to(subj.resolve()) or Path(tars_o).is_relative_to(tmp.resolve())
+                if kind == "child":
+                    bound = bound and "-I" in (j.get("orig_argv") or []) and \
+                        any(Path(a).is_relative_to(tmp.resolve()) for a in j["orig_argv"] if a.endswith(".py"))
+                procs.append({"file": str(f.relative_to(C.PKT)), "sha256": C.fsha(f), "kind": kind, "ok": g,
+                              "bound": bound, "tars_origin": tars_o, "orig_argv": j.get("orig_argv")})
+            expected_children = sum(1 for n in nodes if n.split("[")[0] in SPAWNERS)
+            rec["processes"] = procs
+            rec["expected_children"] = expected_children
+            if errs or sum(p["kind"] == "main" for p in procs) != 1 or \
+                    sum(p["kind"] == "child" for p in procs) != expected_children:
+                prob.append(f"process records: {len(procs)} (children expected {expected_children}), errors {len(errs)}")
+            if not all(p["ok"] and p["bound"] for p in procs):
+                prob.append("a process ENV record is incomplete or unbound")
+            if C.fsha(subj / "uv.lock") != C.LOCK_PIN:
+                prob.append("subject uv.lock")
+            after = blob_manifest(subj)
+            if after != man:
+                prob.append("subject changed during the run")
+            rec["record_problems"] = prob
+            return rec
+
+        # ---- control ----
+        union = sorted({n for _, _, _, ds in M.MUTANTS for n, _ in ds})
+        ctl = execute("control", union, [])
+        res["control"] = ctl
+        res["executions"].append({"id": "control", "verdict": None})
+        notpass = [n for n in union if ctl.get("cases", {}).get(f"{node_key(n)[0]}::{node_key(n)[1]}", {}).get("outcome") != "passed"]
+        ctl["not_passed"] = notpass
+        if ctl.get("verdict") == "INVALID-EDIT" or ctl.get("record_problems", ["no run"]) or notpass \
+                or ctl.get("run", {}).get("exit") != 0:
+            ctl["verdict"] = "CONTROL-FAILED"
+            res["executions"][-1]["verdict"] = "CONTROL-FAILED"
+            raise Stop("control did not pass every designated node with complete records")
+        ctl["verdict"] = "CONTROL-PASSED"
+        res["executions"][-1]["verdict"] = "CONTROL-PASSED"
+        print(json.dumps({"id": "control", "verdict": "CONTROL-PASSED"}), flush=True)
+        # ---- mutants, frozen order, stop at first failure ----
+        res["results"] = []
+        for mid, cls, edits, designated in M.MUTANTS:
+            m = execute(mid, [n for n, _ in designated], edits)
+            m["class"] = cls
+            m["designated"] = [list(d) for d in designated]
+            res["results"].append(m)
+            if m.get("verdict") == "INVALID-EDIT":
+                res["executions"].append({"id": mid, "verdict": "INVALID-EDIT"})
+                raise Stop(f"{mid}: invalid edit")
+            if m["record_problems"]:
+                m["verdict"] = "INVALID-RECORD"
+                res["executions"].append({"id": mid, "verdict": "INVALID-RECORD"})
+                raise Stop(f"{mid}: invalid record {m['record_problems']}")
+            per = []
+            for node, tag in designated:
+                c = m["cases"].get(f"{node_key(node)[0]}::{node_key(node)[1]}", {"outcome": "absent", "message": ""})
+                per.append({"node": node, "tag": tag, "outcome": c["outcome"], "message": c["message"][:400],
+                            "killed": c["outcome"] == "failure" and c["message"].startswith("AssertionError")
+                            and tag in c["message"]})
+            m["node_results"] = per
+            if all(p["killed"] for p in per):
+                m["verdict"] = "KILLED"
+            elif any(p["outcome"] in ("error", "skipped", "absent") for p in per):
+                m["verdict"] = "INVALID-OUTCOME"
+            else:
+                m["verdict"] = "SURVIVOR"
+            res["executions"].append({"id": mid, "verdict": m["verdict"]})
+            print(json.dumps({"id": mid, "verdict": m["verdict"]}), flush=True)
+            if m["verdict"] != "KILLED":
+                raise Stop(f"{mid}: {m['verdict']}")
+    except Stop as exc:
+        res["stop"] = str(exc)
+    except Exception as exc:  # a driver error never qualifies; recorded as a stop
+        import traceback
+        res["stop"] = f"driver error: {type(exc).__qualname__}: {exc}"
+        res["driver_traceback"] = traceback.format_exc()
+    res["finished"] = C.now()
+    res["summary"] = {v: [e["id"] for e in res["executions"] if e["verdict"] == v]
+                      for v in ("CONTROL-PASSED", "KILLED", "SURVIVOR", "INVALID-EDIT", "INVALID-RECORD",
+                                "INVALID-OUTCOME", "CONTROL-FAILED")}
+    res["ok"] = res["stop"] is None and len(res["summary"]["KILLED"]) == 53
+    with open(OUT / "CAMPAIGN.json", "x") as fh:
+        fh.write(json.dumps(res, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": res["ok"], "stop": res["stop"], "killed": len(res["summary"]["KILLED"])}))
+    sys.exit(0 if res["ok"] else 1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,155 @@
+"""Collect one CI run read-only and extract/verify the per-job S2/S3 records (v4 §13.1–§13.3, §12.2;
+D-S3-07 (a); PC-7 §8). Usage (run with the bcC clone's venv python, which carries the recorder):
+
+    python -B ci_collect.py <run id> <label> <expected head sha> <out dir (new)> <clone root>
+
+Raw logs come from the GitHub API (read-only) and are never modified. Derived logs strip only the
+timestamp prefix (the committed `docs/science/experiments/m3-t2/s2/ci/strip_gh_timestamps.py.txt`,
+read from the BC clone). S2 records: the I-105 extractor (hash-verified copy). S3 records: every
+expected prefix exactly once per check job, body sha256 verified. R-S2: stable projections compared
+with the main CI run 42715616493 baseline per job name; environment drift recorded, Class P report-only.
+"""
+
+import hashlib
+import json
+import re
+import subprocess
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+REPO = "guillermoMartin96/tars"
+I105 = Path("/Users/guillermomartin/tars-evidence/I-105/scripts/extract_s2_records_v2.py")
+I105_SHA = "58323ce9f187165508cd4f846692ae818c0be3700d271b965f7d7c14bd4cb960"
+BASE = Path("/Users/guillermomartin/tars-evidence/S2-acceptance-merge/ci/ci-main-42715616493")
+S3_PREFIXES = ("S3-POINTS", "S3-DATA", "S3-TABLE-HEX", "S3-DL4", "S3-XP3")
+LABEL = "densities are UNVERIFIED ABOVE 1000 KM (P5)"
+
+
+def sh(argv, out=None):
+    p = subprocess.run(argv, capture_output=True)
+    if out:
+        Path(out).write_bytes(p.stdout)
+        Path(str(out) + ".err").write_bytes(p.stderr)
+    return p
+
+
+def sha(b):
+    return hashlib.sha256(b).hexdigest()
+
+
+def projection(rec_dir: Path):
+    a = json.loads((rec_dir / "S2-G17A-REPORT.json").read_text())
+    b = json.loads((rec_dir / "S2-G17B-RECORD.json").read_text())
+    rows = (rec_dir / "S2-XP3-LISTING.csv").read_text().splitlines()
+    hdr = rows[0].split(",")
+    keep = [hdr.index(c) for c in ("set", "index", "x_hex", "y_hex", "z_hex", "label")]
+    return {
+        "S2-G17A-REPORT": {k: a.get(k) for k in ("check", "entries_compared", "class_X_coordinate_differences",
+                                                  "label_differences_at_identical_coordinates",
+                                                  "witness_slot_comparison_failures", "environment_basis", "limitation")},
+        "S2-G17B-RECORD": {k: b.get(k) for k in ("check", "class_X_entries_compared", "differences",
+                                                  "environment_basis", "limitation")},
+        "S2-XP3-LISTING": {"entries": len(rows) - 1,
+                           "rows_sha256": sha("\n".join(",".join(r.split(",")[i] for i in keep) for r in rows[1:]).encode())},
+    }
+
+
+def main():
+    run, label, head, out, clone = sys.argv[1], sys.argv[2], sys.argv[3], Path(sys.argv[4]), Path(sys.argv[5])
+    if out.exists():
+        raise SystemExit("occupied")
+    if sha(I105.read_bytes()) != I105_SHA:
+        raise SystemExit("STOP: I-105 extractor hash differs")
+    for d in ("logs", "derived", "records"):
+        (out / d).mkdir(parents=True)
+    res = {"record": f"CI collection and record extraction: {label} run {run}", "collect_utc":
+           datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"), "label": LABEL, "expected_head_sha": head, "jobs": {}}
+    sh(["gh", "run", "view", "-R", REPO, run, "--json",
+        "attempt,conclusion,createdAt,databaseId,event,headBranch,headSha,jobs,name,number,startedAt,status,updatedAt,url,workflowName"],
+       out / "run.json")
+    sh(["gh", "api", f"repos/{REPO}/actions/runs/{run}/attempts/1/jobs"], out / "jobs-attempt1.json")
+    r = json.loads((out / "run.json").read_text())
+    jobs = json.loads((out / "jobs-attempt1.json").read_text())["jobs"]
+    strip = clone / "docs/science/experiments/m3-t2/s2/ci/strip_gh_timestamps.py.txt"
+    base_jobs = {j["name"]: j["id"] for j in json.loads((BASE / "jobs-attempt1.json").read_text())["jobs"]}
+    ok = (r["attempt"] == 1 and r["headSha"] == head and r["status"] == "completed" and r["conclusion"] == "success"
+          and len(jobs) == 4)
+    for j in jobs:
+        jid = j["id"]
+        raw = out / "logs" / f"job-{jid}.log"
+        # --allow-escape-sequences: job logs contain ANSI sequences (attempt 1 without it got empty logs)
+        g = sh(["gh", "api", "--allow-escape-sequences", f"repos/{REPO}/actions/jobs/{jid}/logs"], raw)
+        if g.returncode != 0 or raw.stat().st_size == 0:
+            ok = False
+        jr = {"name": j["name"], "id": jid, "conclusion": j["conclusion"], "run_attempt": j["run_attempt"],
+              "head_sha": j["head_sha"], "started_at": j["started_at"], "completed_at": j["completed_at"],
+              "steps_succeeded": sum(s["conclusion"] == "success" for s in j["steps"]), "steps": len(j["steps"]),
+              "raw_log_sha256": sha(raw.read_bytes())}
+        jr["executed (not carried over)"] = j["run_attempt"] == 1 and bool(j["started_at"]) and jr["steps_succeeded"] > 0
+        jok = j["conclusion"] == "success" and j["head_sha"] == head and jr["executed (not carried over)"]
+        if j["name"].startswith("check"):
+            der = out / "derived" / f"job-{jid}.stripped.log"
+            p = sh([sys.executable, "-I", "-B", str(strip), str(raw), str(der)])
+            rd = out / "records" / f"job-{jid}"
+            x = sh([sys.executable, "-I", "-B", str(I105), str(der), str(rd)], out / "records" / f"job-{jid}.s2-extract.stdout")
+            log = der.read_text()
+            s3 = {}
+            for pfx in S3_PREFIXES:
+                found = re.findall(rf"{pfx} sha256=([0-9a-f]{{64}}) (\{{.*\}})$", log, re.M)
+                st = {"found": len(found)}
+                if len(found) == 1:
+                    st["verified"] = sha(found[0][1].encode()) == found[0][0]
+                    st["body_sha256"] = found[0][0]
+                    (rd / f"{pfx}.json").write_text(found[0][1] + "\n")
+                    body = json.loads(found[0][1])
+                    st["label_present"] = body.get("label") == LABEL
+                s3[pfx] = st
+            st2 = json.loads((rd / "extraction-status.json").read_text()) if (rd / "extraction-status.json").exists() else {}
+            env = json.loads((rd / "S2-ENV-RECORD.json").read_text()) if (rd / "S2-ENV-RECORD.json").exists() else {}
+            commit = env.get("run", {}).get("[O] commit (git rev-parse HEAD)", "")
+            lock = env.get("run", {}).get("[O] uv.lock sha256", "")
+            s3ok = all(v["found"] == 1 and v.get("verified") and v.get("label_present") for v in s3.values())
+            dl4 = json.loads((rd / "S3-DL4.json").read_text()) if (rd / "S3-DL4.json").exists() else {}
+            pts = json.loads((rd / "S3-POINTS.json").read_text()) if (rd / "S3-POINTS.json").exists() else {}
+            jr.update({"strip_exit": p.returncode, "s2_extract_exit": x.returncode, "s2_status_complete": st2.get("complete"),
+                       "s3_records": s3, "env_commit": commit, "env_uv_lock": lock,
+                       "env_sys_version": env.get("python", {}).get("[O] sys.version"),
+                       "dl4_points_compared": dl4.get("points_compared"), "dl4_differences": dl4.get("differences"),
+                       "points": {k: pts.get(k) for k in ("listing_sha256", "count")},
+                       "pytest_summary": st2.get("pytest_summary_line")})
+            # R-S2 stable projections vs the main-run baseline of the same job name.
+            bdir = BASE / "records" / f"job-{base_jobs.get(j['name'])}"
+            if st2.get("complete") and bdir.exists():
+                pa, pb = projection(rd), projection(bdir)
+                benv = json.loads((bdir / "S2-ENV-RECORD.json").read_text())
+                drift = sorted(k for k in ("python", "os", "cpu", "build_config [P]", "libm")
+                               if json.dumps(env.get(k), sort_keys=True) != json.dumps(benv.get(k), sort_keys=True))
+                jr["R-S2"] = {"baseline_job": base_jobs.get(j["name"]), "projection_equal": pa == pb,
+                              "differing": sorted(k for k in pa if pa[k] != pb[k]),
+                              "environment": "same" if not drift else f"drifted: {drift}",
+                              "libm_digest": {"new": env.get("libm behaviour digest", {}).get("[O] sha256"),
+                                              "baseline": benv.get("libm behaviour digest", {}).get("[O] sha256")},
+                              "class_P_report_only": {
+                                  "new": json.loads((rd / "S2-G17A-REPORT.json").read_text()).get("class_P_coordinate_differences"),
+                                  "baseline": json.loads((bdir / "S2-G17A-REPORT.json").read_text()).get("class_P_coordinate_differences")}}
+            else:
+                jr["R-S2"] = {"projection_equal": False, "error": "extraction incomplete or no baseline"}
+            jok = jok and p.returncode == 0 and x.returncode == 0 and st2.get("complete") is True and s3ok \
+                and commit == f"[O] {head}" and lock.endswith("6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf") \
+                and dl4.get("differences") == [] and jr["R-S2"]["projection_equal"]
+        jr["ok"] = bool(jok)
+        res["jobs"][str(jid)] = jr
+        ok = ok and jok
+    res["run"] = {k: r.get(k) for k in ("databaseId", "attempt", "headSha", "headBranch", "event", "status",
+                                         "conclusion", "url", "createdAt", "updatedAt")}
+    res["ok"] = bool(ok)
+    (out / "raw-logs.sha256").write_text("".join(f"{sha(p.read_bytes())}  {p.relative_to(out)}\n"
+                                                 for p in sorted((out / "logs").glob("*.log"))))
+    (out / "COLLECTION.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": res["ok"], "jobs": {v["name"]: v["ok"] for v in res["jobs"].values()}}))
+    sys.exit(0 if ok else 1)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,49 @@
+"""Independent re-check of the qualifying packaging chain's record completeness (stage0/1 run-2, stage2 run-4).
+Re-reads every ENV record from disk, re-applies check_env_record, and matches records to launches.
+Usage: python3.12 -I -B pk_coverage.py <out.json> (new)."""
+import importlib.util, json, re, sys
+from pathlib import Path
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).with_name("common.py")))
+C = importlib.util.module_from_spec(_s); _s.loader.exec_module(C)
+out = Path(sys.argv[1])
+if out.exists():
+    raise SystemExit("occupied")
+P2, P4 = C.PKT / "packaging/run-2", C.PKT / "packaging/run-4"
+TREE = C.PKT / "scratch/pk-run-2/tree"
+res = {"record": "packaging record-completeness re-check", "utc": C.now(), "label": C.LABEL, "items": []}
+ok = True
+def add(kind, f, extra=True, **facts):
+    global ok
+    g, fx = C.check_env_record(f, expect_subject=TREE)
+    res["items"].append({"kind": kind, "file": str(Path(f).relative_to(C.PKT)), "sha256": C.fsha(f) if Path(f).exists() else None,
+                         "ok": g and extra, **facts, "pid": fx.get("pid"), "observer": fx.get("observer")})
+    ok &= bool(g and extra)
+for st, d in (("stage0", P2), ("stage1", P2), ("stage2", P4)):
+    j = json.loads((d / f"{st.upper()}.json").read_text()); ok &= j["ok"]
+    add("driver", d / f"driver-{st}.env.json", stage_ok=j["ok"])
+for sid in ("ctl-wrong-hash", "PK-1-build", "PK-2-build"):
+    step = next((P2 / "steps-stage1").glob(f"*-{sid}.stderr"))
+    calls = re.findall(r"Calling `uv_build\.(\w+)\(", step.read_text(errors="replace"))
+    recs = sorted((P2 / "hook-env" / sid).glob("*.env.json"))
+    errs = sorted((P2 / "hook-env" / sid).glob("*.error.txt"))
+    res.setdefault("hook_launch_match", {})[sid] = {"calls": sorted(calls), "records": len(recs), "errors": len(errs)}
+    ok &= len(calls) == len(recs) and not errs
+    for f in recs:
+        add("build-hook", f, build=sid)
+steps = sorted((P4 / "steps-stage2").glob("*.json"))
+py_steps = [json.loads(s.read_text()) for s in steps]
+wrapped = [s for s in py_steps if any("<pk-payload>" in a for a in s["argv"])]
+envs = sorted((P4 / "process-env").glob("*.env.json"))
+res["wrapper_launch_match"] = {"wrapped_launches": len(wrapped), "records": len(envs)}
+ok &= len(wrapped) == len(envs)
+for f in envs:
+    add("wrapper", f)
+tools = [s for s in py_steps if s not in wrapped]
+res["tool_steps"] = [{"step": s["step"], "argv0": s["argv"][0], "exit": s["exit"]} for s in tools]
+ok &= all(t["argv0"] in (C.UV, "git") for t in res["tool_steps"])
+res["counts"] = {k: sum(1 for i in res["items"] if i["kind"] == k) for k in ("driver", "build-hook", "wrapper")}
+res["ok"] = bool(ok)
+out.write_text(json.dumps(res, indent=1) + "\n")
+print(json.dumps({"ok": res["ok"], "counts": res["counts"], "hooks": res["hook_launch_match"], "wrappers": res["wrapper_launch_match"],
+                  "tool_argv0": sorted({t["argv0"] for t in res["tool_steps"]})}))
+sys.exit(0 if ok else 1)

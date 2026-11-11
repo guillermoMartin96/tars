@@ -1,0 +1,77 @@
+{
+ "record": "S3 report-only rows S3-R-01..S3-R-05 (REPORT-ONLY; never gated; no bound or accuracy claim)",
+ "label": "densities are UNVERIFIED ABOVE 1000 KM (P5)",
+ "host_xp3_body_sha256": "6e14d63e85fb1024749841d49188785e0cda428f4b5cac499000f66609afb7b9",
+ "points": 3758,
+ "S3-R-01": {
+  "report_only": true,
+  "assumption": "A-FP-2 (unaccepted; nothing gated)",
+  "evaluated": 1278,
+  "points_above_E3_upper_enclosure": [],
+  "min_relative_margin_to_upper": 4.8180965131237e-16,
+  "lower_side_relative_difference_min_max": [
+   -1.0,
+   0.9925512190546696
+  ],
+  "note": "E3 gives no lower bound; lower-side differences are reported only"
+ },
+ "S3-R-02": {
+  "report_only": true,
+  "consecutive_same_band_pairs": 3220,
+  "a_non_increase_violations": [],
+  "b_equal_adjacent_pairs_not_strict": 2122,
+  "assumption": "(a) needs A-LM-2 (not accepted); (b) reported only"
+ },
+ "S3-R-03": {
+  "report_only": true,
+  "rule": "RQ-3: measured and reported, never gated",
+  "pairs": {
+   "host|macos-15-intel": {
+    "differing_points": 0,
+    "max_ulp": 0,
+    "outcome_kind_differences": 0
+   },
+   "host|macos-latest": {
+    "differing_points": 1,
+    "max_ulp": 1,
+    "outcome_kind_differences": 0
+   },
+   "host|ubuntu-latest": {
+    "differing_points": 3,
+    "max_ulp": 1,
+    "outcome_kind_differences": 0
+   },
+   "macos-15-intel|macos-latest": {
+    "differing_points": 1,
+    "max_ulp": 1,
+    "outcome_kind_differences": 0
+   },
+   "macos-15-intel|ubuntu-latest": {
+    "differing_points": 3,
+    "max_ulp": 1,
+    "outcome_kind_differences": 0
+   },
+   "macos-latest|ubuntu-latest": {
+    "differing_points": 2,
+    "max_ulp": 1,
+    "outcome_kind_differences": 0
+   }
+  }
+ },
+ "S3-R-04": {
+  "report_only": true,
+  "compared_h_ge_0": 3248,
+  "bitwise_equal": 3248,
+  "differing": 0,
+  "max_ulp": 0
+ },
+ "S3-R-05": {
+  "report_only": true,
+  "P-D_points": 2265,
+  "first_subnormal_h_m": 181890968.16720495,
+  "first_zero_h_m": 191735430.7198784,
+  "rho_at_1e6": 3.019e-15,
+  "rho_at_nd_1e6": 3.0190482489066557e-15,
+  "relative_jump_at_1000km": 1.5981751128100814e-05
+ }
+}

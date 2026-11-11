@@ -1,0 +1,109 @@
+"""Full required local checks for a D or E commit before its push (PC-7 §6, §8; owner instruction §5).
+
+Usage: python3.12 -I -B local_checks.py <label> <commit>    -> d/local-<label>/LOCAL.json (new)
+
+Every step of the CI `check` job (.github/workflows/ci.yml at L, unchanged) runs in a fresh local
+clone (`git clone --no-local` of the local repository) of the exact commit, never in the worktree.
+The clone venv is `uv sync --locked --offline --python <3.12.15>` against the packet-local uv cache,
+plus the byte-identical external sitecustomize, so every Python process records its own complete ENV
+(commit field = the clone HEAD = the checked commit); the S2 ENV node also runs inside pytest.
+"""
+
+import importlib.util
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).parents[1] / "common.py"))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+
+REPO = "/Users/guillermomartin/projects/tars"
+UVCACHE = C.PKT / "scratch" / "d" / "uvcache"
+
+
+def env_ok(f, clone, rev):
+    g, x = C.check_env_record(f, expect_prefix=clone / ".venv", expect_subject=clone)
+    if x.get("commit_field") != f"[O] {rev}":
+        return False, x
+    good = all([not x["s2_error"], x["s2_body_sha256_verifies"], x["libm_arguments"] == 6235,
+                x["libm_results"] == 7175, str(x["cpu_brand"]).startswith("[O] "), not x["cpu_artificial_U"],
+                x["fp_fields"] > 0, x["build_config_present"], x["executable_realpath"] == C.PY,
+                x["executable_sha256"] == C.PY_SHA, x["exe_sha_in_body"] == "[O] " + C.PY_SHA,
+                x["libpython_sha256"] == C.LIBPY_SHA, x["libpython_sha_in_body"] == "[O] " + C.LIBPY_SHA,
+                x["lock_independent"] == C.LOCK_PIN, x["lock_in_body"] == "[O] " + C.LOCK_PIN,
+                x["label_p5"] == C.LABEL, Path(x["sys.prefix"]) == clone / ".venv"])
+    return good, x
+
+
+def main():
+    label, rev = sys.argv[1], sys.argv[2]
+    out, scr = C.PKT / "d" / f"local-{label}", C.PKT / "scratch" / "d" / f"local-{label}"
+    if out.exists() or scr.exists():
+        raise SystemExit("occupied")
+    out.mkdir(parents=True)
+    scr.mkdir(parents=True)
+    (scr / "tmp").mkdir()
+    r = C.Runner(out / "steps")
+    env0 = {**C.base_env(scr / "tmp", Path("/nonexistent")), "UV_CACHE_DIR": str(UVCACHE), "UV": C.UV,
+            "PYTHONDONTWRITEBYTECODE": "1"}
+    env0.pop("GIT_CEILING_DIRECTORIES")
+    res = {"record": f"local checks before push: {label} {rev}", "started": C.now(), "label": C.LABEL,
+           "commit": rev, "steps": [], "tools": {"uv": C.fsha(C.UV), "python": C.fsha(C.PY)}}
+    c = scr / "clone"
+    r.run("clone", ["git", "clone", "-q", "--no-local", REPO, c], scr, env0)
+    r.run("checkout", ["git", "-C", c, "checkout", "-q", "--detach", rev], scr, env0)
+    h = r.run("head", ["git", "-C", c, "rev-parse", "HEAD", "HEAD^{tree}"], scr, env0)
+    st = r.run("status-before", ["git", "-C", c, "status", "--porcelain", "--untracked-files=all"], scr, env0)
+    u = r.run("uv-sync", [C.UV, "sync", "--locked", "--offline", "--python", C.PY], c, env0)
+    site = c / ".venv/lib/python3.12/site-packages"
+    shutil.copy2(C.REC_DIR / "sitecustomize.py", site / "sitecustomize.py")
+    ok = h["stdout"].split()[0] == rev and st["stdout"] == "" and u["exit"] == 0
+    res["head"], res["tree"] = h["stdout"].split()
+    py, ruff = c / ".venv/bin/python", c / ".venv/bin/ruff"
+    res["tools"]["ruff"] = r.run("ruff-version", [ruff, "--version"], scr, env0)["stdout"].strip()
+    res["tools"]["ruff_sha256"] = C.fsha(ruff)
+    steps = [("m2-xp-collect", [py, "toolbox/validators/m2_cross_platform.py", "collect", "--out", out / "m2-xp-host.json"], True),
+             ("ruff-check", [ruff, "check", "--no-cache", "."], False),
+             ("ruff-format", [ruff, "format", "--no-cache", "--check", "."], False),
+             ("pytest", [py, "-m", "pytest", "-p", "no:cacheprovider", f"--junitxml={out / 'pytest-junit.xml'}",
+                         "-W", "always::UserWarning"], True),
+             ("determinism", [py, "toolbox/validators/determinism.py"], True),
+             ("cross-platform", [py, "toolbox/validators/cross_platform.py"], True),
+             ("gmat-m1-compare", [py, "toolbox/scripts/gmat_m1.py", "compare"], True),
+             ("m1-proof", [py, "toolbox/validators/m1_proof.py", "--out", out / "m1_non_gmat_host.json"], True)]
+    steps += [(f"m2-determinism-{s.stem}", [py, "toolbox/validators/determinism.py", "--scenario", f"scenarios/{s.name}"], True)
+              for s in sorted((c / "scenarios").glob("m2_*.json"))]
+    steps += [("gmat-m2-compare", [py, "toolbox/scripts/gmat_m2.py", "compare"], True),
+              ("m2-proof", [py, "toolbox/validators/m2_proof.py", "--out", out / "m2_host.json"], True)]
+    for sid, argv, python in steps:
+        rd = out / "env" / sid
+        rd.mkdir(parents=True)
+        p = r.run(sid, argv, c, {**env0, **C.rec_env(rd, c, f"local {label} {sid}")}, timeout=7200)
+        recs, errs = sorted(rd.glob("*.env.json")), sorted(rd.glob("*.error.txt"))
+        bad = [f.name for f in recs if not env_ok(f, c, rev)[0]]
+        good = p["exit"] == 0 and not errs and not bad and (bool(recs) if python else not recs)
+        row = {"step": sid, "exit": p["exit"], "env_records": len(recs), "incomplete": bad, "errors": len(errs),
+               "python": python, "ok": good, "tail": p["stdout"].strip().splitlines()[-1:] if p["stdout"].strip() else []}
+        if sid == "pytest":
+            (out / "pytest-stdout.txt").write_text(p["stdout"])
+            m = re.findall(r"S2-ENV-RECORD sha256=([0-9a-f]{64}) (\{.*\})\s*$", p["stdout"], re.M)
+            row["s2_env_node_record"] = len(m) == 1 and C.sha(m[0][1].encode()) == m[0][0]
+            row["ok"] = row["ok"] and row["s2_env_node_record"]
+        res["steps"].append(row)
+        ok = ok and row["ok"]
+    sa = r.run("status-after", ["git", "-C", c, "status", "--porcelain", "--untracked-files=all"], scr, env0)
+    res["status_after"] = sa["stdout"]
+    ok = ok and sa["stdout"] == ""
+    res["finished"] = C.now()
+    res["ok"] = bool(ok)
+    with open(out / "LOCAL.json", "x") as fh:
+        fh.write(json.dumps(res, indent=1, default=str) + "\n")
+    print(json.dumps({"ok": res["ok"], "steps": {s["step"]: s["ok"] for s in res["steps"]}}))
+    sys.exit(0 if ok else 1)
+
+
+if __name__ == "__main__":
+    main()

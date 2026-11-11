@@ -1,0 +1,500 @@
+"""Corrected packaging chain PK-1 ... PK-8 at committed BC (v4 §7.3; PC-7 §10; owner instruction
+2026-11-11 §4), with an own-process ENV record in EVERY Python process (build hooks via the external
+sitecustomize; drivers and payloads via `finally` capture).
+
+Usage:  python3.12 -I -B pk3_run.py stage0   (fresh BC export; BA-1...BA-5 re-verified and sealed)
+        python3.12 -I -B pk3_run.py stage1   (backend negative control, PK-1, PK-2, backend binding)
+        python3.12 -I -B pk3_run.py stage2   (PK-3 ... PK-8)
+Each stage stops (exit 1) on the first failed requirement of its predecessor; never overwrites.
+Retained outputs: packaging/ (records, artifacts, ENV). Runtime trees: scratch/pk (excluded).
+"""
+
+import ast
+import base64
+import hashlib
+import importlib.util
+import json
+import re
+import shutil
+import sys
+import tarfile
+import zipfile
+from pathlib import Path
+
+_s = importlib.util.spec_from_file_location("common", str(Path(__file__).with_name("common.py")))
+C = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(C)
+
+# run-1 (stage0 only; failed DRIVER-ENV: driver launched without GIT_CEILING_DIRECTORIES) used
+# OUT=packaging/, SCR=scratch/pk. Later runs: python ... pk3_run.py <stage> <run>.
+RUN = sys.argv[2]
+OUT = C.PKT / "packaging" / RUN
+SCR = C.PKT / "scratch" / f"pk-{RUN}"
+TREE = SCR / "tree"
+BK = OUT / "backend"                  # retained copy of the exact backend wheel + BA record
+DIST = BK / "dist"
+CONSTR = BK / "build-constraints.txt"
+MEMBER = "tars/sim/data/EarthExponentialAtmosphereData.txt"
+REC_BA = {"BA-RECORD.md": "ed7f4859fc1df531ae40f4c970d125cac861807ed79dd32e10fe4b6ad02f0350",
+          "BA-VERIFY.json": "1b3c8cc1e0415c2c9055adae8b813ceb0e92ddebc61b55505ec698972618087e",
+          "metadata/pypi-json.body": "f10235348f20d0ffcc45fd64cce50adaad1a2c584eb70f45be494a4d9c643a45",
+          "metadata/pypi-json.headers": "b64773562d814583d6fc774430307f891756a7f83be39f2f869cfd3873d920a2",
+          "metadata/wheel.headers": "2a434020940e062ff90d61781dd45b9e71fb8832b1cbef675cdadc8a058fd715"}
+OLD_PK2_LOG = Path("/Users/guillermomartin/tars-evidence/S3-implementation-v1/records/PK-2-build.txt")
+
+
+class Stage:
+    def __init__(self, name, start):
+        self.name, self.res, self.ok = name, {"record": f"S3 corrected packaging {name}", "started": C.now(),
+                                              "label": C.LABEL, "checks": {},
+                                              "subject": {"bc_sha": C.BC, "bc_tree": C.BC_TREE}}, True
+        self.r = C.Runner(OUT / f"steps-{name}", start) if not (OUT / f"steps-{name}").exists() else None
+        if self.r is None:
+            raise SystemExit(f"occupied: {OUT / f'steps-{name}'}")
+
+    def check(self, name, cond, **facts):
+        self.ok &= bool(cond)
+        self.res["checks"].setdefault(name, []).append({"pass": bool(cond), **facts})
+
+    def finish(self):
+        if not C.os.environ.get("GIT_CEILING_DIRECTORIES"):
+            raise SystemExit("STOP: driver process lacks GIT_CEILING_DIRECTORIES (its ENV commit field would "
+                             "report the enclosing evidence repository)")
+        # The driver process's own ENV record, captured after its payload (Q-1: artifact-check driver).
+        envp = OUT / f"driver-{self.name}.env.json"
+        spec = importlib.util.spec_from_file_location("_envcap2", str(C.ENVCAP))
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        m.capture(str(envp), str(TREE), f"packaging driver {self.name}", "driver-finally")
+        good, facts = C.check_env_record(envp, expect_subject=TREE)
+        self.check("DRIVER-ENV", good and facts["sys.prefix"] == str(Path(C.PY).parents[1]), **facts)
+        self.res["finished"] = C.now()
+        self.res["ok"] = bool(self.ok)
+        with open(OUT / f"{self.name.upper()}.json", "x") as fh:
+            fh.write(json.dumps(self.res, indent=1, default=str) + "\n")
+        print(json.dumps({"ok": self.res["ok"], "stop": self.res.get("stop"),
+                          "checks": {k: [c["pass"] for c in v] for k, v in self.res["checks"].items()}}))
+        sys.exit(0 if self.ok else 1)
+
+
+def need(prev, base=None):
+    p = (base or OUT) / f"{prev.upper()}.json"
+    d = json.loads(p.read_text())
+    if not d["ok"]:
+        raise SystemExit(f"STOP: {prev} did not pass")
+    return d, C.fsha(p)
+
+
+def stage0():
+    if SCR.exists() or OUT.joinpath("backend").exists():
+        raise SystemExit("occupied")
+    OUT.mkdir(parents=True)
+    SCR.mkdir(parents=True)
+    (SCR / "tmp").mkdir()
+    st = Stage("stage0", 0)
+    env = C.base_env(SCR / "tmp", SCR)
+    st.r.run("tool-uv-version", [C.UV, "--version"], SCR, env)
+    st.r.run("tool-uv-sha256", ["shasum", "-a", "256", C.UV], SCR, env)
+    st.r.run("tool-python-sha256", ["shasum", "-a", "256", C.PY, C.LIBPY], SCR, env)
+    st.r.run("tool-python-otool-L", ["otool", "-L", C.PY], SCR, env)
+    st.r.run("tool-uv-config-absent", ["ls", "-la", env["HOME"] + "/.config/uv", "/etc/uv"], SCR, env)
+    s = st.r.run("wt-status-start", ["git", "-C", C.WT, "status", "--porcelain=v1", "--untracked-files=all"],
+                 SCR, {**env, "GIT_CEILING_DIRECTORIES": ""})
+    h = st.r.run("wt-head-start", ["git", "-C", C.WT, "rev-parse", "HEAD", "HEAD^{tree}"], SCR,
+                 {**env, "GIT_CEILING_DIRECTORIES": ""})
+    st.check("SRC-worktree", s["exit"] == 0 and s["stdout"] == "" and h["stdout"].split() == [C.BC, C.BC_TREE],
+             status=s["stdout"], head=h["stdout"].split())
+    exp = C.export_bc(st.r, TREE, SCR / "bc.tar", env)
+    man = exp.pop("manifest")
+    (OUT / "EXPORT-MANIFEST.json").write_text(json.dumps(man, indent=1, sort_keys=True) + "\n")
+    t0 = (TREE / "docs/science/experiments/m3-t0/data/EarthExponentialAtmosphereData.txt").read_bytes()
+    st.check("SRC-export", exp["ok"] and C.sha(t0) == C.PIN, t0_copy_sha256=C.sha(t0), **exp)
+    # BA-1...BA-5 re-verified from the sealed recovery payload, BEFORE any new build.
+    rec_ok = {k: C.fsha(C.REC_PKT / "backend" / k) == v for k, v in REC_BA.items()}
+    DIST.mkdir(parents=True)
+    shutil.copy2(C.BACKEND_WHL, DIST / C.BACKEND_WHL.name)
+    whl = DIST / C.BACKEND_WHL.name
+    with zipfile.ZipFile(whl) as zf:
+        names = zf.namelist()
+        meta = zf.read("uv_build-0.12.24.dist-info/METADATA").decode()
+        wheel = zf.read("uv_build-0.12.24.dist-info/WHEEL").decode()
+        record = zf.read("uv_build-0.12.24.dist-info/RECORD").decode()
+        bad = []
+        for ln in record.splitlines():
+            path, hv, size = ln.rsplit(",", 2)
+            if hv:
+                algo, val = hv.split("=", 1)
+                d = base64.urlsafe_b64encode(hashlib.new(algo, zf.read(path)).digest()).rstrip(b"=").decode()
+                if d != val or int(size) != zf.getinfo(path).file_size:
+                    bad.append(path)
+    pj = json.loads((C.REC_PKT / "backend/metadata/pypi-json.body").read_text())
+    pub = [u for u in pj["urls"] if u["filename"] == C.BACKEND_WHL.name]
+    old = OLD_PK2_LOG.read_text(errors="replace")
+    sel = [ln for ln in old.splitlines() if "Selecting: uv-build==0.12.24" in ln]
+    CONSTR.write_text(f"uv-build==0.12.24 --hash=sha256:{C.BACKEND_SHA}\n")
+    ba = {"BA-1": {"name": re.search(r"^Name: (.+)$", meta, re.M).group(1),
+                   "version": re.search(r"^Version: (.+)$", meta, re.M).group(1)},
+          "BA-2": {"filename": whl.name, "wheel_tags": re.findall(r"^Tag: (.+)$", wheel, re.M)},
+          "BA-3": {"measured_sha256": C.fsha(whl), "size": whl.stat().st_size,
+                   "published_sha256": pub[0]["digests"]["sha256"] if len(pub) == 1 else None,
+                   "record_mismatches": bad, "members": len(names)},
+          "BA-4": {"artifact_url": pub[0]["url"] if len(pub) == 1 else None,
+                   "metadata_url": "https://pypi.org/pypi/uv-build/0.12.24/json",
+                   "retained_evidence": "S3-phaseD-recovery-v1/backend/metadata/* and records/BA-*.txt "
+                                        "(recovery manifest 45726c1f…52ea); no new network"},
+          "BA-5": {"original_resolver_selection_line": sel, "original_log": str(OLD_PK2_LOG),
+                   "original_log_sha256": C.fsha(OLD_PK2_LOG),
+                   "recovery_acquisition_records": sorted(p.name for p in (C.REC_PKT / "records").glob("BA-*.txt")),
+                   "this_run_constraint": CONSTR.read_text()},
+          "source": {"recovery_payload_wheel": str(C.BACKEND_WHL), "recovery_payload_files_verified": rec_ok}}
+    st.res["BA"] = ba
+    st.check("BA", all(rec_ok.values()) and ba["BA-1"] == {"name": "uv-build", "version": "0.12.24"}
+             and ba["BA-2"]["wheel_tags"] == ["py3-none-macosx_10_12_x86_64"]
+             and ba["BA-3"]["measured_sha256"] == ba["BA-3"]["published_sha256"] == C.BACKEND_SHA
+             and not bad and len(sel) == 1 and sorted(p.name for p in DIST.iterdir()) == [whl.name], **ba)
+    seal = BK / "BA-SEAL.sha256"
+    lines = [f"{C.fsha(p)}  {p.relative_to(BK)}" for p in (whl, CONSTR)]
+    seal.write_text(f"# sealed {C.now()} before any stage1 build\n" + "\n".join(lines) + "\n")
+    st.res["BA_seal"] = {"file": str(seal), "sha256": C.fsha(seal)}
+    st.finish()
+
+
+def hook_names(stderr):
+    return sorted(re.search(r"Calling `uv_build\.(\w+)\(", ln).group(1)
+                  for ln in stderr.splitlines() if "Calling `uv_build." in ln)
+
+
+def hook_fn(argv):
+    code = (argv or [""])[-1]
+    m = re.search(r"backend\.(build_\w+)\(", code) or re.search(r"getattr\(backend, \"(\w+)\"", code)
+    return m.group(1) if m else None
+
+
+def stage1():
+    s0, s0sha = need("stage0")
+    st = Stage("stage1", 100)
+    st.res["stage0"] = {"sha256": s0sha}
+    seal = BK / "BA-SEAL.sha256"
+    st.check("BA-seal-unchanged", C.fsha(seal) == s0["BA_seal"]["sha256"]
+             and C.fsha(DIST / C.BACKEND_WHL.name) == C.BACKEND_SHA)
+    env = C.base_env(SCR / "tmp", SCR)
+    envdir = OUT / "hook-env"
+    envdir.mkdir()
+
+    def uv_build(sid, extra, cache, outdir, src, constraints=CONSTR):
+        rd = envdir / sid
+        rd.mkdir()
+        e = {**env, "PYTHONPATH": str(C.REC_DIR), **C.rec_env(rd, TREE, f"{sid} uv_build hook")}
+        p = st.r.run(sid, [C.UV, "build", "-vv", "--force-pep517", "--offline", "--no-index", "--find-links", DIST,
+                           "--build-constraints", constraints, "--require-hashes", "--python", C.PY,
+                           "--no-python-downloads", "--cache-dir", cache, *extra, "--out-dir", outdir, src], SCR, e)
+        recs, errs = sorted(rd.glob("*.env.json")), sorted(rd.glob("*.error.txt"))
+        per = []
+        for f in recs:
+            good, facts = C.check_env_record(f, expect_subject=TREE)
+            j = json.loads(f.read_text())
+            uvb = j["module_origins_at_capture"].get("uv_build", "")
+            facts.update({"file": str(f.relative_to(C.PKT)), "sha256": C.fsha(f), "hook": hook_fn(j.get("orig_argv")),
+                          "uv_build_origin": uvb, "uv_build_isolated": uvb.startswith(str(cache) + "/builds-v0/"),
+                          "extra_sys_path": [x for x in j["sys.path"] if x and not x.startswith(str(cache))
+                                             and not x.startswith(str(Path(C.PY).parents[1])) and x != str(C.REC_DIR)]})
+            facts["ok"] = good and facts["uv_build_isolated"] and not facts["extra_sys_path"] and facts["hook"]
+            per.append(facts)
+        names = hook_names(p["stderr"])
+        st.check(f"{sid}-HOOK-ENV", len(names) == len(recs) and not errs and all(x["ok"] for x in per)
+                 and sorted(x["hook"] for x in per) == names, hook_calls=names, records=per,
+                 errors=[str(e) for e in errs])
+        base = re.findall(r"Using base executable for virtual environment: (\S+)", p["stderr"])
+        st.check(f"{sid}-NO-NETWORK-NO-DIRECT", not re.search(r"GET request|https://", p["stderr"])
+                 and "direct build" not in p["stderr"].lower() and set(base) <= {C.PY}
+                 and (bool(base) or not names), base_executables=sorted(set(base)))
+        return p
+
+    bad = OUT / "controls" / "wrong-hash-constraints.txt"
+    bad.parent.mkdir()
+    bad.write_text("uv-build==0.12.24 --hash=sha256:" + C.BACKEND_SHA[:-1] + ("0" if C.BACKEND_SHA[-1] != "0" else "1") + "\n")
+    nc = uv_build("ctl-wrong-hash", ["--sdist", "--wheel"], SCR / "cache-ctl", SCR / "dist-ctl", TREE, bad)
+    outs = sorted(p.name for p in (SCR / "dist-ctl").iterdir()) if (SCR / "dist-ctl").exists() else []
+    st.check("CTL-hash-enforced", nc["exit"] != 0 and not any(n.endswith((".whl", ".tar.gz")) for n in outs)
+             and "hash" in nc["stderr"].lower(), exit=nc["exit"], outputs=outs, stderr_tail=nc["stderr"][-800:])
+    tar_before = C.fsha(SCR / "bc.tar")
+    p1 = uv_build("PK-1-build", ["--sdist", "--wheel"], SCR / "cache-pk1", SCR / "dist-tree", TREE)
+    dt = sorted(p.name for p in (SCR / "dist-tree").iterdir())
+    sd, tw = [n for n in dt if n.endswith(".tar.gz")], [n for n in dt if n.endswith(".whl")]
+    st.check("PK-1", p1["exit"] == 0 and len(sd) == 1 and len(tw) == 1, exit=p1["exit"], outputs=dt,
+             source_tar_sha256=tar_before)
+    if not (len(sd) == 1 and len(tw) == 1):
+        st.res["stop"] = "PK-1 did not produce one sdist and one wheel"
+        st.finish()
+    sdist = SCR / "dist-tree" / sd[0]
+    before = C.fsha(sdist)
+    p2 = uv_build("PK-2-build", ["--wheel"], SCR / "cache-pk2", SCR / "dist-sdist", sdist)
+    ds = sorted(p.name for p in (SCR / "dist-sdist").iterdir())
+    sw = [n for n in ds if n.endswith(".whl")]
+    st.check("PK-2", p2["exit"] == 0 and len(sw) == 1 and C.fsha(sdist) == before, exit=p2["exit"], outputs=ds,
+             input_sdist=str(sdist), input_sdist_sha256_before=before, input_sdist_sha256_after=C.fsha(sdist))
+    if len(sw) != 1:
+        st.res["stop"] = "PK-2 did not produce one wheel"
+        st.finish()
+    arts = {"sdist": sdist, "tree_wheel": SCR / "dist-tree" / tw[0], "sdist_wheel": SCR / "dist-sdist" / sw[0]}
+    (OUT / "artifacts").mkdir()
+    for k, p in arts.items():
+        (OUT / "artifacts" / k).mkdir()
+        shutil.copy2(p, OUT / "artifacts" / k / p.name)
+    st.res["artifacts"] = {k: {"file": str(OUT / "artifacts" / k / p.name), "sha256": C.fsha(p)} for k, p in arts.items()}
+    st.res["lineage"] = {"PK-1 source": "BC export (stage0)", "bc_tar_sha256": tar_before,
+                         "PK-2 input": str(sdist), "PK-2 input sha256": before}
+    with zipfile.ZipFile(DIST / C.BACKEND_WHL.name) as zf:
+        members = {n: zf.read(n) for n in zf.namelist() if not n.endswith("/")}
+    for sid, cache in (("PK-1", SCR / "cache-pk1"), ("PK-2", SCR / "cache-pk2")):
+        roots = sorted({p.parent.parent for p in cache.rglob("uv_build/__init__.py")})
+        per = []
+        for root in roots:
+            cmp_ = {n: ("equal" if (root / n).is_file() and (root / n).read_bytes() == b else
+                        "absent" if not (root / n).exists() else "different") for n, b in members.items()}
+            per.append({"root": str(root), "members": cmp_})
+        st.check(f"BA-binding-{sid}", bool(per) and all(all(v == "equal" or (v == "absent" and n.endswith("RECORD"))
+                                                             for n, v in x["members"].items()) for x in per),
+                 unpacked=per)
+    st.finish()
+
+
+WRAP = '''import sys
+_env = sys.argv[-3:]
+del sys.argv[-3:]
+try:
+    exec(compile({payload!r}, "<pk-payload>", "exec"), {{"__name__": "__main__"}})
+finally:
+    import importlib.util as _u
+    _sp = _u.spec_from_file_location("_envcap2", {envcap!r})
+    _m = _u.module_from_spec(_sp)
+    _sp.loader.exec_module(_m)
+    _m.capture(_env[0], _env[1], _env[2], "wrapper-finally")
+'''
+RUNMOD = "import runpy, sys\nsys.argv = [{mod!r}] + sys.argv[1:]\nrunpy.run_module({mod!r}, run_name='__main__', alter_sys=True)\n"
+IMPORT = r"""
+import hashlib, json, os, struct, sys
+import tars, tars.sim.atmosphere as m
+raw = m._DATA_PATH.read_bytes()
+bits = lambda x: struct.pack("<d", x).hex()
+print(json.dumps({"cwd": os.getcwd(), "tars_file": os.path.realpath(tars.__file__),
+  "component_file": os.path.realpath(m.__file__), "data_path": os.path.realpath(m._DATA_PATH),
+  "data_sha256": hashlib.sha256(raw).hexdigest(), "density_0": bits(m.density(0.0)),
+  "row0_rho0": bits(m._TABLE[0].rho0), "sys_path": sys.path, "prefix": sys.prefix,
+  "executable_realpath": os.path.realpath(sys.executable)}))
+"""
+PROFILED = r"""
+import json, sys
+calls = [0]
+def prof(frame, event, arg):
+    if event == "call" and frame.f_code.co_name == "_parse_and_validate":
+        calls[0] += 1
+sys.setprofile(prof)
+try:
+    import tars.sim.atmosphere as m
+    rec = {"outcome": "imported"}
+except Exception as exc:
+    rec = {"outcome": "raised", "qualname": type(exc).__qualname__,
+           "reason": getattr(exc, "reason", None), "rule": getattr(exc, "rule", None)}
+sys.setprofile(None)
+rec["calls"] = calls[0]
+print(json.dumps(rec))
+"""
+ZIPIMPORT = r"""
+import json, sys
+sys.path.insert(0, sys.argv[1])
+try:
+    import tars.sim.atmosphere as m
+    rec = {"outcome": "imported", "file": m.__file__}
+except Exception as exc:
+    rec = {"outcome": "raised", "qualname": type(exc).__qualname__, "reason": getattr(exc, "reason", None)}
+import tars
+rec["tars_file"] = getattr(tars, "__file__", None)
+print(json.dumps(rec))
+"""
+
+
+def last_json(text):
+    try:
+        return json.loads(text.strip().splitlines()[-1])
+    except (IndexError, json.JSONDecodeError):
+        return {}
+
+
+def stage2():
+    global TREE
+    s1run = sys.argv[3] if len(sys.argv) > 3 else RUN   # stage1 artifacts/export may come from an earlier run
+    s1, s1sha = need("stage1", C.PKT / "packaging" / s1run)
+    s0, _ = need("stage0", C.PKT / "packaging" / s1run)
+    TREE = C.PKT / "scratch" / f"pk-{s1run}" / "tree"
+    if RUN != s1run:
+        OUT.mkdir(parents=True)
+        SCR.mkdir(parents=True)
+        (SCR / "tmp").mkdir()
+    st = Stage("stage2", 200)
+    st.res["stage1"] = {"run": s1run, "sha256": s1sha}
+    # Ceiling at scratch/ (above every export): run-3 used scratch/pk-run-3, which is not above the
+    # run-2 export, so its wrapper ENV records reported the evidence repo HEAD (rejected; retained).
+    env = C.base_env(SCR / "tmp", C.PKT / "scratch")
+    man = json.loads((C.PKT / "packaging" / s1run / "EXPORT-MANIFEST.json").read_text())
+    now_man = {str(p.relative_to(TREE)): C.git_blob(p.read_bytes()) for p in sorted(TREE.rglob("*"))
+               if (p.is_file() or p.is_symlink()) and "__pycache__" not in p.parts}
+    st.check("SRC-export-unchanged", now_man == man, differing=sorted(k for k in set(man) | set(now_man)
+                                                                       if man.get(k) != now_man.get(k)))
+    envdir = OUT / "process-env"
+    envdir.mkdir()
+
+    def pyrun(sid, argv, cwd, label, venv=None):
+        envp = envdir / f"{sid}.env.json"
+        p = st.r.run(sid, [*argv, envp, TREE, label], cwd, env)
+        good, facts = C.check_env_record(envp, expect_prefix=venv, expect_subject=TREE)
+        facts["file"] = str(envp.relative_to(C.PKT))
+        facts["sha256"] = C.fsha(envp) if envp.exists() else None
+        return p, good, facts
+
+    arts = {k: Path(v["file"]) for k, v in s1["artifacts"].items()}
+    for k, p in arts.items():
+        st.check("ART-unchanged", C.fsha(p) == s1["artifacts"][k]["sha256"], artifact=k, sha256=C.fsha(p))
+    wheels = {"tree": arts["tree_wheel"], "sdist": arts["sdist_wheel"]}
+    comp_src = (TREE / "src/tars/sim/atmosphere.py").read_bytes()
+    listings = {}
+    for name, whl in wheels.items():          # PK-3 (in this driver process; driver ENV at finish)
+        with zipfile.ZipFile(whl) as zf:
+            names = zf.namelist()
+            listings[name] = names
+            data = zf.read(MEMBER) if MEMBER in names else b""
+            rec_text = zf.read(next(n for n in names if n.endswith(".dist-info/RECORD"))).decode()
+            lines = [ln for ln in rec_text.splitlines() if ln.startswith(MEMBER + ",")]
+            bad = []
+            for ln in rec_text.splitlines():
+                path, hv, size = ln.rsplit(",", 2)
+                if hv:
+                    algo, val = hv.split("=", 1)
+                    d = base64.urlsafe_b64encode(hashlib.new(algo, zf.read(path)).digest()).rstrip(b"=").decode()
+                    if d != val or int(size) != zf.getinfo(path).file_size:
+                        bad.append(path)
+            comp = zf.read("tars/sim/atmosphere.py") if "tars/sim/atmosphere.py" in names else b""
+        want = "sha256=" + base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode()
+        st.check("PK-3", C.sha(data) == C.PIN and len(data) == 661 and lines == [f"{MEMBER},{want},661"]
+                 and not bad and comp == comp_src, wheel=name, member_sha256=C.sha(data), size=len(data),
+                 record_lines=lines, record_mismatches=bad, component_equals_bc_blob=comp == comp_src)
+    with tarfile.open(arts["sdist"]) as tf:
+        mem = [m for m in tf.getmembers() if m.name.endswith("src/" + MEMBER)]
+        data = tf.extractfile(mem[0]).read() if len(mem) == 1 else b""
+        listings["sdist"] = sorted(m.name for m in tf.getmembers())
+        st.check("PK-3", len(mem) == 1 and C.sha(data) == C.PIN and len(data) == 661, artifact="sdist",
+                 member_sha256=C.sha(data))
+    (OUT / "LISTINGS.json").write_text(json.dumps(listings, indent=1) + "\n")
+
+    def sp(venv):
+        return venv / "lib/python3.12/site-packages"
+
+    def wrap(payload):
+        return WRAP.format(payload=payload, envcap=str(C.ENVCAP))
+
+    def make_venv(tag, inst, whl, cache):
+        venv = SCR / f"venv-{tag}"
+        tool, envs = [], []
+        if inst == "uv":
+            tool.append(st.r.run(f"{tag}-uv-venv", [C.UV, "venv", "-v", "--offline", "--no-python-downloads",
+                                                    "--python", C.PY, "--cache-dir", cache, venv], SCR, env))
+            tool.append(st.r.run(f"{tag}-uv-pip-install", [C.UV, "pip", "install", "-v", "--offline", "--no-deps",
+                                                           "--no-index", "--python", venv / "bin/python",
+                                                           "--cache-dir", cache, whl], SCR, env))
+            cfg = (venv / "pyvenv.cfg").read_text() if (venv / "pyvenv.cfg").exists() else None
+            home = re.search(r"^home = (.+)$", cfg or "", re.M)
+            # uv writes the minor-version link dir (cpython-3.12-…/bin); bind by realpath (run-2 checker
+            # compared the literal string and failed although the venvs resolve to 3.12.15).
+            bound = bool(home) and C.os.path.realpath(home.group(1) + "/python3.12") == C.PY
+            return venv, tool, envs, {"pyvenv.cfg": cfg, "interpreter_bound": bound}
+        p, g, f = pyrun(f"{tag}-venv", [C.PY, "-I", "-c", wrap(RUNMOD.format(mod="venv")), venv], SCR,
+                        f"{tag} python -m venv (setup)")
+        envs.append((p, g, f))
+        p, g, f = pyrun(f"{tag}-pip-install", [venv / "bin/python", "-I", "-c", wrap(RUNMOD.format(mod="pip")),
+                                               "install", "--no-deps", "--no-index", whl], SCR, f"{tag} pip install", venv)
+        envs.append((p, g, f))
+        p, g, f = pyrun(f"{tag}-pip-version", [venv / "bin/python", "-I", "-c", wrap(RUNMOD.format(mod="pip")),
+                                               "--version"], SCR, f"{tag} pip --version", venv)
+        envs.append((p, g, f))
+        cfg = (venv / "pyvenv.cfg").read_text()
+        return venv, tool, envs, {"pyvenv.cfg": cfg, "interpreter_bound": True,
+                                  "ensurepip_children": "incidental helper processes of `python -m venv` "
+                                                        "(ensurepip); inventoried, no ENV (Q-1)"}
+
+    forbidden = [C.WT.resolve(), TREE.resolve(), Path("/Users/guillermomartin/projects/tars").resolve()]
+    for name, whl in wheels.items():
+        for inst in ("uv", "pip"):
+            tag = f"{name}-{inst}"
+            venv, tool, envs, vf = make_venv(tag, inst, whl, SCR / f"cache-{tag}")
+            rec = sp(venv) / "tars-0.1.0.dist-info/RECORD"
+            inst_txt = sp(venv) / "tars-0.1.0.dist-info/INSTALLER"
+            st.check("PK-4", all(t["exit"] == 0 for t in tool) and all(p["exit"] == 0 and g for p, g, _ in envs)
+                     and rec.exists() and vf["interpreter_bound"], wheel=name, installer=inst, venv=str(venv),
+                     tool_steps=[t["step"] for t in tool], process_env=[f for _, _, f in envs],
+                     installer_file=inst_txt.read_text().strip() if inst_txt.exists() else None,
+                     installed_record=rec.read_text() if rec.exists() else None,
+                     installer_version=(envs[2][0]["stdout"].strip() if inst == "pip"
+                                        else "uv frontend (tool); version/sha256 in stage0 steps"), **vf)
+            cwd = SCR / f"cwd-{tag}"
+            cwd.mkdir()
+            ri, g, facts = pyrun(f"PK-5-{tag}-import", [venv / "bin/python", "-I", "-c", wrap(IMPORT)], cwd,
+                                 f"PK-5 {tag} import", venv)
+            o = last_json(ri["stdout"])
+            spr = sp(venv).resolve()
+            paths = [o.get("tars_file"), o.get("component_file"), o.get("data_path")]
+            installed = sp(venv) / MEMBER
+            st.check("PK-5", ri["exit"] == 0 and all(x and Path(x).is_relative_to(spr) for x in paths)
+                     and not any(x and Path(x).is_relative_to(f) for x in paths for f in forbidden)
+                     and o.get("data_sha256") == C.PIN and installed.exists() and C.fsha(installed) == C.PIN
+                     and o.get("density_0") == o.get("row0_rho0") and o.get("density_0")
+                     and o.get("executable_realpath") == C.PY and g,
+                     wheel=name, installer=inst, step=ri["step"], observed=o, process_env=facts)
+    for variant, expected in (("delete", "missing"), ("flip", "digest_mismatch"), ("crlf", "digest_mismatch")):
+        tag = f"pk6-{variant}"
+        venv, tool, envs, vf = make_venv(tag, "uv", wheels["tree"], SCR / f"cache-{tag}")
+        data_p = sp(venv) / MEMBER
+        raw = data_p.read_bytes()
+        if variant == "delete":
+            data_p.unlink()
+            edit = {"deleted": True}
+        elif variant == "flip":
+            n = raw.count(b"60.0, 3.206e-4,")
+            data_p.write_bytes(raw.replace(b"60.0, 3.206e-4,", b"60.0, 3.207e-4,", 1))
+            edit = {"occurrences": n, "after_sha256": C.fsha(data_p)}
+        else:
+            data_p.write_bytes(raw.replace(b"\n", b"\r\n"))
+            edit = {"after_sha256": C.fsha(data_p), "after_size": data_p.stat().st_size}
+        cwd = SCR / f"cwd-{tag}"
+        cwd.mkdir()
+        rp, g, facts = pyrun(f"PK-6-{variant}", [venv / "bin/python", "-I", "-c", wrap(PROFILED)], cwd,
+                             f"PK-6 {variant}", venv)
+        o = last_json(rp["stdout"])
+        st.check("PK-6", all(t["exit"] == 0 for t in tool) and vf["interpreter_bound"] and o.get("outcome") == "raised"
+                 and o.get("reason") == expected and o.get("calls") == 0 and g
+                 and (variant != "flip" or edit["occurrences"] == 1),
+                 variant=variant, expected=expected, edit=edit, step=rp["step"], observed=o, process_env=facts)
+    cwd = SCR / "cwd-pk7"
+    cwd.mkdir()
+    rz, g, facts = pyrun("PK-7-zipimport", [C.PY, "-I", "-c", wrap(ZIPIMPORT), wheels["tree"]], cwd, "PK-7 zipimport")
+    o = last_json(rz["stdout"])
+    st.check("PK-7", o.get("reason") == "unreadable" and g and facts["sys.prefix"] == str(Path(C.PY).parents[1]),
+             recorded_outcome=o, step=rz["step"], process_env=facts,
+             expected="reason unreadable (fail closed); zip import stays unsupported")
+    for name in wheels:                         # PK-8 (in this driver process)
+        src = (sp(SCR / f"venv-{name}-uv") / "tars/sim/atmosphere.py").read_text()
+        mods = set()
+        for node in ast.walk(ast.parse(src)):
+            if isinstance(node, ast.Import):
+                mods |= {a.name.split(".")[0] for a in node.names}
+            elif isinstance(node, ast.ImportFrom):
+                mods.add((node.module or "").split(".")[0])
+        st.check("PK-8", mods <= set(sys.stdlib_module_names), wheel=name, imports=sorted(mods))
+    s = st.r.run("wt-status-end", ["git", "-C", C.WT, "status", "--porcelain=v1", "--untracked-files=all"], SCR,
+                 {**env, "GIT_CEILING_DIRECTORIES": ""})
+    st.check("SRC-worktree-end", s["exit"] == 0 and s["stdout"] == "", status=s["stdout"])
+    st.check("TOOL-python-end", C.fsha(C.PY) == C.PY_SHA)
+    st.finish()
+
+
+if __name__ == "__main__":
+    {"stage0": stage0, "stage1": stage1, "stage2": stage2}[sys.argv[1]]()

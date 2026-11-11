@@ -1,0 +1,197 @@
+"""S3 phase-D mutant population (proposal v4 sections 11.4, 11.5) for the selected combination
+D-S3-01 (a), D-S3-09 (a1), D-S3-10 (a), D-S3-17 (a), D-S3-18 (a). Each mutant is a list of exact
+edits (old occurs exactly once in the target) on the committed BC export, with its effective
+designated (JUnit node, tag) pairs. Declared equivalents M-13 and M-25c are not run (documented).
+"""
+
+C = "src/tars/sim/atmosphere.py"
+TW = "tests/s3_dl4_density_twin.py"
+AD = "tests/test_s3_atmosphere_data.py"
+DN = "tests/test_s3_density.py"
+CF = "tests/test_s3_density_conformance.py"
+WI = "tests/test_s3_witnesses.py"
+ST = "tests/test_s3_selftests.py"
+
+T07 = (f"{DN}::test_s3_t07_guard_and_categories", "S3-T-07/OBS")
+T08 = (f"{DN}::test_s3_t08_exact_bases", "S3-T-08/OBS")
+T09 = (f"{DN}::test_s3_t09_base_neighbours", "S3-T-09/OBS")
+T10 = (f"{DN}::test_s3_t10_top_band_no_cutoff", "S3-T-10/OBS")
+T12 = (f"{CF}::test_s3_t12_dl4_conformance_every_listing_point", "S3-T-12/OBS")
+T22 = (f"{WI}::test_s3_t22_frozen_witness_inputs", "S3-T-22/OBS")
+T03 = (f"{AD}::test_s3_t03_parsed_table", "S3-T-03/VALUE")
+T13 = (f"{DN}::test_s3_t13_type_contract", "S3-T-13/OBS")
+T06 = (f"{DN}::test_s3_t06_static_guard_and_component_ast", "S3-T-06/AST")
+T17 = (f"{ST}::test_s3_t17_twin_independence_ast", "S3-T-17/AST")
+
+
+def t02a(fid, aspect):
+    return (f"{AD}::test_s3_t02a_checked_load_in_process[{fid}]", f"S3-T-02a/{aspect}")
+
+
+def t02b(fid, aspect):
+    return (f"{AD}::test_s3_t02b_fresh_import_order[{fid}]", f"S3-T-02b/{aspect}")
+
+
+def t04(name, rule):
+    return (f"{AD}::test_s3_t04_validity_rule[{name}]", f"S3-T-04/{rule}")
+
+
+def e(old, new, path=C):
+    return {"path": path, "old": old, "new": new, "count": 1}
+
+
+GUARD_D = '    if h_m < 0.0:\n        raise DensityInputError("below_zero")\n    return _evaluate(h_m, _TABLE)\n'
+FIN_GUARD_D = (
+    '    if not math.isfinite(h_m):\n        raise DensityInputError("nonfinite")\n' + GUARD_D
+)
+FIN_D = '    if not math.isfinite(h_m):\n        raise DensityInputError("nonfinite")\n    if h_m < 0.0:\n        raise DensityInputError("below_zero")\n    return _evaluate(h_m, _TABLE)\n'
+EXPR = "    return rho0 * math.exp(-(h - base_km) / scale_km)\n"
+DIGEST = (
+    "    if hashlib.sha256(raw).hexdigest() != DATASET_SHA256:\n"
+    '        raise DatasetIntegrityError("digest_mismatch")\n'
+)
+LOADS = "_TABLE = _load_checked(_DATA_PATH)\n"
+TYPE_D = 'UNVERIFIED ABOVE 1000 KM."""\n    if type(h_m) is not float:\n'
+TYPE_FIN_D = (
+    TYPE_D + "        raise UnsupportedHeightTypeError()\n"
+    '    if not math.isfinite(h_m):\n        raise DensityInputError("nonfinite")\n'
+)
+V2 = (
+    '    if not text.endswith("\\n") or "\\r" in text:\n        raise _invalid("V-2")\n'
+    '    lines = text[:-1].split("\\n")\n    if "" in lines:\n        raise _invalid("V-2")\n'
+)
+V5 = (
+    "    try:\n        values = [tuple(float(token) for token in tokens) for tokens in fields]\n"
+    '    except ValueError:\n        raise _invalid("V-5") from None\n'
+)
+V6 = '    if not all(math.isfinite(v) for row in values for v in row):\n        raise _invalid("V-6")\n'
+V9A = '    if not all(row[1] > 0.0 for row in values):\n        raise _invalid("V-9a")\n'
+
+MUTANTS = [
+    # --- P4 guard and precedence (S3-T-07) ---
+    ("M-01", "established", [e(GUARD_D, GUARD_D.replace("if h_m < 0.0:", "if (h_m / 1000.0) < 0.0:"))], [T07]),
+    ("M-02", "established", [e(GUARD_D, GUARD_D.replace("if h_m < 0.0:", "if h_m <= 0.0:"))], [T07]),
+    ("M-03", "established", [e(GUARD_D, GUARD_D.replace("if h_m < 0.0:", "if math.copysign(1.0, h_m) < 0:"))], [T07]),
+    ("M-04", "established", [e(FIN_GUARD_D,
+        '    if h_m < 0.0:\n        raise DensityInputError("below_zero")\n'
+        '    if not math.isfinite(h_m):\n        raise DensityInputError("nonfinite")\n'
+        "    return _evaluate(h_m, _TABLE)\n")], [T07]),
+    ("M-05a", "established", [e(FIN_D, GUARD_D)], [T07]),
+    ("M-05b", "established", [e(FIN_D, FIN_D.replace("if not math.isfinite(h_m):", "if h_m != h_m:"))], [T07]),
+    ("M-06", "established", [e(GUARD_D, "    return _evaluate(h_m, _TABLE)\n")], [T07]),
+    # --- band selection and expression (candidates use the frozen witnesses, S3-T-22) ---
+    ("M-07", "candidate", [e("        if h < table[i + 1][0]:\n", "        if h <= table[i + 1][0]:\n")], [T08, T22]),
+    ("M-08a", "established", [e("    base_km, rho0, scale_km = table[i]\n",
+        "    base_km, rho0, scale_km = table[i]\n    if i < len(table) - 1:\n"
+        "        rho0, scale_km = table[i + 1][1], table[i + 1][2]\n")], [T08]),
+    ("M-08b", "candidate", [e("    base_km, rho0, scale_km = table[i]\n",
+        "    base_km, rho0, scale_km = table[i + 1] if i < len(table) - 1 else table[i]\n")], [T08, T22]),
+    ("M-09", "candidate", [e(EXPR, "    return rho0 * math.exp(-(h - base_km) / (scale_km * 1000.0))\n")], [T09, T12, T22]),
+    ("M-10", "candidate", [e("    h = h_m / 1000.0\n", "    h = h_m * 0.001\n")], [T12, T22]),
+    ("M-11", "candidate", [e(EXPR, "    return rho0 * math.exp(-(h_m - base_km * 1000.0) / (scale_km * 1000.0))\n")], [T12, T22]),
+    ("M-12", "candidate", [e(EXPR, "    return rho0 * math.exp(-h / scale_km + base_km / scale_km)\n")], [T09, T12, T22]),
+    ("M-14", "candidate", [e(EXPR, "    return rho0 * math.exp((h - base_km) / scale_km)\n")], [T09, T12, T22]),
+    ("M-15", "established", [e("    h = h_m / 1000.0\n", "    h = h_m / 1000.0\n    if h > 1000.0:\n        return 0.0\n")], [T10]),
+    ("M-16", "established", [e("    h = h_m / 1000.0\n",
+        '    h = h_m / 1000.0\n    if h > 1000.0:\n        raise DensityInputError("above_table")\n')], [T10]),
+    ("M-17", "candidate", [e(LOADS, LOADS +
+        "_TABLE = (*_TABLE[:27], Row(_TABLE[27][0], _TABLE[26][1] * math.exp(-100.0 / _TABLE[26][2]),"
+        " _TABLE[27][2]))\n")], [T03, T08, T22]),
+    # --- checked loader (S3-T-02) ---
+    ("M-18", "established", [e(DIGEST, "")], [t02a("F-T1", "CAT"), t02b("F-T1", "CAT")]),
+    ("M-19a", "established", [e("        raw = path.read_bytes()\n",
+        '        raw = path.read_text(encoding="ascii").encode("ascii")\n')],
+        [t02a("F-T2", "CAT"), t02a("F-T3", "CAT")]),
+    ("M-19b", "established", [e(DIGEST, '    raw = raw.replace(b"\\r\\n", b"\\n")\n' + DIGEST)], [t02a("F-T2", "CAT")]),
+    ("M-20a", "established", [e(DIGEST + "    return _parse_and_validate(raw)\n",
+        "    rows = _parse_and_validate(raw)\n" + DIGEST + "    return rows\n")],
+        [t02a("F-T1", "ORDER"), t02b("F-T1", "ORDER")]),
+    ("M-20b", "established", [e(DIGEST + "    return _parse_and_validate(raw)\n",
+        "    try:\n        rows = _parse_and_validate(raw)\n    except DatasetIntegrityError:\n"
+        '        raise DatasetIntegrityError("digest_mismatch") from None\n' + DIGEST + "    return rows\n")],
+        [t02a("F-T1", "ORDER"), t02b("F-T1", "ORDER")]),
+    ("M-20c", "established", [e(DIGEST + "    return _parse_and_validate(raw)\n",
+        "    _parse_and_validate(raw)\n" + DIGEST + "    return _parse_and_validate(raw)\n")],
+        [t02a("F-T1", "ORDER")]),
+    ("M-21a", "established", [e(LOADS, LOADS +
+        "_TABLE = (*_TABLE[:5], Row(_TABLE[5][0], math.nextafter(_TABLE[5][1], math.inf), _TABLE[5][2]),"
+        " *_TABLE[6:])\n")], [T03, T08]),
+    ("M-21b", "established", [e("    base_km, rho0, scale_km = table[i]\n",
+        "    base_km, rho0, scale_km = table[i]\n    if table is _TABLE and i == 5:\n"
+        "        rho0 = math.nextafter(rho0, math.inf)\n")], [T08]),
+    # --- V-rules (S3-T-04) ---
+    ("M-22-V1", "established", [e('    try:\n        text = raw.decode("ascii")\n    except UnicodeDecodeError:\n'
+        '        raise _invalid("V-1") from None\n', '    text = raw.decode("ascii")\n')], [t04("V-1-nbsp", "V-1")]),
+    ("M-22-V2", "established", [e(V2, '    lines = text[:-1].split("\\n")\n')],
+        [t04("V-2-no-final-lf", "V-2"), t04("V-2-crlf", "V-2"), t04("V-2-blank-line", "V-2")]),
+    ("M-22-V3", "established", [e('    if len(lines) != _ROW_COUNT:\n        raise _invalid("V-3")\n', "")],
+        [t04("V-3-27-rows", "V-3"), t04("V-3-29-rows", "V-3")]),
+    ("M-22-V4", "established", [e('    if any(len(tokens) != 3 for tokens in fields):\n        raise _invalid("V-4")\n', "")],
+        [t04("V-4-2-fields", "V-4"), t04("V-4-4-fields", "V-4")]),
+    ("M-22-V5", "established", [e(V5, "    values = [tuple(float(token) for token in tokens) for tokens in fields]\n")],
+        [t04("V-5-token", "V-5")]),
+    ("M-22-V6", "established", [e(V6, "")], [t04("V-6-inf-H", "V-6"), t04("V-6-1e999-rho0", "V-6")]),
+    ("M-22-V7", "established", [e('    if values[0][0] != 0.0:\n        raise _invalid("V-7")\n', "")], [t04("V-7-base-1", "V-7")]),
+    ("M-22-V8", "established", [e("    if any(values[i + 1][0] <= values[i][0] for i in range(len(values) - 1)):\n"
+        '        raise _invalid("V-8")\n', "")], [t04("V-8-equal-bases", "V-8")]),
+    ("M-22-V9a", "established", [e(V9A, "")], [t04("V-9a-rho0-zero", "V-9a"), t04("V-9a-rho0-negative", "V-9a")]),
+    ("M-22-V9b", "established", [e('    if not all(row[2] > 0.0 for row in values):\n        raise _invalid("V-9b")\n', "")],
+        [t04("V-9b-H-zero", "V-9b"), t04("V-9b-H-negative", "V-9b")]),
+    ("M-22-ORD", "established", [e(V6 + "    if values[0][0] != 0.0:\n", V9A + V6 + "    if values[0][0] != 0.0:\n"),
+        e('    if values[0][0] != 0.0:\n        raise _invalid("V-7")\n'
+          "    if any(values[i + 1][0] <= values[i][0] for i in range(len(values) - 1)):\n"
+          '        raise _invalid("V-8")\n' + V9A,
+          '    if values[0][0] != 0.0:\n        raise _invalid("V-7")\n'
+          "    if any(values[i + 1][0] <= values[i][0] for i in range(len(values) - 1)):\n"
+          '        raise _invalid("V-8")\n')],
+        [(f"{AD}::test_s3_t04_rule_precedence", "S3-T-04/PREC")]),
+    # --- purity / eager load (S3-T-05) ---
+    ("M-23a", "established", [e("    return _evaluate(h_m, _TABLE)\n", "    return _evaluate(h_m, _load_checked(_DATA_PATH))\n")],
+        [(f"{DN}::test_s3_t05a_no_io_during_evaluation", "S3-T-05a/IO")]),
+    ("M-23b", "established", [
+        e("_TABLE = _load_checked(_DATA_PATH)\n_SUBSET = _derive_one_band_subset(_TABLE)\n",
+          "_CACHE = {}\n\n\ndef _tables():\n    if not _CACHE:\n        _CACHE[\"table\"] = _load_checked(_DATA_PATH)\n"
+          "        _CACHE[\"subset\"] = _derive_one_band_subset(_CACHE[\"table\"])\n    return _CACHE\n"),
+        e("    return _evaluate(h_m, _TABLE)\n", '    return _evaluate(h_m, _tables()["table"])\n'),
+        e("    return _evaluate(h_m, _SUBSET)\n", '    return _evaluate(h_m, _tables()["subset"])\n')],
+        [(f"{DN}::test_s3_t05b_eager_table_and_unchanged_module_state", "S3-T-05b/EAGER")]),
+    # --- static (S3-T-06) ---
+    ("M-24a", "established", [e("import math\n", "import math\n\nimport numpy as np\n"),
+        e(EXPR, "    return rho0 * float(np.exp(-(h - base_km) / scale_km))\n")], [T06]),
+    ("M-24b", "established", [e("import math\n", "import math\n\nfrom numpy import exp\n"),
+        e(EXPR, "    return rho0 * float(exp(-(h - base_km) / scale_km))\n")], [T06]),
+    ("M-24c", "established", [e(EXPR, "    return rho0 * math.e ** (-(h - base_km) / scale_km)\n")], [T06]),
+    # --- subset (S3-T-14) ---
+    ("M-25a", "established", [e("_SUBSET_BASE_KM = 250.0\n", "_SUBSET_BASE_KM = 200.0\n")],
+        [(f"{DN}::test_s3_t14a_subset_row", "S3-T-14a/ROW")]),
+    ("M-25b", "established", [e("    found = tuple(row for row in table if row[0] == _SUBSET_BASE_KM)\n",
+        "    found = (Row(250.0, 7.248e-11, 45.546),)\n")],
+        [(f"{DN}::test_s3_t14b_derivation_sensitivity", "S3-T-14b/DERIVE"),
+         (f"{DN}::test_s3_t14c_no_subset_literals", "S3-T-14c/LITERAL")]),
+    ("M-28c-a1", "established", [e('    if h_m < 0.0:\n        raise DensityInputError("below_zero")\n'
+        "    return _evaluate(h_m, _SUBSET)\n", "    return _evaluate(h_m, _SUBSET)\n")],
+        [(f"{DN}::test_s3_t14d_a1_domain_witnesses", "S3-T-14d/A1-P4")]),
+    # --- type contract (S3-T-13) ---
+    ("M-26a", "established", [e(TYPE_D, TYPE_D.replace("if type(h_m) is not float:", "if not isinstance(h_m, float):"))], [T13]),
+    ("M-26b", "established", [e(TYPE_D, TYPE_D.replace("if type(h_m) is not float:", "if not isinstance(h_m, (int, float)):"))], [T13]),
+    ("M-26c", "established", [e(TYPE_FIN_D,
+        TYPE_D.replace("    if type(h_m) is not float:\n", "")
+        + '    if not math.isfinite(h_m):\n        raise DensityInputError("nonfinite")\n'
+        "    if type(h_m) is not float:\n        raise UnsupportedHeightTypeError()\n")], [T13]),
+    # --- twin independence (S3-T-17) ---
+    ("M-27a", "established", [e("import math\n", "import math\n\nimport tars\n", TW)], [T17]),
+    ("M-27b", "established", [e("import math\n", "import math\n\nfrom tars.sim import atmosphere\n", TW)], [T17]),
+    ("M-27c", "established", [e("import math\n",
+        'import importlib\nimport math\n\n_COMPONENT = importlib.import_module("tars.sim.atmosphere")\n', TW)], [T17]),
+    ("M-27d", "established", [e("import math\n", 'import math\n\n_TARS = __import__("tars")\n', TW)], [T17]),
+    # --- missing-file mapping (S3-T-02c) ---
+    ("M-29", "established", [e('    except FileNotFoundError:\n        raise DatasetIntegrityError("missing") from None\n',
+        "    except FileNotFoundError:\n        raise\n")],
+        [(f"{AD}::test_s3_t02c_missing_file", "S3-T-02c/CAT")]),
+]
+
+EQUIVALENTS = {
+    "M-13": "exponent (base - h)/H: output-equivalent under the declared runtime (v4 11.4; AN-2); "
+    "detectable only by RR-15 source inspection; not counted",
+    "M-25c": "subset := _TABLE[17]: equivalent on the only digest-admitted table (v4 11.4); not counted",
+}

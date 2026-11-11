@@ -1,0 +1,181 @@
+"""S3 report-only rows S3-R-01...S3-R-05 (v4 §10.3). REPORT-ONLY: never gated, no bound claimed,
+no accuracy claim, no promotion (P-i...P-iii not authorized). Densities are UNVERIFIED ABOVE 1000 KM (P5).
+
+Usage: python -B report_only.py <clone root> <out.json> <host S3-XP3 source log> [<label>=<CI records dir> ...]
+Run with the clone's venv python (recorder present). Reads the component's per-point observations from
+S3-XP3 records (host full-suite log; CI job extractions); evaluates nothing of the component itself.
+
+- S3-R-01 (U-13): rho^ vs T0's E3 upper enclosure rho^ <= F_rho e^eta0 rho(h_s) exp(theta_x X) + N_rho
+  (A-FP-2; constants from t0_termination.rounding_allowances / its F_rho definition), evaluated in
+  60-digit Decimal at the km-route selection height h_s = 1000 fl(h/1000); lower-side difference reported.
+- S3-R-02 (PM-4): (a) non-increase / (b) strict decrease between consecutive listing points of one band.
+- S3-R-03 (X-P3): pairwise cross-platform bit differences of rho^ at listing points (ulps).
+- S3-R-04 (X-D1): comparison with t0_model.density(units="km") at h >= 0 (read-only import of T0 code).
+- S3-R-05 (B-14): first subnormal and first zero output positions in P-D; relative jump at 1000 km.
+"""
+
+import importlib.util
+import json
+import re
+import struct
+import sys
+from decimal import Decimal, getcontext
+from fractions import Fraction
+from pathlib import Path
+
+getcontext().prec = 60
+LABEL = "densities are UNVERIFIED ABOVE 1000 KM (P5)"
+
+
+def xp3_from_log(path):
+    t = Path(path).read_text(errors="replace")
+    m = re.findall(r"S3-XP3 sha256=([0-9a-f]{64}) (\{.*\})$", t, re.M)
+    assert len(m) == 1, (path, len(m))
+    import hashlib
+    assert hashlib.sha256(m[0][1].encode()).hexdigest() == m[0][0]
+    return json.loads(m[0][1]), m[0][0]
+
+
+def bits_to_float(h):
+    return struct.unpack("<d", struct.pack("<Q", int(h, 16)))[0]
+
+
+def ordered(v):
+    i = struct.unpack("<q", struct.pack("<d", v))[0]
+    return i if i >= 0 else -(i & 0x7FFFFFFFFFFFFFFF)
+
+
+def main():
+    clone, out, hostlog = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+    if out.exists():
+        raise SystemExit("occupied")
+    host, host_sha = xp3_from_log(hostlog)
+    rows = host["rows"]
+    res = {"record": "S3 report-only rows S3-R-01..S3-R-05 (REPORT-ONLY; never gated; no bound or accuracy claim)",
+           "label": LABEL, "host_xp3_body_sha256": host_sha, "points": len(rows)}
+    data = (clone / "src/tars/sim/data/EarthExponentialAtmosphereData.txt").read_text()
+    table = [tuple(Decimal(x.strip()) for x in ln.split(",")) for ln in data.strip().splitlines()]
+    tf = [tuple(float(x) for x in r) for r in table]
+    spec = importlib.util.spec_from_file_location("t0_termination", clone / "docs/science/experiments/m3-t0/t0_termination.py")
+    sys.path.insert(0, str(clone / "docs/science/experiments/m3-t0"))
+    t0t = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(t0t)
+    ra = t0t.rounding_allowances()
+    U = t0t.U
+    uf = t0t.LIBM_ULP * Fraction(1, 2**52)
+    f_rho = Decimal((1 + uf).numerator) / Decimal((1 + uf).denominator) * (1 + Decimal(U.numerator) / Decimal(U.denominator)) ** 2
+    theta_x = Decimal(Fraction(ra["theta_x"]).numerator) / Decimal(Fraction(ra["theta_x"]).denominator)
+    tiny = Decimal(2) ** -1074
+    n_rho = Decimal(str(ra["N_rho_in_2^-1074"])) * tiny
+    eta0 = Decimal(2) ** -1075
+    e_eta0 = eta0.exp()
+
+    def band(hkm):
+        for i in range(len(tf) - 1):
+            if hkm < tf[i + 1][0]:
+                return i
+        return len(tf) - 1
+
+    # S3-R-01 and S3-R-02 on value observations at finite h >= 0.
+    over, margins, lower, pts = [], [], [], []
+    for s, i, tok, kind, obs in rows:
+        if kind != "value" or tok in ("nan", "-nan", "inf", "-inf"):
+            continue
+        h = float.fromhex(tok)
+        if h < 0 or (h == 0 and tok.startswith("-")):
+            continue
+        rho = bits_to_float(obs)
+        hkm = h / 1000.0
+        b = band(hkm)
+        base, r0, H = table[b]
+        X = (Decimal(hkm) - base) / H
+        if X < 0:
+            continue
+        exact = r0 * (-X).exp()
+        bound = f_rho * e_eta0 * exact * (theta_x * X).exp() + n_rho
+        pts.append((h, b, rho))
+        if Decimal(rho) > bound:
+            over.append([s, i, tok])
+        if exact > 0:
+            margins.append(float((bound - Decimal(rho)) / exact))
+            lower.append(float((Decimal(rho) - exact) / exact))
+    res["S3-R-01"] = {"report_only": True, "assumption": "A-FP-2 (unaccepted; nothing gated)",
+                      "evaluated": len(margins), "points_above_E3_upper_enclosure": over,
+                      "min_relative_margin_to_upper": min(margins) if margins else None,
+                      "lower_side_relative_difference_min_max": [min(lower), max(lower)] if lower else None,
+                      "note": "E3 gives no lower bound; lower-side differences are reported only"}
+    pts.sort()
+    inc, eq, pairs = [], 0, 0
+    for (h1, b1, r1), (h2, b2, r2) in zip(pts, pts[1:]):
+        if b1 != b2 or h1 == h2:
+            continue
+        pairs += 1
+        if r2 > r1:
+            inc.append([h1.hex(), h2.hex()])
+        if r2 == r1:
+            eq += 1
+    res["S3-R-02"] = {"report_only": True, "consecutive_same_band_pairs": pairs,
+                      "a_non_increase_violations": inc, "b_equal_adjacent_pairs_not_strict": eq,
+                      "assumption": "(a) needs A-LM-2 (not accepted); (b) reported only"}
+    # S3-R-03 cross-platform.
+    plats = {"host": {(r[0], r[1]): (r[3], r[4]) for r in rows}}
+    for arg in sys.argv[4:]:
+        lab, d = arg.split("=", 1)
+        body = json.loads((Path(d) / "S3-XP3.json").read_text())
+        plats[lab] = {(r[0], r[1]): (r[3], r[4]) for r in body["rows"]}
+    pair_res = {}
+    labs = sorted(plats)
+    for a_i in range(len(labs)):
+        for b_i in range(a_i + 1, len(labs)):
+            a, b = plats[labs[a_i]], plats[labs[b_i]]
+            diff, maxu, kinds = 0, 0, 0
+            for k in a:
+                if a[k] != b.get(k):
+                    diff += 1
+                    if a[k][0] == b[k][0] == "value":
+                        maxu = max(maxu, abs(ordered(bits_to_float(a[k][1])) - ordered(bits_to_float(b[k][1]))))
+                    else:
+                        kinds += 1
+            pair_res[f"{labs[a_i]}|{labs[b_i]}"] = {"differing_points": diff, "max_ulp": maxu,
+                                                    "outcome_kind_differences": kinds}
+    res["S3-R-03"] = {"report_only": True, "rule": "RQ-3: measured and reported, never gated", "pairs": pair_res}
+    # S3-R-04 X-D1 vs t0_model.density(units="km").
+    spec = importlib.util.spec_from_file_location("t0_model", clone / "docs/science/experiments/m3-t0/t0_model.py")
+    t0m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(t0m)
+    same = dif = 0
+    maxu = 0
+    for s, i, tok, kind, obs in rows:
+        if kind != "value" or tok in ("nan", "-nan", "inf", "-inf"):
+            continue
+        h = float.fromhex(tok)
+        if h < 0 or tok.startswith("-"):
+            continue
+        t = t0m.density(h, units="km")
+        c = bits_to_float(obs)
+        if struct.pack("<d", t) == struct.pack("<d", c):
+            same += 1
+        else:
+            dif += 1
+            maxu = max(maxu, abs(ordered(t) - ordered(c)))
+    res["S3-R-04"] = {"report_only": True, "compared_h_ge_0": same + dif, "bitwise_equal": same,
+                      "differing": dif, "max_ulp": maxu}
+    # S3-R-05 subnormal onset / zero in P-D; 1000 km jump.
+    pd = [(float.fromhex(r[2]), bits_to_float(r[4])) for r in rows if r[0] == "P-D" and r[3] == "value"]
+    pd.sort()
+    sub = next((h for h, v in pd if 0 < v < 2.2250738585072014e-308), None)
+    zero = next((h for h, v in pd if v == 0.0), None)
+    vals = {r[2]: bits_to_float(r[4]) for r in rows if r[3] == "value"}
+    import math
+    at = vals.get((1e6).hex())
+    below = vals.get(math.nextafter(1e6, 0.0).hex())
+    res["S3-R-05"] = {"report_only": True, "P-D_points": len(pd), "first_subnormal_h_m": sub, "first_zero_h_m": zero,
+                      "rho_at_1e6": at, "rho_at_nd_1e6": below,
+                      "relative_jump_at_1000km": ((below - at) / at) if (at and below) else None}
+    with open(out, "x") as fh:
+        fh.write(json.dumps(res, indent=1, default=str) + "\n")
+    print(json.dumps({k: v for k, v in res.items() if k.startswith("S3-R")}, default=str)[:3000])
+
+
+if __name__ == "__main__":
+    main()

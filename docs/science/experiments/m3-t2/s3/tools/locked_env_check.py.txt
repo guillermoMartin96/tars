@@ -1,0 +1,25 @@
+"""Read-only: do the worktree venv's installed distributions equal the BC uv.lock (pin 6d784550…)?
+Usage: python3.12 -I -B locked_env_check.py <uv.lock> <site-packages> <out.json> (new)."""
+import hashlib, json, re, sys, tomllib
+from pathlib import Path
+lock, site, out = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
+if out.exists():
+    raise SystemExit("occupied")
+raw = lock.read_bytes()
+data = tomllib.loads(raw.decode())
+norm = lambda n: re.sub(r"[-_.]+", "-", n).lower()
+locked = {norm(p["name"]): p["version"] for p in data["package"]}
+installed = {}
+for d in site.glob("*.dist-info"):
+    meta = (d / "METADATA").read_text(errors="replace")
+    name = re.search(r"^Name: (.+)$", meta, re.M).group(1).strip()
+    ver = re.search(r"^Version: (.+)$", meta, re.M).group(1).strip()
+    installed[norm(name)] = ver
+mism = {k: {"locked": locked.get(k), "installed": v} for k, v in installed.items() if locked.get(k) != v}
+res = {"uv_lock_sha256": hashlib.sha256(raw).hexdigest(), "site": str(site), "installed": installed,
+       "installed_not_matching_lock": mism, "locked_not_installed": sorted(set(locked) - set(installed)),
+       "pyvenv_cfg": (site.parents[2] / "pyvenv.cfg").read_text()}
+res["ok"] = res["uv_lock_sha256"] == "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf" and not mism
+out.write_text(json.dumps(res, indent=1, sort_keys=True) + "\n")
+print(json.dumps({"ok": res["ok"], "mismatch": mism, "locked_not_installed": res["locked_not_installed"]}))
+sys.exit(0 if res["ok"] else 1)

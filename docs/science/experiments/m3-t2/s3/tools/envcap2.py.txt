@@ -1,0 +1,118 @@
+"""Own-process ENV record (PC-7 §4 D-S3-04 (a), §8; owner instruction 2026-11-11 §2 Q-1, §3).
+
+Loaded BY PATH (never importable by name) at the END of a Python process, after its payload ran:
+either from tools/rec/sitecustomize.py (atexit) or from a driver/wrapper `finally`. It runs the
+existing, unmodified S2 ENV node's `build_record()` (S2-approved libm argument set) from the subject's
+own `tests/test_s2_environment_record.py`, giving that module a temporary stub `tests.conftest` whose
+only attribute is REPO_ROOT = <subject root>, and restores sys.modules afterwards. It adds the process's
+own identity (executable, libpython, build, flags, pid/ppid, argv, cwd), the origins of selected loaded
+modules (binding), and an independent sha256 of <subject>/uv.lock. It records no environment dump: only
+the presence of fixed variable names and the values of a fixed list of path-valued variables.
+
+capture(out_path, subject_root, label, observer) writes out_path with mode "x" (never overwrites).
+"""
+
+import hashlib
+import importlib.util
+import json
+import os
+import sys
+import sysconfig
+import types
+from datetime import UTC, datetime
+
+NAMES = ("VIRTUAL_ENV", "PYTHONHOME", "PYTHONPATH", "PYTHONVERBOSE", "PYTHONDONTWRITEBYTECODE",
+         "UV_CACHE_DIR", "UV_OFFLINE", "UV_PYTHON_DOWNLOADS", "TMPDIR", "PIP_NO_INDEX", "PATH",
+         "GIT_CEILING_DIRECTORIES", "S3REC_DIR", "S3REC_SUBJECT", "S3REC_LABEL", "S3REC_ENVCAP")
+SHOW_VALUES = ("VIRTUAL_ENV", "PYTHONHOME", "PYTHONPATH", "PATH", "GIT_CEILING_DIRECTORIES",
+               "S3REC_SUBJECT")
+MODULE_PREFIXES = ("tars", "tests", "s3_", "uv_build", "pytest", "_pytest", "numpy", "pip", "venv",
+                   "ensurepip", "sitecustomize", "s3rec_plugin")
+LABEL_P5 = "densities are UNVERIFIED ABOVE 1000 KM (P5)"
+
+
+def _sha(path):
+    try:
+        with open(path, "rb") as fh:
+            return hashlib.sha256(fh.read()).hexdigest()
+    except OSError as exc:
+        return f"[U] unavailable: {type(exc).__name__}: {exc}"
+
+
+def _origins():
+    """__file__ of loaded modules whose top-level name starts with one of MODULE_PREFIXES."""
+    out = {}
+    for name, mod in list(sys.modules.items()):
+        if name.split(".")[0].startswith(MODULE_PREFIXES):
+            f = getattr(mod, "__file__", None)
+            if isinstance(f, str):
+                out[name] = os.path.realpath(f)
+    return dict(sorted(out.items()))
+
+
+def capture(out_path, subject_root, label, observer):
+    saved = {k: sys.modules.get(k) for k in ("tests", "tests.conftest")}
+    origins_before = _origins()
+    pkg = types.ModuleType("tests")
+    pkg.__path__ = []
+    conf = types.ModuleType("tests.conftest")
+    from pathlib import Path
+
+    conf.REPO_ROOT = Path(subject_root)
+    sys.modules["tests"], sys.modules["tests.conftest"] = pkg, conf
+    src = os.path.join(subject_root, "tests", "test_s2_environment_record.py")
+    try:
+        spec = importlib.util.spec_from_file_location("_s2_env_record_from_subject", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        rec = mod.build_record()
+        s2_text = json.dumps(rec, sort_keys=True, default=str)
+        s2 = {"S2-ENV-RECORD body sha256": hashlib.sha256(s2_text.encode()).hexdigest(),
+              "body": rec, "module": src, "module_sha256": _sha(src)}
+    except BaseException as exc:  # recorded, never repaired
+        s2 = {"error": f"{type(exc).__qualname__}: {exc}", "module": src, "module_sha256": _sha(src)}
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                sys.modules.pop(k, None)
+            else:
+                sys.modules[k] = v
+        sys.modules.pop("_s2_env_record_from_subject", None)
+    cfg = sysconfig.get_config_vars()
+    lib = os.path.join(cfg.get("LIBDIR") or "", cfg.get("LDLIBRARY") or "")
+    exe = os.path.realpath(sys.executable)
+    out = {
+        "record": "own-process ENV (S2 ENV node build_record + process identity)",
+        "observer": observer,
+        "label": label,
+        "utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "pid": os.getpid(),
+        "ppid": os.getppid(),
+        "argv": sys.argv,
+        "orig_argv": getattr(sys, "orig_argv", None),
+        "cwd": os.getcwd(),
+        "sys.executable": sys.executable,
+        "executable_realpath": exe,
+        "executable_sha256": _sha(exe),
+        "sys.version": sys.version,
+        "sys.prefix": sys.prefix,
+        "sys.base_prefix": sys.base_prefix,
+        "in_venv": sys.prefix != sys.base_prefix,
+        "sys.flags": {k: getattr(sys.flags, k) for k in dir(sys.flags)
+                      if not k.startswith("_") and isinstance(getattr(sys.flags, k), int)},
+        "Py_ENABLE_SHARED": cfg.get("Py_ENABLE_SHARED"),
+        "libpython": lib,
+        "libpython_realpath": os.path.realpath(lib),
+        "libpython_sha256": _sha(lib) if cfg.get("Py_ENABLE_SHARED") else "not a shared build",
+        "sys.path": sys.path,
+        "module_origins_at_capture": origins_before,
+        "subject_root": str(subject_root),
+        "subject_uv_lock_sha256_independent": _sha(os.path.join(subject_root, "uv.lock")),
+        "env_names_present": sorted(n for n in NAMES if n in os.environ),
+        "env_values": {n: os.environ[n] for n in SHOW_VALUES if n in os.environ},
+        "s2_env_record": s2,
+        "label_p5": LABEL_P5,
+    }
+    text = json.dumps(out, indent=1, sort_keys=True, default=str)
+    with open(out_path, "x", encoding="utf-8") as fh:
+        fh.write(text + "\n")

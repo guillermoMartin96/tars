@@ -1,0 +1,15 @@
+{
+ "check": "G-17b class X replay equality (OB-33)",
+ "class_X_entries_compared": 8853,
+ "differences": [],
+ "environment": {
+  "interpreter executable sha256": "d4f152f2a753c94e0e7935c8ebbe6b2609979e1df7898422b577d0076383d08b",
+  "platform.machine()": "x86_64",
+  "platform.platform()": "macOS-15.7.9-x86_64-i386-64bit",
+  "sys.version": "3.12.10 (v3.12.10:0cc81280367, Apr  8 2025, 08:47:00) [Clang 13.0.0 (clang-1300.0.29.30)]",
+  "uv.lock sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf"
+ },
+ "environment_basis": "owner determination I-101: equality of sys.version, platform.platform(), platform.machine(), the uv.lock sha256 and the sha256 of the interpreter executable (real path resolved before hashing); commit SHA and CI-only run fields excluded",
+ "environment_kind": "other",
+ "limitation": "ENV fields with unobservable values do not certify a perfectly reproduced library/build environment; a controlled regeneration comparison must record that limitation rather than assume matching proxy fields prove identity. (r83:83)"
+}
