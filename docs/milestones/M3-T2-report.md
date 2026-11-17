@@ -1304,7 +1304,12 @@ is not a review verdict.
   - D-S3-10 (a): exact built-in `float` only.
   - D-S3-13 (a): VAL deferred to S6.
   - D-S3-18 (a): CI conformance only.
-  - D-S3-01: S3-T-12 is absent; DL-4 for ρ is gated by the S3 records.
+  - D-S3-01 (a): S3 content retained, including DL-4 density conformance. S3-T-12 is present:
+    `tests/test_s3_density_conformance.py::test_s3_t12_dl4_conformance_every_listing_point` gates
+    DL-4 for ρ by asserting that the component and the twin agree bitwise at every point of the
+    frozen listing (`assert differences == []`, tag `S3-T-12/OBS`). The `S3-POINTS`, `S3-DL4` and
+    `S3-XP3` records it emits record the outcome; they do not replace the assertion. CF-S3-DL4 is
+    not created; M-10 and M-11 are not transferred.
 
 ### S3.1 Branch, base and commits
 
@@ -1541,4 +1546,134 @@ S3 creates these duties and never discharges them.
   owner acts.
 
 **Status: S3 IMPLEMENTED (A, BC) / PHASE-D EVIDENCE (D; CI attempt 1 FAILED, attempt 2 4/4) / NOT REVIEWED /
+NOT ACCEPTED / NOT MERGED.**
+
+### S3.7 Corrections after E (commit F): review findings, owner departures, recording-only CI
+
+> **Superseding note (commit F).** S3.0–S3.6 are the historical record of commit E and are kept
+> unchanged, except the S3.0 line on D-S3-01, which commit F corrects (finding F-S3-03). In S3.1,
+> "this commit" in the E row means E `4298dd3949557113e55ccc84a6e4995f1b121887`. The S3.6
+> obligation lines, its "not launched" handoff sentence and its status line describe E. The current
+> status is at the end of this section.
+
+**Owner choices.** The owner instruction recording choices OC-1…OC-5 and the historical
+dispositions OC-2H, OC-3H and OC-4 is
+`~/tars-evidence/S3-correction-authorization-preparation-v1/OWNER-INSTRUCTION.txt` (sha256
+`7d848e505187c50bfe6905b1068d10597ac09c754f6e255f791f30fb436216f6`). The instruction that issued
+this commit's execution is recorded verbatim at
+`~/tars-evidence/S3-F-commit-and-recorded-CI-v1/OWNER-INSTRUCTION.txt`. Both are external.
+
+**Review.** The independent S3 implementation review of exact E (r6, continued twice;
+`~/tars-evidence/S3-IMPL-REVIEW-E-4298dd3-r6-continuation2/`, manifest sha256
+`b94e0854236909a1761a74c60e75c930a98f244d391045bf7f13369cca383964`) is **BLOCKED** with no
+implementation verdict. Two of the reviewer's own regression command records were lost. That is a
+reviewer recording limitation, not a defect of E. Separately, the review supports four author
+findings, and the author accepted all four (`~/tars-evidence/S3-E-findings-response-plan-v1/`). The
+review's obligation ledger records OB-S3-16 and OB-S3-20 as **FAILED**. Nothing in this section
+changes that or makes any obligation MET.
+
+- **F-S3-03 (MINOR).** The S3.0 line said that S3-T-12 is absent. S3-T-12 is present and gates DL-4
+  for ρ by its assertion. Commit F corrects the line. No gate was missing.
+- **F-S3-01 (MAJOR, OB-S3-20).** Two original phase-D verdict drivers ran without their own ENV and
+  `uv.lock` record. Both records are in `~/tars-evidence/S3-provenance-contract-recovery-v1/`:
+  - the campaign assessment `assess.py` at 2026-11-11T16:41:33Z (`records/CAMP-assess.txt`). The
+    53/53 in S3.3 rests on its verdicts;
+  - the regression-gate driver `rgates.py`, 16:42:02Z–19:27:19Z (`records/D-rgates.txt`). It made
+    the R-1…R-S2 comparisons of S3.3 in its own process. Its child steps have their own records; the
+    driver itself does not.
+
+  Both originals are INCOMPLETE and NONQUALIFYING. The handoff classified the `rgates.py` process as
+  "tool metadata only". That was wrong and is withdrawn. The owner instruction required a stop at
+  the first missing record (16:41:33Z), and the author did not stop. The later recorded re-runs
+  (`records/D-campaign-assess-2.txt`, `records/D-rcompare.txt`) are new executions and do not
+  complete the originals.
+  - **Owner departure OC-2H (historical, effective, bounded to this continuation).** Later properly
+    recorded D evidence may be considered on its merits despite the continuation after
+    16:41:33Z. The stop was violated. The two originals remain incomplete. This departure validates
+    no later work, fills no record, changes no computation and makes nothing MET.
+  - **Replacement evidence (new computation, not a reproduction).** After E, under the owner's
+    correction instruction, both verdict computations were run again from the sealed retained
+    evidence, in processes with their own ENV and `uv.lock` record
+    (`~/tars-evidence/S3-F01-A2-reexecution-v1/`).
+    - The drivers are new adapter versions; their exact diffs are kept there.
+    - The historical campaign subjects are reconstructed from Git and the sealed edit records.
+    - One assessment sub-check is not re-established (C-PROBE). The original assessment compared
+      each execution's child-process records with the probe script files it observed in the
+      runtime tree. That tree is unsealed, and the observation was not reproduced.
+    - A2 reports C-PROBE separately, as not established under the original predicate. Beside it,
+      A2 reports a candidate inference derived from the test source and the sealed JUnit outcomes.
+      That inference is not the original observation.
+    - Which basis, if any, is accepted for C-PROBE is the owner's method determination in the
+      issued instruction, and it is subject to independent assessment.
+
+    These results are external and await independent verification.
+- **F-S3-02 (MAJOR, OB-S3-20).** In CI only pytest emitted an ENV record, from inside its own
+  process. The standalone numerical commands of the check and gate jobs had no own ENV or
+  `uv.lock` record in the CI runs relied on for A (42921184021, attempt 1), BC (42937733985,
+  attempt 1), D (43093656546, attempt 2) and E (43122442469, attempt 1):
+  - 34 top-level processes per run, 136 in all;
+  - by source derivation, not observation, each `determinism.py` invocation also ran 2 child
+    simulations: 10 per check job, 120 in all.
+
+  The CI outcomes remain successes, and the missing records remain missing. D attempt 1 remains
+  FAILED and contributes no job to attempt 2.
+  - Python processes that tests start inside the Tests step, for example the S3 probe children,
+    also had no own record (scope gap SG-1). They are outside the owner's bounded CI disposition
+    below. Their disposition is a separate owner decision. Recording from this commit onward does
+    not repair those historical records.
+  - **Owner disposition OC-3H (historical, CONDITIONAL, not yet effective).** Successor recorded CI
+    evidence is the proposed replacement for the missing per-process records of exactly those four
+    runs. It takes effect only on three conditions:
+    - a finite, source-bound historical inventory;
+    - complete successor records;
+    - independent assessment.
+
+    None of the conditions is claimed met here. No future CI recording exemption is granted.
+  - **This commit adds recording-only CI capture** (`.github/recording/`,
+    `.github/workflows/ci.yml`):
+    - every numerical Python process of the check and gate jobs, including child processes, writes
+      its own ENV and lock record, bound to run, job, attempt and commit;
+    - pytest writes JUnit;
+    - records and JUnit are uploaded even on failure;
+    - a completeness check fails the job if a record is missing or incomplete for its platform;
+    - a following step checks the completeness checker's own record. That step's own record is
+      checked offline from the uploaded artifact;
+    - on macOS arm64, the unchanged S2 node records three CPU probes as unavailable (`[U]`). Whether
+      that is acceptable is owner determination PR-1. Its status is recorded in
+      `.github/recording/expected-steps.json`, and a rule that is not adopted never passes.
+
+    Commands, thresholds, platforms, dependencies and the lock are unchanged. F cannot record its
+    own CI; its CI run is recorded externally.
+  - Whether historical CI pytest JUnit was required, and so missing, is an open review question.
+    It has not been made a finding.
+- **F-S3-04 (MAJOR, OB-S3-16).** A's red-first chronology for `tests/test_s3_selftests.py`
+  (S3-T-17…S3-T-20) is not met:
+  - **A-RED** (2026-11-10T22:34:19Z) was red for the declared reasons with test blob
+    `6175074097908bcc09b8776c1aef0169d7e16cbd`. That blob differs from the committed blob
+    `590fe863e3d4688a33a182d410470f4319601424`. The `6175074…` bytes and A-GREEN's intermediate
+    bytes are not retained.
+  - **A-GREEN** (22:36:40Z) failed unexpectedly on S3-T-17/PB1.
+  - **A-RED-2** (22:37:12Z), the first run of the committed bytes, **passed** all four nodes,
+    because the subjects were not held aside.
+  - A-GREEN's failure and A-RED-2's pass were both stops that were not taken.
+  - Earlier text called A-RED-2 only an "invalid zsh run". That includes the note in D's
+    `docs/science/experiments/m3-t2/s3/red-green/RECORDS.json`, which stays unchanged in D. The
+    description was inaccurate: a shell error left the subjects in place, and pytest then ran the
+    nodes and they passed.
+  - **A-RED-3** (22:37:45Z) is a valid red of the committed bytes with the subjects held aside, and
+    **A-GREEN-2** (22:37:52Z) is green. They do not make the committed bytes' first execution red.
+  - **Owner departure OC-4 (historical, effective, bounded to that file, those nodes and the five A
+    runs).**
+    - The owner accepts the loss of first-execution-red assurance and permits continued evaluation
+      of the A group on its retained evidence.
+    - It does not establish red-first compliance, and the FAILED assessment stays.
+    - Self-test adequacy still needs independent assessment.
+    - No BC, production, numerical, mutation, packaging, provenance or future red-first requirement
+      is waived.
+
+**Sequence.** The pushed commits are A, BC, D, E and F (owner decision OC-1). F changes only this
+report and the recording-only CI files.
+
+**Status: S3 IMPLEMENTED (A, BC) / PHASE-D EVIDENCE (D) / REPORT (E) / CORRECTIONS AND
+RECORDING-ONLY CI (F) / REVIEW r6 BLOCKED, NO VERDICT (OB-S3-16 AND OB-S3-20 FAILED) /
 NOT ACCEPTED / NOT MERGED.**

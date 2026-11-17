@@ -1,0 +1,241 @@
+{
+ "schema": "s3-ci-expected/2",
+ "note": "Recording-only expectations for check_ci_records.py: literal pins, the platform matrix, exact root argv templates of the existing workflow's numerical Python steps, and platform rules for [U] values. Changing a step command, a pin or a rule status requires changing this file in the same reviewed change; a rule whose status is not 'adopted' never passes.",
+ "pins": {
+  "s2_module_path": "tests/test_s2_environment_record.py",
+  "s2_module_sha256": "fe3df292812ef2e6ef0194692ce1c681e9c8134dcf5703c4f7ba2536a661b92c",
+  "uv_lock_sha256": "6d784550fa46f0c79a80ba77012a7179d585916bad97bff26b26ac7d4e7850cf",
+  "envcap_sha256": "771d087fc08dbe5990e28c549e08c4b42fde86596d13673d0291417291235f12",
+  "loader_sha256": "3ff9f53226854ee632ac6f2c12de66b43b4e099c32a0987980dbb9610f080496"
+ },
+ "libm_counts": [
+  6235,
+  7175
+ ],
+ "python_minor": [
+  3,
+  12
+ ],
+ "matrix": {
+  "ubuntu-latest": {
+   "RUNNER_OS": "Linux",
+   "RUNNER_ARCH": "X64",
+   "system": "Linux",
+   "machine": "x86_64"
+  },
+  "macos-latest": {
+   "RUNNER_OS": "macOS",
+   "RUNNER_ARCH": "ARM64",
+   "system": "Darwin",
+   "machine": "arm64"
+  },
+  "macos-15-intel": {
+   "RUNNER_OS": "macOS",
+   "RUNNER_ARCH": "X64",
+   "system": "Darwin",
+   "machine": "x86_64"
+  }
+ },
+ "job_ids": {
+  "check": "check",
+  "gate": "m2-cross-platform"
+ },
+ "platform_rules": {
+  "A-1": {
+   "status": "adopted",
+   "applies": [
+    "Darwin-x86_64"
+   ],
+   "paths": [
+    [
+     "cpu",
+     "[P] arm64 FP features"
+    ]
+   ],
+   "authority": "approved check_env.py (sha256 ee37c9f6...) lines 114-115: on x86_64 the arm64 FP sysctl probe may be [U]"
+  },
+  "PR-1": {
+   "status": "adopted",
+   "applies": [
+    "Darwin-arm64"
+   ],
+   "paths": [
+    [
+     "cpu",
+     "[P] features"
+    ],
+    [
+     "cpu",
+     "[P] leaf7 features"
+    ],
+    [
+     "cpu",
+     "[P] arm64 FP features"
+    ]
+   ],
+   "authority": "owner determination PR-1 in the issued correction execution instruction, recorded verbatim at ~/tars-evidence/S3-F-commit-and-recorded-CI-v1/OWNER-INSTRUCTION.txt"
+  }
+ },
+ "m2_scenarios": [
+  "scenarios/m2_burn_to_depletion.json",
+  "scenarios/m2_invalid_commands.json",
+  "scenarios/m2_prograde_burn.json",
+  "scenarios/m2_retrograde_burn.json"
+ ],
+ "checker_dirs": [
+  "90-checker",
+  "91-checker-own"
+ ],
+ "checker_argv": {
+  "records": [
+   ".github/recording/check_ci_records.py",
+   "records",
+   "--job",
+   "{job}",
+   "--platform",
+   "{platform}",
+   "--root",
+   "{runner_temp}/s3rec",
+   "--out",
+   "{runner_temp}/s3rec/CHECK.json"
+  ],
+  "own": [
+   ".github/recording/check_ci_records.py",
+   "own",
+   "--job",
+   "{job}",
+   "--platform",
+   "{platform}",
+   "--dir",
+   "{runner_temp}/s3rec/90-checker",
+   "--check-json",
+   "{runner_temp}/s3rec/CHECK.json",
+   "--out",
+   "{runner_temp}/s3rec/OWN-CHECK.json"
+  ]
+ },
+ "jobs": {
+  "check": [
+   {
+    "dir": "01-m2-xp-collect",
+    "roots": [
+     [
+      "toolbox/validators/m2_cross_platform.py",
+      "collect",
+      "--out",
+      "runs/xp/{os}.json"
+     ]
+    ]
+   },
+   {
+    "dir": "02-pytest",
+    "roots": [
+     [
+      "{workspace}/.venv/bin/pytest",
+      "--junitxml={runner_temp}/s3rec/junit/pytest.xml"
+     ]
+    ],
+    "junit": "junit/pytest.xml"
+   },
+   {
+    "dir": "03-determinism-m1",
+    "roots": [
+     [
+      "toolbox/validators/determinism.py"
+     ]
+    ]
+   },
+   {
+    "dir": "04-cross-platform",
+    "roots": [
+     [
+      "toolbox/validators/cross_platform.py"
+     ]
+    ]
+   },
+   {
+    "dir": "05-gmat-m1-compare",
+    "roots": [
+     [
+      "toolbox/scripts/gmat_m1.py",
+      "compare"
+     ]
+    ]
+   },
+   {
+    "dir": "06-m1-proof",
+    "roots": [
+     [
+      "toolbox/validators/m1_proof.py",
+      "--out",
+      "runs/proof/m1_non_gmat_{os}.json"
+     ]
+    ]
+   },
+   {
+    "dir": "07-m2-determinism",
+    "roots": [
+     [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_burn_to_depletion.json"
+     ],
+     [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_invalid_commands.json"
+     ],
+     [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_prograde_burn.json"
+     ],
+     [
+      "toolbox/validators/determinism.py",
+      "--scenario",
+      "scenarios/m2_retrograde_burn.json"
+     ]
+    ]
+   },
+   {
+    "dir": "08-gmat-m2-compare",
+    "roots": [
+     [
+      "toolbox/scripts/gmat_m2.py",
+      "compare"
+     ]
+    ]
+   },
+   {
+    "dir": "09-m2-proof",
+    "roots": [
+     [
+      "toolbox/validators/m2_proof.py",
+      "--out",
+      "runs/proof/m2_{os}.json"
+     ]
+    ]
+   }
+  ],
+  "gate": [
+   {
+    "dir": "01-m2-gate",
+    "roots": [
+     [
+      "toolbox/validators/m2_cross_platform.py",
+      "gate",
+      "runs/xp-in/macos-15-intel.json",
+      "runs/xp-in/ubuntu-latest.json",
+      "runs/xp-in/macos-latest.json",
+      "--revision",
+      "{sha}",
+      "--run-id",
+      "{GITHUB_RUN_ID}",
+      "--report",
+      "runs/proof/m2_cross_platform.json"
+     ]
+    ]
+   }
+  ]
+ }
+}
