@@ -1641,6 +1641,16 @@ changes that or makes any obligation MET.
     - on macOS arm64, the unchanged S2 node records three CPU probes as unavailable (`[U]`). Whether
       that is acceptable is owner determination PR-1. Its status is recorded in
       `.github/recording/expected-steps.json`, and a rule that is not adopted never passes.
+    - F's recorded pilot run (44156777882, attempt 1) failed at the completeness check on all four
+      jobs, and that failure stands. G corrects only the checker's rules, through two owner
+      determinations recorded with their status in `.github/recording/expected-steps.json`:
+      - **PR-2 (Linux only).** The hosted Ubuntu runner reports an empty `uname` processor field.
+        It is accepted as empty, never filled in, and only when the `uname -p` launch and a
+        non-empty CPU brand are recorded.
+      - **PR-3 (macOS only).** The framework-build venv launcher re-runs the framework app binary
+        in the same process, so a child's first argument is that binary, not the launched
+        `.venv/bin/python`. Such a child matches its launch only if every other argument and its
+        recorded interpreter, venv, base prefix and subject agree with the parent's.
 
     Commands, thresholds, platforms, dependencies and the lock are unchanged. F cannot record its
     own CI; its CI run is recorded externally.
@@ -1672,8 +1682,9 @@ changes that or makes any obligation MET.
       is waived.
 
 **Sequence.** The pushed commits are A, BC, D, E and F (owner decision OC-1). F changes only this
-report and the recording-only CI files.
+report and the recording-only CI files. G, F's child, changes only the recording checker, its
+expected-steps file and this report.
 
 **Status: S3 IMPLEMENTED (A, BC) / PHASE-D EVIDENCE (D) / REPORT (E) / CORRECTIONS AND
-RECORDING-ONLY CI (F) / REVIEW r6 BLOCKED, NO VERDICT (OB-S3-16 AND OB-S3-20 FAILED) /
+RECORDING-ONLY CI (F) / RECORDING-CHECKER CORRECTION (G) / REVIEW r6 BLOCKED, NO VERDICT (OB-S3-16 AND OB-S3-20 FAILED) /
 NOT ACCEPTED / NOT MERGED.**

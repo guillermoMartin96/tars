@@ -116,6 +116,66 @@ def u_allowed(spec, rules_id, path):
     return False, None
 
 
+def rule_status(spec, rules_id, kind):
+    """(adopted, rule id) of the platform rule of this kind that applies to rules_id; (False, None) if none."""
+    for rid, r in spec["platform_rules"].items():
+        if r.get("kind") == kind and rules_id in r["applies"]:
+            return r["status"] == "adopted", rid
+    return False, None
+
+
+def empty_processor_allowed(spec, rules_id, rec, body, un):
+    """PR-2: on Linux only, uname field 5 (processor) may be exactly "" (platform.uname() maps `uname -p`
+    output 'unknown' to ""), only if the record shows the `uname -p` launch and a non-empty observed CPU
+    brand. Nothing is filled in; every other uname/CPU predicate is unchanged."""
+    adopted, _ = rule_status(spec, rules_id, "linux-empty-uname-processor")
+    if not (adopted and rules_id.startswith("Linux-") and un[5] == ""):
+        return False
+    cpu = body.get("cpu") if isinstance(body.get("cpu"), dict) else {}
+    brand = cpu.get("[O] brand")
+    launched = any(
+        s.get("argv") == ["uname", "-p"] and s.get("phase") in ("capture", "payload")
+        for s in (rec.get("spawns") if isinstance(rec.get("spawns"), list) else [])
+    )
+    return launched and isinstance(brand, str) and brand.startswith("[O] ") and nonempty(brand[4:])
+
+
+FRAMEWORK_APP = "/Resources/Python.app/Contents/MacOS/Python"
+
+
+def framework_alias(spec, platform, s, parent, child, ws):
+    """PR-3: a macOS framework-build venv launcher re-executes the framework app binary in the same
+    process, so the child's orig_argv[0] is <sys.base_prefix>/Resources/Python.app/Contents/MacOS/Python
+    while the parent launched <workspace>/.venv/bin/python. Accepted only if every other argument is
+    identical and the child's own recorded identity binds it to the launched venv interpreter and to the
+    parent's interpreter, base prefix and subject. Never name-only; nothing is resolved on this host."""
+    _, rules_id = plat(spec, platform)
+    adopted, _ = rule_status(spec, rules_id, "darwin-framework-launcher-alias")
+    argv, orig = s.get("argv"), child.get("orig_argv")
+    if not (adopted and rules_id.startswith("Darwin-") and isinstance(argv, list) and isinstance(orig, list)):
+        return False
+    venv_py = ws + "/.venv/bin/python"
+    bp = child.get("sys.base_prefix")
+    return (
+        len(argv) >= 1
+        and len(orig) == len(argv)
+        and orig[1:] == argv[1:]
+        and argv[0] == venv_py
+        and s.get("executable") == venv_py
+        and child.get("sys.executable") == venv_py
+        and child.get("in_venv") is True
+        and (child.get("env_values") or {}).get("VIRTUAL_ENV") == ws + "/.venv"
+        and isinstance(bp, str)
+        and bp.startswith("/")
+        and bp == parent.get("sys.base_prefix")
+        and orig[0] == bp + FRAMEWORK_APP
+        and child.get("executable_realpath") == parent.get("executable_realpath")
+        and is_hex(child.get("executable_sha256"))
+        and child.get("executable_sha256") == parent.get("executable_sha256")
+        and child.get("subject_root") == parent.get("subject_root") == ws
+    )
+
+
 def record_problems(rec, ctx, spec, platform, label, root):
     """R-predicates for one own-process record. ctx: workspace, runner_temp, sha, run ids."""
     p = []
@@ -212,7 +272,8 @@ def record_problems(rec, ctx, spec, platform, label, root):
         and un[0] == m["system"]
         and un[1] == "[redacted]"
         and un[4] == m["machine"]
-        and all(nonempty(un[i]) for i in (2, 3, 5))
+        and all(nonempty(un[i]) for i in (2, 3))
+        and (nonempty(un[5]) or empty_processor_allowed(spec, rid, rec, body, un))
     ):
         p.append("R17 os/uname")
     libc = osr.get("[P] libc_ver (empty on macOS)")
@@ -447,7 +508,12 @@ def check_step(d, step, ctx, spec, platform, job):
                 m = [
                     c
                     for c, x in recs.items()
-                    if x.get("ppid") == pid and x.get("orig_argv") == argv and c not in used
+                    if x.get("ppid") == pid
+                    and c not in used
+                    and (
+                        x.get("orig_argv") == argv
+                        or framework_alias(spec, platform, s, r, x, ctx["workspace"])
+                    )
                 ]
                 if len(m) != 1:
                     out["problems"].append(f"T04 {pid}: launch {argv} has {len(m)} child records")
